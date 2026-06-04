@@ -3402,11 +3402,14 @@ print(w.grad)       # tensor(0.) -> reproduce el cálculo a mano de arriba`;
                     Un envío de flores a Miami para San Valentín se retrasó y generó pérdidas. ¿De quién es la culpa? ¿Del
                     conductor de última milla (capa de salida)? ¿Del despachador en El Dorado (capa oculta 2)? ¿Del agrónomo que
                     demoró la cosecha (capa oculta 1)? ¿O de una política mal diseñada (pesos iniciales)? En una red hay miles de
-                    neuronas: <strong>¿cuáles deben ajustar sus pesos y en qué medida?</strong>
+                    neuronas: <strong>¿cuáles deben ajustar sus pesos y en qué medida?</strong> Determinar cuánta
+                    responsabilidad —cuánto «crédito» del error— corresponde a cada una es el <strong>problema de asignación de
+                    crédito</strong> (calco del inglés <em>credit assignment</em>: «crédito» alude a la atribución de
+                    responsabilidad, no a un elogio).
                 </Box>
 
                 <p>
-                    La <strong>retropropagación</strong> es el «mecanismo administrativo» perfecto: rastrea el error desde el
+                    La <strong>retropropagación</strong> es el «mecanismo administrativo» perfecto para resolverlo: rastrea el error desde el
                     resultado final hacia atrás, capa por capa, calculando la contribución exacta de cada neurona al desastre.
                 </p>
 
