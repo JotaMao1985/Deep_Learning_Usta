@@ -1688,6 +1688,441 @@ modelo = nn.Sequential(
             );
         };
 
+        /* ============================================================
+           LABORATORIO: frontera de decisión de un MLP (Cap. 2)
+           Red neuronal "desde cero" (sin librerías de ML) + mapa de calor
+           en un <canvas> oscuro. Entrena por descenso del gradiente sobre la
+           entropía cruzada binaria (BCE) y dibuja la frontera en tiempo real.
+        ============================================================ */
+        const RedFrontera = () => {
+            // --- Configuración de la arquitectura (estado de la UI) ---
+            const [dataset, setDataset] = useState('lunas');        // 'lunas' | 'circulos'
+            const [nCapas, setNCapas] = useState(2);                // capas ocultas: 1..3
+            const [nNodos, setNNodos] = useState(6);                // nodos por capa: 1..10
+            const [activacion, setActivacion] = useState('tanh');   // 'relu'|'sigmoide'|'tanh'
+            const [lrExp, setLrExp] = useState(0.8);                // 0..1 -> lr logarítmico
+            const [corriendo, setCorriendo] = useState(false);      // animación activa
+            const [metricas, setMetricas] = useState({ epoca: 0, perdida: NaN, acc: 0 });
+            const [hayCongelada, setHayCongelada] = useState(false);
+
+            const lr = Math.pow(10, -3 + 3 * lrExp);                // escala logarítmica: 0.001 .. 1.0
+
+            // --- Refs de trabajo (no provocan re-render) ---
+            const canvasRef = useRef(null);
+            const redCanvasRef = useRef(null);  // canvas del diagrama de la red (neuronas + pesos)
+            const offRef = useRef(null);        // canvas auxiliar RES×RES para el mapa de calor
+            const datosRef = useRef([]);        // [{x, y, t}]  t = etiqueta 0/1
+            const redRef = useRef(null);        // {sizes, W, b, act}
+            const congeladaRef = useRef(null);  // grilla RES×RES de la frontera "fantasma"
+            const animRef = useRef(null);       // id de requestAnimationFrame
+            const corriendoRef = useRef(false); // espejo de `corriendo` para el bucle
+            const epocaRef = useRef(0);
+            const lrRef = useRef(lr);
+
+            const DOM = 3.5;     // dominio del mundo: [-DOM, DOM] en X e Y
+            const RES = 56;      // resolución del mapa de calor (RES×RES predicciones)
+            const LIENZO = 380;  // lado del canvas en px
+
+            // ===== Activaciones y sus derivadas (en función de la salida activada `a`) =====
+            const sigmoide = (z) => 1 / (1 + Math.exp(-z));
+            const activar = { relu: (z) => Math.max(0, z), sigmoide, tanh: (z) => Math.tanh(z) };
+            const dActivar = { relu: (a) => (a > 0 ? 1 : 0), sigmoide: (a) => a * (1 - a), tanh: (a) => 1 - a * a };
+
+            // ===== Datos sintéticos =====
+            const gauss = () => {                       // ruido gaussiano (Box-Muller)
+                let u = 0, v = 0;
+                while (u === 0) u = Math.random();
+                while (v === 0) v = Math.random();
+                return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+            };
+            const genLunas = (n = 220, ruido = 0.18) => {   // dos medias lunas entrelazadas
+                const pts = [], m = n / 2;
+                for (let i = 0; i < m; i++) {
+                    const t = Math.PI * i / m;
+                    pts.push({ x: (Math.cos(t) - 0.5) * 1.9 + gauss() * ruido, y: (Math.sin(t) - 0.25) * 1.9 + gauss() * ruido, t: 0 });
+                    pts.push({ x: (1 - Math.cos(t) - 0.5) * 1.9 + gauss() * ruido, y: (0.5 - Math.sin(t) - 0.25) * 1.9 + gauss() * ruido, t: 1 });
+                }
+                return pts;
+            };
+            const genCirculos = (n = 220, ruido = 0.14) => {  // dos anillos concéntricos
+                const pts = [], m = n / 2;
+                for (let i = 0; i < m; i++) {
+                    const t = 2 * Math.PI * i / m;
+                    pts.push({ x: 2.4 * Math.cos(t) + gauss() * ruido, y: 2.4 * Math.sin(t) + gauss() * ruido, t: 0 });
+                    pts.push({ x: 1.1 * Math.cos(t) + gauss() * ruido, y: 1.1 * Math.sin(t) + gauss() * ruido, t: 1 });
+                }
+                return pts;
+            };
+
+            // ===== Construcción de la red (pesos aleatorios He/Xavier) =====
+            const crearRed = () => {
+                const sizes = [2];
+                for (let i = 0; i < nCapas; i++) sizes.push(nNodos);
+                sizes.push(1);
+                const W = [], b = [];
+                for (let l = 1; l < sizes.length; l++) {
+                    const fanIn = sizes[l - 1], fanOut = sizes[l];
+                    const esReluOculta = activacion === 'relu' && l < sizes.length - 1;
+                    const std = Math.sqrt((esReluOculta ? 2 : 1) / fanIn);   // He si ReLU, Xavier si no
+                    const Wl = [], bl = [];
+                    for (let j = 0; j < fanOut; j++) {
+                        const fila = [];
+                        for (let i = 0; i < fanIn; i++) fila.push(gauss() * std);
+                        Wl.push(fila); bl.push(0);
+                    }
+                    W.push(Wl); b.push(bl);
+                }
+                return { sizes, W, b, act: activacion };
+            };
+
+            // ===== Forward pass: devuelve la activación de CADA capa =====
+            // acts[0] = entrada; acts[k] = salida activada de la capa k-1;
+            // la última capa usa siempre sigmoide (clasificación binaria).
+            const adelante = (red, x0, x1) => {
+                let a = [x0, x1];
+                const acts = [a];
+                for (let l = 0; l < red.W.length; l++) {
+                    const esSalida = l === red.W.length - 1;
+                    a = red.b[l].map((bj, j) => {
+                        let z = bj; const wj = red.W[l][j];
+                        for (let i = 0; i < acts[l].length; i++) z += wj[i] * acts[l][i];  // z = w·a + b
+                        return esSalida ? sigmoide(z) : activar[red.act](z);
+                    });
+                    acts.push(a);
+                }
+                return acts;
+            };
+
+            // ===== Backward pass + actualización (descenso del gradiente, full-batch) =====
+            const entrenarEpoca = (red, datos, tasa) => {
+                const { W, b } = red;
+                const gW = W.map(Wl => Wl.map(row => row.map(() => 0)));   // gradientes acumulados
+                const gB = b.map(bl => bl.map(() => 0));
+                for (const p of datos) {
+                    const acts = adelante(red, p.x, p.y);
+                    // delta de la capa de salida: con BCE + sigmoide se simplifica a (â - y)
+                    let delta = [acts[acts.length - 1][0] - p.t];
+                    for (let l = W.length - 1; l >= 0; l--) {
+                        const aPrev = acts[l];                          // entrada de la capa l
+                        for (let j = 0; j < W[l].length; j++) {
+                            gB[l][j] += delta[j];
+                            for (let i = 0; i < aPrev.length; i++) gW[l][j][i] += delta[j] * aPrev[i];
+                        }
+                        if (l > 0) {                                    // propagar el error a la capa anterior
+                            const nuevo = new Array(aPrev.length).fill(0);
+                            for (let i = 0; i < aPrev.length; i++) {
+                                let s = 0;
+                                for (let j = 0; j < W[l].length; j++) s += delta[j] * W[l][j][i];
+                                nuevo[i] = s * dActivar[red.act](aPrev[i]);   // × derivada de la activación oculta
+                            }
+                            delta = nuevo;
+                        }
+                    }
+                }
+                const N = datos.length;                                  // promedio del gradiente y paso
+                for (let l = 0; l < W.length; l++)
+                    for (let j = 0; j < W[l].length; j++) {
+                        b[l][j] -= tasa * gB[l][j] / N;
+                        for (let i = 0; i < W[l][j].length; i++) W[l][j][i] -= tasa * gW[l][j][i] / N;
+                    }
+            };
+
+            // ===== Pérdida (BCE) y precisión sobre todo el conjunto =====
+            const evaluar = (red, datos) => {
+                let L = 0, ok = 0; const eps = 1e-7;
+                for (const p of datos) {
+                    const acts = adelante(red, p.x, p.y);
+                    const yhat = Math.min(1 - eps, Math.max(eps, acts[acts.length - 1][0]));
+                    L += -(p.t * Math.log(yhat) + (1 - p.t) * Math.log(1 - yhat));
+                    if ((yhat >= 0.5 ? 1 : 0) === p.t) ok++;
+                }
+                return { perdida: L / datos.length, acc: ok / datos.length };
+            };
+
+            // ===== Predicción en una grilla RES×RES (para el mapa de calor) =====
+            const predecirGrilla = (red) => {
+                const g = new Float32Array(RES * RES);
+                for (let yi = 0; yi < RES; yi++) {
+                    const wy = DOM - 2 * DOM * (yi + 0.5) / RES;     // fila 0 = y máximo (arriba)
+                    for (let xi = 0; xi < RES; xi++) {
+                        const wx = -DOM + 2 * DOM * (xi + 0.5) / RES;
+                        const acts = adelante(red, wx, wy);
+                        g[yi * RES + xi] = acts[acts.length - 1][0];
+                    }
+                }
+                return g;
+            };
+
+            // ===== Dibujo del canvas =====
+            const pintar = () => {
+                const cv = canvasRef.current, red = redRef.current;
+                if (!cv || !red) return;
+                const ctx = cv.getContext('2d'), Wd = cv.width, Hd = cv.height;
+
+                // 1) Mapa de calor de la red actual (grilla pequeña escalada y suavizada)
+                let off = offRef.current;
+                if (!off) { off = document.createElement('canvas'); offRef.current = off; }
+                off.width = RES; off.height = RES;
+                const octx = off.getContext('2d'), im = octx.createImageData(RES, RES);
+                const bg = [11, 15, 28], cP = [150, 99, 224], cK = [240, 70, 150];  // fondo, clase 0 (morado), clase 1 (rosa)
+                const g = predecirGrilla(red);
+                for (let k = 0; k < RES * RES; k++) {
+                    const p = isFinite(g[k]) ? g[k] : 0.5;
+                    const conf = Math.min(1, Math.abs(p - 0.5) * 2);   // confianza: 0 en la frontera, 1 al estar seguro
+                    const col = p < 0.5 ? cP : cK, mix = 0.12 + 0.72 * conf, o = k * 4;
+                    im.data[o] = bg[0] + (col[0] - bg[0]) * mix;
+                    im.data[o + 1] = bg[1] + (col[1] - bg[1]) * mix;
+                    im.data[o + 2] = bg[2] + (col[2] - bg[2]) * mix;
+                    im.data[o + 3] = 255;
+                }
+                octx.putImageData(im, 0, 0);
+                ctx.imageSmoothingEnabled = true;
+                ctx.drawImage(off, 0, 0, RES, RES, 0, 0, Wd, Hd);
+
+                // 2) Ejes centrales tenues
+                ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.moveTo(Wd / 2, 0); ctx.lineTo(Wd / 2, Hd); ctx.moveTo(0, Hd / 2); ctx.lineTo(Wd, Hd / 2); ctx.stroke();
+
+                // 3) Frontera "congelada": banda dorada donde la grilla fantasma cruza 0.5
+                if (congeladaRef.current) {
+                    const fg = congeladaRef.current, cw = Wd / RES, ch = Hd / RES;
+                    ctx.fillStyle = 'rgba(253,185,19,0.6)';
+                    for (let yi = 0; yi < RES; yi++) for (let xi = 0; xi < RES; xi++)
+                        if (Math.abs(fg[yi * RES + xi] - 0.5) < 0.045) ctx.fillRect(xi * cw, yi * ch, cw + 1, ch + 1);
+                }
+
+                // 4) Puntos de datos (color claro de su clase + borde oscuro para que resalten)
+                for (const p of datosRef.current) {
+                    const px = (p.x + DOM) / (2 * DOM) * Wd, py = (DOM - p.y) / (2 * DOM) * Hd;
+                    ctx.beginPath(); ctx.arc(px, py, 4.2, 0, 2 * Math.PI);
+                    ctx.fillStyle = p.t === 0 ? '#CBB6FF' : '#FF9DC8';
+                    ctx.fill(); ctx.lineWidth = 1.4; ctx.strokeStyle = 'rgba(5,8,18,0.85)'; ctx.stroke();
+                }
+                pintarRed();   // mantener el diagrama de la red sincronizado con el estado actual
+            };
+
+            // ===== Diagrama del "estado de la red": neuronas por capa y conexiones coloreadas por peso =====
+            const pintarRed = () => {
+                const cv = redCanvasRef.current, red = redRef.current;
+                if (!cv || !red) return;
+                const ctx = cv.getContext('2d'), Wd = cv.width, Hd = cv.height;
+                ctx.clearRect(0, 0, Wd, Hd);
+                const sz = red.sizes, L = sz.length, padX = 52, padY = 26;
+                const maxN = Math.max(...sz);
+                const r = Math.max(5, Math.min(12, (Hd - 2 * padY) / (maxN * 2.3)));   // radio de neurona, adaptado al nº de nodos
+                const xs = sz.map((_, i) => padX + (Wd - 2 * padX) * (L === 1 ? 0.5 : i / (L - 1)));
+                const ys = sz.map(n => Array.from({ length: n }, (_, j) => padY + (Hd - 2 * padY) * (n === 1 ? 0.5 : j / (n - 1))));
+
+                // Magnitud máxima de los pesos, para normalizar grosor y opacidad
+                let maxAbs = 0.5;
+                for (const Wl of red.W) for (const row of Wl) for (const w of row) maxAbs = Math.max(maxAbs, Math.abs(w));
+
+                // 1) Conexiones = pesos (morado = positivo, rosa = negativo); grosor ∝ magnitud
+                for (let l = 0; l < red.W.length; l++) {
+                    const Wl = red.W[l];
+                    for (let j = 0; j < Wl.length; j++)
+                        for (let i = 0; i < Wl[j].length; i++) {
+                            const w = Wl[j][i], mag = Math.abs(w) / maxAbs;
+                            const base = w >= 0 ? '124,77,201' : '237,30,121';
+                            ctx.beginPath();
+                            ctx.moveTo(xs[l], ys[l][i]);
+                            ctx.lineTo(xs[l + 1], ys[l + 1][j]);
+                            ctx.strokeStyle = `rgba(${base},${0.12 + 0.65 * mag})`;
+                            ctx.lineWidth = 0.4 + 2.6 * mag;
+                            ctx.stroke();
+                        }
+                }
+
+                // 2) Neuronas (entrada navy, ocultas moradas, salida verde)
+                for (let l = 0; l < L; l++) {
+                    const esEnt = l === 0, esSal = l === L - 1;
+                    for (let j = 0; j < sz[l]; j++) {
+                        ctx.beginPath();
+                        ctx.arc(xs[l], ys[l][j], r, 0, 2 * Math.PI);
+                        ctx.fillStyle = esEnt ? '#001A4D' : esSal ? '#15803D' : '#3D008D';
+                        ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke();
+                    }
+                }
+
+                // 3) Etiquetas: dentro de las neuronas de entrada/salida y bajo cada capa
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
+                if (r >= 7) {
+                    ctx.font = `700 ${Math.max(9, r - 1)}px Montserrat`;
+                    ctx.fillText('x', xs[0], ys[0][0]);
+                    ctx.fillText('y', xs[0], ys[0][1]);
+                    ctx.fillText('ŷ', xs[L - 1], ys[L - 1][0]);
+                }
+                ctx.fillStyle = '#64748B'; ctx.font = '600 11px Montserrat'; ctx.textBaseline = 'alphabetic';
+                ctx.fillText('Entrada', xs[0], Hd - 8);
+                ctx.fillText('Salida', xs[L - 1], Hd - 8);
+                for (let l = 1; l < L - 1; l++) ctx.fillText('Oculta ' + l, xs[l], Hd - 8);
+            };
+
+            // ===== Bucle de entrenamiento animado =====
+            const bucle = () => {
+                const red = redRef.current;
+                if (!red || !corriendoRef.current) return;
+                for (let e = 0; e < 3; e++) { entrenarEpoca(red, datosRef.current, lrRef.current); epocaRef.current++; }
+                pintar();
+                const { perdida, acc } = evaluar(red, datosRef.current);
+                setMetricas({ epoca: epocaRef.current, perdida, acc });
+                if (corriendoRef.current) animRef.current = requestAnimationFrame(bucle);
+            };
+
+            const detener = () => { corriendoRef.current = false; setCorriendo(false); if (animRef.current) cancelAnimationFrame(animRef.current); };
+            const alternarEntrenar = () => {
+                if (corriendoRef.current) { detener(); return; }
+                corriendoRef.current = true; setCorriendo(true);
+                animRef.current = requestAnimationFrame(bucle);
+            };
+
+            // Rehacer la red (mismos datos): pesos nuevos, época y métricas a cero
+            const reconstruir = () => {
+                detener();
+                redRef.current = crearRed();
+                epocaRef.current = 0;
+                if (datosRef.current.length) setMetricas({ epoca: 0, ...evaluar(redRef.current, datosRef.current) });
+                pintar();
+            };
+            const congelar = () => { congeladaRef.current = predecirGrilla(redRef.current); setHayCongelada(true); pintar(); };
+            const limpiar = () => { congeladaRef.current = null; setHayCongelada(false); pintar(); };
+
+            // Regenerar datos al cambiar de conjunto
+            useEffect(() => { datosRef.current = dataset === 'lunas' ? genLunas() : genCirculos(); reconstruir(); }, [dataset]);
+            // Reconstruir la red al cambiar la arquitectura (capas, nodos o activación)
+            useEffect(() => { reconstruir(); }, [nCapas, nNodos, activacion]);
+            // La tasa de aprendizaje se ajusta en caliente, sin reiniciar
+            useEffect(() => { lrRef.current = lr; }, [lr]);
+            // Limpieza al desmontar
+            useEffect(() => () => { corriendoRef.current = false; if (animRef.current) cancelAnimationFrame(animRef.current); }, []);
+
+            // Arquitectura y conteo de parámetros (pesos + sesgos) para mostrar
+            const sizes = [2, ...Array(nCapas).fill(nNodos), 1];
+            const nParams = sizes.slice(1).reduce((s, n, i) => s + sizes[i] * n + n, 0);
+            const pillBtn = (activo) => `px-3 py-1 rounded-full text-xs font-bold transition-all ${activo ? 'usta-gradient text-white shadow' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`;
+
+            return (
+                <div className="my-6 rounded-2xl overflow-hidden shadow-md border border-primary/15 bg-white not-prose">
+                    <div className="usta-gradient px-5 py-3 flex items-center gap-3">
+                        <span className="bg-white/20 rounded-lg p-2 text-white flex items-center justify-center flex-shrink-0"><i className="fas fa-vector-square"></i></span>
+                        <div>
+                            <div className="text-white font-bold text-base leading-tight">Laboratorio de fronteras de decisión</div>
+                            <div className="text-white/80 text-xs">Una red neuronal entrenándose desde cero, en vivo</div>
+                        </div>
+                    </div>
+                    <div className="p-5 grid md:grid-cols-2 gap-5 items-start">
+                        {/* ---------- Controles ---------- */}
+                        <div className="space-y-4 order-2 md:order-1">
+                            <div>
+                                <div className="text-xs font-semibold text-gray-500 mb-1.5">Conjunto de datos</div>
+                                <div className="flex gap-2">
+                                    <button onClick={() => setDataset('lunas')} className={pillBtn(dataset === 'lunas')}><i className="fas fa-circle-half-stroke mr-1"></i>Dos lunas</button>
+                                    <button onClick={() => setDataset('circulos')} className={pillBtn(dataset === 'circulos')}><i className="fas fa-bullseye mr-1"></i>Círculos</button>
+                                </div>
+                            </div>
+                            <div>
+                                <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1">
+                                    <span>Capas ocultas</span><span className="text-primary">{nCapas}</span>
+                                </div>
+                                <input type="range" min="1" max="3" step="1" value={nCapas} onChange={e => setNCapas(+e.target.value)} className="usta-range" aria-label="Número de capas ocultas" />
+                            </div>
+                            <div>
+                                <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1">
+                                    <span>Nodos por capa</span><span className="text-primary">{nNodos}</span>
+                                </div>
+                                <input type="range" min="1" max="10" step="1" value={nNodos} onChange={e => setNNodos(+e.target.value)} className="usta-range" aria-label="Nodos por capa oculta" />
+                            </div>
+                            <div>
+                                <div className="text-xs font-semibold text-gray-500 mb-1.5">Activación (capas ocultas)</div>
+                                <div className="flex gap-2">
+                                    {['relu', 'tanh', 'sigmoide'].map(k => (
+                                        <button key={k} onClick={() => setActivacion(k)} className={pillBtn(activacion === k)}>
+                                            {k === 'relu' ? 'ReLU' : k === 'tanh' ? 'Tanh' : 'Sigmoide'}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div>
+                                <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1">
+                                    <span>Tasa de aprendizaje</span><span className="text-secondary">{lr < 0.01 ? lr.toFixed(4) : lr.toFixed(3)}</span>
+                                </div>
+                                <input type="range" min="0" max="1" step="0.01" value={lrExp} onChange={e => setLrExp(+e.target.value)} className="usta-range" aria-label="Tasa de aprendizaje (escala logarítmica)" />
+                                <div className="flex justify-between text-[0.65rem] text-gray-400 mt-0.5"><span>0.001</span><span>escala logarítmica</span><span>1.0</span></div>
+                            </div>
+                            <div className="flex flex-wrap gap-2 pt-1">
+                                <button onClick={alternarEntrenar} className="px-3 py-1.5 rounded-lg text-xs font-bold text-white usta-gradient shadow hover:opacity-90 transition">
+                                    <i className={`fas ${corriendo ? 'fa-pause' : 'fa-play'} mr-1`}></i>{corriendo ? 'Pausar' : (metricas.epoca > 0 ? 'Reanudar' : 'Entrenar')}
+                                </button>
+                                <button onClick={reconstruir} className="px-3 py-1.5 rounded-lg text-xs font-bold text-primary bg-gray-100 hover:bg-gray-200 transition"><i className="fas fa-rotate-left mr-1"></i>Reiniciar pesos</button>
+                                <button onClick={congelar} className="px-3 py-1.5 rounded-lg text-xs font-bold text-white shadow hover:opacity-90 transition" style={{ background: '#D97706' }}><i className="fas fa-snowflake mr-1"></i>Congelar frontera</button>
+                                <button onClick={limpiar} disabled={!hayCongelada} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${hayCongelada ? 'text-gray-700 bg-gray-100 hover:bg-gray-200' : 'text-gray-300 bg-gray-50 cursor-not-allowed'}`}><i className="fas fa-eraser mr-1"></i>Limpiar congelada</button>
+                            </div>
+                        </div>
+                        {/* ---------- Lienzo + métricas ---------- */}
+                        <div className="order-1 md:order-2">
+                            <div className="rounded-xl overflow-hidden border border-gray-800 shadow-inner mx-auto" style={{ maxWidth: LIENZO }}>
+                                <canvas ref={canvasRef} width={LIENZO} height={LIENZO} style={{ width: '100%', height: 'auto', display: 'block', background: '#0b0f1c' }} aria-label="Mapa de calor de la frontera de decisión" />
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 mt-3">
+                                {[
+                                    { etq: 'Época', val: metricas.epoca, col: '#001A4D' },
+                                    { etq: 'Pérdida (BCE)', val: isFinite(metricas.perdida) ? metricas.perdida.toFixed(4) : '—', col: '#ED1E79' },
+                                    { etq: 'Precisión', val: `${Math.round(metricas.acc * 100)}%`, col: '#15803D' },
+                                ].map(m => (
+                                    <div key={m.etq} className="rounded-lg bg-bg border border-gray-200 px-2 py-1.5 text-center">
+                                        <div className="text-[0.62rem] uppercase tracking-wide text-gray-400">{m.etq}</div>
+                                        <div className="font-mono font-bold text-sm" style={{ color: m.col }}>{m.val}</div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="text-[0.7rem] text-gray-500 mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 justify-center">
+                                <span><span className="inline-block w-2.5 h-2.5 rounded-full align-middle mr-1" style={{ background: '#CBB6FF' }}></span>Clase 0</span>
+                                <span><span className="inline-block w-2.5 h-2.5 rounded-full align-middle mr-1" style={{ background: '#FF9DC8' }}></span>Clase 1</span>
+                                <span><span className="inline-block w-3 h-2 align-middle mr-1" style={{ background: '#D97706' }}></span>Frontera congelada</span>
+                                <span className="text-gray-400">Arquitectura {sizes.join('→')} · {nParams.toLocaleString('es-CO')} parámetros</span>
+                            </div>
+                        </div>
+                    </div>
+                    {/* ---------- Estado de la red: diagrama de neuronas + explicación de componentes ---------- */}
+                    <div className="px-5 pb-5">
+                        <div className="rounded-xl border border-gray-200 bg-bg overflow-hidden">
+                            <div className="px-4 py-2 border-b border-gray-200 bg-white flex items-center gap-2 flex-wrap">
+                                <i className="fas fa-diagram-project text-primary"></i>
+                                <span className="text-xs font-bold text-navy">Estado de la red</span>
+                                <span className="text-[0.7rem] text-gray-400">— las conexiones son los pesos; se reajustan en cada época de entrenamiento</span>
+                            </div>
+                            <div className="p-4 grid md:grid-cols-2 gap-4 items-center">
+                                {/* Diagrama de neuronas y conexiones */}
+                                <div className="rounded-lg border border-gray-200 bg-white p-2">
+                                    <canvas ref={redCanvasRef} width={580} height={230} style={{ width: '100%', height: 'auto', display: 'block' }} aria-label="Diagrama de la red neuronal: neuronas por capa y conexiones (pesos)" />
+                                    <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-[0.68rem] text-gray-500 mt-1">
+                                        <span><span className="inline-block w-4 align-middle mr-1" style={{ borderTop: '3px solid #7C4DC9' }}></span>Peso positivo</span>
+                                        <span><span className="inline-block w-4 align-middle mr-1" style={{ borderTop: '3px solid #ED1E79' }}></span>Peso negativo</span>
+                                        <span className="text-gray-400">grosor ∝ magnitud</span>
+                                    </div>
+                                </div>
+                                {/* Explicación de cada componente */}
+                                <div className="space-y-2 text-[0.8rem] text-gray-700">
+                                    {[
+                                        { ic: 'fa-right-to-bracket', col: '#001A4D', t: 'Capa de entrada', d: 'Dos neuronas: las coordenadas (x, y) de cada punto del plano.' },
+                                        { ic: 'fa-layer-group', col: '#3D008D', t: 'Capas ocultas', d: 'Transforman los datos en características; más capas o nodos curvan más la frontera.' },
+                                        { ic: 'fa-flag-checkered', col: '#15803D', t: 'Capa de salida', d: 'Una neurona con sigmoide: la probabilidad ŷ de pertenecer a la clase 1.' },
+                                        { ic: 'fa-rotate', col: '#ED1E79', t: 'Época', d: 'Una pasada completa por todos los datos ajustando los pesos; el contador sube al entrenar.' },
+                                        { ic: 'fa-snowflake', col: '#D97706', t: 'Congelar frontera', d: 'Guarda la frontera actual (banda dorada) y la fija para comparar el antes y el después de reentrenar.' },
+                                    ].map(c => (
+                                        <div key={c.t} className="flex gap-2.5 items-start">
+                                            <span className="mt-0.5 flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center text-white text-xs" style={{ background: c.col }}><i className={`fas ${c.ic}`}></i></span>
+                                            <span><strong className="text-navy">{c.t}:</strong> {c.d}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
         const Cap2Section = () => (
             <div className="prose-usta">
                 <p>
@@ -1829,6 +2264,27 @@ modelo = nn.Sequential(
                     <p>Cada capa lineal aporta <em>pesos</em> (entradas × neuronas) + <em>sesgos</em> (uno por neurona). Para la red 4 → 16 → 8 → 1:</p>
                     <Eq>{String.raw`$$ \underbrace{(4{\times}16+16)}_{80} + \underbrace{(16{\times}8+8)}_{136} + \underbrace{(8{\times}1+1)}_{9} = 225 \text{ parámetros} $$`}</Eq>
                     <p className="!mb-0">Son justamente los {String.raw`\(w\)`} y {String.raw`\(b\)`} que el entrenamiento ajustará. <strong>Profundidad vs. anchura:</strong> el Teorema garantiza que <em>basta</em> una capa oculta, pero apilar varias capas suele lograr el mismo poder con <strong>muchos menos parámetros</strong> (por eso «deep» learning).</p>
+                </Box>
+
+                <h3>Laboratorio: la arquitectura en acción</h3>
+                <p>
+                    Las ideas anteriores —capas, nodos y activaciones— cobran sentido al verlas operar sobre datos. El
+                    siguiente laboratorio entrena, <strong>desde cero y dentro del navegador</strong> (sin librerías de aprendizaje
+                    automático), un MLP de clasificación binaria sobre dos conjuntos clásicos no lineales: <strong>dos lunas </strong>
+                    entrelazadas y <strong>círculos concéntricos</strong>. El fondo del lienzo es un mapa de calor de la predicción
+                    de la red en cada punto del plano; la franja donde el color cambia de morado a rosa es la <strong>frontera de
+                    decisión</strong>. Conviene modificar la arquitectura y observar cómo esa frontera pasa de una recta rígida a
+                    una curva capaz de envolver los datos.
+                </p>
+                <RedFrontera />
+                <Box type="tip" label="Qué conviene observar">
+                    <ul>
+                        <li>Con <strong>una sola capa y pocos nodos</strong>, la frontera es casi recta: no logra separar las lunas ni los círculos.</li>
+                        <li>Al <strong>añadir nodos y capas</strong>, la frontera se curva y abraza la forma de los datos: el Teorema de Aproximación Universal en vivo.</li>
+                        <li>La <strong>activación importa</strong>: <em>ReLU</em> produce fronteras de tramos rectos (poligonales); <em>Tanh</em> y <em>Sigmoide</em>, curvas suaves. La <em>Sigmoide</em>, por su saturación (desvanecimiento del gradiente), suele necesitar una <strong>tasa de aprendizaje mayor</strong> para avanzar.</li>
+                        <li>Una <strong>tasa de aprendizaje</strong> muy alta hace oscilar o divergir la pérdida; una muy baja, aprender a paso lento.</li>
+                        <li>El botón <strong>«Congelar frontera»</strong> fija la frontera actual como banda dorada, para contrastar el «antes» y el «después» tras cambiar la arquitectura y reentrenar.</li>
+                    </ul>
                 </Box>
 
                 <MCQ
