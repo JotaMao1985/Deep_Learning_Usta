@@ -2123,6 +2123,285 @@ modelo = nn.Sequential(
             );
         };
 
+        /* ============================================================
+           INTERPOLADOR DE CURVA 1D (Cap. 2): regresión con red desde cero.
+           El estudiante coloca/arrastra puntos (x, y) y la red ajusta una
+           curva y=f(x). Salida LINEAL, pérdida MSE, optimizador Adam.
+           La activación de las ocultas cambia la forma: ReLU (quebrada) vs
+           Tanh/Sigmoide (suave). Lienzo claro: es una gráfica de función.
+        ============================================================ */
+        const InterpoladorCurva = () => {
+            const [nCapas, setNCapas] = useState(2);
+            const [nNodos, setNNodos] = useState(10);
+            const [activacion, setActivacion] = useState('tanh');
+            const [lrExp, setLrExp] = useState(0.62);            // 0..1 -> lr logarítmico
+            const [corriendo, setCorriendo] = useState(false);
+            const [metricas, setMetricas] = useState({ epoca: 0, mse: NaN });
+
+            const lr = Math.pow(10, -3 + 3 * lrExp);             // 0.001 .. 1.0
+
+            const canvasRef = useRef(null);
+            const datosRef = useRef([]);
+            const redRef = useRef(null);
+            const animRef = useRef(null);
+            const corriendoRef = useRef(false);
+            const epocaRef = useRef(0);
+            const lrRef = useRef(lr);
+            const dragRef = useRef(null);
+
+            const LW = 560, LH = 320;
+            const DX0 = -1.05, DX1 = 1.05, DY0 = -1.18, DY1 = 1.18;   // dominio de visualización
+
+            // Activaciones (ocultas); la salida es LINEAL
+            const sigmoide = (z) => 1 / (1 + Math.exp(-z));
+            const activar = { relu: (z) => Math.max(0, z), tanh: (z) => Math.tanh(z), sigmoide };
+            const dActivar = { relu: (a) => (a > 0 ? 1 : 0), tanh: (a) => 1 - a * a, sigmoide: (a) => a * (1 - a) };
+            const gauss = () => { let u = 0, v = 0; while (u === 0) u = Math.random(); while (v === 0) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+
+            // Puntos de ejemplo (una onda)
+            const puntosEjemplo = () => {
+                const pts = [];
+                for (let i = 0; i < 9; i++) { const x = -0.9 + i * 0.225; pts.push({ x: +x.toFixed(3), y: +(0.55 * Math.sin(x * 3.0)).toFixed(3) }); }
+                return pts;
+            };
+
+            // Construir red [1, oculta..., 1] con momentos de Adam
+            const crearRed = () => {
+                const sizes = [1]; for (let i = 0; i < nCapas; i++) sizes.push(nNodos); sizes.push(1);
+                const W = [], b = [], mW = [], vW = [], mB = [], vB = [];
+                for (let l = 1; l < sizes.length; l++) {
+                    const fi = sizes[l - 1], fo = sizes[l];
+                    const esRelu = activacion === 'relu' && l < sizes.length - 1;
+                    const std = Math.sqrt((esRelu ? 2 : 1) / fi);
+                    const Wl = [], bl = [], mWl = [], vWl = [], mBl = [], vBl = [];
+                    for (let j = 0; j < fo; j++) {
+                        const f = [], mf = [], vf = [];
+                        for (let i = 0; i < fi; i++) { f.push(gauss() * std); mf.push(0); vf.push(0); }
+                        Wl.push(f); mWl.push(mf); vWl.push(vf); bl.push(0); mBl.push(0); vBl.push(0);
+                    }
+                    W.push(Wl); b.push(bl); mW.push(mWl); vW.push(vWl); mB.push(mBl); vB.push(vBl);
+                }
+                return { sizes, W, b, act: activacion, mW, vW, mB, vB, t: 0 };
+            };
+
+            // Forward pass (la capa de salida NO lleva activación)
+            const adelante = (red, x0) => {
+                let a = [x0]; const acts = [a];
+                for (let l = 0; l < red.W.length; l++) {
+                    const esSalida = l === red.W.length - 1;
+                    a = red.b[l].map((bj, j) => {
+                        let z = bj; const wj = red.W[l][j];
+                        for (let i = 0; i < acts[l].length; i++) z += wj[i] * acts[l][i];
+                        return esSalida ? z : activar[red.act](z);
+                    });
+                    acts.push(a);
+                }
+                return acts;
+            };
+
+            const salida = (red, x0) => adelante(red, x0)[red.W.length][0];
+
+            // Backward pass + actualización con Adam (pérdida MSE)
+            const entrenarPaso = (red, datos, tasa) => {
+                const { W, b } = red;
+                const gW = W.map(Wl => Wl.map(r => r.map(() => 0)));
+                const gB = b.map(bl => bl.map(() => 0));
+                for (const p of datos) {
+                    const acts = adelante(red, p.x);
+                    let delta = [acts[acts.length - 1][0] - p.y];   // MSE + salida lineal -> (ŷ - y)
+                    for (let l = W.length - 1; l >= 0; l--) {
+                        const aPrev = acts[l];
+                        for (let j = 0; j < W[l].length; j++) {
+                            gB[l][j] += delta[j];
+                            for (let i = 0; i < aPrev.length; i++) gW[l][j][i] += delta[j] * aPrev[i];
+                        }
+                        if (l > 0) {
+                            const nuevo = new Array(aPrev.length).fill(0);
+                            for (let i = 0; i < aPrev.length; i++) {
+                                let s = 0; for (let j = 0; j < W[l].length; j++) s += delta[j] * W[l][j][i];
+                                nuevo[i] = s * dActivar[red.act](aPrev[i]);
+                            }
+                            delta = nuevo;
+                        }
+                    }
+                }
+                // Paso de Adam (corrige el sesgo de los momentos)
+                const N = datos.length, b1 = 0.9, b2 = 0.999, eps = 1e-8;
+                red.t++; const cb1 = 1 - Math.pow(b1, red.t), cb2 = 1 - Math.pow(b2, red.t);
+                for (let l = 0; l < W.length; l++)
+                    for (let j = 0; j < W[l].length; j++) {
+                        let g = gB[l][j] / N;
+                        red.mB[l][j] = b1 * red.mB[l][j] + (1 - b1) * g;
+                        red.vB[l][j] = b2 * red.vB[l][j] + (1 - b2) * g * g;
+                        b[l][j] -= tasa * (red.mB[l][j] / cb1) / (Math.sqrt(red.vB[l][j] / cb2) + eps);
+                        for (let i = 0; i < W[l][j].length; i++) {
+                            g = gW[l][j][i] / N;
+                            red.mW[l][j][i] = b1 * red.mW[l][j][i] + (1 - b1) * g;
+                            red.vW[l][j][i] = b2 * red.vW[l][j][i] + (1 - b2) * g * g;
+                            W[l][j][i] -= tasa * (red.mW[l][j][i] / cb1) / (Math.sqrt(red.vW[l][j][i] / cb2) + eps);
+                        }
+                    }
+            };
+
+            const errorCuadratico = (red, datos) => {
+                if (!datos.length) return NaN;
+                let s = 0; for (const p of datos) s += (salida(red, p.x) - p.y) ** 2; return s / datos.length;
+            };
+
+            const toPx = (wx, wy) => [(wx - DX0) / (DX1 - DX0) * LW, (DY1 - wy) / (DY1 - DY0) * LH];
+
+            const pintar = () => {
+                const cv = canvasRef.current, red = redRef.current;
+                if (!cv || !red) return;
+                const ctx = cv.getContext('2d');
+                ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, LW, LH);
+                // rejilla
+                ctx.strokeStyle = '#EEE9F6'; ctx.lineWidth = 1;
+                for (let gx = -1; gx <= 1.001; gx += 0.25) { const [px] = toPx(gx, 0); ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, LH); ctx.stroke(); }
+                for (let gy = -1; gy <= 1.001; gy += 0.25) { const [, py] = toPx(0, gy); ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(LW, py); ctx.stroke(); }
+                // ejes
+                const [px0, py0] = toPx(0, 0);
+                ctx.strokeStyle = '#D9D2EA'; ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.moveTo(0, py0); ctx.lineTo(LW, py0); ctx.moveTo(px0, 0); ctx.lineTo(px0, LH); ctx.stroke();
+                // residuos: línea punteada de cada punto a la curva (lo que minimiza el MSE)
+                ctx.strokeStyle = 'rgba(100,116,139,0.5)'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+                for (const p of datosRef.current) {
+                    const [px, py] = toPx(p.x, p.y); const [, pyf] = toPx(p.x, salida(red, p.x));
+                    ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px, pyf); ctx.stroke();
+                }
+                ctx.setLineDash([]);
+                // curva ajustada por la red
+                ctx.strokeStyle = '#ED1E79'; ctx.lineWidth = 2.6; ctx.beginPath();
+                for (let s = 0; s <= 240; s++) {
+                    const wx = DX0 + (DX1 - DX0) * s / 240;
+                    const wy = Math.max(DY0 - 1, Math.min(DY1 + 1, salida(red, wx)));
+                    const [px, py] = toPx(wx, wy);
+                    if (s === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+                // puntos (arrastrables)
+                datosRef.current.forEach((p, idx) => {
+                    const [px, py] = toPx(p.x, p.y);
+                    ctx.beginPath(); ctx.arc(px, py, idx === dragRef.current ? 8 : 6, 0, 2 * Math.PI);
+                    ctx.fillStyle = idx === dragRef.current ? '#FDB913' : '#3D008D';
+                    ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke();
+                });
+            };
+
+            const bucle = () => {
+                const red = redRef.current;
+                if (!red || !corriendoRef.current) return;
+                for (let s = 0; s < 5; s++) { entrenarPaso(red, datosRef.current, lrRef.current); epocaRef.current++; }
+                pintar();
+                setMetricas({ epoca: epocaRef.current, mse: errorCuadratico(red, datosRef.current) });
+                if (corriendoRef.current) animRef.current = requestAnimationFrame(bucle);
+            };
+            const detener = () => { corriendoRef.current = false; setCorriendo(false); if (animRef.current) cancelAnimationFrame(animRef.current); };
+            const alternar = () => { if (corriendoRef.current) { detener(); return; } corriendoRef.current = true; setCorriendo(true); animRef.current = requestAnimationFrame(bucle); };
+            const reconstruir = () => { detener(); redRef.current = crearRed(); epocaRef.current = 0; setMetricas({ epoca: 0, mse: errorCuadratico(redRef.current, datosRef.current) }); pintar(); };
+            const ejemplo = () => { datosRef.current = puntosEjemplo(); reconstruir(); };
+            const borrarUltimo = () => { if (datosRef.current.length > 2) { datosRef.current.pop(); pintar(); setMetricas(m => ({ ...m, mse: errorCuadratico(redRef.current, datosRef.current) })); } };
+
+            // Interacción: clic para añadir, arrastrar para mover
+            const eventoMundo = (e) => {
+                const cv = canvasRef.current, rect = cv.getBoundingClientRect();
+                const px = (e.clientX - rect.left) * (LW / rect.width);
+                const py = (e.clientY - rect.top) * (LH / rect.height);
+                return { px, py, wx: DX0 + px / LW * (DX1 - DX0), wy: DY1 - py / LH * (DY1 - DY0) };
+            };
+            const clamp = (v) => Math.max(-1, Math.min(1, v));
+            const onDown = (e) => {
+                e.preventDefault();
+                const { px, py, wx, wy } = eventoMundo(e);
+                let idx = -1, mejor = 196;   // radio de captura 14px
+                datosRef.current.forEach((p, i) => { const [qx, qy] = toPx(p.x, p.y); const d = (qx - px) ** 2 + (qy - py) ** 2; if (d < mejor) { mejor = d; idx = i; } });
+                if (idx === -1 && datosRef.current.length < 24) { datosRef.current.push({ x: clamp(wx), y: clamp(wy) }); idx = datosRef.current.length - 1; }
+                dragRef.current = idx >= 0 ? idx : null;
+                if (e.pointerId != null && e.target.setPointerCapture) { try { e.target.setPointerCapture(e.pointerId); } catch (_) { } }
+                pintar();
+            };
+            const onMove = (e) => {
+                if (dragRef.current == null) return;
+                const { wx, wy } = eventoMundo(e);
+                datosRef.current[dragRef.current] = { x: clamp(wx), y: clamp(wy) };
+                if (!corriendoRef.current) pintar();
+            };
+            const onUp = () => { dragRef.current = null; pintar(); };
+
+            useEffect(() => { datosRef.current = puntosEjemplo(); reconstruir(); }, []);
+            useEffect(() => { reconstruir(); }, [nCapas, nNodos, activacion]);
+            useEffect(() => { lrRef.current = lr; }, [lr]);
+            useEffect(() => () => { corriendoRef.current = false; if (animRef.current) cancelAnimationFrame(animRef.current); }, []);
+
+            const pill = (a) => `px-3 py-1 rounded-full text-xs font-bold transition-all ${a ? 'usta-gradient text-white shadow' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`;
+
+            return (
+                <div className="my-6 rounded-2xl overflow-hidden shadow-md border border-primary/15 bg-white not-prose">
+                    <div className="usta-gradient px-5 py-3 flex items-center gap-3">
+                        <span className="bg-white/20 rounded-lg p-2 text-white flex items-center justify-center flex-shrink-0"><i className="fas fa-bezier-curve"></i></span>
+                        <div>
+                            <div className="text-white font-bold text-base leading-tight">Interpolador de curvas</div>
+                            <div className="text-white/80 text-xs">La red ajusta y = f(x) a los puntos; la activación cambia la forma</div>
+                        </div>
+                    </div>
+                    <div className="p-5">
+                        <p className="text-xs text-gray-500 mb-2"><i className="fas fa-hand-pointer mr-1"></i>Clic en el lienzo para <strong>añadir</strong> un punto · arrastra para <strong>moverlo</strong>. La salida es lineal y la pérdida es el error cuadrático medio (MSE).</p>
+                        <div className="rounded-xl overflow-hidden border border-gray-200 shadow-inner">
+                            <canvas ref={canvasRef} width={LW} height={LH}
+                                onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerLeave={onUp}
+                                style={{ width: '100%', height: 'auto', display: 'block', background: '#fff', touchAction: 'none', cursor: 'pointer' }}
+                                aria-label="Lienzo de interpolación: puntos arrastrables y la curva ajustada por la red" />
+                        </div>
+                        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[0.7rem] text-gray-500 mt-2">
+                            <span><span className="inline-block w-2.5 h-2.5 rounded-full align-middle mr-1" style={{ background: '#3D008D' }}></span>Puntos</span>
+                            <span><span className="inline-block w-5 align-middle mr-1" style={{ borderTop: '3px solid #ED1E79' }}></span>Curva de la red</span>
+                            <span><span className="inline-block w-5 align-middle mr-1" style={{ borderTop: '2px dashed #94A3B8' }}></span>Residuos (MSE)</span>
+                        </div>
+
+                        <div className="grid sm:grid-cols-2 gap-4 mt-4">
+                            <div className="space-y-3">
+                                <div>
+                                    <div className="text-xs font-semibold text-gray-500 mb-1.5">Activación (capas ocultas)</div>
+                                    <div className="flex gap-2">
+                                        {['relu', 'tanh', 'sigmoide'].map(k => (
+                                            <button key={k} onClick={() => setActivacion(k)} className={pill(activacion === k)}>{k === 'relu' ? 'ReLU' : k === 'tanh' ? 'Tanh' : 'Sigmoide'}</button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1"><span>Tasa de aprendizaje</span><span className="text-secondary">{lr < 0.01 ? lr.toFixed(4) : lr.toFixed(3)}</span></div>
+                                    <input type="range" min="0" max="1" step="0.01" value={lrExp} onChange={e => setLrExp(+e.target.value)} className="usta-range" aria-label="Tasa de aprendizaje (escala logarítmica)" />
+                                </div>
+                            </div>
+                            <div className="space-y-3">
+                                <div>
+                                    <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1"><span>Capas ocultas</span><span className="text-primary">{nCapas}</span></div>
+                                    <input type="range" min="1" max="3" step="1" value={nCapas} onChange={e => setNCapas(+e.target.value)} className="usta-range" aria-label="Número de capas ocultas" />
+                                </div>
+                                <div>
+                                    <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1"><span>Nodos por capa</span><span className="text-primary">{nNodos}</span></div>
+                                    <input type="range" min="1" max="16" step="1" value={nNodos} onChange={e => setNNodos(+e.target.value)} className="usta-range" aria-label="Nodos por capa oculta" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2 mt-4">
+                            <button onClick={alternar} className="px-3 py-1.5 rounded-lg text-xs font-bold text-white usta-gradient shadow hover:opacity-90 transition">
+                                <i className={`fas ${corriendo ? 'fa-pause' : 'fa-play'} mr-1`}></i>{corriendo ? 'Pausar' : (metricas.epoca > 0 ? 'Reanudar' : 'Entrenar')}
+                            </button>
+                            <button onClick={reconstruir} className="px-3 py-1.5 rounded-lg text-xs font-bold text-primary bg-gray-100 hover:bg-gray-200 transition"><i className="fas fa-rotate-left mr-1"></i>Reiniciar pesos</button>
+                            <button onClick={ejemplo} className="px-3 py-1.5 rounded-lg text-xs font-bold text-primary bg-gray-100 hover:bg-gray-200 transition"><i className="fas fa-wave-square mr-1"></i>Puntos de ejemplo</button>
+                            <button onClick={borrarUltimo} className="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition"><i className="fas fa-delete-left mr-1"></i>Borrar último</button>
+                            <div className="ml-auto flex gap-2">
+                                <span className="rounded-lg bg-bg border border-gray-200 px-2.5 py-1 text-center"><span className="text-[0.62rem] uppercase tracking-wide text-gray-400 mr-1">Época</span><span className="font-mono font-bold text-sm text-navy">{metricas.epoca}</span></span>
+                                <span className="rounded-lg bg-bg border border-gray-200 px-2.5 py-1 text-center"><span className="text-[0.62rem] uppercase tracking-wide text-gray-400 mr-1">MSE</span><span className="font-mono font-bold text-sm" style={{ color: '#ED1E79' }}>{isFinite(metricas.mse) ? metricas.mse.toFixed(4) : '—'}</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
         const Cap2Section = () => (
             <div className="prose-usta">
                 <p>
@@ -2231,6 +2510,25 @@ modelo = nn.Sequential(
                 </p>
 
                 <TeoremaAproximacion />
+
+                <h3>Interpolar puntos: la red como función</h3>
+                <p>
+                    El Teorema garantiza que una red puede aproximar cualquier función continua; aquí puede comprobarse de
+                    forma directa. En el siguiente laboratorio se colocan puntos en el plano y una red de <strong>regresión</strong>
+                    (salida lineal, pérdida del error cuadrático medio) ajusta la curva <em>y = f(x)</em> que mejor los explica.
+                    Al cambiar la <strong>función de activación</strong> se observa un contraste revelador: <strong>ReLU</strong>
+                    teje la curva con tramos rectos (es poligonal), mientras <strong>Tanh</strong> y <strong>Sigmoide</strong>
+                    producen curvas suaves.
+                </p>
+                <InterpoladorCurva />
+                <Box type="tip" label="Qué conviene observar">
+                    <ul>
+                        <li><strong>La activación moldea la curva:</strong> ReLU → quebrada (tramos rectos); Tanh/Sigmoide → suave. Es el mismo efecto del catálogo que sigue, pero visible sobre la función aprendida.</li>
+                        <li><strong>Más neuronas = más flexibilidad:</strong> con pocos nodos la curva es rígida; con muchos puede pasar casi exactamente por todos los puntos… y empezar a <em>serpentear</em> entre ellos (sobreajuste, Capítulo 5).</li>
+                        <li><strong>Los residuos</strong> (líneas punteadas de cada punto a la curva) son justo lo que el error cuadrático medio minimiza.</li>
+                        <li><strong>En los extremos</strong> se aprecia la extrapolación: ReLU continúa recto; Tanh y Sigmoide se aplanan (saturan).</li>
+                    </ul>
+                </Box>
 
                 <h3>Catálogo de funciones de activación</h3>
                 <p>
