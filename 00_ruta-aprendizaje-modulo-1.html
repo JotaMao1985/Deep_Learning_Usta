@@ -959,36 +959,38 @@
             },
         };
 
-        /* 2 videos */
+        /* 2 videos — serie Deep Learning de 3Blue1Brown */
         const videos = [
             {
                 id: 'seccion',
                 tipo: 'Video de Sección',
                 icono: 'fa-circle-play',
-                titulo: 'Del Error al Aprendizaje: ética y validación en el caso del hospital con dengue',
-                duracion: '4 min 17 s',
-                numEscenas: 12,
-                conceptos: ['Falso Negativo clínico', 'Recall vs. Accuracy', 'Validación cruzada por grupos', 'Marco Ético IA Colombia', 'Transfer Learning como solución'],
+                titulo: '¿Qué es una red neuronal? — 3Blue1Brown (Chapter 1)',
+                duracion: '~ 20 min',
+                numEscenas: null,
+                conceptos: ['Neuronas y capas', 'Representación de funciones', 'Descenso del gradiente', 'Entrenamiento de redes', 'MNIST como caso de estudio'],
                 textoDestacado: [
-                    '"Entrenar ≠ Aprender"',
-                    '"Éxito técnico ≠ Éxito clínico"',
-                    '"El sesgo no es del algoritmo: es del dataset"',
+                    '"Una red neuronal es un conjunto de capas de neuronas, donde cada neurona toma un número y lo transforma"',
+                    '"El aprendizaje es ajustar pesos y sesgos para que la salida coincida con lo esperado"',
+                    '"Las capas ocultas aprenden representaciones intermedias de los datos"',
                 ],
+                url: 'https://www.youtube.com/watch?v=aircAruvnKk',
                 linkMd: 'modulos/modulo-1-fundamentos/videos/video-seccion-m1.md',
             },
             {
                 id: 'profundizacion',
                 tipo: 'Video de Profundización',
                 icono: 'fa-film',
-                titulo: 'Descenso del Gradiente: cómo las redes optimizan sus parámetros',
-                duracion: '10 – 12 min',
-                numEscenas: 7,
-                conceptos: ['Función de pérdida', 'Descenso del gradiente', 'Regla de la cadena', 'Tasa de aprendizaje', 'Optimizadores (Adam, RMSProp)', 'Batches, épocas, curvas'],
+                titulo: 'Descenso del gradiente y retropropagación — 3Blue1Brown (Chapters 2–4)',
+                duracion: '~ 50 min (3 videos)',
+                numEscenas: null,
+                conceptos: ['Función de pérdida', 'Descenso del gradiente', 'Regla de la cadena', 'Tasa de aprendizaje', 'Backpropagation y autograd', 'Optimizadores (Adam, RMSProp)', 'Batches, épocas, curvas'],
                 textoDestacado: [
                     '"El excursionista tantea el suelo con los pies"',
                     '"LR alto: rebota; LR bajo: se congela; LR óptimo: converge"',
                     '"Adelante van los datos; atrás va la responsabilidad del error"',
                 ],
+                url: 'https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi',
                 linkMd: 'modulos/modulo-1-fundamentos/videos/video-profundizacion-m1.md',
             },
         ];
@@ -1035,9 +1037,12 @@
                 { ref: 'Géron, A. (2023). Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow (3rd Ed.). O\'Reilly Media.' },
                 { ref: 'Chollet, F. (2021). Deep Learning with Python (2nd Ed.). Manning Publications.' },
                 { ref: 'Zhang, A., Lipton, Z. C., Li, M., & Smola, A. J. (2023). Dive into Deep Learning. Cambridge University Press.', url: 'https://d2l.ai' },
+                { ref: 'Nielsen, M. (2015). Neural Networks and Deep Learning. Determination Press.', url: 'http://neuralnetworksanddeeplearning.com/' },
+                { ref: 'Deisenroth, M. P., Faisal, A. A., & Ong, C. S. (2020). Mathematics for Machine Learning. Cambridge University Press.', url: 'https://mml-book.github.io/' },
             ],
             webgrafia: [
                 { ref: 'Smilkov, D., & Carter, S. TensorFlow Playground: simulación web de redes neuronales.', url: 'https://playground.tensorflow.org' },
+                { ref: '3Blue1Brown. Deep Learning (serie completa). YouTube.', url: 'https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi' },
                 { ref: 'Starmer, J. (2020). The Essential Main Ideas of Neural Networks (StatQuest).', url: 'https://www.youtube.com/watch?v=CqOfi41LfDw' },
                 { ref: 'Santana Vega, C. (2018). ¿Qué es el Descenso del Gradiente? (Dot CSV).', url: 'https://www.youtube.com/watch?v=A6FiCDoz8_4' },
                 { ref: 'Ministerio de Ciencia (2021). Marco Ético para la IA en Colombia.', url: 'https://minciencias.gov.co/sites/default/files/marco-etico-ia-colombia-2021.pdf' },
@@ -1253,8 +1258,7 @@
                                 className="w-4 h-4 accent-secondary cursor-pointer" />
                             {act.tipo === 'guia' ? 'Marcar Guía 1 como entregada' : 'Marcar Actividad 1 como entregada'}
                         </label>
-                        <a href={`obsidian://${act.linkMd}`}
-                            onClick={(e) => { e.preventDefault(); window.open(act.linkMd, '_blank'); }}
+                        <a href={`obsidian://open?vault=Deep%20learning%20course&file=${encodeURIComponent(act.linkMd)}`}
                             className="ml-auto text-xs font-semibold text-primary hover:text-secondary transition-colors">
                             <i className="fas fa-file-lines mr-1"></i>Abrir ficha .md
                         </a>
@@ -1436,7 +1440,13 @@
                             className="w-4 h-4 accent-secondary cursor-pointer" />
                         Marcar como visto
                     </label>
-                    <a href={v.linkMd} target="_blank" rel="noopener"
+                    {v.url && (
+                        <a href={v.url} target="_blank" rel="noopener"
+                            className="text-xs font-semibold text-secondary hover:text-primary transition-colors">
+                            <i className="fab fa-youtube mr-1"></i>Ver en YouTube
+                        </a>
+                    )}
+                    <a href={`obsidian://open?vault=Deep%20learning%20course&file=${encodeURIComponent(v.linkMd)}`}
                         className="ml-auto text-xs font-semibold text-primary hover:text-secondary transition-colors">
                         <i className="fas fa-file-lines mr-1"></i>Ver guion completo
                     </a>
@@ -1607,7 +1617,7 @@
                             Transfer Learning y modelado predictivo de series temporales.
                         </p>
                         <div className="mt-4 flex flex-wrap items-center gap-2">
-                            <a href="Welcome.md" target="_blank" rel="noopener"
+                            <a href="obsidian://open?vault=Deep%20learning%20course&file=Welcome"
                                 className="inline-flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-full text-white usta-gradient hover:opacity-90 transition-opacity shadow-md">
                                 <i className="fas fa-map-location-dot"></i>Ir al mapa del Segundo Cerebro
                             </a>
