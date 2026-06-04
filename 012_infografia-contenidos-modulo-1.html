@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Infografía detallada de los contenidos del Módulo 1 — Fundamentos del Aprendizaje Profundo. Maestría en Ciencia de Datos, Universidad Santo Tomás. Síntesis visual de los 5 capítulos: historia, MLP, optimización, retropropagación, regularización, evaluación y ética.">
+    <title>Infografía · Contenidos del Módulo 1 — Fundamentos del Aprendizaje Profundo · USTA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Tailwind CSS (utilidades) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome (iconografía de apoyo) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- MathJax 3 — el contenido es matemáticamente denso; aquí es estático (no se revela
+         dinámicamente), por lo que MathJax tipografía una sola vez al cargar, sin re-typeset. -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <!-- Google Fonts: Montserrat (texto) y Fira Code (código) -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Montserrat', 'Helvetica Neue', 'Arial', 'sans-serif'] },
+                    colors: {
+                        primary: '#3D008D',
+                        secondary: '#ED1E79',
+                        navy: '#001A4D',
+                        gold: '#FDB913',
+                        teal: '#0E7490',
+                        bg: '#F8FAFC',
+                        surface: '#FFFFFF',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #F8FAFC;
+            color: #1E293B;
+            scroll-behavior: smooth;
+        }
+        code, pre, .mono { font-family: 'Fira Code', monospace; }
+
+        /* Gradientes institucionales USTA */
+        .usta-gradient { background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%); }
+        .usta-gradient-text {
+            background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .usta-header { background: linear-gradient(135deg, #001A4D 0%, #3D008D 60%, #5B1C9E 100%); }
+
+        /* Tarjeta base */
+        .card {
+            background: #fff; border-radius: 16px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+            transition: box-shadow .25s ease, transform .25s ease;
+        }
+        .card:hover { box-shadow: 0 12px 30px rgba(0,0,0,0.11); transform: translateY(-3px); }
+
+        /* Barra de desplazamiento */
+        ::-webkit-scrollbar { width: 9px; height: 9px; }
+        ::-webkit-scrollbar-track { background: #eef2f7; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg,#3D008D,#ED1E79); border-radius: 5px; }
+
+        /* Aparición progresiva: SOLO una entrada sutil que nunca oculta el contenido.
+           (El contenido es 100% visible siempre; la animación es un realce opcional.) */
+        @keyframes riseIn { from { opacity: .35; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        .js .reveal.in { animation: riseIn .5s ease-out both; }
+
+        /* Código en línea */
+        .icode {
+            background: #F1F5F9; color: #0F172A; padding: .08rem .42rem;
+            border-radius: 5px; font-size: .85em; font-family: 'Fira Code', monospace;
+        }
+        .codeblock {
+            background: #0F172A; color: #E2E8F0; border-radius: 12px;
+            padding: 1rem 1.1rem; font-family: 'Fira Code', monospace;
+            font-size: .82rem; line-height: 1.7; overflow-x: auto;
+        }
+        .codeblock .cm { color: #64748B; }
+        .codeblock .kw { color: #F472B6; }
+        .codeblock .fn { color: #7DD3FC; }
+        .codeblock .st { color: #FDE68A; }
+
+        /* Píldoras de fórmula */
+        .eq {
+            background: #FAF8FF; border: 1px solid rgba(61,0,141,.14);
+            border-radius: 12px; padding: .55rem 1rem; overflow-x: auto;
+        }
+
+        /* Callout / analogía */
+        .callout { border-left: 4px solid; border-radius: 12px; padding: .9rem 1.1rem; }
+
+        /* Cinta de capítulo */
+        .ribbon { writing-mode: vertical-rl; text-orientation: mixed; letter-spacing: .15em; }
+
+        /* Navegación sticky */
+        .navlink.active { color: #fff; }
+        .navlink.active .dot { transform: scale(1.6); }
+
+        h2.sec-title { font-weight: 800; letter-spacing: -.02em; }
+
+        /* Impresión / PDF */
+        @media print {
+            body { background: #fff; }
+            .no-print { display: none !important; }
+            .card { box-shadow: none; border: 1px solid #e5e7eb; break-inside: avoid; }
+            section { break-inside: avoid-page; }
+            .js .reveal { opacity: 1 !important; transform: none !important; }
+            a { color: #1E293B; text-decoration: none; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ====================== ENCABEZADO ====================== -->
+    <header class="usta-header text-white">
+        <div class="max-w-6xl mx-auto px-5 md:px-8 py-10 md:py-14">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="usta-gradient p-2.5 rounded-xl shadow-lg"><i class="fas fa-diagram-project text-lg"></i></span>
+                <span class="text-[11px] md:text-xs uppercase tracking-[0.25em] text-gold font-bold">Universidad Santo Tomás · Maestría en Ciencia de Datos</span>
+            </div>
+            <p class="text-secondary font-semibold text-sm md:text-base mb-1">Profundización I: Redes Neuronales — Deep Learning · EA-N-F-004</p>
+            <h1 class="text-3xl md:text-5xl font-extrabold leading-tight tracking-tight">
+                Infografía de Contenidos<br class="hidden md:block"> · Módulo 1
+            </h1>
+            <p class="text-xl md:text-2xl font-light text-white/90 mt-2">Fundamentos del Aprendizaje Profundo</p>
+            <p class="text-white/70 mt-4 max-w-3xl leading-relaxed text-sm md:text-base">
+                Síntesis visual de los <strong class="text-white">5 capítulos</strong> del módulo, pensada para
+                <strong class="text-white"> analizar y repasar de un vistazo</strong>: de la neurona de McCulloch-Pitts
+                al perceptrón multicapa, la matemática del error, la retropropagación, la regularización, la evaluación
+                y la ética. Todas las analogías están contextualizadas a Colombia.
+            </p>
+
+            <!-- estadísticas rápidas -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8">
+                <div class="bg-white/10 border border-white/15 rounded-xl px-4 py-3">
+                    <div class="text-2xl md:text-3xl font-extrabold text-gold">5</div>
+                    <div class="text-xs text-white/75 mt-0.5">capítulos de contenido</div>
+                </div>
+                <div class="bg-white/10 border border-white/15 rounded-xl px-4 py-3">
+                    <div class="text-2xl md:text-3xl font-extrabold text-gold">48 h</div>
+                    <div class="text-xs text-white/75 mt-0.5">carga total del módulo</div>
+                </div>
+                <div class="bg-white/10 border border-white/15 rounded-xl px-4 py-3">
+                    <div class="text-2xl md:text-3xl font-extrabold text-gold">25 %</div>
+                    <div class="text-xs text-white/75 mt-0.5">del peso de la nota final</div>
+                </div>
+                <div class="bg-white/10 border border-white/15 rounded-xl px-4 py-3">
+                    <div class="text-2xl md:text-3xl font-extrabold text-gold">26</div>
+                    <div class="text-xs text-white/75 mt-0.5">términos en el glosario</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ====================== NAV STICKY ====================== -->
+    <nav class="no-print sticky top-0 z-40 bg-navy/95 backdrop-blur border-b border-white/10 shadow-lg">
+        <div class="max-w-6xl mx-auto px-2 md:px-6 overflow-x-auto">
+            <ul class="flex items-center gap-1 py-2 text-[11px] md:text-sm font-semibold whitespace-nowrap text-white/70">
+                <li><a href="#mapa" class="navlink flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition"><span class="dot w-2 h-2 rounded-full bg-gold inline-block transition-transform"></span>Mapa</a></li>
+                <li><a href="#cap1" class="navlink flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition"><span class="dot w-2 h-2 rounded-full bg-primary inline-block transition-transform"></span>1 · Historia</a></li>
+                <li><a href="#cap2" class="navlink flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition"><span class="dot w-2 h-2 rounded-full bg-secondary inline-block transition-transform"></span>2 · MLP</a></li>
+                <li><a href="#cap3" class="navlink flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition"><span class="dot w-2 h-2 rounded-full bg-gold inline-block transition-transform"></span>3 · Optimización</a></li>
+                <li><a href="#cap4" class="navlink flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition"><span class="dot w-2 h-2 rounded-full bg-teal inline-block transition-transform"></span>4 · Backprop</a></li>
+                <li><a href="#cap5" class="navlink flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition"><span class="dot w-2 h-2 rounded-full bg-navy inline-block transition-transform" style="background:#5B1C9E"></span>5 · Ajuste y Ética</a></li>
+                <li><a href="#cheatsheet" class="navlink flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition"><span class="dot w-2 h-2 rounded-full bg-white inline-block transition-transform"></span>Fórmulas</a></li>
+                <li class="ml-auto"><button onclick="window.print()" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gold text-navy font-bold hover:opacity-90 transition"><i class="fas fa-print"></i><span class="hidden md:inline">Imprimir / PDF</span></button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 md:px-8 py-10">
+
+        <!-- ====================== MAPA CONCEPTUAL ====================== -->
+        <section id="mapa" class="scroll-mt-20">
+            <div class="flex items-center gap-3 mb-5">
+                <span class="usta-gradient text-white p-2.5 rounded-xl shadow"><i class="fas fa-sitemap"></i></span>
+                <h2 class="sec-title text-2xl md:text-3xl text-navy">Mapa del módulo en una mirada</h2>
+            </div>
+            <p class="text-gray-600 max-w-3xl mb-6 text-[0.95rem]">El módulo sigue el ciclo de vida real de un modelo: primero entiendo <em>de dónde viene</em> y <em>cuándo conviene</em> el Deep Learning, luego construyo la arquitectura, le doy un objetivo, le enseño a corregirse y, por último, evito que se engañe a sí mismo y lo hago éticamente responsable.</p>
+
+            <div class="grid md:grid-cols-5 gap-3">
+                <!-- flujo -->
+                <a href="#cap1" class="card p-4 border-t-4 border-primary block">
+                    <div class="flex items-center justify-between"><span class="text-3xl font-extrabold text-primary/25">01</span><i class="fas fa-clock-rotate-left text-primary"></i></div>
+                    <h3 class="font-bold text-navy mt-1 leading-tight">Historia y Contexto</h3>
+                    <p class="text-xs text-gray-500 mt-1">3 ciclos, ML vs DL, Colombia</p>
+                </a>
+                <a href="#cap2" class="card p-4 border-t-4 border-secondary block">
+                    <div class="flex items-center justify-between"><span class="text-3xl font-extrabold text-secondary/25">02</span><i class="fas fa-network-wired text-secondary"></i></div>
+                    <h3 class="font-bold text-navy mt-1 leading-tight">MLP y Arquitectura</h3>
+                    <p class="text-xs text-gray-500 mt-1">Neurona, capas, activaciones</p>
+                </a>
+                <a href="#cap3" class="card p-4 border-t-4 border-gold block">
+                    <div class="flex items-center justify-between"><span class="text-3xl font-extrabold text-gold/40">03</span><i class="fas fa-arrow-trend-down" style="color:#B45309"></i></div>
+                    <h3 class="font-bold text-navy mt-1 leading-tight">Error y Optimización</h3>
+                    <p class="text-xs text-gray-500 mt-1">Loss, gradiente, learning rate</p>
+                </a>
+                <a href="#cap4" class="card p-4 border-t-4 border-teal block">
+                    <div class="flex items-center justify-between"><span class="text-3xl font-extrabold text-teal/25">04</span><i class="fas fa-diagram-project text-teal"></i></div>
+                    <h3 class="font-bold text-navy mt-1 leading-tight">Retropropagación</h3>
+                    <p class="text-xs text-gray-500 mt-1">Grafos, regla de la cadena</p>
+                </a>
+                <a href="#cap5" class="card p-4 border-t-4 block" style="border-color:#5B1C9E">
+                    <div class="flex items-center justify-between"><span class="text-3xl font-extrabold" style="color:#5B1C9E40">05</span><i class="fas fa-scale-balanced" style="color:#5B1C9E"></i></div>
+                    <h3 class="font-bold text-navy mt-1 leading-tight">Ajuste, Evaluación, Ética</h3>
+                    <p class="text-xs text-gray-500 mt-1">Overfitting, BatchNorm, sesgos</p>
+                </a>
+            </div>
+
+            <div class="card p-5 mt-5 bg-gradient-to-br from-[#FAF8FF] to-[#FCE7F1]">
+                <p class="text-sm text-gray-700"><i class="fas fa-quote-left text-secondary mr-2"></i><strong>Idea-fuerza del módulo:</strong> «Quien entiende un MLP comprende aproximadamente el <strong>80 %</strong> del Deep Learning moderno.» Una red profunda no es una caja negra mágica: es una <strong>cadena de procesamiento</strong> que transforma materia prima "sucia" (datos crudos) en un resultado refinado (una decisión), igual que la cadena de beneficio del café.</p>
+            </div>
+        </section>
+
+        <!-- ====================== CAPÍTULO 1 ====================== -->
+        <section id="cap1" class="scroll-mt-20 mt-14 reveal">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-14 h-14 rounded-2xl usta-gradient text-white flex items-center justify-center text-2xl font-extrabold shadow-lg flex-shrink-0">01</div>
+                <div>
+                    <p class="text-xs uppercase tracking-widest text-primary font-bold">Capítulo 1 · #tema/historia</p>
+                    <h2 class="sec-title text-2xl md:text-3xl text-navy">Introducción y Contexto Histórico</h2>
+                </div>
+            </div>
+
+            <!-- Línea de tiempo de los 3 ciclos -->
+            <div class="card p-6 mb-5">
+                <h3 class="font-bold text-navy mb-1 flex items-center gap-2"><i class="fas fa-timeline text-primary"></i>Una historia de ciclos: entusiasmo, "inviernos" y renacimiento</h3>
+                <p class="text-sm text-gray-500 mb-5">70+ años de investigación en tres grandes oleadas.</p>
+
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div class="rounded-xl border border-primary/15 bg-[#FAF8FF] p-4">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-primary">Ciclo 1 · 1943–1969</span>
+                        <h4 class="font-bold text-navy mt-1">Orígenes y primer invierno</h4>
+                        <ul class="text-[0.86rem] text-gray-600 mt-2 space-y-1.5">
+                            <li><strong>1943</strong> — Neurona de McCulloch-Pitts (modelo lógico binario: AND/OR/NOT).</li>
+                            <li><strong>1958</strong> — Perceptrón de Rosenblatt (Mark I): la primera máquina que <em>aprende</em>.</li>
+                            <li><strong>1969</strong> — Minsky &amp; Papert demuestran que el perceptrón simple no resuelve el <strong>XOR</strong> (no separable). Llega el primer "invierno de la IA".</li>
+                        </ul>
+                    </div>
+                    <div class="rounded-xl border border-secondary/15 bg-[#FCE7F1]/40 p-4">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-secondary">Ciclo 2 · 1986–2006</span>
+                        <h4 class="font-bold text-navy mt-1">Renacimiento por backprop</h4>
+                        <ul class="text-[0.86rem] text-gray-600 mt-2 space-y-1.5">
+                            <li><strong>1986</strong> — Rumelhart, Hinton &amp; Williams popularizan la <strong>retropropagación</strong> (regla de la cadena para entrenar capas ocultas).</li>
+                            <li><strong>1989/98</strong> — LeNet de Yann LeCun: primeras CNN, leen cheques bancarios.</li>
+                            <li><strong>1997</strong> — LSTM (Hochreiter &amp; Schmidhuber). Pero las SVM dominan: segundo invierno por <em>vanishing gradients</em>.</li>
+                        </ul>
+                    </div>
+                    <div class="rounded-xl border border-gold/40 bg-[#FEF9E7] p-4">
+                        <span class="text-[11px] font-bold uppercase tracking-wider" style="color:#B45309">Ciclo 3 · 2006–hoy</span>
+                        <h4 class="font-bold text-navy mt-1">La revolución actual</h4>
+                        <ul class="text-[0.86rem] text-gray-600 mt-2 space-y-1.5">
+                            <li><strong>2006</strong> — Hinton acuña "Deep Learning".</li>
+                            <li><strong>2012</strong> — <strong>AlexNet</strong> gana ImageNet (15.3 % error vs 26.2 %): punto de inflexión.</li>
+                            <li><strong>2015</strong> — ResNet (152 capas) supera al humano. <strong>2017</strong> Transformers. <strong>2020+</strong> GPT-3/4, Claude, Gemini.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="callout mt-4" style="border-color:#3D008D; background:#F5F0FA">
+                    <p class="text-sm text-gray-700"><i class="fas fa-bolt text-primary mr-1"></i><strong>La convergencia que lo cambió todo (2012):</strong> <strong>Big Data</strong> (ImageNet, 14M imágenes) + <strong>GPUs</strong> (10–100× más rápidas que CPU) + <strong>mejoras algorítmicas</strong> (ReLU, Dropout, Batch Norm, init Xavier/He).</p>
+                </div>
+            </div>
+
+            <!-- ML vs DL -->
+            <div class="grid lg:grid-cols-2 gap-5 mb-5">
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-3 flex items-center gap-2"><i class="fas fa-code-compare text-primary"></i>Machine Learning clásico vs. Deep Learning</h3>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">La diferencia de fondo es la <strong>ingeniería de características</strong>: en ML clásico la diseña un experto a mano; en DL la red la <strong>aprende sola</strong>, de píxeles → bordes → texturas → partes → objeto.</p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-[0.8rem] border-collapse">
+                            <thead>
+                                <tr class="bg-[#F5F0FA] text-primary">
+                                    <th class="text-left p-2 border border-gray-200">Criterio</th>
+                                    <th class="text-left p-2 border border-gray-200">ML clásico</th>
+                                    <th class="text-left p-2 border border-gray-200">Deep Learning</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-700">
+                                <tr><td class="p-2 border border-gray-200 font-semibold">Características</td><td class="p-2 border border-gray-200">Manuales (semanas)</td><td class="p-2 border border-gray-200">Automáticas</td></tr>
+                                <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Datos</td><td class="p-2 border border-gray-200">100 – 10 000</td><td class="p-2 border border-gray-200">10 000 – 1 000 000+</td></tr>
+                                <tr><td class="p-2 border border-gray-200 font-semibold">Mejor para</td><td class="p-2 border border-gray-200">Tabular (CSV/SQL)</td><td class="p-2 border border-gray-200">Imagen, audio, texto</td></tr>
+                                <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Interpretabilidad</td><td class="p-2 border border-gray-200">Alta</td><td class="p-2 border border-gray-200">Baja ("caja negra")</td></tr>
+                                <tr><td class="p-2 border border-gray-200 font-semibold">Hardware</td><td class="p-2 border border-gray-200">CPU</td><td class="p-2 border border-gray-200">GPU / TPU</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-3 flex items-center gap-2"><i class="fas fa-diagram-successor text-primary"></i>Árbol de decisión: ¿cuándo usar cada uno?</h3>
+                    <ul class="space-y-2.5 text-[0.86rem] text-gray-700">
+                        <li class="flex gap-2"><span class="font-bold text-primary">1.</span><span><strong>¿Tipo de datos?</strong> Tabular → prueba ML (XGBoost). Imagen/texto/audio → considera DL.</span></li>
+                        <li class="flex gap-2"><span class="font-bold text-primary">2.</span><span><strong>¿Cuántos ejemplos?</strong> &lt;1 000 → ML. &gt;10 000 → DL viable. &gt;100 000 → DL gana.</span></li>
+                        <li class="flex gap-2"><span class="font-bold text-primary">3.</span><span><strong>¿Necesitas interpretabilidad?</strong> Sí (salud, finanzas) → ML o DL + explicabilidad (LIME/SHAP).</span></li>
+                        <li class="flex gap-2"><span class="font-bold text-primary">4.</span><span><strong>¿Recursos?</strong> Solo CPU/poco presupuesto → ML. GPU disponible → DL.</span></li>
+                        <li class="flex gap-2"><span class="font-bold text-primary">5.</span><span><strong>¿Tiempo?</strong> Días → ML (prototipo). Meses → DL (ajuste de arquitectura).</span></li>
+                    </ul>
+                    <div class="callout mt-3" style="border-color:#15803D; background:#F0FDF4">
+                        <p class="text-[0.82rem] text-gray-700"><strong>Regla pragmática:</strong> empieza simple (baseline con XGBoost). Con imágenes y pocos datos, <strong>Transfer Learning</strong> + <strong>Data Augmentation</strong> antes que entrenar desde cero.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colombia -->
+            <div class="card p-6">
+                <h3 class="font-bold text-navy mb-3 flex items-center gap-2"><i class="fas fa-earth-americas text-primary"></i>Deep Learning en Colombia: oportunidades y desafíos</h3>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 text-[0.84rem]">
+                    <div class="bg-gray-50 rounded-lg p-3"><strong class="text-primary">Cenicafé</strong> — visión por computador para clasificar granos y detectar broca del café.</div>
+                    <div class="bg-gray-50 rounded-lg p-3"><strong class="text-primary">INS</strong> — modelos predictivos para vigilancia de dengue, Zika y Chikungunya (SIVIGILA).</div>
+                    <div class="bg-gray-50 rounded-lg p-3"><strong class="text-primary">IDEAM</strong> — deforestación en la Amazonía con imágenes Sentinel-2 / Landsat.</div>
+                    <div class="bg-gray-50 rounded-lg p-3"><strong class="text-primary">Sector privado</strong> — Rappi (recomendación), Bancolombia (fraude).</div>
+                    <div class="bg-gray-50 rounded-lg p-3"><strong class="text-secondary">Desafíos</strong> — brecha de talento, acceso limitado a GPU, datos de baja calidad.</div>
+                    <div class="bg-gray-50 rounded-lg p-3"><strong class="text-secondary">Conectividad</strong> — <em>edge computing</em> (Raspberry Pi, Jetson) con MobileNet/TinyYOLO + cuantización.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== CAPÍTULO 2 ====================== -->
+        <section id="cap2" class="scroll-mt-20 mt-14 reveal">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-14 h-14 rounded-2xl bg-secondary text-white flex items-center justify-center text-2xl font-extrabold shadow-lg flex-shrink-0">02</div>
+                <div>
+                    <p class="text-xs uppercase tracking-widest text-secondary font-bold">Capítulo 2 · #tema/mlp</p>
+                    <h2 class="sec-title text-2xl md:text-3xl text-navy">El Perceptrón Multicapa (MLP) y la Arquitectura</h2>
+                </div>
+            </div>
+
+            <!-- Neurona + MLP diagrama -->
+            <div class="grid lg:grid-cols-2 gap-5 mb-5">
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-circle-nodes text-secondary"></i>Anatomía de una neurona</h3>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">Una neurona es una <strong>regresión lineal envuelta en una función de decisión</strong>: suma ponderada + no-linealidad.</p>
+                    <div class="eq text-center my-3">$$y = \sigma\left(\sum_{i=1}^n w_i x_i + b\right) = \sigma(\mathbf{w}^\top \mathbf{x} + b)$$</div>
+                    <!-- SVG neurona -->
+                    <svg viewBox="0 0 420 200" class="w-full">
+                        <!-- entradas -->
+                        <g font-size="12" font-family="Montserrat" fill="#334155">
+                            <circle cx="40" cy="40" r="16" fill="#FCE7F1" stroke="#ED1E79"/><text x="40" y="44" text-anchor="middle">x₁</text>
+                            <circle cx="40" cy="100" r="16" fill="#FCE7F1" stroke="#ED1E79"/><text x="40" y="104" text-anchor="middle">x₂</text>
+                            <circle cx="40" cy="160" r="16" fill="#FCE7F1" stroke="#ED1E79"/><text x="40" y="164" text-anchor="middle">x₃</text>
+                        </g>
+                        <!-- pesos -->
+                        <g stroke="#94A3B8" stroke-width="1.5">
+                            <line x1="56" y1="40" x2="180" y2="100"/><line x1="56" y1="100" x2="180" y2="100"/><line x1="56" y1="160" x2="180" y2="100"/>
+                        </g>
+                        <g font-size="10" fill="#64748B" font-style="italic">
+                            <text x="110" y="60">w₁</text><text x="118" y="94">w₂</text><text x="110" y="142">w₃</text>
+                        </g>
+                        <!-- suma -->
+                        <circle cx="200" cy="100" r="24" fill="#F5F0FA" stroke="#3D008D" stroke-width="2"/>
+                        <text x="200" y="106" text-anchor="middle" font-size="18" fill="#3D008D">Σ</text>
+                        <text x="200" y="150" text-anchor="middle" font-size="10" fill="#64748B">+ b (sesgo)</text>
+                        <!-- activacion -->
+                        <line x1="224" y1="100" x2="270" y2="100" stroke="#94A3B8" stroke-width="1.5"/>
+                        <rect x="270" y="76" width="60" height="48" rx="8" fill="#FFF7ED" stroke="#B45309"/>
+                        <text x="300" y="98" text-anchor="middle" font-size="11" fill="#B45309">σ</text>
+                        <text x="300" y="114" text-anchor="middle" font-size="8" fill="#9A3412">activación</text>
+                        <!-- salida -->
+                        <line x1="330" y1="100" x2="372" y2="100" stroke="#94A3B8" stroke-width="1.5"/>
+                        <circle cx="392" cy="100" r="18" fill="#DCFCE7" stroke="#15803D"/><text x="392" y="104" text-anchor="middle" font-size="13" fill="#15803D">y</text>
+                    </svg>
+                    <div class="callout mt-2" style="border-color:#B45309; background:#FFFBEB">
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-door-open mr-1" style="color:#B45309"></i><strong>ReLU = el portero de la discoteca:</strong> si el valor es positivo (útil) "pase"; si es negativo (ruido) "cero, usted no entra".</p>
+                    </div>
+                </div>
+
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-network-wired text-secondary"></i>Arquitectura feedforward (MLP)</h3>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">Las <strong>capas ocultas</strong> transforman "papeles" en "conceptos interpretables". Aprenden representaciones <strong>jerárquicas</strong>.</p>
+                    <!-- SVG MLP -->
+                    <svg viewBox="0 0 420 210" class="w-full">
+                        <!-- conexiones generadas: dibujamos manualmente algunas para sugerir densidad -->
+                        <g stroke="#E2E8F0" stroke-width="1">
+                            <!-- entrada->oculta1 -->
+                            <line x1="46" y1="45" x2="160" y2="35"/><line x1="46" y1="45" x2="160" y2="85"/><line x1="46" y1="45" x2="160" y2="125"/><line x1="46" y1="45" x2="160" y2="165"/>
+                            <line x1="46" y1="105" x2="160" y2="35"/><line x1="46" y1="105" x2="160" y2="85"/><line x1="46" y1="105" x2="160" y2="125"/><line x1="46" y1="105" x2="160" y2="165"/>
+                            <line x1="46" y1="165" x2="160" y2="35"/><line x1="46" y1="165" x2="160" y2="85"/><line x1="46" y1="165" x2="160" y2="125"/><line x1="46" y1="165" x2="160" y2="165"/>
+                            <!-- oculta1->oculta2 -->
+                            <line x1="160" y1="35" x2="274" y2="65"/><line x1="160" y1="35" x2="274" y2="135"/>
+                            <line x1="160" y1="85" x2="274" y2="65"/><line x1="160" y1="85" x2="274" y2="135"/>
+                            <line x1="160" y1="125" x2="274" y2="65"/><line x1="160" y1="125" x2="274" y2="135"/>
+                            <line x1="160" y1="165" x2="274" y2="65"/><line x1="160" y1="165" x2="274" y2="135"/>
+                            <!-- oculta2->salida -->
+                            <line x1="274" y1="65" x2="380" y2="100"/><line x1="274" y1="135" x2="380" y2="100"/>
+                        </g>
+                        <!-- capa entrada -->
+                        <g fill="#FCE7F1" stroke="#ED1E79"><circle cx="46" cy="45" r="13"/><circle cx="46" cy="105" r="13"/><circle cx="46" cy="165" r="13"/></g>
+                        <!-- ocultas -->
+                        <g fill="#F5F0FA" stroke="#3D008D"><circle cx="160" cy="35" r="13"/><circle cx="160" cy="85" r="13"/><circle cx="160" cy="125" r="13"/><circle cx="160" cy="165" r="13"/></g>
+                        <g fill="#F5F0FA" stroke="#3D008D"><circle cx="274" cy="65" r="13"/><circle cx="274" cy="135" r="13"/></g>
+                        <!-- salida -->
+                        <circle cx="380" cy="100" r="15" fill="#DCFCE7" stroke="#15803D"/>
+                        <!-- etiquetas -->
+                        <g font-size="10" font-family="Montserrat" fill="#64748B" text-anchor="middle">
+                            <text x="46" y="195">Entrada</text>
+                            <text x="217" y="195">Capas ocultas</text>
+                            <text x="380" y="135">Salida</text>
+                        </g>
+                    </svg>
+                    <div class="grid grid-cols-3 gap-2 text-[0.74rem] text-center mt-1">
+                        <div class="bg-[#FCE7F1]/50 rounded p-1.5"><strong>Ventanilla</strong><br>datos crudos</div>
+                        <div class="bg-[#F5F0FA] rounded p-1.5"><strong>Analistas</strong><br>extraen conceptos</div>
+                        <div class="bg-[#DCFCE7]/60 rounded p-1.5"><strong>Director</strong><br>decisión final</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teorema de aproximación universal -->
+            <div id="uat" class="card overflow-hidden mb-5 scroll-mt-24">
+                <div class="px-5 py-3 usta-gradient text-white flex items-center gap-2.5">
+                    <i class="fas fa-mountain-sun"></i>
+                    <h3 class="font-bold">Teorema de Aproximación Universal</h3>
+                </div>
+                <div class="p-5 md:p-6">
+                    <p class="text-[0.92rem] text-gray-700 mb-4">Una red con <strong>al menos una capa oculta</strong> y suficientes neuronas puede aproximar <strong>cualquier función continua</strong>. Cada neurona aporta un pequeño "bloque" no lineal; al sumar muchos, se reconstruye cualquier forma.</p>
+                    <div class="grid md:grid-cols-2 gap-5 md:gap-6 items-center">
+                        <div class="rounded-xl border border-gray-200 bg-[#FAFBFF] p-3">
+                            <div class="plot-lego"></div>
+                            <p class="text-center text-[0.72rem] text-gray-500 mt-1.5">Pocos bloques → silueta tosca. Muchos bloques → ajuste milimétrico.</p>
+                        </div>
+                        <div class="rounded-xl border-l-4 border-secondary bg-[#FFF1F7] px-4 py-3">
+                            <p class="text-[0.7rem] font-bold uppercase tracking-wider text-secondary mb-1.5"><i class="fas fa-cubes mr-1"></i>Analogía Lego · La Cordillera Central</p>
+                            <p class="text-[0.88rem] text-gray-700 leading-relaxed">Una <strong>regresión lineal</strong> es una rampa rígida de madera: no encaja en el perfil del Túnel de La Línea. Una <strong>red neuronal</strong> es como millones de piezas de Lego: cada neurona pone un bloque y, ajustando su altura (\(w\)) y su posición (\(b\)), recrea con precisión la silueta de los Andes.</p>
+                            <p class="text-[0.82rem] text-gray-600 mt-2 pt-2 border-t border-secondary/15"><i class="fas fa-triangle-exclamation text-secondary mr-1"></i><strong>Sin no-linealidad</strong>, apilar capas equivale a una sola regresión lineal.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Galería de activaciones -->
+            <div id="galeria" class="card p-6 scroll-mt-24">
+                <h3 class="font-bold text-navy mb-1 flex items-center gap-2"><i class="fas fa-wave-square text-secondary"></i>Galería de funciones de activación</h3>
+                <p class="text-sm text-gray-500 mb-4">El "gatillo" que rompe la linealidad. Las gráficas son reales (generadas a partir de cada fórmula).</p>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="rounded-xl border border-gray-200 overflow-hidden flex flex-col bg-white">
+                        <div class="px-3 py-2 flex items-center justify-between" style="background:#ECFDF3">
+                            <h4 class="font-bold text-navy text-sm">ReLU</h4>
+                            <span class="text-[0.6rem] text-white px-2 py-0.5 rounded-full font-bold" style="background:#15803D">ocultas</span>
+                        </div>
+                        <div class="plot px-1.5 pt-2" data-fn="relu"></div>
+                        <div class="px-3 py-2.5 border-t border-gray-100 flex-1">
+                            <div class="text-center text-navy text-[0.95rem] mb-1">\(f(z)=\max(0,z)\)</div>
+                            <p class="text-[0.72rem] text-gray-500 leading-snug">Rango \([0,\infty)\). Eficiente; evita el <em>vanishing</em>. Riesgo: <em>dying ReLU</em>.</p>
+                        </div>
+                    </div>
+                    <div class="rounded-xl border border-gray-200 overflow-hidden flex flex-col bg-white">
+                        <div class="px-3 py-2 flex items-center justify-between" style="background:#EFF4FF">
+                            <h4 class="font-bold text-navy text-sm">Sigmoide</h4>
+                            <span class="text-[0.6rem] text-white px-2 py-0.5 rounded-full font-bold" style="background:#2563EB">salida binaria</span>
+                        </div>
+                        <div class="plot px-1.5 pt-2" data-fn="sigmoid"></div>
+                        <div class="px-3 py-2.5 border-t border-gray-100 flex-1">
+                            <div class="text-center text-navy text-[0.95rem] mb-1">\(\sigma(z)=\dfrac{1}{1+e^{-z}}\)</div>
+                            <p class="text-[0.72rem] text-gray-500 leading-snug">Rango \((0,1)\), como probabilidad. <em>Vanishing</em> severo (deriv. máx. 0,25).</p>
+                        </div>
+                    </div>
+                    <div class="rounded-xl border border-gray-200 overflow-hidden flex flex-col bg-white">
+                        <div class="px-3 py-2 flex items-center justify-between" style="background:#F4F1FF">
+                            <h4 class="font-bold text-navy text-sm">Tanh</h4>
+                            <span class="text-[0.6rem] text-white px-2 py-0.5 rounded-full font-bold" style="background:#7C3AED">RNN / LSTM</span>
+                        </div>
+                        <div class="plot px-1.5 pt-2" data-fn="tanh"></div>
+                        <div class="px-3 py-2.5 border-t border-gray-100 flex-1">
+                            <div class="text-center text-navy text-[0.95rem] mb-1">\(\tanh(z)\)</div>
+                            <p class="text-[0.72rem] text-gray-500 leading-snug">Rango \((-1,1)\), centrada en 0. Mejor convergencia que la sigmoide, pero aún satura.</p>
+                        </div>
+                    </div>
+                    <div class="rounded-xl border border-gray-200 overflow-hidden flex flex-col bg-white">
+                        <div class="px-3 py-2 flex items-center justify-between" style="background:#FEF9E7">
+                            <h4 class="font-bold text-navy text-sm">Softmax</h4>
+                            <span class="text-[0.6rem] text-white px-2 py-0.5 rounded-full font-bold" style="background:#B45309">multiclase</span>
+                        </div>
+                        <div class="px-1.5 pt-2">
+                            <svg viewBox="0 0 240 120" style="width:100%;height:112px;display:block">
+                                <line x1="16" y1="100" x2="226" y2="100" stroke="#CBD5E1"/>
+                                <rect x="30" y="34" width="30" height="66" rx="3" fill="#3D008D"/>
+                                <rect x="80" y="70" width="30" height="30" rx="3" fill="#ED1E79"/>
+                                <rect x="130" y="84" width="30" height="16" rx="3" fill="#FDB913"/>
+                                <rect x="180" y="92" width="30" height="8" rx="3" fill="#0E7490"/>
+                                <text x="45" y="113" font-size="9" text-anchor="middle" fill="#64748B">café</text>
+                                <text x="95" y="113" font-size="9" text-anchor="middle" fill="#64748B">plát.</text>
+                                <text x="145" y="113" font-size="9" text-anchor="middle" fill="#64748B">yuca</text>
+                                <text x="195" y="113" font-size="9" text-anchor="middle" fill="#64748B">maíz</text>
+                            </svg>
+                        </div>
+                        <div class="px-3 py-2.5 border-t border-gray-100 flex-1">
+                            <div class="text-center text-navy text-[0.95rem] mb-1">\(\operatorname{softmax}(z)_i=\dfrac{e^{z_i}}{\sum_j e^{z_j}}\)</div>
+                            <p class="text-[0.72rem] text-gray-500 leading-snug">K probabilidades que <strong>suman 1</strong>. Para ≥ 3 clases.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- reglas de selección -->
+                <div class="mt-5 grid md:grid-cols-2 gap-3 text-[0.84rem]">
+                    <div class="bg-[#F5F0FA] rounded-lg p-3"><i class="fas fa-layer-group text-primary mr-1"></i><strong>Capas ocultas:</strong> siempre <strong>ReLU</strong> (o Leaky ReLU si hay <em>dying ReLU</em>).</div>
+                    <div class="bg-[#F5F0FA] rounded-lg p-3"><i class="fas fa-ruler text-primary mr-1"></i><strong>Salida · regresión:</strong> activación <strong>lineal</strong> (sin transformación).</div>
+                    <div class="bg-[#F5F0FA] rounded-lg p-3"><i class="fas fa-toggle-on text-primary mr-1"></i><strong>Salida · binaria:</strong> <strong>Sigmoide</strong> (probabilidad de la clase positiva).</div>
+                    <div class="bg-[#F5F0FA] rounded-lg p-3"><i class="fas fa-list-ol text-primary mr-1"></i><strong>Salida · multiclase:</strong> <strong>Softmax</strong> (distribución sobre K clases).</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== CAPÍTULO 3 ====================== -->
+        <section id="cap3" class="scroll-mt-20 mt-14 reveal">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-14 h-14 rounded-2xl text-white flex items-center justify-center text-2xl font-extrabold shadow-lg flex-shrink-0" style="background:#B45309">03</div>
+                <div>
+                    <p class="text-xs uppercase tracking-widest font-bold" style="color:#B45309">Capítulo 3 · #tema/optimizacion</p>
+                    <h2 class="sec-title text-2xl md:text-3xl text-navy">La Matemática del Error y la Optimización</h2>
+                </div>
+            </div>
+
+            <div class="callout mb-5" style="border-color:#B45309; background:#FFFBEB">
+                <p class="text-[0.9rem] text-gray-700"><i class="fas fa-lightbulb mr-1" style="color:#B45309"></i>Para una máquina, <strong>aprender = minimizar el error</strong>. Necesita dos herramientas: la <strong>función de costo</strong> (el altímetro que dice qué tan mal está) y el <strong>optimizador</strong> (la estrategia para descender).</p>
+            </div>
+
+            <!-- Funciones de costo -->
+            <div class="grid lg:grid-cols-2 gap-5 mb-5">
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-ruler-combined" style="color:#B45309"></i>MSE — Regresión</h3>
+                    <div class="eq text-center my-2">$$\text{MSE} = \frac{1}{N}\sum_{i=1}^N (y_i - \hat{y}_i)^2$$</div>
+                    <p class="text-[0.86rem] text-gray-600">Al elevar al cuadrado, <strong>penaliza desproporcionadamente los errores grandes</strong>. Predecir 5 mm cuando llueven 100 mm no cuesta 95, cuesta \(95^2=9025\) → la red presta atención a los extremos (alertas de inundación en el Río Magdalena).</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-equals" style="color:#B45309"></i>Entropía Cruzada Binaria — Clasificación</h3>
+                    <div class="eq text-center my-2">$$\text{BCE} = -\frac{1}{N}\sum_{i=1}^N \big[ y_i\log \hat{y}_i + (1-y_i)\log(1-\hat{y}_i) \big]$$</div>
+                    <p class="text-[0.86rem] text-gray-600">No mide distancia sino <strong>probabilidad</strong>. Castiga severamente al modelo que dice "100 % seguro que está sano" cuando la hoja de café <em>sí</em> tiene roya.</p>
+                </div>
+            </div>
+
+            <div class="callout mb-5" style="border-color:#0E7490; background:#ECFEFF">
+                <p class="text-[0.86rem] text-gray-700"><i class="fas fa-scale-balanced mr-1 text-teal"></i><strong>Dimensión ética:</strong> con datos de dengue desbalanceados (95 % leve / 5 % grave), una pérdida estándar puede ignorar los casos raros. Un <strong>falso negativo</strong> en salud puede ser fatal → se incorporan <strong>pesos diferenciales</strong> (p. ej. equivocarse en un caso grave cuesta 10×).</p>
+            </div>
+
+            <!-- Descenso del gradiente + learning rate -->
+            <div class="card p-6 mb-5">
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-person-hiking" style="color:#B45309"></i>Descenso del Gradiente — el excursionista en el Páramo de Letras</h3>
+                <p class="text-[0.88rem] text-gray-700 mb-2">A 3 677 m, de noche y con niebla densa: no ve el valle, así que <strong>tantea el suelo con los pies</strong> (calcula el gradiente) y da un paso en la dirección <strong>opuesta</strong> a la pendiente. Repite.</p>
+                <div class="eq text-center my-3">$$\theta_{t+1} = \theta_t - \eta\,\nabla_\theta L(\theta_t)$$</div>
+                <p class="text-center text-[0.8rem] text-gray-500 -mt-1">\(\nabla_\theta L\) = inclinación (gradiente) · \(\eta\) = tasa de aprendizaje (tamaño del paso)</p>
+
+                <h4 class="font-semibold text-navy mt-5 mb-2 text-sm"><i class="fas fa-gauge-high mr-1" style="color:#B45309"></i>La tasa de aprendizaje (\(\eta\)): cuestión de vida o muerte</h4>
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div class="rounded-xl border border-red-200 bg-red-50/50 p-3">
+                        <div class="plot-desc" data-eta="high"></div>
+                        <p class="text-[0.78rem] text-gray-700 mt-1"><strong class="text-red-600">η muy alta</strong> — saltos de 50 m: pasa por encima del valle, sube la ladera opuesta y <strong>diverge</strong>.</p>
+                    </div>
+                    <div class="rounded-xl border border-green-200 bg-green-50/50 p-3">
+                        <div class="plot-desc" data-eta="ideal"></div>
+                        <p class="text-[0.78rem] text-gray-700 mt-1"><strong class="text-green-700">η ideal</strong> — pasos firmes que se acortan al aplanarse el terreno: <strong>converge</strong>.</p>
+                    </div>
+                    <div class="rounded-xl border border-amber-200 bg-amber-50/50 p-3">
+                        <div class="plot-desc" data-eta="low"></div>
+                        <p class="text-[0.78rem] text-gray-700 mt-1"><strong style="color:#B45309">η muy baja</strong> — pasos de hormiga: tarda años; "muere de hipotermia" antes de converger.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Batch vs SGD + momentum -->
+            <div class="grid lg:grid-cols-3 gap-5">
+                <div class="card p-5">
+                    <h4 class="font-bold text-navy mb-1 text-sm"><i class="fas fa-database mr-1" style="color:#B45309"></i>Batch GD</h4>
+                    <p class="text-[0.82rem] text-gray-600">Usa <strong>todos</strong> los datos para un solo paso. Gradiente exacto pero <strong>no cabe en RAM</strong> y es lentísimo.</p>
+                </div>
+                <div class="card p-5">
+                    <h4 class="font-bold text-navy mb-1 text-sm"><i class="fas fa-shoe-prints mr-1" style="color:#B45309"></i>SGD (mini-batch)</h4>
+                    <p class="text-[0.82rem] text-gray-600">Usa mini-lotes (p. ej. 32). Camino <strong>zigzagueante</strong> pero rápido; el ruido ayuda a <strong>escapar de mínimos locales</strong>.</p>
+                </div>
+                <div class="card p-5">
+                    <h4 class="font-bold text-navy mb-1 text-sm"><i class="fas fa-bicycle mr-1" style="color:#B45309"></i>Momentum</h4>
+                    <p class="text-[0.82rem] text-gray-600">Acumula <strong>inercia</strong> de gradientes previos (como bajar en bici el Alto de Letras): atraviesa baches y suaviza el zigzagueo.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== CAPÍTULO 4 ====================== -->
+        <section id="cap4" class="scroll-mt-20 mt-14 reveal">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-14 h-14 rounded-2xl bg-teal text-white flex items-center justify-center text-2xl font-extrabold shadow-lg flex-shrink-0">04</div>
+                <div>
+                    <p class="text-xs uppercase tracking-widest text-teal font-bold">Capítulo 4 · #tema/backpropagation</p>
+                    <h2 class="sec-title text-2xl md:text-3xl text-navy">El Algoritmo de Retropropagación</h2>
+                </div>
+            </div>
+
+            <div class="callout mb-5" style="border-color:#0E7490; background:#ECFEFF">
+                <p class="text-[0.9rem] text-gray-700"><i class="fas fa-truck-fast mr-1 text-teal"></i><strong>Problema de asignación de crédito (las flores que llegaron tarde a Miami):</strong> la red falló (pérdida alta) pero hay <strong>miles de neuronas</strong> involucradas. ¿Fue el conductor (salida)? ¿el despachador en El Dorado (oculta 2)? ¿el agrónomo (oculta 1)? ¿o la política inicial (pesos)? Backprop <strong>rastrea el error de atrás hacia adelante</strong>, capa por capa.</p>
+            </div>
+
+            <!-- Grafo computacional -->
+            <div class="card p-6 mb-5">
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-diagram-project text-teal"></i>Pensar en grafos, no en neuronas</h3>
+                <p class="text-[0.86rem] text-gray-600 mb-4">La ecuación \(y=\text{ReLU}(w\cdot x + b)\) se descompone en nodos elementales. Los datos fluyen <span class="font-semibold text-blue-600">hacia adelante</span> (predicción); la <span class="font-semibold text-red-500">responsabilidad</span> (gradiente) fluye <span class="font-semibold text-red-500">hacia atrás</span>.</p>
+                <svg viewBox="0 0 660 150" class="w-full">
+                    <defs>
+                        <marker id="arrB" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2563EB"/></marker>
+                        <marker id="arrR" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#EF4444"/></marker>
+                    </defs>
+                    <!-- nodos -->
+                    <g font-family="Montserrat" text-anchor="middle">
+                        <g><circle cx="60" cy="55" r="26" fill="#ECFEFF" stroke="#0E7490" stroke-width="2"/><text x="60" y="52" font-size="13" font-weight="700" fill="#0E7490">A</text><text x="60" y="67" font-size="9" fill="#475569">x·w</text></g>
+                        <g><circle cx="190" cy="55" r="26" fill="#ECFEFF" stroke="#0E7490" stroke-width="2"/><text x="190" y="52" font-size="13" font-weight="700" fill="#0E7490">B</text><text x="190" y="67" font-size="9" fill="#475569">+ b</text></g>
+                        <g><circle cx="320" cy="55" r="26" fill="#ECFEFF" stroke="#0E7490" stroke-width="2"/><text x="320" y="52" font-size="13" font-weight="700" fill="#0E7490">C</text><text x="320" y="67" font-size="9" fill="#475569">ReLU</text></g>
+                        <g><circle cx="450" cy="55" r="26" fill="#ECFEFF" stroke="#0E7490" stroke-width="2"/><text x="450" y="52" font-size="13" font-weight="700" fill="#0E7490">D</text><text x="450" y="67" font-size="9" fill="#475569">− y</text></g>
+                        <g><circle cx="590" cy="55" r="28" fill="#FEF2F2" stroke="#EF4444" stroke-width="2"/><text x="590" y="52" font-size="13" font-weight="700" fill="#EF4444">E</text><text x="590" y="67" font-size="9" fill="#475569">( )²  Error</text></g>
+                    </g>
+                    <!-- forward (azul, arriba) -->
+                    <g stroke="#2563EB" stroke-width="2" fill="none" marker-end="url(#arrB)">
+                        <line x1="86" y1="48" x2="162" y2="48"/><line x1="216" y1="48" x2="292" y2="48"/><line x1="346" y1="48" x2="422" y2="48"/><line x1="476" y1="48" x2="560" y2="48"/>
+                    </g>
+                    <!-- backward (rojo, abajo) -->
+                    <g stroke="#EF4444" stroke-width="2" fill="none" marker-end="url(#arrR)" stroke-dasharray="5 3">
+                        <line x1="562" y1="72" x2="478" y2="72"/><line x1="424" y1="72" x2="348" y2="72"/><line x1="294" y1="72" x2="218" y2="72"/><line x1="164" y1="72" x2="88" y2="72"/>
+                    </g>
+                    <text x="120" y="26" font-size="11" fill="#2563EB" font-weight="600">▶ Forward Pass (predicción)</text>
+                    <text x="430" y="110" font-size="11" fill="#EF4444" font-weight="600">◀ Backward Pass (gradiente)</text>
+                </svg>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-5">
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-link text-teal"></i>La regla de la cadena — el "efecto dominó"</h3>
+                    <div class="eq text-center my-3">$$\frac{dy}{dx} = \frac{dy}{du}\cdot\frac{du}{dx}$$</div>
+                    <p class="text-[0.86rem] text-gray-600"><strong>El rumor en la oficina:</strong> el impacto de la información original en la reacción del jefe = (cuánto la distorsiona el colega) × (intensidad del mensaje original). La capa final multiplica su <strong>derivada local</strong> por la señal que recibe y la pasa hacia atrás, <strong>recursivamente</strong>, hasta la entrada.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-robot text-teal"></i>Autograd — el "secretario invisible"</h3>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">Ya no se derivan fórmulas a mano. Con <span class="icode">requires_grad=True</span>, PyTorch <strong>registra cada operación en una bitácora</strong>. Al llamar <span class="icode">loss.backward()</span>, lee la bitácora <strong>de atrás hacia adelante</strong> y aplica la regla de la cadena automáticamente.</p>
+                    <div class="codeblock">
+<span class="cm"># PyTorch registra las operaciones…</span>
+x = torch.tensor(<span class="st">2.0</span>, <span class="fn">requires_grad</span>=<span class="kw">True</span>)
+y = x**<span class="st">2</span> + <span class="st">3</span>*x
+y.<span class="fn">backward</span>()   <span class="cm"># …y deriva sola</span>
+<span class="fn">print</span>(x.grad)  <span class="cm"># dy/dx = 2x+3 = 7</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== CAPÍTULO 5 ====================== -->
+        <section id="cap5" class="scroll-mt-20 mt-14 reveal">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-14 h-14 rounded-2xl text-white flex items-center justify-center text-2xl font-extrabold shadow-lg flex-shrink-0" style="background:#5B1C9E">05</div>
+                <div>
+                    <p class="text-xs uppercase tracking-widest font-bold" style="color:#5B1C9E">Capítulo 5 · #tema/regularizacion · #tema/etica</p>
+                    <h2 class="sec-title text-2xl md:text-3xl text-navy">Ajuste, Evaluación y Ética de Modelos</h2>
+                </div>
+            </div>
+
+            <!-- Training loop -->
+            <div class="card p-6 mb-5">
+                <h3 class="font-bold text-navy mb-3 flex items-center gap-2"><i class="fas fa-rotate text-primary"></i>El bucle de entrenamiento (Training Loop) — 5 pasos</h3>
+                <div class="grid md:grid-cols-5 gap-2 text-center text-[0.78rem]">
+                    <div class="rounded-lg bg-[#F5F0FA] p-2.5"><div class="font-extrabold text-primary text-lg">1</div><strong>Forward</strong><div class="text-gray-500">predicción</div><code class="icode block mt-1 text-[0.66rem]">model(x)</code></div>
+                    <div class="rounded-lg bg-[#F5F0FA] p-2.5"><div class="font-extrabold text-primary text-lg">2</div><strong>Pérdida</strong><div class="text-gray-500">vs realidad</div><code class="icode block mt-1 text-[0.66rem]">loss_fn()</code></div>
+                    <div class="rounded-lg bg-[#FFF1F7] p-2.5"><div class="font-extrabold text-secondary text-lg">3</div><strong>Zero grad</strong><div class="text-gray-500">limpieza</div><code class="icode block mt-1 text-[0.66rem]">zero_grad()</code></div>
+                    <div class="rounded-lg bg-[#ECFEFF] p-2.5"><div class="font-extrabold text-teal text-lg">4</div><strong>Backward</strong><div class="text-gray-500">reflexión</div><code class="icode block mt-1 text-[0.66rem]">backward()</code></div>
+                    <div class="rounded-lg bg-[#FEF9E7] p-2.5"><div class="font-extrabold text-lg" style="color:#B45309">5</div><strong>Step</strong><div class="text-gray-500">corrección</div><code class="icode block mt-1 text-[0.66rem]">step()</code></div>
+                </div>
+                <p class="text-[0.8rem] text-gray-500 mt-3"><i class="fas fa-triangle-exclamation mr-1 text-secondary"></i>El paso 3 es <strong>crítico</strong>: PyTorch <strong>acumula</strong> gradientes por defecto; sin <span class="icode">zero_grad()</span> se sumarían los de iteraciones previas y se corrompería la dirección de descenso.</p>
+            </div>
+
+            <!-- Overfitting + curvas -->
+            <div class="grid lg:grid-cols-2 gap-5 mb-5">
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-chart-line text-primary"></i>Overfitting vs. generalización</h3>
+                    <p class="text-[0.86rem] text-gray-600 mb-2"><strong>El ICFES:</strong> el Estudiante A memoriza el cuadernillo viejo (puntaje perfecto en simulacro, falla en el real); el Estudiante B entiende los conceptos. Queremos al <strong>Estudiante B</strong>.</p>
+                    <div class="plot-curves"></div>
+                    <p class="text-[0.78rem] text-gray-500 mt-1">Si la validación <strong>sube</strong> mientras el entrenamiento sigue bajando → <strong>sobreajuste</strong>. Solución: <strong>Early Stopping</strong> (guardar los pesos del mínimo).</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-sliders text-primary"></i>Regularización: la Navaja de Ockham</h3>
+                    <div class="eq text-center my-2">$$\text{Costo} = L(\hat{\mathbf{y}},\mathbf{y}) + \lambda\,\Omega(\mathbf{w})$$</div>
+                    <div class="grid grid-cols-2 gap-2 text-[0.8rem] mt-2">
+                        <div class="bg-gray-50 rounded-lg p-2.5"><strong>L2 (Ridge)</strong> \(\frac{1}{2}\sum w_j^2\)<div class="text-gray-500 mt-0.5">Reparte la importancia; pesos pequeños, ninguno cero.</div></div>
+                        <div class="bg-gray-50 rounded-lg p-2.5"><strong>L1 (Lasso)</strong> \(\sum|w_j|\)<div class="text-gray-500 mt-0.5">Selecciona: lleva a cero lo irrelevante (modelo <em>sparse</em>).</div></div>
+                    </div>
+                    <div class="callout mt-3" style="border-color:#5B1C9E; background:#FAF8FF">
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-people-group mr-1" style="color:#5B1C9E"></i><strong>Dropout (grupo de estudio rotativo):</strong> apaga al azar ~50 % de neuronas en cada iteración para que nadie dependa de la "estrella". Rompe la <strong>co-adaptación frágil</strong> y fuerza representaciones redundantes (jaguar vs. puma sin fijarse solo en las manchas).</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Batch Norm -->
+            <div class="card p-6 mb-5">
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-bowl-food text-primary"></i>Normalización por Lotes (Batch Norm) — el Ajiaco Santafereño</h3>
+                <p class="text-[0.86rem] text-gray-600 mb-3">Combate el <strong>desplazamiento de covariable interna</strong> (a cada capa "le mueven el piso" cuando cambian las anteriores). Estandariza las entradas de cada capa → permite tasas de aprendizaje más altas y convergencia rápida.</p>
+                <div class="grid md:grid-cols-3 gap-3">
+                    <div class="rounded-xl border border-gray-200 p-3">
+                        <span class="text-[0.7rem] font-bold text-primary uppercase">1 · Centrar</span>
+                        <div class="eq text-center my-1 text-sm">$$\mu_{\mathcal{B}}=\frac{1}{m}\sum_i x_i$$</div>
+                        <p class="text-[0.74rem] text-gray-500">Restar la media: "lavar las papas para quitar la tierra".</p>
+                    </div>
+                    <div class="rounded-xl border border-gray-200 p-3">
+                        <span class="text-[0.7rem] font-bold text-primary uppercase">2 · Escalar</span>
+                        <div class="eq text-center my-1 text-sm">$$\hat{x}_i=\frac{x_i-\mu_{\mathcal{B}}}{\sqrt{\sigma_{\mathcal{B}}^2+\epsilon}}$$</div>
+                        <p class="text-[0.74rem] text-gray-500">Dividir por la desviación: "cubos del mismo tamaño".</p>
+                    </div>
+                    <div class="rounded-xl border border-gray-200 p-3">
+                        <span class="text-[0.7rem] font-bold text-primary uppercase">3 · Transformar</span>
+                        <div class="eq text-center my-1 text-sm">$$y_i=\gamma\hat{x}_i+\beta$$</div>
+                        <p class="text-[0.74rem] text-gray-500">\(\gamma,\beta\) aprendibles: "añadir sal y ajustar el fuego".</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Validación + params -->
+            <div class="grid lg:grid-cols-2 gap-5 mb-5">
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-layer-group text-primary"></i>Validación cruzada K-Fold</h3>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">Con \(K=5\): se divide en 5 pliegues; en cada ronda 4 entrenan y 1 valida; cada pliegue valida <strong>una vez</strong>; la métrica final es el <strong>promedio</strong>. Evita el sesgo de una sola partición afortunada.</p>
+                    <div class="space-y-1.5">
+                        <div class="flex gap-1">
+                            <span class="flex-1 text-center text-[0.62rem] rounded py-1.5 bg-secondary text-white font-bold">VAL</span>
+                            <span class="flex-1 text-center text-[0.62rem] rounded py-1.5 bg-primary/20 text-primary">train</span>
+                            <span class="flex-1 text-center text-[0.62rem] rounded py-1.5 bg-primary/20 text-primary">train</span>
+                            <span class="flex-1 text-center text-[0.62rem] rounded py-1.5 bg-primary/20 text-primary">train</span>
+                            <span class="flex-1 text-center text-[0.62rem] rounded py-1.5 bg-primary/20 text-primary">train</span>
+                        </div>
+                        <div class="flex gap-1">
+                            <span class="flex-1 text-center text-[0.62rem] rounded py-1.5 bg-primary/20 text-primary">train</span>
+                            <span class="flex-1 text-center text-[0.62rem] rounded py-1.5 bg-secondary text-white font-bold">VAL</span>
+                            <span class="flex-1 text-center text-[0.62rem] rounded py-1.5 bg-primary/20 text-primary">train</span>
+                            <span class="flex-1 text-center text-[0.62rem] rounded py-1.5 bg-primary/20 text-primary">train</span>
+                            <span class="flex-1 text-center text-[0.62rem] rounded py-1.5 bg-primary/20 text-primary">train</span>
+                        </div>
+                        <div class="flex gap-1">
+                            <span class="flex-1 text-center text-[0.62rem] rounded py-1.5 bg-primary/20 text-primary">train</span>
+                            <span class="flex-1 text-center text-[0.62rem] rounded py-1.5 bg-primary/20 text-primary">train</span>
+                            <span class="flex-1 text-center text-[0.62rem] rounded py-1.5 bg-secondary text-white font-bold">VAL</span>
+                            <span class="flex-1 text-center text-[0.62rem] rounded py-1.5 bg-primary/20 text-primary">train</span>
+                            <span class="flex-1 text-center text-[0.62rem] rounded py-1.5 bg-primary/20 text-primary">train</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-gears text-primary"></i>Parámetros vs. Hiperparámetros</h3>
+                    <table class="w-full text-[0.8rem] border-collapse">
+                        <thead><tr class="bg-[#F5F0FA] text-primary"><th class="text-left p-2 border border-gray-200"></th><th class="text-left p-2 border border-gray-200">Parámetros</th><th class="text-left p-2 border border-gray-200">Hiperparámetros</th></tr></thead>
+                        <tbody class="text-gray-700">
+                            <tr><td class="p-2 border border-gray-200 font-semibold">Qué</td><td class="p-2 border border-gray-200">Internos, aprendidos</td><td class="p-2 border border-gray-200">Externos, fijados por ti</td></tr>
+                            <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Ejemplos</td><td class="p-2 border border-gray-200">Pesos \(w\), sesgo \(b\)</td><td class="p-2 border border-gray-200">\(\eta\), épocas, batch, \(\lambda\), dropout</td></tr>
+                            <tr><td class="p-2 border border-gray-200 font-semibold">Cómo</td><td class="p-2 border border-gray-200">Backprop + gradiente</td><td class="p-2 border border-gray-200">Grid / Random Search</td></tr>
+                        </tbody>
+                    </table>
+                    <p class="text-[0.78rem] text-gray-500 mt-2"><i class="fas fa-fire mr-1" style="color:#B45309"></i><strong>El tostador de café:</strong> el grano (datos) es fijo, pero temperatura y tiempo (hiperparámetros) definen el sabor final.</p>
+                </div>
+            </div>
+
+            <!-- Matriz de confusión -->
+            <div class="card p-6 mb-5">
+                <h3 class="font-bold text-navy mb-1 flex items-center gap-2"><i class="fas fa-table-cells-large text-primary"></i>Matriz de Confusión — la trilladora de café (Excelso vs. Pasilla)</h3>
+                <p class="text-sm text-gray-500 mb-4">El "95 % de accuracy" puede ser una <strong>mentira peligrosa</strong> con clases desbalanceadas. La matriz desglosa <em>en qué</em> falla el modelo.</p>
+                <div class="grid md:grid-cols-2 gap-6 items-start">
+                    <div>
+                        <div class="grid grid-cols-[auto_1fr_1fr] gap-1 text-[0.78rem]">
+                            <div></div>
+                            <div class="text-center font-bold text-gray-500 pb-1">Pred. Excelso</div>
+                            <div class="text-center font-bold text-gray-500 pb-1">Pred. Pasilla</div>
+                            <div class="flex items-center justify-center font-bold text-gray-500 [writing-mode:vertical-rl] rotate-180">Real Excelso</div>
+                            <div class="rounded-lg bg-green-100 border border-green-300 p-3 text-center"><div class="font-extrabold text-green-700">VP</div><div class="text-[0.66rem] text-gray-600">Excelso bien clasificado ✓</div></div>
+                            <div class="rounded-lg bg-red-100 border border-red-300 p-3 text-center"><div class="font-extrabold text-red-600">FN</div><div class="text-[0.66rem] text-gray-600">Excelso descartado → pérdida al caficultor</div></div>
+                            <div class="flex items-center justify-center font-bold text-gray-500 [writing-mode:vertical-rl] rotate-180">Real Pasilla</div>
+                            <div class="rounded-lg bg-red-100 border border-red-300 p-3 text-center"><div class="font-extrabold text-red-600">FP</div><div class="text-[0.66rem] text-gray-600">Pasilla como Excelso → daña la reputación</div></div>
+                            <div class="rounded-lg bg-green-100 border border-green-300 p-3 text-center"><div class="font-extrabold text-green-700">VN</div><div class="text-[0.66rem] text-gray-600">Pasilla bien filtrado ✓</div></div>
+                        </div>
+                    </div>
+                    <div class="space-y-2 text-[0.82rem]">
+                        <div class="eq">Exactitud \(=\dfrac{VP+VN}{VP+VN+FP+FN}\)</div>
+                        <div class="eq">Precisión \(=\dfrac{VP}{VP+FP}\)</div>
+                        <div class="eq">Sensibilidad (Recall) \(=\dfrac{VP}{VP+FN}\)</div>
+                        <div class="eq">\(F_1 = 2\cdot\dfrac{P\cdot R}{P+R}\)</div>
+                        <p class="text-gray-500 text-[0.78rem]"><i class="fas fa-circle-info mr-1 text-primary"></i>No se optimiza directamente (es discreta, no diferenciable): el entrenamiento usa la <strong>entropía cruzada</strong> como aproximación suave. La matriz guía los <em>ajustes</em> (p. ej. subir el costo de los FN).</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ética -->
+            <div class="card p-6 bg-gradient-to-br from-[#ECFEFF] to-white border-l-4 border-teal">
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-scale-balanced text-teal"></i>Ética: el Marco Ético de la IA en Colombia (MinCiencias, 2021)</h3>
+                <div class="grid sm:grid-cols-3 gap-3 text-[0.84rem]">
+                    <div class="bg-white rounded-lg p-3 border border-teal/15"><strong class="text-teal">Sensibilidad &gt; Exactitud</strong><div class="text-gray-600 mt-1">En dengue/deslizamientos/plagas, prioriza detectar a todos los graves: un falso negativo puede ser fatal.</div></div>
+                    <div class="bg-white rounded-lg p-3 border border-teal/15"><strong class="text-teal">Transparencia</strong><div class="text-gray-600 mt-1">Decisiones sobre derechos no pueden ser "caja negra"; deben poder explicarse (Constitución, Art. 49 y 29).</div></div>
+                    <div class="bg-white rounded-lg p-3 border border-teal/15"><strong class="text-teal">Sesgo de datos</strong><div class="text-gray-600 mt-1">Un modelo entrenado en la Amazonía falla en el Chocó. Datos urbanos andinos no representan la costa Caribe.</div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== CHEAT SHEET / FÓRMULAS ====================== -->
+        <section id="cheatsheet" class="scroll-mt-20 mt-14 reveal">
+            <div class="flex items-center gap-3 mb-5">
+                <span class="usta-gradient text-white p-2.5 rounded-xl shadow"><i class="fas fa-square-root-variable"></i></span>
+                <h2 class="sec-title text-2xl md:text-3xl text-navy">Hoja de fórmulas &amp; glosario rápido</h2>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-5">
+                <!-- formulas -->
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-3 text-sm uppercase tracking-wider">Fórmulas esenciales</h3>
+                    <div class="space-y-2 text-[0.86rem]">
+                        <div class="eq">Neurona \(\;y=\sigma(\mathbf{w}^\top\mathbf{x}+b)\)</div>
+                        <div class="eq">ReLU \(\;\max(0,z)\) · Sigmoide \(\;\frac{1}{1+e^{-z}}\)</div>
+                        <div class="eq">MSE \(\;\frac1N\sum (y_i-\hat y_i)^2\)</div>
+                        <div class="eq">BCE \(\;-\frac1N\sum[y\log\hat y+(1-y)\log(1-\hat y)]\)</div>
+                        <div class="eq">Descenso \(\;\theta_{t+1}=\theta_t-\eta\nabla_\theta L\)</div>
+                        <div class="eq">Cadena \(\;\frac{dy}{dx}=\frac{dy}{du}\frac{du}{dx}\)</div>
+                        <div class="eq">Regularización \(\;L+\lambda\,\Omega(\mathbf{w})\)</div>
+                        <div class="eq">Batch Norm \(\;\hat x=\frac{x-\mu}{\sqrt{\sigma^2+\epsilon}},\; y=\gamma\hat x+\beta\)</div>
+                    </div>
+                </div>
+                <!-- glosario -->
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-3 text-sm uppercase tracking-wider">Glosario relámpago (analogías)</h3>
+                    <dl class="text-[0.83rem] space-y-2">
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Función de pérdida</dt><dd class="text-gray-600">el altímetro: qué tan lejos del valle (error 0).</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Learning rate</dt><dd class="text-gray-600">tamaño del paso al bajar la montaña en la niebla.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Capa oculta</dt><dd class="text-gray-600">los analistas que vuelven "papeles" en "conceptos".</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Backpropagation</dt><dd class="text-gray-600">leer la bitácora al revés para asignar culpas.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Overfitting</dt><dd class="text-gray-600">memorizar el cuadernillo viejo del ICFES.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Dropout</dt><dd class="text-gray-600">rotar a las estrellas de la Selección Colombia.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Batch Norm</dt><dd class="text-gray-600">homogeneizar las papas del ajiaco.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Aprox. Universal</dt><dd class="text-gray-600">recrear los Andes sumando piezas de Lego.</dd></div>
+                    </dl>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== FOOTER ====================== -->
+        <footer class="mt-14 reveal">
+            <div class="card p-6 md:p-8 usta-gradient text-white">
+                <div class="flex flex-wrap items-center gap-3 mb-2">
+                    <i class="fas fa-book-open-reader text-gold text-2xl"></i>
+                    <h2 class="text-xl md:text-2xl font-extrabold">Esta infografía resume el Módulo 1 completo</h2>
+                </div>
+                <p class="text-white/85 text-sm leading-relaxed max-w-3xl">Profundiza en cada tema con el <strong>material principal de aprendizaje autónomo</strong>, sigue tu avance con la <strong>ruta de aprendizaje</strong> y prepárate para los dos hitos del módulo: la <strong>Guía de Profundización 1</strong> (5 %) y la <strong>Actividad 1 "El Guardián del Cafetal"</strong> (20 %).</p>
+                <div class="flex flex-wrap gap-2 mt-5 no-print">
+                    <a href="01_Modulo_1_Fundamentos_Deep_Learning.html" class="inline-flex items-center gap-2 bg-white text-primary text-sm font-bold px-4 py-2 rounded-full hover:opacity-90 transition"><i class="fas fa-graduation-cap"></i>Material principal</a>
+                    <a href="00_ruta-aprendizaje-modulo-1.html" class="inline-flex items-center gap-2 bg-white/15 border border-white/30 text-white text-sm font-bold px-4 py-2 rounded-full hover:bg-white/25 transition"><i class="fas fa-route"></i>Ruta de aprendizaje</a>
+                    <a href="index.html" class="inline-flex items-center gap-2 bg-white/15 border border-white/30 text-white text-sm font-bold px-4 py-2 rounded-full hover:bg-white/25 transition"><i class="fas fa-house"></i>Portal del módulo</a>
+                </div>
+            </div>
+            <div class="text-center text-xs text-gray-500 mt-6 space-y-1">
+                <p><strong class="text-navy">Experto temático:</strong> Javier Mauricio Sierra · <i class="fas fa-envelope mr-1"></i>javiersierra@usta.edu.co · <i class="fas fa-phone mr-1"></i>311 241 3858</p>
+                <p>Universidad Santo Tomás · Maestría en Ciencia de Datos · Espacio académico EA-N-F-004 · Documento HTML autocontenido (Tailwind + MathJax 3).</p>
+            </div>
+        </footer>
+    </main>
+
+    <!-- Botón volver arriba -->
+    <button id="topBtn" class="no-print fixed right-5 bottom-5 z-50 usta-gradient text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center opacity-0 pointer-events-none transition-opacity" aria-label="Volver arriba">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script>
+        document.documentElement.classList.add('js');
+
+        /* ---------- Generación de mini-gráficas SVG a partir de funciones ---------- */
+        function buildPlot(fns, o) {
+            o = Object.assign({ xmin: -5, xmax: 5, ymin: -1.3, ymax: 1.6, w: 200, h: 120, pad: 14 }, o);
+            const X = x => o.pad + (x - o.xmin) / (o.xmax - o.xmin) * (o.w - 2 * o.pad);
+            const Y = y => o.h - o.pad - (y - o.ymin) / (o.ymax - o.ymin) * (o.h - 2 * o.pad);
+            let svg = '<svg viewBox="0 0 ' + o.w + ' ' + o.h + '" preserveAspectRatio="none" style="width:100%;height:112px;display:block">';
+            // línea base y=0 (punteada) y eje x=0
+            if (o.ymin <= 0 && o.ymax >= 0) svg += '<line x1="' + o.pad + '" y1="' + Y(0).toFixed(1) + '" x2="' + (o.w - o.pad) + '" y2="' + Y(0).toFixed(1) + '" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="3 3"/>';
+            if (o.xmin <= 0 && o.xmax >= 0) svg += '<line x1="' + X(0).toFixed(1) + '" y1="' + o.pad + '" x2="' + X(0).toFixed(1) + '" y2="' + (o.h - o.pad) + '" stroke="#E2E8F0" stroke-width="1"/>';
+            fns.forEach(function (f) {
+                const pts = [];
+                for (let i = 0; i <= 120; i++) {
+                    const x = o.xmin + (o.xmax - o.xmin) * i / 120;
+                    let y = f.fn(x);
+                    if (!isFinite(y)) continue;
+                    y = Math.max(o.ymin, Math.min(o.ymax, y));
+                    pts.push([X(x), Y(y)]);
+                }
+                if (!pts.length) return;
+                const line = 'M' + pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' L');
+                const baseY = Y(o.ymin).toFixed(1);
+                const area = line + ' L' + pts[pts.length - 1][0].toFixed(1) + ',' + baseY + ' L' + pts[0][0].toFixed(1) + ',' + baseY + ' Z';
+                svg += '<path d="' + area + '" fill="' + f.color + '" opacity="0.13"/>';
+                svg += '<path d="' + line + '" fill="none" stroke="' + f.color + '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
+            });
+            return svg + '</svg>';
+        }
+
+        const ACT = {
+            relu: [{ fn: x => Math.max(0, x), color: '#15803D' }],
+            sigmoid: [{ fn: x => 1 / (1 + Math.exp(-x)), color: '#2563EB' }],
+            tanh: [{ fn: x => Math.tanh(x), color: '#7C3AED' }]
+        };
+        document.querySelectorAll('.plot').forEach(function (el) {
+            try {
+                const k = el.getAttribute('data-fn');
+                const opts = (k === 'relu') ? { ymin: -0.4, ymax: 5.2, xmin: -5, xmax: 5 }
+                    : (k === 'sigmoid') ? { ymin: -0.08, ymax: 1.08 }
+                        : { ymin: -1.15, ymax: 1.15 };
+                el.innerHTML = buildPlot(ACT[k], opts);
+            } catch (e) { }
+        });
+
+        /* ---------- Teorema de Aproximación Universal: bloques "Lego" aproximando los Andes ---------- */
+        function buildLego() {
+            const W = 320, H = 150, base = 126, left = 16, right = 304;
+            const cols = ['#3D008D', '#ED1E79', '#FDB913', '#0E7490', '#5B1C9E'];
+            const m = x => base - (80 * Math.exp(-Math.pow((x - 112) / 44, 2)) + 58 * Math.exp(-Math.pow((x - 220) / 60, 2)));
+            let svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:148px;display:block">';
+            svg += '<line x1="' + left + '" y1="' + base + '" x2="' + right + '" y2="' + base + '" stroke="#CBD5E1"/>';
+            const N = 12, bw = (right - left) / N, gap = 2.5;
+            for (let i = 0; i < N; i++) {
+                const x0 = left + i * bw, xc = x0 + bw / 2, top = m(xc), h = base - top, c = cols[i % cols.length];
+                svg += '<rect x="' + (x0 + gap / 2).toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + (bw - gap).toFixed(1) + '" height="' + h.toFixed(1) + '" rx="2" fill="' + c + '" opacity="0.82"/>';
+                svg += '<rect x="' + (xc - 4).toFixed(1) + '" y="' + (top - 3).toFixed(1) + '" width="8" height="4" rx="1.5" fill="' + c + '"/>';
+            }
+            let d = '';
+            for (let x = left; x <= right; x += 3) d += (d ? ' L' : 'M') + x + ',' + m(x).toFixed(1);
+            svg += '<path d="' + d + '" fill="none" stroke="#001A4D" stroke-width="3" stroke-linejoin="round"/>';
+            svg += '<circle cx="' + (left + 4) + '" cy="11" r="3.5" fill="#001A4D"/><text x="' + (left + 12) + '" y="14" font-size="9.5" fill="#001A4D" font-weight="700">Función objetivo (los Andes)</text>';
+            svg += '<text x="' + right + '" y="' + (H - 3) + '" font-size="8.5" fill="#64748B" text-anchor="end">cada bloque = una neurona oculta</text>';
+            return svg + '</svg>';
+        }
+        document.querySelectorAll('.plot-lego').forEach(function (el) { try { el.innerHTML = buildLego(); } catch (e) { } });
+
+        /* ---------- Descenso del gradiente: parábola + trayectoria según η ---------- */
+        function buildDescent(eta) {
+            const w = 200, h = 120, pad = 16, xmin = -4.2, xmax = 4.2, ymin = -1.5, ymax = 16;
+            const f = x => x * x;
+            const X = x => pad + (x - xmin) / (xmax - xmin) * (w - 2 * pad);
+            const Y = y => h - pad - (y - ymin) / (ymax - ymin) * (h - 2 * pad);
+            let svg = '<svg viewBox="0 0 ' + w + ' ' + h + '" class="w-full" style="max-height:110px">';
+            // parabola
+            let d = '';
+            for (let i = 0; i <= 60; i++) { const x = xmin + (xmax - xmin) * i / 60; d += (i ? ' L' : 'M') + X(x).toFixed(1) + ',' + Y(Math.min(ymax, f(x))).toFixed(1); }
+            svg += '<path d="' + d + '" fill="none" stroke="#CBD5E1" stroke-width="2"/>';
+            // trayectoria
+            const cfg = { low: { e: 0.04, c: '#B45309' }, ideal: { e: 0.32, c: '#15803D' }, high: { e: 1.04, c: '#DC2626' } }[eta];
+            let x = 3.6, pts = [[x, f(x)]];
+            for (let i = 0; i < 9; i++) { x = x - cfg.e * 2 * x; if (Math.abs(x) > 4.2) { x = Math.sign(x) * 4.2; pts.push([x, f(x)]); break; } pts.push([x, f(x)]); }
+            let pd = '';
+            pts.forEach((p, i) => { pd += (i ? ' L' : 'M') + X(p[0]).toFixed(1) + ',' + Y(Math.min(ymax, p[1])).toFixed(1); });
+            svg += '<path d="' + pd + '" fill="none" stroke="' + cfg.c + '" stroke-width="2" stroke-dasharray="4 2"/>';
+            pts.forEach(p => { svg += '<circle cx="' + X(p[0]).toFixed(1) + '" cy="' + Y(Math.min(ymax, p[1])).toFixed(1) + '" r="3" fill="' + cfg.c + '"/>'; });
+            return svg + '</svg>';
+        }
+        document.querySelectorAll('.plot-desc').forEach(function (el) {
+            try { el.innerHTML = buildDescent(el.getAttribute('data-eta')); } catch (e) { }
+        });
+
+        /* ---------- Curvas de aprendizaje (overfitting) ---------- */
+        (function () {
+            const el = document.querySelector('.plot-curves');
+            if (!el) return;
+            const w = 360, h = 170, pad = 30, exMax = 50;
+            const train = e => 0.9 * Math.exp(-e / 8) + 0.06;
+            const val = e => 0.82 * Math.exp(-e / 6.5) + 0.07 + 0.00050 * e * e;
+            const X = x => pad + x / exMax * (w - 2 * pad);
+            const Y = y => h - pad - y / 1.0 * (h - 2 * pad);
+            // minimo de val
+            let minE = 0, minV = 99; for (let e = 0; e <= exMax; e++) { if (val(e) < minV) { minV = val(e); minE = e; } }
+            let svg = '<svg viewBox="0 0 ' + w + ' ' + h + '" class="w-full">';
+            svg += '<line x1="' + pad + '" y1="' + (h - pad) + '" x2="' + (w - pad) + '" y2="' + (h - pad) + '" stroke="#CBD5E1"/>';
+            svg += '<line x1="' + pad + '" y1="' + pad + '" x2="' + pad + '" y2="' + (h - pad) + '" stroke="#CBD5E1"/>';
+            svg += '<text x="' + (w / 2) + '" y="' + (h - 6) + '" font-size="9" fill="#64748B" text-anchor="middle">Épocas →</text>';
+            svg += '<text x="10" y="' + (h / 2) + '" font-size="9" fill="#64748B" transform="rotate(-90 10 ' + (h / 2) + ')" text-anchor="middle">Error</text>';
+            function curve(fn, color) { let d = ''; for (let e = 0; e <= exMax; e++) { d += (e ? ' L' : 'M') + X(e).toFixed(1) + ',' + Y(fn(e)).toFixed(1); } return '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="2.5"/>'; }
+            svg += curve(train, '#15803D');
+            svg += curve(val, '#ED1E79');
+            // early stopping
+            svg += '<line x1="' + X(minE) + '" y1="' + pad + '" x2="' + X(minE) + '" y2="' + (h - pad) + '" stroke="#3D008D" stroke-width="1.5" stroke-dasharray="4 3"/>';
+            svg += '<circle cx="' + X(minE) + '" cy="' + Y(minV) + '" r="4" fill="#3D008D"/>';
+            svg += '<text x="' + (X(minE) + 4) + '" y="' + (pad + 10) + '" font-size="8.5" fill="#3D008D" font-weight="700">Early Stopping</text>';
+            // leyenda
+            svg += '<circle cx="' + (w - 92) + '" cy="' + (pad + 2) + '" r="3.5" fill="#15803D"/><text x="' + (w - 85) + '" y="' + (pad + 5) + '" font-size="9" fill="#475569">Entrenamiento</text>';
+            svg += '<circle cx="' + (w - 92) + '" cy="' + (pad + 16) + '" r="3.5" fill="#ED1E79"/><text x="' + (w - 85) + '" y="' + (pad + 19) + '" font-size="9" fill="#475569">Validación</text>';
+            el.innerHTML = svg + '</svg>';
+        })();
+
+        /* ---------- Scroll-spy nav + botón arriba + reveal ---------- */
+        const sections = ['mapa', 'cap1', 'cap2', 'cap3', 'cap4', 'cap5', 'cheatsheet'].map(id => document.getElementById(id)).filter(Boolean);
+        const links = {};
+        document.querySelectorAll('.navlink').forEach(a => { links[a.getAttribute('href').slice(1)] = a; });
+        function onScroll() {
+            let cur = sections[0] ? sections[0].id : null;
+            sections.forEach(s => { if (s.getBoundingClientRect().top <= 130) cur = s.id; });
+            Object.values(links).forEach(a => a.classList.remove('active', 'bg-white/10'));
+            if (links[cur]) { links[cur].classList.add('active', 'bg-white/10'); }
+            const btn = document.getElementById('topBtn');
+            if (window.scrollY > 500) { btn.classList.remove('opacity-0', 'pointer-events-none'); }
+            else { btn.classList.add('opacity-0', 'pointer-events-none'); }
+        }
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+        document.getElementById('topBtn').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+        // reveal on scroll
+        if ('IntersectionObserver' in window) {
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+            }, { threshold: 0.08 });
+            document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+        } else {
+            document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+        }
+    </script>
+</body>
+
+</html>

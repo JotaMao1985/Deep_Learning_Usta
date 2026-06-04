@@ -1,0 +1,1935 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Microlearning del Módulo 1 — Fundamentos del Aprendizaje Profundo. 5 cápsulas de 3-5 minutos sobre los conceptos esenciales: XOR, ReLU, Descenso del Gradiente, Backpropagation y Overfitting. Universidad Santo Tomás.">
+    <title>Microlearning · Módulo 1 — Fundamentos del Deep Learning · USTA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+            svg: { fontCache: 'global' },
+            startup: { typeset: false }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Montserrat', 'Helvetica Neue', 'Arial', 'sans-serif'] },
+                    colors: {
+                        primary: '#3D008D', secondary: '#ED1E79',
+                        navy: '#001A4D', gold: '#FDB913',
+                        bg: '#F8FAFC', surface: '#FFFFFF',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* ===== BASE ===== */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #F0F2F8;
+            color: #1E293B;
+            background-image:
+                radial-gradient(circle at 1px 1px, rgba(61,0,141,0.04) 1px, transparent 0);
+            background-size: 28px 28px;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(61,0,141,0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(237,30,121,0.03) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        code, pre { font-family: 'Fira Code', monospace; }
+
+        /* ===== GRADIENTS ===== */
+        .usta-gradient { background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%); }
+        .usta-gradient-text {
+            background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ===== HEADER ===== */
+        .usta-header {
+            background: linear-gradient(180deg, #001A4D 0%, #002868 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .usta-header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(61,0,141,0.25) 0%, transparent 50%),
+                radial-gradient(circle at 80% 30%, rgba(237,30,121,0.15) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .neural-bg {
+            position: absolute; inset: 0; pointer-events: none; opacity: 0.08;
+        }
+
+        /* ===== GLASSMORPHISM CARD ===== */
+        .usta-card {
+            background: rgba(255,255,255,0.82);
+            backdrop-filter: blur(16px) saturate(1.6);
+            -webkit-backdrop-filter: blur(16px) saturate(1.6);
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.6);
+            box-shadow:
+                0 4px 6px rgba(0,0,0,0.04),
+                0 12px 40px rgba(61,0,141,0.08),
+                0 0 0 1px rgba(61,0,141,0.03);
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+        .usta-card:hover {
+            box-shadow:
+                0 8px 12px rgba(0,0,0,0.06),
+                0 20px 60px rgba(61,0,141,0.12),
+                0 0 0 1px rgba(61,0,141,0.05);
+            transform: translateY(-2px);
+        }
+
+        /* ===== ANIMATIONS ===== */
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide-in { animation: slideIn 0.5s cubic-bezier(0.16,1,0.3,1) forwards; }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(40px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        .animate-slide-out { animation: slideOut 0.3s ease-in forwards; }
+        @keyframes slideOut {
+            from { opacity: 1; transform: translateX(0); }
+            to   { opacity: 0; transform: translateX(-40px); }
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(237,30,121,0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(237,30,121,0); }
+        }
+        @keyframes draw-stroke {
+            from { stroke-dashoffset: var(--path-length, 1000); }
+            to   { stroke-dashoffset: 0; }
+        }
+        @keyframes confetti-fall {
+            0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(80px) rotate(720deg); opacity: 0; }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .reveal { opacity: 0; transform: translateY(20px); transition: all 0.6s cubic-bezier(0.16,1,0.3,1); }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        /* ===== INLINE CODE ===== */
+        .inline-code {
+            background: #F1F5F9; color: #0F172A;
+            padding: 0.1rem 0.4rem; border-radius: 6px;
+            font-size: 0.88em; font-family: 'Fira Code', monospace;
+            border: 1px solid rgba(0,0,0,0.06);
+        }
+
+        /* ===== EQUATION BLOCK ===== */
+        .eq-block {
+            background: linear-gradient(135deg, #FAF8FF 0%, #F5F0FA 100%);
+            border: 1px solid rgba(61, 0, 141, 0.12);
+            border-radius: 16px;
+            padding: 0.8rem 1.2rem;
+            overflow-x: auto;
+            text-align: center;
+            box-shadow: inset 0 1px 3px rgba(61,0,141,0.04);
+        }
+
+        /* ===== CALLOUTS ===== */
+        .callout {
+            border-left: 5px solid #3D008D;
+            background: linear-gradient(135deg, #F5F0FA 0%, #FAF8FF 100%);
+            padding: 16px 20px;
+            border-radius: 0 16px 16px 0;
+            margin: 1rem 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .callout.tip    { border-left-color: #15803D; background: linear-gradient(135deg, #F0FDF4 0%, #F7FEF9 100%); }
+        .callout.warn   { border-left-color: #B45309; background: linear-gradient(135deg, #FFFBEB 0%, #FFFDF5 100%); }
+        .callout.ethics { border-left-color: #0E7490; background: linear-gradient(135deg, #ECFEFF 0%, #F5FEFF 100%); }
+        .callout-label {
+            display: inline-block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 6px;
+            color: white;
+            background: linear-gradient(140deg, #3D008D, #6B21A8);
+            margin-bottom: 8px;
+            box-shadow: 0 2px 4px rgba(61,0,141,0.2);
+        }
+        .callout.tip .callout-label    { background: linear-gradient(140deg, #15803D, #22C55E); }
+        .callout.warn .callout-label   { background: linear-gradient(140deg, #B45309, #F59E0B); }
+        .callout.ethics .callout-label { background: linear-gradient(140deg, #0E7490, #06B6D4); }
+
+        /* ===== PILLS ===== */
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.6);
+        }
+
+        /* ===== STEP INDICATOR ===== */
+        .step-dot {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.85rem;
+            transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+        }
+        .step-dot.done {
+            background: linear-gradient(140deg, #15803D, #22C55E);
+            color: white;
+            box-shadow: 0 4px 12px rgba(21,128,61,0.3);
+        }
+        .step-dot.active {
+            background: linear-gradient(140deg, #3D008D, #ED1E79);
+            color: white;
+            box-shadow: 0 4px 16px rgba(61,0,141,0.4);
+            transform: scale(1.18);
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        .step-dot.future { background: #E2E8F0; color: #94A3B8; }
+        .step-line { flex: 1; height: 3px; background: #E2E8F0; border-radius: 9999px; transition: background 0.5s ease; }
+        .step-line.done { background: linear-gradient(90deg, #15803D, #3D008D); }
+
+        /* ===== FOCUS ===== */
+        button:focus-visible, a:focus-visible { outline: 2px solid #ED1E79; outline-offset: 2px; }
+
+        /* ===== SVG SHARED ===== */
+        .svg-chart { width: 100%; border-radius: 12px; }
+        .svg-chart text { font-family: 'Montserrat', sans-serif; }
+        .axis-line { stroke: #94A3B8; stroke-width: 1; }
+        .grid-line { stroke: #E2E8F0; stroke-width: 0.5; stroke-dasharray: 3,4; }
+        .draw-animated {
+            stroke-dasharray: var(--path-length, 1000);
+            stroke-dashoffset: var(--path-length, 1000);
+            animation: draw-stroke 1.5s ease-out forwards;
+        }
+        .draw-animated-slow {
+            stroke-dasharray: var(--path-length, 1000);
+            stroke-dashoffset: var(--path-length, 1000);
+            animation: draw-stroke 2.5s ease-out forwards;
+        }
+
+        /* ===== XOR SCATTER ===== */
+        .xor-point { transition: all 0.3s ease; cursor: pointer; }
+        .xor-point:hover { filter: brightness(1.2); }
+        .decision-boundary { transition: opacity 0.6s ease; }
+
+        /* ===== ACTIVATION ===== */
+        .sigmoid-curve { stroke: #ED1E79; stroke-width: 3; fill: none; }
+        .relu-curve    { stroke: #15803D; stroke-width: 3; fill: none; }
+        .sigmoid-area  { fill: rgba(237,30,121,0.06); }
+        .relu-area     { fill: rgba(21,128,61,0.06); }
+
+        /* ===== LEARNING CURVES ===== */
+        .train-curve { stroke: #3D008D; stroke-width: 3; fill: none; }
+        .val-curve   { stroke: #ED1E79; stroke-width: 3; fill: none; }
+        .stop-line   { stroke: #15803D; stroke-width: 2; stroke-dasharray: 6,4; }
+        .overfit-region { fill: rgba(237, 30, 121, 0.06); }
+
+        /* ===== VISUAL CONTAINERS ===== */
+        .visual-container {
+            background: linear-gradient(135deg, #FFFFFF 0%, #FAFBFF 100%);
+            border: 1px solid rgba(61,0,141,0.08);
+            border-radius: 20px;
+            padding: 1.25rem;
+            margin: 1rem 0;
+            box-shadow:
+                0 4px 12px rgba(0,0,0,0.04),
+                0 1px 3px rgba(61,0,141,0.06);
+            overflow: hidden;
+            position: relative;
+        }
+        .visual-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3D008D, #ED1E79, #FDB913);
+            opacity: 0.6;
+        }
+        .visual-title {
+            text-align: center;
+            color: #001A4D;
+            font-weight: 700;
+            font-size: 0.88rem;
+            margin-bottom: 0.75rem;
+        }
+
+        /* ===== CONFETTI ===== */
+        .confetti-piece {
+            position: absolute;
+            width: 8px; height: 8px;
+            border-radius: 2px;
+            animation: confetti-fall 1.2s ease-out forwards;
+            pointer-events: none;
+        }
+
+        /* ===== MCQ ===== */
+        .mcq-shake { animation: shake 0.4s ease-in-out; }
+        .mcq-option { position: relative; overflow: hidden; }
+        .mcq-option::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.3) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .mcq-option:hover::after { opacity: 1; }
+
+        /* ===== PROGRESS SEGMENTS ===== */
+        .progress-segment {
+            height: 6px;
+            border-radius: 3px;
+            transition: all 0.5s ease;
+            flex: 1;
+        }
+        .progress-segment:hover { transform: scaleY(1.5); }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+        /* ============================================================
+           MathJax lazy typeset
+        ============================================================ */
+        const typesetMath = (ref) => {
+            setTimeout(() => {
+                if (ref.current && window.MathJax && window.MathJax.typesetPromise) {
+                    window.MathJax.typesetPromise([ref.current]).catch(() => {});
+                }
+            }, 50);
+        };
+
+        /* ============================================================
+           IntersectionObserver for scroll reveal
+        ============================================================ */
+        const useReveal = () => {
+            const ref = useRef(null);
+            useEffect(() => {
+                const el = ref.current;
+                if (!el) return;
+                const obs = new IntersectionObserver(
+                    ([entry]) => { if (entry.isIntersecting) { el.classList.add('visible'); obs.unobserve(el); } },
+                    { threshold: 0.15 }
+                );
+                obs.observe(el);
+                return () => obs.disconnect();
+            }, []);
+            return ref;
+        };
+
+        /* ============================================================
+           Persistencia del progreso
+        ============================================================ */
+        const STORAGE_KEY = 'usta-m1-micro';
+
+        const defaultMicro = () => ({
+            capsVistas: { 1: false, 2: false, 3: false, 4: false, 5: false },
+            mcqAciertos: { 1: false, 2: false, 3: false, 4: false, 5: false },
+            startedAt: new Date().toISOString(),
+        });
+
+        const useMicroProgress = () => {
+            const [progress, setProgress] = useState(() => {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (!raw) return defaultMicro();
+                    const parsed = JSON.parse(raw);
+                    return {
+                        ...defaultMicro(),
+                        ...parsed,
+                        capsVistas:  { ...defaultMicro().capsVistas,  ...(parsed.capsVistas  || {}) },
+                        mcqAciertos: { ...defaultMicro().mcqAciertos, ...(parsed.mcqAciertos || {}) },
+                    };
+                } catch (e) { return defaultMicro(); }
+            });
+            useEffect(() => {
+                try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch (e) {}
+            }, [progress]);
+            const update = useCallback((patch) => {
+                setProgress(prev => ({ ...prev, ...(typeof patch === 'function' ? patch(prev) : patch) }));
+            }, []);
+            const reset = useCallback(() => setProgress(defaultMicro()), []);
+            return [progress, update, reset];
+        };
+
+        /* ============================================================
+           SUBCOMPONENTES
+        ============================================================ */
+
+        const Pill = ({ children, color = 'primary', icon }) => {
+            const palette = {
+                primary:   { bg: '#F5F0FA', fg: '#3D008D' },
+                secondary: { bg: '#FCE7F1', fg: '#BE185D' },
+                gold:      { bg: '#FEF3C7', fg: '#B45309' },
+                navy:      { bg: '#DBEAFE', fg: '#001A4D' },
+                green:     { bg: '#DCFCE7', fg: '#15803D' },
+            }[color] || { bg: '#F5F0FA', fg: '#3D008D' };
+            return (
+                <span className="pill" style={{ background: palette.bg, color: palette.fg }}>
+                    {icon && <i className={`fas ${icon} text-[0.65rem]`}></i>}{children}
+                </span>
+            );
+        };
+
+        const Eq = ({ children }) => <div className="eq-block my-3">{children}</div>;
+
+        const Callout = ({ type = 'info', label, children }) => {
+            const revRef = useReveal();
+            return (
+                <div ref={revRef} className={`callout reveal ${type !== 'info' ? type : ''}`}>
+                    {label && <span className="callout-label">{label}</span>}
+                    <div className="text-gray-700 leading-relaxed text-[0.95rem]">{children}</div>
+                </div>
+            );
+        };
+
+        /* ============================================================
+           CONFETTI
+        ============================================================ */
+        const Confetti = ({ show }) => {
+            if (!show) return null;
+            const colors = ['#3D008D', '#ED1E79', '#FDB913', '#15803D', '#2563EB', '#F59E0B'];
+            const pieces = Array.from({ length: 18 }, (_, i) => ({
+                id: i,
+                color: colors[i % colors.length],
+                left: `${10 + Math.random() * 80}%`,
+                delay: `${Math.random() * 0.5}s`,
+                size: 6 + Math.random() * 6,
+            }));
+            return (
+                <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 10 }}>
+                    {pieces.map(p => (
+                        <div key={p.id} className="confetti-piece"
+                            style={{
+                                background: p.color, left: p.left, top: '10%',
+                                animationDelay: p.delay,
+                                width: p.size, height: p.size,
+                                borderRadius: Math.random() > 0.5 ? '50%' : '2px',
+                            }} />
+                    ))}
+                </div>
+            );
+        };
+
+        /* ============================================================
+           MCQ mejorado con confetti y shake
+        ============================================================ */
+        const MCQ = ({ pregunta, opciones, onCorrect, id }) => {
+            const [sel, setSel] = useState(null);
+            const [checked, setChecked] = useState(false);
+            const [showConfetti, setShowConfetti] = useState(false);
+            const [shaking, setShaking] = useState(false);
+            const correctIdx = opciones.findIndex(o => o.correcta);
+            const ok = sel === correctIdx;
+
+            useEffect(() => {
+                if (checked && ok) {
+                    setShowConfetti(true);
+                    if (onCorrect) onCorrect();
+                    const t = setTimeout(() => setShowConfetti(false), 1500);
+                    return () => clearTimeout(t);
+                }
+                if (checked && !ok) {
+                    setShaking(true);
+                    const t = setTimeout(() => setShaking(false), 400);
+                    return () => clearTimeout(t);
+                }
+            }, [checked, ok, onCorrect]);
+
+            return (
+                <div className={`relative my-4 rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-white/90 to-purple-50/40 p-5 shadow-sm ${shaking ? 'mcq-shake' : ''}`}
+                    style={{ backdropFilter: 'blur(8px)' }}>
+                    <Confetti show={showConfetti} />
+                    <div className="flex items-start gap-2 font-bold text-navy mb-3">
+                        <i className="fas fa-circle-question text-secondary mt-0.5"></i>
+                        <span className="text-[0.98rem]">{pregunta}</span>
+                    </div>
+                    <div className="space-y-2">
+                        {opciones.map((o, i) => {
+                            let cls = 'border-gray-200 hover:border-primary/40 hover:shadow-sm';
+                            if (checked) {
+                                if (i === correctIdx) cls = 'border-green-500 bg-green-50 shadow-sm shadow-green-100';
+                                else if (i === sel) cls = 'border-red-400 bg-red-50';
+                                else cls = 'border-gray-200 opacity-50';
+                            } else if (i === sel) cls = 'border-secondary bg-pink-50 shadow-sm shadow-pink-100';
+                            return (
+                                <button key={i} onClick={() => !checked && setSel(i)}
+                                    disabled={checked}
+                                    className={`w-full text-left px-4 py-2.5 rounded-xl border text-[0.92rem] flex items-center gap-3 transition-all duration-200 ${cls}`}>
+                                    <span className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${i === sel ? 'usta-gradient text-white shadow-md' : 'bg-gray-100 text-gray-500'}`}>
+                                        {String.fromCharCode(97 + i)}
+                                    </span>
+                                    <span className="flex-1 text-gray-700">{o.texto}</span>
+                                    {checked && i === correctIdx && <i className="fas fa-check-circle text-green-600 text-lg"></i>}
+                                    {checked && i === sel && i !== correctIdx && <i className="fas fa-times-circle text-red-500 text-lg"></i>}
+                                </button>
+                            );
+                        })}
+                    </div>
+                    <div className="mt-3 flex items-center gap-3 flex-wrap">
+                        {!checked
+                            ? <button onClick={() => sel !== null && setChecked(true)} disabled={sel === null}
+                                className="text-sm font-bold px-5 py-2 rounded-full text-white usta-gradient disabled:opacity-40 shadow-md hover:shadow-lg transition-shadow">
+                                Comprobar</button>
+                            : <button onClick={() => { setChecked(false); setSel(null); }}
+                                className="text-sm font-bold px-5 py-2 rounded-full border-2 border-primary text-primary hover:bg-primary/5 transition-colors">Reintentar</button>}
+                        {checked && (
+                            <span className={`text-sm font-bold ${ok ? 'text-green-600' : 'text-red-500'}`}>
+                                <i className={`fas ${ok ? 'fa-circle-check' : 'fa-circle-xmark'} mr-1`}></i>
+                                {ok ? '¡Correcto!' : 'Revisa la explicación abajo'}
+                            </span>
+                        )}
+                    </div>
+                    {checked && (
+                        <div className="mt-3 text-[0.9rem] text-gray-700 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-4 border-l-4 border-gold animate-fade-in shadow-sm">
+                            <strong>Explicación: </strong>{opciones[correctIdx].justificacion}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        /* Step Indicator (5 dots conectados) */
+        const StepIndicator = ({ current, total, completed }) => {
+            return (
+                <div className="flex items-center gap-2 mb-6">
+                    {Array.from({ length: total }).map((_, i) => {
+                        const n = i + 1;
+                        const status = n < current ? 'done' : n === current ? 'active' : 'future';
+                        return (
+                            <React.Fragment key={n}>
+                                <div className={`step-dot ${status}`}>
+                                    {status === 'done' ? <i className="fas fa-check text-[0.7rem]"></i> : n}
+                                </div>
+                                {n < total && <div className={`step-line ${n < current ? 'done' : ''}`}></div>}
+                            </React.Fragment>
+                        );
+                    })}
+                </div>
+            );
+        };
+
+        /* ============================================================
+           VISUALES SVG MEJORADOS
+        ============================================================ */
+
+        /* ——— Cápsula 1: XOR Scatter Plot Interactivo ——— */
+        const XorVisual = () => {
+            const [showCurve, setShowCurve] = useState(false);
+            const [hovered, setHovered] = useState(null);
+            const [lineAngle, setLineAngle] = useState(0);
+            const [animating, setAnimating] = useState(false);
+            const animRef = useRef(null);
+
+            const W = 340, H = 300;
+            const m = { t: 35, r: 30, b: 50, l: 50 };
+            const pw = W - m.l - m.r, ph = H - m.t - m.b;
+            const sx = (v) => m.l + v * pw;
+            const sy = (v) => m.t + (1 - v) * ph;
+
+            const points = [
+                { x: 0, y: 0, cls: 0, label: '(0,0) → Clase 0' },
+                { x: 1, y: 1, cls: 0, label: '(1,1) → Clase 0' },
+                { x: 0, y: 1, cls: 1, label: '(0,1) → Clase 1' },
+                { x: 1, y: 0, cls: 1, label: '(1,0) → Clase 1' },
+            ];
+
+            // Animated rotating line
+            const animateLine = () => {
+                if (animRef.current) cancelAnimationFrame(animRef.current);
+                setAnimating(true);
+                let angle = 0;
+                const step = () => {
+                    angle += 1.5;
+                    setLineAngle(angle);
+                    if (angle < 360) animRef.current = requestAnimationFrame(step);
+                    else setAnimating(false);
+                };
+                animRef.current = requestAnimationFrame(step);
+            };
+            useEffect(() => () => { if (animRef.current) cancelAnimationFrame(animRef.current); }, []);
+
+            // Line endpoint from center
+            const cx = sx(0.5), cy = sy(0.5);
+            const rad = Math.min(pw, ph) * 0.55;
+            const lx1 = cx + rad * Math.cos((lineAngle * Math.PI) / 180);
+            const ly1 = cy + rad * Math.sin((lineAngle * Math.PI) / 180);
+            const lx2 = cx - rad * Math.cos((lineAngle * Math.PI) / 180);
+            const ly2 = cy - rad * Math.sin((lineAngle * Math.PI) / 180);
+
+            // Decision region paths (filled areas showing separability)
+            // Class 0 region: around (0,0) and (1,1) — two diagonal blobs
+            const class0Region = `M ${sx(0.35).toFixed(1)} ${sy(0.35).toFixed(1)} Q ${sx(0.5).toFixed(1)} ${sy(0.15).toFixed(1)} ${sx(0.65).toFixed(1)} ${sy(0.35).toFixed(1)} Q ${sx(0.85).toFixed(1)} ${sy(0.5).toFixed(1)} ${sx(0.65).toFixed(1)} ${sy(0.65).toFixed(1)} Q ${sx(0.5).toFixed(1)} ${sy(0.85).toFixed(1)} ${sx(0.35).toFixed(1)} ${sy(0.65).toFixed(1)} Q ${sx(0.15).toFixed(1)} ${sy(0.5).toFixed(1)} ${sx(0.35).toFixed(1)} ${sy(0.35).toFixed(1)} Z`;
+            // Class 1 region: around (0,1) and (1,0) — two corner blobs
+            const class1Region = `M ${sx(0.15).toFixed(1)} ${sy(0.85).toFixed(1)} Q ${sx(0.35).toFixed(1)} ${sy(0.65).toFixed(1)} ${sx(0.35).toFixed(1)} ${sy(0.35).toFixed(1)} Q ${sx(0.35).toFixed(1)} ${sy(0.15).toFixed(1)} ${sx(0.65).toFixed(1)} ${sy(0.15).toFixed(1)} Q ${sx(0.85).toFixed(1)} ${sy(0.15).toFixed(1)} ${sx(0.85).toFixed(1)} ${sy(0.35).toFixed(1)} Q ${sx(0.85).toFixed(1)} ${sy(0.65).toFixed(1)} ${sx(0.65).toFixed(1)} ${sy(0.65).toFixed(1)} Q ${sx(0.65).toFixed(1)} ${sy(0.85).toFixed(1)} ${sx(0.35).toFixed(1)} ${sy(0.85).toFixed(1)} Q ${sx(0.15).toFixed(1)} ${sy(0.85).toFixed(1)} ${sx(0.15).toFixed(1)} ${sy(0.85).toFixed(1)} Z`;
+
+            // Non-linear separator path (hyperbolic-like curve through the gaps)
+            const curvePath = (() => {
+                const pts = [];
+                for (let t = 0; t <= 1; t += 0.02) {
+                    const x = t;
+                    const y = 0.5 + 0.45 * Math.sin(Math.PI * t);
+                    pts.push(`${t === 0 ? 'M' : 'L'} ${sx(x).toFixed(1)} ${sy(y).toFixed(1)}`);
+                }
+                return pts.join(' ');
+            })();
+            const curvePath2 = (() => {
+                const pts = [];
+                for (let t = 0; t <= 1; t += 0.02) {
+                    const x = t;
+                    const y = 0.5 - 0.45 * Math.sin(Math.PI * t);
+                    pts.push(`${t === 0 ? 'M' : 'L'} ${sx(x).toFixed(1)} ${sy(y).toFixed(1)}`);
+                }
+                return pts.join(' ');
+            })();
+
+            const revRef = useReveal();
+
+            return (
+                <div ref={revRef} className="visual-container reveal">
+                    <h4 className="visual-title">
+                        <i className="fas fa-braille text-secondary mr-2"></i>Scatter plot XOR — ¿Se puede separar con una línea?
+                    </h4>
+                    <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart">
+                        <defs>
+                            <linearGradient id="gridGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stopColor="#F5F0FA" />
+                                <stop offset="100%" stopColor="#FAFBFF" />
+                            </linearGradient>
+                            <radialGradient id="glow0" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stopColor="#ED1E79" stopOpacity="0.25" />
+                                <stop offset="100%" stopColor="#ED1E79" stopOpacity="0" />
+                            </radialGradient>
+                            <radialGradient id="glow1" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stopColor="#15803D" stopOpacity="0.25" />
+                                <stop offset="100%" stopColor="#15803D" stopOpacity="0" />
+                            </radialGradient>
+                            <filter id="pointShadow">
+                                <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#000" floodOpacity="0.15" />
+                            </filter>
+                            <pattern id="dotGrid" width="8" height="8" patternUnits="userSpaceOnUse">
+                                <circle cx="4" cy="4" r="0.5" fill="#CBD5E1" opacity="0.3" />
+                            </pattern>
+                        </defs>
+                        {/* Background with dot grid */}
+                        <rect x={m.l} y={m.t} width={pw} height={ph} fill="url(#gridGrad)" rx="8" />
+                        <rect x={m.l} y={m.t} width={pw} height={ph} fill="url(#dotGrid)" rx="8" />
+                        {/* Grid lines */}
+                        {[0.25, 0.5, 0.75].map(v => (
+                            <React.Fragment key={v}>
+                                <line className="grid-line" x1={sx(v)} y1={m.t} x2={sx(v)} y2={m.t + ph} />
+                                <line className="grid-line" x1={m.l} y1={sy(v)} x2={m.l + pw} y2={sy(v)} />
+                            </React.Fragment>
+                        ))}
+                        {/* Axes */}
+                        <line className="axis-line" x1={m.l} y1={m.t + ph} x2={m.l + pw} y2={m.t + ph} />
+                        <line className="axis-line" x1={m.l} y1={m.t} x2={m.l} y2={m.t + ph} />
+                        <text x={sx(0.5)} y={H - 8} textAnchor="middle" fontSize="11" fill="#64748B" fontWeight="600">Entrada A</text>
+                        <text x="14" y={sy(0.5)} textAnchor="middle" fontSize="11" fill="#64748B" fontWeight="600"
+                            transform={`rotate(-90, 14, ${sy(0.5)})`}>Entrada B</text>
+                        {/* Axis labels */}
+                        <text x={sx(0)} y={m.t + ph + 16} textAnchor="middle" fontSize="10" fill="#94A3B8">0</text>
+                        <text x={sx(1)} y={m.t + ph + 16} textAnchor="middle" fontSize="10" fill="#94A3B8">1</text>
+                        <text x={m.l - 10} y={sy(0) + 4} textAnchor="middle" fontSize="10" fill="#94A3B8">0</text>
+                        <text x={m.l - 10} y={sy(1) + 4} textAnchor="middle" fontSize="10" fill="#94A3B8">1</text>
+
+                        {/* Decision regions (shown when curve is active) */}
+                        {showCurve && (
+                            <>
+                                <path d={class0Region} fill="rgba(237,30,121,0.08)" stroke="#ED1E79" strokeWidth="1" strokeDasharray="3,3" opacity="0.7" className="decision-boundary" />
+                                <path d={class1Region} fill="rgba(21,128,61,0.08)" stroke="#15803D" strokeWidth="1" strokeDasharray="3,3" opacity="0.7" className="decision-boundary" />
+                            </>
+                        )}
+
+                        {/* Rotating linear separator */}
+                        <line x1={lx1} y1={ly1} x2={lx2} y2={ly2}
+                            stroke="#94A3B8" strokeWidth="2" strokeDasharray="8,4" opacity="0.7" />
+
+                        {/* Non-linear separator */}
+                        {showCurve && (
+                            <>
+                                <path d={curvePath} fill="none" stroke="#15803D" strokeWidth="2.5"
+                                    className="draw-animated" style={{ '--path-length': 600 }} />
+                                <path d={curvePath2} fill="none" stroke="#15803D" strokeWidth="2.5"
+                                    className="draw-animated" style={{ '--path-length': 600 }} />
+                            </>
+                        )}
+
+                        {/* Points with enhanced glow and shadow */}
+                        {points.map((p, i) => {
+                            const isHov = hovered === i;
+                            const r = isHov ? 16 : 13;
+                            const glowR = isHov ? 28 : 22;
+                            return (
+                                <g key={i} className="xor-point"
+                                    onMouseEnter={() => setHovered(i)}
+                                    onMouseLeave={() => setHovered(null)}>
+                                    {/* Outer glow */}
+                                    <circle cx={sx(p.x)} cy={sy(p.y)} r={glowR}
+                                        fill={p.cls === 0 ? 'url(#glow0)' : 'url(#glow1)'}
+                                        style={{ transition: 'r 0.3s' }} />
+                                    {/* Point with shadow */}
+                                    <circle cx={sx(p.x)} cy={sy(p.y)} r={r}
+                                        fill={p.cls === 0 ? '#ED1E79' : '#15803D'}
+                                        stroke="white" strokeWidth="3"
+                                        filter="url(#pointShadow)"
+                                        style={{ transition: 'r 0.3s', filter: isHov ? 'brightness(1.15)' : 'none' }} />
+                                    <text x={sx(p.x)} y={sy(p.y) + 1} textAnchor="middle" dominantBaseline="central"
+                                        fontSize="11" fontWeight="bold" fill="white">
+                                        {p.cls}
+                                    </text>
+                                    {/* Tooltip */}
+                                    {isHov && (
+                                        <g>
+                                            <rect x={sx(p.x) - 55} y={sy(p.y) - 34} width="110" height="22" rx="6"
+                                                fill="#1E293B" opacity="0.92" />
+                                            <text x={sx(p.x)} y={sy(p.y) - 20} textAnchor="middle"
+                                                fontSize="10" fill="white" fontWeight="600">{p.label}</text>
+                                        </g>
+                                    )}
+                                </g>
+                            );
+                        })}
+                        {/* Legend */}
+                        <g transform={`translate(${W - 100}, 8)`}>
+                            <rect width="92" height="38" rx="8" fill="white" stroke="#E2E8F0" strokeWidth="1" filter="url(#pointShadow)" />
+                            <circle cx="14" cy="16" r="6" fill="#ED1E79" />
+                            <text x="26" y="20" fontSize="10" fill="#64748B" fontWeight="600">Clase 0</text>
+                            <circle cx="14" cy="32" r="6" fill="#15803D" />
+                            <text x="26" y="36" fontSize="10" fill="#64748B" fontWeight="600">Clase 1</text>
+                        </g>
+                    </svg>
+                    <div className="flex gap-2 mt-3 justify-center flex-wrap">
+                        <button onClick={animateLine} disabled={animating}
+                            className="text-xs font-bold px-4 py-1.5 rounded-full border-2 border-gray-300 text-gray-600 hover:border-secondary hover:text-secondary transition-all disabled:opacity-40">
+                            <i className="fas fa-rotate mr-1"></i>Rotar línea recta
+                        </button>
+                        <button onClick={() => setShowCurve(!showCurve)}
+                            className={`text-xs font-bold px-4 py-1.5 rounded-full border-2 transition-all ${showCurve ? 'border-green-500 text-green-700 bg-green-50' : 'border-gray-300 text-gray-600 hover:border-green-500 hover:text-green-700'}`}>
+                            <i className={`fas ${showCurve ? 'fa-eye' : 'fa-eye-slash'} mr-1`}></i>
+                            {showCurve ? 'Frontera no-lineal ✓' : 'Mostrar frontera no-lineal'}
+                        </button>
+                    </div>
+                    <p className="text-center text-xs text-gray-500 mt-3 italic leading-relaxed">
+                        Rote la línea recta: <strong>ninguna posición separa las clases</strong>.
+                        Active la frontera no-lineal para ver cómo <strong>una capa oculta</strong> resuelve el problema.
+                    </p>
+                </div>
+            );
+        };
+
+
+
+        /* ——— Cápsula 2: ReLU vs Sigmoid con animación de trazo ——— */
+        const ActivationVisual = () => {
+            const [mounted, setMounted] = useState(false);
+            const [showDerivatives, setShowDerivatives] = useState(false);
+            useEffect(() => { const t = setTimeout(() => setMounted(true), 200); return () => clearTimeout(t); }, []);
+            const revRef = useReveal();
+
+            const sigmoid = [], relu = [], sigmoidDeriv = [], reluDeriv = [];
+            for (let i = 0; i <= 80; i++) {
+                const z = -6 + (i / 80) * 12;
+                const s = 1 / (1 + Math.exp(-z));
+                sigmoid.push({ z, s });
+                relu.push({ z, r: Math.max(0, z) });
+                sigmoidDeriv.push({ z, d: s * (1 - s) });
+                reluDeriv.push({ z, d: z > 0 ? 1 : 0 });
+            }
+
+            const W = 380, H = 220;
+            const m = { t: 25, r: 20, b: 35, l: 40 };
+            const pw = W - m.l - m.r, ph = H - m.t - m.b;
+            const xS = (z) => m.l + ((z + 6) / 12) * pw;
+            const yNorm = (v, max) => m.t + ph - (v / max) * ph;
+
+            const sigmoidPath = sigmoid.map((p, i) =>
+                `${i === 0 ? 'M' : 'L'} ${xS(p.z).toFixed(1)} ${yNorm(p.s, 1.1).toFixed(1)}`).join(' ');
+            const reluPath = relu.map((p, i) =>
+                `${i === 0 ? 'M' : 'L'} ${xS(p.z).toFixed(1)} ${yNorm(p.r, 7).toFixed(1)}`).join(' ');
+
+            // Derivative paths (scaled to fit same chart)
+            const sigmoidDerivPath = sigmoidDeriv.map((p, i) =>
+                `${i === 0 ? 'M' : 'L'} ${xS(p.z).toFixed(1)} ${yNorm(p.d, 0.3).toFixed(1)}`).join(' ');
+            const reluDerivPath = reluDeriv.map((p, i) => {
+                const x = xS(p.z);
+                const y = p.d > 0.5 ? yNorm(1, 0.3) : yNorm(0, 0.3);
+                return `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+            }).join(' ');
+
+            // Areas
+            const sigmoidAreaPath = sigmoidPath + ` L ${xS(6).toFixed(1)} ${yNorm(0, 1.1).toFixed(1)} L ${xS(-6).toFixed(1)} ${yNorm(0, 1.1).toFixed(1)} Z`;
+            const reluAreaPath = reluPath + ` L ${xS(6).toFixed(1)} ${yNorm(0, 7).toFixed(1)} L ${xS(-6).toFixed(1)} ${yNorm(0, 7).toFixed(1)} Z`;
+
+            return (
+                <div ref={revRef} className="visual-container reveal">
+                    <h4 className="visual-title">
+                        <i className="fas fa-wave-square text-secondary mr-2"></i>Funciones de activación: Sigmoid vs ReLU
+                    </h4>
+                    <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart">
+                        <defs>
+                            <linearGradient id="sigmoidGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#ED1E79" stopOpacity="0.15" />
+                                <stop offset="100%" stopColor="#ED1E79" stopOpacity="0" />
+                            </linearGradient>
+                            <linearGradient id="reluGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#15803D" stopOpacity="0.12" />
+                                <stop offset="100%" stopColor="#15803D" stopOpacity="0" />
+                            </linearGradient>
+                            <pattern id="actDotGrid" width="10" height="10" patternUnits="userSpaceOnUse">
+                                <circle cx="5" cy="5" r="0.4" fill="#CBD5E1" opacity="0.2" />
+                            </pattern>
+                        </defs>
+                        {/* Dot grid background */}
+                        <rect x={m.l} y={m.t} width={pw} height={ph} fill="url(#actDotGrid)" />
+                        {/* Grid */}
+                        {[-4, -2, 0, 2, 4].map(z => (
+                            <line key={z} className="grid-line" x1={xS(z)} y1={m.t} x2={xS(z)} y2={m.t + ph} />
+                        ))}
+                        {/* Axes */}
+                        <line className="axis-line" x1={m.l} y1={m.t + ph} x2={m.l + pw} y2={m.t + ph} />
+                        <line className="axis-line" x1={xS(0)} y1={m.t} x2={xS(0)} y2={m.t + ph} />
+                        {/* y=1 reference */}
+                        <line x1={m.l} y1={yNorm(1, 1.1)} x2={m.l + pw} y2={yNorm(1, 1.1)}
+                            stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4,4" />
+                        <text x={m.l - 4} y={yNorm(1, 1.1) + 4} textAnchor="end" fontSize="9" fill="#94A3B8">1</text>
+
+                        {/* Areas */}
+                        {mounted && <path d={sigmoidAreaPath} fill="url(#sigmoidGrad)" />}
+                        {mounted && <path d={reluAreaPath} fill="url(#reluGrad)" />}
+
+                        {/* Derivative curves */}
+                        {showDerivatives && mounted && (
+                            <>
+                                <path d={sigmoidDerivPath} fill="none" stroke="#ED1E79" strokeWidth="1.5" strokeDasharray="4,3" opacity="0.5"
+                                    className="draw-animated" style={{ '--path-length': 500 }} />
+                                <path d={reluDerivPath} fill="none" stroke="#15803D" strokeWidth="1.5" strokeDasharray="4,3" opacity="0.5"
+                                    className="draw-animated" style={{ '--path-length': 500 }} />
+                            </>
+                        )}
+
+                        {/* Curves with draw animation */}
+                        <path d={sigmoidPath} className={`sigmoid-curve ${mounted ? 'draw-animated' : ''}`}
+                            style={{ '--path-length': 500 }} />
+                        <path d={reluPath} className={`relu-curve ${mounted ? 'draw-animated' : ''}`}
+                            style={{ '--path-length': 500 }} />
+
+                        {/* Axis labels */}
+                        {[-6, -4, -2, 0, 2, 4, 6].map(z => (
+                            <text key={z} x={xS(z)} y={m.t + ph + 14} textAnchor="middle" fontSize="9" fill="#94A3B8">{z}</text>
+                        ))}
+                        <text x={xS(0)} y={H - 4} textAnchor="middle" fontSize="10" fill="#64748B" fontWeight="600">z</text>
+
+                        {/* Legend */}
+                        <rect x={W - 130} y="8" width="120" height={showDerivatives ? "54" : "38"} rx="8" fill="white" stroke="#E2E8F0" strokeWidth="1" />
+                        <line x1={W - 122} y1="20" x2={W - 100} y2="20" stroke="#ED1E79" strokeWidth="3" />
+                        <text x={W - 96} y="24" fontSize="10" fill="#64748B" fontWeight="600">Sigmoid σ(z)</text>
+                        <line x1={W - 122} y1="36" x2={W - 100} y2="36" stroke="#15803D" strokeWidth="3" />
+                        <text x={W - 96} y="40" fontSize="10" fill="#64748B" fontWeight="600">ReLU max(0,z)</text>
+                        {showDerivatives && (
+                            <>
+                                <line x1={W - 122} y1="50" x2={W - 100} y2="50" stroke="#ED1E79" strokeWidth="1.5" strokeDasharray="4,3" />
+                                <text x={W - 96} y="54" fontSize="9" fill="#94A3B8">σ'(z)</text>
+                            </>
+                        )}
+                    </svg>
+                    <div className="flex gap-2 mt-2 justify-center">
+                        <button onClick={() => setShowDerivatives(!showDerivatives)}
+                            className={`text-xs font-bold px-4 py-1.5 rounded-full border-2 transition-all ${showDerivatives ? 'border-primary text-primary bg-purple-50' : 'border-gray-300 text-gray-600 hover:border-primary hover:text-primary'}`}>
+                            <i className={`fas ${showDerivatives ? 'fa-eye' : 'fa-eye-slash'} mr-1`}></i>
+                            {showDerivatives ? 'Derivadas visibles' : 'Mostrar derivadas'}
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 mt-3">
+                        <div className="bg-pink-50 rounded-xl p-3 text-center border border-pink-100">
+                            <div className="text-xs font-bold text-pink-700 mb-1">⚠️ Sigmoid</div>
+                            <div className="text-[0.72rem] text-gray-600">Derivada máx. = <strong>0.25</strong>. Se aplana en los extremos → <em>vanishing gradient</em></div>
+                        </div>
+                        <div className="bg-green-50 rounded-xl p-3 text-center border border-green-100">
+                            <div className="text-xs font-bold text-green-700 mb-1">✅ ReLU</div>
+                            <div className="text-[0.72rem] text-gray-600">Derivada = <strong>1</strong> para z&gt;0. El gradiente <em>fluye sin reducirse</em></div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        /* ——— Cápsula 3: Descenso del Gradiente (reescritura completa) ——— */
+        const GradientVisual = () => {
+            const revRef = useReveal();
+            const f = (x) => 0.5 * (x - 3) ** 2 + 0.5;
+
+            const simulate = (lr, steps = 25) => {
+                const path = [{ x: -4, y: f(-4) }];
+                let x = -4;
+                for (let i = 0; i < steps; i++) {
+                    const grad = x - 3;
+                    x = x - lr * grad;
+                    x = Math.max(-5.5, Math.min(8, x)); // clamp
+                    path.push({ x, y: f(x) });
+                }
+                return path;
+            };
+
+            const W = 400, H = 220;
+            const m = { t: 30, r: 20, b: 40, l: 45 };
+            const pw = W - m.l - m.r, ph = H - m.t - m.b;
+            const xRange = [-5, 8];
+            const yRange = [0, 18];
+            const xS = (x) => m.l + ((x - xRange[0]) / (xRange[1] - xRange[0])) * pw;
+            const yS = (y) => m.t + ph - ((y - yRange[0]) / (yRange[1] - yRange[0])) * ph;
+
+            // Loss surface
+            const surfacePts = [];
+            for (let i = 0; i <= 100; i++) {
+                const x = xRange[0] + (i / 100) * (xRange[1] - xRange[0]);
+                surfacePts.push({ x, y: f(x) });
+            }
+            const surfacePath = surfacePts.map((p, i) =>
+                `${i === 0 ? 'M' : 'L'} ${xS(p.x).toFixed(1)} ${yS(p.y).toFixed(1)}`).join(' ');
+            const surfaceArea = surfacePath +
+                ` L ${xS(xRange[1]).toFixed(1)} ${yS(0).toFixed(1)} L ${xS(xRange[0]).toFixed(1)} ${yS(0).toFixed(1)} Z`;
+
+            const scenarios = [
+                { lr: 0.05, label: 'η = 0.05', desc: 'Muy lento', color: '#B45309', icon: '🐌' },
+                { lr: 0.3,  label: 'η = 0.30', desc: 'Ideal',     color: '#15803D', icon: '🎯' },
+                { lr: 1.5,  label: 'η = 1.50', desc: 'Diverge',   color: '#DC2626', icon: '💥' },
+            ];
+
+            const makePath = (pts) => pts.map((p, i) =>
+                `${i === 0 ? 'M' : 'L'} ${xS(p.x).toFixed(1)} ${yS(p.y).toFixed(1)}`).join(' ');
+
+            const [activeIdx, setActiveIdx] = useState(1);
+            const [mounted, setMounted] = useState(false);
+            useEffect(() => { const t = setTimeout(() => setMounted(true), 300); return () => clearTimeout(t); }, []);
+
+            return (
+                <div ref={revRef} className="visual-container reveal">
+                    <h4 className="visual-title">
+                        <i className="fas fa-person-hiking text-secondary mr-2"></i>Tres learning rates, tres destinos
+                    </h4>
+                    <Eq>{String.raw`$$\theta_{t+1} = \theta_t - \eta \cdot \nabla L(\theta_t)$$`}</Eq>
+                    <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart mt-2">
+                        <defs>
+                            <linearGradient id="mountainGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#E8E0F0" stopOpacity="0.6" />
+                                <stop offset="100%" stopColor="#F5F0FA" stopOpacity="0.1" />
+                            </linearGradient>
+                            <radialGradient id="minGlow" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stopColor="#15803D" stopOpacity="0.3" />
+                                <stop offset="100%" stopColor="#15803D" stopOpacity="0" />
+                            </radialGradient>
+                            <pattern id="gradDescentGrid" width="12" height="12" patternUnits="userSpaceOnUse">
+                                <circle cx="6" cy="6" r="0.5" fill="#CBD5E1" opacity="0.15" />
+                            </pattern>
+                        </defs>
+                        {/* Dot grid background */}
+                        <rect x={m.l} y={m.t} width={pw} height={ph} fill="url(#gradDescentGrid)" />
+                        {/* Surface area */}
+                        <path d={surfaceArea} fill="url(#mountainGrad)" />
+                        {/* Surface curve */}
+                        <path d={surfacePath} fill="none" stroke="#94A3B8" strokeWidth="2" />
+                        {/* Grid */}
+                        <line className="axis-line" x1={m.l} y1={m.t + ph} x2={m.l + pw} y2={m.t + ph} />
+                        <line className="axis-line" x1={m.l} y1={m.t} x2={m.l} y2={m.t + ph} />
+                        {/* Minimum marker with glow */}
+                        <circle cx={xS(3)} cy={yS(f(3))} r="12" fill="url(#minGlow)" />
+                        <circle cx={xS(3)} cy={yS(f(3))} r="5" fill="#15803D" opacity="0.3" />
+                        <circle cx={xS(3)} cy={yS(f(3))} r="3" fill="#15803D" />
+                        <text x={xS(3)} y={yS(f(3)) + 16} textAnchor="middle" fontSize="9" fill="#15803D" fontWeight="bold">mínimo</text>
+
+                        {/* Trajectories */}
+                        {scenarios.map((s, i) => {
+                            const pts = simulate(s.lr);
+                            const path = makePath(pts);
+                            const isActive = activeIdx === i;
+                            const lastPt = pts[pts.length - 1];
+                            return (
+                                <g key={i} opacity={isActive ? 1 : 0.2} style={{ transition: 'opacity 0.4s' }}>
+                                    <path d={path} fill="none" stroke={s.color} strokeWidth={isActive ? 3 : 1.5}
+                                        strokeLinejoin="round" strokeLinecap="round"
+                                        className={mounted && isActive ? 'draw-animated-slow' : ''}
+                                        style={{ '--path-length': 1200 }} />
+                                    {/* Step markers along trajectory */}
+                                    {isActive && pts.filter((_, j) => j % 3 === 0).map((p, j) => (
+                                        <circle key={j} cx={xS(p.x)} cy={yS(p.y)} r="2" fill={s.color} opacity="0.4" />
+                                    ))}
+                                    {/* Start point */}
+                                    <circle cx={xS(-4)} cy={yS(f(-4))} r={isActive ? 5 : 3} fill={s.color} stroke="white" strokeWidth="2" />
+                                    {/* End point with glow */}
+                                    {isActive && (
+                                        <circle cx={xS(lastPt.x)} cy={yS(lastPt.y)} r="10" fill={s.color} opacity="0.2" />
+                                    )}
+                                    <circle cx={xS(lastPt.x)} cy={yS(lastPt.y)} r={isActive ? 6 : 3} fill={s.color}
+                                        stroke="white" strokeWidth="2" />
+                                </g>
+                            );
+                        })}
+
+                        {/* Labels */}
+                        <text x={m.l + pw / 2} y={H - 6} textAnchor="middle" fontSize="10" fill="#64748B" fontWeight="600">θ (parámetro)</text>
+                        <text x="12" y={m.t + ph / 2} textAnchor="middle" fontSize="10" fill="#64748B" fontWeight="600"
+                            transform={`rotate(-90, 12, ${m.t + ph / 2})`}>L(θ) pérdida</text>
+                    </svg>
+                    {/* Selector buttons */}
+                    <div className="flex gap-2 mt-3 justify-center flex-wrap">
+                        {scenarios.map((s, i) => (
+                            <button key={i} onClick={() => { setActiveIdx(i); setMounted(false); setTimeout(() => setMounted(true), 50); }}
+                                className={`text-xs font-bold px-4 py-2 rounded-full border-2 transition-all ${
+                                    activeIdx === i
+                                        ? 'text-white shadow-md'
+                                        : 'border-gray-200 text-gray-500 hover:border-gray-400'
+                                }`}
+                                style={activeIdx === i ? { background: s.color, borderColor: s.color } : {}}>
+                                <span className="mr-1">{s.icon}</span>{s.label} — {s.desc}
+                            </button>
+                        ))}
+                    </div>
+                    <p className="text-center text-xs text-gray-500 mt-2 italic">
+                        Seleccione un learning rate para ver cómo se comporta la trayectoria del optimizador sobre la superficie de pérdida.
+                    </p>
+                </div>
+            );
+        };
+
+
+
+        /* ——— Cápsula 4: Backprop con animación de flujo ——— */
+        const BackpropVisual = () => {
+            const [phase, setPhase] = useState('none'); // none, forward, backward
+            const [activeNode, setActiveNode] = useState(-1);
+            const timerRef = useRef(null);
+            const revRef = useReveal();
+
+            const nodes = [
+                { label: 'x·w', sub: 'producto', x: 30 },
+                { label: '+b', sub: 'sesgo', x: 150 },
+                { label: 'σ', sub: 'activación', x: 270 },
+                { label: 'ŷ', sub: 'predicción', x: 390 },
+                { label: 'L', sub: 'pérdida', x: 510 },
+            ];
+
+            const runAnimation = (dir) => {
+                if (timerRef.current) clearInterval(timerRef.current);
+                setPhase(dir);
+                const order = dir === 'forward' ? [0,1,2,3,4] : [4,3,2,1,0];
+                let step = 0;
+                setActiveNode(order[0]);
+                timerRef.current = setInterval(() => {
+                    step++;
+                    if (step >= order.length) {
+                        clearInterval(timerRef.current);
+                        setTimeout(() => { setPhase('none'); setActiveNode(-1); }, 800);
+                    } else {
+                        setActiveNode(order[step]);
+                    }
+                }, 500);
+            };
+            useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
+
+            const W = 580, H = 200;
+
+            return (
+                <div ref={revRef} className="visual-container reveal">
+                    <h4 className="visual-title">
+                        <i className="fas fa-diagram-project text-secondary mr-2"></i>Grafo computacional: forward vs backward
+                    </h4>
+                    <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" style={{ minWidth: 280 }}>
+                        <defs>
+                            <marker id="arrF" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                                <path d="M0,0 L6,3 L0,6 Z" fill="#2563EB" />
+                            </marker>
+                            <marker id="arrB" markerWidth="8" markerHeight="8" refX="2" refY="3" orient="auto">
+                                <path d="M6,0 L0,3 L6,6 Z" fill="#DC2626" />
+                            </marker>
+                            <linearGradient id="nodeGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#F5F0FA" />
+                                <stop offset="100%" stopColor="#EDE5F7" />
+                            </linearGradient>
+                            <linearGradient id="nodeActiveF" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#DBEAFE" />
+                                <stop offset="100%" stopColor="#BFDBFE" />
+                            </linearGradient>
+                            <linearGradient id="nodeActiveB" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#FEE2E2" />
+                                <stop offset="100%" stopColor="#FECACA" />
+                            </linearGradient>
+                            <filter id="glow">
+                                <feGaussianBlur stdDeviation="3" result="blur" />
+                                <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                            </filter>
+                        </defs>
+                        {/* Forward arrows */}
+                        {nodes.slice(0, -1).map((n, i) => (
+                            <line key={`f${i}`}
+                                x1={n.x + 50} y1="80" x2={nodes[i+1].x} y2="80"
+                                stroke={phase === 'forward' && activeNode >= i ? '#2563EB' : '#CBD5E1'}
+                                strokeWidth="2" markerEnd="url(#arrF)"
+                                style={{ transition: 'stroke 0.3s' }} />
+                        ))}
+                        {/* Backward arrows */}
+                        {nodes.slice(0, -1).map((n, i) => (
+                            <line key={`b${i}`}
+                                x1={nodes[i+1].x} y1="140" x2={n.x + 50} y2="140"
+                                stroke={phase === 'backward' && activeNode <= i + 1 ? '#DC2626' : '#CBD5E1'}
+                                strokeWidth="2" strokeDasharray="5,3" markerEnd="url(#arrB)"
+                                style={{ transition: 'stroke 0.3s' }} />
+                        ))}
+                        {/* Derivative labels on backward arrows */}
+                        {['∂L/∂ŷ', '∂ŷ/∂σ', '∂σ/∂z', '∂z/∂w'].map((label, i) => (
+                            <text key={`dl${i}`}
+                                x={(nodes[i].x + 50 + nodes[i+1].x) / 2} y="158"
+                                textAnchor="middle" fontSize="8" fill="#DC2626" fontWeight="600"
+                                opacity={phase === 'backward' ? 0.8 : 0.3}
+                                style={{ transition: 'opacity 0.3s' }}>
+                                {label}
+                            </text>
+                        ))}
+                        {/* Nodes */}
+                        {nodes.map((n, i) => {
+                            const isActive = activeNode === i;
+                            const nodeFill = isActive
+                                ? (phase === 'forward' ? 'url(#nodeActiveF)' : 'url(#nodeActiveB)')
+                                : 'url(#nodeGrad)';
+                            const nodeStroke = isActive
+                                ? (phase === 'forward' ? '#2563EB' : '#DC2626')
+                                : '#3D008D';
+                            return (
+                                <g key={i} filter={isActive ? 'url(#glow)' : undefined}>
+                                    <rect x={n.x} y="60" width="50" height="40" rx="12"
+                                        fill={nodeFill} stroke={nodeStroke} strokeWidth={isActive ? 2.5 : 1.5}
+                                        style={{ transition: 'all 0.3s' }} />
+                                    <text x={n.x + 25} y="84" textAnchor="middle"
+                                        fontSize="13" fill={isActive ? nodeStroke : '#3D008D'} fontWeight="bold"
+                                        style={{ transition: 'fill 0.3s' }}>
+                                        {n.label}
+                                    </text>
+                                    <text x={n.x + 25} y="118" textAnchor="middle" fontSize="9" fill="#64748B">
+                                        {n.sub}
+                                    </text>
+                                </g>
+                            );
+                        })}
+                        {/* Phase labels */}
+                        <text x="20" y="30" fontSize="12" fill="#2563EB" fontWeight="bold"
+                            opacity={phase === 'forward' ? 1 : 0.4} style={{ transition: 'opacity 0.3s' }}>
+                            ▶ Forward (predicción)
+                        </text>
+                        <text x="20" y="185" fontSize="12" fill="#DC2626" fontWeight="bold"
+                            opacity={phase === 'backward' ? 1 : 0.4} style={{ transition: 'opacity 0.3s' }}>
+                            ◀ Backward (gradiente = regla de la cadena)
+                        </text>
+                    </svg>
+                    <div className="flex gap-2 mt-3 justify-center flex-wrap">
+                        <button onClick={() => runAnimation('forward')}
+                            className="text-xs font-bold px-4 py-2 rounded-full border-2 border-blue-300 text-blue-600 hover:bg-blue-50 transition-all">
+                            <i className="fas fa-play mr-1"></i>Animar Forward
+                        </button>
+                        <button onClick={() => runAnimation('backward')}
+                            className="text-xs font-bold px-4 py-2 rounded-full border-2 border-red-300 text-red-600 hover:bg-red-50 transition-all">
+                            <i className="fas fa-backward mr-1"></i>Animar Backward
+                        </button>
+                    </div>
+                    <p className="text-center text-xs text-gray-600 mt-2">
+                        La <strong>cadena de derivadas</strong> locales multiplica cuánto aporta cada nodo al error final.
+                    </p>
+                </div>
+            );
+        };
+
+        /* ——— Cápsula 5: Curvas de Overfitting animadas ——— */
+        const OverfitVisual = () => {
+            const [mounted, setMounted] = useState(false);
+            const [hoveredEpoch, setHoveredEpoch] = useState(null);
+            const svgRef = useRef(null);
+            const revRef = useReveal();
+
+            useEffect(() => { const t = setTimeout(() => setMounted(true), 300); return () => clearTimeout(t); }, []);
+
+            const W = 400, H = 220;
+            const m = { t: 30, r: 25, b: 40, l: 50 };
+            const pw = W - m.l - m.r, ph = H - m.t - m.b;
+            const epochs = Array.from({ length: 50 }, (_, i) => i + 1);
+            const trainY = epochs.map(e => 0.9 * Math.exp(-e / 18) + 0.05);
+            const valY = epochs.map(e => 0.85 * Math.exp(-e / 15) + 0.18 + Math.max(0, e - 22) * 0.012);
+
+            const xS = (e) => m.l + ((e - 1) / 49) * pw;
+            const yS = (v) => m.t + ph - v * ph;
+
+            const trainPath = epochs.map((e, i) => `${i === 0 ? 'M' : 'L'} ${xS(e).toFixed(1)} ${yS(trainY[i]).toFixed(1)}`).join(' ');
+            const valPath = epochs.map((e, i) => `${i === 0 ? 'M' : 'L'} ${xS(e).toFixed(1)} ${yS(valY[i]).toFixed(1)}`).join(' ');
+
+            // Divergence gap fill
+            const divergencePath = epochs.filter(e => e >= 22).map((e, i) => {
+                const prefix = i === 0 ? 'M' : 'L';
+                return `${prefix} ${xS(e).toFixed(1)} ${yS(trainY[e-1]).toFixed(1)}`;
+            }).join(' ') + ' ' + epochs.filter(e => e >= 22).reverse().map((e, i) => {
+                return `L ${xS(e).toFixed(1)} ${yS(valY[e-1]).toFixed(1)}`;
+            }).join(' ') + ' Z';
+
+            const stopX = 22;
+
+            const handleMouse = (e) => {
+                if (!svgRef.current) return;
+                const rect = svgRef.current.getBoundingClientRect();
+                const relX = e.clientX - rect.left;
+                const svgX = (relX / rect.width) * W;
+                const epoch = Math.round(1 + ((svgX - m.l) / pw) * 49);
+                if (epoch >= 1 && epoch <= 50) setHoveredEpoch(epoch);
+                else setHoveredEpoch(null);
+            };
+            const he = hoveredEpoch;
+            const trainAtH = he ? trainY[he - 1] : null;
+            const valAtH = he ? valY[he - 1] : null;
+
+            return (
+                <div ref={revRef} className="visual-container reveal">
+                    <h4 className="visual-title">
+                        <i className="fas fa-chart-line text-secondary mr-2"></i>Curvas de aprendizaje: la firma del overfitting
+                    </h4>
+                    <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} className="svg-chart cursor-crosshair"
+                        onMouseMove={handleMouse} onMouseLeave={() => setHoveredEpoch(null)}>
+                        <defs>
+                            <linearGradient id="overfitGrad" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stopColor="#ED1E79" stopOpacity="0.02" />
+                                <stop offset="100%" stopColor="#ED1E79" stopOpacity="0.1" />
+                            </linearGradient>
+                            <linearGradient id="gapGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#ED1E79" stopOpacity="0.15" />
+                                <stop offset="100%" stopColor="#ED1E79" stopOpacity="0.02" />
+                            </linearGradient>
+                            <pattern id="overfitDotGrid" width="10" height="10" patternUnits="userSpaceOnUse">
+                                <circle cx="5" cy="5" r="0.4" fill="#CBD5E1" opacity="0.15" />
+                            </pattern>
+                        </defs>
+                        {/* Dot grid background */}
+                        <rect x={m.l} y={m.t} width={pw} height={ph} fill="url(#overfitDotGrid)" />
+                        {/* Overfit region */}
+                        <rect className="overfit-region" x={xS(stopX)} y={m.t} width={m.l + pw - xS(stopX)} height={ph} rx="4" fill="url(#overfitGrad)" />
+                        <text x={xS(36)} y={m.t + 14} textAnchor="middle" fontSize="9" fill="#ED1E79" fontWeight="600" opacity="0.7">
+                            Zona de overfitting
+                        </text>
+                        {/* Divergence gap highlight */}
+                        {mounted && <path d={divergencePath} fill="url(#gapGrad)" />}
+                        {/* Axes */}
+                        <line className="axis-line" x1={m.l} y1={m.t + ph} x2={m.l + pw} y2={m.t + ph} />
+                        <line className="axis-line" x1={m.l} y1={m.t} x2={m.l} y2={m.t + ph} />
+                        {/* Grid */}
+                        {[0.2, 0.4, 0.6, 0.8].map(v => (
+                            <line key={v} className="grid-line" x1={m.l} y1={yS(v)} x2={m.l + pw} y2={yS(v)} />
+                        ))}
+                        {/* Early stop line */}
+                        <line className="stop-line" x1={xS(stopX)} y1={m.t} x2={xS(stopX)} y2={m.t + ph} />
+                        <text x={xS(stopX)} y={m.t - 4} textAnchor="middle" fontSize="9" fill="#15803D" fontWeight="bold">
+                            ✋ Early Stop
+                        </text>
+                        {/* Curves */}
+                        <path className={`train-curve ${mounted ? 'draw-animated-slow' : ''}`} d={trainPath}
+                            style={{ '--path-length': 800 }} />
+                        <path className={`val-curve ${mounted ? 'draw-animated-slow' : ''}`} d={valPath}
+                            style={{ '--path-length': 800, animationDelay: '0.3s' }} />
+                        {/* Hover crosshair + tooltip */}
+                        {he && (
+                            <g>
+                                <line x1={xS(he)} y1={m.t} x2={xS(he)} y2={m.t + ph} stroke="#64748B" strokeWidth="1" strokeDasharray="3,3" opacity="0.5" />
+                                <circle cx={xS(he)} cy={yS(trainAtH)} r="4" fill="#3D008D" stroke="white" strokeWidth="2" />
+                                <circle cx={xS(he)} cy={yS(valAtH)} r="4" fill="#ED1E79" stroke="white" strokeWidth="2" />
+                                {/* Tooltip box */}
+                                <rect x={xS(he) + (he > 35 ? -110 : 8)} y={m.t + 20} width="100" height="40" rx="6"
+                                    fill="#1E293B" opacity="0.9" />
+                                <text x={xS(he) + (he > 35 ? -60 : 58)} y={m.t + 36}
+                                    textAnchor="middle" fontSize="9" fill="white" fontWeight="bold">
+                                    Época {he}
+                                </text>
+                                <text x={xS(he) + (he > 35 ? -60 : 58)} y={m.t + 48}
+                                    textAnchor="middle" fontSize="8" fill="#A5B4FC">
+                                    Train: {trainAtH.toFixed(3)} | Val: {valAtH.toFixed(3)}
+                                </text>
+                            </g>
+                        )}
+                        {/* Legend */}
+                        <rect x={W - 110} y="12" width="100" height="38" rx="8" fill="white" stroke="#E2E8F0" strokeWidth="1" />
+                        <line x1={W - 102} y1="24" x2={W - 82} y2="24" stroke="#3D008D" strokeWidth="3" />
+                        <text x={W - 78} y="28" fontSize="10" fill="#64748B" fontWeight="600">Train</text>
+                        <line x1={W - 102} y1="40" x2={W - 82} y2="40" stroke="#ED1E79" strokeWidth="3" />
+                        <text x={W - 78} y="44" fontSize="10" fill="#64748B" fontWeight="600">Validación</text>
+                        {/* Axis labels */}
+                        <text x={m.l + pw / 2} y={H - 6} textAnchor="middle" fontSize="10" fill="#64748B" fontWeight="600">Época</text>
+                        <text x="12" y={m.t + ph / 2} textAnchor="middle" fontSize="10" fill="#64748B" fontWeight="600"
+                            transform={`rotate(-90, 12, ${m.t + ph / 2})`}>Pérdida</text>
+                        <text x={xS(1)} y={m.t + ph + 14} textAnchor="middle" fontSize="9" fill="#94A3B8">1</text>
+                        <text x={xS(25)} y={m.t + ph + 14} textAnchor="middle" fontSize="9" fill="#94A3B8">25</text>
+                        <text x={xS(50)} y={m.t + ph + 14} textAnchor="middle" fontSize="9" fill="#94A3B8">50</text>
+                    </svg>
+                    <div className="grid grid-cols-2 gap-3 mt-3">
+                        <div className="bg-purple-50 rounded-xl p-3 text-center border border-purple-100">
+                            <i className="fas fa-arrow-down text-primary mr-1 text-sm"></i>
+                            <span className="text-[0.78rem] text-gray-700">Train sigue bajando <em>(memoriza)</em></span>
+                        </div>
+                        <div className="bg-pink-50 rounded-xl p-3 text-center border border-pink-100">
+                            <i className="fas fa-arrow-up text-secondary mr-1 text-sm"></i>
+                            <span className="text-[0.78rem] text-gray-700">Val sube desde época 22 <em>(overfitting)</em></span>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        /* ============================================================
+           5 CÁPSULAS
+        ============================================================ */
+
+        const capsules = [
+            {
+                id: 1, num: '01', icon: 'fa-xmarks-lines', badgeColor: 'primary',
+                title: '¿Por qué una sola capa no basta?',
+                duracion: '~ 3 min',
+                objetivo: 'Comprender por qué el perceptrón simple de Rosenblatt no pudo resolver el problema XOR y por qué se necesitaron capas ocultas.',
+                analogia: {
+                    tipo: 'warn',
+                    titulo: 'Analogía: separar el agua y la tierra en el Chocó',
+                    contenido: (
+                        <p>
+                            Un perceptrón simple solo puede trazar una <strong>frontera lineal</strong> (una línea recta).
+                            Intentar separar el agua de la tierra en un mapa del Chocó trazando una sola recta es
+                            imposible: la intrincada red de ríos y afluentes forma un patrón no lineal. Se necesita
+                            una frontera curva, y eso requiere <strong>capas ocultas</strong>.
+                        </p>
+                    ),
+                },
+                visual: <XorVisual />,
+                contenidoExtra: (
+                    <div>
+                        <p>
+                            En 1958, Frank Rosenblatt construyó el <em>Mark I Perceptron</em>, una máquina que
+                            aprendía a clasificar patrones visuales simples. La Marina de EE.UU. lo financió
+                            esperando aplicaciones militares. Pero en 1969, Minsky y Papert publicaron
+                            <em> Perceptrons</em>, demostrando matemáticamente que el perceptrón simple
+                            <strong> no podía resolver problemas no linealmente separables</strong>, como el
+                            operador XOR.
+                        </p>
+                        <p>
+                            El XOR es una operación lógica aparentemente trivial:
+                        </p>
+                        <ul>
+                            <li>0 XOR 0 = 0</li>
+                            <li>0 XOR 1 = 1</li>
+                            <li>1 XOR 0 = 1</li>
+                            <li>1 XOR 1 = 0</li>
+                        </ul>
+                        <p>
+                            Si graficamos estas 4 combinaciones en un plano (eje X = entrada A, eje Y = entrada B),
+                            las dos clases (0 y 1) se alternan en las esquinas opuestas. <strong>Ninguna línea
+                            recta puede separarlas</strong>: las clases 0 están en (0,0) y (1,1), las clases 1
+                            en (0,1) y (1,0).
+                        </p>
+                    </div>
+                ),
+                formula: null,
+                mcq: {
+                    pregunta: '¿Por qué el perceptrón simple no puede aprender XOR?',
+                    opciones: [
+                        { texto: 'Porque requiere más memoria RAM de la disponible.', correcta: false, justificacion: 'La limitación no es de cómputo sino de capacidad representacional: una sola capa solo traza rectas.' },
+                        { texto: 'Porque XOR no es linealmente separable: una sola capa solo traza una frontera recta.', correcta: true, justificacion: 'Correcto. Las clases 0 (en (0,0) y (1,1)) y 1 (en (0,1) y (1,0)) se alternan; ninguna línea recta las separa. Se requieren capas ocultas para fronteras curvas.' },
+                        { texto: 'Porque la función XOR no es derivable.', correcta: false, justificacion: 'XOR sí es una función bien definida y derivable como función indicadora; el problema es de separabilidad, no de diferenciabilidad.' },
+                        { texto: 'Porque necesita más datos de los que existían en 1969.', correcta: false, justificacion: 'La limitación es geométrica (separabilidad lineal), no de cantidad de datos.' },
+                    ],
+                },
+            },
+            {
+                id: 2, num: '02', icon: 'fa-bolt', badgeColor: 'secondary',
+                title: 'ReLU: la activación que salvó al Deep Learning',
+                duracion: '~ 3 min',
+                objetivo: 'Entender por qué ReLU reemplazó a sigmoid y tanh en las capas ocultas, resolviendo el problema del vanishing gradient.',
+                analogia: {
+                    tipo: 'tip',
+                    titulo: 'Analogía: el portero de la discoteca',
+                    contenido: (
+                        <>
+                            <p>
+                                ReLU actúa como un <strong>portero estricto de discoteca</strong>:
+                            </p>
+                            <ul>
+                                <li>Si el valor que llega es <strong>positivo</strong> (información útil): "Pase".</li>
+                                <li>Si el valor es <strong>negativo</strong> (ruido o información inútil): "Cero. Usted no entra".</li>
+                            </ul>
+                            <p>Matemáticamente: {String.raw`\(f(z) = \max(0, z)\)`}</p>
+                        </>
+                    ),
+                },
+                visual: <ActivationVisual />,
+                contenidoExtra: (
+                    <div>
+                        <p>
+                            En los años 2000, las redes neuronales estaban en su segundo "invierno". Entrenar
+                            redes profundas era casi imposible por el <strong>vanishing gradient</strong>: los
+                            gradientes se volvían microscópicos en las capas tempranas, frenando el aprendizaje.
+                        </p>
+                        <p>
+                            La causa: las funciones sigmoid y tanh <strong>aplastan</strong> los valores en
+                            (0, 1) o (-1, 1), y sus derivadas se <strong>aplanan en los extremos</strong>. Cuando
+                            se encadenan 10 capas, multiplicar 10 derivadas de 0.25 (máximo de sigmoid) da
+                            <code className="inline-code">0.25<sup>10</sup> ≈ 0.000001</code>: el gradiente
+                            prácticamente desaparece.
+                        </p>
+                        <p>
+                            <strong>ReLU (Rectified Linear Unit)</strong> es brutalmente simple: si z &gt; 0,
+                            devuelve z; si z ≤ 0, devuelve 0. Su derivada es exactamente 1 para z &gt; 0.
+                            Esto significa que el gradiente <strong>fluye sin reducirse</strong> por todas las
+                            capas positivas, permitiendo entrenar redes de cientos de capas.
+                        </p>
+                    </div>
+                ),
+                formula: String.raw`$$f(z) = \max(0, z) = \begin{cases} z & \text{si } z > 0 \\ 0 & \text{si } z \leq 0 \end{cases}$$`,
+                mcq: {
+                    pregunta: '¿Por qué ReLU resolvió el problema del "vanishing gradient"?',
+                    opciones: [
+                        { texto: 'Porque normaliza la salida entre 0 y 1.', correcta: false, justificacion: 'Eso lo hace sigmoid; ReLU no normaliza. ReLU devuelve z tal cual si z>0, sin acotar superiormente.' },
+                        { texto: 'Porque su derivada es exactamente 1 para z > 0, evitando que el gradiente se encoja al propagarse por capas profundas.', correcta: true, justificacion: 'Correcto. En una red de 10 capas, multiplicar 10 derivadas de 1 da 1: el gradiente no se desvanece. En cambio, con sigmoid la derivada máxima es 0.25 y se encoge exponencialmente.' },
+                        { texto: 'Porque consume menos electricidad.', correcta: false, justificacion: 'Aunque ReLU es más eficiente computacionalmente, esa no es la razón principal por la que resolvió el vanishing gradient.' },
+                        { texto: 'Porque funciona mejor con datos normalizados.', correcta: false, justificacion: 'La ventaja principal es matemática (derivada constante en zona positiva), no de preprocesamiento.' },
+                    ],
+                },
+            },
+            {
+                id: 3, num: '03', icon: 'fa-person-hiking', badgeColor: 'gold',
+                title: 'Descenso del Gradiente: el excursionista del Páramo de Letras',
+                duracion: '~ 5 min',
+                objetivo: 'Comprender intuitivamente el algoritmo fundamental del Deep Learning y el impacto de la tasa de aprendizaje η.',
+                analogia: {
+                    tipo: 'warn',
+                    titulo: 'Analogía andina: el excursionista en el Páramo de Letras',
+                    contenido: (
+                        <>
+                            <p>
+                                Se encuentra a 3.677 m de altitud, de noche, con niebla tan densa que no ve a un
+                                metro de distancia. El objetivo es descender al valle donde está el pueblo.
+                                Como no puede ver el valle, <strong>tantea el suelo con los pies</strong> y avanza
+                                iterativamente en la dirección de mayor pendiente descendente.
+                            </p>
+                            <p>
+                                <strong>Tasa de aprendizaje (η): cuestión de vida o muerte</strong>
+                            </p>
+                            <ul>
+                                <li><em>η muy alta</em> (saltos de 50 m): se pasa del valle, sube la ladera opuesta, diverge.</li>
+                                <li><em>η muy baja</em> (pasos de hormiga): muere de hipotermia antes de converger.</li>
+                                <li><em>η ideal</em>: pasos seguros pero firmes, que se reducen cuando el terreno se aplana.</li>
+                            </ul>
+                        </>
+                    ),
+                },
+                visual: <GradientVisual />,
+                contenidoExtra: (
+                    <div>
+                        <p>
+                            El descenso del gradiente es el <strong>algoritmo fundamental</strong> del Deep
+                            Learning. La red ajusta sus pesos en la dirección <em>opuesta</em> al gradiente
+                            de la función de pérdida:
+                        </p>
+                    </div>
+                ),
+                formula: String.raw`$$\theta_{t+1} = \theta_t - \eta \cdot \nabla L(\theta_t)$$`,
+                mcq: {
+                    pregunta: 'Si η es muy alta, el descenso del gradiente…',
+                    opciones: [
+                        { texto: 'Desciende muy lento (convergencia lenta).', correcta: false, justificacion: 'Eso ocurre con η muy baja. Con η muy alta, los pasos son demasiado grandes y el algoritmo rebota.' },
+                        { texto: 'Da saltos tan grandes que pasa por encima del valle y sube la ladera opuesta (divergencia).', correcta: true, justificacion: 'Correcto. El algoritmo "rebota" entre las paredes de la función de costo, aumentando el error en lugar de reducirlo. La pérdida diverge.' },
+                        { texto: 'Encuentra el óptimo global de inmediato.', correcta: false, justificacion: 'Pasos grandes no garantizan optimalidad; de hecho, garantizan que NO convergerá al mínimo.' },
+                        { texto: 'Se queda atrapado en un mínimo local sin moverse.', correcta: false, justificacion: 'Quedarse atrapado en mínimos locales es un problema opuesto: suele ocurrir con η muy baja, no muy alta.' },
+                    ],
+                },
+            },
+            {
+                id: 4, num: '04', icon: 'fa-diagram-project', badgeColor: 'primary',
+                title: 'Backpropagation: leer la bitácora al revés',
+                duracion: '~ 5 min',
+                objetivo: 'Entender cómo la retropropagación distribuye la responsabilidad del error entre las neuronas usando la regla de la cadena.',
+                analogia: {
+                    tipo: 'tip',
+                    titulo: 'Analogía: el retraso del envío de flores a Miami',
+                    contenido: (
+                        <>
+                            <p>
+                                Un envío de flores a Miami para San Valentín se retrasó y generó pérdidas.
+                                ¿De quién es la culpa?
+                            </p>
+                            <ul>
+                                <li>¿Del <strong>conductor de la última milla</strong> (capa de salida)?</li>
+                                <li>¿Del <strong>despachador en El Dorado</strong> (capa oculta 2)?</li>
+                                <li>¿Del <strong>agrónomo que demoró la cosecha</strong> (capa oculta 1)?</li>
+                                <li>¿O de una <strong>política mal diseñada</strong> (pesos iniciales)?</li>
+                            </ul>
+                            <p>
+                                En deep learning esto es el <strong>problema de asignación de crédito</strong>:
+                                la red falló, pero hay miles de neuronas. <em>¿Cuáles deben ajustar sus pesos
+                                y en qué medida?</em>
+                            </p>
+                        </>
+                    ),
+                },
+                visual: <BackpropVisual />,
+                contenidoExtra: (
+                    <div>
+                        <p>
+                            La retropropagación es el "mecanismo administrativo" perfecto: rastrea el error
+                            desde el resultado final hacia atrás, capa por capa, calculando la contribución
+                            exacta de cada neurona. Matemáticamente se basa en la <strong>regla de la cadena</strong>:
+                        </p>
+                    </div>
+                ),
+                formula: String.raw`$$\frac{dL}{dw} = \frac{dL}{d\hat{y}} \cdot \frac{d\hat{y}}{dz} \cdot \frac{dz}{dw}$$`,
+                mcq: {
+                    pregunta: 'La retropropagación se fundamenta matemáticamente en…',
+                    opciones: [
+                        { texto: 'La regla de la cadena del cálculo diferencial.', correcta: true, justificacion: 'Correcto. Multiplica derivadas locales en cadena ("efecto dominó") para hallar el gradiente respecto a cada peso, capa por capa, desde la salida hasta la entrada.' },
+                        { texto: 'El teorema de Pitágoras.', correcta: false, justificacion: 'El teorema de Pitágoras no tiene relación con la diferenciación en grafos computacionales.' },
+                        { texto: 'La regla de tres simple.', correcta: false, justificacion: 'La regla de tres es aritmética elemental, no tiene relación con el cálculo multivariable que sustenta backprop.' },
+                        { texto: 'La transformada de Fourier.', correcta: false, justificacion: 'La transformada de Fourier se usa en procesamiento de señales, no en el algoritmo de retropropagación.' },
+                    ],
+                },
+            },
+            {
+                id: 5, num: '05', icon: 'fa-graduation-cap', badgeColor: 'secondary',
+                title: 'Overfitting: cuando la red memoriza el cuadernillo viejo',
+                duracion: '~ 5 min',
+                objetivo: 'Reconocer el sobreajuste en las curvas de aprendizaje y aplicar la solución correcta (Early Stopping).',
+                analogia: {
+                    tipo: 'warn',
+                    titulo: 'Analogía: el estudiante y el ICFES',
+                    contenido: (
+                        <>
+                            <p>
+                                Un estudiante que se prepara para el ICFES y obtiene un cuadernillo con preguntas
+                                del año anterior junto con sus respuestas correctas.
+                            </p>
+                            <ul>
+                                <li><strong>Estudiante A (memorización):</strong> memoriza asociaciones específicas como "la respuesta a la pregunta que comienza con 'Simón Bolívar...' es la opción C". En el simulacro (entrenamiento) obtiene puntaje perfecto.</li>
+                                <li><strong>Estudiante B (generalización):</strong> estudia los conceptos históricos y comprende las razones detrás de las acciones de Bolívar. Tal vez cometa errores en el simulacro.</li>
+                            </ul>
+                            <p>
+                                El día del examen real (conjunto de prueba), las preguntas presentan variaciones.
+                                El Estudiante A obtiene un desempeño deficiente. El Estudiante B logra adaptarse
+                                y obtener un resultado satisfactorio. <strong>En Deep Learning queremos emular
+                                al Estudiante B.</strong>
+                            </p>
+                        </>
+                    ),
+                },
+                visual: <OverfitVisual />,
+                contenidoExtra: (
+                    <div>
+                        <p>
+                            El sobreajuste (overfitting) ocurre cuando el modelo es demasiado complejo para
+                            la cantidad de datos disponibles y termina <strong>memorizando ruido</strong>
+                            (sombras de nubes en imágenes de café, asociaciones espurias en datos clínicos)
+                            en lugar de aprender los patrones verdaderamente representativos.
+                        </p>
+                        <p>
+                            La firma visual del overfitting: la <strong>curva de entrenamiento sigue bajando</strong>
+                            pero la <strong>curva de validación empieza a subir</strong> (divergen). Si la
+                            divergencia empieza en la época 22, esa es la <strong>época ideal para detener
+                            el entrenamiento</strong> y guardar los pesos.
+                        </p>
+                    </div>
+                ),
+                formula: null,
+                mcq: {
+                    pregunta: 'Si la pérdida de validación sube desde la época 50 mientras la de entrenamiento sigue bajando, lo correcto es…',
+                    opciones: [
+                        { texto: 'Entrenar 1.000 épocas más, ya que el modelo seguirá mejorando.', correcta: false, justificacion: 'Entrenar más solo empeorará el sobreajuste. La curva de validación subiendo es una señal clara de que el modelo está memorizando, no aprendiendo.' },
+                        { texto: 'Implementar Early Stopping, guardando los pesos de la época 50.', correcta: true, justificacion: 'Correcto. La "U" invertida en validación es la firma del overfitting. Early Stopping detiene el entrenamiento justo antes de que el modelo empiece a memorizar ruido, preservando los mejores pesos.' },
+                        { texto: 'Eliminar el conjunto de validación para simplificar.', correcta: false, justificacion: 'Sin validación perdemos la única señal que nos permite detectar el sobreajuste a tiempo.' },
+                        { texto: 'Aumentar la tasa de aprendizaje.', correcta: false, justificacion: 'Una tasa mayor no detiene el sobreajuste; solo cambia la trayectoria del descenso. La solución correcta es la parada anticipada.' },
+                    ],
+                },
+            },
+        ];
+
+        /* ============================================================
+           APP
+        ============================================================ */
+        const App = () => {
+            const [progress, update, reset] = useMicroProgress();
+            const [current, setCurrent] = useState(() => {
+                for (let i = 0; i < capsules.length; i++) {
+                    if (!progress.capsVistas[i + 1]) return i;
+                }
+                return capsules.length - 1;
+            });
+            const [showFinal, setShowFinal] = useState(false);
+            const [animKey, setAnimKey] = useState(0);
+            const contentRef = useRef(null);
+            const cap = capsules[current];
+            const totalCaps = capsules.length;
+            const completedCount = Object.values(progress.capsVistas).filter(Boolean).length;
+            const pct = Math.round((completedCount / totalCaps) * 100);
+
+            useEffect(() => {
+                typesetMath(contentRef);
+            }, [current, animKey]);
+
+            const goNext = () => {
+                if (current < totalCaps - 1) {
+                    setCurrent(current + 1);
+                } else {
+                    setShowFinal(true);
+                }
+                setAnimKey(k => k + 1);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+            const goPrev = () => {
+                setShowFinal(false);
+                if (current > 0) setCurrent(current - 1);
+                setAnimKey(k => k + 1);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+            const markVisto = () => {
+                update(prev => ({ ...prev, capsVistas: { ...prev.capsVistas, [cap.id]: true } }));
+            };
+            const onM_correct = () => {
+                update(prev => ({ ...prev, mcqAciertos: { ...prev.mcqAciertos, [cap.id]: true } }));
+            };
+
+            if (showFinal) {
+                return (
+                    <div className="min-h-screen">
+                        <FinalScreen
+                            progress={progress}
+                            pct={pct}
+                            onRestart={() => { setShowFinal(false); setCurrent(0); update(() => defaultMicro()); }}
+                            onAgain={() => { setShowFinal(false); setCurrent(0); }}
+                        />
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen">
+                    <Header progress={progress} pct={pct} completedCount={completedCount} total={totalCaps} onReset={reset} />
+                    <main className="max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-10">
+                        <StepIndicator current={current + 1} total={totalCaps} completed={progress.capsVistas} />
+                        <article ref={contentRef} className="usta-card p-5 md:p-8 animate-slide-in" key={animKey}>
+                            <CapsuleHeader cap={cap} visto={progress.capsVistas[cap.id]} onMarkVisto={markVisto} />
+                            <h2 className="text-xl md:text-2xl font-extrabold text-navy leading-snug mb-2 mt-1">
+                                {cap.title}
+                            </h2>
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 mb-4">
+                                <span><i className="far fa-clock mr-1"></i>{cap.duracion}</span>
+                                <span>·</span>
+                                <span>Cápsula {cap.num} de 0{totalCaps}</span>
+                            </div>
+                            <Callout type="info" label="Objetivo de esta cápsula">
+                                <p>{cap.objetivo}</p>
+                            </Callout>
+                            <div className="prose-usta text-[0.95rem] text-gray-700 leading-relaxed">
+                                {cap.contenidoExtra}
+                            </div>
+                            {cap.formula && <Eq>{cap.formula}</Eq>}
+                            {cap.visual}
+                            <Callout type={cap.analogia.tipo} label={cap.analogia.titulo}>
+                                {cap.analogia.contenido}
+                            </Callout>
+                            <div className="mt-5">
+                                <h3 className="text-navy font-bold text-base mb-1">
+                                    <i className="fas fa-circle-question text-secondary mr-2"></i>
+                                    Autoevaluación
+                                </h3>
+                                <MCQ
+                                    id={cap.id}
+                                    pregunta={cap.mcq.pregunta}
+                                    opciones={cap.mcq.opciones}
+                                    onCorrect={onM_correct}
+                                />
+                            </div>
+                            <Navigation
+                                current={current}
+                                total={totalCaps}
+                                onPrev={goPrev}
+                                onNext={goNext}
+                                isLast={current === totalCaps - 1}
+                            />
+                        </article>
+                        <div className="text-center mt-6">
+                            <button onClick={() => {
+                                if (window.confirm('¿Reiniciar todo el progreso del microlearning? Esta acción no se puede deshacer.')) reset();
+                            }} className="text-xs font-semibold text-gray-400 hover:text-secondary transition-colors">
+                                <i className="fas fa-rotate-left mr-1"></i>Reiniciar progreso
+                            </button>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        /* ============================================================
+           HEADER con patrón neural
+        ============================================================ */
+        const Header = ({ progress, pct, completedCount, total, onReset }) => (
+            <header className="usta-header text-white">
+                {/* Neural network SVG pattern */}
+                <svg className="neural-bg" viewBox="0 0 800 120" preserveAspectRatio="xMidYMid slice">
+                    {/* Nodes */}
+                    {[[80,30],[80,60],[80,90],[200,20],[200,45],[200,70],[200,95],[350,25],[350,55],[350,85],[500,35],[500,65],[500,95],[650,30],[650,60],[650,90],[750,50],[750,80]].map(([x,y],i) => (
+                        <circle key={i} cx={x} cy={y} r="3" fill="white" opacity="0.5" />
+                    ))}
+                    {/* Connections */}
+                    {[[80,30,200,20],[80,30,200,45],[80,60,200,45],[80,60,200,70],[80,90,200,70],[80,90,200,95],[200,20,350,25],[200,45,350,25],[200,45,350,55],[200,70,350,55],[200,70,350,85],[200,95,350,85],[350,25,500,35],[350,55,500,35],[350,55,500,65],[350,85,500,65],[350,85,500,95],[500,35,650,30],[500,35,650,60],[500,65,650,60],[500,65,650,90],[500,95,650,90],[650,30,750,50],[650,60,750,50],[650,60,750,80],[650,90,750,80]].map(([x1,y1,x2,y2],i) => (
+                        <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="white" strokeWidth="0.5" opacity="0.2" />
+                    ))}
+                </svg>
+                <div className="relative max-w-3xl mx-auto px-4 md:px-6 py-5">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="usta-gradient p-2.5 rounded-xl shadow-lg">
+                            <i className="fas fa-microchip text-lg"></i>
+                        </div>
+                        <div>
+                            <span className="text-[0.65rem] uppercase tracking-widest text-gold font-bold block">Universidad Santo Tomás</span>
+                            <span className="text-[0.6rem] uppercase tracking-wider text-white/50 font-semibold">Profundización I · Deep Learning</span>
+                        </div>
+                    </div>
+                    <h1 className="text-xl md:text-2xl font-extrabold">Microlearning · Módulo 1</h1>
+                    <p className="text-xs md:text-sm text-white/80 mt-0.5">5 cápsulas · ~ 20 min · Fundamentos del Aprendizaje Profundo</p>
+                    {/* Segmented progress bar */}
+                    <div className="mt-4">
+                        <div className="flex justify-between text-[0.7rem] font-semibold mb-1.5">
+                            <span>{completedCount} / {total} cápsulas completadas</span>
+                            <span className="text-gold">{pct}%</span>
+                        </div>
+                        <div className="flex gap-1.5">
+                            {Array.from({ length: total }).map((_, i) => (
+                                <div key={i} className="progress-segment"
+                                    style={{
+                                        background: progress.capsVistas[i + 1]
+                                            ? 'linear-gradient(90deg, #FDB913, #F59E0B)'
+                                            : 'rgba(255,255,255,0.15)',
+                                        boxShadow: progress.capsVistas[i + 1] ? '0 0 8px rgba(253,185,19,0.4)' : 'none',
+                                    }} />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </header>
+        );
+
+        const CapsuleHeader = ({ cap, visto, onMarkVisto }) => (
+            <div className="flex flex-wrap items-start gap-3 mb-1">
+                <div className={`flex-shrink-0 w-14 h-14 rounded-2xl text-white font-extrabold text-2xl flex items-center justify-center shadow-lg usta-gradient`}>
+                    {cap.num}
+                </div>
+                <div className="flex-1 min-w-[200px]">
+                    <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                        <Pill color={cap.badgeColor} icon={cap.icon}>Cápsula {cap.num}</Pill>
+                        <Pill color="green" icon="fa-circle-check">{visto ? 'Vista' : 'Por ver'}</Pill>
+                    </div>
+                </div>
+                <button onClick={onMarkVisto} disabled={visto}
+                    className={`text-xs font-bold px-3 py-1.5 rounded-full border-2 transition-all ${visto
+                        ? 'border-green-500 text-green-700 bg-green-50 shadow-sm shadow-green-100'
+                        : 'border-primary text-primary hover:bg-primary/5 hover:shadow-sm'}`}>
+                    <i className={`fas ${visto ? 'fa-check' : 'fa-bookmark'} mr-1`}></i>
+                    {visto ? 'Vista' : 'Marcar como vista'}
+                </button>
+            </div>
+        );
+
+        const Navigation = ({ current, total, onPrev, onNext, isLast }) => (
+            <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
+                <button onClick={onPrev} disabled={current === 0}
+                    className="text-sm font-semibold px-5 py-2.5 rounded-full border-2 border-gray-300 text-gray-600 hover:border-primary hover:text-primary disabled:opacity-30 disabled:hover:border-gray-300 disabled:hover:text-gray-600 transition-all">
+                    <i className="fas fa-arrow-left mr-1"></i>Anterior
+                </button>
+                <div className="text-xs text-gray-400 font-semibold">
+                    {current + 1} / {total}
+                </div>
+                <button onClick={onNext}
+                    className="text-sm font-bold px-6 py-2.5 rounded-full text-white usta-gradient hover:opacity-90 transition-all shadow-lg hover:shadow-xl">
+                    {isLast ? 'Finalizar' : 'Siguiente'}<i className={`fas ${isLast ? 'fa-flag-checkered' : 'fa-arrow-right'} ml-1`}></i>
+                </button>
+            </div>
+        );
+
+        /* ============================================================
+           FINAL SCREEN con confetti
+        ============================================================ */
+        const FinalScreen = ({ progress, pct, onRestart, onAgain }) => {
+            const allDone = pct === 100;
+            const [showConfetti, setShowConfetti] = useState(allDone);
+            useEffect(() => { if (allDone) { const t = setTimeout(() => setShowConfetti(false), 3000); return () => clearTimeout(t); } }, [allDone]);
+
+            const confettiColors = ['#3D008D', '#ED1E79', '#FDB913', '#15803D', '#2563EB', '#F59E0B', '#DC2626'];
+            const confettiPieces = Array.from({ length: 40 }, (_, i) => ({
+                id: i,
+                color: confettiColors[i % confettiColors.length],
+                left: `${Math.random() * 100}%`,
+                delay: `${Math.random() * 1}s`,
+                size: 6 + Math.random() * 8,
+                duration: `${1 + Math.random() * 1.5}s`,
+            }));
+
+            return (
+                <div className="min-h-screen relative">
+                    {showConfetti && (
+                        <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 50 }}>
+                            {confettiPieces.map(p => (
+                                <div key={p.id} className="absolute"
+                                    style={{
+                                        left: p.left, top: '-5%',
+                                        width: p.size, height: p.size,
+                                        background: p.color,
+                                        borderRadius: Math.random() > 0.5 ? '50%' : '2px',
+                                        animation: `confetti-fall ${p.duration} ease-out ${p.delay} forwards`,
+                                    }} />
+                            ))}
+                        </div>
+                    )}
+                    <header className="usta-header text-white">
+                        <svg className="neural-bg" viewBox="0 0 800 120" preserveAspectRatio="xMidYMid slice">
+                            {[[150,30],[300,50],[450,30],[600,60],[250,80],[500,80]].map(([x,y],i) => (
+                                <circle key={i} cx={x} cy={y} r="3" fill="white" opacity="0.4" />
+                            ))}
+                        </svg>
+                        <div className="relative max-w-3xl mx-auto px-4 md:px-6 py-6 text-center">
+                            <div className="flex justify-center mb-3">
+                                <div className="usta-gradient p-4 rounded-2xl shadow-xl">
+                                    <i className="fas fa-trophy text-3xl"></i>
+                                </div>
+                            </div>
+                            <h1 className="text-2xl md:text-3xl font-extrabold">¡Microlearning completado!</h1>
+                            <p className="text-sm text-white/80 mt-1">5 cápsulas · ~ 20 min de aprendizaje concentrado</p>
+                        </div>
+                    </header>
+                    <main className="max-w-3xl mx-auto px-4 md:px-6 py-10">
+                        <div className="usta-card p-6 md:p-8 text-center animate-fade-in">
+                            {allDone ? (
+                                <div className="mb-6">
+                                    <div className="w-24 h-24 rounded-full usta-gradient text-white text-5xl flex items-center justify-center mx-auto shadow-xl">
+                                        <i className="fas fa-medal"></i>
+                                    </div>
+                                    <h2 className="text-2xl md:text-3xl font-extrabold text-navy mt-4">¡Felicitaciones!</h2>
+                                    <p className="text-gray-700 mt-2 leading-relaxed max-w-md mx-auto">
+                                        Ha completado las 5 cápsulas del microlearning y ha respondido correctamente
+                                        todas las preguntas de autoevaluación. Tiene una base sólida para enfrentar
+                                        las actividades del Módulo 1.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="mb-6">
+                                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 text-primary text-4xl flex items-center justify-center mx-auto">
+                                        <span className="font-extrabold">{pct}%</span>
+                                    </div>
+                                    <h2 className="text-2xl md:text-3xl font-extrabold text-navy mt-4">Progreso: {pct}%</h2>
+                                    <p className="text-gray-700 mt-2 leading-relaxed max-w-md mx-auto">
+                                        Ha llegado al final del recorrido. Le recomendamos volver a las cápsulas
+                                        pendientes para reforzar los conceptos antes de la Actividad 1.
+                                    </p>
+                                </div>
+                            )}
+                            {/* Detailed stats */}
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 my-6 text-left">
+                                {capsules.map(c => {
+                                    const v = progress.capsVistas[c.id];
+                                    const m = progress.mcqAciertos[c.id];
+                                    return (
+                                        <div key={c.id} className={`rounded-xl p-3 border-2 transition-all ${v ? 'bg-green-50 border-green-200 shadow-sm shadow-green-100' : 'bg-gray-50 border-gray-200'}`}>
+                                            <div className="flex items-center gap-2">
+                                                <i className={`fas ${v ? 'fa-circle-check text-green-600' : 'fa-circle text-gray-300'}`}></i>
+                                                <span className="text-[0.7rem] font-bold text-navy">Cápsula {c.num}</span>
+                                            </div>
+                                            <div className="text-[0.65rem] text-gray-600 mt-1 leading-tight truncate">
+                                                {c.title}
+                                            </div>
+                                            <div className="flex gap-2 mt-1.5">
+                                                <span className={`text-[0.6rem] font-bold px-1.5 py-0.5 rounded ${v ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'}`}>
+                                                    {v ? '✓ Vista' : 'Pendiente'}
+                                                </span>
+                                                {m && <span className="text-[0.6rem] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">MCQ ✓</span>}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <div className="flex flex-wrap items-center justify-center gap-3">
+                                <button onClick={onAgain}
+                                    className="text-sm font-bold px-6 py-2.5 rounded-full text-white usta-gradient hover:opacity-90 transition-all shadow-lg hover:shadow-xl">
+                                    <i className="fas fa-rotate-left mr-1"></i>Repetir microlearning
+                                </button>
+                                <a href="ruta-aprendizaje-modulo-1.html"
+                                    className="text-sm font-bold px-6 py-2.5 rounded-full border-2 border-primary text-primary hover:bg-primary/5 transition-all">
+                                    <i className="fas fa-route mr-1"></i>Ir a la ruta completa
+                                </a>
+                            </div>
+                        </div>
+                        {/* Footer credits */}
+                        <div className="text-center mt-8 text-xs text-gray-400">
+                            <p>Universidad Santo Tomás · Profundización I: Redes Neuronales – Deep Learning</p>
+                            <p className="mt-0.5">Módulo 1 — Fundamentos del Aprendizaje Profundo</p>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>

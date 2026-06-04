@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Portal del Módulo 1 — Fundamentos del Aprendizaje Profundo. Maestría en Ciencia de Datos, Universidad Santo Tomás. Acceso al material de aprendizaje autónomo, la ruta de aprendizaje y el material de consulta.">
+    <title>Portal · Módulo 1 — Fundamentos del Aprendizaje Profundo · USTA</title>
+
+    <!-- Preconnect para rendimiento de fuentes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- React & ReactDOM (UMD) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Babel para transpilar JSX en el navegador -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Tailwind CSS (utilidades) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome (iconografía de apoyo) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- NOTA: este portal solo navega entre archivos; no incluye Plotly ni MathJax
+         (no hay gráficas ni LaTeX que renderizar). El resto del stack es idéntico al
+         material principal 01_Modulo_1_Fundamentos_Deep_Learning.html. -->
+
+    <!-- Google Fonts: Montserrat (texto) y Fira Code (código) -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#3D008D',
+                        secondary: '#ED1E79',
+                        navy: '#001A4D',
+                        gold: '#FDB913',
+                        bg: '#F8FAFC',
+                        surface: '#FFFFFF',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #F8FAFC;
+            color: #1E293B;
+            scroll-behavior: smooth;
+        }
+
+        code, pre { font-family: 'Fira Code', monospace; }
+
+        /* Gradientes institucionales USTA */
+        .usta-gradient { background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%); }
+        .usta-header   { background: linear-gradient(180deg, #001A4D 0%, #002868 100%); }
+
+        /* Tarjeta con elevación al pasar el cursor */
+        .usta-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+        .usta-card:hover {
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+            transform: translateY(-4px);
+        }
+
+        /* Barra de desplazamiento personalizada */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #3D008D, #ED1E79); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #4A00A8, #FF2D8A); }
+
+        /* Animación de aparición */
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Accesibilidad: foco visible */
+        a:focus-visible, button:focus-visible { outline: 2px solid #ED1E79; outline-offset: 3px; }
+
+        /* Código en línea */
+        .inline-code {
+            background: #F1F5F9;
+            color: #0F172A;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.88em;
+            font-family: 'Fira Code', monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        /* ============================================================
+           DATOS DEL PORTAL — Módulo 1
+           El "núcleo" (01) es el material padre; la Ruta (00) y la
+           Consulta (011) son recursos hijos que lo acompañan.
+        ============================================================ */
+        const TEMAS = ['Historia', 'MLP', 'Optimización', 'Backpropagation', 'Regularización', 'Ética'];
+
+        const NUCLEO = {
+            archivo: '01_Modulo_1_Fundamentos_Deep_Learning.html',
+            eyebrow: 'Material principal · Aprendizaje autónomo',
+            titulo: 'Fundamentos del Aprendizaje Profundo',
+            desc: 'Recorrido completo y autónomo de los 5 capítulos del módulo: de la neurona de McCulloch-Pitts al perceptrón multicapa, la matemática del error, la retropropagación, la regularización y la ética. Con teoría breve, analogías colombianas, diagramas, código comentado y cuestionarios.',
+            cta: 'Abrir material',
+            icon: 'fa-graduation-cap',
+        };
+
+        const RECURSOS = [
+            {
+                archivo: '00_ruta-aprendizaje-modulo-1.html',
+                titulo: 'Ruta de Aprendizaje',
+                desc: 'Mapa navegable del módulo: 5 capítulos, 2 actividades, 2 videos, glosario y cronograma. El punto de partida para orientarte.',
+                cta: 'Ver la ruta',
+                icon: 'fa-route',
+            },
+            {
+                archivo: '011_material-consulta-modulo-1.html',
+                titulo: 'Material de consulta',
+                desc: 'Recursos de referencia y bibliografía del módulo, listos para consulta rápida mientras estudias el material principal.',
+                cta: 'Abrir consulta',
+                icon: 'fa-book-open',
+            },
+            {
+                archivo: '012_infografia-contenidos-modulo-1.html',
+                titulo: 'Infografía de contenidos',
+                desc: 'Síntesis visual del módulo en una mirada: el mapa de los 5 capítulos, las cifras clave (carga horaria, peso evaluativo, glosario) y el ciclo de vida del modelo.',
+                cta: 'Ver infografía',
+                icon: 'fa-chart-pie',
+            },
+            {
+                archivo: '013_microlearning-modulo-1.html',
+                titulo: 'Microlearning',
+                desc: 'Píldoras de aprendizaje interactivas: repasa los conceptos clave del módulo en sesiones cortas con ejemplos y verificación inmediata.',
+                cta: 'Empezar microlearning',
+                icon: 'fa-bolt',
+            },
+        ];
+
+        /* ============================================================
+           HERO — cabecera institucional navy
+        ============================================================ */
+        const Hero = () => (
+            <header className="usta-header">
+                <div className="max-w-5xl mx-auto px-6 py-14 lg:py-20 text-center">
+                    <p className="text-xs uppercase tracking-[0.25em] text-gold font-bold mb-3">
+                        Universidad Santo Tomás
+                    </p>
+                    <p className="text-sm text-secondary font-semibold mb-2">
+                        Profundización I: Redes Neuronales — Deep Learning
+                    </p>
+                    <h1 className="text-3xl lg:text-5xl font-extrabold text-white tracking-tight">
+                        Módulo 1 — Fundamentos del Aprendizaje Profundo
+                    </h1>
+                    <p className="text-white/70 font-light mt-4 max-w-2xl mx-auto">
+                        Portal del módulo. Desde aquí accedes al material de aprendizaje autónomo,
+                        la ruta de aprendizaje y el material de consulta.
+                    </p>
+
+                    <div className="flex justify-center flex-wrap gap-2 mt-6">
+                        {TEMAS.map(t => (
+                            <span key={t}
+                                className="px-3 py-1 rounded-full text-xs text-white bg-white/10 border border-white/15">
+                                {t}
+                            </span>
+                        ))}
+                    </div>
+
+                    <p className="text-[11px] text-white/40 mt-8">
+                        Maestría en Ciencia de Datos · Facultad de Estadística · EA-N-F-004 · Teórico-práctico · 3 créditos
+                    </p>
+                </div>
+            </header>
+        );
+
+        /* ============================================================
+           TARJETA DESTACADA — núcleo del módulo (01)
+        ============================================================ */
+        const TarjetaNucleo = ({ data }) => (
+            <a href={data.archivo}
+                className="usta-card block overflow-hidden group">
+                <div className="usta-gradient h-2 w-full"></div>
+                <div className="p-7 lg:p-9 flex flex-col md:flex-row gap-6 items-start">
+                    <div className="usta-gradient text-white rounded-2xl flex-shrink-0 flex items-center justify-center shadow-md"
+                        style={{ width: 64, height: 64 }}>
+                        <i className={`fas ${data.icon} text-2xl`}></i>
+                    </div>
+                    <div className="flex-1">
+                        <p className="text-xs uppercase tracking-widest text-secondary font-bold mb-1">
+                            {data.eyebrow}
+                        </p>
+                        <h2 className="text-2xl font-bold text-primary">{data.titulo}</h2>
+                        <p className="text-gray-600 mt-3 leading-relaxed">{data.desc}</p>
+                        <span className="inline-flex items-center gap-2 mt-5 px-5 py-2.5 rounded-full text-white usta-gradient text-sm font-semibold group-hover:opacity-90 transition-opacity">
+                            {data.cta} <i className="fas fa-arrow-right"></i>
+                        </span>
+                    </div>
+                </div>
+            </a>
+        );
+
+        /* ============================================================
+           TARJETA DE RECURSO — hijos del módulo (00, 011)
+        ============================================================ */
+        const TarjetaRecurso = ({ data }) => (
+            <a href={data.archivo}
+                className="usta-card block p-6 group h-full flex flex-col">
+                <div className="flex items-center gap-3 mb-3">
+                    <span className="bg-primary/10 text-primary rounded-xl flex items-center justify-center flex-shrink-0"
+                        style={{ width: 44, height: 44 }}>
+                        <i className={`fas ${data.icon} text-lg`}></i>
+                    </span>
+                    <h3 className="text-lg font-bold text-navy">{data.titulo}</h3>
+                </div>
+                <p className="text-sm text-gray-600 leading-relaxed flex-1">{data.desc}</p>
+                <span className="inline-flex items-center gap-2 mt-4 text-sm font-semibold text-secondary group-hover:gap-3 transition-all">
+                    {data.cta} <i className="fas fa-arrow-right text-xs"></i>
+                </span>
+            </a>
+        );
+
+        /* ============================================================
+           APP — portal de una sola página
+        ============================================================ */
+        const App = () => (
+            <div className="min-h-screen flex flex-col">
+                <Hero />
+
+                <main className="flex-1 max-w-5xl w-full mx-auto px-6 py-12 animate-fade-in">
+                    <TarjetaNucleo data={NUCLEO} />
+
+                    <div className="mt-12">
+                        <div className="flex items-center gap-3 mb-5">
+                            <span className="usta-gradient text-white p-2 rounded-lg">
+                                <i className="fas fa-layer-group"></i>
+                            </span>
+                            <h2 className="text-xl font-bold text-navy">Recursos del módulo</h2>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-5">
+                            {RECURSOS.map(r => <TarjetaRecurso key={r.archivo} data={r} />)}
+                        </div>
+                    </div>
+                </main>
+
+                <footer className="max-w-5xl w-full mx-auto px-6 pb-12">
+                    <div className="usta-header rounded-xl p-6 text-center">
+                        <p className="text-white font-medium text-sm">
+                            <strong>Módulo 1 · Fundamentos del Aprendizaje Profundo</strong>
+                        </p>
+                        <p className="text-xs mt-1 text-white/70">
+                            Maestría en Ciencia de Datos · Universidad Santo Tomás · Profundización I: Redes Neuronales - Deep Learning
+                        </p>
+                        <p className="text-[10px] mt-2 text-white/50">
+                            Material de aprendizaje autónomo. Analogías contextualizadas al entorno colombiano.
+                        </p>
+                    </div>
+                </footer>
+            </div>
+        );
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+
+</html>

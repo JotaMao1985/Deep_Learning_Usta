@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Ruta de Aprendizaje Interactiva del Módulo 1 — Fundamentos del Aprendizaje Profundo. Maestría en Ciencia de Datos, Universidad Santo Tomás. Mapa navegable de los 5 capítulos, 2 actividades, 2 videos, glosario y cronograma.">
+    <title>Ruta de Aprendizaje · Módulo 1 — Fundamentos del Aprendizaje Profundo · USTA</title>
+
+    <!-- Preconnect para rendimiento de fuentes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- React & ReactDOM (UMD) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Babel para transpilar JSX en el navegador -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Tailwind CSS (utilidades) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome (iconografía de apoyo) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- MathJax 3 — JUSTIFICACIÓN: el material es matemáticamente denso ($...$ y $$...$$);
+         MathJax renderiza LaTeX de forma nativa y accesible sin dependencias locales. -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' },
+            startup: { typeset: false }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <!-- Google Fonts: Montserrat (texto) y Fira Code (código) -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#3D008D',
+                        secondary: '#ED1E79',
+                        navy: '#001A4D',
+                        gold: '#FDB913',
+                        bg: '#F8FAFC',
+                        surface: '#FFFFFF',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #F8FAFC;
+            color: #1E293B;
+            scroll-behavior: smooth;
+        }
+
+        code, pre { font-family: 'Fira Code', monospace; }
+
+        /* Gradientes institucionales USTA */
+        .usta-gradient { background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%); }
+        .usta-gradient-text {
+            background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .usta-header   { background: linear-gradient(180deg, #001A4D 0%, #002868 100%); }
+
+        /* Tarjeta con elevación al pasar el cursor */
+        .usta-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+        .usta-card:hover {
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+            transform: translateY(-4px);
+        }
+
+        /* Barra de desplazamiento personalizada */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #3D008D, #ED1E79); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #4A00A8, #FF2D8A); }
+
+        /* Animación de aparición */
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Accesibilidad: foco visible */
+        button:focus-visible, a:focus-visible { outline: 2px solid #ED1E79; outline-offset: 2px; }
+
+        /* Código en línea */
+        .inline-code {
+            background: #F1F5F9;
+            color: #0F172A;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.88em;
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Tipografía de contenido */
+        .prose-usta p { margin-bottom: 1rem; line-height: 1.75; }
+        .prose-usta h3 { color: #ED1E79; font-weight: 600; font-size: 1.2rem; margin: 1.8rem 0 0.6rem; }
+        .prose-usta h4 { color: #001A4D; font-weight: 600; font-size: 1.05rem; margin: 1.4rem 0 0.4rem; }
+        .prose-usta ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+        .prose-usta ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
+        .prose-usta li { margin-bottom: 0.35rem; line-height: 1.65; }
+        .prose-usta strong { color: #0F172A; }
+        .prose-usta table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 1rem 0; }
+        .prose-usta th { background: #F5F0FA; color: #3D008D; text-align: left; padding: 0.6rem 0.8rem; border: 1px solid #E2E8F0; }
+        .prose-usta td { padding: 0.6rem 0.8rem; border: 1px solid #E2E8F0; vertical-align: top; }
+
+        /* Ecuación destacada */
+        .eq-block {
+            background: #FAF8FF;
+            border: 1px solid rgba(61, 0, 141, 0.12);
+            border-radius: 12px;
+            padding: 0.6rem 1rem;
+            overflow-x: auto;
+        }
+
+        /* Botón flotante "Volver arriba" */
+        .scroll-top-btn {
+            position: fixed;
+            right: 1.5rem;
+            bottom: 1.5rem;
+            z-index: 50;
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .scroll-top-btn.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        /* Línea de tiempo (timeline) — nodo y línea vertical */
+        .timeline-line {
+            position: relative;
+            border-left: 2px solid rgba(61, 0, 141, 0.3);
+            margin-left: 0.75rem;
+            padding-left: 1.75rem;
+        }
+        .timeline-node {
+            position: absolute;
+            left: -2.05rem;
+            top: 0.25rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+        /* ============================================================
+           TIPOGRAFÍA MATEMÁTICA (MathJax) — re-tipografiado al cambiar
+        ============================================================ */
+        const typesetMath = (retries = 25) => {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                try { window.MathJax.typesetClear && window.MathJax.typesetClear(); } catch (e) {}
+                window.MathJax.typesetPromise().catch(() => {});
+            } else if (retries > 0) {
+                setTimeout(() => typesetMath(retries - 1), 200);
+            }
+        };
+        const useTypeset = (ref, deps) => {
+            useEffect(() => {
+                const t = setTimeout(() => {
+                    if (ref.current && window.MathJax && window.MathJax.typesetPromise) {
+                        window.MathJax.typesetPromise([ref.current]).catch(() => {});
+                    }
+                }, 40);
+                return () => clearTimeout(t);
+            }, deps);
+        };
+
+        /* ============================================================
+           HOOK: useLocalStorage — persistencia del progreso
+        ============================================================ */
+        const STORAGE_KEY = 'usta-m1-progress';
+
+        const defaultProgress = () => ({
+            capsVistos:    { 1: false, 2: false, 3: false, 4: false, 5: false },
+            mcqAciertos:   { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+            videosVistos:  { seccion: false, profundizacion: false },
+            guia1Pasos:    { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false },
+            act1Pasos:     { 1: false, 2: false, 3: false, 4: false, 5: false },
+            guia1Entregada:  false,
+            act1Entregada:   false,
+            resetAt: new Date().toISOString(),
+        });
+
+        const useLocalProgress = () => {
+            const [progress, setProgress] = useState(() => {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (!raw) return defaultProgress();
+                    const parsed = JSON.parse(raw);
+                    // Mezcla profunda para tolerar keys nuevas en versiones futuras
+                    return { ...defaultProgress(), ...parsed,
+                        capsVistos:   { ...defaultProgress().capsVistos,   ...(parsed.capsVistos   || {}) },
+                        mcqAciertos:  { ...defaultProgress().mcqAciertos,  ...(parsed.mcqAciertos  || {}) },
+                        videosVistos: { ...defaultProgress().videosVistos, ...(parsed.videosVistos || {}) },
+                        guia1Pasos:   { ...defaultProgress().guia1Pasos,   ...(parsed.guia1Pasos   || {}) },
+                        act1Pasos:    { ...defaultProgress().act1Pasos,    ...(parsed.act1Pasos    || {}) },
+                    };
+                } catch (e) { return defaultProgress(); }
+            });
+            useEffect(() => {
+                try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch (e) {}
+            }, [progress]);
+            const update = useCallback((patch) => {
+                setProgress(prev => ({ ...prev, ...(typeof patch === 'function' ? patch(prev) : patch) }));
+            }, []);
+            const reset = useCallback(() => setProgress(defaultProgress()), []);
+            return [progress, update, reset];
+        };
+
+        /* ============================================================
+           CÁLCULO DE PROGRESO GLOBAL (0–100)
+        ============================================================ */
+        const computeProgress = (p) => {
+            // 5 caps (10% c/u) + 2 videos (10% c/u) + pasos Guía (10%)
+            // + pasos Act (10%) + entregas (10%) = 100%
+            let pct = 0;
+            for (let i = 1; i <= 5; i++) if (p.capsVistos[i]) pct += 10;
+            if (p.videosVistos.seccion)       pct += 5;
+            if (p.videosVistos.profundizacion) pct += 5;
+            const g1 = Object.values(p.guia1Pasos).filter(Boolean).length;
+            pct += (g1 / 6) * 10;
+            const a1 = Object.values(p.act1Pasos).filter(Boolean).length;
+            pct += (a1 / 5) * 10;
+            if (p.guia1Entregada) pct += 5;
+            if (p.act1Entregada)  pct += 5;
+            return Math.min(100, Math.round(pct));
+        };
+
+        /* ============================================================
+           SUBCOMPONENTES UI
+        ============================================================ */
+
+        /* Box — callout (info / tip / warn / danger / eth) */
+        const Box = ({ type = 'info', label, children }) => {
+            const styles = {
+                info:   { border: '#3D008D', bg: '#F5F0FA', label: '#3D008D', icon: 'fa-circle-info' },
+                tip:    { border: '#15803D', bg: '#F0FDF4', label: '#15803D', icon: 'fa-lightbulb' },
+                warn:   { border: '#B45309', bg: '#FFFBEB', label: '#B45309', icon: 'fa-triangle-exclamation' },
+                danger: { border: '#B91C1C', bg: '#FEF2F2', label: '#B91C1C', icon: 'fa-circle-exclamation' },
+                eth:    { border: '#0E7490', bg: '#ECFEFF', label: '#0E7490', icon: 'fa-scale-balanced' },
+            }[type] || { border: '#3D008D', bg: '#F5F0FA', label: '#3D008D', icon: 'fa-circle-info' };
+            return (
+                <div className="rounded-xl px-5 py-4 my-4 border-l-4" style={{ borderColor: styles.border, background: styles.bg }}>
+                    {label && (
+                        <span className="inline-flex items-center gap-2 text-[0.7rem] uppercase tracking-wider font-bold rounded mb-2 px-2 py-0.5 text-white" style={{ background: styles.label }}>
+                            <i className={`fas ${styles.icon}`}></i>{label}
+                        </span>
+                    )}
+                    <div className="text-gray-700 leading-relaxed text-[0.95rem]">{children}</div>
+                </div>
+            );
+        };
+
+        /* Accordion — apertura/cierre de un panel */
+        const Accordion = ({ items, multi = false }) => {
+            const [open, setOpen] = useState(multi ? new Set() : null);
+            const ref = useRef(null);
+            useTypeset(ref, [open]);
+            const toggle = (i) => {
+                if (multi) {
+                    setOpen(prev => {
+                        const s = new Set(prev);
+                        s.has(i) ? s.delete(i) : s.add(i);
+                        return s;
+                    });
+                } else {
+                    setOpen(open === i ? null : i);
+                }
+            };
+            return (
+                <div ref={ref} className="space-y-2 my-5">
+                    {items.map((it, i) => {
+                        const isOpen = multi ? open.has(i) : open === i;
+                        return (
+                            <div key={i} className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+                                <button onClick={() => toggle(i)}
+                                    className="w-full flex justify-between items-center px-4 py-3 hover:bg-gray-50 text-left font-semibold text-navy transition-colors">
+                                    <span className="flex items-center gap-2">
+                                        {it.icon && <i className={`fas ${it.icon} text-secondary text-sm`}></i>}
+                                        {it.titulo}
+                                    </span>
+                                    <i className={`fas fa-chevron-down transition-transform duration-300 text-secondary ${isOpen ? 'rotate-180' : ''}`}></i>
+                                </button>
+                                {isOpen && (
+                                    <div className="px-4 py-3 bg-gray-50 text-gray-700 text-[0.92rem] leading-relaxed animate-fade-in border-t border-gray-100">
+                                        {it.contenido}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            );
+        };
+
+        /* MCQ — opción múltiple con retroalimentación */
+        const MCQ = ({ pregunta, opciones, multiple = false }) => {
+            const [sel, setSel] = useState([]);
+            const [checked, setChecked] = useState(false);
+            const toggle = (i) => {
+                if (checked) return;
+                if (multiple) setSel(s => s.includes(i) ? s.filter(x => x !== i) : [...s, i]);
+                else setSel([i]);
+            };
+            const correctSet = opciones.map((o, i) => o.correcta ? i : -1).filter(i => i >= 0);
+            const acierto = sel.length === correctSet.length && sel.every(i => opciones[i].correcta);
+            const ref = useRef(null);
+            useTypeset(ref, [checked]);
+            return (
+                <div ref={ref} className="my-5 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                    <div className="flex items-start gap-2 font-semibold text-navy mb-1">
+                        <i className="fas fa-circle-question text-secondary mt-1"></i>
+                        <span>{pregunta}</span>
+                    </div>
+                    {multiple && <p className="text-xs text-gray-400 mb-2 ml-6">Selección múltiple</p>}
+                    <div className="space-y-2 mt-3">
+                        {opciones.map((o, i) => {
+                            const isSel = sel.includes(i);
+                            let cls = 'border-gray-200 hover:border-primary/50';
+                            if (checked) {
+                                if (o.correcta) cls = 'border-green-500 bg-green-50';
+                                else if (isSel) cls = 'border-red-400 bg-red-50';
+                                else cls = 'border-gray-200 opacity-70';
+                            } else if (isSel) cls = 'border-secondary bg-pink-50';
+                            return (
+                                <button key={i} onClick={() => toggle(i)} disabled={checked}
+                                    className={`w-full text-left px-4 py-2.5 rounded-lg border text-[0.92rem] flex items-center gap-3 transition-all ${cls}`}>
+                                    <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${isSel ? 'usta-gradient text-white' : 'bg-gray-100 text-gray-500'}`}>
+                                        {String.fromCharCode(97 + i)}
+                                    </span>
+                                    <span className="flex-1 text-gray-700">{o.texto}</span>
+                                    {checked && o.correcta && <i className="fas fa-check text-green-600"></i>}
+                                    {checked && isSel && !o.correcta && <i className="fas fa-xmark text-red-500"></i>}
+                                </button>
+                            );
+                        })}
+                    </div>
+                    <div className="mt-3 flex items-center gap-3 flex-wrap">
+                        {!checked
+                            ? <button onClick={() => sel.length && setChecked(true)} disabled={!sel.length}
+                                className="text-sm font-bold px-4 py-1.5 rounded-full text-white usta-gradient disabled:opacity-40">Comprobar</button>
+                            : <button onClick={() => { setChecked(false); setSel([]); }}
+                                className="text-sm font-bold px-4 py-1.5 rounded-full border border-primary text-primary hover:bg-primary/5">Reintentar</button>}
+                        {checked && (
+                            <span className={`text-sm font-bold ${acierto ? 'text-green-600' : 'text-red-500'}`}>
+                                <i className={`fas ${acierto ? 'fa-circle-check' : 'fa-circle-xmark'} mr-1`}></i>
+                                {acierto ? '¡Correcto!' : 'Revisa la explicación'}
+                            </span>
+                        )}
+                    </div>
+                    {checked && (() => {
+                        const justifs = opciones.filter(o => o.correcta && o.justificacion).map(o => o.justificacion);
+                        if (!justifs.length) return null;
+                        return (
+                            <div className="mt-3 text-[0.9rem] text-gray-700 bg-bg rounded-lg p-3 border-l-4 animate-fade-in" style={{ borderColor: '#FDB913' }}>
+                                <strong>Explicación: </strong>{justifs.join(' ')}
+                            </div>
+                        );
+                    })()}
+                </div>
+            );
+        };
+
+        /* Tabs — alternar entre paneles (con accent lookup, no template strings) */
+        const Tabs = ({ tabs, accent = 'primary' }) => {
+            const [active, setActive] = useState(0);
+            const contentRef = useRef(null);
+            useTypeset(contentRef, [active]);
+            const accentClass = {
+                primary:   'text-primary',
+                secondary: 'text-secondary',
+                navy:      'text-navy',
+                gold:      'text-gold',
+            }[accent] || 'text-primary';
+            return (
+                <div className="my-5">
+                    <div className="flex flex-wrap gap-1 border-b border-gray-200">
+                        {tabs.map((t, i) => (
+                            <button key={i} onClick={() => setActive(i)}
+                                className={`px-4 py-2 text-sm font-semibold rounded-t-lg transition-colors ${active === i
+                                    ? `${accentClass} border-b-2 border-secondary bg-white`
+                                    : 'text-gray-500 hover:text-primary'}`}>
+                                {t.icon && <i className={`fas ${t.icon} mr-2`}></i>}
+                                {t.label}
+                            </button>
+                        ))}
+                    </div>
+                    <div ref={contentRef} className="p-4 md:p-5 bg-white border border-t-0 border-gray-200 rounded-b-lg animate-fade-in text-[0.95rem] text-gray-700">
+                        <div key={active}>{tabs[active].content}</div>
+                    </div>
+                </div>
+            );
+        };
+
+        /* ProgressBar — barra de progreso segmentada */
+        const ProgressBar = ({ value = 0, label = 'Progreso', showPct = true, segments = null }) => {
+            return (
+                <div className="w-full">
+                    <div className="flex justify-between items-center mb-1.5">
+                        <span className="text-sm font-semibold text-navy">{label}</span>
+                        {showPct && <span className="text-sm font-bold text-primary">{value}%</span>}
+                    </div>
+                    <div className="w-full h-3 rounded-full bg-gray-200 overflow-hidden shadow-inner">
+                        <div className="h-full usta-gradient transition-all duration-500 ease-out"
+                            style={{ width: `${value}%` }}></div>
+                    </div>
+                    {segments && (
+                        <div className="mt-2 flex flex-wrap gap-2 text-[0.72rem]">
+                            {segments.map((s, i) => (
+                                <span key={i} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full ${s.done ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                                    <i className={`fas ${s.done ? 'fa-circle-check' : 'fa-circle'}`}></i>{s.label}
+                                </span>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        /* Checklist — lista de tareas marcables (persistente) */
+        const Checklist = ({ items, value, onChange, titulo, icono = 'fa-list-check' }) => {
+            const doneCount = items.filter((_, i) => value[i + 1] || value[String(i + 1)]).length;
+            return (
+                <div className="bg-white border border-gray-200 rounded-xl p-4">
+                    {titulo && (
+                        <div className="flex items-center gap-2 mb-3 text-navy font-semibold text-sm">
+                            <i className={`fas ${icono} text-secondary`}></i>{titulo}
+                            <span className="ml-auto text-xs text-gray-400">{doneCount}/{items.length}</span>
+                        </div>
+                    )}
+                    <ul className="space-y-2">
+                        {items.map((it, i) => {
+                            const k = i + 1;
+                            const checked = !!value[k];
+                            return (
+                                <li key={i}>
+                                    <label className={`flex items-start gap-2.5 cursor-pointer p-2 rounded-lg transition-colors ${checked ? 'bg-green-50/60' : 'hover:bg-gray-50'}`}>
+                                        <input type="checkbox" checked={checked}
+                                            onChange={(e) => onChange(k, e.target.checked)}
+                                            className="mt-0.5 w-4 h-4 accent-secondary cursor-pointer flex-shrink-0" />
+                                        <span className={`text-[0.9rem] leading-snug ${checked ? 'text-gray-400 line-through' : 'text-gray-700'}`}>
+                                            {it}
+                                        </span>
+                                    </label>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </div>
+            );
+        };
+
+        /* Timeline — línea de tiempo de eventos */
+        const Timeline = ({ eventos }) => (
+            <div className="timeline-line my-5 space-y-5">
+                {eventos.map((e, i) => (
+                    <div key={i} className="relative">
+                        <span className="timeline-node usta-gradient"></span>
+                        <div className="flex flex-wrap items-baseline gap-2">
+                            {e.fecha && <span className="text-xs font-bold text-secondary uppercase tracking-wide">{e.fecha}</span>}
+                            {e.hora && <span className="text-xs text-gray-500"><i className="far fa-clock mr-1"></i>{e.hora}</span>}
+                            {e.tipo && (
+                                <span className="text-[0.65rem] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded text-white"
+                                    style={{ background: e.tipoColor || '#3D008D' }}>
+                                    {e.tipo}
+                                </span>
+                            )}
+                        </div>
+                        <h4 className="text-navy font-semibold text-[1rem] mt-1">{e.titulo}</h4>
+                        {e.desc && <p className="text-[0.88rem] text-gray-600 mt-1 leading-relaxed">{e.desc}</p>}
+                        {e.link && (
+                            <a href={e.link} target="_blank" rel="noopener"
+                                className="inline-flex items-center gap-1 mt-2 text-xs font-semibold text-primary hover:text-secondary transition-colors">
+                                <i className="fas fa-external-link-alt"></i>{e.linkLabel || 'Enlace'}
+                            </a>
+                        )}
+                    </div>
+                ))}
+            </div>
+        );
+
+        /* Stat — caja numérica grande */
+        const Stat = ({ value, label, sub, icon, color = 'primary' }) => (
+            <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between mb-2">
+                    {icon && (
+                        <div className={`p-2 rounded-lg text-white`} style={{ background: color === 'primary' ? '#3D008D' : color === 'secondary' ? '#ED1E79' : color === 'gold' ? '#FDB913' : '#001A4D' }}>
+                            <i className={`fas ${icon}`}></i>
+                        </div>
+                    )}
+                </div>
+                <div className={`text-3xl font-extrabold`} style={{ color: color === 'primary' ? '#3D008D' : color === 'secondary' ? '#ED1E79' : color === 'gold' ? '#B45309' : '#001A4D' }}>
+                    {value}
+                </div>
+                <div className="text-sm font-semibold text-gray-700 mt-1">{label}</div>
+                {sub && <div className="text-xs text-gray-500 mt-0.5">{sub}</div>}
+            </div>
+        );
+
+        /* Tag — chip */
+        const Tag = ({ children, color = 'primary', icon }) => {
+            const colors = {
+                primary:   { bg: '#F5F0FA', fg: '#3D008D' },
+                secondary: { bg: '#FCE7F1', fg: '#BE185D' },
+                gold:      { bg: '#FEF3C7', fg: '#B45309' },
+                navy:      { bg: '#DBEAFE', fg: '#001A4D' },
+                green:     { bg: '#DCFCE7', fg: '#15803D' },
+                gray:      { bg: '#F1F5F9', fg: '#475569' },
+            }[color] || { bg: '#F5F0FA', fg: '#3D008D' };
+            return (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[0.72rem] font-semibold"
+                    style={{ background: colors.bg, color: colors.fg }}>
+                    {icon && <i className={`fas ${icon} text-[0.65rem]`}></i>}
+                    {children}
+                </span>
+            );
+        };
+
+        /* ScrollTopButton — botón flotante "Volver arriba" */
+        const ScrollTopButton = () => {
+            const [visible, setVisible] = useState(false);
+            useEffect(() => {
+                const onScroll = () => setVisible(window.scrollY > 400);
+                window.addEventListener('scroll', onScroll, { passive: true });
+                onScroll();
+                return () => window.removeEventListener('scroll', onScroll);
+            }, []);
+            const goTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+            return (
+                <button onClick={goTop} aria-label="Volver arriba"
+                    className={`scroll-top-btn usta-gradient text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform ${visible ? 'visible' : ''}`}>
+                    <i className="fas fa-arrow-up"></i>
+                </button>
+            );
+        };
+
+        /* ============================================================
+           URL del aula virtual Teams (constante, mismo enlace los 4 encuentros)
+        ============================================================ */
+        const TEAMS_URL = 'https://teams.microsoft.com/l/meetup-join/19%3ameeting_MjkwMTczNTMtYmIwNS00NzQ5LThlMjItNWQ0NjI1NjM5NjE0%40thread.v2/0?context=%7b%22Tid%22%3a%22c1406a49-4b6f-4747-9571-871250615680%22%2c%22Oid%22%3a%22f0e54d22-6d4a-4b96-a5fb-9c84c73c3d29%22%7d';
+
+        /* ============================================================
+           DATOS PEDAGÓGICOS (literales, extraídos de los .md del vault)
+        ============================================================ */
+
+        /* 5 capítulos del Módulo 1 */
+        const chapters = [
+            {
+                id: 1,
+                num: '01',
+                title: 'Introducción y Contexto Histórico',
+                icon: 'fa-clock-rotate-left',
+                tag: 'tema/historia',
+                badgeColor: 'primary',
+                duracion: '~ 30 min lectura',
+                ra: [
+                    'Comprender los tres ciclos del Deep Learning (1943–1969, 1986–2006, 2006–presente).',
+                    'Diferenciar entre Machine Learning clásico y Deep Learning.',
+                    'Aplicar el árbol de decisión ML clásico vs. DL según tipo y volumen de datos.',
+                    'Reconocer aplicaciones del Deep Learning en Colombia y América Latina.',
+                ],
+                analogia: {
+                    titulo: 'Analogía local: el beneficio del café',
+                    contenido: (
+                        <div>
+                            <p>
+                                Imagine que quiere clasificar automáticamente si un lote de café será
+                                <em> "Grado Exportación"</em> o <em>"Consumo Nacional"</em>. La red neuronal se parece a la cadena
+                                de beneficio del café: una secuencia de etapas (<em>despulpado → fermentación → secado → trilla →
+                                catación</em>) que transforma materia prima "sucia" en un resultado refinado. La capa de entrada
+                                son los datos crudos (altitud, humedad, horas de sol, % broca); las capas ocultas separan,
+                                combinan y refinan características; la capa de salida emite la decisión final del "maestro catador".
+                            </p>
+                            <Box type="tip" label="Idea clave">
+                                <strong>Entrenar la red = encontrar los pesos y sesgos correctos</strong> en cada etapa, igual que
+                                un caficultor aprende con los años las proporciones y los tiempos.
+                            </Box>
+                        </div>
+                    ),
+                },
+                mcq: [
+                    {
+                        pregunta: 'Sobre el perceptrón simple de Rosenblatt (1958), ¿cuál fue su limitación fatal demostrada por Minsky y Papert?',
+                        opciones: [
+                            { texto: 'No podía aprender a sumar números.', correcta: false },
+                            { texto: 'No podía resolver problemas no linealmente separables como el XOR.', correcta: true,
+                              justificacion: 'Un perceptrón de una sola capa traza una frontera lineal; el XOR requiere una frontera curva, lo que demuestra la necesidad de capas ocultas.' },
+                            { texto: 'Requería demasiada memoria RAM.', correcta: false },
+                            { texto: 'Solo funcionaba con números positivos.', correcta: false },
+                        ],
+                    },
+                    {
+                        pregunta: '¿Cuál de los siguientes NO es un criterio para decidir entre ML clásico y Deep Learning?',
+                        opciones: [
+                            { texto: 'El tipo de datos (tabular vs. imagen/texto).', correcta: false },
+                            { texto: 'La cantidad de datos etiquetados disponibles.', correcta: false },
+                            { texto: 'La marca del fabricante de la GPU.', correcta: true,
+                              justificacion: 'La marca de la GPU no es un criterio técnico de decisión; los criterios reales son tipo de datos, volumen, interpretabilidad, recursos y tiempo.' },
+                            { texto: 'La necesidad o no de interpretabilidad.', correcta: false },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 2,
+                num: '02',
+                title: 'El Perceptrón Multicapa (MLP) y la Arquitectura',
+                icon: 'fa-network-wired',
+                tag: 'tema/mlp',
+                badgeColor: 'secondary',
+                duracion: '~ 25 min lectura',
+                ra: [
+                    'Describir la anatomía de un MLP: capas de entrada, ocultas y de salida.',
+                    'Explicar el Teorema de Aproximación Universal con la analogía de las "piezas de Lego".',
+                    'Seleccionar la función de activación adecuada para cada capa.',
+                    'Justificar el rol de las capas ocultas en la extracción jerárquica de características.',
+                ],
+                analogia: {
+                    titulo: 'Analogía local: la oficina de subsidios del Ministerio',
+                    contenido: (
+                        <div>
+                            <p>
+                                Imagine la aprobación de un subsidio agrícola en una oficina gubernamental:
+                            </p>
+                            <ul>
+                                <li><strong>Capa de entrada (ventanilla):</strong> recibe documentos crudos (cédula, escrituras, facturas).</li>
+                                <li><strong>Capas ocultas (analistas técnicos):</strong> procesan los datos y los transforman en conceptos: ¿el predio es legal?, ¿el cultivo es prioritario?, ¿hay riesgo financiero?</li>
+                                <li><strong>Capa de salida (director):</strong> toma la decisión final: otorga o no el subsidio.</li>
+                            </ul>
+                            <p>
+                                Ningún analista por sí solo aprueba el subsidio, pero la cadena de evidencia
+                                que construyen sustenta la decisión del director. <strong>Las capas ocultas no deciden,
+                                pero transforman "papeles" en "conceptos interpretables"</strong>.
+                            </p>
+                        </div>
+                    ),
+                },
+                mcq: [
+                    {
+                        pregunta: 'El Teorema de Aproximación Universal afirma que:',
+                        opciones: [
+                            { texto: 'Una red con al menos una capa oculta y suficientes neuronas puede aproximar cualquier función continua.', correcta: true,
+                              justificacion: 'Cada neurona aporta un pequeño "bloque" no lineal; sumando suficientes se reconstruye la topografía de cualquier función continua.' },
+                            { texto: 'Toda red neuronal aprende sin errores en un solo paso.', correcta: false },
+                            { texto: 'Solo las redes recurrentes pueden aproximar funciones.', correcta: false },
+                            { texto: 'Las redes necesitan más de 10 capas para ser "profundas".', correcta: false },
+                        ],
+                    },
+                    {
+                        pregunta: '¿Por qué ReLU se convirtió en la activación estándar de las capas ocultas? (seleccione 2)',
+                        multiple: true,
+                        opciones: [
+                            { texto: 'Porque evita el desvanecimiento del gradiente en regiones positivas (derivada = 1).', correcta: true,
+                              justificacion: 'Su derivada constante (= 1 para z>0) evita que el gradiente se encoja en redes profundas.' },
+                            { texto: 'Porque es computacionalmente eficiente: solo compara con cero.', correcta: true,
+                              justificacion: 'max(0, z) es básicamente gratuito frente a sigmoid/tanh que requieren exponenciales.' },
+                            { texto: 'Porque normaliza la salida entre 0 y 1.', correcta: false },
+                            { texto: 'Porque es lineal y simplifica todas las matemáticas.', correcta: false },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 3,
+                num: '03',
+                title: 'La Matemática del Error y la Optimización',
+                icon: 'fa-arrow-trend-down',
+                tag: 'tema/optimizacion',
+                badgeColor: 'gold',
+                duracion: '~ 35 min lectura',
+                ra: [
+                    'Cuantificar el error con funciones de costo: MSE para regresión y BCE para clasificación.',
+                    'Aplicar el descenso del gradiente y sus variantes (batch, mini-batch, SGD).',
+                    'Seleccionar la tasa de aprendizaje y entender su impacto en la convergencia.',
+                    'Identificar el rol del momentum y de optimizadores adaptativos (Adam, RMSProp).',
+                ],
+                analogia: {
+                    titulo: 'Analogía andina: el excursionista en el Páramo de Letras',
+                    contenido: (
+                        <div>
+                            <p>
+                                Se encuentra a 3.677 m de altitud, de noche, con niebla tan densa que no ve a un metro de distancia.
+                                El objetivo es descender al valle donde está el pueblo. Como no puede ver el valle,
+                                <strong> tantea el suelo con los pies</strong> y avanza iterativamente en la dirección de mayor
+                                pendiente descendente.
+                            </p>
+                            <Box type="warn" label="Tasa de aprendizaje (η): cuestión de vida o muerte">
+                                <ul className="list-disc pl-5">
+                                    <li><strong>η muy alta (saltos de 50 m):</strong> se pasa del valle, sube la ladera opuesta, diverge.</li>
+                                    <li><strong>η muy baja (pasos de hormiga):</strong> muere de hipotermia antes de converger.</li>
+                                    <li><strong>η ideal:</strong> pasos seguros pero firmes, que se reducen cuando el terreno se aplana.</li>
+                                </ul>
+                            </Box>
+                        </div>
+                    ),
+                },
+                mcq: [
+                    {
+                        pregunta: '¿Qué función de costo es apropiada para predecir MILÍMETROS de lluvia mensual (regresión)?',
+                        opciones: [
+                            { texto: 'MSE (Error Cuadrático Medio): penaliza el cuadrado de la diferencia.', correcta: true,
+                              justificacion: 'MSE es el estándar para regresión: penaliza desproporcionadamente los errores grandes (útil para alertas tempranas de inundación).' },
+                            { texto: 'Binary Cross-Entropy (BCE).', correcta: false,
+                              justificacion: 'BCE se usa para clasificación binaria (probabilidades entre 0 y 1), no para valores continuos.' },
+                            { texto: 'Softmax.', correcta: false,
+                              justificacion: 'Softmax es una función de activación para clasificación multiclase, no una función de costo.' },
+                        ],
+                    },
+                    {
+                        pregunta: 'Si la tasa de aprendizaje es demasiado alta, el descenso del gradiente…',
+                        opciones: [
+                            { texto: 'Desciende muy lento (convergencia lenta).', correcta: false },
+                            { texto: 'Da saltos tan grandes que pasa por encima del valle y sube la ladera opuesta (divergencia).', correcta: true,
+                              justificacion: 'El algoritmo "rebota" entre las paredes de la función de costo, aumentando el error en lugar de reducirlo.' },
+                            { texto: 'Encuentra el óptimo global de inmediato.', correcta: false },
+                            { texto: 'Se queda atrapado en un mínimo local sin moverse.', correcta: false },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 4,
+                num: '04',
+                title: 'Retropropagación (Backpropagation)',
+                icon: 'fa-diagram-project',
+                tag: 'tema/backpropagation',
+                badgeColor: 'primary',
+                duracion: '~ 30 min lectura',
+                ra: [
+                    'Comprender el "problema de asignación de crédito" en redes profundas.',
+                    'Modelar la red como un grafo computacional de operaciones elementales.',
+                    'Aplicar la regla de la cadena del cálculo para propagar gradientes hacia atrás.',
+                    'Usar autograd de PyTorch para calcular gradientes automáticamente.',
+                ],
+                analogia: {
+                    titulo: 'Analogía local: el retraso del envío de flores a Miami',
+                    contenido: (
+                        <div>
+                            <p>
+                                Un envío de flores a Miami para San Valentín se retrasó y generó pérdidas. ¿De quién es la culpa?
+                            </p>
+                            <ul>
+                                <li>¿Del <strong>conductor de la última milla</strong> (capa de salida)?</li>
+                                <li>¿Del <strong>despachador en El Dorado</strong> (capa oculta 2)?</li>
+                                <li>¿Del <strong>agrónomo que demoró la cosecha en la sabana</strong> (capa oculta 1)?</li>
+                                <li>¿O de una <strong>política mal diseñada</strong> (pesos iniciales)?</li>
+                            </ul>
+                            <p>
+                                En deep learning esto se llama el <strong>problema de asignación de crédito</strong>: la red falló,
+                                pero hay miles de neuronas involucradas. <em>¿Cuáles deben ajustar sus pesos y en qué medida?</em>
+                            </p>
+                            <Box type="tip" label={'La regla de la cadena: el «efecto dominó»'}>
+                                <p>
+                                    Imagine un rumor en una oficina: si un colega distorsiona la información al pasarla al jefe,
+                                    el impacto final = (cuánto distorsiona el colega) × (intensidad del mensaje original).
+                                    Multiplicando derivadas locales en cadena, la capa final reparte la responsabilidad hacia atrás.
+                                </p>
+                            </Box>
+                        </div>
+                    ),
+                },
+                mcq: [
+                    {
+                        pregunta: 'Si el gradiente de un peso es exactamente cero, entonces…',
+                        opciones: [
+                            { texto: 'Cambiar ese peso no afecta (localmente) el error: estamos en un punto estacionario.', correcta: true,
+                              justificacion: 'Gradiente cero = pendiente plana; mover el peso no sube ni baja el error, no hay dirección local de mejora.' },
+                            { texto: 'El peso es el más importante de la red.', correcta: false },
+                            { texto: 'La red ya alcanzó el óptimo global con certeza.', correcta: false },
+                            { texto: 'Hay un error de hardware.', correcta: false },
+                        ],
+                    },
+                    {
+                        pregunta: '¿Por qué es necesario llamar <code className="inline-code">optimizer.zero_grad()</code> antes de cada backward?',
+                        opciones: [
+                            { texto: 'Para reiniciar los pesos a valores aleatorios.', correcta: false },
+                            { texto: 'Para liberar RAM de la GPU.', correcta: false },
+                            { texto: 'Para evitar que los gradientes del lote actual se sumen a los acumulados de lotes anteriores.', correcta: true,
+                              justificacion: 'PyTorch acumula gradientes por defecto; sin limpiarlos, se corrompería la dirección de descenso (se sumarían derivadas de iteraciones pasadas).' },
+                            { texto: 'Para ejecutar el forward pass.', correcta: false },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 5,
+                num: '05',
+                title: 'Ajuste, Evaluación y Ética de Modelos',
+                icon: 'fa-scale-balanced',
+                tag: 'tema/regularizacion',
+                badgeColor: 'secondary',
+                duracion: '~ 40 min lectura',
+                ra: [
+                    'Identificar el sobreajuste (overfitting) y distinguirlo del subajuste.',
+                    'Aplicar técnicas de regularización: L1, L2, Dropout, Early Stopping.',
+                    'Comprender y aplicar Batch Normalization entre capas.',
+                    'Evaluar modelos con matriz de confusión y elegir métricas éticamente alineadas.',
+                    'Reconocer las implicaciones éticas del despliegue de modelos en contextos colombianos.',
+                ],
+                analogia: {
+                    titulo: 'Analogías locales: el ICFES, la Selección Colombia y el ajiaco santafereño',
+                    contenido: (
+                        <div>
+                            <Box type="warn" label="El estudiante y el ICFES">
+                                <p>
+                                    Un estudiante que memoriza el cuadernillo del año pasado saca puntaje perfecto en el simulacro
+                                    pero fracasa en el examen real: <strong>memorizó en lugar de aprender</strong>. En Deep Learning
+                                    queremos emular al Estudiante B (generalización), no al A (memorización).
+                                </p>
+                            </Box>
+                            <Box type="tip" label="La Selección Colombia y el dropout">
+                                <p>
+                                    Imagine la Selección Colombia con una "estrella" que resuelve todo. Si la estrella falta el día
+                                    del partido, el equipo colapsa. <strong>El dropout apaga neuronas al azar en cada iteración</strong>
+                                    para que ninguna neurona se convierta en "estrella" y todas aprendan a contribuir.
+                                </p>
+                            </Box>
+                            <Box type="info" label="El ajiaco santafereño y la Batch Normalization">
+                                <p>
+                                    La Batch Normalization actúa como el protocolo de homogeneización del ajiaco: la papa sabanera,
+                                    la pastusa y la criolla llegan con tamaños distintos cada lote. Si no se estandarizan (cortar en
+                                    cubos uniformes), el proceso de cocción es inestable. <strong>Normalizar las entradas a cada capa
+                                    estabiliza el entrenamiento</strong> y permite tasas de aprendizaje más altas.
+                                </p>
+                            </Box>
+                        </div>
+                    ),
+                },
+                mcq: [
+                    {
+                        pregunta: 'Un modelo obtiene 98 % de accuracy en Medellín pero solo 55 % en Cúcuta. ¿Qué está ocurriendo?',
+                        opciones: [
+                            { texto: 'Underfitting (subajuste).', correcta: false },
+                            { texto: 'Overfitting: el modelo memorizó el "ruido" de Medellín en vez de conceptos generales.', correcta: true,
+                              justificacion: 'La brecha grande entre entrenamiento (alto) y prueba (bajo) es la firma del sobreajuste.' },
+                            { texto: 'Generalización correcta: el modelo funciona diferente en cada ciudad.', correcta: false },
+                            { texto: 'Error de hardware en Cúcuta.', correcta: false },
+                        ],
+                    },
+                    {
+                        pregunta: '¿Por qué Dropout ayuda contra el overfitting? (seleccione 2)',
+                        multiple: true,
+                        opciones: [
+                            { texto: 'Al apagar neuronas al azar evita depender de una "neurona estrella".', correcta: true,
+                              justificacion: 'Rompe la co-adaptación frágil entre neuronas, obligando a la red a aprender patrones distribuidos.' },
+                            { texto: 'Obliga a aprender representaciones redundantes y distribuidas.', correcta: true,
+                              justificacion: 'Si una neurona falla, otras pueden compensar: la red se vuelve robusta.' },
+                            { texto: 'Duplica las imágenes existentes en el dataset.', correcta: false },
+                            { texto: 'Elimina permanentemente neuronas con pesos negativos.', correcta: false },
+                        ],
+                    },
+                    {
+                        pregunta: 'Si la curva de validación sube desde la época 50 mientras la de entrenamiento sigue bajando, lo correcto es…',
+                        opciones: [
+                            { texto: 'Entrenar 1.000 épocas más, ya que el modelo seguirá mejorando.', correcta: false },
+                            { texto: 'Implementar Early Stopping, guardando los pesos de la época 50.', correcta: true,
+                              justificacion: 'La "U" invertida en validación es la firma del overfitting; Early Stopping detiene justo antes de que el modelo empiece a memorizar ruido.' },
+                            { texto: 'Eliminar el conjunto de validación para simplificar.', correcta: false },
+                            { texto: 'Aumentar la tasa de aprendizaje.', correcta: false },
+                        ],
+                    },
+                ],
+            },
+        ];
+
+        /* 2 actividades evaluativas */
+        const activities = {
+            guia1: {
+                tipo: 'guia',
+                titulo: 'Guía de Profundización 1: Del Error al Aprendizaje',
+                peso: 5,
+                horas: 8,
+                desglose: '1 h directo · 1 h indirecto · 6 h autónomo',
+                entregable: 'Foro + escrito reflexivo (500–700 palabras + 2 réplicas)',
+                caso: 'Hospital público colombiano: IA entrenada con datos de Bogotá/Medellín/Cali desplegada en costa Caribe y Amazonas. Predice "bajo riesgo" a pacientes graves.',
+                pasos: [
+                    'Visualización inicial: vea el video de StatQuest sobre gradient descent y anote conceptos clave.',
+                    'Lectura crítica: lea el Capítulo 8 del Deep Learning Book (Goodfellow) y el artículo de Rajkomar et al. sobre equidad en IA médica.',
+                    'Análisis del caso: lea el caso del hospital y responda 5 preguntas orientadoras (diagnóstico, validación, ética).',
+                    'Experimentación con TensorFlow Playground: pruebe learning rates extremos y overfitting vs. generalización.',
+                    'Construya su respuesta reflexiva con tesis, evidencia, dimensión ética y conclusión (APA 7.ª).',
+                    'Revisión final: verifique citación APA, ortografía y pensamiento propio (no solo paráfrasis).',
+                ],
+                rubrica: [
+                    { criterio: 'Dominio conceptual técnico', peso: 25 },
+                    { criterio: 'Diagnóstico y resolución de problemas', peso: 25 },
+                    { criterio: 'Ética y contexto social colombiano', peso: 20 },
+                    { criterio: 'Calidad argumentativa y formal (APA)', peso: 15 },
+                    { criterio: 'Pensamiento crítico y originalidad', peso: 15 },
+                ],
+                linkMd: 'modulos/modulo-1-fundamentos/actividades/guia-1.md',
+            },
+            act1: {
+                tipo: 'actividad',
+                titulo: 'Actividad 1: "El Guardián del Cafetal" — Diseño, Entrenamiento y Auditoría Ética de un MLP',
+                peso: 20,
+                horas: 40,
+                desglose: '4 h directo · 4 h indirecto · 32 h autónomo',
+                entregable: 'Notebook (.ipynb) + Informe técnico-ético en PDF (máx. 3 págs.) en un .zip o repositorio GitHub',
+                caso: 'Cooperativa cafetera le contrata como ingeniero de IA para clasificar hojas de café (Sana vs. Con Roya) usando datos espectrales del dataset RoCoLe.',
+                pasos: [
+                    'Prepare el entorno: suba el CSV pre-procesado de RoCoLe a Google Colab e importe PyTorch, Pandas, Scikit-Learn y Matplotlib.',
+                    'Diseñe la arquitectura: defina una clase Python con ≥ 2 capas ocultas; justifique ReLU en ocultas y Sigmoid en salida.',
+                    'Configure el entrenamiento: elija Binary Cross-Entropy, optimizador (SGD o Adam) y learning rate inicial; escriba el training loop explícito (5 pasos).',
+                    'Entrene 50 épocas, grafique pérdida de entrenamiento vs. validación, induzca overfitting a propósito y luego corríjalo con Dropout o ajuste de LR.',
+                    'Auditoría ética: responda con base en el Marco Ético de IA Colombia qué sucedería con falsos positivos (gasto innecesario en fungicidas para el caficultor).',
+                ],
+                rubrica: [
+                    { criterio: 'Justificación arquitectónica (capas, activaciones)', peso: 20 },
+                    { criterio: 'Implementación del training loop', peso: 25 },
+                    { criterio: 'Análisis de curvas y diagnóstico de overfitting', peso: 20 },
+                    { criterio: 'Aplicación de regularización (Dropout / L2 / ajuste LR)', peso: 20 },
+                    { criterio: 'Auditoría ética con Marco Ético IA Colombia', peso: 15 },
+                ],
+                linkMd: 'modulos/modulo-1-fundamentos/actividades/actividad-1.md',
+            },
+        };
+
+        /* 2 videos */
+        const videos = [
+            {
+                id: 'seccion',
+                tipo: 'Video de Sección',
+                icono: 'fa-circle-play',
+                titulo: 'Del Error al Aprendizaje: ética y validación en el caso del hospital con dengue',
+                duracion: '4 min 17 s',
+                numEscenas: 12,
+                conceptos: ['Falso Negativo clínico', 'Recall vs. Accuracy', 'Validación cruzada por grupos', 'Marco Ético IA Colombia', 'Transfer Learning como solución'],
+                textoDestacado: [
+                    '"Entrenar ≠ Aprender"',
+                    '"Éxito técnico ≠ Éxito clínico"',
+                    '"El sesgo no es del algoritmo: es del dataset"',
+                ],
+                linkMd: 'modulos/modulo-1-fundamentos/videos/video-seccion-m1.md',
+            },
+            {
+                id: 'profundizacion',
+                tipo: 'Video de Profundización',
+                icono: 'fa-film',
+                titulo: 'Descenso del Gradiente: cómo las redes optimizan sus parámetros',
+                duracion: '10 – 12 min',
+                numEscenas: 7,
+                conceptos: ['Función de pérdida', 'Descenso del gradiente', 'Regla de la cadena', 'Tasa de aprendizaje', 'Optimizadores (Adam, RMSProp)', 'Batches, épocas, curvas'],
+                textoDestacado: [
+                    '"El excursionista tantea el suelo con los pies"',
+                    '"LR alto: rebota; LR bajo: se congela; LR óptimo: converge"',
+                    '"Adelante van los datos; atrás va la responsabilidad del error"',
+                ],
+                linkMd: 'modulos/modulo-1-fundamentos/videos/video-profundizacion-m1.md',
+            },
+        ];
+
+        /* 26 términos del glosario (literales del cap 1-5) */
+        const glossary = [
+            { t: 'Backpropagation',     d: 'Algoritmo que calcula el gradiente del error respecto a cada peso, distribuyendo la "responsabilidad" desde la salida hacia atrás. Analogía: la cadena de mando que lee la bitácora al revés.' },
+            { t: 'Batch (Lote)',        d: 'Subconjunto pequeño de datos (ej. 32 o 64) que la red procesa simultáneamente.' },
+            { t: 'Batch Normalization', d: 'Estandariza las entradas de cada capa durante el entrenamiento. Analogía: protocolo de homogeneización del ajiaco santafereño.' },
+            { t: 'Capa Oculta',         d: 'Capas entre la entrada y la salida que extraen características y aprenden representaciones abstractas. Analogía: los "analistas técnicos" del ministerio.' },
+            { t: 'Curva de Aprendizaje', d: 'Gráfico del error a lo largo del tiempo; vital para diagnosticar la salud del entrenamiento.' },
+            { t: 'Descenso del Gradiente', d: 'Algoritmo de optimización iterativo que minimiza la pérdida ajustando pesos en dirección opuesta a la pendiente. Analogía: el ciclista bajando el Páramo de Letras en la niebla.' },
+            { t: 'Dropout',             d: 'Regularización que "apaga" neuronas al azar durante el entrenamiento para evitar el sobreajuste. Analogía: rotar a las estrellas de la Selección Colombia.' },
+            { t: 'Early Stopping',      d: 'Detener el entrenamiento en la época donde la pérdida de validación alcanza su mínimo, para evitar memorización.' },
+            { t: 'Época (Epoch)',       d: 'Un ciclo completo en el que la red ha visto todos los datos una vez.' },
+            { t: 'Forward Pass',        d: 'Propagación hacia adelante: los datos atraviesan la red desde la entrada hasta la salida, generando una predicción.' },
+            { t: 'Función de Activación', d: 'Función (ReLU, Sigmoide) que introduce no-linealidad, permitiendo aprender patrones complejos. Es el "interruptor" que decide si la neurona dispara.' },
+            { t: 'Función de Pérdida (Loss)', d: 'Cuantifica la diferencia entre predicción y valor real. Analogía: el altímetro del excursionista. Ejemplos: Cross-Entropy, MSE.' },
+            { t: 'Gamma (γ) y Beta (β)', d: 'Parámetros aprendibles de la Batch Normalization que permiten ajustar o "deshacer" la normalización.' },
+            { t: 'Gradiente',           d: 'Vector de derivadas parciales que indica la dirección de máximo aumento de la función de pérdida. El descenso va en la dirección opuesta.' },
+            { t: 'Grid / Random Search', d: 'Métodos para probar combinaciones de hiperparámetros y hallar la mejor.' },
+            { t: 'Hiperparámetro',      d: 'Configuración externa (learning rate, dropout) que no se aprende, se define antes de entrenar.' },
+            { t: 'K-Fold',              d: 'Validación cruzada que divide los datos en K partes; cada parte actúa una vez como validación.' },
+            { t: 'L1 (Lasso)',          d: 'Regularización que elimina características irrelevantes forzando pesos a cero.' },
+            { t: 'L2 (Ridge)',          d: 'Regularización que reduce la influencia excesiva de cualquier característica (pesos bajos pero no cero).' },
+            { t: 'Learning Rate (η)',   d: 'Hiperparámetro que determina el tamaño del paso en cada iteración. Muy alto diverge; muy bajo converge lento.' },
+            { t: 'Matriz de Confusión', d: 'Tabla 2×2 (VP, FP, FN, VN) que desglosa los errores de un clasificador binario. Es la base del Recall, Precision y F1.' },
+            { t: 'Media y Varianza',    d: 'El promedio (centro) y la dispersión (ancho) de los datos. La Batch Norm los usa para estandarizar.' },
+            { t: 'Momentum',            d: 'Técnica de optimización que acumula inercia de gradientes previos para suavizar el zigzagueo del SGD.' },
+            { t: 'Overfitting (Sobreajuste)', d: 'El modelo memoriza el ruido del entrenamiento y pierde capacidad de generalizar. Analogía: memorizar el cuadernillo viejo del ICFES.' },
+            { t: 'Parámetro',           d: 'Valor interno (peso w, sesgo b) que el modelo aprende por sí solo durante el entrenamiento.' },
+            { t: 'ReLU',                d: 'Activación f(x) = max(0, x); eficiente y mitiga el desvanecimiento del gradiente. Deja pasar lo positivo, anula lo negativo.' },
+            { t: 'Regularización',      d: 'Técnicas que previenen el sobreajuste penalizando la complejidad (L1, L2, Dropout, Early Stopping).' },
+            { t: 'SGD (Stochastic Gradient Descent)', d: 'Variante estocástica que actualiza pesos con mini-lotes; trayectorias en zigzag que ayudan a escapar de mínimos locales.' },
+            { t: 'Teorema de Aproximación Universal', d: 'Una red con al menos una capa oculta y suficientes neuronas aproxima cualquier función continua. Analogía: recrear los Andes sumando funciones simples.' },
+            { t: 'Validación Cruzada',  d: 'Evaluar el modelo con múltiples divisiones de los datos (K-Fold, GroupKFold) para evitar sesgos por una sola partición afortunada.' },
+            { t: 'Vanishing Gradient',  d: 'Fenómeno en el que los gradientes se vuelven extremadamente pequeños en capas tempranas, frenando el aprendizaje.' },
+        ];
+
+        /* Recursos (literales del cap 1-5 y bibliografía oficial) */
+        const resources = {
+            bibliografia: [
+                { ref: 'Goodfellow, I., Bengio, Y., & Courville, A. (2016). Deep Learning. MIT Press.', url: 'https://www.deeplearningbook.org' },
+                { ref: 'Géron, A. (2023). Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow (3rd Ed.). O\'Reilly Media.' },
+                { ref: 'Chollet, F. (2021). Deep Learning with Python (2nd Ed.). Manning Publications.' },
+                { ref: 'Zhang, A., Lipton, Z. C., Li, M., & Smola, A. J. (2023). Dive into Deep Learning. Cambridge University Press.', url: 'https://d2l.ai' },
+            ],
+            webgrafia: [
+                { ref: 'Smilkov, D., & Carter, S. TensorFlow Playground: simulación web de redes neuronales.', url: 'https://playground.tensorflow.org' },
+                { ref: 'Starmer, J. (2020). The Essential Main Ideas of Neural Networks (StatQuest).', url: 'https://www.youtube.com/watch?v=CqOfi41LfDw' },
+                { ref: 'Santana Vega, C. (2018). ¿Qué es el Descenso del Gradiente? (Dot CSV).', url: 'https://www.youtube.com/watch?v=A6FiCDoz8_4' },
+                { ref: 'Ministerio de Ciencia (2021). Marco Ético para la IA en Colombia.', url: 'https://minciencias.gov.co/sites/default/files/marco-etico-ia-colombia-2021.pdf' },
+                { ref: 'Khan Academy. Cálculo multivariable: descenso del gradiente y regla de la cadena.', url: 'https://es.khanacademy.org/math/multivariable-calculus/applications-of-multivariable-derivatives/optimizing-multivariable-functions/a/what-is-gradient-descent' },
+            ],
+            datasets: [
+                { ref: 'Parraga-Alava, J. et al. (2019). RoCoLe: A robusta coffee leaf images dataset (v2). Mendeley Data.', url: 'https://data.mendeley.com/datasets/c5yvn32dzg/2' },
+                { ref: 'Instituto Nacional de Salud. Protocolo de vigilancia en salud pública: Dengue.', url: 'https://www.minsalud.gov.co/' },
+                { ref: 'TensorFlow Playground. Simulador interactivo de redes neuronales (sin instalar nada).', url: 'https://playground.tensorflow.org' },
+            ],
+        };
+
+        /* Cronograma (literales del .tex) */
+        const cronograma = {
+            semana1: {
+                titulo: 'Semana 1 — Del perceptrón al MLP',
+                eventos: [
+                    { fecha: '03/06', hora: '19:30 – 21:00', tipo: 'Encuentro 1', tipoColor: '#3D008D', titulo: 'Introducción y Contexto Histórico del Deep Learning', desc: 'McCulloch-Pitts, Perceptrón de Rosenblatt, Inviernos de la IA y Renacimiento moderno.', link: TEAMS_URL, linkLabel: 'Teams Sincrónico' },
+                    { fecha: '04/06', hora: '19:30 – 21:00', tipo: 'Encuentro 2', tipoColor: '#3D008D', titulo: 'El Perceptrón Multicapa (MLP)', desc: 'Teorema de Aproximación Universal, Funciones de Activación (ReLU, Sigmoide, Softmax) y Arquitectura Feedforward.', link: TEAMS_URL, linkLabel: 'Teams Sincrónico' },
+                    { fecha: 'Toda la semana', tipo: 'Asincrónico', tipoColor: '#FDB913', titulo: 'Videoconferencia asincrónica 1 — Descenso del Gradiente', desc: 'Grabación disponible toda la semana. Cubre la intuición del gradiente, regla de la cadena, tasa de aprendizaje y momentum.' },
+                    { fecha: '08/06', tipo: 'Foro', tipoColor: '#15803D', titulo: 'Momento 1: Foro de reflexión', desc: 'Publicación en el foro del campus virtual sobre los fundamentos del Deep Learning.', link: 'https://campus.usta.edu.co', linkLabel: 'Campus Virtual' },
+                ],
+            },
+            semana2: {
+                titulo: 'Semana 2 — Optimización, backprop y entrega',
+                eventos: [
+                    { fecha: '10/06', hora: '19:30 – 21:00', tipo: 'Encuentro 3', tipoColor: '#3D008D', titulo: 'Matemática del Error y Optimización', desc: 'Funciones de Costo (MSE, BCE), Descenso del Gradiente y Tasa de Aprendizaje.', link: TEAMS_URL, linkLabel: 'Teams Sincrónico' },
+                    { fecha: '11/06', hora: '19:30 – 21:00', tipo: 'Encuentro 4', tipoColor: '#3D008D', titulo: 'Retropropagación (Backpropagation)', desc: 'Regla de la Cadena, Grafos Computacionales y Autograd en PyTorch.', link: TEAMS_URL, linkLabel: 'Teams Sincrónico' },
+                    { fecha: 'Toda la semana', tipo: 'Asincrónico', tipoColor: '#FDB913', titulo: 'Videoconferencia asincrónica 2 — El Proceso de Entrenamiento', desc: 'Grabación sobre regularización, dropout, batch norm, evaluación y ética en salud.' },
+                    { fecha: '15/06', hora: '23:59', tipo: 'Entrega', tipoColor: '#BE185D', titulo: 'Momento 2: 1ra entrega', desc: 'Notebook + Informe técnico-ético de la Actividad 1 "El Guardián del Cafetal".', link: 'https://campus.usta.edu.co', linkLabel: 'Campus Virtual' },
+                ],
+            },
+        };
+
+        /* ============================================================
+           NAVEGACIÓN STICKY (top anchor bar)
+        ============================================================ */
+        const navItems = [
+            { id: 'inicio',         label: 'Inicio',         icon: 'fa-house' },
+            { id: 'cronograma',     label: 'Cronograma',     icon: 'fa-calendar-days' },
+            { id: 'hitos',          label: 'Hitos',          icon: 'fa-flag-checkered' },
+            { id: 'capitulos',      label: 'Capítulos',      icon: 'fa-book' },
+            { id: 'videos',         label: 'Videos',         icon: 'fa-video' },
+            { id: 'glosario',       label: 'Glosario',       icon: 'fa-language' },
+            { id: 'recursos',       label: 'Recursos',       icon: 'fa-folder-open' },
+        ];
+
+        const StickyNav = () => {
+            const [active, setActive] = useState('inicio');
+            useEffect(() => {
+                const onScroll = () => {
+                    let cur = 'inicio';
+                    for (const it of navItems) {
+                        const el = document.getElementById(it.id);
+                        if (el) {
+                            const r = el.getBoundingClientRect();
+                            if (r.top <= 120) cur = it.id;
+                        }
+                    }
+                    setActive(cur);
+                };
+                window.addEventListener('scroll', onScroll, { passive: true });
+                onScroll();
+                return () => window.removeEventListener('scroll', onScroll);
+            }, []);
+            return (
+                <nav className="sticky top-0 z-40 bg-white/95 backdrop-blur shadow-sm border-b border-gray-200">
+                    <div className="max-w-6xl mx-auto px-2 md:px-6 overflow-x-auto">
+                        <ul className="flex items-center gap-1 md:gap-2 py-2 text-xs md:text-sm font-semibold whitespace-nowrap">
+                            {navItems.map(it => (
+                                <li key={it.id}>
+                                    <a href={`#${it.id}`}
+                                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md transition-colors ${active === it.id
+                                            ? 'usta-gradient text-white shadow-sm'
+                                            : 'text-gray-600 hover:text-primary hover:bg-gray-50'}`}>
+                                        <i className={`fas ${it.icon} text-[0.7rem]`}></i>{it.label}
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </nav>
+            );
+        };
+
+        /* ============================================================
+           SECCIÓN 1 — HERO + PROGRESO GLOBAL
+        ============================================================ */
+        const HeroSection = ({ progress, onReset }) => {
+            const pct = computeProgress(progress);
+            const segments = [
+                { label: 'Cap 1', done: progress.capsVistos[1] },
+                { label: 'Cap 2', done: progress.capsVistos[2] },
+                { label: 'Cap 3', done: progress.capsVistos[3] },
+                { label: 'Cap 4', done: progress.capsVistos[4] },
+                { label: 'Cap 5', done: progress.capsVistos[5] },
+                { label: 'Video Sec.', done: progress.videosVistos.seccion },
+                { label: 'Video Prof.', done: progress.videosVistos.profundizacion },
+                { label: 'Guía 1', done: progress.guia1Entregada },
+                { label: 'Act 1', done: progress.act1Entregada },
+            ];
+            return (
+                <section id="inicio" className="grid lg:grid-cols-3 gap-5">
+                    <div className="lg:col-span-2 usta-card p-6 md:p-8">
+                        <div className="flex flex-wrap items-center gap-2 mb-3">
+                            <Tag color="primary" icon="fa-route">Ruta de Aprendizaje</Tag>
+                            <Tag color="secondary" icon="fa-graduation-cap">Módulo 1 · 48 h</Tag>
+                            <Tag color="gold" icon="fa-percent">25 % de la nota final</Tag>
+                        </div>
+                        <h1 className="text-3xl md:text-4xl font-extrabold text-navy leading-tight mb-2">
+                            Fundamentos del Aprendizaje Profundo
+                        </h1>
+                        <p className="text-gray-700 leading-relaxed text-[0.98rem]">
+                            Mapa navegable de los <strong>5 capítulos</strong>, las <strong>2 actividades evaluativas</strong> y los
+                            <strong> 2 videos</strong> que componen el Módulo 1. Aquí podrá consultar la ruta, marcar su progreso
+                            (se guarda en su navegador) y autoevaluarse antes de cada entrega.
+                        </p>
+                        <div className="mt-5">
+                            <ProgressBar value={pct} label="Su progreso en el módulo" segments={segments} />
+                        </div>
+                        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-gray-500">
+                            <span><i className="far fa-clock mr-1"></i>Última limpieza: {new Date(progress.resetAt).toLocaleString('es-CO')}</span>
+                            <button onClick={() => {
+                                if (window.confirm('¿Reiniciar todo el progreso del Módulo 1? Esta acción no se puede deshacer.')) onReset();
+                            }} className="ml-auto text-xs font-semibold text-secondary hover:text-primary transition-colors">
+                                <i className="fas fa-rotate-left mr-1"></i>Reiniciar progreso
+                            </button>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-3 lg:grid-cols-1 gap-3">
+                        <Stat value="48 h" label="Carga total" sub="5 directo · 5 indirecto · 38 autónomo" icon="fa-clock" color="primary" />
+                        <Stat value="25 %" label="Peso evaluativo" sub="Guía 1 (5%) + Actividad 1 (20%)" icon="fa-percent" color="secondary" />
+                        <Stat value="5" label="Capítulos" sub="3 sincronías + 2 asincronías" icon="fa-book" color="gold" />
+                    </div>
+                </section>
+            );
+        };
+
+        /* ============================================================
+           SECCIÓN 2 — CRONOGRAMA (TABS: Semana 1 / Semana 2)
+        ============================================================ */
+        const CronogramaSection = () => (
+            <section id="cronograma" className="mt-10">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="usta-gradient p-2.5 rounded-xl shadow-md text-white">
+                        <i className="fas fa-calendar-days text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 className="text-2xl font-extrabold text-navy">Cronograma de las 2 semanas</h2>
+                        <p className="text-sm text-gray-600">Encuentros sincrónicos por Teams (19:30–21:00) + actividades asincrónicas en el campus virtual.</p>
+                    </div>
+                </div>
+                <Tabs accent="primary" tabs={[
+                    {
+                        label: 'Semana 1', icon: 'fa-calendar-week',
+                        content: (
+                            <div>
+                                <h3 className="text-navy font-bold mb-2">{cronograma.semana1.titulo}</h3>
+                                <Timeline eventos={cronograma.semana1.eventos} />
+                            </div>
+                        ),
+                    },
+                    {
+                        label: 'Semana 2', icon: 'fa-calendar-week',
+                        content: (
+                            <div>
+                                <h3 className="text-navy font-bold mb-2">{cronograma.semana2.titulo}</h3>
+                                <Timeline eventos={cronograma.semana2.eventos} />
+                            </div>
+                        ),
+                    },
+                ]} />
+            </section>
+        );
+
+        /* ============================================================
+           SECCIÓN 3 — HITOS EVALUATIVOS (Guía 1 + Actividad 1)
+        ============================================================ */
+        const HitoCard = ({ act, progress, onTogglePaso, onToggleEntregada, checklistKey }) => {
+            const totalPasos = act.pasos.length;
+            const pasosHechos = Object.values(progress[checklistKey] || {}).filter(Boolean).length;
+            const pct = Math.round((pasosHechos / totalPasos) * 100);
+            return (
+                <div className="usta-card p-5 md:p-6 flex flex-col">
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <Tag color={act.tipo === 'guia' ? 'navy' : 'secondary'} icon={act.tipo === 'guia' ? 'fa-pen-to-square' : 'fa-laptop-code'}>
+                            {act.tipo === 'guia' ? 'Hito 1' : 'Hito 2'}
+                        </Tag>
+                        <Tag color="gold" icon="fa-percent">{act.peso} %</Tag>
+                        <Tag color="gray" icon="fa-clock">{act.horas} h</Tag>
+                    </div>
+                    <h3 className="text-lg md:text-xl font-bold text-navy leading-snug">{act.titulo}</h3>
+                    <p className="text-xs text-gray-500 mt-1">{act.desglose}</p>
+                    <Box type="info" label="Caso problematizador">
+                        <p className="text-[0.88rem]">{act.caso}</p>
+                    </Box>
+                    <div className="text-sm text-gray-700 mb-2">
+                        <strong className="text-navy">Entregable:</strong> {act.entregable}
+                    </div>
+                    <Checklist
+                        titulo={`Pasos (${pasosHechos}/${totalPasos})`}
+                        items={act.pasos}
+                        value={progress[checklistKey]}
+                        onChange={onTogglePaso}
+                        icono="fa-list-check"
+                    />
+                    <ProgressBar value={pct} label="Avance del hito" showPct={true} />
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <label className="flex items-center gap-2 text-sm font-semibold text-navy cursor-pointer">
+                            <input type="checkbox"
+                                checked={!!progress[act.tipo === 'guia' ? 'guia1Entregada' : 'act1Entregada']}
+                                onChange={(e) => onToggleEntregada(e.target.checked)}
+                                className="w-4 h-4 accent-secondary cursor-pointer" />
+                            {act.tipo === 'guia' ? 'Marcar Guía 1 como entregada' : 'Marcar Actividad 1 como entregada'}
+                        </label>
+                        <a href={`obsidian://${act.linkMd}`}
+                            onClick={(e) => { e.preventDefault(); window.open(act.linkMd, '_blank'); }}
+                            className="ml-auto text-xs font-semibold text-primary hover:text-secondary transition-colors">
+                            <i className="fas fa-file-lines mr-1"></i>Abrir ficha .md
+                        </a>
+                    </div>
+                    <Accordion items={[
+                        { titulo: `Rúbrica resumida (${act.rubrica.length} criterios)`, icono: 'fa-table-list',
+                          contenido: (
+                            <ul className="space-y-1.5">
+                                {act.rubrica.map((r, i) => (
+                                    <li key={i} className="flex items-center justify-between text-sm">
+                                        <span className="text-gray-700">{r.criterio}</span>
+                                        <span className="font-bold text-secondary">{r.peso} %</span>
+                                    </li>
+                                ))}
+                            </ul>
+                          ),
+                        },
+                    ]} />
+                </div>
+            );
+        };
+
+        const HitosSection = ({ progress, update }) => (
+            <section id="hitos" className="mt-10">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="usta-gradient p-2.5 rounded-xl shadow-md text-white">
+                        <i className="fas fa-flag-checkered text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 className="text-2xl font-extrabold text-navy">Hitos evaluativos del módulo</h2>
+                        <p className="text-sm text-gray-600">Los 2 hitos del Módulo 1 suman <strong>25 % de la nota final</strong> (5% + 20%).</p>
+                    </div>
+                </div>
+                <div className="grid md:grid-cols-2 gap-5">
+                    <HitoCard
+                        act={activities.guia1}
+                        progress={progress}
+                        checklistKey="guia1Pasos"
+                        onTogglePaso={(k, v) => update(prev => ({ ...prev, guia1Pasos: { ...prev.guia1Pasos, [k]: v } }))}
+                        onToggleEntregada={(v) => update(prev => ({ ...prev, guia1Entregada: v }))}
+                    />
+                    <HitoCard
+                        act={activities.act1}
+                        progress={progress}
+                        checklistKey="act1Pasos"
+                        onTogglePaso={(k, v) => update(prev => ({ ...prev, act1Pasos: { ...prev.act1Pasos, [k]: v } }))}
+                        onToggleEntregada={(v) => update(prev => ({ ...prev, act1Entregada: v }))}
+                    />
+                </div>
+            </section>
+        );
+
+        /* ============================================================
+           SECCIÓN 4 — CAPÍTULOS (5 cards con acordeones y MCQ)
+        ============================================================ */
+        const ChapterCard = ({ ch, isVisto, onToggleVisto }) => (
+            <article className="usta-card overflow-hidden">
+                <header className="flex flex-wrap items-start gap-3 p-5 md:p-6 border-b border-gray-100"
+                    style={{ background: 'linear-gradient(135deg, #FAF8FF 0%, #FCE7F1 100%)' }}>
+                    <div className={`flex-shrink-0 w-12 h-12 rounded-xl text-white font-extrabold text-lg flex items-center justify-center shadow-md usta-gradient`}>
+                        {ch.num}
+                    </div>
+                    <div className="flex-1 min-w-[200px]">
+                        <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                            <Tag color={ch.badgeColor} icon="fa-tag">#{ch.tag}</Tag>
+                            <Tag color="gray" icon="fa-clock">{ch.duracion}</Tag>
+                            {isVisto && <Tag color="green" icon="fa-circle-check">Visto</Tag>}
+                        </div>
+                        <h3 className="text-lg md:text-xl font-extrabold text-navy leading-tight flex items-center gap-2">
+                            <i className={`fas ${ch.icon} text-secondary`}></i>{ch.title}
+                        </h3>
+                    </div>
+                    <label className="flex items-center gap-2 text-xs font-semibold text-navy cursor-pointer bg-white px-3 py-1.5 rounded-full shadow-sm hover:shadow transition-shadow">
+                        <input type="checkbox" checked={isVisto}
+                            onChange={(e) => onToggleVisto(e.target.checked)}
+                            className="w-4 h-4 accent-secondary cursor-pointer" />
+                        {isVisto ? 'Visto' : 'Marcar como visto'}
+                    </label>
+                </header>
+                <div className="p-5 md:p-6">
+                    <Accordion items={[
+                        { titulo: `Qué voy a aprender (${ch.ra.length} resultados)`, icono: 'fa-bullseye',
+                          contenido: (
+                            <ul className="space-y-1.5">
+                                {ch.ra.map((r, i) => (
+                                    <li key={i} className="flex items-start gap-2 text-[0.92rem] text-gray-700">
+                                        <i className="fas fa-check text-secondary mt-1 text-[0.7rem] flex-shrink-0"></i>
+                                        <span>{r}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                          ),
+                        },
+                        { titulo: ch.analogia.titulo, icono: 'fa-mug-hot',
+                          contenido: ch.analogia.contenido,
+                        },
+                    ]} />
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                        <div className="flex items-center gap-2 mb-3 text-navy font-bold text-sm">
+                            <i className="fas fa-circle-question text-secondary"></i>Autoevaluación ({ch.mcq.length} {ch.mcq.length === 1 ? 'pregunta' : 'preguntas'})
+                        </div>
+                        {ch.mcq.map((q, i) => (
+                            <MCQ key={i} pregunta={q.pregunta} opciones={q.opciones} multiple={q.multiple || false} />
+                        ))}
+                    </div>
+                </div>
+            </article>
+        );
+
+        const CapitulosSection = ({ progress, update }) => (
+            <section id="capitulos" className="mt-12">
+                <div className="flex items-center gap-3 mb-2">
+                    <div className="usta-gradient p-2.5 rounded-xl shadow-md text-white">
+                        <i className="fas fa-book text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 className="text-2xl font-extrabold text-navy">Catálogo de los 5 capítulos</h2>
+                        <p className="text-sm text-gray-600">Cada capítulo cierra con preguntas de autoevaluación. Marque como visto al completar la lectura.</p>
+                    </div>
+                </div>
+                <div className="space-y-5 mt-4">
+                    {chapters.map(ch => (
+                        <ChapterCard
+                            key={ch.id}
+                            ch={ch}
+                            isVisto={!!progress.capsVistos[ch.id]}
+                            onToggleVisto={(v) => update(prev => ({ ...prev, capsVistos: { ...prev.capsVistos, [ch.id]: v } }))}
+                        />
+                    ))}
+                </div>
+            </section>
+        );
+
+        /* ============================================================
+           SECCIÓN 5 — VIDEOS (2 cards)
+        ============================================================ */
+        const VideoCard = ({ v, visto, onToggleVisto }) => (
+            <div className="usta-card p-5 md:p-6">
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <Tag color="navy" icon="fa-video">{v.tipo}</Tag>
+                    <Tag color="gold" icon="fa-clock">{v.duracion}</Tag>
+                    <Tag color="gray" icon="fa-film">{v.numEscenas} escenas</Tag>
+                    {visto && <Tag color="green" icon="fa-circle-check">Visto</Tag>}
+                </div>
+                <h3 className="text-lg md:text-xl font-extrabold text-navy leading-snug flex items-center gap-2">
+                    <i className={`fas ${v.icono} text-secondary`}></i>{v.titulo}
+                </h3>
+                <div className="grid sm:grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <h4 className="text-xs uppercase tracking-wider font-bold text-navy mb-2">
+                            <i className="fas fa-lightbulb text-gold mr-1"></i>Conceptos cubiertos
+                        </h4>
+                        <ul className="space-y-1.5">
+                            {v.conceptos.map((c, i) => (
+                                <li key={i} className="flex items-start gap-2 text-[0.88rem] text-gray-700">
+                                    <i className="fas fa-angle-right text-secondary mt-1 text-[0.7rem] flex-shrink-0"></i>
+                                    <span>{c}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 className="text-xs uppercase tracking-wider font-bold text-navy mb-2">
+                            <i className="fas fa-quote-left text-secondary mr-1"></i>Texto en pantalla destacado
+                        </h4>
+                        <ul className="space-y-1.5">
+                            {v.textoDestacado.map((t, i) => (
+                                <li key={i} className="text-[0.88rem] text-gray-700 italic bg-bg px-3 py-2 rounded-lg border-l-2 border-secondary">
+                                    "{t}"
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+                <div className="mt-4 pt-4 border-t border-gray-100 flex flex-wrap items-center gap-3">
+                    <label className="flex items-center gap-2 text-sm font-semibold text-navy cursor-pointer">
+                        <input type="checkbox" checked={visto}
+                            onChange={(e) => onToggleVisto(e.target.checked)}
+                            className="w-4 h-4 accent-secondary cursor-pointer" />
+                        Marcar como visto
+                    </label>
+                    <a href={v.linkMd} target="_blank" rel="noopener"
+                        className="ml-auto text-xs font-semibold text-primary hover:text-secondary transition-colors">
+                        <i className="fas fa-file-lines mr-1"></i>Ver guion completo
+                    </a>
+                </div>
+            </div>
+        );
+
+        const VideosSection = ({ progress, update }) => (
+            <section id="videos" className="mt-12">
+                <div className="flex items-center gap-3 mb-2">
+                    <div className="usta-gradient p-2.5 rounded-xl shadow-md text-white">
+                        <i className="fas fa-video text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 className="text-2xl font-extrabold text-navy">Videos del módulo</h2>
+                        <p className="text-sm text-gray-600">2 piezas audiovisuales: una de profundización técnica y una de reflexión ética sobre el caso del hospital.</p>
+                    </div>
+                </div>
+                <div className="grid md:grid-cols-2 gap-5 mt-4">
+                    {videos.map(v => (
+                        <VideoCard
+                            key={v.id}
+                            v={v}
+                            visto={!!progress.videosVistos[v.id]}
+                            onToggleVisto={(val) => update(prev => ({ ...prev, videosVistos: { ...prev.videosVistos, [v.id]: val } }))}
+                        />
+                    ))}
+                </div>
+            </section>
+        );
+
+        /* ============================================================
+           SECCIÓN 6 — GLOSARIO (31 términos)
+        ============================================================ */
+        const GlosarioSection = () => {
+            // Agrupar por letra inicial
+            const grouped = useMemo(() => {
+                const map = {};
+                glossary.forEach(g => {
+                    const letter = g.t[0].toUpperCase();
+                    (map[letter] = map[letter] || []).push(g);
+                });
+                return Object.keys(map).sort().reduce((acc, k) => (acc[k] = map[k], acc), {});
+            }, []);
+            const items = Object.entries(grouped).map(([letter, terms]) => ({
+                titulo: `${letter}  ·  ${terms.length} ${terms.length === 1 ? 'término' : 'términos'}`,
+                icono: 'fa-book-open',
+                contenido: (
+                    <div className="space-y-3">
+                        {terms.map((g, i) => (
+                            <div key={i} className="border-l-2 border-primary/30 pl-3">
+                                <h4 className="font-bold text-navy text-[0.95rem]">
+                                    <span className="inline-code mr-1.5">{g.t}</span>
+                                </h4>
+                                <p className="text-[0.85rem] text-gray-600 leading-relaxed">{g.d}</p>
+                            </div>
+                        ))}
+                    </div>
+                ),
+            }));
+            return (
+                <section id="glosario" className="mt-12">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="usta-gradient p-2.5 rounded-xl shadow-md text-white">
+                            <i className="fas fa-language text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-extrabold text-navy">Glosario del módulo</h2>
+                            <p className="text-sm text-gray-600"><strong>{glossary.length} términos clave</strong> con su definición operativa y la analogía local colombiana cuando aplica.</p>
+                        </div>
+                    </div>
+                    <div className="mt-4 usta-card p-5 md:p-6">
+                        <Accordion items={items} multi={true} />
+                    </div>
+                </section>
+            );
+        };
+
+        /* ============================================================
+           SECCIÓN 7 — RECURSOS (bibliografía, webgrafía, datasets)
+        ============================================================ */
+        const ResourcesSection = () => {
+            const renderList = (arr, icon, accent) => (
+                <ul className="space-y-2.5">
+                    {arr.map((r, i) => (
+                        <li key={i} className="flex items-start gap-2 text-[0.92rem]">
+                            <i className={`fas ${icon} text-${accent} mt-1 text-[0.8rem] flex-shrink-0`}></i>
+                            <span className="text-gray-700">
+                                {r.url
+                                    ? <a href={r.url} target="_blank" rel="noopener" className="hover:text-secondary transition-colors">{r.ref} <i className="fas fa-external-link-alt text-[0.65rem] ml-1 text-gray-400"></i></a>
+                                    : r.ref}
+                            </span>
+                        </li>
+                    ))}
+                </ul>
+            );
+            return (
+                <section id="recursos" className="mt-12">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="usta-gradient p-2.5 rounded-xl shadow-md text-white">
+                            <i className="fas fa-folder-open text-xl"></i>
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-extrabold text-navy">Recursos complementarios</h2>
+                            <p className="text-sm text-gray-600">Bibliografía oficial, webgrafía y datasets para profundizar después del módulo.</p>
+                        </div>
+                    </div>
+                    <div className="grid md:grid-cols-3 gap-4 mt-4">
+                        <div className="usta-card p-5">
+                            <h3 className="font-bold text-navy mb-3 flex items-center gap-2">
+                                <i className="fas fa-book text-primary"></i>Bibliografía
+                            </h3>
+                            {renderList(resources.bibliografia, 'fa-bookmark', 'primary')}
+                        </div>
+                        <div className="usta-card p-5">
+                            <h3 className="font-bold text-navy mb-3 flex items-center gap-2">
+                                <i className="fas fa-globe text-secondary"></i>Webgrafía
+                            </h3>
+                            {renderList(resources.webgrafia, 'fa-link', 'secondary')}
+                        </div>
+                        <div className="usta-card p-5">
+                            <h3 className="font-bold text-navy mb-3 flex items-center gap-2">
+                                <i className="fas fa-database text-gold"></i>Datasets y herramientas
+                            </h3>
+                            {renderList(resources.datasets, 'fa-cube', 'gold')}
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        /* ============================================================
+           SECCIÓN 8 — FOOTER + CTA MÓDULO 2
+        ============================================================ */
+        const FooterSection = ({ progress }) => {
+            const pct = computeProgress(progress);
+            return (
+                <footer className="mt-14">
+                    <div className="usta-card p-6 md:p-8" style={{ background: 'linear-gradient(135deg, #FAF8FF 0%, #FCE7F1 100%)' }}>
+                        <div className="flex flex-wrap items-start gap-3 mb-3">
+                            <i className="fas fa-trophy text-gold text-2xl"></i>
+                            <h2 className="text-2xl font-extrabold text-navy">¡Felicitaciones por completar el Módulo 1!</h2>
+                        </div>
+                        {pct === 100 ? (
+                            <Box type="tip" label="Módulo 1 completado al 100%">
+                                <p>Ha marcado los 5 capítulos, los 2 videos, las 2 entregas y todos los pasos de los 2 hitos.
+                                Ahora puede continuar con el Módulo 2: Arquitecturas de Redes Neuronales Especializadas.</p>
+                            </Box>
+                        ) : (
+                            <p className="text-gray-700 leading-relaxed">
+                                Si su progreso actual es <strong>{pct}%</strong>, aún le quedan actividades por marcar.
+                                Use los acordeones de cada capítulo para repasar o visite la sección de <a href="#recursos" className="text-primary font-semibold hover:text-secondary">recursos</a> para profundizar.
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="mt-6 usta-card p-6 md:p-8 border-2 border-primary/20">
+                        <div className="flex flex-wrap items-center gap-3 mb-3">
+                            <Tag color="primary" icon="fa-forward">Próximo módulo</Tag>
+                        </div>
+                        <h3 className="text-xl md:text-2xl font-extrabold text-navy leading-tight flex items-center gap-2">
+                            <i className="fas fa-brain text-secondary"></i>Módulo 2: Arquitecturas de Redes Neuronales Especializadas
+                        </h3>
+                        <p className="text-gray-700 mt-2 leading-relaxed">
+                            Aprenderá <strong>Redes Convolucionales (CNN)</strong> para visión artificial, <strong>RNN/LSTM/GRU</strong>
+                            para series de tiempo y lenguaje, y <strong>modelos generativos (GAN, VAE, Autoencoders)</strong>.
+                            Mantiene la misma carga (48 h, 25% de la nota) con dos actividades prácticas: clasificación con
+                            Transfer Learning y modelado predictivo de series temporales.
+                        </p>
+                        <div className="mt-4 flex flex-wrap items-center gap-2">
+                            <a href="Welcome.md" target="_blank" rel="noopener"
+                                className="inline-flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-full text-white usta-gradient hover:opacity-90 transition-opacity shadow-md">
+                                <i className="fas fa-map-location-dot"></i>Ir al mapa del Segundo Cerebro
+                            </a>
+                            <span className="text-xs text-gray-500">Disponible al iniciar el Módulo 2</span>
+                        </div>
+                    </div>
+
+                    <div className="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500 space-y-1">
+                        <p>
+                            <strong className="text-navy">Experto temático:</strong> Javier Mauricio Sierra
+                            &nbsp;·&nbsp; <i className="fas fa-envelope mr-1"></i>javiersierra@usta.edu.co
+                            &nbsp;·&nbsp; <i className="fas fa-phone mr-1"></i>311 241 3858
+                        </p>
+                        <p>
+                            Universidad Santo Tomás · Maestría en Ciencia de Datos · Espacio académico EA-N-F-004
+                        </p>
+                        <p className="text-gray-400">Documento HTML autocontenido · React 18 + Tailwind CDN + MathJax 3 ·
+                            Progreso persistido en <code className="inline-code">localStorage</code> (clave <code className="inline-code">usta-m1-progress</code>)</p>
+                    </div>
+                </footer>
+            );
+        };
+
+        /* ============================================================
+           APP (compone todo)
+        ============================================================ */
+        const App = () => {
+            const [progress, update, reset] = useLocalProgress();
+
+            return (
+                <div className="min-h-screen">
+                    <header className="usta-header text-white">
+                        <div className="max-w-6xl mx-auto px-4 md:px-6 py-6">
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className="usta-gradient p-2.5 rounded-xl shadow-md">
+                                    <i className="fas fa-route text-xl"></i>
+                                </div>
+                                <span className="text-xs uppercase tracking-widest text-gold font-bold">Universidad Santo Tomás</span>
+                            </div>
+                            <h1 className="text-2xl md:text-3xl font-extrabold">Ruta de Aprendizaje · Módulo 1</h1>
+                            <p className="text-sm md:text-base text-white/80 mt-1">Fundamentos del Aprendizaje Profundo · Maestría en Ciencia de Datos</p>
+                        </div>
+                    </header>
+
+                    <StickyNav />
+
+                    <main className="max-w-6xl mx-auto px-4 md:px-6 py-8 space-y-2">
+                        <HeroSection progress={progress} onReset={reset} />
+                        <CronogramaSection />
+                        <HitosSection progress={progress} update={update} />
+                        <CapitulosSection progress={progress} update={update} />
+                        <VideosSection progress={progress} update={update} />
+                        <GlosarioSection />
+                        <ResourcesSection />
+                        <FooterSection progress={progress} />
+                    </main>
+
+                    <ScrollTopButton />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
