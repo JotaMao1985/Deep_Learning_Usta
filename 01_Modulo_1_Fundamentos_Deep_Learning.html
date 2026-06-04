@@ -2790,6 +2790,68 @@ opt_adam = torch.optim.Adam(modelo.parameters(), lr=0.001)
             );
         };
 
+        /* Gráfica SVG nativa: curva de la entropía cruzada L = -log(ŷ).
+           Se dibuja a mano (sin Plotly) y marca sobre la curva los valores de la tabla BCE. */
+        const EntropiaCruzadaChart = () => {
+            const W = 560, H = 340;
+            const padL = 56, padR = 18, padT = 18, padB = 46;
+            const plotW = W - padL - padR;
+            const plotH = H - padT - padB;
+            const Lmax = 5;
+            const xPix = p => padL + p * plotW;                              // p (probabilidad) en [0,1]
+            const yPix = L => padT + plotH - (Math.min(L, Lmax) / Lmax) * plotH;
+
+            // Curva L = -ln(p) muestreada finamente
+            let d = '';
+            for (let p = 0.01; p <= 1.0001; p += 0.004) {
+                const L = -Math.log(p);
+                if (L > Lmax) continue;
+                d += (d === '' ? 'M' : 'L') + xPix(p).toFixed(1) + ' ' + yPix(L).toFixed(1) + ' ';
+            }
+
+            const puntos = [
+                { p: 0.99, L: 0.01 }, { p: 0.90, L: 0.11 }, { p: 0.50, L: 0.69 },
+                { p: 0.10, L: 2.30 }, { p: 0.01, L: 4.61 },
+            ];
+            const xticks = [0, 0.25, 0.5, 0.75, 1];
+            const yticks = [0, 1, 2, 3, 4, 5];
+            const cy = padT + plotH / 2;
+
+            return (
+                <div className="my-4">
+                    <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img"
+                        aria-label="Curva de la entropía cruzada: el costo menos logaritmo de y-hat crece sin límite cuando la probabilidad asignada a la clase correcta tiende a cero, y vale cero cuando esa probabilidad es uno."
+                        style={{ display: 'block', maxWidth: '640px', margin: '0 auto', background: '#FAF8FF', borderRadius: '12px', border: '1px solid rgba(61,0,141,0.12)' }}>
+                        {yticks.map(t => (
+                            <g key={'y' + t}>
+                                <line x1={padL} y1={yPix(t)} x2={W - padR} y2={yPix(t)} stroke="#E2E8F0" strokeWidth="1" />
+                                <text x={padL - 8} y={yPix(t) + 4} textAnchor="end" fontSize="11" fill="#64748B" fontFamily="Montserrat">{t}</text>
+                            </g>
+                        ))}
+                        {xticks.map(t => (
+                            <text key={'x' + t} x={xPix(t)} y={padT + plotH + 18} textAnchor="middle" fontSize="11" fill="#64748B" fontFamily="Montserrat">{t.toFixed(2)}</text>
+                        ))}
+                        <line x1={padL} y1={padT} x2={padL} y2={padT + plotH} stroke="#94A3B8" strokeWidth="1.5" />
+                        <line x1={padL} y1={padT + plotH} x2={W - padR} y2={padT + plotH} stroke="#94A3B8" strokeWidth="1.5" />
+                        <path d={d} fill="none" stroke="#ED1E79" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                        {puntos.map((pt, i) => (
+                            <g key={'pt' + i}>
+                                <circle cx={xPix(pt.p)} cy={yPix(pt.L)} r="5" fill="#3D008D" stroke="#fff" strokeWidth="1.5" />
+                                <text x={xPix(pt.p) + (pt.p > 0.8 ? -9 : 9)} y={yPix(pt.L) - 7}
+                                    textAnchor={pt.p > 0.8 ? 'end' : 'start'} fontSize="10.5" fill="#3D008D" fontFamily="Montserrat" fontWeight="700">{pt.L.toFixed(2)}</text>
+                            </g>
+                        ))}
+                        <text x={padL + plotW / 2} y={H - 8} textAnchor="middle" fontSize="12" fill="#334155" fontFamily="Montserrat" fontWeight="600">ŷ — probabilidad asignada a la clase correcta</text>
+                        <text transform={`rotate(-90 16 ${cy})`} x="16" y={cy} textAnchor="middle" fontSize="12" fill="#334155" fontFamily="Montserrat" fontWeight="600">Costo  −log(ŷ)</text>
+                    </svg>
+                    <p className="text-xs text-gray-500 text-center mt-2" style={{ fontStyle: 'italic' }}>
+                        El costo vale 0 cuando la red asigna toda la probabilidad a la clase correcta (ŷ = 1) y crece sin límite a medida que ŷ → 0:
+                        equivocarse con seguridad se penaliza de forma desmedida. Los puntos marcan los valores de la tabla anterior.
+                    </p>
+                </div>
+            );
+        };
+
         const Cap3Section = () => (
             <div className="prose-usta">
                 <Box type="info" label="Idea central">
@@ -2810,17 +2872,64 @@ opt_adam = torch.optim.Adam(modelo.parameters(), lr=0.001)
                 <h4>Error Cuadrático Medio (MSE) — regresión</h4>
                 <Eq>{String.raw`$$ \text{MSE} = \frac{1}{N}\sum_{i=1}^{N}(y_i - \hat{y}_i)^2 $$`}</Eq>
                 <p>
-                    Al elevar al cuadrado, se penalizan desproporcionadamente los errores grandes. Si una red predice una llovizna
-                    (5 mm) en la cuenca del Río Magdalena pero ocurre un diluvio (100 mm), el error no es 95 sino
-                    {String.raw` \(95^2 = 9025\)`}: esto obliga a la red a atender los eventos extremos, crucial para alertas de inundación.
+                    Al elevar al cuadrado, se penalizan desproporcionadamente los errores grandes. Considérese un modelo que predice la
+                    precipitación diaria (mm) en tres estaciones de la cuenca del Río Magdalena:
+                </p>
+                <div className="overflow-x-auto my-4">
+                    <table className="w-full text-sm border-collapse">
+                        <thead>
+                            <tr className="bg-bg text-navy">
+                                <th className="text-left p-2 border-b-2 border-gray-200">Estación</th>
+                                <th className="text-left p-2 border-b-2 border-gray-200">Real {String.raw`\(y\)`}</th>
+                                <th className="text-left p-2 border-b-2 border-gray-200">Predicho {String.raw`\(\hat{y}\)`}</th>
+                                <th className="text-left p-2 border-b-2 border-gray-200">{String.raw`\(|y-\hat{y}|\)`}</th>
+                                <th className="text-left p-2 border-b-2 border-gray-200">{String.raw`\((y-\hat{y})^2\)`}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td className="p-2 border-b border-gray-100">Honda</td><td className="p-2 border-b border-gray-100">12</td><td className="p-2 border-b border-gray-100">10</td><td className="p-2 border-b border-gray-100">2</td><td className="p-2 border-b border-gray-100">4</td></tr>
+                            <tr><td className="p-2 border-b border-gray-100">Girardot</td><td className="p-2 border-b border-gray-100">8</td><td className="p-2 border-b border-gray-100">9</td><td className="p-2 border-b border-gray-100">1</td><td className="p-2 border-b border-gray-100">1</td></tr>
+                            <tr><td className="p-2">Barrancabermeja</td><td className="p-2">100</td><td className="p-2">60</td><td className="p-2">40</td><td className="p-2">1600</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    Un solo fallo grande —el evento extremo no anticipado— domina el resultado: {String.raw`\(\text{MSE} = \frac{4+1+1600}{3} = 535\)`},
+                    frente a un error absoluto medio de apenas {String.raw`\(\frac{2+1+40}{3} \approx 14.3\)`}. El cuadrado convierte ese fallo en la
+                    prioridad del entrenamiento; por ello el MSE resulta apropiado cuando los valores atípicos importan (alertas de inundación) y
+                    problemático cuando son ruido que conviene ignorar.
                 </p>
 
                 <h4>Entropía Cruzada Binaria (BCE) — clasificación</h4>
                 <Eq>{String.raw`$$ \text{BCE} = -\frac{1}{N}\sum_{i=1}^{N}\big[\,y_i\log(\hat{y}_i) + (1-y_i)\log(1-\hat{y}_i)\,\big] $$`}</Eq>
                 <p>
-                    Se usa, por ejemplo, para diagnosticar si una hoja de café tiene roya. No importa la distancia numérica, sino la
-                    probabilidad: castiga severamente al modelo que dice «100 % seguro que está sano» cuando la planta está enferma.
+                    Se usa, por ejemplo, para diagnosticar si una hoja de café tiene roya. No importa la distancia numérica, sino la probabilidad
+                    asignada a la respuesta correcta. Para un único ejemplo, la BCE se reduce a {String.raw`\(-\log(\hat{y})\)`}, donde
+                    {String.raw` \(\hat{y}\)`} es la probabilidad que el modelo otorga a la clase <em>verdadera</em>:
                 </p>
+                <div className="overflow-x-auto my-4">
+                    <table className="w-full text-sm border-collapse">
+                        <thead>
+                            <tr className="bg-bg text-navy">
+                                <th className="text-left p-2 border-b-2 border-gray-200">{String.raw`\(\hat{y}\)`} (prob. de la clase correcta)</th>
+                                <th className="text-left p-2 border-b-2 border-gray-200">0.99</th>
+                                <th className="text-left p-2 border-b-2 border-gray-200">0.90</th>
+                                <th className="text-left p-2 border-b-2 border-gray-200">0.50</th>
+                                <th className="text-left p-2 border-b-2 border-gray-200">0.10</th>
+                                <th className="text-left p-2 border-b-2 border-gray-200">0.01</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td className="p-2">Costo {String.raw`\(-\log(\hat{y})\)`}</td><td className="p-2">0.01</td><td className="p-2">0.11</td><td className="p-2">0.69</td><td className="p-2">2.30</td><td className="p-2">4.61</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    La penalización no es lineal: equivocarse con seguridad —asignar {String.raw`\(0.01\)`} a una hoja realmente enferma— cuesta unas
+                    460 veces más que acertar con seguridad, y cerca de 7 veces más que la simple indecisión ({String.raw`\(0.69\)`}). Esa asimetría es
+                    precisamente lo que disuade a la red de emitir afirmaciones rotundas y falsas.
+                </p>
+                <EntropiaCruzadaChart />
 
                 <h4>Entropía Cruzada Categórica (CCE) — clasificación multiclase</h4>
                 <p>
@@ -2838,6 +2947,14 @@ opt_adam = torch.optim.Adam(modelo.parameters(), lr=0.001)
                 <p>
                     Es la generalización natural de la BCE a {String.raw`\(C\)`} clases: si la red asigna baja probabilidad a la enfermedad correcta,
                     {String.raw` \(-\log(\hat{y})\)`} se dispara y el costo crece. De hecho, <strong>la BCE es el caso particular de la CCE con {String.raw`\(C = 2\)`}</strong>.
+                </p>
+                <p>
+                    Un ejemplo concreto: una hoja cuya clase verdadera es <em>roya</em>. La red emite los logits
+                    {String.raw` \(z = [\,2.0,\ 1.0,\ 0.1,\ 0.5\,]\)`} para [roya, mancha de hierro, antracnosis, sana]; tras la Softmax se obtiene la
+                    distribución {String.raw`\([\,0.57,\ 0.21,\ 0.09,\ 0.13\,]\)`}. La CCE solo considera la probabilidad de la clase verdadera:
+                    {String.raw` \(-\log(0.57) \approx 0.55\)`}. Si la red hubiese asignado {String.raw`\(0.90\)`} a <em>roya</em>, el costo bajaría a
+                    {String.raw` \(0.11\)`}; si la hubiese relegado a {String.raw`\(0.10\)`}, treparía a {String.raw`\(2.30\)`}. Las clases incorrectas no
+                    figuran directamente en la suma: su influencia es indirecta, pues la Softmax les resta masa de probabilidad a costa de la correcta.
                 </p>
 
                 <div className="overflow-x-auto my-4">
@@ -2923,22 +3040,67 @@ opt_adam = torch.optim.Adam(modelo.parameters(), lr=0.001)
                     </table>
                 </div>
                 <Box type="info" label="Ejemplo numérico">
-                    Con 50.000 imágenes y un tamaño de lote de 100, una época tiene {String.raw`\(50\,000 / 100 = 500\)`} iteraciones.
-                    Entrenar durante 20 épocas equivale a {String.raw`\(500 \times 20 = 10\,000\)`} actualizaciones de pesos.
+                    Supóngase un conjunto de <strong>50.000</strong> imágenes entrenado con un tamaño de lote de <strong>100</strong>:
+                    <ul>
+                        <li>Cada <strong>iteración</strong> procesa un lote de 100 imágenes y ajusta los pesos <em>una</em> vez.</li>
+                        <li>Recorrer las 50.000 imágenes (una <strong>época</strong>) requiere, por tanto, {String.raw`\(50\,000 / 100 = 500\)`} iteraciones.</li>
+                        <li>Entrenar durante <strong>20 épocas</strong> acumula {String.raw`\(500 \times 20 = 10\,000\)`} actualizaciones de pesos.</li>
+                    </ul>
+                    El tamaño del lote fija <strong>cuántas veces se ajustan los pesos por época</strong>: con lotes de 10 en lugar de 100, la
+                    misma época tendría {String.raw`\(50\,000 / 10 = 5\,000\)`} iteraciones —cinco veces más actualizaciones, cada una a partir de
+                    menos datos—. Esa disyuntiva, pocos pasos grandes o muchos pasos pequeños, es justamente el tema de la siguiente sección.
                 </Box>
 
                 <h3>SGD vs. Batch Gradient Descent</h3>
                 <p>
-                    En teoría, para el gradiente exacto habría que medir la inclinación de <em>toda</em> la montaña a la vez: pasar
-                    todos los datos (ej. 1 millón de imágenes) antes de un solo paso (<strong>Batch Gradient Descent</strong>).
+                    El descenso del gradiente plantea una pregunta práctica: <strong>¿con cuántos datos conviene estimar la pendiente
+                    antes de dar cada paso?</strong> Tres respuestas distintas dan origen a tres variantes, y cada una aparece para
+                    corregir el defecto de la anterior.
                 </p>
-                <Box type="warn" label="El problema">
-                    En una laptop típica no caben 1 millón de imágenes en RAM, y además es lentísimo.
-                </Box>
                 <p>
-                    La solución es el <strong>Descenso de Gradiente Estocástico (SGD)</strong>: usar una pequeña porción
-                    (mini-batch, ej. 32 imágenes), calcular el error y actualizar. El camino al valle es zigzagueante (cada lote
-                    empuja distinto), pero es rapidísimo y el ruido a veces ayuda a escapar de mínimos locales.
+                    <strong>1. Batch Gradient Descent — todos los datos.</strong> Retomando al excursionista, equivale a promediar la
+                    inclinación de <em>todo</em> el terreno antes de cada paso: la dirección es <strong>exacta</strong> y el descenso, suave.
+                    El problema aparece con la escala: con un millón (1.000.000) de ejemplos, cada paso exige recorrer el conjunto completo
+                    —<strong>una sola actualización por época</strong>, lentísimo, y a menudo el lote ni siquiera cabe en memoria—.
+                </p>
+                <p>
+                    <strong>2. SGD estocástico puro — un solo ejemplo.</strong> El extremo opuesto: estimar la pendiente con
+                    <strong> un único ejemplo</strong> y dar el paso de inmediato. Los pasos resultan baratísimos y hay millones por época,
+                    y el ruido incluso ayuda a escapar de mínimos pobres. Pero un ejemplo no representa al conjunto: la estimación es
+                    <strong> muy ruidosa</strong> y la convergencia, inestable.
+                </p>
+                <p>
+                    <strong>3. Mini-batch — el término medio</strong> (lo que hoy se llama, por costumbre, «SGD»). Promediar un puñado de
+                    ejemplos (8–512; por ejemplo, 32) <strong>reduce el ruido sin renunciar a la frecuencia</strong> de actualización, y
+                    aprovecha el paralelismo de la GPU. Es el estándar de facto.
+                </p>
+                <Box type="info" label="La intuición clave">
+                    El gradiente de un mini-lote es un <strong>estimador insesgado</strong> del gradiente verdadero: en promedio apunta en la
+                    dirección correcta, solo que con ruido. Por eso conviene cambiar <strong>pocos pasos exactos y costosos por muchos pasos
+                    aproximados y baratos</strong>: se avanza más en el mismo tiempo.
+                </Box>
+                <div className="overflow-x-auto my-4">
+                    <table className="w-full text-sm border-collapse">
+                        <thead>
+                            <tr className="bg-bg text-navy">
+                                <th className="text-left p-2 border-b-2 border-gray-200">Variante</th>
+                                <th className="text-left p-2 border-b-2 border-gray-200">Ejemplos por paso</th>
+                                <th className="text-left p-2 border-b-2 border-gray-200">Pasos por época</th>
+                                <th className="text-left p-2 border-b-2 border-gray-200">Ruido del gradiente</th>
+                                <th className="text-left p-2 border-b-2 border-gray-200">Memoria</th>
+                                <th className="text-left p-2 border-b-2 border-gray-200">Uso típico</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td className="p-2 border-b border-gray-100"><strong>Batch GD</strong></td><td className="p-2 border-b border-gray-100">Todo el conjunto</td><td className="p-2 border-b border-gray-100">1</td><td className="p-2 border-b border-gray-100">Nulo (exacto)</td><td className="p-2 border-b border-gray-100">Alta</td><td className="p-2 border-b border-gray-100">Conjuntos pequeños</td></tr>
+                            <tr><td className="p-2 border-b border-gray-100"><strong>SGD (puro)</strong></td><td className="p-2 border-b border-gray-100">1</td><td className="p-2 border-b border-gray-100">N</td><td className="p-2 border-b border-gray-100">Muy alto</td><td className="p-2 border-b border-gray-100">Mínima</td><td className="p-2 border-b border-gray-100">Casi en desuso</td></tr>
+                            <tr><td className="p-2"><strong>Mini-batch</strong></td><td className="p-2">8–512</td><td className="p-2">N ÷ tamaño de lote</td><td className="p-2">Moderado</td><td className="p-2">Media</td><td className="p-2"><strong>Estándar actual</strong></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    Con 1.000.000 de ejemplos (N), el Batch GD realiza 1 actualización por época; un mini-lote de 32 realiza
+                    <strong> 31.250</strong>. Más pasos —aunque aproximados— suelen alcanzar un buen mínimo mucho antes.
                 </p>
                 <Box type="tip" label="El tamaño del lote importa">
                     Lotes <strong>pequeños</strong> (8–32) → más ruido por paso: el camino zigzaguea, pero ese ruido ayuda a escapar de malos
@@ -3102,6 +3264,67 @@ opt_adam = torch.optim.Adam(modelo.parameters(), lr=0.001)
         );
 
         /* ============================================================
+           DIAGRAMA SVG: grafo aritmético  f = (a + b)·c  (forward / backward)
+        ============================================================ */
+        const GrafoAritmetico = () => (
+            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                <svg viewBox="0 0 600 222" className="w-full" style={{ minWidth: 520 }}>
+                    <defs>
+                        <marker id="arrF2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2563EB" /></marker>
+                        <marker id="arrB2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#DC2626" /></marker>
+                    </defs>
+
+                    <text x="16" y="18" fontSize="11" fill="#2563EB" fontWeight="bold">▶ Forward: los valores avanzan y se calcula f</text>
+                    <text x="16" y="216" fontSize="11" fill="#DC2626" fontWeight="bold">◀ Backward: los gradientes ∂f/∂(entrada) vuelven en una sola pasada</text>
+
+                    {/* aristas forward (azul) */}
+                    <line x1="78" y1="62" x2="184" y2="62" stroke="#2563EB" strokeWidth="2" markerEnd="url(#arrF2)" />
+                    <line x1="246" y1="62" x2="352" y2="62" stroke="#2563EB" strokeWidth="2" markerEnd="url(#arrF2)" />
+                    <line x1="414" y1="62" x2="508" y2="62" stroke="#2563EB" strokeWidth="2" markerEnd="url(#arrF2)" />
+                    <line x1="133" y1="138" x2="198" y2="92" stroke="#2563EB" strokeWidth="2" markerEnd="url(#arrF2)" />
+                    <line x1="301" y1="138" x2="366" y2="92" stroke="#2563EB" strokeWidth="2" markerEnd="url(#arrF2)" />
+
+                    {/* aristas backward (rojo, punteado) */}
+                    <line x1="508" y1="80" x2="418" y2="80" stroke="#DC2626" strokeWidth="2" strokeDasharray="4,3" markerEnd="url(#arrB2)" />
+                    <line x1="352" y1="80" x2="250" y2="80" stroke="#DC2626" strokeWidth="2" strokeDasharray="4,3" markerEnd="url(#arrB2)" />
+                    <line x1="184" y1="80" x2="82" y2="80" stroke="#DC2626" strokeWidth="2" strokeDasharray="4,3" markerEnd="url(#arrB2)" />
+                    <line x1="214" y1="92" x2="148" y2="138" stroke="#DC2626" strokeWidth="2" strokeDasharray="4,3" markerEnd="url(#arrB2)" />
+                    <line x1="382" y1="92" x2="316" y2="138" stroke="#DC2626" strokeWidth="2" strokeDasharray="4,3" markerEnd="url(#arrB2)" />
+
+                    {/* etiqueta de valor (forward, azul) */}
+                    <text x="299" y="54" textAnchor="middle" fontSize="10" fill="#2563EB" fontWeight="bold">s = 5</text>
+
+                    {/* etiquetas de gradiente (backward, rojo) */}
+                    <text x="461" y="100" textAnchor="middle" fontSize="10" fill="#DC2626">∂f/∂f = 1</text>
+                    <text x="300" y="100" textAnchor="middle" fontSize="10" fill="#DC2626">∂f/∂s = 4</text>
+                    <text x="131" y="100" textAnchor="middle" fontSize="10" fill="#DC2626">∂f/∂a = 4</text>
+                    <text x="133" y="194" textAnchor="middle" fontSize="10" fill="#DC2626">∂f/∂b = 4</text>
+                    <text x="301" y="194" textAnchor="middle" fontSize="10" fill="#DC2626">∂f/∂c = 5</text>
+
+                    {/* nodos: entradas (verde) */}
+                    <rect x="20" y="48" width="58" height="40" rx="10" fill="#F0FDF4" stroke="#15803D" strokeWidth="2" />
+                    <text x="49" y="73" textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="bold">a = 2</text>
+                    <rect x="104" y="138" width="58" height="40" rx="10" fill="#F0FDF4" stroke="#15803D" strokeWidth="2" />
+                    <text x="133" y="163" textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="bold">b = 3</text>
+                    <rect x="272" y="138" width="58" height="40" rx="10" fill="#F0FDF4" stroke="#15803D" strokeWidth="2" />
+                    <text x="301" y="163" textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="bold">c = 4</text>
+
+                    {/* nodos: operaciones (morado) */}
+                    <rect x="188" y="48" width="58" height="40" rx="10" fill="#F5F0FA" stroke="#3D008D" strokeWidth="2" />
+                    <text x="217" y="69" textAnchor="middle" fontSize="15" fill="#3D008D" fontWeight="bold">+</text>
+                    <text x="217" y="83" textAnchor="middle" fontSize="8" fill="#64748B">s = a + b</text>
+                    <rect x="356" y="48" width="58" height="40" rx="10" fill="#F5F0FA" stroke="#3D008D" strokeWidth="2" />
+                    <text x="385" y="69" textAnchor="middle" fontSize="15" fill="#3D008D" fontWeight="bold">×</text>
+                    <text x="385" y="83" textAnchor="middle" fontSize="8" fill="#64748B">f = s · c</text>
+
+                    {/* nodo: salida (rosa USTA) */}
+                    <rect x="512" y="48" width="58" height="40" rx="10" fill="#FDF2F8" stroke="#ED1E79" strokeWidth="2" />
+                    <text x="541" y="73" textAnchor="middle" fontSize="13" fill="#ED1E79" fontWeight="bold">f = 20</text>
+                </svg>
+            </div>
+        );
+
+        /* ============================================================
            DIAGRAMA SVG: grafo computacional (forward / backward)
         ============================================================ */
         const GrafoComputacional = () => {
@@ -3145,19 +3368,19 @@ opt_adam = torch.optim.Adam(modelo.parameters(), lr=0.001)
         const chainNumpy = `import numpy as np
 
 # Grafo de una neurona:  z = w*x + b  ->  a = ReLU(z)  ->  L = (a - y)^2
-x, w, b, y = 2.0, -1.5, 1.0, 0.0
+x, w, b, y = 2.0, -1.5, 1.0, 1.0
 
 # --- Forward pass (predicción) ---
 z = w * x + b            # = -2.0
 a = max(0.0, z)          # ReLU -> 0.0  (z es negativo)
-L = (a - y) ** 2         # error = 0.0
+L = (a - y) ** 2         # error = 1.0  (a=0, y=1: sí hay error)
 
 # --- Backward pass (regla de la cadena, de atrás hacia adelante) ---
-dL_da = 2 * (a - y)            # dL/da
-da_dz = 1.0 if z > 0 else 0.0  # derivada de ReLU
-dz_dw = x                      # dz/dw
+dL_da = 2 * (a - y)            # dL/da = -2.0  (hay error que repartir)
+da_dz = 1.0 if z > 0 else 0.0  # derivada de ReLU = 0.0  (z<0: neurona apagada)
+dz_dw = x                      # dz/dw = 2.0
 dL_dw = dL_da * da_dz * dz_dw  # efecto dominó: producto de derivadas locales
-print(dL_dw)                   # -> 0.0  (neurona "apagada": gradiente nulo)`;
+print(dL_dw)                   # -> 0.0  (el factor da_dz=0 corta la cadena)`;
 
         const autogradTorch = `import torch
 
@@ -3168,10 +3391,10 @@ b = torch.tensor(1.0, requires_grad=True)
 
 z = w * x + b
 a = torch.relu(z)
-L = (a - 0.0) ** 2
+L = (a - 1.0) ** 2
 
 L.backward()        # autograd lee la bitácora al revés y aplica la regla de la cadena
-print(w.grad)       # gradiente dL/dw calculado automáticamente`;
+print(w.grad)       # tensor(0.) -> reproduce el cálculo a mano de arriba`;
 
         const Cap4Section = () => (
             <div className="prose-usta">
@@ -3189,10 +3412,30 @@ print(w.grad)       # gradiente dL/dw calculado automáticamente`;
 
                 <h3>Pensar en grafos, no en neuronas</h3>
                 <p>
-                    Conviene abandonar la analogía del «cerebro» y ver la red como un <strong>grafo computacional</strong>: una
-                    secuencia de operaciones elementales. La ecuación {String.raw`\(y = \text{ReLU}(w\cdot x + b)\)`} se descompone
-                    en nodos. La información fluye hacia adelante (forward) para predecir; la <strong>responsabilidad (el gradiente)
-                        fluye hacia atrás</strong>.
+                    Antes de aplicar la idea a la red conviene precisar el término. Un <strong>grafo</strong> es un conjunto de
+                    <strong> nodos</strong> conectados por <strong>aristas</strong> (flechas que indican qué alimenta a qué); un
+                    <strong> grafo computacional</strong> es aquel en el que cada nodo ejecuta una <strong>operación
+                    elemental</strong> (sumar, multiplicar, aplicar ReLU…) y cada arista transporta el valor resultante hacia la
+                    siguiente. Por ejemplo,
+                    la expresión {String.raw`\(f = (a + b)\cdot c\)`} se descompone en dos nodos —una suma {String.raw`\(s = a + b\)`} y
+                    un producto {String.raw`\(f = s\cdot c\)`}—; con {String.raw`\(a=2,\ b=3,\ c=4\)`} la información recorre el grafo
+                    hacia adelante: primero {String.raw`\(s = 5\)`} y luego {String.raw`\(f = 20\)`}.
+                </p>
+                <GrafoAritmetico />
+                <p>
+                    Aquí se aprecia <strong>por qué esta estructura es útil</strong> para la retropropagación: el mismo grafo,
+                    recorrido hacia adelante (azul), entrega el resultado; recorrido hacia atrás (rojo), entrega en una sola pasada la
+                    <strong> sensibilidad de la salida ante cada entrada</strong>. La clave es la <strong>localidad</strong>: cada nodo
+                    solo necesita su propia derivada —en el producto, {String.raw`\(\partial f/\partial c = s = 5\)`}, que reutiliza el
+                    valor ya calculado en el forward— y el gradiente global se obtiene multiplicando esas derivadas locales a lo largo de
+                    cada camino, por ejemplo {String.raw`\(\partial f/\partial a = \partial f/\partial s \cdot \partial s/\partial a = 4\cdot 1\)`}.
+                    Así, derivar una función de millones de parámetros deja de ser un problema monstruoso y se vuelve un conjunto de pasos
+                    triviales enlazados por la <strong>regla de la cadena</strong>.
+                </p>
+                <p>
+                    Conviene abandonar la analogía del «cerebro» y ver la red como un <strong>grafo computacional</strong> mucho mayor:
+                    la ecuación {String.raw`\(y = \text{ReLU}(w\cdot x + b)\)`} se descompone igual, en nodos. La información fluye hacia
+                    adelante (forward) para predecir; la <strong>responsabilidad (el gradiente) fluye hacia atrás (backward)</strong>.
                 </p>
                 <GrafoComputacional />
 
@@ -3207,8 +3450,18 @@ print(w.grad)       # gradiente dL/dw calculado automáticamente`;
                     original sobre la reacción final es el <strong>producto</strong> de dos factores: cuánto distorsiona el colega
                     (derivada local) y la intensidad de la información inicial (otra derivada local). La capa final retropropaga
                     una señal; cada capa la multiplica por su «factor de distorsión» local y la pasa hacia atrás, hasta la entrada.
+                    Si, en cambio, cada eslabón <strong>atenúa</strong> el mensaje (un factor menor que 1), tras muchas capas la señal puede desvanecerse.
                 </Box>
                 <CodeBlock title="Regla de la cadena a mano (numpy)" code={chainNumpy} />
+
+                <Box type="warn" label="Cuando la cadena se apaga: el desvanecimiento del gradiente">
+                    El ejemplo anterior muestra el caso extremo: una ReLU apagada (factor 0) corta la cadena y anula por completo el
+                    gradiente. De forma más sutil, si la señal atraviesa muchas capas y cada una la multiplica por un factor local
+                    <strong> menor que 1</strong> —la sigmoide, por ejemplo, tiene una derivada máxima de 0,25—, el producto encadenado
+                    se vuelve diminuto y las primeras capas apenas aprenden: es el <strong>desvanecimiento del gradiente</strong>,
+                    anticipado en el Capítulo 1. ReLU, con derivada igual a 1 en su zona activa, lo mitiga (aunque a cambio arriesga
+                    «morir» si una neurona queda apagada).
+                </Box>
 
                 <h3>Autograd en PyTorch</h3>
                 <p>
@@ -3218,6 +3471,15 @@ print(w.grad)       # gradiente dL/dw calculado automáticamente`;
                     bitácora de atrás hacia adelante y calcula todos los gradientes con la regla de la cadena, automáticamente.
                 </p>
                 <CodeBlock title="Autograd: derivación automática (PyTorch)" code={autogradTorch} lang="pytorch" />
+
+                <Box type="info" label="¿Por qué «retro» y no fuerza bruta?">
+                    Calcular el gradiente de cada peso por separado obligaría a recorrer la red una vez por parámetro: inviable con
+                    millones de ellos. La retropropagación reutiliza, en una <strong>sola pasada hacia atrás</strong>, los valores ya
+                    obtenidos en la pasada hacia adelante, y así produce el «vector gigante» de derivadas parciales —el que dejó
+                    planteado el Capítulo 3— de forma <strong>eficiente</strong>. Conviene recordar que <span className="inline-code">backward()</span> solo
+                    <strong> calcula</strong> ese vector; la actualización de los pesos corre por cuenta de <span className="inline-code">optimizer.step()</span>,
+                    que se integra en el bucle de entrenamiento del Capítulo 5.
+                </Box>
 
                 <MCQ
                     pregunta="Si el gradiente de un peso es exactamente cero, entonces…"
@@ -3349,6 +3611,12 @@ red = nn.Sequential(
 
         const Cap5Section = () => (
             <div className="prose-usta">
+                <p>
+                    Este capítulo cierra el ciclo del aprendizaje: una vez que la red puede predecir y calcular gradientes, queda
+                    ponerla a <strong>entrenar</strong> de forma estable, evitar que <strong>memorice</strong> en lugar de aprender,
+                    <strong> evaluarla</strong> con honestidad y considerar las <strong>implicaciones éticas</strong> de su despliegue
+                    en contextos colombianos.
+                </p>
                 <h3>El bucle de entrenamiento (training loop)</h3>
                 <p>
                     Ya se tiene el cuerpo (arquitectura), la brújula (función de costo) y el motor (optimizador). El entrenamiento
@@ -3393,11 +3661,15 @@ red = nn.Sequential(
                     penaliza los pesos grandes.
                 </p>
                 <Tabs tabs={[
-                    { label: 'L2 (Ridge)', content: <span>{String.raw`\(\Omega(\mathbf{w})=\tfrac{1}{2}\sum_j w_j^2\)`}. Como un estudiante que repasa todos los capítulos por igual: empuja los pesos a ser pequeños pero <strong>ninguno se anula</strong>. Distribuye la importancia.</span> },
+                    { label: 'L2 (Ridge)', content: <span>{String.raw`\(\Omega(\mathbf{w})=\tfrac{1}{2}\sum_j w_j^2\)`}. Como un estudiante que repasa todos los capítulos por igual: empuja los pesos a ser pequeños pero <strong>ninguno se anula</strong>. Distribuye la importancia. En PyTorch se activa con el argumento <span className="inline-code">weight_decay</span> del optimizador (el {String.raw`\(\lambda\)`} de la fórmula).</span> },
                     { label: 'L1 (Lasso)', content: <span>{String.raw`\(\Omega(\mathbf{w})=\sum_j |w_j|\)`}. Como un estudiante pragmático que resalta solo lo esencial: fuerza a <strong>cero</strong> los pesos irrelevantes (ej. «color del vehículo»). Produce modelos dispersos e interpretables.</span> },
-                    { label: 'Dropout', content: <span>En cada iteración apaga aleatoriamente un porcentaje de neuronas (ej. 50 %). Como sacar al rotar a la «estrella» del grupo de estudio: nadie depende de una sola neurona, todos aprenden a resolver. Rompe la co-adaptación.</span> },
+                    { label: 'Dropout', content: <span>En cada iteración apaga aleatoriamente un porcentaje de neuronas (ej. 50 %). Es como ir rotando, en cada sesión, a quién se le pide ausentarse del grupo de estudio —incluida la «estrella»—: nadie depende de una sola neurona y todos aprenden a resolver. Rompe la co-adaptación.</span> },
                 ]} />
                 <CodeBlock title="Regularización en PyTorch" code={regulTorch} lang="pytorch" />
+                <p>
+                    Conviene notar una diferencia de naturaleza: <strong>L1 y L2 son penalizaciones</strong> que se suman al costo,
+                    mientras que <strong>Dropout y Batch Normalization son capas</strong> que se insertan en la arquitectura de la red.
+                </p>
                 <Box type="info" label="Caso aplicado · jaguar vs. puma (cámaras trampa, Orinoquía)">
                     Con solo 500 imágenes por especie (muchas nocturnas), el modelo podría aprender «manchas = jaguar» y confundir
                     al ocelote. <strong>Dropout</strong> en las capas de textura lo obliga a usar rasgos robustos (forma de la cabeza,
@@ -3408,7 +3680,7 @@ red = nn.Sequential(
                 <p>
                     Analogía del <strong>Ajiaco Santafereño</strong>: las papas (sabanera, pastusa, criolla) llegan con tamaños muy
                     variables; si entran a la olla sin estandarizar, la cocción es impredecible. La solución es cortar todo a cubos
-                    uniformes. Batch Norm hace lo mismo entre capas: re-escala los datos para que cada neurona reciba una
+                    uniformes. Batch Norm hace lo mismo entre capas: re-escala las activaciones para que cada neurona reciba una
                     distribución estable, permitiendo tasas de aprendizaje altas sin inestabilidad.
                 </p>
                 <Accordion items={[
@@ -3416,12 +3688,17 @@ red = nn.Sequential(
                     { titulo: '2. Escalado (dividir por la desviación estándar)', contenido: <span>{String.raw`\(\hat{x}_i=\frac{x_i-\mu_{\mathcal{B}}}{\sqrt{\sigma_{\mathcal{B}}^2+\epsilon}}\)`}. Cortar las papas en cubos del mismo tamaño: todas con escala 1.</span> },
                     { titulo: '3. Transformación aprendible (γ y β)', contenido: <span>{String.raw`\(y_i=\gamma\,\hat{x}_i+\beta\)`}. El chef añade sal ({String.raw`\(\beta\)`}) y ajusta el fuego ({String.raw`\(\gamma\)`}): la red decide cuánto deshacer la estandarización.</span> },
                 ]} />
+                <Box type="info" label="Detalle clave: entrenamiento vs. inferencia">
+                    Durante el entrenamiento, Batch Norm usa la media y la varianza <strong>del lote actual</strong>; en inferencia
+                    emplea <strong>estadísticas acumuladas</strong> durante el entrenamiento, de modo que la predicción de una muestra
+                    no dependa del lote en que llegue.
+                </Box>
 
                 <h3>Curvas de aprendizaje y Early Stopping</h3>
                 <p>
                     Graficar el error de entrenamiento y validación a lo largo de las épocas diagnostica la salud del modelo. Si el
                     de entrenamiento baja pero el de validación sube (forma de «U»), hay <strong>sobreajuste</strong>. Si ambos
-                    quedan altos, hay <strong>subajuste</strong>.
+                    quedan altos, hay <strong>subajuste (underfitting)</strong>. El <Termino def="Detener el entrenamiento en la época donde el error de validación toca su mínimo, conservando esos pesos, antes de que el modelo empiece a memorizar ruido.">Early Stopping</Termino> (parada temprana) aprovecha esa «U»: detiene el entrenamiento en el mínimo del error de validación y conserva esos pesos.
                 </p>
                 <CurvaAprendizajeChart />
 
@@ -3430,6 +3707,11 @@ red = nn.Sequential(
                     Reservar un único conjunto de validación puede sesgar la estimación. La <strong>validación cruzada K-Fold</strong>
                     (ej. {String.raw`\(K=5\)`}) divide los datos en 5 pliegues; en cada iteración entrena con 4 y valida con 1, rotando.
                     La métrica final es el promedio de las 5: estimación robusta del verdadero desempeño.
+                </p>
+                <p>
+                    K-Fold dice <strong>qué tan bien</strong> generaliza una configuración; pero antes hay que decidir
+                    <strong> qué configurar</strong>. Conviene entonces distinguir lo que el modelo aprende por sí solo de lo que el
+                    ingeniero fija de antemano:
                 </p>
                 <div className="overflow-x-auto">
                     <table>
@@ -3449,8 +3731,9 @@ red = nn.Sequential(
                 <h3>Matriz de confusión y métricas</h3>
                 <p>
                     Decir «mi modelo tiene 95 % de exactitud» puede ser una mentira peligrosa. En Urabá, si solo 5 de cada 100
-                    pacientes tienen dengue grave, un modelo que diga «nadie está grave» acierta el 95 %… pero <strong>omite todos
-                        los casos graves</strong>. Por eso se usa la matriz de confusión (analogía: trilladora de café Excelso/Pasilla):
+                    pacientes tienen dengue grave, un modelo que diga «nadie está grave» acierta el 95 % (los 95 que efectivamente
+                    no están graves)… pero <strong>omite todos los casos graves</strong>. Por eso se usa la matriz de confusión
+                    (analogía: trilladora de café Excelso/Pasilla):
                 </p>
                 <ConfusionMatrix />
                 <div className="grid md:grid-cols-3 gap-3 my-3">
@@ -3459,8 +3742,10 @@ red = nn.Sequential(
                     <div className="usta-card p-4 text-center"><Eq>{String.raw`\(\frac{VP}{VP+FN}\)`}</Eq><span className="text-xs font-bold text-navy">Recall / Sensibilidad</span></div>
                 </div>
                 <CalloutPro tema="eth" titulo="Marco Ético de la IA en Colombia" subtitulo="Transparencia, explicabilidad y sensibilidad">
-                    Las métricas derivadas de la matriz de confusión (exactitud, recall) no son diferenciables —dependen de conteos con umbral—, por eso no se optimizan directamente; pero <strong>guían las decisiones
-                        de ingeniería</strong>: ante muchos falsos negativos (ej. fraude en Bancolombia, o dengue), se asignan
+                    Las métricas derivadas de la matriz de confusión (exactitud, recall) se calculan con <strong>conteos sobre un
+                        umbral</strong>, por lo que su gradiente es nulo o indefinido y no pueden optimizarse directamente por descenso
+                    del gradiente. Lo que sí se optimiza es la pérdida (p. ej. la entropía cruzada); las métricas <strong>guían las
+                        decisiones de ingeniería</strong>: ante muchos falsos negativos (ej. fraude en Bancolombia, o dengue), se asignan
                     <em>pesos de clase</em> para penalizarlos más. En aplicaciones críticas para Colombia —deslizamientos,
                     enfermedades, plagas— suele ser más ético priorizar la <strong>sensibilidad</strong>. El Marco Ético
                     para la IA en Colombia (2021) exige <strong>transparencia y explicabilidad</strong>: una decisión que afecta derechos
@@ -3468,10 +3753,10 @@ red = nn.Sequential(
                 </CalloutPro>
 
                 <MCQ
-                    pregunta="Un modelo da 98 % de exactitud en Medellín pero 55 % en Cúcuta. ¿Qué ocurre?"
+                    pregunta="Un modelo entrenado con datos de Medellín alcanza 98 % allí, pero al aplicarlo en Cúcuta cae a 55 %. ¿Qué ocurre?"
                     opciones={[
                         { texto: 'Generalización correcta.', correcta: false },
-                        { texto: 'Sobreajuste: memorizó el "ruido" de Medellín en vez de los conceptos generales.', correcta: true, justificacion: 'La gran brecha entrenamiento(alto)–prueba(bajo) es la definición de overfitting.' },
+                        { texto: 'Sobreajuste: memorizó rasgos idiosincrásicos de Medellín en vez de los patrones generales.', correcta: true, justificacion: 'La fuerte caída al cambiar de población indica que el modelo aprendió detalles propios de su dominio de entrenamiento y no generalizó: sobreajuste.' },
                         { texto: 'Subajuste.', correcta: false },
                         { texto: 'Un error de hardware.', correcta: false },
                     ]} />
@@ -3543,6 +3828,16 @@ red = nn.Sequential(
                         justificacion: 'Las decisiones que afectan derechos fundamentales no pueden ser cajas negras.'
                     },
                 ]} />
+
+                <Box type="tip" label="Síntesis del Capítulo 5">
+                    El entrenamiento se reduce a un <strong>bucle de cinco pasos</strong> (forward, loss, zero_grad, backward, step).
+                    Para que el modelo aprenda en vez de memorizar, se <strong>regulariza</strong> (L1/L2, Dropout) y se
+                    <strong> estabiliza</strong> (Batch Norm); para evaluarlo con honestidad, se leen las <strong>curvas de
+                    aprendizaje</strong>, se aplica Early Stopping, se valida con <strong>K-Fold</strong> y se mira más allá de la
+                    exactitud con la <strong>matriz de confusión</strong>. En aplicaciones críticas, además, la <strong>ética</strong>
+                    obliga a priorizar la sensibilidad y a garantizar transparencia. Con esto se cierra el contenido del Módulo 1; la
+                    siguiente sección consolida la evaluación integradora, el glosario y los recursos.
+                </Box>
             </div>
         );
 
