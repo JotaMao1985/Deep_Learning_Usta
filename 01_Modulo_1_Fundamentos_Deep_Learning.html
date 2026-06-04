@@ -2345,7 +2345,7 @@ modelo = nn.Sequential(
                         </div>
                     </div>
                     <div className="p-5">
-                        <p className="text-xs text-gray-500 mb-2"><i className="fas fa-hand-pointer mr-1"></i>Clic en el lienzo para <strong>añadir</strong> un punto · arrastra para <strong>moverlo</strong>. La salida es lineal y la pérdida es el error cuadrático medio (MSE).</p>
+                        <p className="text-xs text-gray-500 mb-2"><i className="fas fa-hand-pointer mr-1"></i>Un clic en el lienzo <strong>añade</strong> un punto; al <strong>arrastrarlo</strong> se desplaza. La salida es lineal y la pérdida es el error cuadrático medio (MSE).</p>
                         <div className="rounded-xl overflow-hidden border border-gray-200 shadow-inner">
                             <canvas ref={canvasRef} width={LW} height={LH}
                                 onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerLeave={onUp}
@@ -2408,11 +2408,11 @@ modelo = nn.Sequential(
                     El Perceptrón Multicapa (MLP) es la arquitectura de red neuronal más básica y fundamental. Aunque hoy
                     existen arquitecturas especializadas (CNN para imágenes, RNN para secuencias, Transformers para lenguaje),
                     comprender el MLP es esencial: en él se manifiestan, en su forma más pura, las neuronas, las funciones de
-                    activación, la propagación de señales y los gradientes. <strong>Quien entiende un MLP comprende cerca del 80 %
-                        del aprendizaje profundo moderno.</strong>
+                    activación, la propagación de señales y los gradientes. <strong>Quien comprende un MLP domina los
+                        fundamentos que sostienen la mayor parte del aprendizaje profundo moderno.</strong>
                 </p>
 
-                <Box type="info" label="Qué vas a aprender">
+                <Box type="info" label="Lo que se aprenderá en este capítulo">
                     <ul>
                         <li>Por qué los problemas reales son <strong>no lineales</strong> y por qué una sola recta no basta.</li>
                         <li>La <strong>anatomía de una neurona</strong> (suma ponderada + sesgo + activación) y cómo encadenarla en capas.</li>
@@ -2521,7 +2521,7 @@ modelo = nn.Sequential(
                     producen curvas suaves.
                 </p>
                 <InterpoladorCurva />
-                <Box type="tip" label="Qué conviene observar">
+                <Box type="tip" label="Qué conviene observar en la curva">
                     <ul>
                         <li><strong>La activación moldea la curva:</strong> ReLU → quebrada (tramos rectos); Tanh/Sigmoide → suave. Es el mismo efecto del catálogo que sigue, pero visible sobre la función aprendida.</li>
                         <li><strong>Más neuronas = más flexibilidad:</strong> con pocos nodos la curva es rígida; con muchos puede pasar casi exactamente por todos los puntos… y empezar a <em>serpentear</em> entre ellos (sobreajuste, Capítulo 5).</li>
@@ -2544,6 +2544,15 @@ modelo = nn.Sequential(
                     { titulo: 'Softmax', contenido: <span>{String.raw`\(\text{softmax}(\mathbf{z})_i=\frac{e^{z_i}}{\sum_j e^{z_j}}\)`}. Convierte {String.raw`\(K\)`} logits en probabilidades que suman 1. Capa de salida para clasificación multiclase (ej. {`{café, plátano, yuca, maíz}`}).</span> },
                 ]} />
 
+                <MCQ
+                    pregunta="¿Por qué un MLP necesita funciones de activación no lineales entre sus capas?"
+                    opciones={[
+                        { texto: 'Para acelerar el cómputo en la GPU.', correcta: false },
+                        { texto: 'Porque sin ellas, apilar capas lineales equivale a una sola transformación lineal (no aporta poder expresivo).', correcta: true, justificacion: 'La composición de funciones lineales es lineal; la no linealidad es lo que permite modelar curvas y resolver problemas como el XOR.' },
+                        { texto: 'Para normalizar los datos de entrada.', correcta: false },
+                        { texto: 'Para reducir el número de parámetros.', correcta: false },
+                    ]} />
+
                 <h4>Reglas prácticas de selección</h4>
                 <div className="overflow-x-auto">
                     <table>
@@ -2556,6 +2565,16 @@ modelo = nn.Sequential(
                         </tbody>
                     </table>
                 </div>
+
+                <MCQ
+                    pregunta="Para la capa de salida de un clasificador de 4 especies de cultivo, ¿qué activación corresponde?"
+                    opciones={[
+                        { texto: 'Sigmoide.', correcta: false },
+                        { texto: 'ReLU.', correcta: false },
+                        { texto: 'Softmax.', correcta: true, justificacion: 'Con 3 o más clases mutuamente excluyentes, Softmax produce una distribución de probabilidad que suma 1 sobre las K clases.' },
+                        { texto: 'Lineal.', correcta: false },
+                    ]} />
+
                 <CodeBlock title="Un MLP en PyTorch (ilustrativo)" code={mlpTorch} lang="pytorch" />
 
                 <Box type="tip" label="¿Cuántos parámetros tiene esa red?">
@@ -2575,33 +2594,15 @@ modelo = nn.Sequential(
                     una curva capaz de envolver los datos.
                 </p>
                 <RedFrontera />
-                <Box type="tip" label="Qué conviene observar">
+                <Box type="tip" label="Qué conviene observar en la frontera">
                     <ul>
                         <li>Con <strong>una sola capa y pocos nodos</strong>, la frontera es casi recta: no logra separar las lunas ni los círculos.</li>
                         <li>Al <strong>añadir nodos y capas</strong>, la frontera se curva y abraza la forma de los datos: el Teorema de Aproximación Universal en vivo.</li>
-                        <li>La <strong>activación importa</strong>: <em>ReLU</em> produce fronteras de tramos rectos (poligonales); <em>Tanh</em> y <em>Sigmoide</em>, curvas suaves. La <em>Sigmoide</em>, por su saturación (desvanecimiento del gradiente), suele necesitar una <strong>tasa de aprendizaje mayor</strong> para avanzar.</li>
+                        <li>La <strong>activación importa</strong>: <em>ReLU</em> produce fronteras de tramos rectos (poligonales); <em>Tanh</em> y <em>Sigmoide</em>, curvas suaves. La <em>Sigmoide</em>, por su saturación (desvanecimiento del gradiente), suele <strong>converger más lento</strong> que <em>ReLU</em> o <em>Tanh</em>.</li>
                         <li>Una <strong>tasa de aprendizaje</strong> muy alta hace oscilar o divergir la pérdida; una muy baja, aprender a paso lento.</li>
                         <li>El botón <strong>«Congelar frontera»</strong> fija la frontera actual como banda dorada, para contrastar el «antes» y el «después» tras cambiar la arquitectura y reentrenar.</li>
                     </ul>
                 </Box>
-
-                <MCQ
-                    pregunta="¿Por qué un MLP necesita funciones de activación no lineales entre sus capas?"
-                    opciones={[
-                        { texto: 'Para acelerar el cómputo en la GPU.', correcta: false },
-                        { texto: 'Porque sin ellas, apilar capas lineales equivale a una sola transformación lineal (no aporta poder expresivo).', correcta: true, justificacion: 'La composición de funciones lineales es lineal; la no linealidad es lo que permite modelar curvas y resolver problemas como el XOR.' },
-                        { texto: 'Para normalizar los datos de entrada.', correcta: false },
-                        { texto: 'Para reducir el número de parámetros.', correcta: false },
-                    ]} />
-
-                <MCQ
-                    pregunta="Para la capa de salida de un clasificador de 4 especies de cultivo, ¿qué activación corresponde?"
-                    opciones={[
-                        { texto: 'Sigmoide.', correcta: false },
-                        { texto: 'ReLU.', correcta: false },
-                        { texto: 'Softmax.', correcta: true, justificacion: 'Con 3 o más clases mutuamente excluyentes, Softmax produce una distribución de probabilidad que suma 1 sobre las K clases.' },
-                        { texto: 'Lineal.', correcta: false },
-                    ]} />
 
                 <Quiz titulo="Mini-cuestionario · Capítulo 2" preguntas={[
                     {
@@ -2802,7 +2803,8 @@ opt_adam = torch.optim.Adam(modelo.parameters(), lr=0.001)
                 <p>
                     La función de costo {String.raw`\(L(\hat{y}, y)\)`} compara las predicciones con la realidad: si la diferencia es
                     grande, el costo es alto; si la predicción es perfecta, el costo es cero. La elección no es trivial: define
-                    <em>qué le importa</em> al modelo.
+                    <em>qué le importa</em> al modelo. Retomando la analogía inicial, la función de costo es el <strong>altímetro</strong> del
+                    excursionista: cuanto más alto su valor, más lejos queda el valle que representa la solución.
                 </p>
 
                 <h4>Error Cuadrático Medio (MSE) — regresión</h4>
@@ -2856,6 +2858,14 @@ opt_adam = torch.optim.Adam(modelo.parameters(), lr=0.001)
                     </table>
                 </div>
 
+                <Box type="tip" label="El hilo común: máxima verosimilitud">
+                    Estas tres funciones no son arbitrarias: cada una surge de <strong>maximizar la verosimilitud</strong> de los datos
+                    bajo un supuesto distinto sobre su naturaleza —un ruido gaussiano conduce al <strong>MSE</strong>; un resultado
+                    Bernoulli (sí/no), a la <strong>BCE</strong>; y una variable categórica de {String.raw`\(C\)`} clases, a la
+                    <strong>CCE</strong>—. Minimizar el costo equivale, en los tres casos, a hacer que los datos observados resulten
+                    lo más probables posible para el modelo.
+                </Box>
+
                 <CalloutPro tema="eth" titulo="Dimensión ética" subtitulo="Cuando los datos están desbalanceados">
                     Si los datos de dengue están muy desbalanceados (95 % no graves, 5 % graves), una función de costo estándar
                     podría minimizar el error global <strong>ignorando los casos graves</strong>. En salud pública, un falso negativo
@@ -2881,7 +2891,7 @@ opt_adam = torch.optim.Adam(modelo.parameters(), lr=0.001)
                     forma eficiente? Ese es justamente el tema del <strong>Capítulo 4: Retropropagación</strong>.
                 </Box>
 
-                <h4>La tasa de aprendizaje: cuestión de vida o muerte</h4>
+                <h3>La tasa de aprendizaje: cuestión de vida o muerte</h3>
                 <p>
                     El siguiente laboratorio usa el mismo valle simple {String.raw`\(L(\theta)=\theta^2\)`}. Al variar la tasa de aprendizaje
                     {String.raw` \(\eta\)`} se aprecia cómo cambia el comportamiento del descenso; el resumen de los tres regímenes aparece debajo:
@@ -2970,8 +2980,8 @@ opt_adam = torch.optim.Adam(modelo.parameters(), lr=0.001)
 
                 <h4>RMSProp: un paso a la medida de cada parámetro</h4>
                 <p>
-                    Una sola {String.raw`\(\eta\)`} para todos los pesos es un traje genérico. <strong>RMSProp</strong> lleva un promedio de la
-                    magnitud reciente del gradiente de <em>cada</em> parámetro y divide su paso por ella: los parámetros con gradientes grandes y
+                    Una sola {String.raw`\(\eta\)`} para todos los pesos es un traje genérico. <strong>RMSProp</strong> lleva una media móvil del
+                    <em>cuadrado</em> del gradiente reciente de cada parámetro (su valor RMS, de ahí el nombre) y divide su paso por esa raíz: los parámetros con gradientes grandes y
                     ruidosos avanzan con cautela, y los de gradientes pequeños y constantes avanzan más rápido. Es como dar pasos largos en terreno
                     parejo y pasos cortos donde hay piedras.
                 </p>
@@ -2985,12 +2995,15 @@ opt_adam = torch.optim.Adam(modelo.parameters(), lr=0.001)
                 </p>
                 <CodeBlock title="Optimizadores en PyTorch (ilustrativo)" code={optimTorch} lang="pytorch" />
                 <p>
-                    El siguiente comparador muestra las tres estrategias sobre un mismo «valle estrecho» (una superficie donde el descenso simple
-                    se atasca). Cada botón activa o desactiva una trayectoria:
+                    El comparador pasa de uno a <strong>dos</strong> parámetros ({String.raw`\(\theta_1, \theta_2\)`}) para revelar un fenómeno que
+                    con un solo eje no se aprecia: un <strong>valle alargado</strong>, mucho más empinado en una dirección que en la otra (aquí, una
+                    relación de pendientes de 10:1). En esa geometría —que se denomina problema <strong>mal condicionado</strong>— el descenso
+                    simple zigzaguea de pared a pared en lugar de avanzar hacia el fondo. Sobre ese mismo valle estrecho se contrastan las tres
+                    estrategias; cada botón activa o desactiva una trayectoria:
                 </p>
                 <OptimizerCompare />
                 <Box type="tip" label="¿Cuál elegir?">
-                    En la práctica conviene empezar con <strong>Adam</strong> (lr ≈ 0.001): converge rápido y tolera una mala elección de {String.raw`\(\eta\)`}.
+                    En la práctica conviene empezar con <strong>Adam</strong> ({String.raw`\(\eta \approx 0.001\)`}): converge rápido y tolera una mala elección de la tasa de aprendizaje.
                     <strong>SGD con momentum</strong> a veces generaliza un poco mejor en visión por computador, pero exige ajustar con más cuidado la
                     tasa de aprendizaje. Ante la duda, Adam es un punto de partida seguro.
                 </Box>
@@ -3006,7 +3019,8 @@ opt_adam = torch.optim.Adam(modelo.parameters(), lr=0.001)
                         </div>
                     }>
                     Una neurona lineal sin sesgo predice {String.raw`\(\hat{y} = w\,x\)`} con {String.raw`\(w = 0.5\)`} y entrada {String.raw`\(x = 2\)`}.
-                    El valor real es {String.raw`\(y = 3\)`}. Con error {String.raw`\(L = (\hat{y}-y)^2\)`} y tasa {String.raw`\(\eta = 0.1\)`}, se pide calcular a mano:
+                    El valor real es {String.raw`\(y = 3\)`}. Con un <strong>único ejemplo</strong> el promedio {String.raw`\(1/N\)`} de la fórmula del MSE
+                    desaparece, de modo que el costo se reduce a {String.raw`\(L = (\hat{y}-y)^2\)`}; con tasa {String.raw`\(\eta = 0.1\)`}, se pide calcular a mano:
                     (a)&nbsp;la predicción, (b)&nbsp;el error, (c)&nbsp;el gradiente {String.raw`\(dL/dw\)`} y (d)&nbsp;el nuevo {String.raw`\(w\)`} tras un paso de descenso.
                 </Reto>
 
