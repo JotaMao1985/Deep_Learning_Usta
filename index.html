@@ -157,6 +157,15 @@
                 cta: 'Empezar microlearning',
                 icon: 'fa-bolt',
             },
+            {
+                archivo: 'notebooks/01-lab-fundamentos-modulo-1.ipynb',
+                href: 'https://colab.research.google.com/github/JotaMao1985/Deep_Learning_Usta/blob/main/notebooks/01-lab-fundamentos-modulo-1.ipynb',
+                externo: true,
+                titulo: 'Laboratorio en Python (notebook)',
+                desc: 'Cuaderno ejecutable que acompaña los capítulos: de una neurona en numpy a entrenar un MLP en PyTorch, con frontera de decisión, curvas de pérdida y el reto de sobreajuste y Dropout. Se abre en Google Colab.',
+                cta: 'Abrir en Colab',
+                icon: 'fa-flask',
+            },
         ];
 
         /* ============================================================
@@ -225,7 +234,8 @@
            TARJETA DE RECURSO — hijos del módulo (00, 011)
         ============================================================ */
         const TarjetaRecurso = ({ data }) => (
-            <a href={data.archivo}
+            <a href={data.href || data.archivo}
+                {...(data.externo ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                 className="usta-card block p-6 group h-full flex flex-col">
                 <div className="flex items-center gap-3 mb-3">
                     <span className="bg-primary/10 text-primary rounded-xl flex items-center justify-center flex-shrink-0"
@@ -236,7 +246,7 @@
                 </div>
                 <p className="text-sm text-gray-600 leading-relaxed flex-1">{data.desc}</p>
                 <span className="inline-flex items-center gap-2 mt-4 text-sm font-semibold text-secondary group-hover:gap-3 transition-all">
-                    {data.cta} <i className="fas fa-arrow-right text-xs"></i>
+                    {data.cta} <i className={`fas ${data.externo ? 'fa-arrow-up-right-from-square' : 'fa-arrow-right'} text-xs`}></i>
                 </span>
             </a>
         );
