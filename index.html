@@ -168,6 +168,17 @@
             },
         ];
 
+        /* Proyecto Integrador Centinela — actividades que crecen módulo a módulo. */
+        const PROYECTO = [
+            {
+                archivo: '21_Modulo_2_Actividad_Fase2_Centinela.html',
+                titulo: 'Centinela · Fase 2 (Módulo 2)',
+                desc: 'Actividad evaluativa del Módulo 2: del MLP al sistema multimodal especializado — clasificación con CNN/Transfer Learning, series temporales con RNN/LSTM/GRU y fusión de ambas ramas en un único predictor. Con rúbrica, diagramas y uso responsable de IA.',
+                cta: 'Abrir la actividad',
+                icon: 'fa-satellite-dish',
+            },
+        ];
+
         /* ============================================================
            HERO — cabecera institucional navy
         ============================================================ */
@@ -270,6 +281,18 @@
                         </div>
                         <div className="grid md:grid-cols-2 gap-5">
                             {RECURSOS.map(r => <TarjetaRecurso key={r.archivo} data={r} />)}
+                        </div>
+                    </div>
+
+                    <div className="mt-12">
+                        <div className="flex items-center gap-3 mb-5">
+                            <span className="usta-gradient text-white p-2 rounded-lg">
+                                <i className="fas fa-diagram-project"></i>
+                            </span>
+                            <h2 className="text-xl font-bold text-navy">Proyecto integrador · crece con el curso</h2>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-5">
+                            {PROYECTO.map(p => <TarjetaRecurso key={p.archivo} data={p} />)}
                         </div>
                     </div>
                 </main>

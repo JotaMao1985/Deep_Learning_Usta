@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Actividad evaluativa del Módulo 2 — Proyecto Centinela, Fase 2: del MLP al sistema multimodal especializado. Clasificación con CNN y Transfer Learning, modelado de series temporales con RNN/LSTM/GRU y fusión multimodal. Maestría en Ciencia de Datos, Universidad Santo Tomás.">
+    <title>Actividad · Proyecto Centinela · Fase 2 (Módulo 2) — Arquitecturas Especializadas · USTA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Tailwind CSS (utilidades) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome (iconografía de apoyo) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- MathJax 3 — el contenido es matemáticamente denso; aquí es estático (no se revela
+         dinámicamente), por lo que MathJax tipografía una sola vez al cargar, sin re-typeset.
+         Las pestañas conservan su contenido en el DOM (solo se alterna display), así que
+         todas las fórmulas quedan tipografiadas desde la carga. -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <!-- Google Fonts: Montserrat (texto) y Fira Code (código) -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Montserrat', 'Helvetica Neue', 'Arial', 'sans-serif'] },
+                    colors: {
+                        primary: '#3D008D',
+                        secondary: '#ED1E79',
+                        navy: '#001A4D',
+                        gold: '#FDB913',
+                        teal: '#0E7490',
+                        bg: '#F8FAFC',
+                        surface: '#FFFFFF',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #F8FAFC;
+            color: #1E293B;
+            scroll-behavior: smooth;
+        }
+        code, pre, .mono { font-family: 'Fira Code', monospace; }
+
+        /* Gradientes institucionales USTA */
+        .usta-gradient { background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%); }
+        .usta-gradient-text {
+            background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .usta-header { background: linear-gradient(135deg, #001A4D 0%, #3D008D 60%, #5B1C9E 100%); }
+
+        /* Tarjeta base */
+        .card {
+            background: #fff; border-radius: 16px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+            transition: box-shadow .25s ease, transform .25s ease;
+        }
+        .card:hover { box-shadow: 0 12px 30px rgba(0,0,0,0.11); transform: translateY(-3px); }
+
+        /* Barra de desplazamiento */
+        ::-webkit-scrollbar { width: 9px; height: 9px; }
+        ::-webkit-scrollbar-track { background: #eef2f7; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg,#3D008D,#ED1E79); border-radius: 5px; }
+
+        /* Aparición progresiva: SOLO una entrada sutil que nunca oculta el contenido. */
+        @keyframes riseIn { from { opacity: .35; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        .js .reveal.in { animation: riseIn .5s ease-out both; }
+
+        /* Código en línea y bloques */
+        .icode {
+            background: #F1F5F9; color: #0F172A; padding: .08rem .42rem;
+            border-radius: 5px; font-size: .85em; font-family: 'Fira Code', monospace;
+        }
+        .codeblock {
+            background: #0F172A; color: #E2E8F0; border-radius: 12px;
+            padding: 1rem 1.1rem; font-family: 'Fira Code', monospace;
+            font-size: .82rem; line-height: 1.7; overflow-x: auto;
+        }
+        .codeblock .cm { color: #64748B; }
+        .codeblock .kw { color: #F472B6; }
+        .codeblock .fn { color: #7DD3FC; }
+        .codeblock .st { color: #FDE68A; }
+
+        /* Píldoras de fórmula */
+        .eq {
+            background: #FAF8FF; border: 1px solid rgba(61,0,141,.14);
+            border-radius: 12px; padding: .55rem 1rem; overflow-x: auto;
+        }
+
+        /* Callout / analogía */
+        .callout { border-left: 4px solid; border-radius: 12px; padding: .9rem 1.1rem; }
+        .callout-info   { background:#F3F0FC; border-color:#3D008D; }
+        .callout-tip    { background:#ECFDF5; border-color:#0E9F6E; }
+        .callout-warn   { background:#FFFBEB; border-color:#FDB913; }
+        .callout-danger { background:#FEF2F2; border-color:#DC2626; }
+        .callout-eth    { background:#F0F9FF; border-color:#0E7490; }
+
+        h2.sec-title { font-weight: 800; letter-spacing: -.02em; }
+
+        /* Navegación sticky */
+        .navbar { backdrop-filter: blur(8px); background: rgba(255,255,255,.86); }
+        .navlink { transition: color .2s ease, background .2s ease; }
+        .navlink:hover { color:#3D008D; }
+
+        /* Pestañas (vanilla JS; los paneles permanecen en el DOM) */
+        .tab-btn { transition: all .2s ease; border-bottom: 3px solid transparent; }
+        .tab-btn.active { color:#3D008D; border-bottom-color:#ED1E79; }
+        .tab-panel[hidden] { display: none; }
+
+        /* Tabla genérica */
+        .tbl { width:100%; border-collapse: collapse; font-size:.9rem; }
+        .tbl th, .tbl td { border:1px solid #E2E8F0; padding:.6rem .7rem; vertical-align: top; text-align:left; }
+        .tbl thead th { color:#fff; }
+
+        /* Numeración de pasos */
+        .step-num {
+            flex: 0 0 auto; width:34px; height:34px; border-radius:10px;
+            display:flex; align-items:center; justify-content:center;
+            font-weight:800; color:#fff; background:linear-gradient(140deg,#3D008D,#ED1E79);
+        }
+
+        /* Figuras / diagramas */
+        figure { margin: 0; }
+        figcaption { font-size:.8rem; color:#64748B; margin-top:.5rem; text-align:center; }
+
+        /* Impresión / PDF */
+        @media print {
+            body { background: #fff; }
+            .no-print { display: none !important; }
+            .card { box-shadow: none; border: 1px solid #e5e7eb; break-inside: avoid; }
+            section { break-inside: avoid-page; }
+            .tab-panel[hidden] { display: block !important; }
+            .js .reveal { opacity: 1 !important; transform: none !important; }
+            a { color: #1E293B; text-decoration: none; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ====================== ENCABEZADO ====================== -->
+    <header class="usta-header text-white">
+        <div class="max-w-6xl mx-auto px-5 md:px-8 py-10 md:py-14">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="usta-gradient p-2.5 rounded-xl shadow-lg"><i class="fas fa-satellite-dish text-lg"></i></span>
+                <span class="text-[11px] md:text-xs uppercase tracking-[0.25em] text-gold font-bold">Universidad Santo Tomás · Maestría en Ciencia de Datos</span>
+            </div>
+            <p class="text-secondary font-semibold text-sm md:text-base mb-1">Profundización I: Redes Neuronales — Deep Learning · EA-N-F-004</p>
+            <h1 class="text-3xl md:text-5xl font-extrabold leading-tight tracking-tight">
+                Proyecto <span class="text-gold">Centinela</span> · Fase 2<br class="hidden md:block">
+                Del MLP al Sistema Multimodal Especializado
+            </h1>
+            <p class="text-lg md:text-2xl font-light text-white/90 mt-3">Módulo 2 · Arquitecturas de Redes Neuronales Especializadas (CNN · RNN · Fusión)</p>
+            <div class="flex flex-wrap gap-2 mt-6 text-xs md:text-sm">
+                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-weight-hanging mr-1.5 text-gold"></i>Peso evaluativo 30 %</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-clock mr-1.5 text-gold"></i>46 horas</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-user mr-1.5 text-gold"></i>Individual</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-layer-group mr-1.5 text-gold"></i>Fase 2 de 3</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ====================== NAVEGACIÓN STICKY ====================== -->
+    <nav class="navbar sticky top-0 z-40 border-b border-slate-200 no-print">
+        <div class="max-w-6xl mx-auto px-4 flex gap-1 md:gap-3 overflow-x-auto text-xs md:text-sm font-semibold py-2.5 whitespace-nowrap">
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#contexto"><i class="fas fa-diagram-project mr-1"></i>Contexto</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#objetivos"><i class="fas fa-bullseye mr-1"></i>Objetivos</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#mapa"><i class="fas fa-sitemap mr-1"></i>Mapa de la fase</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#datos"><i class="fas fa-database mr-1"></i>Datos</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#desarrollo"><i class="fas fa-code-branch mr-1"></i>Desarrollo</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#ia"><i class="fas fa-robot mr-1"></i>Uso de IA</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#entrega"><i class="fas fa-box-open mr-1"></i>Entrega</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#rubrica"><i class="fas fa-table-list mr-1"></i>Rúbrica</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#recursos"><i class="fas fa-book mr-1"></i>Recursos</a>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-5 md:px-8 py-10 md:py-14 space-y-14">
+
+        <!-- ====================== CONTEXTO / CONTINUIDAD ====================== -->
+        <section id="contexto" class="reveal">
+            <div class="callout callout-info">
+                <p class="font-bold text-primary mb-1"><i class="fas fa-link mr-2"></i>Esta actividad continúa un proyecto que ya está en marcha</p>
+                <p class="text-sm leading-relaxed">El <strong>Proyecto Centinela</strong> es un sistema de alerta temprana que el estudiante construye una sola vez y hace crecer a lo largo del curso. En la <strong>Fase 1 (Módulo 1)</strong> se levantó una línea base tabular con un Perceptrón Multicapa (MLP). En esta <strong>Fase 2 (Módulo 2)</strong>, el mismo problema y el mismo cliente se conservan, pero la evidencia deja de ser un puñado de características hechas a mano: el sistema aprende directamente de <strong>datos crudos</strong> mediante arquitecturas especializadas —convolucionales para imagen, recurrentes para series de tiempo— y finalmente <strong>fusiona ambas modalidades</strong> en una sola predicción.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-4 mt-6">
+                <div class="card p-5">
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Fase 1 · Módulo 1</div>
+                    <div class="font-bold text-navy mb-1"><i class="fas fa-table-cells text-primary mr-1.5"></i>Línea base (MLP)</div>
+                    <p class="text-sm text-slate-600">Predicción del evento de riesgo a partir de características tabulares. <span class="text-emerald-600 font-semibold">Completada.</span></p>
+                </div>
+                <div class="card p-5 ring-2 ring-secondary">
+                    <div class="text-xs font-bold uppercase tracking-wider text-secondary mb-1">Fase 2 · Módulo 2 · <em>aquí</em></div>
+                    <div class="font-bold text-navy mb-1"><i class="fas fa-network-wired text-secondary mr-1.5"></i>Sistema multimodal</div>
+                    <p class="text-sm text-slate-600">CNN (imagen) + RNN/LSTM/GRU (serie) + <strong>fusión</strong>. La evidencia pasa a ser el dato crudo.</p>
+                </div>
+                <div class="card p-5">
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Fase 3 · Módulo 3</div>
+                    <div class="font-bold text-navy mb-1"><i class="fas fa-microchip text-primary mr-1.5"></i>Pipeline y despliegue</div>
+                    <p class="text-sm text-slate-600">Industrialización con GPU, precisión mixta y despliegue <em>offline</em> en campo.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== OBJETIVOS / COMPETENCIAS ====================== -->
+        <section id="objetivos" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-bullseye text-secondary mr-2"></i>Propósito, competencias y resultados de aprendizaje</h2>
+            <div class="grid md:grid-cols-2 gap-5">
+                <div class="card p-6">
+                    <h3 class="font-bold text-primary mb-2">Propósito</h3>
+                    <p class="text-sm leading-relaxed text-slate-700">El ejercicio consiste en transformar la línea base de la Fase 1 en un <strong>sistema multimodal especializado</strong>: una rama de visión por computador que aprende de imágenes mediante <strong>Transfer Learning</strong>, una rama recurrente que captura dependencias temporales en una serie, y un mecanismo de <strong>fusión</strong> que integra ambas para producir la alerta. El estudiante justifica cada decisión arquitectónica con criterios técnicos y comunica los resultados a un cliente no especializado.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-primary mb-2">Competencia troncal</h3>
+                    <p class="text-sm leading-relaxed text-slate-700 mb-4">Aplicar los modelos de ciencia de datos a la solución eficiente de problemas en contextos reales para mejorar la eficiencia y la eficacia de un sistema.</p>
+                    <h3 class="font-bold text-primary mb-2">Resultados de aprendizaje (Módulo 2)</h3>
+                    <ul class="text-sm text-slate-700 space-y-1.5 list-disc pl-5">
+                        <li>Implementa modelos neuronales especializados para imágenes y series temporales.</li>
+                        <li>Integra la analogía biológica con la matemática de tensores, convoluciones y compuertas.</li>
+                        <li>Comunica resultados con rigor mediante visualizaciones y <em>data storytelling</em>.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== MAPA DE LA FASE ====================== -->
+        <section id="mapa" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-sitemap text-secondary mr-2"></i>Mapa de la Fase 2</h2>
+            <p class="text-slate-600 mb-6 max-w-3xl">La fase se compone de tres entregables encadenados. Las ramas <strong>A</strong> y <strong>B</strong> pueden desarrollarse en paralelo; la <strong>C</strong> las integra y requiere que ambas existan.</p>
+
+            <figure class="card p-6 overflow-x-auto">
+                <svg viewBox="0 0 900 320" width="100%" role="img" aria-labelledby="mapaTitle mapaDesc" style="min-width:680px">
+                    <title id="mapaTitle">Arquitectura multimodal del sistema Centinela</title>
+                    <desc id="mapaDesc">Una rama de imagen procesada por una red convolucional y una rama de serie temporal procesada por una red recurrente convergen en una capa de fusión que produce la predicción de riesgo.</desc>
+                    <defs>
+                        <linearGradient id="gA" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0" stop-color="#3D008D"/><stop offset="1" stop-color="#5B1C9E"/>
+                        </linearGradient>
+                        <linearGradient id="gB" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0" stop-color="#0E7490"/><stop offset="1" stop-color="#0891B2"/>
+                        </linearGradient>
+                        <linearGradient id="gF" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0" stop-color="#ED1E79"/><stop offset="1" stop-color="#FDB913"/>
+                        </linearGradient>
+                        <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                            <path d="M0,0 L8,3 L0,6 Z" fill="#94A3B8"/>
+                        </marker>
+                    </defs>
+
+                    <!-- Rama A: imagen -> CNN -->
+                    <rect x="20" y="40" width="120" height="60" rx="10" fill="#EEF2FF" stroke="#C7D2FE"/>
+                    <text x="80" y="66" text-anchor="middle" font-size="13" font-weight="700" fill="#1E293B">Imágenes</text>
+                    <text x="80" y="84" text-anchor="middle" font-size="11" fill="#64748B">rama A (crudas)</text>
+                    <line x1="140" y1="70" x2="195" y2="70" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow)"/>
+                    <rect x="200" y="35" width="150" height="70" rx="12" fill="url(#gA)"/>
+                    <text x="275" y="62" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">CNN</text>
+                    <text x="275" y="80" text-anchor="middle" font-size="10.5" fill="#E9D5FF">Transfer Learning</text>
+                    <line x1="350" y1="70" x2="430" y2="120" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow)"/>
+                    <text x="370" y="60" font-size="10.5" fill="#475569">embedding <tspan font-style="italic">z</tspan><tspan baseline-shift="sub" font-size="8">img</tspan></text>
+
+                    <!-- Rama B: serie -> RNN -->
+                    <rect x="20" y="215" width="120" height="60" rx="10" fill="#ECFEFF" stroke="#A5F3FC"/>
+                    <text x="80" y="241" text-anchor="middle" font-size="13" font-weight="700" fill="#1E293B">Serie temporal</text>
+                    <text x="80" y="259" text-anchor="middle" font-size="11" fill="#64748B">rama B (ventanas)</text>
+                    <line x1="140" y1="245" x2="195" y2="245" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow)"/>
+                    <rect x="200" y="210" width="150" height="70" rx="12" fill="url(#gB)"/>
+                    <text x="275" y="237" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">LSTM / GRU</text>
+                    <text x="275" y="255" text-anchor="middle" font-size="10.5" fill="#CFFAFE">recurrente</text>
+                    <line x1="350" y1="245" x2="430" y2="195" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow)"/>
+                    <text x="362" y="285" font-size="10.5" fill="#475569">embedding <tspan font-style="italic">z</tspan><tspan baseline-shift="sub" font-size="8">seq</tspan></text>
+
+                    <!-- Fusión -->
+                    <rect x="435" y="130" width="150" height="60" rx="12" fill="#0F172A"/>
+                    <text x="510" y="156" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Fusión</text>
+                    <text x="510" y="174" text-anchor="middle" font-size="10.5" fill="#94A3B8">concatenación</text>
+                    <line x1="585" y1="160" x2="650" y2="160" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow)"/>
+
+                    <!-- Cabeza de decisión -->
+                    <rect x="655" y="125" width="150" height="70" rx="12" fill="url(#gF)"/>
+                    <text x="730" y="152" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">Predicción</text>
+                    <text x="730" y="170" text-anchor="middle" font-size="10.5" fill="#fff">riesgo / alerta</text>
+                </svg>
+                <figcaption>Figura 1. Arquitectura objetivo de la Fase 2: dos ramas especializadas producen vectores de representación (<em>embeddings</em>) que la capa de fusión integra para emitir la alerta. Es la imagen-guía que articula toda la actividad.</figcaption>
+            </figure>
+        </section>
+
+        <!-- ====================== DATOS ====================== -->
+        <section id="datos" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-database text-secondary mr-2"></i>Política de datos</h2>
+            <div class="grid md:grid-cols-3 gap-4">
+                <div class="card p-5">
+                    <div class="text-primary text-2xl mb-2"><i class="fas fa-earth-americas"></i></div>
+                    <h3 class="font-bold text-navy mb-1">Libre elección, fuentes reales</h3>
+                    <p class="text-sm text-slate-600">El estudiante conserva el problema y las fuentes definidas en la <strong>Propuesta de Datos</strong> de la Fase 1, ahora en su versión cruda: imágenes y serie completa. Se permiten fuentes <strong>no necesariamente colombianas</strong>.</p>
+                </div>
+                <div class="card p-5">
+                    <div class="text-secondary text-2xl mb-2"><i class="fas fa-images"></i></div>
+                    <h3 class="font-bold text-navy mb-1">Requisito por rama</h3>
+                    <p class="text-sm text-slate-600"><strong>Imagen:</strong> mínimo 500 imágenes en al menos 3 categorías. <strong>Serie:</strong> mínimo 1.000 observaciones secuenciales. Si una rama no aplica al problema elegido, se acuerda una alternativa con el docente.</p>
+                </div>
+                <div class="card p-5">
+                    <div class="text-red-600 text-2xl mb-2"><i class="fas fa-ban"></i></div>
+                    <h3 class="font-bold text-navy mb-1">Prohibido Kaggle</h3>
+                    <p class="text-sm text-slate-600">Quedan vetados los <em>datasets</em> y competencias de Kaggle y sus <em>mirrors</em>: son retos ya resueltos y con datos demasiado limpios. El detalle de fuentes válidas está en el Catálogo de Fuentes de Datos del curso.</p>
+                </div>
+            </div>
+            <div class="callout callout-warn mt-5">
+                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i>El escenario de referencia <strong>"Centinela del Café"</strong> combina imágenes de hoja (rama A) con la serie climática del municipio —donde la temperatura, la humedad y la lluvia condicionan el brote de roya— (rama B). Sirve de ejemplo; el problema propio del estudiante se rige por la misma lógica multimodal.</p>
+            </div>
+        </section>
+
+        <!-- ====================== DESARROLLO (PESTAÑAS) ====================== -->
+        <section id="desarrollo" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-code-branch text-secondary mr-2"></i>Desarrollo de la actividad</h2>
+
+            <!-- Selector de pestañas -->
+            <div class="flex gap-1 border-b border-slate-200 mb-7 text-sm md:text-base font-bold no-print" role="tablist">
+                <button class="tab-btn active px-3 md:px-5 py-3" data-tab="a" role="tab"><i class="fas fa-eye mr-1.5"></i>A · Rama visual (CNN)</button>
+                <button class="tab-btn px-3 md:px-5 py-3" data-tab="b" role="tab"><i class="fas fa-wave-square mr-1.5"></i>B · Rama temporal (RNN)</button>
+                <button class="tab-btn px-3 md:px-5 py-3" data-tab="c" role="tab"><i class="fas fa-object-group mr-1.5"></i>C · Fusión multimodal</button>
+            </div>
+
+            <!-- ============ PANEL A: CNN ============ -->
+            <div class="tab-panel" data-panel="a">
+                <div class="callout callout-info mb-6">
+                    <p class="text-sm"><strong>Meta de la rama A.</strong> Sustituir las características visuales hechas a mano de la Fase 1 por una <strong>red convolucional preentrenada</strong> que aprende los filtros por sí misma. El núcleo conceptual es la <em>convolución</em>: un mismo filtro recorre la imagen detectando un patrón local (bordes, manchas, texturas) sin importar dónde aparezca.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6 mb-7 items-start">
+                    <div>
+                        <h3 class="font-bold text-primary mb-2">La operación de convolución</h3>
+                        <p class="text-sm text-slate-700 mb-3">Un filtro (o <em>kernel</em>) \(K\) se desliza sobre la imagen \(I\); en cada posición calcula un producto punto que mide cuánto se parece la región a ese patrón:</p>
+                        <div class="eq mb-3">$$ S(i,j) = (I * K)(i,j) = \sum_{m}\sum_{n} I(i+m,\, j+n)\, K(m,n) $$</div>
+                        <p class="text-sm text-slate-700 mb-2">El tamaño del mapa de características de salida depende del tamaño de entrada \(W\), el filtro \(F\), el relleno (<em>padding</em>) \(P\) y el paso (<em>stride</em>) \(S\):</p>
+                        <div class="eq">$$ O = \left\lfloor \dfrac{W - F + 2P}{S} \right\rfloor + 1 $$</div>
+                    </div>
+                    <figure class="card p-5">
+                        <svg viewBox="0 0 360 220" width="100%" role="img" aria-label="Un filtro de 3 por 3 se desliza sobre una rejilla de entrada y produce una celda del mapa de características">
+                            <!-- rejilla de entrada (5x5 celdas de 30 px) -->
+                            <g stroke="#CBD5E1" fill="#F8FAFC">
+                                <rect x="10" y="20" width="150" height="150"/>
+                                <g>
+                                    <line x1="40" y1="20" x2="40" y2="170"/><line x1="70" y1="20" x2="70" y2="170"/>
+                                    <line x1="100" y1="20" x2="100" y2="170"/><line x1="130" y1="20" x2="130" y2="170"/>
+                                    <line x1="10" y1="50" x2="160" y2="50"/><line x1="10" y1="80" x2="160" y2="80"/>
+                                    <line x1="10" y1="110" x2="160" y2="110"/><line x1="10" y1="140" x2="160" y2="140"/>
+                                </g>
+                            </g>
+                            <!-- ventana del kernel resaltada (3x3 celdas = 90x90 px) -->
+                            <rect x="10" y="20" width="90" height="90" fill="rgba(237,30,121,.16)" stroke="#ED1E79" stroke-width="2.5"/>
+                            <text x="85" y="190" text-anchor="middle" font-size="11" fill="#64748B">entrada <tspan font-style="italic">I</tspan> · ventana 3×3</text>
+                            <!-- flecha -->
+                            <line x1="172" y1="70" x2="226" y2="70" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowConv)"/>
+                            <text x="200" y="58" text-anchor="middle" font-size="10.5" fill="#475569">Σ <tspan font-style="italic">I</tspan>·<tspan font-style="italic">K</tspan></text>
+                            <!-- celda de salida -->
+                            <rect x="232" y="45" width="50" height="50" rx="6" fill="#3D008D"/>
+                            <text x="257" y="75" text-anchor="middle" font-size="13" font-weight="700" fill="#fff"><tspan font-style="italic">S</tspan><tspan baseline-shift="sub" font-size="9">ij</tspan></text>
+                            <text x="257" y="115" text-anchor="middle" font-size="10.5" fill="#64748B">mapa de</text>
+                            <text x="257" y="129" text-anchor="middle" font-size="10.5" fill="#64748B">características</text>
+                            <!-- marcador de flecha local (id único, SVG autocontenido) -->
+                            <defs>
+                                <marker id="arrowConv" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                    <path d="M0,0 L8,3 L0,6 Z" fill="#94A3B8"/>
+                                </marker>
+                            </defs>
+                        </svg>
+                        <figcaption>Figura 2. La convolución reutiliza el mismo filtro en toda la imagen (<em>parameter sharing</em>), lo que reduce drásticamente los parámetros frente a un MLP y aporta invariancia a la traslación.</figcaption>
+                    </figure>
+                </div>
+
+                <div class="callout callout-tip mb-7">
+                    <p class="text-sm"><i class="fas fa-lightbulb text-emerald-600 mr-2"></i><strong>Por qué un MLP no basta para imágenes.</strong> Conectar cada píxel a cada neurona haría explotar el número de parámetros y perdería la estructura espacial. La convolución la preserva y comparte pesos: ese es el salto conceptual de la Fase 1 a la Fase 2.</p>
+                </div>
+
+                <h3 class="font-bold text-primary mb-4 text-lg">Pasos de la rama A</h3>
+                <ol class="space-y-4">
+                    <li class="flex gap-4"><span class="step-num">1</span><div><p class="font-semibold text-navy">Análisis exploratorio de imágenes</p><p class="text-sm text-slate-600">Distribución de clases, dimensiones, calidad, balance/desbalance; identificación de ruido visual, oclusiones y variabilidad de iluminación, con muestras representativas por clase.</p></div></li>
+                    <li class="flex gap-4"><span class="step-num">2</span><div><p class="font-semibold text-navy">Selección y justificación de arquitectura</p><p class="text-sm text-slate-600">Comparación de al menos <strong>dos</strong> arquitecturas preentrenadas (ResNet50, VGG16 o EfficientNet) por número de parámetros, profundidad, velocidad de inferencia y similitud con ImageNet. Decisión entre <em>Feature Extraction</em> (congelar pesos) y <em>Fine-Tuning</em> (reentrenar capas superiores) según tamaño y similitud del conjunto propio.</p></div></li>
+                    <li class="flex gap-4"><span class="step-num">3</span><div><p class="font-semibold text-navy">Implementación</p><p class="text-sm text-slate-600">Adaptación de la capa de clasificación final, <em>data augmentation</em> pertinente (rotación, <em>flip</em>, <em>zoom</em>, brillo), partición 70/15/15 justificada, <em>early stopping</em> y <em>callbacks</em>.</p></div></li>
+                    <li class="flex gap-4"><span class="step-num">4</span><div><p class="font-semibold text-navy">Evaluación e interpretabilidad</p><p class="text-sm text-slate-600">Matriz de confusión, precisión/recall/F1 por clase, análisis de errores con ejemplos visuales y <strong>Grad-CAM</strong> para verificar que la red mira la región correcta (la lesión, no el fondo).</p></div></li>
+                </ol>
+
+                <div class="codeblock mt-6"><span class="cm"># Transfer Learning — Feature Extraction (Keras)</span>
+<span class="kw">from</span> tensorflow.keras.applications <span class="kw">import</span> ResNet50
+base = <span class="fn">ResNet50</span>(weights=<span class="st">"imagenet"</span>, include_top=<span class="kw">False</span>, pooling=<span class="st">"avg"</span>)
+base.trainable = <span class="kw">False</span>            <span class="cm"># se congelan los pesos preentrenados</span>
+salida = <span class="fn">Dense</span>(n_clases, activation=<span class="st">"softmax"</span>)(base.output)
+modelo = <span class="fn">Model</span>(base.input, salida)   <span class="cm"># solo se entrena la cabeza</span></div>
+
+                <div class="callout callout-eth mt-6">
+                    <p class="text-sm"><i class="fas fa-scale-balanced text-teal-600 mr-2"></i><strong>Optimización para borde (Edge).</strong> Se aplica al menos una técnica (cuantización, poda o destilación) y se compara tamaño, latencia y precisión antes/después, anticipando el despliegue de campo de la Fase 3.</p>
+                </div>
+            </div>
+
+            <!-- ============ PANEL B: RNN ============ -->
+            <div class="tab-panel" data-panel="b" hidden>
+                <div class="callout callout-info mb-6">
+                    <p class="text-sm"><strong>Meta de la rama B.</strong> Modelar la <strong>serie temporal</strong> del problema (clima, demanda, casos) con arquitecturas recurrentes que recuerdan el pasado. El reto central es el <em>desvanecimiento del gradiente</em>: por qué una RNN simple olvida y cómo las compuertas de LSTM y GRU lo resuelven.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6 mb-7 items-start">
+                    <div>
+                        <h3 class="font-bold text-primary mb-2">La recurrencia y su talón de Aquiles</h3>
+                        <p class="text-sm text-slate-700 mb-3">Una RNN simple actualiza su estado oculto \(h_t\) combinando la entrada actual con la memoria previa:</p>
+                        <div class="eq mb-3">$$ h_t = \tanh\!\left(W_{hh}\,h_{t-1} + W_{xh}\,x_t + b_h\right) $$</div>
+                        <p class="text-sm text-slate-700 mb-3">Al retropropagar a través de muchos pasos (BPTT), el gradiente se vuelve un <strong>producto de Jacobianos</strong>; si sus normas son menores que 1, decae exponencialmente y la red no aprende dependencias largas:</p>
+                        <div class="eq">$$ \dfrac{\partial h_t}{\partial h_k} = \prod_{\tau=k+1}^{t} \dfrac{\partial h_\tau}{\partial h_{\tau-1}} \;\xrightarrow[\;t-k \text{ grande}\;]{}\; 0 $$</div>
+                    </div>
+                    <figure class="card p-5">
+                        <svg viewBox="0 0 360 210" width="100%" role="img" aria-label="Celda LSTM con compuerta de olvido, de entrada y de salida actuando sobre el estado de celda">
+                            <defs>
+                                <marker id="arrowB" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+                                    <path d="M0,0 L7,3 L0,6 Z" fill="#0E7490"/>
+                                </marker>
+                            </defs>
+                            <rect x="20" y="20" width="320" height="170" rx="14" fill="#ECFEFF" stroke="#A5F3FC"/>
+                            <text x="180" y="40" text-anchor="middle" font-size="12" font-weight="700" fill="#0E7490">Celda LSTM</text>
+                            <!-- línea del estado de celda (la autopista) -->
+                            <line x1="40" y1="68" x2="322" y2="68" stroke="#0E7490" stroke-width="3"/>
+                            <text x="40" y="58" font-size="11" fill="#0E7490"><tspan font-style="italic">C</tspan><tspan baseline-shift="sub" font-size="8.5">t−1</tspan></text>
+                            <text x="300" y="58" font-size="11" fill="#0E7490"><tspan font-style="italic">C</tspan><tspan baseline-shift="sub" font-size="8.5">t</tspan></text>
+                            <!-- nodo 1: compuerta de olvido, multiplica el estado previo -->
+                            <circle cx="105" cy="68" r="14" fill="#fff" stroke="#ED1E79" stroke-width="2"/>
+                            <text x="105" y="73" text-anchor="middle" font-size="12" fill="#ED1E79">×</text>
+                            <text x="105" y="100" text-anchor="middle" font-size="10" fill="#475569">olvido <tspan font-style="italic">f</tspan><tspan baseline-shift="sub" font-size="8">t</tspan></text>
+                            <!-- nodo 2: suma la escritura de la compuerta de entrada -->
+                            <circle cx="215" cy="68" r="14" fill="#fff" stroke="#3D008D" stroke-width="2"/>
+                            <text x="215" y="73" text-anchor="middle" font-size="12" fill="#3D008D">+</text>
+                            <text x="215" y="100" text-anchor="middle" font-size="10" fill="#475569">entrada <tspan font-style="italic">i</tspan><tspan baseline-shift="sub" font-size="8">t</tspan> ⊙ <tspan font-style="italic">C&#x0303;</tspan><tspan baseline-shift="sub" font-size="8">t</tspan></text>
+                            <line x1="215" y1="128" x2="215" y2="84" stroke="#3D008D" stroke-width="2" marker-end="url(#arrowB)"/>
+                            <!-- compuerta de salida: lee tanh(C_t) y produce h_t (fuera de la autopista) -->
+                            <circle cx="300" cy="128" r="14" fill="#fff" stroke="#0E7490" stroke-width="2"/>
+                            <text x="300" y="133" text-anchor="middle" font-size="12" fill="#0E7490">×</text>
+                            <text x="300" y="156" text-anchor="middle" font-size="10" fill="#475569">salida <tspan font-style="italic">o</tspan><tspan baseline-shift="sub" font-size="8">t</tspan></text>
+                            <line x1="300" y1="82" x2="300" y2="114" stroke="#0E7490" stroke-width="2" marker-end="url(#arrowB)"/>
+                            <text x="312" y="100" font-size="9.5" fill="#0E7490">tanh</text>
+                            <!-- entradas -->
+                            <line x1="60" y1="170" x2="60" y2="84" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowB)"/>
+                            <text x="60" y="185" text-anchor="middle" font-size="11" fill="#475569"><tspan font-style="italic">x</tspan><tspan baseline-shift="sub" font-size="8">t</tspan>, <tspan font-style="italic">h</tspan><tspan baseline-shift="sub" font-size="8">t−1</tspan></text>
+                            <line x1="160" y1="170" x2="160" y2="84" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowB)"/>
+                            <text x="160" y="185" text-anchor="middle" font-size="11" fill="#475569"><tspan font-style="italic">x</tspan><tspan baseline-shift="sub" font-size="8">t</tspan>, <tspan font-style="italic">h</tspan><tspan baseline-shift="sub" font-size="8">t−1</tspan></text>
+                            <!-- salida h_t -->
+                            <line x1="300" y1="142" x2="300" y2="172" stroke="#0E7490" stroke-width="2" marker-end="url(#arrowB)"/>
+                            <text x="300" y="185" text-anchor="middle" font-size="11" fill="#0E7490"><tspan font-style="italic">h</tspan><tspan baseline-shift="sub" font-size="8">t</tspan></text>
+                        </svg>
+                        <figcaption>Figura 3. La autopista del estado de celda (de \(C_{t-1}\) a \(C_t\)) permite que la información fluya casi sin alteración: la compuerta de olvido \(f_t\) multiplica lo que se conserva, la de entrada \(i_t\) suma lo que se escribe y la de salida \(o_t\) lee \(\tanh(C_t)\) para emitir \(h_t\). Así se mitiga el desvanecimiento del gradiente.</figcaption>
+                    </figure>
+                </div>
+
+                <h3 class="font-bold text-primary mb-2">Las compuertas, formalmente</h3>
+                <div class="grid md:grid-cols-2 gap-5 mb-7">
+                    <div class="eq text-sm">
+                        <p class="font-semibold text-primary mb-1 mono">LSTM</p>
+                        $$\begin{aligned}
+                        f_t &= \sigma(W_f[h_{t-1},x_t]+b_f)\\
+                        i_t &= \sigma(W_i[h_{t-1},x_t]+b_i)\\
+                        \tilde{C}_t &= \tanh(W_C[h_{t-1},x_t]+b_C)\\
+                        C_t &= f_t \odot C_{t-1} + i_t \odot \tilde{C}_t\\
+                        o_t &= \sigma(W_o[h_{t-1},x_t]+b_o)\\
+                        h_t &= o_t \odot \tanh(C_t)
+                        \end{aligned}$$
+                    </div>
+                    <div class="eq text-sm">
+                        <p class="font-semibold text-teal-700 mb-1 mono">GRU</p>
+                        $$\begin{aligned}
+                        z_t &= \sigma(W_z[h_{t-1},x_t])\\
+                        r_t &= \sigma(W_r[h_{t-1},x_t])\\
+                        \tilde{h}_t &= \tanh(W[r_t \odot h_{t-1},\,x_t])\\
+                        h_t &= (1-z_t)\odot h_{t-1} + z_t \odot \tilde{h}_t
+                        \end{aligned}$$
+                        <p class="text-xs text-slate-500 mt-2">La GRU fusiona memoria y estado oculto y usa menos parámetros: más eficiente, frecuentemente comparable en desempeño.</p>
+                    </div>
+                </div>
+
+                <h3 class="font-bold text-primary mb-4 text-lg">Pasos de la rama B</h3>
+                <ol class="space-y-4">
+                    <li class="flex gap-4"><span class="step-num">1</span><div><p class="font-semibold text-navy">Análisis exploratorio de la serie</p><p class="text-sm text-slate-600">Tendencia, estacionalidad y ruido; estadísticas móviles y autocorrelación (ACF/PACF); detección de atípicos, faltantes y periodicidades. Justificación del uso de modelos recurrentes frente a alternativas clásicas (ARIMA).</p></div></li>
+                    <li class="flex gap-4"><span class="step-num">2</span><div><p class="font-semibold text-navy">Preprocesamiento y ventaneo</p><p class="text-sm text-slate-600">Normalización; construcción de secuencias con <em>ventana deslizante</em> (se experimenta con 7, 14 y 30 pasos); partición que <strong>respeta el orden temporal</strong>; variables exógenas si aplica (día de semana, festivos, indicadores).</p></div></li>
+                    <li class="flex gap-4"><span class="step-num">3</span><div><p class="font-semibold text-navy">Implementación comparativa</p><p class="text-sm text-slate-600">Entrenamiento de <strong>RNN simple, LSTM y GRU</strong> con hiperparámetros comparables (estado oculto 64–128, <em>learning rate</em> 0,001, <em>batch</em> 32) y <em>early stopping</em>.</p></div></li>
+                    <li class="flex gap-4"><span class="step-num">4</span><div><p class="font-semibold text-navy">Evaluación y evidencia del desvanecimiento</p><p class="text-sm text-slate-600">Comparación con RMSE, MAE y MAPE; predicciones vs. valores reales; evidencia empírica del desvanecimiento (curvas o normas de gradiente) en RNN frente a LSTM/GRU, con la justificación de cuándo usar cada una.</p></div></li>
+                </ol>
+
+                <div class="codeblock mt-6"><span class="cm"># Comparativa de celdas recurrentes (PyTorch)</span>
+<span class="kw">import</span> torch.nn <span class="kw">as</span> nn
+rnn  = nn.<span class="fn">RNN</span>(n_feat, hidden, batch_first=<span class="kw">True</span>)   <span class="cm"># sufre desvanecimiento</span>
+lstm = nn.<span class="fn">LSTM</span>(n_feat, hidden, batch_first=<span class="kw">True</span>)  <span class="cm"># compuertas f, i, o</span>
+gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="kw">True</span>)   <span class="cm"># compuertas z, r (más liviana)</span></div>
+            </div>
+
+            <!-- ============ PANEL C: FUSIÓN ============ -->
+            <div class="tab-panel" data-panel="c" hidden>
+                <div class="callout callout-info mb-6">
+                    <p class="text-sm"><strong>Meta de la rama C.</strong> Integrar las dos ramas en un <strong>único predictor</strong>. Cada rama produce un vector de representación (<em>embedding</em>); la fusión los combina para que el sistema decida usando, a la vez, lo que <em>ve</em> y lo que <em>recuerda</em>.</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6 mb-6 items-start">
+                    <div>
+                        <h3 class="font-bold text-primary mb-2">Fusión tardía (recomendada como base)</h3>
+                        <p class="text-sm text-slate-700 mb-3">Cada rama se entrena hasta producir su <em>embedding</em>; ambos se concatenan y una pequeña cabeza densa emite la predicción:</p>
+                        <div class="eq mb-3">$$ \hat{y} = \sigma\!\left(W_f\,[\,z_{img} \,\Vert\, z_{seq}\,] + b_f\right) $$</div>
+                        <p class="text-sm text-slate-700">donde \(z_{img}\) proviene de la CNN, \(z_{seq}\) de la red recurrente, y \(\Vert\) denota concatenación. La <strong>fusión temprana</strong> (combinar antes de procesar) y la <strong>fusión por atención</strong> se admiten como extensiones de nivel avanzado.</p>
+                    </div>
+                    <figure class="card p-5">
+                        <svg viewBox="0 0 360 210" width="100%" role="img" aria-label="Dos embeddings se concatenan y pasan por una cabeza densa que produce la predicción">
+                            <defs>
+                                <marker id="arrowC" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+                                    <path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/>
+                                </marker>
+                            </defs>
+                            <rect x="15" y="35" width="95" height="44" rx="9" fill="url(#gA)"/>
+                            <text x="62" y="62" text-anchor="middle" font-size="12" font-weight="700" fill="#fff"><tspan font-style="italic">z</tspan><tspan baseline-shift="sub" font-size="8.5">img</tspan></text>
+                            <rect x="15" y="130" width="95" height="44" rx="9" fill="url(#gB)"/>
+                            <text x="62" y="157" text-anchor="middle" font-size="12" font-weight="700" fill="#fff"><tspan font-style="italic">z</tspan><tspan baseline-shift="sub" font-size="8.5">seq</tspan></text>
+                            <line x1="110" y1="57" x2="158" y2="95" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowC)"/>
+                            <line x1="110" y1="152" x2="158" y2="115" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowC)"/>
+                            <rect x="160" y="86" width="70" height="40" rx="8" fill="#0F172A"/>
+                            <text x="195" y="111" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">concat</text>
+                            <line x1="230" y1="106" x2="266" y2="106" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowC)"/>
+                            <rect x="268" y="82" width="78" height="48" rx="10" fill="url(#gF)"/>
+                            <text x="307" y="103" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">Dense</text>
+                            <text x="307" y="119" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" font-style="italic">ŷ</text>
+                        </svg>
+                        <figcaption>Figura 4. Fusión tardía por concatenación de <em>embeddings</em>. Es la estrategia de partida por su simplicidad y porque permite diagnosticar el aporte de cada modalidad por separado.</figcaption>
+                    </figure>
+                </div>
+
+                <h3 class="font-bold text-primary mb-4 text-lg">Pasos de la rama C</h3>
+                <ol class="space-y-4">
+                    <li class="flex gap-4"><span class="step-num">1</span><div><p class="font-semibold text-navy">Alineación de las modalidades</p><p class="text-sm text-slate-600">Definición de la unidad de predicción común (p. ej. una observación = una hoja fotografiada + la ventana climática previa) y verificación de que no hay <em>fuga temporal</em> entre ramas.</p></div></li>
+                    <li class="flex gap-4"><span class="step-num">2</span><div><p class="font-semibold text-navy">Construcción del modelo fusionado</p><p class="text-sm text-slate-600">Reutilización de las ramas A y B como extractores de <em>embeddings</em>, concatenación y cabeza densa de decisión; entrenamiento conjunto o por etapas, con regularización.</p></div></li>
+                    <li class="flex gap-4"><span class="step-num">3</span><div><p class="font-semibold text-navy">Estudio de ablación</p><p class="text-sm text-slate-600">Comparación de tres modelos: <strong>solo imagen</strong>, <strong>solo serie</strong> y <strong>fusionado</strong>. La pregunta a responder es <em>cuánto</em> y <em>cuándo</em> aporta cada modalidad.</p></div></li>
+                    <li class="flex gap-4"><span class="step-num">4</span><div><p class="font-semibold text-navy">Comunicación al cliente</p><p class="text-sm text-slate-600"><em>Dashboard</em> (Plotly, Streamlit o Dash) e informe que narre el valor del sistema integrado para la toma de decisiones, en lenguaje no técnico.</p></div></li>
+                </ol>
+
+                <div class="callout callout-tip mt-6">
+                    <p class="text-sm"><i class="fas fa-flask text-emerald-600 mr-2"></i><strong>Criterio de honestidad.</strong> Si el modelo fusionado no supera a la mejor rama individual, eso también es un hallazgo válido: se documenta y se discute por qué (modalidad redundante, desalineación, datos insuficientes). Un resultado negativo bien analizado vale más que una mejora inventada.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== USO DE IA ====================== -->
+        <section id="ia" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-robot text-secondary mr-2"></i>Uso responsable de la IA (transversal)</h2>
+            <p class="text-slate-600 max-w-3xl mb-6">El uso de IA generativa está permitido y se espera. La integridad no se sostiene prohibiéndola, sino formando el criterio para usarla bien: pedir, verificar, corregir y rendir cuentas. Tres mecanismos atraviesan toda la fase.</p>
+            <div class="grid md:grid-cols-3 gap-4">
+                <div class="card p-5">
+                    <div class="text-primary text-2xl mb-2"><i class="fas fa-book-open"></i></div>
+                    <h3 class="font-bold text-navy mb-1">Bitácora de IA</h3>
+                    <p class="text-sm text-slate-600">Registro de cada interacción relevante: qué se pidió, qué devolvió la IA y qué se <strong>aceptó, modificó o rechazó</strong>, con su justificación. Las decisiones de rechazo y modificación son las que más valor evidencian.</p>
+                </div>
+                <div class="card p-5">
+                    <div class="text-secondary text-2xl mb-2"><i class="fas fa-comments"></i></div>
+                    <h3 class="font-bold text-navy mb-1">Sustentación oral</h3>
+                    <p class="text-sm text-slate-600">Sesión sincrónica breve donde el estudiante defiende sus decisiones de arquitectura, datos y métricas. Verifica autoría y comprensión real más allá del entregable.</p>
+                </div>
+                <div class="card p-5">
+                    <div class="text-teal-600 text-2xl mb-2"><i class="fas fa-bug-slash"></i></div>
+                    <h3 class="font-bold text-navy mb-1">Auditoría a la IA</h3>
+                    <p class="text-sm text-slate-600">Documentación y corrección de al menos un caso en que la IA falló (p. ej. una capa con dimensiones incompatibles, una métrica mal interpretada o una <em>fuga de datos</em> sugerida).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== ENTREGA ====================== -->
+        <section id="entrega" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-box-open text-secondary mr-2"></i>Entregables, modalidad y tiempos</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="card p-6">
+                    <h3 class="font-bold text-primary mb-3"><i class="fas fa-paperclip mr-2"></i>Productos</h3>
+                    <ul class="text-sm text-slate-700 space-y-2">
+                        <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Notebook</strong> ejecutable (.ipynb) con las ramas A, B y la fusión C, documentado.</li>
+                        <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Informe técnico</strong> (PDF) con metodología, resultados, ablación y limitaciones.</li>
+                        <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Dashboard</strong> de visualización para el cliente.</li>
+                        <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Pesos</strong> de los modelos entrenados (.h5 / .pth).</li>
+                        <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Bitácora de IA</strong> diligenciada.</li>
+                    </ul>
+                    <p class="text-xs text-slate-500 mt-4">Carpeta comprimida: <span class="icode">Apellido_Nombre_Centinela_Fase2.zip</span>. La sustentación se agenda aparte.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-primary mb-3"><i class="fas fa-clock mr-2"></i>Tiempo de desarrollo · 46 horas</h3>
+                    <table class="tbl">
+                        <thead><tr style="background:#3D008D"><th>Tipo de trabajo</th><th style="width:30%">Horas</th></tr></thead>
+                        <tbody>
+                            <tr><td>Acompañado directo</td><td>5</td></tr>
+                            <tr><td>Acompañado indirecto</td><td>4</td></tr>
+                            <tr><td>Autónomo independiente</td><td>37</td></tr>
+                            <tr><td>Autónomo colaborativo</td><td>0</td></tr>
+                            <tr style="background:#FAF8FF;font-weight:700"><td>Total</td><td>46</td></tr>
+                        </tbody>
+                    </table>
+                    <p class="text-sm text-slate-600 mt-3"><strong>Modalidad:</strong> individual. <strong>Peso:</strong> 30 % del curso (Fase 2 = ramas A+B+C; reemplaza las Actividades 2.1 y 2.2).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== RÚBRICA ====================== -->
+        <section id="rubrica" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-3"><i class="fas fa-table-list text-secondary mr-2"></i>Rúbrica de evaluación</h2>
+            <p class="text-slate-600 mb-5 max-w-3xl">Niveles de desempeño: <strong>Estratégico</strong> (4,6–5,0) · <strong>Autónomo</strong> (4,0–4,5) · <strong>Básico</strong> (3,0–3,9) · <strong>Inicial</strong> (1,0–2,9) · <strong>Nulo</strong> — sin entrega (0,0). Los pesos suman 100 %.</p>
+
+            <div class="overflow-x-auto card p-1">
+                <table class="tbl" style="min-width:760px">
+                    <thead>
+                        <tr style="background:#001A4D">
+                            <th style="width:26%">Criterio (peso)</th>
+                            <th>Estratégico (4,6–5,0)</th>
+                            <th>Autónomo (4,0–4,5)</th>
+                            <th>Básico / Inicial</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1. Rama visual — CNN y Transfer Learning (25 %)</strong></td>
+                            <td>Compara 3+ arquitecturas con análisis de parámetros y costo (FLOPs); justifica <em>Feature Extraction</em> vs <em>Fine-Tuning</em> con evidencia empírica; Grad-CAM y optimización Edge.</td>
+                            <td>Compara 2 arquitecturas; justifica la estrategia según tamaño/similitud del conjunto; <em>data augmentation</em> y evaluación correctas.</td>
+                            <td><strong>Básico:</strong> una arquitectura sin comparación rigurosa. <strong>Inicial:</strong> sin justificación o error grave (p. ej. MLP para imágenes).</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2. Rama temporal — RNN/LSTM/GRU (25 %)</strong></td>
+                            <td>Implementa las tres celdas con ventaneo justificado; evidencia empírica del desvanecimiento; explica las compuertas y decide GRU vs LSTM con criterio.</td>
+                            <td>Implementa las tres celdas correctamente; respeta el orden temporal; compara con 2+ métricas e interpreta resultados.</td>
+                            <td><strong>Básico:</strong> 2 de 3 celdas o sin evidencia del desvanecimiento. <strong>Inicial:</strong> mezcla datos temporales o confunde las arquitecturas.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>3. Fusión multimodal y ablación (20 %)</strong></td>
+                            <td>Fusión funcional con estudio de ablación (solo-imagen / solo-serie / fusionado); analiza honestamente cuándo aporta cada modalidad, incluso resultados negativos.</td>
+                            <td>Fusión funcional con comparación frente a al menos una rama individual; interpretación correcta.</td>
+                            <td><strong>Básico:</strong> concatena sin análisis. <strong>Inicial:</strong> fusión no funcional o ausente.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>4. Uso responsable de IA (15 %)</strong></td>
+                            <td>Bitácora con decisiones deliberadas (casos <em>Modificada/Rechazada</em> bien fundamentados); defiende cada decisión como propia en la sustentación; auditoría con un fallo no trivial corregido.</td>
+                            <td>Bitácora completa y verificada; sustenta la mayoría de sus decisiones; la auditoría documenta y corrige un fallo real.</td>
+                            <td><strong>Básico:</strong> registro superficial, titubea en detalles. <strong>Inicial:</strong> bitácora ausente o señales de delegación ciega.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>5. Comunicación y dashboard (15 %)</strong></td>
+                            <td><em>Dashboard</em> profesional e interactivo; informe con narrativa, recomendaciones accionables y citación APA correcta.</td>
+                            <td><em>Dashboard</em> funcional; informe bien estructurado y comprensible para audiencia no técnica.</td>
+                            <td><strong>Básico:</strong> visualizaciones estáticas, recomendaciones genéricas. <strong>Inicial:</strong> sin dashboard o informe desorganizado.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="callout callout-danger mt-4">
+                <p class="text-sm"><i class="fas fa-circle-exclamation text-red-600 mr-2"></i><strong>Nivel Nulo (0,0):</strong> sin entrega del producto. En el Criterio 4 constituye además falta de integridad ocultar el uso de IA o presentar como propio material que no se comprende ni se puede defender.</p>
+            </div>
+        </section>
+
+        <!-- ====================== RECURSOS ====================== -->
+        <section id="recursos" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-book text-secondary mr-2"></i>Recursos de consulta</h2>
+            <div class="overflow-x-auto card p-1">
+                <table class="tbl" style="min-width:680px">
+                    <thead><tr style="background:#3D008D"><th style="width:34%">Referencia (APA 7)</th><th>Aporte a la fase</th><th style="width:18%">Enlace</th></tr></thead>
+                    <tbody>
+                        <tr><td>He, K., Zhang, X., Ren, S., &amp; Sun, J. (2016). Deep residual learning for image recognition. <em>CVPR</em>.</td><td>ResNet: conexiones residuales, base del Transfer Learning de la rama A.</td><td><a href="https://arxiv.org/abs/1512.03385" target="_blank" rel="noopener" style="color:#ED1E79">arXiv</a></td></tr>
+                        <tr><td>Tan, M., &amp; Le, Q. (2019). EfficientNet: Rethinking model scaling for CNNs. <em>ICML</em>.</td><td>Escalado compuesto; arquitectura candidata eficiente para borde.</td><td><a href="https://arxiv.org/abs/1905.11946" target="_blank" rel="noopener" style="color:#ED1E79">arXiv</a></td></tr>
+                        <tr><td>Selvaraju, R. R., et al. (2017). Grad-CAM: Visual explanations from deep networks. <em>ICCV</em>.</td><td>Interpretabilidad visual exigida en la rama A.</td><td><a href="https://arxiv.org/abs/1610.02391" target="_blank" rel="noopener" style="color:#ED1E79">arXiv</a></td></tr>
+                        <tr><td>Hochreiter, S., &amp; Schmidhuber, J. (1997). Long short-term memory. <em>Neural Computation, 9</em>(8).</td><td>LSTM y la solución al desvanecimiento del gradiente.</td><td><a href="https://www.bioinf.jku.at/publications/older/2604.pdf" target="_blank" rel="noopener" style="color:#ED1E79">PDF</a></td></tr>
+                        <tr><td>Cho, K., et al. (2014). Learning phrase representations using RNN encoder-decoder. <em>arXiv:1406.1078</em>.</td><td>GRU: compuertas de actualización y reinicio.</td><td><a href="https://arxiv.org/abs/1406.1078" target="_blank" rel="noopener" style="color:#ED1E79">arXiv</a></td></tr>
+                        <tr><td>Goodfellow, I., Bengio, Y., &amp; Courville, A. (2016). <em>Deep Learning</em> (Cap. 9 y 10). MIT Press.</td><td>Fundamento teórico de convoluciones y modelado de secuencias.</td><td><a href="https://www.deeplearningbook.org/" target="_blank" rel="noopener" style="color:#ED1E79">deeplearningbook.org</a></td></tr>
+                        <tr><td>Baltrušaitis, T., Ahuja, C., &amp; Morency, L.-P. (2019). Multimodal machine learning: A survey and taxonomy. <em>IEEE TPAMI, 41</em>(2).</td><td>Taxonomía de fusión (temprana/tardía) para la rama C.</td><td><a href="https://arxiv.org/abs/1705.09406" target="_blank" rel="noopener" style="color:#ED1E79">arXiv</a></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-xs text-slate-500 mt-3">Documentación oficial sugerida: <a href="https://www.tensorflow.org/tutorials/images/transfer_learning" target="_blank" rel="noopener" style="color:#ED1E79">TensorFlow · Transfer Learning</a> · <a href="https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html" target="_blank" rel="noopener" style="color:#ED1E79">PyTorch · Transfer Learning</a> · <a href="https://www.tensorflow.org/tutorials/structured_data/time_series" target="_blank" rel="noopener" style="color:#ED1E79">TensorFlow · Time Series</a>.</p>
+        </section>
+
+        <!-- ====================== RELACIONADO ====================== -->
+        <section class="reveal">
+            <div class="usta-gradient rounded-2xl p-7 text-white">
+                <h2 class="text-xl md:text-2xl font-extrabold mb-3"><i class="fas fa-diagram-project mr-2"></i>Lugar de esta actividad en el curso</h2>
+                <div class="grid md:grid-cols-3 gap-4 text-sm">
+                    <div class="bg-white/10 rounded-xl p-4">
+                        <p class="font-bold mb-1">Documento maestro</p>
+                        <p class="text-white/85">Proyecto Integrador: Centinela — define las tres fases, la política de datos y la integridad de IA.</p>
+                    </div>
+                    <div class="bg-white/10 rounded-xl p-4">
+                        <p class="font-bold mb-1">Fase anterior</p>
+                        <p class="text-white/85">Fase 1 (Módulo 1): línea base con MLP sobre datos tabulares.</p>
+                    </div>
+                    <div class="bg-white/10 rounded-xl p-4">
+                        <p class="font-bold mb-1">Fase siguiente</p>
+                        <p class="text-white/85">Fase 3 (Módulo 3): pipeline con GPU, precisión mixta y despliegue <em>offline</em> en campo.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ====================== PIE ====================== -->
+    <footer class="bg-navy text-white/80 text-sm">
+        <div class="max-w-6xl mx-auto px-5 md:px-8 py-8">
+            <p class="font-bold text-white mb-1">Universidad Santo Tomás · Maestría en Ciencia de Datos</p>
+            <p>Profundización I: Redes Neuronales — Deep Learning (EA-N-F-004) · Experto temático: Javier Mauricio Sierra</p>
+            <p class="text-white/55 mt-3 text-xs">Proyecto Centinela · Fase 2 — Arquitecturas de Redes Neuronales Especializadas. Material de aprendizaje autónomo. Metodología "Ingeniería de Trinchera": si una arquitectura no corre en Google Colab, no existe.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Activa los realces aditivos (nunca ocultan contenido).
+        document.documentElement.classList.add('js');
+
+        // Aparición progresiva por IntersectionObserver.
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+        }, { threshold: 0.08 });
+        document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+        // Pestañas del desarrollo (los paneles permanecen en el DOM; solo se alterna 'hidden').
+        const btns = document.querySelectorAll('.tab-btn');
+        const panels = document.querySelectorAll('.tab-panel');
+        btns.forEach(b => b.addEventListener('click', () => {
+            btns.forEach(x => x.classList.remove('active'));
+            b.classList.add('active');
+            const t = b.dataset.tab;
+            panels.forEach(p => { p.hidden = (p.dataset.panel !== t); });
+        }));
+
+        // Realce del enlace de navegación activo según la sección visible.
+        const secs = document.querySelectorAll('main section[id]');
+        const links = document.querySelectorAll('.navlink');
+        const navIO = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    links.forEach(l => l.classList.remove('text-primary', 'bg-slate-100'));
+                    const active = document.querySelector('.navlink[href="#' + e.target.id + '"]');
+                    if (active) active.classList.add('text-primary', 'bg-slate-100');
+                }
+            });
+        }, { rootMargin: '-45% 0px -50% 0px' });
+        secs.forEach(s => navIO.observe(s));
+    </script>
+
+</body>
+
+</html>
