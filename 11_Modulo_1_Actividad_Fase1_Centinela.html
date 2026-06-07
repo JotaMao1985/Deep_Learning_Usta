@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Actividad evaluativa del Módulo 1 — Proyecto Centinela, Fase 1: línea base de un sistema de alerta temprana con un Perceptrón Multicapa (MLP). Diseño, entrenamiento, regularización, evaluación y auditoría ética. Maestría en Ciencia de Datos, Universidad Santo Tomás.">
+    <title>Actividad · Proyecto Centinela · Fase 1 (Módulo 1) — Línea Base con MLP · USTA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Tailwind CSS (utilidades) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome (iconografía de apoyo) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- MathJax 3 — contenido estático: tipografía una sola vez al cargar (sin re-typeset).
+         Regla del curso: NUNCA usar delimitadores MathJax dentro de los elementos de texto
+         de un SVG (quedarían invisibles); en los SVG se usa texto nativo con tspan y Unicode. -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <!-- Google Fonts: Montserrat (texto) y Fira Code (código) -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Montserrat', 'Helvetica Neue', 'Arial', 'sans-serif'] },
+                    colors: {
+                        primary: '#3D008D',
+                        secondary: '#ED1E79',
+                        navy: '#001A4D',
+                        gold: '#FDB913',
+                        teal: '#0E7490',
+                        bg: '#F8FAFC',
+                        surface: '#FFFFFF',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #F8FAFC;
+            color: #1E293B;
+            scroll-behavior: smooth;
+        }
+        code, pre, .mono { font-family: 'Fira Code', monospace; }
+
+        /* Gradientes institucionales USTA */
+        .usta-gradient { background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%); }
+        .usta-gradient-text {
+            background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .usta-header { background: linear-gradient(135deg, #001A4D 0%, #3D008D 60%, #5B1C9E 100%); }
+
+        /* Tarjeta base */
+        .card {
+            background: #fff; border-radius: 16px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+            transition: box-shadow .25s ease, transform .25s ease;
+        }
+        .card:hover { box-shadow: 0 12px 30px rgba(0,0,0,0.11); transform: translateY(-3px); }
+
+        /* Barra de desplazamiento */
+        ::-webkit-scrollbar { width: 9px; height: 9px; }
+        ::-webkit-scrollbar-track { background: #eef2f7; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg,#3D008D,#ED1E79); border-radius: 5px; }
+
+        /* Aparición progresiva: SOLO una entrada sutil que nunca oculta el contenido. */
+        @keyframes riseIn { from { opacity: .35; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        .js .reveal.in { animation: riseIn .5s ease-out both; }
+
+        /* Código en línea y bloques */
+        .icode {
+            background: #F1F5F9; color: #0F172A; padding: .08rem .42rem;
+            border-radius: 5px; font-size: .85em; font-family: 'Fira Code', monospace;
+        }
+        .codeblock {
+            background: #0F172A; color: #E2E8F0; border-radius: 12px;
+            padding: 1rem 1.1rem; font-family: 'Fira Code', monospace;
+            font-size: .82rem; line-height: 1.7; overflow-x: auto;
+        }
+        .codeblock .cm { color: #64748B; }
+        .codeblock .kw { color: #F472B6; }
+        .codeblock .fn { color: #7DD3FC; }
+        .codeblock .st { color: #FDE68A; }
+
+        /* Píldoras de fórmula */
+        .eq {
+            background: #FAF8FF; border: 1px solid rgba(61,0,141,.14);
+            border-radius: 12px; padding: .55rem 1rem; overflow-x: auto;
+        }
+
+        /* Callout / analogía */
+        .callout { border-left: 4px solid; border-radius: 12px; padding: .9rem 1.1rem; }
+        .callout-info   { background:#F3F0FC; border-color:#3D008D; }
+        .callout-tip    { background:#ECFDF5; border-color:#0E9F6E; }
+        .callout-warn   { background:#FFFBEB; border-color:#FDB913; }
+        .callout-danger { background:#FEF2F2; border-color:#DC2626; }
+        .callout-eth    { background:#F0F9FF; border-color:#0E7490; }
+
+        h2.sec-title { font-weight: 800; letter-spacing: -.02em; }
+
+        /* Navegación sticky */
+        .navbar { backdrop-filter: blur(8px); background: rgba(255,255,255,.86); }
+        .navlink { transition: color .2s ease, background .2s ease; }
+        .navlink:hover { color:#3D008D; }
+
+        /* Tabla genérica */
+        .tbl { width:100%; border-collapse: collapse; font-size:.9rem; }
+        .tbl th, .tbl td { border:1px solid #E2E8F0; padding:.6rem .7rem; vertical-align: top; text-align:left; }
+        .tbl thead th { color:#fff; }
+
+        /* Numeración de pasos */
+        .step-num {
+            flex: 0 0 auto; width:34px; height:34px; border-radius:10px;
+            display:flex; align-items:center; justify-content:center;
+            font-weight:800; color:#fff; background:linear-gradient(140deg,#3D008D,#ED1E79);
+        }
+
+        /* Figuras / diagramas */
+        figure { margin: 0; }
+        figcaption { font-size:.8rem; color:#64748B; margin-top:.5rem; text-align:center; }
+
+        /* Impresión / PDF */
+        @media print {
+            body { background: #fff; }
+            .no-print { display: none !important; }
+            .card { box-shadow: none; border: 1px solid #e5e7eb; break-inside: avoid; }
+            section { break-inside: avoid-page; }
+            .js .reveal { opacity: 1 !important; transform: none !important; }
+            a { color: #1E293B; text-decoration: none; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ====================== ENCABEZADO ====================== -->
+    <header class="usta-header text-white">
+        <div class="max-w-6xl mx-auto px-5 md:px-8 py-10 md:py-14">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="usta-gradient p-2.5 rounded-xl shadow-lg"><i class="fas fa-brain text-lg"></i></span>
+                <span class="text-[11px] md:text-xs uppercase tracking-[0.25em] text-gold font-bold">Universidad Santo Tomás · Maestría en Ciencia de Datos</span>
+            </div>
+            <p class="text-secondary font-semibold text-sm md:text-base mb-1">Profundización I: Redes Neuronales — Deep Learning · EA-N-F-004</p>
+            <h1 class="text-3xl md:text-5xl font-extrabold leading-tight tracking-tight">
+                Proyecto <span class="text-gold">Centinela</span> · Fase 1<br class="hidden md:block">
+                Línea Base con una Red Neuronal (MLP)
+            </h1>
+            <p class="text-lg md:text-2xl font-light text-white/90 mt-3">Módulo 1 · Fundamentos del Aprendizaje Profundo (MLP · Entrenamiento · Regularización)</p>
+            <div class="flex flex-wrap gap-2 mt-6 text-xs md:text-sm">
+                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-weight-hanging mr-1.5 text-gold"></i>Peso evaluativo 20 %</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-clock mr-1.5 text-gold"></i>40 horas</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-user mr-1.5 text-gold"></i>Individual</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-layer-group mr-1.5 text-gold"></i>Fase 1 de 3</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ====================== NAVEGACIÓN STICKY ====================== -->
+    <nav class="navbar sticky top-0 z-40 border-b border-slate-200 no-print">
+        <div class="max-w-6xl mx-auto px-4 flex gap-1 md:gap-3 overflow-x-auto text-xs md:text-sm font-semibold py-2.5 whitespace-nowrap">
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#contexto"><i class="fas fa-flag-checkered mr-1"></i>Contexto</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#objetivos"><i class="fas fa-bullseye mr-1"></i>Objetivos</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#mapa"><i class="fas fa-sitemap mr-1"></i>Mapa de la fase</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#datos"><i class="fas fa-database mr-1"></i>Datos</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#desarrollo"><i class="fas fa-list-ol mr-1"></i>Desarrollo</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#ia"><i class="fas fa-robot mr-1"></i>Uso de IA</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#entrega"><i class="fas fa-box-open mr-1"></i>Entrega</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#rubrica"><i class="fas fa-table-list mr-1"></i>Rúbrica</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#recursos"><i class="fas fa-book mr-1"></i>Recursos</a>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-5 md:px-8 py-10 md:py-14 space-y-14">
+
+        <!-- ====================== CONTEXTO / CONTINUIDAD ====================== -->
+        <section id="contexto" class="reveal">
+            <div class="callout callout-info">
+                <p class="font-bold text-primary mb-1"><i class="fas fa-flag-checkered mr-2"></i>Aquí empieza el Proyecto Centinela</p>
+                <p class="text-sm leading-relaxed">El <strong>Proyecto Centinela</strong> es un sistema de alerta temprana que el estudiante construye una sola vez y hace crecer a lo largo del curso. Esta <strong>Fase 1 (Módulo 1)</strong> levanta el <strong>cimiento</strong>: con un <strong>Perceptrón Multicapa (MLP)</strong> sobre datos <strong>tabulares</strong> se predice un evento de riesgo y se audita la "caja negra" del modelo. En las fases siguientes ese mismo problema y ese mismo cliente se conservan, pero el sistema aprende de datos crudos (imágenes y series) y termina desplegándose en campo. Lo que se entregue aquí es el punto de partida reutilizado después.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-4 mt-6">
+                <div class="card p-5 ring-2 ring-secondary">
+                    <div class="text-xs font-bold uppercase tracking-wider text-secondary mb-1">Fase 1 · Módulo 1 · <em>aquí</em></div>
+                    <div class="font-bold text-navy mb-1"><i class="fas fa-table-cells text-secondary mr-1.5"></i>Línea base (MLP)</div>
+                    <p class="text-sm text-slate-600">Predicción del evento de riesgo a partir de características <strong>tabulares</strong>, con un MLP entrenado desde cero.</p>
+                </div>
+                <div class="card p-5">
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Fase 2 · Módulo 2</div>
+                    <div class="font-bold text-navy mb-1"><i class="fas fa-network-wired text-primary mr-1.5"></i>Sistema multimodal</div>
+                    <p class="text-sm text-slate-600">CNN (imagen) + RNN/LSTM/GRU (serie) + <strong>fusión</strong>. La evidencia pasa a ser el dato crudo.</p>
+                </div>
+                <div class="card p-5">
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Fase 3 · Módulo 3</div>
+                    <div class="font-bold text-navy mb-1"><i class="fas fa-microchip text-primary mr-1.5"></i>Pipeline y despliegue</div>
+                    <p class="text-sm text-slate-600">Industrialización con GPU, precisión mixta y despliegue <em>offline</em> en campo.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== OBJETIVOS / COMPETENCIAS ====================== -->
+        <section id="objetivos" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-bullseye text-secondary mr-2"></i>Propósito, competencias y resultados de aprendizaje</h2>
+            <div class="grid md:grid-cols-2 gap-5">
+                <div class="card p-6">
+                    <h3 class="font-bold text-primary mb-2">Propósito</h3>
+                    <p class="text-sm leading-relaxed text-slate-700">El ejercicio consiste en construir la <strong>línea base</strong> de un sistema <strong>Centinela</strong> (alerta temprana). En esta fase, con un <strong>Perceptrón Multicapa</strong> sobre datos <strong>tabulares</strong>, se predice un evento de riesgo (presencia de una enfermedad o plaga, o una condición de riesgo) y se audita su comportamiento. El estudiante asume el rol de ingeniero de IA que entrega un primer modelo y rinde cuentas de sus aciertos y errores ante un cliente no especializado.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-primary mb-2">Competencia troncal</h3>
+                    <p class="text-sm leading-relaxed text-slate-700 mb-4">Aplicar los modelos de ciencia de datos a la solución eficiente de problemas en contextos reales para mejorar la eficiencia y la eficacia de un sistema.</p>
+                    <h3 class="font-bold text-primary mb-2">Resultados de aprendizaje (Módulo 1)</h3>
+                    <ul class="text-sm text-slate-700 space-y-1.5 list-disc pl-5">
+                        <li>Define la relación entre los requerimientos del cliente y la solución propuesta.</li>
+                        <li>Comunica resultados con rigor a un público no especializado.</li>
+                        <li>Aplica <em>data storytelling</em> al comunicar los resultados.</li>
+                        <li>Usa la IA generativa con criterio: verifica, corrige y rinde cuentas.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== MAPA DE LA FASE ====================== -->
+        <section id="mapa" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-sitemap text-secondary mr-2"></i>Mapa de la Fase 1</h2>
+            <p class="text-slate-600 mb-6 max-w-3xl">La línea base es una tubería sencilla: las <strong>características tabulares</strong> entran a un MLP con <strong>al menos dos capas ocultas</strong>; una activación <strong>sigmoide</strong> en la salida produce la probabilidad del evento de riesgo.</p>
+
+            <figure class="card p-6 overflow-x-auto">
+                <svg viewBox="0 0 680 300" width="100%" role="img" aria-labelledby="mlpTitle mlpDesc" style="min-width:560px">
+                    <title id="mlpTitle">Arquitectura de un Perceptrón Multicapa</title>
+                    <desc id="mlpDesc">Tres características de entrada se conectan a dos capas ocultas con activación ReLU y a una neurona de salida con activación sigmoide que produce la predicción de riesgo.</desc>
+                    <!-- aristas: entrada(3) -> oculta1(3) -->
+                    <g stroke="#CBD5E1" stroke-width="1">
+                        <line x1="95" y1="90"  x2="235" y2="90"/><line x1="95" y1="90"  x2="235" y2="150"/><line x1="95" y1="90"  x2="235" y2="210"/>
+                        <line x1="95" y1="150" x2="235" y2="90"/><line x1="95" y1="150" x2="235" y2="150"/><line x1="95" y1="150" x2="235" y2="210"/>
+                        <line x1="95" y1="210" x2="235" y2="90"/><line x1="95" y1="210" x2="235" y2="150"/><line x1="95" y1="210" x2="235" y2="210"/>
+                        <!-- oculta1(3) -> oculta2(2) -->
+                        <line x1="265" y1="90"  x2="405" y2="120"/><line x1="265" y1="90"  x2="405" y2="180"/>
+                        <line x1="265" y1="150" x2="405" y2="120"/><line x1="265" y1="150" x2="405" y2="180"/>
+                        <line x1="265" y1="210" x2="405" y2="120"/><line x1="265" y1="210" x2="405" y2="180"/>
+                        <!-- oculta2(2) -> salida(1) -->
+                        <line x1="435" y1="120" x2="575" y2="150"/><line x1="435" y1="180" x2="575" y2="150"/>
+                    </g>
+                    <!-- nodos de entrada -->
+                    <g>
+                        <circle cx="80" cy="90"  r="15" fill="#E2E8F0" stroke="#94A3B8"/><text x="80" y="95" text-anchor="middle" font-size="11" fill="#475569" font-style="italic">x₁</text>
+                        <circle cx="80" cy="150" r="15" fill="#E2E8F0" stroke="#94A3B8"/><text x="80" y="155" text-anchor="middle" font-size="11" fill="#475569" font-style="italic">x₂</text>
+                        <circle cx="80" cy="210" r="15" fill="#E2E8F0" stroke="#94A3B8"/><text x="80" y="215" text-anchor="middle" font-size="11" fill="#475569" font-style="italic">x₃</text>
+                    </g>
+                    <!-- capa oculta 1 -->
+                    <g fill="#3D008D">
+                        <circle cx="250" cy="90"  r="15"/><circle cx="250" cy="150" r="15"/><circle cx="250" cy="210" r="15"/>
+                    </g>
+                    <!-- capa oculta 2 -->
+                    <g fill="#5B1C9E">
+                        <circle cx="420" cy="120" r="15"/><circle cx="420" cy="180" r="15"/>
+                    </g>
+                    <!-- salida -->
+                    <circle cx="590" cy="150" r="18" fill="#ED1E79"/>
+                    <text x="590" y="155" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">σ</text>
+                    <line x1="608" y1="150" x2="650" y2="150" stroke="#94A3B8" stroke-width="2"/>
+                    <text x="650" y="146" font-size="11" fill="#475569" font-style="italic">ŷ</text>
+                    <text x="650" y="160" font-size="9" fill="#94A3B8">riesgo</text>
+                    <!-- rótulos de columna -->
+                    <text x="80"  y="255" text-anchor="middle" font-size="11" font-weight="600" fill="#64748B">Entrada</text>
+                    <text x="80"  y="270" text-anchor="middle" font-size="9.5" fill="#94A3B8">características</text>
+                    <text x="250" y="255" text-anchor="middle" font-size="11" font-weight="600" fill="#3D008D">Capa oculta 1</text>
+                    <text x="250" y="270" text-anchor="middle" font-size="9.5" fill="#94A3B8">ReLU</text>
+                    <text x="420" y="255" text-anchor="middle" font-size="11" font-weight="600" fill="#5B1C9E">Capa oculta 2</text>
+                    <text x="420" y="270" text-anchor="middle" font-size="9.5" fill="#94A3B8">ReLU</text>
+                    <text x="590" y="255" text-anchor="middle" font-size="11" font-weight="600" fill="#ED1E79">Salida</text>
+                    <text x="590" y="270" text-anchor="middle" font-size="9.5" fill="#94A3B8">Sigmoide</text>
+                </svg>
+                <figcaption>Figura 1. Arquitectura objetivo de la Fase 1: un MLP con dos capas ocultas (ReLU) y una salida sigmoide. Es la imagen-guía que articula toda la actividad.</figcaption>
+            </figure>
+        </section>
+
+        <!-- ====================== DATOS ====================== -->
+        <section id="datos" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-database text-secondary mr-2"></i>Política de datos</h2>
+            <div class="grid md:grid-cols-3 gap-4">
+                <div class="card p-5">
+                    <div class="text-primary text-2xl mb-2"><i class="fas fa-earth-americas"></i></div>
+                    <h3 class="font-bold text-navy mb-1">Libre elección, fuentes reales</h3>
+                    <p class="text-sm text-slate-600">El estudiante define su problema y sus fuentes en una <strong>Propuesta de Datos</strong> de una página, aprobada por el docente. Se permiten fuentes <strong>no necesariamente colombianas</strong>.</p>
+                </div>
+                <div class="card p-5">
+                    <div class="text-secondary text-2xl mb-2"><i class="fas fa-table-list"></i></div>
+                    <h3 class="font-bold text-navy mb-1">Fase 1 = versión tabular</h3>
+                    <p class="text-sm text-slate-600">En este módulo se trabaja con <strong>características numéricas</strong> (por ejemplo, promedios espectrales de una imagen o clima agregado a una tabla). La propuesta debe mostrar el camino hacia imagen y serie en la Fase 2.</p>
+                </div>
+                <div class="card p-5">
+                    <div class="text-red-600 text-2xl mb-2"><i class="fas fa-ban"></i></div>
+                    <h3 class="font-bold text-navy mb-1">Prohibido Kaggle</h3>
+                    <p class="text-sm text-slate-600">Quedan vetados los <em>datasets</em> y competencias de Kaggle y sus <em>mirrors</em>: son retos ya resueltos y con datos demasiado limpios. El detalle de fuentes válidas está en el Catálogo de Fuentes de Datos del curso.</p>
+                </div>
+            </div>
+            <div class="callout callout-warn mt-5">
+                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i>El escenario de referencia <strong>"Centinela del Café"</strong> clasifica el estado de la hoja (<strong>Sana</strong> vs. <strong>Enferma</strong> por roya) a partir de un vector de características (promedios de intensidad RGB e Infrarrojo) del conjunto <strong>RoCoLe</strong>. Sirve de ejemplo; el estudiante puede adoptarlo o proponer el suyo con la misma lógica.</p>
+            </div>
+        </section>
+
+        <!-- ====================== DESARROLLO ====================== -->
+        <section id="desarrollo" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-6"><i class="fas fa-list-ol text-secondary mr-2"></i>Desarrollo de la actividad</h2>
+
+            <!-- Paso 0 -->
+            <div class="flex gap-4 mb-8"><span class="step-num">0</span>
+                <div class="flex-1">
+                    <h3 class="font-bold text-navy text-lg">Propuesta de Datos (puerta de aprobación)</h3>
+                    <p class="text-sm text-slate-600 mt-1">Antes de modelar se entrega una página que define problema y cliente, las dos modalidades previstas para el sistema completo (imagen + serie), las fuentes elegidas con enlaces y licencia, <strong>por qué no es un reto ya resuelto</strong> y los riesgos éticos. El docente la aprueba o pide ajustes. Esta propuesta es la primera defensa de autoría y, a la vez, una competencia evaluable de <em>framing</em> de problemas.</p>
+                </div>
+            </div>
+
+            <!-- Paso 1 -->
+            <div class="flex gap-4 mb-8"><span class="step-num">1</span>
+                <div class="flex-1">
+                    <h3 class="font-bold text-navy text-lg">Preparación del entorno y de los datos</h3>
+                    <p class="text-sm text-slate-600 mt-1">Importación de librerías (PyTorch —recomendado— o Keras 3, Pandas, Scikit-Learn, Matplotlib) en Google Colab. Carga del conjunto tabular elegido y <strong>análisis exploratorio</strong> mínimo: distribución de clases, escalas, valores faltantes y balance/desbalance. Partición en entrenamiento / validación / prueba con la estrategia justificada.</p>
+                    <div class="callout callout-tip mt-3">
+                        <p class="text-sm"><i class="fas fa-flask text-emerald-600 mr-2"></i><strong>Andamiaje opcional.</strong> El curso ofrece un <a href="https://colab.research.google.com/github/JotaMao1985/Deep_Learning_Usta/blob/main/notebooks/02-scaffold-centinela-fase1.ipynb" target="_blank" rel="noopener" style="color:#0E7490;font-weight:600">notebook de andamiaje</a> con la estructura de secciones y funciones de graficación ya resueltas; <strong>no contiene la solución</strong> (la arquitectura y el bucle de entrenamiento quedan como ejercicio).</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paso 2 + figura neurona -->
+            <div class="flex gap-4 mb-2"><span class="step-num">2</span>
+                <div class="flex-1">
+                    <h3 class="font-bold text-navy text-lg">Diseño de la arquitectura (MLP)</h3>
+                    <p class="text-sm text-slate-600 mt-1">Definición de una clase con <strong>al menos dos capas ocultas</strong> y justificación de las funciones de activación (por ejemplo, ReLU en las ocultas y Sigmoide en la salida) con base en la teoría de la no-linealidad.</p>
+                </div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
+                <div>
+                    <p class="text-sm text-slate-700 mb-3">Cada neurona calcula una <strong>suma ponderada</strong> de sus entradas más un sesgo y le aplica una función de activación no lineal:</p>
+                    <div class="eq mb-3">$$ z = \sum_{i} w_i\,x_i + b \qquad a = \phi(z) $$</div>
+                    <p class="text-sm text-slate-700 mb-3">Una capa completa se expresa en forma matricial, \( h = \phi(Wx + b) \). Sin la no-linealidad \( \phi \), apilar capas equivaldría a una sola transformación lineal. Las dos activaciones típicas de esta fase:</p>
+                    <div class="eq">$$ \mathrm{ReLU}(z) = \max(0,\,z) \qquad \sigma(z) = \dfrac{1}{1 + e^{-z}} $$</div>
+                </div>
+                <figure class="card p-5">
+                    <svg viewBox="0 0 360 210" width="100%" role="img" aria-label="Una neurona suma las entradas ponderadas por sus pesos, añade un sesgo y aplica una activación">
+                        <defs>
+                            <marker id="arrowNeur" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/>
+                            </marker>
+                        </defs>
+                        <!-- entradas -->
+                        <circle cx="35" cy="50"  r="13" fill="#E2E8F0" stroke="#94A3B8"/><text x="35" y="54" text-anchor="middle" font-size="10" fill="#475569" font-style="italic">x₁</text>
+                        <circle cx="35" cy="105" r="13" fill="#E2E8F0" stroke="#94A3B8"/><text x="35" y="109" text-anchor="middle" font-size="10" fill="#475569" font-style="italic">x₂</text>
+                        <circle cx="35" cy="160" r="13" fill="#E2E8F0" stroke="#94A3B8"/><text x="35" y="164" text-anchor="middle" font-size="10" fill="#475569" font-style="italic">x₃</text>
+                        <!-- pesos en las aristas -->
+                        <line x1="48" y1="50"  x2="150" y2="98"  stroke="#94A3B8" stroke-width="1.5"/><text x="92" y="64"  font-size="9.5" fill="#ED1E79" font-style="italic">w₁</text>
+                        <line x1="48" y1="105" x2="150" y2="105" stroke="#94A3B8" stroke-width="1.5"/><text x="92" y="100" font-size="9.5" fill="#ED1E79" font-style="italic">w₂</text>
+                        <line x1="48" y1="160" x2="150" y2="112" stroke="#94A3B8" stroke-width="1.5"/><text x="92" y="150" font-size="9.5" fill="#ED1E79" font-style="italic">w₃</text>
+                        <!-- nodo suma -->
+                        <circle cx="170" cy="105" r="20" fill="#3D008D"/><text x="170" y="111" text-anchor="middle" font-size="16" fill="#fff">Σ</text>
+                        <text x="170" y="150" text-anchor="middle" font-size="10" fill="#475569">+ sesgo <tspan font-style="italic">b</tspan></text>
+                        <line x1="170" y1="150" x2="170" y2="128" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrowNeur)"/>
+                        <!-- activación -->
+                        <line x1="190" y1="105" x2="222" y2="105" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowNeur)"/>
+                        <text x="206" y="96" text-anchor="middle" font-size="10" fill="#475569" font-style="italic">z</text>
+                        <rect x="226" y="83" width="48" height="44" rx="10" fill="#ED1E79"/><text x="250" y="111" text-anchor="middle" font-size="15" fill="#fff" font-style="italic">φ</text>
+                        <!-- salida -->
+                        <line x1="274" y1="105" x2="312" y2="105" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowNeur)"/>
+                        <text x="330" y="101" text-anchor="middle" font-size="12" fill="#3D008D" font-style="italic">a</text>
+                        <text x="330" y="116" text-anchor="middle" font-size="8.5" fill="#94A3B8">salida</text>
+                    </svg>
+                    <figcaption>Figura 2. Anatomía de una neurona: la suma ponderada de las entradas más el sesgo (\(z\)) pasa por la activación \(\phi\) para producir la salida \(a\). El MLP de la Figura 1 apila muchas de estas unidades.</figcaption>
+                </figure>
+            </div>
+            <div class="codeblock"><span class="cm"># Arquitectura: MLP con dos capas ocultas (PyTorch)</span>
+<span class="kw">class</span> <span class="fn">MLP</span>(nn.Module):
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        <span class="kw">super</span>().<span class="fn">__init__</span>()
+        self.red = nn.<span class="fn">Sequential</span>(
+            nn.<span class="fn">Linear</span>(n_feat, 16), nn.<span class="fn">ReLU</span>(),   <span class="cm"># capa oculta 1</span>
+            nn.<span class="fn">Linear</span>(16, 8),      nn.<span class="fn">ReLU</span>(),   <span class="cm"># capa oculta 2</span>
+            nn.<span class="fn">Linear</span>(8, 1),       nn.<span class="fn">Sigmoid</span>())  <span class="cm"># salida binaria</span>
+    <span class="kw">def</span> <span class="fn">forward</span>(self, x):
+        <span class="kw">return</span> self.red(x)</div>
+
+            <!-- Paso 3 + figura bucle -->
+            <div class="flex gap-4 mb-2 mt-8"><span class="step-num">3</span>
+                <div class="flex-1">
+                    <h3 class="font-bold text-navy text-lg">Configuración del entrenamiento</h3>
+                    <p class="text-sm text-slate-600 mt-1">Selección de una <strong>función de pérdida</strong> adecuada (por ejemplo, <em>Binary Cross Entropy</em> para clasificación binaria), de un <strong>optimizador</strong> (SGD o Adam) y de una <strong>tasa de aprendizaje</strong>. El corazón de la fase es escribir el <strong>bucle de entrenamiento explícito</strong>.</p>
+                </div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
+                <div>
+                    <p class="text-sm text-slate-700 mb-3">La pérdida mide cuánto se equivoca el modelo; para clasificación binaria se usa la entropía cruzada:</p>
+                    <div class="eq mb-3">$$ \mathcal{L} = -\dfrac{1}{N}\sum_{n=1}^{N}\big[\,y_n\log\hat{y}_n + (1-y_n)\log(1-\hat{y}_n)\,\big] $$</div>
+                    <p class="text-sm text-slate-700 mb-3">El <strong>descenso del gradiente</strong> ajusta cada parámetro en la dirección que reduce la pérdida, con un paso proporcional a la tasa de aprendizaje \( \eta \):</p>
+                    <div class="eq">$$ \theta \leftarrow \theta - \eta\,\nabla_\theta \mathcal{L} $$</div>
+                </div>
+                <figure class="card p-5">
+                    <svg viewBox="0 0 380 230" width="100%" role="img" aria-label="Ciclo de entrenamiento: forward, cálculo de la pérdida, backward y actualización de los pesos">
+                        <defs>
+                            <marker id="arrowLoop" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L7,3 L0,6 Z" fill="#3D008D"/>
+                            </marker>
+                        </defs>
+                        <rect x="35"  y="28"  width="130" height="48" rx="10" fill="#EEF2FF" stroke="#C7D2FE"/>
+                        <text x="100" y="48" text-anchor="middle" font-size="11" font-weight="700" fill="#1E293B">1 · Forward</text>
+                        <text x="100" y="64" text-anchor="middle" font-size="10" fill="#475569" font-style="italic">ŷ = f(x)</text>
+                        <rect x="215" y="28"  width="130" height="48" rx="10" fill="#FCE7F3" stroke="#FBCFE8"/>
+                        <text x="280" y="48" text-anchor="middle" font-size="11" font-weight="700" fill="#1E293B">2 · Pérdida</text>
+                        <text x="280" y="64" text-anchor="middle" font-size="10" fill="#475569">ℒ(ŷ, y)</text>
+                        <rect x="215" y="150" width="130" height="48" rx="10" fill="#F3E8FF" stroke="#E9D5FF"/>
+                        <text x="280" y="170" text-anchor="middle" font-size="11" font-weight="700" fill="#1E293B">3 · Backward</text>
+                        <text x="280" y="186" text-anchor="middle" font-size="10" fill="#475569">∇ℒ (gradientes)</text>
+                        <rect x="35"  y="150" width="130" height="48" rx="10" fill="#FEF9C3" stroke="#FEF08A"/>
+                        <text x="100" y="170" text-anchor="middle" font-size="11" font-weight="700" fill="#1E293B">4 · Optimizer</text>
+                        <text x="100" y="186" text-anchor="middle" font-size="10" fill="#475569">θ ← θ − η∇ℒ</text>
+                        <!-- flechas del ciclo -->
+                        <line x1="165" y1="52"  x2="210" y2="52"  stroke="#3D008D" stroke-width="2" marker-end="url(#arrowLoop)"/>
+                        <line x1="280" y1="78"  x2="280" y2="146" stroke="#3D008D" stroke-width="2" marker-end="url(#arrowLoop)"/>
+                        <line x1="215" y1="174" x2="170" y2="174" stroke="#3D008D" stroke-width="2" marker-end="url(#arrowLoop)"/>
+                        <line x1="100" y1="146" x2="100" y2="80"  stroke="#3D008D" stroke-width="2" marker-end="url(#arrowLoop)"/>
+                        <text x="190" y="118" text-anchor="middle" font-size="10" font-weight="700" fill="#64748B">época</text>
+                        <text x="190" y="131" text-anchor="middle" font-size="9" fill="#94A3B8">× 50</text>
+                        <text x="100" y="118" text-anchor="middle" font-size="8.5" fill="#94A3B8">zero_grad</text>
+                    </svg>
+                    <figcaption>Figura 3. El bucle de entrenamiento repite cincuenta veces el ciclo <em>forward → pérdida → backward → actualización</em>. Limpiar los gradientes (<span class="icode">zero_grad</span>) antes de cada paso es imprescindible.</figcaption>
+                </figure>
+            </div>
+            <div class="codeblock"><span class="cm"># Bucle de entrenamiento explícito — 50 épocas (PyTorch)</span>
+<span class="kw">for</span> epoca <span class="kw">in</span> <span class="fn">range</span>(50):
+    optim.<span class="fn">zero_grad</span>()                  <span class="cm"># 1 · limpia los gradientes previos</span>
+    y_hat   = <span class="fn">modelo</span>(X_train)            <span class="cm"># 2 · forward pass</span>
+    perdida = <span class="fn">criterio</span>(y_hat, y_train)     <span class="cm"># 3 · cálculo del error (BCE)</span>
+    perdida.<span class="fn">backward</span>()                 <span class="cm"># 4 · backward pass (retropropagación)</span>
+    optim.<span class="fn">step</span>()                      <span class="cm"># 5 · actualiza los pesos</span></div>
+
+            <!-- Paso 4 + figura overfitting -->
+            <div class="flex gap-4 mb-2 mt-8"><span class="step-num">4</span>
+                <div class="flex-1">
+                    <h3 class="font-bold text-navy text-lg">Experimentación y regularización</h3>
+                    <p class="text-sm text-slate-600 mt-1">Entrenamiento por <strong>50 épocas</strong> y graficación de las curvas de pérdida de <strong>entrenamiento vs. validación</strong>. El desafío consiste en inducir intencionalmente <strong>sobreajuste</strong> (más neuronas o más épocas) y luego corregirlo con <strong>Dropout</strong> o ajustando la tasa de aprendizaje, documentando el cambio en las gráficas.</p>
+                </div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
+                <figure class="card p-5">
+                    <svg viewBox="0 0 380 240" width="100%" role="img" aria-label="Curvas de pérdida de entrenamiento y validación que ilustran el sobreajuste y su corrección con Dropout">
+                        <!-- ejes -->
+                        <line x1="55" y1="20" x2="55" y2="195" stroke="#94A3B8" stroke-width="1.5"/>
+                        <line x1="55" y1="195" x2="360" y2="195" stroke="#94A3B8" stroke-width="1.5"/>
+                        <text x="20" y="110" font-size="10" fill="#64748B" transform="rotate(-90 20,110)">pérdida</text>
+                        <text x="205" y="223" text-anchor="middle" font-size="10" fill="#64748B">épocas</text>
+                        <!-- región de sobreajuste -->
+                        <rect x="210" y="20" width="150" height="175" fill="#FEF2F2" opacity="0.7"/>
+                        <line x1="210" y1="20" x2="210" y2="195" stroke="#DC2626" stroke-width="1.2" stroke-dasharray="4 3"/>
+                        <text x="285" y="36" text-anchor="middle" font-size="9.5" fill="#DC2626" font-weight="600">sobreajuste</text>
+                        <text x="210" y="14" text-anchor="middle" font-size="8.5" fill="#DC2626">punto óptimo</text>
+                        <!-- curva de entrenamiento (desciende siempre) -->
+                        <polyline points="60,55 105,95 150,125 200,148 255,163 310,172 355,178" fill="none" stroke="#3D008D" stroke-width="2.5"/>
+                        <!-- curva de validación (U: baja y vuelve a subir) -->
+                        <polyline points="60,68 105,108 150,135 210,143 260,128 310,104 355,82" fill="none" stroke="#ED1E79" stroke-width="2.5"/>
+                        <!-- validación con Dropout (se mantiene baja) -->
+                        <polyline points="60,74 120,116 200,142 270,150 320,152 355,153" fill="none" stroke="#0E7490" stroke-width="2.2" stroke-dasharray="5 3"/>
+                        <!-- leyenda -->
+                        <line x1="240" y1="55" x2="262" y2="55" stroke="#3D008D" stroke-width="2.5"/><text x="266" y="58" font-size="9" fill="#475569">entrenamiento</text>
+                        <line x1="240" y1="68" x2="262" y2="68" stroke="#ED1E79" stroke-width="2.5"/><text x="266" y="71" font-size="9" fill="#475569">validación</text>
+                        <line x1="240" y1="81" x2="262" y2="81" stroke="#0E7490" stroke-width="2.2" stroke-dasharray="5 3"/><text x="266" y="84" font-size="9" fill="#475569">val. + Dropout</text>
+                    </svg>
+                    <figcaption>Figura 4. Cuando la pérdida de validación deja de bajar y empieza a subir mientras la de entrenamiento sigue cayendo, hay sobreajuste. El Dropout (línea punteada) mantiene la validación más baja y estable.</figcaption>
+                </figure>
+                <div>
+                    <div class="callout callout-danger mb-4">
+                        <p class="text-sm"><i class="fas fa-bolt text-red-600 mr-2"></i><strong>Síntoma del sobreajuste.</strong> El modelo memoriza el conjunto de entrenamiento (pérdida que sigue bajando) pero pierde capacidad de generalizar (la validación sube). No basta con que la pérdida de entrenamiento sea pequeña.</p>
+                    </div>
+                    <p class="text-sm text-slate-700 mb-2">Herramientas de regularización exigidas en esta fase:</p>
+                    <ul class="text-sm text-slate-700 space-y-1.5 list-disc pl-5">
+                        <li><strong>Dropout:</strong> apaga aleatoriamente una fracción de neuronas en cada paso, forzando representaciones redundantes.</li>
+                        <li><strong>Detención temprana</strong> (<em>early stopping</em>): conservar el modelo del punto óptimo de validación.</li>
+                        <li>Ajuste de la <strong>tasa de aprendizaje</strong> y del número de neuronas.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Paso 5 + figura matriz de confusión -->
+            <div class="flex gap-4 mb-2 mt-8"><span class="step-num">5</span>
+                <div class="flex-1">
+                    <h3 class="font-bold text-navy text-lg">Evaluación, análisis de errores y ética</h3>
+                    <p class="text-sm text-slate-600 mt-1">Evaluación en el conjunto de <strong>prueba</strong> con <strong>matriz de confusión</strong>, precisión, <em>recall</em> y F1; análisis de <strong>falsos positivos vs. falsos negativos</strong>. Con el <strong>Marco Ético para la IA en Colombia (Minciencias, 2021)</strong> se discute el costo real de cada tipo de error para el cliente.</p>
+                </div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
+                <figure class="card p-5">
+                    <svg viewBox="0 0 360 250" width="100%" role="img" aria-label="Matriz de confusión dos por dos con verdaderos y falsos positivos y negativos">
+                        <!-- encabezado de columnas: Predicho -->
+                        <text x="215" y="28" text-anchor="middle" font-size="11" font-weight="700" fill="#3D008D">Predicho</text>
+                        <text x="170" y="46" text-anchor="middle" font-size="10" fill="#475569">Positivo</text>
+                        <text x="260" y="46" text-anchor="middle" font-size="10" fill="#475569">Negativo</text>
+                        <!-- encabezado de filas: Real -->
+                        <text x="22" y="120" text-anchor="middle" font-size="11" font-weight="700" fill="#3D008D" transform="rotate(-90 22,120)">Real</text>
+                        <text x="48" y="90"  text-anchor="middle" font-size="10" fill="#475569" transform="rotate(-90 48,90)">Positivo</text>
+                        <text x="48" y="170" text-anchor="middle" font-size="10" fill="#475569" transform="rotate(-90 48,170)">Negativo</text>
+                        <!-- celdas -->
+                        <rect x="125" y="55"  width="90" height="70" fill="#DCFCE7" stroke="#86EFAC"/>
+                        <text x="170" y="86"  text-anchor="middle" font-size="12" font-weight="700" fill="#15803D">VP</text>
+                        <text x="170" y="104" text-anchor="middle" font-size="9" fill="#15803D">acierto</text>
+                        <rect x="215" y="55"  width="90" height="70" fill="#FEE2E2" stroke="#FCA5A5"/>
+                        <text x="260" y="82"  text-anchor="middle" font-size="12" font-weight="700" fill="#B91C1C">FN</text>
+                        <text x="260" y="99"  text-anchor="middle" font-size="8.5" fill="#B91C1C">falso negativo</text>
+                        <text x="260" y="113" text-anchor="middle" font-size="8.5" fill="#B91C1C">¡el más peligroso!</text>
+                        <rect x="125" y="125" width="90" height="70" fill="#FEF3C7" stroke="#FDE68A"/>
+                        <text x="170" y="156" text-anchor="middle" font-size="12" font-weight="700" fill="#B45309">FP</text>
+                        <text x="170" y="173" text-anchor="middle" font-size="8.5" fill="#B45309">falso positivo</text>
+                        <rect x="215" y="125" width="90" height="70" fill="#DCFCE7" stroke="#86EFAC"/>
+                        <text x="260" y="156" text-anchor="middle" font-size="12" font-weight="700" fill="#15803D">VN</text>
+                        <text x="260" y="174" text-anchor="middle" font-size="9" fill="#15803D">acierto</text>
+                    </svg>
+                    <figcaption>Figura 5. Matriz de confusión. En un sistema de alerta temprana, un <strong>falso negativo</strong> (no avisar cuando el riesgo existe) suele ser el error más costoso: el daño ocurre sin que nadie lo prevenga.</figcaption>
+                </figure>
+                <div>
+                    <div class="callout callout-eth mb-4">
+                        <p class="text-sm"><i class="fas fa-scale-balanced text-teal-600 mr-2"></i><strong>Auditoría ética (caso del café).</strong> ¿Qué consecuencia tiene una alta tasa de <strong>falsos negativos</strong> (no detectar la roya cuando existe)? ¿Y de <strong>falsos positivos</strong> (alertar sin causa), que llevarían al pequeño caficultor a gastar en fungicidas innecesarios?</p>
+                    </div>
+                    <p class="text-sm text-slate-700">La reflexión conecta la métrica con la decisión: qué error privilegiar depende de su <strong>costo real</strong> para las personas, no solo de la exactitud global. Esta discusión, anclada al Marco Ético nacional, es parte evaluable de la fase.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== USO DE IA ====================== -->
+        <section id="ia" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-robot text-secondary mr-2"></i>Uso responsable de la IA (transversal)</h2>
+            <p class="text-slate-600 max-w-3xl mb-6">El uso de IA generativa está permitido y se espera. La integridad no se sostiene prohibiéndola, sino formando el criterio para usarla bien: pedir, verificar, corregir y rendir cuentas. Tres mecanismos atraviesan toda la fase.</p>
+            <div class="grid md:grid-cols-3 gap-4">
+                <div class="card p-5">
+                    <div class="text-primary text-2xl mb-2"><i class="fas fa-book-open"></i></div>
+                    <h3 class="font-bold text-navy mb-1">Bitácora de IA</h3>
+                    <p class="text-sm text-slate-600">Registro de cada interacción relevante: qué se pidió, qué devolvió la IA y qué se <strong>aceptó, modificó o rechazó</strong>, con su justificación. Las decisiones de rechazo y modificación son las que más valor evidencian.</p>
+                </div>
+                <div class="card p-5">
+                    <div class="text-secondary text-2xl mb-2"><i class="fas fa-comments"></i></div>
+                    <h3 class="font-bold text-navy mb-1">Sustentación oral</h3>
+                    <p class="text-sm text-slate-600">Sesión sincrónica breve donde el estudiante defiende sus decisiones de arquitectura, datos y métricas. Verifica autoría y comprensión real más allá del entregable.</p>
+                </div>
+                <div class="card p-5">
+                    <div class="text-teal-600 text-2xl mb-2"><i class="fas fa-bug-slash"></i></div>
+                    <h3 class="font-bold text-navy mb-1">Auditoría a la IA</h3>
+                    <p class="text-sm text-slate-600">Documentación y corrección de al menos un caso en que la IA falló (por ejemplo, un bucle de entrenamiento sin <span class="icode">zero_grad</span>, una fuga de datos o una métrica mal interpretada).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== ENTREGA ====================== -->
+        <section id="entrega" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-box-open text-secondary mr-2"></i>Entregables, modalidad y tiempos</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="card p-6">
+                    <h3 class="font-bold text-primary mb-3"><i class="fas fa-paperclip mr-2"></i>Productos</h3>
+                    <ul class="text-sm text-slate-700 space-y-2">
+                        <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Notebook</strong> (.ipynb) con la clase del MLP, el bucle de entrenamiento explícito, las curvas y la matriz de confusión.</li>
+                        <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Informe técnico-ético</strong> (PDF, máx. 4 páginas).</li>
+                        <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Bitácora de IA</strong> diligenciada.</li>
+                        <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Propuesta de Datos</strong> aprobada.</li>
+                    </ul>
+                    <p class="text-xs text-slate-500 mt-4">Carpeta comprimida: <span class="icode">Apellido_Nombre_Centinela_Fase1.zip</span>. La sustentación se agenda aparte.</p>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-primary mb-3"><i class="fas fa-clock mr-2"></i>Tiempo de desarrollo · 40 horas</h3>
+                    <table class="tbl">
+                        <thead><tr style="background:#3D008D"><th>Tipo de trabajo</th><th style="width:30%">Horas</th></tr></thead>
+                        <tbody>
+                            <tr><td>Acompañado directo</td><td>4</td></tr>
+                            <tr><td>Acompañado indirecto</td><td>4</td></tr>
+                            <tr><td>Autónomo independiente</td><td>32</td></tr>
+                            <tr><td>Autónomo colaborativo</td><td>0</td></tr>
+                            <tr style="background:#FAF8FF;font-weight:700"><td>Total</td><td>40</td></tr>
+                        </tbody>
+                    </table>
+                    <p class="text-sm text-slate-600 mt-3"><strong>Modalidad:</strong> individual. <strong>Peso:</strong> 20 % del curso (Fase 1; primera de las tres fases del proyecto).</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== RÚBRICA ====================== -->
+        <section id="rubrica" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-3"><i class="fas fa-table-list text-secondary mr-2"></i>Rúbrica de evaluación</h2>
+            <p class="text-slate-600 mb-5 max-w-3xl">Niveles de desempeño: <strong>Estratégico</strong> (4,6–5,0) · <strong>Autónomo</strong> (4,0–4,5) · <strong>Básico</strong> (3,0–3,9) · <strong>Inicial</strong> (1,0–2,9) · <strong>Nulo</strong> — sin entrega (0,0). Los pesos suman 100 %.</p>
+
+            <div class="overflow-x-auto card p-1">
+                <table class="tbl" style="min-width:760px">
+                    <thead>
+                        <tr style="background:#001A4D">
+                            <th style="width:26%">Criterio (peso)</th>
+                            <th>Estratégico (4,6–5,0)</th>
+                            <th>Autónomo (4,0–4,5)</th>
+                            <th>Básico / Inicial</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1. Propuesta de datos y EDA (15 %)</strong></td>
+                            <td>Problema y cliente bien delimitados; fuentes no-Kaggle pertinentes con las dos modalidades previstas; EDA exhaustivo que detecta desbalance, escala y faltantes y guía decisiones.</td>
+                            <td>Propuesta clara y aprobada; fuentes válidas; EDA correcto con visualizaciones y partición justificada.</td>
+                            <td><strong>Básico:</strong> propuesta con vacíos, EDA superficial. <strong>Inicial:</strong> fuente inadmisible (Kaggle) o EDA ausente/erróneo.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2. Diseño e implementación del MLP (30 %)</strong></td>
+                            <td>MLP ≥2 capas con activaciones justificadas; bucle de entrenamiento explícito impecable; código modular, documentado y reproducible (semilla fija).</td>
+                            <td>MLP correcto; bucle explícito funcional; código organizado y comentado.</td>
+                            <td><strong>Básico:</strong> red entrenable con errores menores. <strong>Inicial:</strong> no ejecuta o falta <span class="icode">zero_grad</span>/dimensiones incorrectas.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>3. Regularización y experimentación (15 %)</strong></td>
+                            <td>Induce y corrige el sobreajuste con evidencia gráfica clara (train vs. val) y analiza el efecto del Dropout o de la tasa de aprendizaje.</td>
+                            <td>Muestra sobreajuste y su corrección con curvas adecuadas e interpretación correcta.</td>
+                            <td><strong>Básico:</strong> curvas con interpretación superficial. <strong>Inicial:</strong> sin evidencia de sobreajuste ni regularización.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>4. Evaluación, errores y ética (15 %)</strong></td>
+                            <td>Matriz de confusión y métricas por clase; prioriza falsos negativos/positivos según el costo real; reflexión ética sólida anclada al Marco Ético.</td>
+                            <td>Métricas principales y matriz de confusión interpretadas; reflexión ética pertinente al cliente.</td>
+                            <td><strong>Básico:</strong> solo precisión global; ética sin integrar. <strong>Inicial:</strong> evaluación en <em>training set</em>; ética ausente.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>5. Uso responsable de IA (15 %)</strong></td>
+                            <td>Bitácora con decisiones deliberadas (casos <em>Modificada/Rechazada</em> bien fundamentados); defiende cada decisión como propia; auditoría con un fallo no trivial corregido.</td>
+                            <td>Bitácora completa y verificada; sustenta la mayoría de sus decisiones; la auditoría documenta y corrige un fallo real.</td>
+                            <td><strong>Básico:</strong> registro superficial, titubea. <strong>Inicial:</strong> bitácora ausente o señales de delegación ciega.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>6. Comunicación y storytelling (10 %)</strong></td>
+                            <td>Informe riguroso y claro para audiencia no especializada; narrativa de datos sólida; citas APA correctas.</td>
+                            <td>Informe bien estructurado y comprensible con visualizaciones adecuadas.</td>
+                            <td><strong>Básico:</strong> estructura incompleta o visualizaciones poco claras. <strong>Inicial:</strong> informe desorganizado, sin referencias.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="callout callout-danger mt-4">
+                <p class="text-sm"><i class="fas fa-circle-exclamation text-red-600 mr-2"></i><strong>Nivel Nulo (0,0):</strong> sin entrega del producto. En el Criterio 5 constituye además falta de integridad ocultar el uso de IA o presentar como propio material que no se comprende ni se puede defender.</p>
+            </div>
+        </section>
+
+        <!-- ====================== RECURSOS ====================== -->
+        <section id="recursos" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-book text-secondary mr-2"></i>Recursos de consulta</h2>
+            <div class="overflow-x-auto card p-1">
+                <table class="tbl" style="min-width:680px">
+                    <thead><tr style="background:#3D008D"><th style="width:34%">Referencia (APA 7)</th><th>Aporte a la fase</th><th style="width:18%">Enlace</th></tr></thead>
+                    <tbody>
+                        <tr><td>Goodfellow, I., Bengio, Y., &amp; Courville, A. (2016). <em>Deep Learning</em> (Cap. 6 y 8). MIT Press.</td><td>Fundamento del MLP (redes <em>feedforward</em>) y de la optimización del entrenamiento.</td><td><a href="https://www.deeplearningbook.org/" target="_blank" rel="noopener" style="color:#ED1E79">deeplearningbook.org</a></td></tr>
+                        <tr><td>Géron, A. (2023). <em>Hands-On Machine Learning with Scikit-Learn, Keras &amp; TensorFlow</em> (3.ª ed.). O'Reilly.</td><td>Implementación práctica de un MLP y su entrenamiento (Cap. 10 y 11).</td><td>Biblioteca USTA</td></tr>
+                        <tr><td>Chollet, F. (2021). <em>Deep Learning with Python</em> (2.ª ed.). Manning.</td><td>Intuición del aprendizaje y del descenso del gradiente con ejemplos ejecutables.</td><td>Manning</td></tr>
+                        <tr><td>Parraga-Alava, J., et al. (2019). <em>RoCoLe: A robusta coffee leaf images dataset</em>. Mendeley Data.</td><td>Dataset del escenario de referencia (se usa la versión tabular RGB + IR).</td><td><a href="https://data.mendeley.com/datasets/c5yvn32dzg/2" target="_blank" rel="noopener" style="color:#ED1E79">Mendeley</a></td></tr>
+                        <tr><td>Ministerio de Ciencia, Tecnología e Innovación. (2021). <em>Marco Ético para la IA en Colombia</em>.</td><td>Referencia de la auditoría ética transversal (falsos negativos/positivos).</td><td><a href="https://minciencias.gov.co/" target="_blank" rel="noopener" style="color:#ED1E79">minciencias.gov.co</a></td></tr>
+                        <tr><td>StatQuest (Starmer, J., 2020). <em>The Essential Main Ideas of Neural Networks</em> [Video].</td><td>Fundamentos visuales de nodos, pesos, sesgos y activación.</td><td><a href="https://www.youtube.com/watch?v=CqOfi41LfDw" target="_blank" rel="noopener" style="color:#ED1E79">YouTube</a></td></tr>
+                        <tr><td>Smilkov, D., &amp; Carter, S. <em>TensorFlow Playground</em>.</td><td>Simulador para experimentar con capas, tasa de aprendizaje y sobreajuste.</td><td><a href="https://playground.tensorflow.org" target="_blank" rel="noopener" style="color:#ED1E79">playground</a></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-xs text-slate-500 mt-3">Documentación oficial sugerida: <a href="https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html" target="_blank" rel="noopener" style="color:#ED1E79">PyTorch · bucle de optimización</a> · <a href="https://www.tensorflow.org/guide/keras/sequential_model" target="_blank" rel="noopener" style="color:#ED1E79">Keras · modelo Sequential</a>.</p>
+        </section>
+
+        <!-- ====================== RELACIONADO ====================== -->
+        <section class="reveal">
+            <div class="usta-gradient rounded-2xl p-7 text-white">
+                <h2 class="text-xl md:text-2xl font-extrabold mb-3"><i class="fas fa-diagram-project mr-2"></i>Lugar de esta actividad en el curso</h2>
+                <div class="grid md:grid-cols-3 gap-4 text-sm">
+                    <div class="bg-white/10 rounded-xl p-4">
+                        <p class="font-bold mb-1">Documento maestro</p>
+                        <p class="text-white/85">Proyecto Integrador: Centinela — define las tres fases, la política de datos y la integridad de IA.</p>
+                    </div>
+                    <div class="bg-white/10 rounded-xl p-4">
+                        <p class="font-bold mb-1">Punto de partida</p>
+                        <p class="text-white/85">Esta es la Fase 1: inicia el proyecto. Se apoya en la Guía de Profundización 1 (reflexión sobre el entrenamiento).</p>
+                    </div>
+                    <div class="bg-white/10 rounded-xl p-4">
+                        <p class="font-bold mb-1">Fase siguiente</p>
+                        <p class="text-white/85">Fase 2 (Módulo 2): el MLP evoluciona a un sistema multimodal con CNN, RNN y fusión.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ====================== PIE ====================== -->
+    <footer class="bg-navy text-white/80 text-sm">
+        <div class="max-w-6xl mx-auto px-5 md:px-8 py-8">
+            <p class="font-bold text-white mb-1">Universidad Santo Tomás · Maestría en Ciencia de Datos</p>
+            <p>Profundización I: Redes Neuronales — Deep Learning (EA-N-F-004) · Experto temático: Javier Mauricio Sierra</p>
+            <p class="text-white/55 mt-3 text-xs">Proyecto Centinela · Fase 1 — Fundamentos del Aprendizaje Profundo. Material de aprendizaje autónomo. Metodología "Ingeniería de Trinchera": si una arquitectura no corre en Google Colab, no existe.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Activa los realces aditivos (nunca ocultan contenido).
+        document.documentElement.classList.add('js');
+
+        // Aparición progresiva por IntersectionObserver.
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+        }, { threshold: 0.08 });
+        document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+        // Realce del enlace de navegación activo según la sección visible.
+        const secs = document.querySelectorAll('main section[id]');
+        const links = document.querySelectorAll('.navlink');
+        const navIO = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    links.forEach(l => l.classList.remove('text-primary', 'bg-slate-100'));
+                    const active = document.querySelector('.navlink[href="#' + e.target.id + '"]');
+                    if (active) active.classList.add('text-primary', 'bg-slate-100');
+                }
+            });
+        }, { rootMargin: '-45% 0px -50% 0px' });
+        secs.forEach(s => navIO.observe(s));
+    </script>
+
+</body>
+
+</html>
