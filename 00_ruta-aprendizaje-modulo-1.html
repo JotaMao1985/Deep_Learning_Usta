@@ -56,6 +56,7 @@
                         secondary: '#ED1E79',
                         navy: '#001A4D',
                         gold: '#FDB913',
+                        teal: '#0E7490',
                         bg: '#F8FAFC',
                         surface: '#FFFFFF',
                     }
@@ -254,7 +255,7 @@
            CÁLCULO DE PROGRESO GLOBAL (0–100)
         ============================================================ */
         const computeProgress = (p) => {
-            // 5 caps (10% c/u) + 2 videos (10% c/u) + pasos Guía (10%)
+            // 5 caps (10% c/u) + 2 videos (5% c/u) + pasos Guía (10%)
             // + pasos Act (10%) + entregas (10%) = 100%
             let pct = 0;
             for (let i = 1; i <= 5; i++) if (p.capsVistos[i]) pct += 10;
@@ -945,7 +946,7 @@
                     'Propuesta de Datos (compuerta): declare el problema y el cliente, las dos modalidades del sistema, las fuentes reales no provenientes de Kaggle y cuál modalidad se aplana a tabla en esta fase.',
                     'Prepare el entorno y realice el EDA del conjunto tabular: revise clases, escalas, faltantes y la partición en train/val/test.',
                     'Diseñe el MLP con ≥ 2 capas ocultas; la salida es un logit (nn.Linear(..., 1) sin sigmoide dentro del modelo) y justifique las funciones de activación.',
-                    'Configure el entrenamiento con BCEWithLogitsLoss (estable; evita la doble sigmoide), optimizador y learning rate; escriba el training loop explícito (zero_grad → forward → loss → backward → step).',
+                    'Configure el entrenamiento con BCEWithLogitsLoss (estable; evita la doble sigmoide), optimizador y learning rate; escriba el bucle de entrenamiento (training loop) explícito (zero_grad → forward → loss → backward → step).',
                     'Entrene 50 épocas, grafique la pérdida de entrenamiento vs. validación, induzca overfitting a propósito y corríjalo con Dropout o ajuste de LR.',
                     'Evalúe con matriz de confusión y métricas; analice falsos positivos/negativos (en alerta temprana los falsos negativos suelen ser los más costosos) y realice la auditoría ética con el Marco Ético de IA Colombia.',
                     'Documente la Bitácora de IA (qué pidió, aceptó y rechazó) y la Auditoría a la IA (un fallo de la IA que detectó y corrigió); prepárese para la sustentación oral.',
@@ -1179,7 +1180,7 @@
                     <div className="grid grid-cols-3 lg:grid-cols-1 gap-3">
                         <Stat value="48 h" label="Carga total" sub="5 directo · 5 indirecto · 38 autónomo" icon="fa-clock" color="primary" />
                         <Stat value="25 %" label="Peso evaluativo" sub="Guía 1 (5%) + Fase 1 (20%)" icon="fa-percent" color="secondary" />
-                        <Stat value="5" label="Capítulos" sub="3 sincronías + 2 asincronías" icon="fa-book" color="gold" />
+                        <Stat value="5" label="Capítulos" sub="4 sincronías + 2 asincronías" icon="fa-book" color="gold" />
                     </div>
                 </section>
             );
@@ -1410,7 +1411,7 @@
                 <div className="flex flex-wrap items-center gap-2 mb-2">
                     <Tag color="navy" icon="fa-video">{v.tipo}</Tag>
                     <Tag color="gold" icon="fa-clock">{v.duracion}</Tag>
-                    <Tag color="gray" icon="fa-film">{v.numEscenas} escenas</Tag>
+                    {v.numEscenas != null && (<Tag color="gray" icon="fa-film">{v.numEscenas} escenas</Tag>)}
                     {visto && <Tag color="green" icon="fa-circle-check">Visto</Tag>}
                 </div>
                 <h3 className="text-lg md:text-xl font-extrabold text-navy leading-snug flex items-center gap-2">
@@ -1472,7 +1473,7 @@
                     </div>
                     <div>
                         <h2 className="text-2xl font-extrabold text-navy">Videos del módulo</h2>
-                        <p className="text-sm text-gray-600">2 piezas audiovisuales: una de profundización técnica y una de reflexión ética sobre el caso del hospital.</p>
+                        <p className="text-sm text-gray-600">2 piezas audiovisuales de 3Blue1Brown: una introductoria (¿qué es una red neuronal?) y una de profundización (descenso del gradiente y retropropagación).</p>
                     </div>
                 </div>
                 <div className="grid md:grid-cols-2 gap-5 mt-4">
@@ -1635,17 +1636,25 @@
                         </div>
                     </div>
 
-                    <div className="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500 space-y-1">
-                        <p>
-                            <strong className="text-navy">Experto temático:</strong> Javier Mauricio Sierra
-                            &nbsp;·&nbsp; <i className="fas fa-envelope mr-1"></i>javiersierra@usta.edu.co
-                            &nbsp;·&nbsp; <i className="fas fa-phone mr-1"></i>311 241 3858
+                    <div className="mt-8 rounded-2xl bg-navy text-white px-6 py-8 text-center space-y-3">
+                        <p className="text-sm md:text-base font-semibold text-gold italic leading-relaxed max-w-2xl mx-auto">
+                            <i className="fas fa-quote-left mr-2 text-xs"></i>
+                            Metodología "Ingeniería de Trinchera": si una arquitectura no corre en Google Colab, no existe.
                         </p>
-                        <p>
-                            Universidad Santo Tomás · Maestría en Ciencia de Datos · Espacio académico EA-N-F-004
-                        </p>
-                        <p className="text-gray-400">Documento HTML autocontenido · React 18 + Tailwind CDN + MathJax 3 ·
-                            Progreso persistido en <code className="inline-code">localStorage</code> (clave <code className="inline-code">usta-m1-progress</code>)</p>
+                        <div className="pt-3 border-t border-white/15 text-xs text-white/70 space-y-1">
+                            <p>
+                                <i className="fas fa-envelope mr-1"></i>javiersierra@usta.edu.co
+                                &nbsp;·&nbsp; <i className="fas fa-phone mr-1"></i>311 241 3858
+                            </p>
+                            <p className="text-white/90 font-semibold">
+                                Universidad Santo Tomás · Maestría en Ciencia de Datos
+                            </p>
+                            <p>
+                                Profundización I: Redes Neuronales — Deep Learning (EA-N-F-004) · Experto temático: Javier Mauricio Sierra
+                            </p>
+                            <p className="text-white/50">Documento HTML autocontenido · React 18 + Tailwind CDN + MathJax 3 ·
+                                Progreso persistido en <code className="inline-code">localStorage</code> (clave <code className="inline-code">usta-m1-progress</code>)</p>
+                        </div>
                     </div>
                 </footer>
             );

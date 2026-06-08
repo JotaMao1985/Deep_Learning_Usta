@@ -98,11 +98,25 @@
             background: #0F172A; color: #E2E8F0; border-radius: 12px;
             padding: 1rem 1.1rem; font-family: 'Fira Code', monospace;
             font-size: .82rem; line-height: 1.7; overflow-x: auto;
+            white-space: pre; tab-size: 4;
         }
         .codeblock .cm { color: #64748B; }
         .codeblock .kw { color: #F472B6; }
         .codeblock .fn { color: #7DD3FC; }
         .codeblock .st { color: #FDE68A; }
+
+        /* ====== Ventana de código (cromo tipo terminal · marca USTA) ====== */
+        .code-window { position: relative; background: #0F172A; border: 1px solid #1E293B; border-radius: 14px; overflow: hidden; box-shadow: 0 12px 32px rgba(2,6,23,.30); }
+        .code-window::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; z-index: 2; background: linear-gradient(90deg, #3D008D 0%, #ED1E79 60%, #FDB913 100%); }
+        .code-window-bar { display: flex; align-items: center; gap: .55rem; padding: .62rem .95rem; padding-top: calc(.62rem + 3px); background: #0B1326; border-bottom: 1px solid #1E293B; }
+        .code-window-dots { display: flex; gap: .42rem; }
+        .code-window-dots span { width: 11px; height: 11px; border-radius: 50%; display: block; }
+        .code-window-dots .d-r { background: #FF5F56; } .code-window-dots .d-y { background: #FFBD2E; } .code-window-dots .d-g { background: #27C93F; }
+        .code-window-title { font-family: 'Fira Code', monospace; font-size: .72rem; color: #94A3B8; letter-spacing: .01em; }
+        .code-window-lang { margin-left: auto; font-family: 'Fira Code', monospace; font-size: .67rem; color: #FDE68A; background: rgba(253,185,19,.13); padding: .14rem .55rem; border-radius: 999px; white-space: nowrap; }
+        .code-copy { margin-left: .55rem; background: transparent; border: none; color: #94A3B8; cursor: pointer; font-size: .82rem; line-height: 1; padding: .2rem .35rem; border-radius: 7px; transition: color .15s ease, background .15s ease; }
+        .code-copy:hover { color: #E2E8F0; background: rgba(148,163,184,.16); }
+        .code-window .codeblock { border-radius: 0; box-shadow: none; }
 
         /* Píldoras de fórmula */
         .eq {
@@ -358,7 +372,9 @@
                     <p class="text-[0.86rem] text-gray-600 mb-3">Una neurona es una <strong>regresión lineal envuelta en una función de decisión</strong>: suma ponderada + no-linealidad.</p>
                     <div class="eq text-center my-3">$$y = \sigma\left(\sum_{i=1}^n w_i x_i + b\right) = \sigma(\mathbf{w}^\top \mathbf{x} + b)$$</div>
                     <!-- SVG neurona -->
-                    <svg viewBox="0 0 420 200" class="w-full">
+                    <svg viewBox="0 0 420 200" class="w-full" role="img" aria-labelledby="neuronaTitle neuronaDesc">
+                        <title id="neuronaTitle">Anatomía de una neurona artificial</title>
+                        <desc id="neuronaDesc">Tres entradas x₁, x₂, x₃ se conectan mediante pesos w₁, w₂, w₃ a un nodo de suma ponderada Σ con sesgo b; el resultado pasa por una función de activación σ y produce la salida y.</desc>
                         <!-- entradas -->
                         <g font-size="12" font-family="Montserrat" fill="#334155">
                             <circle cx="40" cy="40" r="16" fill="#FCE7F1" stroke="#ED1E79"/><text x="40" y="44" text-anchor="middle">x₁</text>
@@ -394,7 +410,9 @@
                     <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-network-wired text-secondary"></i>Arquitectura feedforward (MLP)</h3>
                     <p class="text-[0.86rem] text-gray-600 mb-3">Las <strong>capas ocultas</strong> transforman "papeles" en "conceptos interpretables". Aprenden representaciones <strong>jerárquicas</strong>.</p>
                     <!-- SVG MLP -->
-                    <svg viewBox="0 0 420 210" class="w-full">
+                    <svg viewBox="0 0 420 210" class="w-full" role="img" aria-labelledby="mlpTitle mlpDesc">
+                        <title id="mlpTitle">Arquitectura feedforward de un perceptrón multicapa</title>
+                        <desc id="mlpDesc">Red densamente conectada: una capa de entrada con tres nodos, dos capas ocultas (de cuatro y dos nodos) y una neurona de salida; cada nodo de una capa se enlaza con todos los de la siguiente.</desc>
                         <!-- conexiones generadas: dibujamos manualmente algunas para sugerir densidad -->
                         <g stroke="#E2E8F0" stroke-width="1">
                             <!-- entrada->oculta1 -->
@@ -441,7 +459,7 @@
                     <p class="text-[0.92rem] text-gray-700 mb-4">Una red con <strong>al menos una capa oculta</strong> y suficientes neuronas puede aproximar <strong>cualquier función continua</strong>. Cada neurona aporta un pequeño "bloque" no lineal; al sumar muchos, se reconstruye cualquier forma.</p>
                     <div class="grid md:grid-cols-2 gap-5 md:gap-6 items-center">
                         <div class="rounded-xl border border-gray-200 bg-[#FAFBFF] p-3">
-                            <div class="plot-lego"></div>
+                            <div class="plot-lego" role="img" aria-label="Gráfico que aproxima el perfil de la cordillera de los Andes mediante bloques tipo Lego: cada bloque representa una neurona oculta y, al sumar muchos, se reconstruye la función objetivo."></div>
                             <p class="text-center text-[0.72rem] text-gray-500 mt-1.5">Pocos bloques → silueta tosca. Muchos bloques → ajuste milimétrico.</p>
                         </div>
                         <div class="rounded-xl border-l-4 border-secondary bg-[#FFF1F7] px-4 py-3">
@@ -463,7 +481,7 @@
                             <h4 class="font-bold text-navy text-sm">ReLU</h4>
                             <span class="text-[0.6rem] text-white px-2 py-0.5 rounded-full font-bold" style="background:#15803D">ocultas</span>
                         </div>
-                        <div class="plot px-1.5 pt-2" data-fn="relu"></div>
+                        <div class="plot px-1.5 pt-2" data-fn="relu" role="img" aria-label="Gráfica de la función de activación ReLU: vale cero para entradas negativas y crece de forma lineal para entradas positivas."></div>
                         <div class="px-3 py-2.5 border-t border-gray-100 flex-1">
                             <div class="text-center text-navy text-[0.95rem] mb-1">\(f(z)=\max(0,z)\)</div>
                             <p class="text-[0.72rem] text-gray-500 leading-snug">Rango \([0,\infty)\). Eficiente; evita el <em>vanishing</em>. Riesgo: <em>dying ReLU</em>.</p>
@@ -474,7 +492,7 @@
                             <h4 class="font-bold text-navy text-sm">Sigmoide</h4>
                             <span class="text-[0.6rem] text-white px-2 py-0.5 rounded-full font-bold" style="background:#2563EB">salida binaria</span>
                         </div>
-                        <div class="plot px-1.5 pt-2" data-fn="sigmoid"></div>
+                        <div class="plot px-1.5 pt-2" data-fn="sigmoid" role="img" aria-label="Gráfica de la función de activación sigmoide: curva en forma de S que comprime cualquier entrada al rango entre cero y uno."></div>
                         <div class="px-3 py-2.5 border-t border-gray-100 flex-1">
                             <div class="text-center text-navy text-[0.95rem] mb-1">\(\sigma(z)=\dfrac{1}{1+e^{-z}}\)</div>
                             <p class="text-[0.72rem] text-gray-500 leading-snug">Rango \((0,1)\), como probabilidad. <em>Vanishing</em> severo (deriv. máx. 0,25).</p>
@@ -485,7 +503,7 @@
                             <h4 class="font-bold text-navy text-sm">Tanh</h4>
                             <span class="text-[0.6rem] text-white px-2 py-0.5 rounded-full font-bold" style="background:#7C3AED">RNN / LSTM</span>
                         </div>
-                        <div class="plot px-1.5 pt-2" data-fn="tanh"></div>
+                        <div class="plot px-1.5 pt-2" data-fn="tanh" role="img" aria-label="Gráfica de la función de activación tangente hiperbólica: curva en forma de S centrada en cero que comprime la entrada al rango entre menos uno y uno."></div>
                         <div class="px-3 py-2.5 border-t border-gray-100 flex-1">
                             <div class="text-center text-navy text-[0.95rem] mb-1">\(\tanh(z)\)</div>
                             <p class="text-[0.72rem] text-gray-500 leading-snug">Rango \((-1,1)\), centrada en 0. Mejor convergencia que la sigmoide, pero aún satura.</p>
@@ -497,7 +515,9 @@
                             <span class="text-[0.6rem] text-white px-2 py-0.5 rounded-full font-bold" style="background:#B45309">multiclase</span>
                         </div>
                         <div class="px-1.5 pt-2">
-                            <svg viewBox="0 0 240 120" style="width:100%;height:112px;display:block">
+                            <svg viewBox="0 0 240 120" style="width:100%;height:112px;display:block" role="img" aria-labelledby="softmaxTitle softmaxDesc">
+                                <title id="softmaxTitle">Salida softmax como distribución de probabilidad</title>
+                                <desc id="softmaxDesc">Gráfico de barras con cuatro clases (café, plátano, yuca y maíz) cuyas alturas representan probabilidades que suman uno; la clase café concentra la probabilidad más alta.</desc>
                                 <line x1="16" y1="100" x2="226" y2="100" stroke="#CBD5E1"/>
                                 <rect x="30" y="34" width="30" height="66" rx="3" fill="#3D008D"/>
                                 <rect x="80" y="70" width="30" height="30" rx="3" fill="#ED1E79"/>
@@ -568,15 +588,15 @@
                 <h4 class="font-semibold text-navy mt-5 mb-2 text-sm"><i class="fas fa-gauge-high mr-1" style="color:#B45309"></i>La tasa de aprendizaje (\(\eta\)): cuestión de vida o muerte</h4>
                 <div class="grid md:grid-cols-3 gap-4">
                     <div class="rounded-xl border border-red-200 bg-red-50/50 p-3">
-                        <div class="plot-desc" data-eta="high"></div>
+                        <div class="plot-desc" data-eta="high" role="img" aria-label="Descenso del gradiente con tasa de aprendizaje muy alta: la trayectoria sobre la parábola da saltos enormes que rebotan de un lado a otro y divergen sin alcanzar el mínimo."></div>
                         <p class="text-[0.78rem] text-gray-700 mt-1"><strong class="text-red-600">η muy alta</strong> — saltos de 50 m: pasa por encima del valle, sube la ladera opuesta y <strong>diverge</strong>.</p>
                     </div>
                     <div class="rounded-xl border border-green-200 bg-green-50/50 p-3">
-                        <div class="plot-desc" data-eta="ideal"></div>
+                        <div class="plot-desc" data-eta="ideal" role="img" aria-label="Descenso del gradiente con tasa de aprendizaje ideal: la trayectoria sobre la parábola da pasos firmes que se acortan al aproximarse y converge suavemente al mínimo."></div>
                         <p class="text-[0.78rem] text-gray-700 mt-1"><strong class="text-green-700">η ideal</strong> — pasos firmes que se acortan al aplanarse el terreno: <strong>converge</strong>.</p>
                     </div>
                     <div class="rounded-xl border border-amber-200 bg-amber-50/50 p-3">
-                        <div class="plot-desc" data-eta="low"></div>
+                        <div class="plot-desc" data-eta="low" role="img" aria-label="Descenso del gradiente con tasa de aprendizaje muy baja: la trayectoria sobre la parábola avanza con pasos diminutos que apenas se acercan al mínimo tras muchas iteraciones."></div>
                         <p class="text-[0.78rem] text-gray-700 mt-1"><strong style="color:#B45309">η muy baja</strong> — pasos de hormiga: tarda años; "muere de hipotermia" antes de converger.</p>
                     </div>
                 </div>
@@ -617,7 +637,9 @@
             <div class="card p-6 mb-5">
                 <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-diagram-project text-teal"></i>Pensar en grafos, no en neuronas</h3>
                 <p class="text-[0.86rem] text-gray-600 mb-4">La ecuación \(y=\text{ReLU}(w\cdot x + b)\) se descompone en nodos elementales. Los datos fluyen <span class="font-semibold text-blue-600">hacia adelante</span> (predicción); la <span class="font-semibold text-red-500">responsabilidad</span> (gradiente) fluye <span class="font-semibold text-red-500">hacia atrás</span>.</p>
-                <svg viewBox="0 0 660 150" class="w-full">
+                <svg viewBox="0 0 660 150" class="w-full" role="img" aria-labelledby="grafobpTitle grafobpDesc">
+                    <title id="grafobpTitle">Grafo computacional de la retropropagación</title>
+                    <desc id="grafobpDesc">Cinco nodos elementales A (x·w), B (+b), C (ReLU), D (−y) y E (cuadrado del error) en cadena; el paso hacia adelante (azul) calcula la predicción y el paso hacia atrás (rojo, punteado) propaga el gradiente del error.</desc>
                     <defs>
                         <marker id="arrB" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2563EB"/></marker>
                         <marker id="arrR" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#EF4444"/></marker>
@@ -652,12 +674,20 @@
                 <div class="card p-6">
                     <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-robot text-teal"></i>Autograd — el "secretario invisible"</h3>
                     <p class="text-[0.86rem] text-gray-600 mb-3">Ya no se derivan fórmulas a mano. Con <span class="icode">requires_grad=True</span>, PyTorch <strong>registra cada operación en una bitácora</strong>. Al llamar <span class="icode">loss.backward()</span>, lee la bitácora <strong>de atrás hacia adelante</strong> y aplica la regla de la cadena automáticamente.</p>
-                    <div class="codeblock">
+                    <div class="code-window">
+                        <div class="code-window-bar">
+                            <span class="code-window-dots"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></span>
+                            <span class="code-window-title">autograd.py</span>
+                            <span class="code-window-lang">Python · PyTorch</span>
+                            <button class="code-copy" type="button" aria-label="Copiar código" title="Copiar"><i class="fas fa-copy"></i></button>
+                        </div>
+                        <div class="codeblock">
 <span class="cm"># PyTorch registra las operaciones…</span>
 x = torch.tensor(<span class="st">2.0</span>, <span class="fn">requires_grad</span>=<span class="kw">True</span>)
 y = x**<span class="st">2</span> + <span class="st">3</span>*x
 y.<span class="fn">backward</span>()   <span class="cm"># …y deriva sola</span>
 <span class="fn">print</span>(x.grad)  <span class="cm"># dy/dx = 2x+3 = 7</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -691,7 +721,7 @@ y.<span class="fn">backward</span>()   <span class="cm"># …y deriva sola</span
                 <div class="card p-6">
                     <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-chart-line text-primary"></i>Overfitting vs. generalización</h3>
                     <p class="text-[0.86rem] text-gray-600 mb-2"><strong>El ICFES:</strong> el Estudiante A memoriza el cuadernillo viejo (puntaje perfecto en simulacro, falla en el real); el Estudiante B entiende los conceptos. Queremos al <strong>Estudiante B</strong>.</p>
-                    <div class="plot-curves"></div>
+                    <div class="plot-curves" role="img" aria-label="Curvas de aprendizaje frente a las épocas: el error de entrenamiento (verde) baja de forma continua, mientras que el error de validación (rosa) baja y luego vuelve a subir; una línea marca el punto de Early Stopping en el mínimo de validación."></div>
                     <p class="text-[0.78rem] text-gray-500 mt-1">Si la validación <strong>sube</strong> mientras el entrenamiento sigue bajando → <strong>sobreajuste</strong>. Solución: <strong>Early Stopping</strong> (guardar los pesos del mínimo).</p>
                 </div>
                 <div class="card p-6">
@@ -865,7 +895,10 @@ y.<span class="fn">backward</span>()   <span class="cm"># …y deriva sola</span
                     <a href="index.html" class="inline-flex items-center gap-2 bg-white/15 border border-white/30 text-white text-sm font-bold px-4 py-2 rounded-full hover:bg-white/25 transition"><i class="fas fa-house"></i>Portal del módulo</a>
                 </div>
             </div>
-            <div class="text-center text-xs text-gray-500 mt-6 space-y-1">
+            <div class="text-navy bg-navy/[0.04] border border-navy/10 rounded-xl px-4 py-3 mt-6">
+                <p class="text-center text-[0.82rem] italic text-navy/80"><i class="fas fa-helmet-safety text-gold mr-1"></i>Metodología «Ingeniería de Trinchera»: si una arquitectura no corre en Google Colab, no existe.</p>
+            </div>
+            <div class="text-center text-xs text-gray-500 mt-4 space-y-1">
                 <p><strong class="text-navy">Experto temático:</strong> Javier Mauricio Sierra · <i class="fas fa-envelope mr-1"></i>javiersierra@usta.edu.co · <i class="fas fa-phone mr-1"></i>311 241 3858</p>
                 <p>Universidad Santo Tomás · Maestría en Ciencia de Datos · Espacio académico EA-N-F-004 · Documento HTML autocontenido (Tailwind + MathJax 3).</p>
             </div>
@@ -1025,6 +1058,17 @@ y.<span class="fn">backward</span>()   <span class="cm"># …y deriva sola</span
         } else {
             document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
         }
+
+        /* ---------- Botón "copiar" de las ventanas de código ---------- */
+        document.querySelectorAll('.code-copy').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var win = btn.closest('.code-window'); var body = win && win.querySelector('.codeblock'); if (!body) return;
+                navigator.clipboard.writeText(body.innerText).then(function () {
+                    var icon = btn.querySelector('i'); var prev = icon.className; icon.className = 'fas fa-check'; btn.style.color = '#27C93F';
+                    setTimeout(function () { icon.className = prev; btn.style.color = ''; }, 1400);
+                });
+            });
+        });
     </script>
 </body>
 

@@ -4,392 +4,442 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Material de consulta del Módulo 1: bibliografía, recursos audiovisuales, papers, marco normativo-ético y datasets para Fundamentos del Aprendizaje Profundo. Maestría en Ciencia de Datos, Universidad Santo Tomás.">
     <title>Material de consulta · Módulo 1 — Fundamentos del Aprendizaje Profundo · USTA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Tailwind CSS (utilidades) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome (iconografía de apoyo) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Google Fonts: Montserrat (texto) y Fira Code (código) -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Montserrat', 'Helvetica Neue', 'Arial', 'sans-serif'] },
+                    colors: {
+                        primary: '#3D008D',
+                        secondary: '#ED1E79',
+                        navy: '#001A4D',
+                        gold: '#FDB913',
+                        teal: '#0E7490',
+                        bg: '#F8FAFC',
+                        surface: '#FFFFFF',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #F8FAFC;
+            color: #1E293B;
+            scroll-behavior: smooth;
+        }
+        code, pre, .mono { font-family: 'Fira Code', monospace; }
+
+        /* Gradientes institucionales USTA */
+        .usta-gradient { background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%); }
+        .usta-gradient-text {
+            background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .usta-header { background: linear-gradient(135deg, #001A4D 0%, #3D008D 60%, #5B1C9E 100%); }
+
+        /* Tarjeta base */
+        .card {
+            background: #fff; border-radius: 16px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+            transition: box-shadow .25s ease, transform .25s ease;
+        }
+        .card:hover { box-shadow: 0 12px 30px rgba(0,0,0,0.11); transform: translateY(-3px); }
+
+        /* Barra de desplazamiento */
+        ::-webkit-scrollbar { width: 9px; height: 9px; }
+        ::-webkit-scrollbar-track { background: #eef2f7; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg,#3D008D,#ED1E79); border-radius: 5px; }
+
+        /* Aparición progresiva: SOLO una entrada sutil que nunca oculta el contenido. */
+        @keyframes riseIn { from { opacity: .35; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        .js .reveal.in { animation: riseIn .5s ease-out both; }
+
+        /* Código en línea */
+        .icode {
+            background: #F1F5F9; color: #0F172A; padding: .08rem .42rem;
+            border-radius: 5px; font-size: .85em; font-family: 'Fira Code', monospace;
+        }
+
+        /* Callout / analogía */
+        .callout { border-left: 4px solid; border-radius: 12px; padding: .9rem 1.1rem; }
+        .callout-info   { background:#F3F0FC; border-color:#3D008D; }
+        .callout-tip    { background:#ECFDF5; border-color:#0E9F6E; }
+        .callout-warn   { background:#FFFBEB; border-color:#FDB913; }
+        .callout-danger { background:#FEF2F2; border-color:#DC2626; }
+        .callout-eth    { background:#F0F9FF; border-color:#0E7490; }
+
+        h2.sec-title { font-weight: 800; letter-spacing: -.02em; }
+
+        /* Navegación sticky */
+        .navbar { backdrop-filter: blur(8px); background: rgba(255,255,255,.86); }
+        .navlink { transition: color .2s ease, background .2s ease; }
+        .navlink:hover { color:#3D008D; }
+
+        /* Tabla genérica */
+        .tbl { width:100%; border-collapse: collapse; font-size:.9rem; }
+        .tbl th, .tbl td { border:1px solid #E2E8F0; padding:.6rem .7rem; vertical-align: top; text-align:left; }
+        .tbl thead th { color:#fff; }
+        .tbl a { color:#ED1E79; }
+
+        /* Figuras / diagramas */
+        figure { margin: 0; }
+        figcaption { font-size:.8rem; color:#64748B; margin-top:.5rem; text-align:center; }
+
+        /* Impresión / PDF */
+        @media print {
+            body { background: #fff; }
+            .no-print { display: none !important; }
+            .card { box-shadow: none; border: 1px solid #e5e7eb; break-inside: avoid; }
+            section { break-inside: avoid-page; }
+            .js .reveal { opacity: 1 !important; transform: none !important; }
+            a { color: #1E293B; text-decoration: none; }
+        }
+    </style>
 </head>
 
 <body>
 
-<!-- ============================================================
-     BANNER INSTITUCIONAL USTA
-     ============================================================ -->
-<div
-  style="position: relative; width: 100%; max-width: 100%; overflow: hidden;">
-  <!-- Imagen del banner -->
-  <img class="img-fluid"
-    style="width: 100%; height: auto; display: block;"
-    src="https://mdm.usta.edu.co/recursos/etiquetas/Etiqueta+Virtual.jpg"
-    alt="Banner con título de sección">
-  <!-- Texto centrado, responsive y con sombra -->
-  <div
-    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; padding: 5%; box-sizing: border-box;">
-    <div
-      style="font-size: clamp(12px, 3vw, 32px); color: white; font-weight: bold; padding: 10px; border-radius: 10px; max-width: 90%; line-height: 1.2; word-break: break-word; text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);">
-      Material de consulta</div>
-  </div>
-</div>
+    <!-- ====================== ENCABEZADO ====================== -->
+    <header class="usta-header text-white">
+        <div class="max-w-6xl mx-auto px-5 md:px-8 py-10 md:py-14">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="usta-gradient p-2.5 rounded-xl shadow-lg"><i class="fas fa-book-open text-lg"></i></span>
+                <span class="text-[11px] md:text-xs uppercase tracking-[0.25em] text-gold font-bold">Universidad Santo Tomás · Maestría en Ciencia de Datos</span>
+            </div>
+            <p class="text-secondary font-semibold text-sm md:text-base mb-1">Profundización I: Redes Neuronales — Deep Learning · EA-N-F-004</p>
+            <h1 class="text-3xl md:text-5xl font-extrabold leading-tight tracking-tight">
+                Material de <span class="text-gold">consulta</span> · Módulo 1
+            </h1>
+            <p class="text-lg md:text-2xl font-light text-white/90 mt-3">Fundamentos del Aprendizaje Profundo · Bibliografía, webgrafía y fuentes recomendadas</p>
+            <div class="flex flex-wrap gap-2 mt-6 text-xs md:text-sm">
+                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-book mr-1.5 text-gold"></i>Bibliografía</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-video mr-1.5 text-gold"></i>Audiovisuales</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-file-lines mr-1.5 text-gold"></i>Papers</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-scale-balanced mr-1.5 text-gold"></i>Marco ético</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-database mr-1.5 text-gold"></i>Datasets</span>
+            </div>
+        </div>
+    </header>
 
-<p dir="ltr" style="text-align: left;"></p>
+    <!-- ====================== NAVEGACIÓN STICKY ====================== -->
+    <nav class="navbar sticky top-0 z-40 border-b border-slate-200 no-print">
+        <div class="max-w-6xl mx-auto px-4 flex gap-1 md:gap-3 overflow-x-auto text-xs md:text-sm font-semibold py-2.5 whitespace-nowrap">
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#bibliografia"><i class="fas fa-book mr-1"></i>Bibliografía</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#audiovisual"><i class="fas fa-video mr-1"></i>Audiovisuales</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#papers"><i class="fas fa-file-lines mr-1"></i>Papers</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#normativo"><i class="fas fa-scale-balanced mr-1"></i>Marco ético</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#datasets"><i class="fas fa-database mr-1"></i>Datasets</a>
+        </div>
+    </nav>
 
-<!-- ============================================================
-     TABLA INTRODUCTORIA: IMAGEN + TEXTO
-     ============================================================ -->
-<table style="min-width: 600px; max-width: 1200px;" border="0" cellspacing="0"
-  cellpadding="0">
-  <tbody>
-    <tr>
-      <td width="118">
-        <p align="center"><img class="img-fluid" role="presentation"
-            src="https://mdm.usta.edu.co/moodle/recursos/plantillas/imagenes_aula_multicampus_mv/contenidos-de-apoyo-2.png"
-            alt="Organizador gráfico de Contenidos de apoyo" width="500"
-            height="500"></p>
-      </td>
-      <td width="307">
-        <p align="center"></p>
-        <p dir="ltr">Las fuentes de consulta de base para el desarrollo de la
-          actividad corresponden a las lecturas sugeridas dispuestas en el aula
-          virtual o cualquier otra fuente que consideren pertinente consultar.
-        </p>
-        <p dir="ltr"><strong>Principales</strong></p>
-        <p></p>
-      </td>
-    </tr>
-  </tbody>
-</table>
+    <main class="max-w-6xl mx-auto px-5 md:px-8 py-10 md:py-14 space-y-14">
 
-<!-- ============================================================
-     SECCIÓN 1 — BIBLIOGRAFÍA PRINCIPAL
-     ============================================================ -->
-<h2 dir="ltr" style="color: #3D008D; font-family: Montserrat, sans-serif;">
-  📚 Bibliografía principal</h2>
+        <!-- ====================== INTRODUCCIÓN ====================== -->
+        <section class="reveal">
+            <div class="callout callout-info">
+                <p class="font-bold text-primary mb-1"><i class="fas fa-circle-info mr-2"></i>Cómo usar este material</p>
+                <p class="text-sm leading-relaxed">Las fuentes de consulta de base para el desarrollo de la actividad corresponden a las lecturas sugeridas dispuestas en el aula virtual o cualquier otra fuente que consideren pertinente consultar. A continuación se recopilan las fuentes <strong>principales</strong> del Módulo 1, organizadas por tipo: bibliografía, recursos audiovisuales, artículos académicos, marco normativo-ético y conjuntos de datos de práctica.</p>
+            </div>
+        </section>
 
-<table
-  style="min-width: 600px; max-width: 1200px; border-collapse: collapse; font-family: Montserrat, sans-serif;"
-  border="1" cellspacing="0" cellpadding="8">
-  <thead>
-    <tr style="background-color: #3D008D; color: white;">
-      <th style="text-align: left; width: 30%;">Referencia</th>
-      <th style="text-align: left; width: 50%;">Aporte al módulo</th>
-      <th style="text-align: left; width: 20%;">Enlace</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Goodfellow, I., Bengio, Y., &amp; Courville, A. (2016). <em>Deep
-          Learning</em>. MIT Press.</td>
-      <td>Texto canónico. Cap. 6 (Feedforward Networks), Cap. 7 (Regularización),
-        Cap. 8 (Optimization for Training Deep Models) y Cap. 10 (Intro to
-        sequence modeling) son la base teórica de los 5 capítulos del módulo.</td>
-      <td><a href="https://www.deeplearningbook.org" target="_blank" rel="noopener"
-          style="color: #ED1E79;">deeplearningbook.org</a></td>
-    </tr>
-    <tr>
-      <td>Géron, A. (2023). <em>Hands-On Machine Learning with Scikit-Learn,
-          Keras, and TensorFlow</em> (3rd Ed.). O'Reilly Media.</td>
-      <td>Cap. 10 (Introduction to Artificial Neural Networks with Keras) y
-        Cap. 11 (Training Deep Neural Networks) ofrecen la implementación
-        práctica con Keras/PyTorch que se usa como referencia en el
-        <strong>Proyecto Centinela · Fase 1</strong> (antes "El Guardián del Cafetal").</td>
-      <td>Recurso disponible en la biblioteca USTA</td>
-    </tr>
-    <tr>
-      <td>Chollet, F. (2021). <em>Deep Learning with Python</em> (2nd Ed.).
-        Manning Publications.</td>
-      <td>Cap. 2 y Cap. 4 explican la intuición del ML y del descenso del
-        gradiente con ejemplos ejecutables en Keras, ideales como complemento
-        al capítulo 3 del módulo.</td>
-      <td>Recurso disponible en la biblioteca USTA</td>
-    </tr>
-    <tr>
-      <td>Zhang, A., Lipton, Z. C., Li, M., &amp; Smola, A. J. (2023).
-        <em>Dive into Deep Learning</em>. Cambridge University Press.</td>
-      <td>Libro abierto con notebooks ejecutables: cada sección combina
-        matemática, código en PyTorch/TensorFlow y aplicaciones. Útil para
-        profundizar en el MLP y la retropropagación.</td>
-      <td><a href="https://d2l.ai" target="_blank" rel="noopener"
-          style="color: #ED1E79;">d2l.ai</a></td>
-    </tr>
-    <tr>
-      <td>Nielsen, M. (2015). <em>Neural Networks and Deep Learning</em>.
-        Determination Press.</td>
-      <td>Libro abierto con explicaciones intuitivas y ejemplos interactivos
-        en Python. Ideal para complementar los conceptos del Cap. 1 y 2
-        (perceptrón y MLP) con implementaciones paso a paso.</td>
-      <td><a href="http://neuralnetworksanddeeplearning.com/" target="_blank"
-          rel="noopener" style="color: #ED1E79;">neuralnetworksanddeeplearning.com</a></td>
-    </tr>
-    <tr>
-      <td>Deisenroth, M. P., Faisal, A. A., &amp; Ong, C. S. (2020).
-        <em>Mathematics for Machine Learning</em>. Cambridge University Press.</td>
-      <td>Fundamentos matemáticos (álgebra lineal, cálculo, probabilidad)
-        necesarios para entender el funcionamiento interno de las redes
-        neuronales. Refuerza los conceptos del Cap. 3 y 4.</td>
-      <td><a href="https://mml-book.github.io/" target="_blank" rel="noopener"
-          style="color: #ED1E79;">mml-book.github.io</a></td>
-    </tr>
-  </tbody>
-</table>
+        <!-- ====================== SECCIÓN 1 — BIBLIOGRAFÍA PRINCIPAL ====================== -->
+        <section id="bibliografia" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-book text-secondary mr-2"></i>Bibliografía principal</h2>
+            <div class="overflow-x-auto card p-1">
+                <table class="tbl" style="min-width:680px">
+                    <thead>
+                        <tr style="background:#3D008D">
+                            <th scope="col" style="width:30%">Referencia</th>
+                            <th scope="col" style="width:50%">Aporte al módulo</th>
+                            <th scope="col" style="width:20%">Enlace</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Goodfellow, I., Bengio, Y., &amp; Courville, A. (2016). <em>Deep Learning</em>. MIT Press.</td>
+                            <td>Texto canónico. Cap. 6 (Feedforward Networks), Cap. 7 (Regularización), Cap. 8 (Optimization for Training Deep Models) y Cap. 10 (Intro to sequence modeling) son la base teórica de los 5 capítulos del módulo.</td>
+                            <td><a href="https://www.deeplearningbook.org" target="_blank" rel="noopener">deeplearningbook.org</a></td>
+                        </tr>
+                        <tr>
+                            <td>Géron, A. (2023). <em>Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow</em> (3rd Ed.). O'Reilly Media.</td>
+                            <td>Cap. 10 (Introduction to Artificial Neural Networks with Keras) y Cap. 11 (Training Deep Neural Networks) ofrecen la implementación práctica con Keras/TensorFlow que se usa como referencia en el <strong>Proyecto Centinela · Fase 1</strong> (antes "El Guardián del Cafetal").</td>
+                            <td>Recurso disponible en la biblioteca USTA</td>
+                        </tr>
+                        <tr>
+                            <td>Chollet, F. (2021). <em>Deep Learning with Python</em> (2nd Ed.). Manning Publications.</td>
+                            <td>Cap. 2 y Cap. 4 explican la intuición del ML y del descenso del gradiente con ejemplos ejecutables en Keras, ideales como complemento al Cap. 3 del módulo.</td>
+                            <td>Recurso disponible en la biblioteca USTA</td>
+                        </tr>
+                        <tr>
+                            <td>Zhang, A., Lipton, Z. C., Li, M., &amp; Smola, A. J. (2023). <em>Dive into Deep Learning</em>. Cambridge University Press.</td>
+                            <td>Libro abierto con notebooks ejecutables: cada sección combina matemática, código en PyTorch/TensorFlow y aplicaciones. Útil para profundizar en el MLP y la retropropagación.</td>
+                            <td><a href="https://d2l.ai" target="_blank" rel="noopener">d2l.ai</a></td>
+                        </tr>
+                        <tr>
+                            <td>Nielsen, M. (2015). <em>Neural Networks and Deep Learning</em>. Determination Press.</td>
+                            <td>Libro abierto con explicaciones intuitivas y ejemplos interactivos en Python. Ideal para complementar los conceptos del Cap. 1 y 2 (perceptrón y MLP) con implementaciones paso a paso.</td>
+                            <td><a href="http://neuralnetworksanddeeplearning.com/" target="_blank" rel="noopener">neuralnetworksanddeeplearning.com</a></td>
+                        </tr>
+                        <tr>
+                            <td>Deisenroth, M. P., Faisal, A. A., &amp; Ong, C. S. (2020). <em>Mathematics for Machine Learning</em>. Cambridge University Press.</td>
+                            <td>Fundamentos matemáticos (álgebra lineal, cálculo, probabilidad) necesarios para entender el funcionamiento interno de las redes neuronales. Refuerza los conceptos del Cap. 3 y 4.</td>
+                            <td><a href="https://mml-book.github.io/" target="_blank" rel="noopener">mml-book.github.io</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
-<!-- ============================================================
-     SECCIÓN 2 — RECURSOS AUDIOVISUALES Y HERRAMIENTAS
-     ============================================================ -->
-<h2 dir="ltr" style="color: #3D008D; font-family: Montserrat, sans-serif;">
-  🎥 Recursos audiovisuales y herramientas interactivas</h2>
+        <!-- ====================== SECCIÓN 2 — RECURSOS AUDIOVISUALES ====================== -->
+        <section id="audiovisual" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-video text-secondary mr-2"></i>Recursos audiovisuales y herramientas interactivas</h2>
+            <div class="overflow-x-auto card p-1">
+                <table class="tbl" style="min-width:680px">
+                    <thead>
+                        <tr style="background:#3D008D">
+                            <th scope="col" style="width:30%">Recurso</th>
+                            <th scope="col" style="width:50%">Descripción y vínculo pedagógico</th>
+                            <th scope="col" style="width:20%">Enlace</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>TensorFlow Playground</strong> (Smilkov &amp; Carter, Google)</td>
+                            <td>Simulador web que permite "jugar" con redes neuronales en tiempo real visualizando fronteras de decisión, <em>overfitting</em> y Teorema de Aproximación Universal. Recomendado en el Cap. 2.</td>
+                            <td><a href="https://playground.tensorflow.org" target="_blank" rel="noopener">playground.tensorflow.org</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>StatQuest · The Essential Main Ideas of Neural Networks</strong> (Josh Starmer, 2020)</td>
+                            <td>Video de ~16 min que desglosa nodos, pesos, sesgos y activación de forma visual. Cubre los fundamentos del Cap. 1 y 2. Mencionado explícitamente en los recursos del <strong>Proyecto Centinela · Fase 1</strong>.</td>
+                            <td><a href="https://www.youtube.com/watch?v=CqOfi41LfDw" target="_blank" rel="noopener">YouTube</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>¿Qué es el Descenso del Gradiente?</strong> (Dot CSV, Carlos Santana, 2018)</td>
+                            <td>Video en español (~10 min) que explica el algoritmo con la analogía de descender una montaña a ciegas. Acompaña directamente el Cap. 3.</td>
+                            <td><a href="https://www.youtube.com/watch?v=A6FiCDoz8_4" target="_blank" rel="noopener">YouTube</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>3Blue1Brown · ¿Qué es una red neuronal?</strong> (Grant Sanderson, 2017)</td>
+                            <td>Serie "Deep Learning" con visualizaciones 3D de grafos computacionales y <em>backpropagation</em>. Excelente complemento visual para el Cap. 4.</td>
+                            <td><a href="https://www.youtube.com/watch?v=aircAruvnKk" target="_blank" rel="noopener">YouTube</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>3Blue1Brown · Playlist completa "Deep Learning"</strong> (Grant Sanderson)</td>
+                            <td>Serie de 4 videos que cubre: qué son las redes neuronales, descenso del gradiente, qué hace realmente la retropropagación, y cálculo de <em>backpropagation</em>. Complemento visual ideal para los Cap. 1–4.</td>
+                            <td><a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi" target="_blank" rel="noopener">YouTube Playlist</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Khan Academy · Cálculo multivariable: descenso del gradiente</strong></td>
+                            <td>Mejor explicación en español de derivadas parciales y regla de la cadena (motor matemático de la retropropagación). Lectura recomendada para reforzar el Cap. 4.</td>
+                            <td><a href="https://es.khanacademy.org/math/multivariable-calculus/applications-of-multivariable-derivatives/optimizing-multivariable-functions/a/what-is-gradient-descent" target="_blank" rel="noopener">Khan Academy</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
-<table
-  style="min-width: 600px; max-width: 1200px; border-collapse: collapse; font-family: Montserrat, sans-serif;"
-  border="1" cellspacing="0" cellpadding="8">
-  <thead>
-    <tr style="background-color: #ED1E79; color: white;">
-      <th style="text-align: left; width: 30%;">Recurso</th>
-      <th style="text-align: left; width: 50%;">Descripción y vínculo pedagógico</th>
-      <th style="text-align: left; width: 20%;">Enlace</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>TensorFlow Playground</strong> (Smilkov &amp; Carter, Google)</td>
-      <td>Simulador web que permite "jugar" con redes neuronales en tiempo real
-        visualizando fronteras de decisión, overfitting y Teorema de
-        Aproximación Universal. Recomendado en el Cap. 2.</td>
-      <td><a href="https://playground.tensorflow.org" target="_blank"
-          rel="noopener" style="color: #ED1E79;">playground.tensorflow.org</a></td>
-    </tr>
-    <tr>
-      <td><strong>StatQuest · The Essential Main Ideas of Neural Networks</strong>
-        (Josh Starmer, 2020)</td>
-      <td>Video de ~16 min que desglosa nodos, pesos, sesgos y activación de
-        forma visual. Cubre los fundamentos del Cap. 1 y 2. Mencionado
-        explícitamente en los recursos del <strong>Proyecto Centinela · Fase 1</strong>.</td>
-      <td><a href="https://www.youtube.com/watch?v=CqOfi41LfDw" target="_blank"
-          rel="noopener" style="color: #ED1E79;">YouTube</a></td>
-    </tr>
-    <tr>
-      <td><strong>¿Qué es el Descenso del Gradiente?</strong> (Dot CSV, Carlos
-        Santana, 2018)</td>
-      <td>Video en español (~10 min) que explica el algoritmo con la analogía
-        de descender una montaña a ciegas. Acompaña directamente el Cap. 3.</td>
-      <td><a href="https://www.youtube.com/watch?v=A6FiCDoz8_4" target="_blank"
-          rel="noopener" style="color: #ED1E79;">YouTube</a></td>
-    </tr>
-    <tr>
-      <td><strong>3Blue1Brown · ¿Qué es una red neuronal?</strong> (Grant
-        Sanderson, 2017)</td>
-      <td>Serie "Deep Learning" con visualizaciones 3D de grafos
-        computacionales y backpropagation. Excelente complemento visual para
-        el Cap. 4.</td>
-      <td><a href="https://www.youtube.com/watch?v=aircAruvnKk" target="_blank"
-          rel="noopener" style="color: #ED1E79;">YouTube</a></td>
-    </tr>
-    <tr>
-      <td><strong>3Blue1Brown · Playlist completa "Deep Learning"</strong> (Grant
-        Sanderson)</td>
-      <td>Serie de 4 videos que cubre: qué son las redes neuronales, descenso
-        del gradiente, qué hace realmente la retropropagación, y cálculo de
-        backpropagation. Complemento visual ideal para los Cap. 1–4.</td>
-      <td><a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi" target="_blank"
-          rel="noopener" style="color: #ED1E79;">YouTube Playlist</a></td>
-    </tr>
-    <tr>
-      <td><strong>Khan Academy · Cálculo multivariable: descenso del
-          gradiente</strong></td>
-      <td>Mejor explicación en español de derivadas parciales y regla de la
-        cadena (motor matemático de la retropropagación). Lectura recomendada
-        para reforzar el Cap. 4.</td>
-      <td><a href="https://es.khanacademy.org/math/multivariable-calculus/applications-of-multivariable-derivatives/optimizing-multivariable-functions/a/what-is-gradient-descent"
-          target="_blank" rel="noopener" style="color: #ED1E79;">Khan Academy</a></td>
-    </tr>
-  </tbody>
-</table>
+        <!-- ====================== SECCIÓN 3 — ARTÍCULOS Y PAPERS ====================== -->
+        <section id="papers" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-file-lines text-secondary mr-2"></i>Artículos y papers académicos</h2>
+            <div class="overflow-x-auto card p-1">
+                <table class="tbl" style="min-width:680px">
+                    <thead>
+                        <tr style="background:#3D008D">
+                            <th scope="col" style="width:30%">Referencia</th>
+                            <th scope="col" style="width:50%">Aporte al módulo</th>
+                            <th scope="col" style="width:20%">Enlace</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Rajkomar, A., Hardt, M., Howell, M. D., Corrado, G., &amp; Chin, M. H. (2018). Ensuring fairness in machine learning to advance health equity. <em>Annals of Internal Medicine, 169</em>(12), 866-872.</td>
+                            <td>Paper seminal sobre sesgos en IA médica. Lectura obligatoria para la Guía 1 (caso del hospital con dengue) y para la reflexión ética del Cap. 5.</td>
+                            <td><a href="https://www.acpjournals.org/doi/10.7326/M18-2569" target="_blank" rel="noopener">Annals of Internal Medicine</a></td>
+                        </tr>
+                        <tr>
+                            <td>Ruiz Sandoval, D. F. (2024). <em>Clasificación de especies: un enfoque para mejorar la precisión en la identificación de serpientes</em> (Tesis de maestría, USTA).</td>
+                            <td>Aplicación de redes a la biodiversidad colombiana. Ejemplo de Cap. 2 (MLP) y Cap. 5 (regularización) en problemas de clasificación de imágenes en contexto nacional.</td>
+                            <td><a href="https://repository.usta.edu.co/items/e3922c0f-bb7d-4cf3-a79c-7ec17e6178e6" target="_blank" rel="noopener">repository.usta.edu.co</a></td>
+                        </tr>
+                        <tr>
+                            <td>Huertas Mora, A. (2020). <em>Algoritmos de aprendizaje supervisado con datos de monitoreo de condiciones: pronóstico de fallas en máquinas</em> (Tesis de maestría, USTA).</td>
+                            <td>Optimización y funciones de pérdida aplicadas a contextos industriales colombianos. Refuerza los conceptos de los Cap. 3 y 4.</td>
+                            <td><a href="https://repository.usta.edu.co/items/e9c7bd23-3862-4262-98a4-a80121c083e8" target="_blank" rel="noopener">repository.usta.edu.co</a></td>
+                        </tr>
+                        <tr>
+                            <td>Borda-Malo E., S. (Comp.). (2025). <em>IA versus inteligencia humana y espiritual</em>. Ediciones USTA.</td>
+                            <td>Reflexión filosófica y ética sobre la IA desde la perspectiva humanista. Lectura complementaria para el Cap. 5 (Ética de modelos).</td>
+                            <td><a href="https://www.opcolombia.org/images/noti_publicaciones/40/IA_VERSUS_INTELIGENCIA_HUMANA_Y_ESPIRITUAL.pdf" target="_blank" rel="noopener">opcolombia.org</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
-<!-- ============================================================
-     SECCIÓN 3 — ARTÍCULOS Y PAPERS ACADÉMICOS
-     ============================================================ -->
-<h2 dir="ltr" style="color: #3D008D; font-family: Montserrat, sans-serif;">
-  📄 Artículos y papers académicos</h2>
+        <!-- ====================== SECCIÓN 4 — MARCO NORMATIVO Y ÉTICO ====================== -->
+        <section id="normativo" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-scale-balanced text-secondary mr-2"></i>Marco normativo y ético colombiano</h2>
+            <div class="overflow-x-auto card p-1">
+                <table class="tbl" style="min-width:680px">
+                    <thead>
+                        <tr style="background:#3D008D">
+                            <th scope="col" style="width:30%">Documento</th>
+                            <th scope="col" style="width:50%">Aplicación en el módulo</th>
+                            <th scope="col" style="width:20%">Enlace</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Ministerio de Ciencia, Tecnología e Innovación. (2021). <em>Marco Ético para la Inteligencia Artificial en Colombia</em>.</td>
+                            <td>Referencia clave del Cap. 5 y de la auditoría ética transversal del <strong>Proyecto Centinela · Fase 1</strong>. Marco aplicable también a la política de <strong>Uso Responsable de IA</strong> de la actividad. Lectura obligatoria para todos los estudiantes.</td>
+                            <td><a href="https://minciencias.gov.co/sites/default/files/marco-etico-ia-colombia-2021.pdf" target="_blank" rel="noopener">minciencias.gov.co</a></td>
+                        </tr>
+                        <tr>
+                            <td>Instituto Nacional de Salud Colombia. (2023). <em>Protocolo de vigilancia en salud pública: Dengue</em>.</td>
+                            <td>Contexto clínico-epidemiológico del caso de la Guía 1 (hospital colombiano con dengue).</td>
+                            <td><a href="https://www.minsalud.gov.co/" target="_blank" rel="noopener">minsalud.gov.co</a></td>
+                        </tr>
+                        <tr>
+                            <td>UNODC. (2022). <em>Colombia: explotación de oro de aluvión. Evidencias a partir de percepción remota 2021</em>.</td>
+                            <td>Reporte oficial sobre detección de minería ilegal con percepción remota. Mencionado en el Cap. 5 como ejemplo de aplicación de Deep Learning para problemas ambientales nacionales.</td>
+                            <td><a href="https://www.unodc.org/documents/colombia/2022/Junio/Informe_Colombia_Explotacion_de_Oro_de_Aluvion_Evidencias_a_Partir_de_Percepcion_Remota_2021_SP_.pdf" target="_blank" rel="noopener">unodc.org</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
-<table
-  style="min-width: 600px; max-width: 1200px; border-collapse: collapse; font-family: Montserrat, sans-serif;"
-  border="1" cellspacing="0" cellpadding="8">
-  <thead>
-    <tr style="background-color: #001A4D; color: white;">
-      <th style="text-align: left; width: 30%;">Referencia</th>
-      <th style="text-align: left; width: 50%;">Aporte al módulo</th>
-      <th style="text-align: left; width: 20%;">Enlace</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Rajkomar, A., Hardt, M., Howell, M. D., Corrado, G., &amp; Chin, M. H.
-        (2018). Ensuring fairness in machine learning to advance health equity.
-        <em>Annals of Internal Medicine, 169</em>(12), 866-872.</td>
-      <td>Paper seminal sobre sesgos en IA médica. Lectura obligatoria para
-        la Guía 1 (caso del hospital con dengue) y para la reflexión ética del
-        Cap. 5.</td>
-      <td><a href="https://www.acpjournals.org/doi/10.7326/M18-2569" target="_blank" rel="noopener"
-          style="color: #ED1E79;">Annals of Internal Medicine</a></td>
-    </tr>
-    <tr>
-      <td>Ruiz Sandoval, D. F. (2024). <em>Clasificación de especies: un
-          enfoque para mejorar la precisión en la identificación de
-          serpientes</em> (Tesis de maestría, USTA).</td>
-      <td>Aplicación de redes a la biodiversidad colombiana. Ejemplo de
-        Cap. 2 (MLP) y Cap. 5 (regularización) en problemas de clasificación
-        de imágenes en contexto nacional.</td>
-      <td><a href="https://repository.usta.edu.co/items/e3922c0f-bb7d-4cf3-a79c-7ec17e6178e6"
-          target="_blank" rel="noopener" style="color: #ED1E79;">repository.usta.edu.co</a></td>
-    </tr>
-    <tr>
-      <td>Huertas Mora, A. (2020). <em>Algoritmos de aprendizaje supervisado
-          con datos de monitoreo de condiciones: pronóstico de fallas en
-          máquinas</em> (Tesis de maestría, USTA).</td>
-      <td>Optimización y funciones de pérdida aplicadas a contextos
-        industriales colombianos. Refuerza los conceptos de los Cap. 3 y 4.</td>
-      <td><a href="https://repository.usta.edu.co/items/e9c7bd23-3862-4262-98a4-a80121c083e8"
-          target="_blank" rel="noopener" style="color: #ED1E79;">repository.usta.edu.co</a></td>
-    </tr>
-    <tr>
-      <td>Borda-Malo E., S. (Comp.). (2025). <em>IA versus inteligencia humana
-          y espiritual</em>. Ediciones USTA.</td>
-      <td>Reflexión filosófica y ética sobre la IA desde la perspectiva
-        humanista. Lectura complementaria para el Cap. 5 (Ética de modelos).</td>
-      <td><a href="https://www.opcolombia.org/images/noti_publicaciones/40/IA_VERSUS_INTELIGENCIA_HUMANA_Y_ESPIRITUAL.pdf"
-          target="_blank" rel="noopener" style="color: #ED1E79;">opcolombia.org</a></td>
-    </tr>
-  </tbody>
-</table>
+        <!-- ====================== SECCIÓN 5 — DATASETS Y HERRAMIENTAS ====================== -->
+        <section id="datasets" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-database text-secondary mr-2"></i>Datasets y herramientas de práctica</h2>
 
-<!-- ============================================================
-     SECCIÓN 4 — MARCO NORMATIVO Y ÉTICO
-     ============================================================ -->
-<h2 dir="ltr" style="color: #3D008D; font-family: Montserrat, sans-serif;">
-  ⚖️ Marco normativo y ético colombiano</h2>
+            <div class="callout callout-warn mb-5">
+                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i><strong>Política de datos del proyecto.</strong> <strong>Kaggle Notebooks</strong> está permitido como <em>entorno de cómputo</em>, pero los <em>datasets</em> y <em>competencias</em> de Kaggle <strong>NO se permiten</strong> como fuente de datos de la actividad: son retos ya resueltos y con datos demasiado limpios. El proyecto exige fuentes reales y públicas (se admiten fuentes internacionales).</p>
+            </div>
 
-<table
-  style="min-width: 600px; max-width: 1200px; border-collapse: collapse; font-family: Montserrat, sans-serif;"
-  border="1" cellspacing="0" cellpadding="8">
-  <thead>
-    <tr style="background-color: #FDB913; color: #001A4D;">
-      <th style="text-align: left; width: 30%;">Documento</th>
-      <th style="text-align: left; width: 50%;">Aplicación en el módulo</th>
-      <th style="text-align: left; width: 20%;">Enlace</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Ministerio de Ciencia, Tecnología e Innovación. (2021). <em>Marco
-          Ético para la Inteligencia Artificial en Colombia</em>.</td>
-      <td>Referencia clave del Cap. 5 y de la auditoría ética transversal
-        del <strong>Proyecto Centinela · Fase 1</strong>. Marco aplicable también
-        a la política de <strong>Uso Responsable de IA</strong> de la actividad.
-        Lectura obligatoria para todos los estudiantes.</td>
-      <td><a href="https://minciencias.gov.co/sites/default/files/marco-etico-ia-colombia-2021.pdf"
-          target="_blank" rel="noopener" style="color: #ED1E79;">minciencias.gov.co</a></td>
-    </tr>
-    <tr>
-      <td>Instituto Nacional de Salud Colombia. (2023). <em>Protocolo de
-          vigilancia en salud pública: Dengue</em>.</td>
-      <td>Contexto clínico-epidemiológico del caso de la Guía 1 (hospital
-        colombiano con dengue).</td>
-      <td><a href="https://www.minsalud.gov.co/" target="_blank" rel="noopener"
-          style="color: #ED1E79;">minsalud.gov.co</a></td>
-    </tr>
-    <tr>
-      <td>UNODC. (2022). <em>Colombia: explotación de oro de aluvión.
-          Evidencias a partir de percepción remota 2021</em>.</td>
-      <td>Reporte oficial sobre detección de minería ilegal con
-        percepción remota. Mencionado en el Cap. 5 como ejemplo de
-        aplicación de Deep Learning para problemas ambientales nacionales.</td>
-      <td><a href="https://www.unodc.org/documents/colombia/2022/Junio/Informe_Colombia_Explotacion_de_Oro_de_Aluvion_Evidencias_a_Partir_de_Percepcion_Remota_2021_SP_.pdf"
-          target="_blank" rel="noopener" style="color: #ED1E79;">unodc.org</a></td>
-    </tr>
-  </tbody>
-</table>
+            <div class="overflow-x-auto card p-1">
+                <table class="tbl" style="min-width:680px">
+                    <thead>
+                        <tr style="background:#3D008D">
+                            <th scope="col" style="width:30%">Recurso</th>
+                            <th scope="col" style="width:50%">Uso en el módulo</th>
+                            <th scope="col" style="width:20%">Enlace</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Actividad evaluable · Proyecto Centinela · Fase 1</strong></td>
+                            <td>Enunciado completo de la actividad evaluable del Módulo 1. Incluye la <strong>Propuesta de Datos</strong>, el <strong>Catálogo de Fuentes de Datos</strong> y la política de <strong>Uso Responsable de IA</strong> (permitido y evaluado mediante bitácora, sustentación oral y auditoría a la IA). Recuerda la política de datos del proyecto: fuentes reales y públicas, <strong>sin datasets de Kaggle</strong>.</td>
+                            <td><a href="11_Modulo_1_Actividad_Fase1_Centinela.html" target="_blank" rel="noopener">Proyecto Centinela · Fase 1</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>RoCoLe</strong> — Parraga-Alava, J. et al. (2019). <em>RoCoLe: A robusta coffee leaf images dataset</em> (v2). Mendeley Data.</td>
+                            <td>Dataset del <strong>escenario de referencia</strong> del <strong>Proyecto Centinela · Fase 1</strong> (antes "El Guardián del Cafetal"): el café / roya como línea base (MLP, datos tabulares) de un sistema de alerta temprana que crece en los Módulos 2 y 3. Contiene imágenes de hojas de café Robusta clasificadas (sanas / con roya); se usa una versión pre-procesada (CSV con vectores espectrales RGB + IR) para enfocarse en la arquitectura del MLP.</td>
+                            <td><a href="https://data.mendeley.com/datasets/c5yvn32dzg/2" target="_blank" rel="noopener">mendeley.data</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Google Colab</strong> + <strong>Kaggle Notebooks</strong></td>
+                            <td>Entornos de cómputo gratuitos con GPU. Toda la implementación práctica del módulo (Notebook del <strong>Proyecto Centinela · Fase 1</strong>) se ejecuta en estos entornos según la metodología "Ingeniería de Trinchera". <strong>Kaggle Notebooks</strong> está permitido como entorno de cómputo, pero los <em>datasets</em> y <em>competencias</em> de Kaggle no se admiten como fuente de datos de la actividad (véase la alerta superior).</td>
+                            <td>
+                                <a href="https://colab.research.google.com/" target="_blank" rel="noopener">colab.research.google.com</a><br>
+                                <a href="https://www.kaggle.com/code" target="_blank" rel="noopener">kaggle.com/code</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>TensorFlow Playground</strong></td>
+                            <td>Simulador interactivo para visualizar el comportamiento de distintas configuraciones de MLP (capas ocultas, <em>learning rate</em>, funciones de activación). Recomendado como primer contacto visual con el Cap. 2.</td>
+                            <td><a href="https://playground.tensorflow.org" target="_blank" rel="noopener">playground.tensorflow.org</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
-<!-- ============================================================
-     SECCIÓN 5 — DATASETS Y HERRAMIENTAS
-     ============================================================ -->
-<h2 dir="ltr" style="color: #3D008D; font-family: Montserrat, sans-serif;">
-  🗂️ Datasets y herramientas de práctica</h2>
+            <div class="callout callout-tip mt-5">
+                <p class="text-sm"><i class="fas fa-lightbulb text-emerald-600 mr-2"></i><strong>Biblioteca del aula.</strong> Además de las fuentes listadas, el aula virtual del campus multicampus USTA dispone de las lecturas digitalizadas del libro <strong>Goodfellow et al. (2016)</strong> y de material complementario en formato PDF y video, accesibles desde la sección "Biblioteca" del espacio académico.</p>
+            </div>
+        </section>
 
-<table
-  style="min-width: 600px; max-width: 1200px; border-collapse: collapse; font-family: Montserrat, sans-serif;"
-  border="1" cellspacing="0" cellpadding="8">
-  <thead>
-    <tr style="background-color: #15803D; color: white;">
-      <th style="text-align: left; width: 30%;">Recurso</th>
-      <th style="text-align: left; width: 50%;">Uso en el módulo</th>
-      <th style="text-align: left; width: 20%;">Enlace</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Actividad evaluable · Proyecto Centinela · Fase 1</strong></td>
-      <td>Enunciado completo de la actividad evaluable del Módulo 1. Incluye la
-        <strong>Propuesta de Datos</strong>, el <strong>Catálogo de Fuentes de
-        Datos</strong> y la política de <strong>Uso Responsable de IA</strong>
-        (permitido y evaluado mediante bitácora, sustentación oral y auditoría
-        a la IA). Recuerda la política de datos del proyecto: fuentes reales y
-        públicas, <strong>sin datasets de Kaggle</strong>.</td>
-      <td><a href="11_Modulo_1_Actividad_Fase1_Centinela.html" target="_blank"
-          rel="noopener" style="color: #ED1E79;">Proyecto Centinela · Fase 1</a></td>
-    </tr>
-    <tr>
-      <td><strong>RoCoLe</strong> — Parraga-Alava, J. et al. (2019).
-        <em>A robusta coffee leaf images dataset</em> (v2). Mendeley Data.</td>
-      <td>Dataset del <strong>escenario de referencia</strong> del
-        <strong>Proyecto Centinela · Fase 1</strong> (antes "El Guardián del
-        Cafetal"): el café / roya como línea base (MLP, datos tabulares) de un
-        sistema de alerta temprana que crece en los Módulos 2 y 3. Contiene
-        imágenes de hojas de café Robusta clasificadas (sanas / con roya); se
-        usa una versión pre-procesada (CSV con vectores espectrales RGB + IR)
-        para enfocarse en la arquitectura del MLP.</td>
-      <td><a href="https://data.mendeley.com/datasets/c5yvn32dzg/2" target="_blank"
-          rel="noopener" style="color: #ED1E79;">mendeley.data</a></td>
-    </tr>
-    <tr>
-      <td><strong>Google Colab</strong> + <strong>Kaggle Notebooks</strong></td>
-      <td>Entornos de cómputo gratuitos con GPU. Toda la implementación
-        práctica del módulo (Notebook del <strong>Proyecto Centinela · Fase
-        1</strong>) se ejecuta en estos entornos según la metodología
-        "Ingeniería de Trinchera".
-        <br><br>
-        <strong>Nota sobre Kaggle:</strong> <strong>Kaggle Notebooks</strong>
-        está permitido como <em>entorno de cómputo</em>, pero los
-        <em>datasets</em> y <em>competencias</em> de Kaggle <strong>NO se
-        permiten</strong> como fuente de datos de la actividad: son retos ya
-        resueltos y con datos demasiado limpios. La política de datos del
-        proyecto exige fuentes reales y públicas (se admiten fuentes
-        internacionales).</td>
-      <td>
-        <a href="https://colab.research.google.com/" target="_blank"
-          rel="noopener" style="color: #ED1E79;">colab.research.google.com</a><br>
-        <a href="https://www.kaggle.com/code" target="_blank" rel="noopener"
-          style="color: #ED1E79;">kaggle.com/code</a>
-      </td>
-    </tr>
-    <tr>
-      <td><strong>TensorFlow Playground</strong></td>
-      <td>Simulador interactivo para visualizar el comportamiento de
-        distintas configuraciones de MLP (capas ocultas, learning rate,
-        funciones de activación). Recomendado como primer contacto visual
-        con el Cap. 2.</td>
-      <td><a href="https://playground.tensorflow.org" target="_blank"
-          rel="noopener" style="color: #ED1E79;">playground.tensorflow.org</a></td>
-    </tr>
-  </tbody>
-</table>
+        <!-- ====================== RELACIONADO ====================== -->
+        <section class="reveal">
+            <div class="usta-gradient rounded-2xl p-7 text-white">
+                <h2 class="text-xl md:text-2xl font-extrabold mb-3"><i class="fas fa-diagram-project mr-2"></i>🔗 Relacionado</h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                    <a href="01_Modulo_1_Fundamentos_Deep_Learning.html" class="bg-white/10 hover:bg-white/20 transition rounded-xl p-4 block">
+                        <p class="font-bold mb-1"><i class="fas fa-layer-group mr-1.5"></i>Contenido del módulo</p>
+                        <p class="text-white/85">Fundamentos del Aprendizaje Profundo — los 5 capítulos del Módulo 1.</p>
+                    </a>
+                    <a href="00_ruta-aprendizaje-modulo-1.html" class="bg-white/10 hover:bg-white/20 transition rounded-xl p-4 block">
+                        <p class="font-bold mb-1"><i class="fas fa-route mr-1.5"></i>Ruta de aprendizaje</p>
+                        <p class="text-white/85">Secuencia recomendada de estudio y entregas del Módulo 1.</p>
+                    </a>
+                    <a href="11_Modulo_1_Actividad_Fase1_Centinela.html" class="bg-white/10 hover:bg-white/20 transition rounded-xl p-4 block">
+                        <p class="font-bold mb-1"><i class="fas fa-clipboard-check mr-1.5"></i>Actividad evaluativa</p>
+                        <p class="text-white/85">Proyecto Centinela · Fase 1 — línea base con un MLP.</p>
+                    </a>
+                    <a href="index.html" class="bg-white/10 hover:bg-white/20 transition rounded-xl p-4 block">
+                        <p class="font-bold mb-1"><i class="fas fa-house mr-1.5"></i>Portal del curso</p>
+                        <p class="text-white/85">Página principal con todos los módulos y materiales.</p>
+                    </a>
+                </div>
+            </div>
+        </section>
 
-<!-- ============================================================
-     CIERRE
-     ============================================================ -->
-<p dir="ltr" style="text-align: left; font-family: Montserrat, sans-serif;
-   color: #475569; margin-top: 24px;">
-  <em>Nota: además de las fuentes listadas, el aula virtual del campus
-    multicampus USTA dispone de las lecturas digitalizadas del libro
-    <strong>Goodfellow et al. (2016)</strong> y de material complementario
-    en formato PDF y video, accesibles desde la sección "Biblioteca" del
-    espacio académico.</em>
-</p>
+    </main>
+
+    <!-- ====================== PIE ====================== -->
+    <footer class="bg-navy text-white/80 text-sm">
+        <div class="max-w-6xl mx-auto px-5 md:px-8 py-8">
+            <p class="font-bold text-white mb-1">Universidad Santo Tomás · Maestría en Ciencia de Datos</p>
+            <p>Profundización I: Redes Neuronales — Deep Learning (EA-N-F-004) · Experto temático: Javier Mauricio Sierra</p>
+            <p class="text-white/55 mt-3 text-xs">Material de consulta · Módulo 1 — Fundamentos del Aprendizaje Profundo. Material de aprendizaje autónomo. Metodología "Ingeniería de Trinchera": si una arquitectura no corre en Google Colab, no existe.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Activa los realces aditivos (nunca ocultan contenido).
+        document.documentElement.classList.add('js');
+
+        // Aparición progresiva por IntersectionObserver.
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+        }, { threshold: 0.08 });
+        document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+        // Realce del enlace de navegación activo según la sección visible.
+        const secs = document.querySelectorAll('main section[id]');
+        const links = document.querySelectorAll('.navlink');
+        const navIO = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    links.forEach(l => l.classList.remove('text-primary', 'bg-slate-100'));
+                    const active = document.querySelector('.navlink[href="#' + e.target.id + '"]');
+                    if (active) active.classList.add('text-primary', 'bg-slate-100');
+                }
+            });
+        }, { rootMargin: '-45% 0px -50% 0px' });
+        secs.forEach(s => navIO.observe(s));
+    </script>
 
 </body>
 

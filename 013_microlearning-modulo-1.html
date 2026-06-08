@@ -37,6 +37,7 @@
                     colors: {
                         primary: '#3D008D', secondary: '#ED1E79',
                         navy: '#001A4D', gold: '#FDB913',
+                        teal: '#0E7490',
                         bg: '#F8FAFC', surface: '#FFFFFF',
                     }
                 }
@@ -648,7 +649,8 @@
                     <h4 className="visual-title">
                         <i className="fas fa-braille text-secondary mr-2"></i>Scatter plot XOR — ¿Se puede separar con una línea?
                     </h4>
-                    <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart">
+                    <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
+                        aria-label="Diagrama de dispersión del problema XOR: las clases 0 están en las esquinas (0,0) y (1,1) y las clases 1 en (0,1) y (1,0). Ninguna línea recta separa ambas clases; solo una frontera no lineal lo logra.">
                         <defs>
                             <linearGradient id="gridGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                                 <stop offset="0%" stopColor="#F5F0FA" />
@@ -824,7 +826,8 @@
                     <h4 className="visual-title">
                         <i className="fas fa-wave-square text-secondary mr-2"></i>Funciones de activación: Sigmoid vs ReLU
                     </h4>
-                    <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart">
+                    <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
+                        aria-label="Comparación de funciones de activación: la sigmoide satura (se aplana) en los extremos y su derivada máxima es 0.25, lo que provoca desvanecimiento del gradiente; ReLU es lineal para z mayor que cero y su derivada vale 1, dejando fluir el gradiente.">
                         <defs>
                             <linearGradient id="sigmoidGrad" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0%" stopColor="#ED1E79" stopOpacity="0.15" />
@@ -964,10 +967,11 @@
             return (
                 <div ref={revRef} className="visual-container reveal">
                     <h4 className="visual-title">
-                        <i className="fas fa-person-hiking text-secondary mr-2"></i>Tres learning rates, tres destinos
+                        <i className="fas fa-person-hiking text-secondary mr-2"></i>Tres tasas de aprendizaje, tres destinos
                     </h4>
                     <Eq>{String.raw`$$\theta_{t+1} = \theta_t - \eta \cdot \nabla L(\theta_t)$$`}</Eq>
-                    <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart mt-2">
+                    <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart mt-2" role="img"
+                        aria-label="Trayectorias del descenso del gradiente sobre una superficie de pérdida en forma de valle, según la tasa de aprendizaje: una tasa baja converge muy lento, una tasa ideal alcanza el mínimo y una tasa alta diverge rebotando por las laderas.">
                         <defs>
                             <linearGradient id="mountainGrad" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0%" stopColor="#E8E0F0" stopOpacity="0.6" />
@@ -1044,7 +1048,7 @@
                         ))}
                     </div>
                     <p className="text-center text-xs text-gray-500 mt-2 italic">
-                        Seleccione un learning rate para ver cómo se comporta la trayectoria del optimizador sobre la superficie de pérdida.
+                        Seleccione una tasa de aprendizaje para ver cómo se comporta la trayectoria del optimizador sobre la superficie de pérdida.
                     </p>
                 </div>
             );
@@ -1092,7 +1096,9 @@
                     <h4 className="visual-title">
                         <i className="fas fa-diagram-project text-secondary mr-2"></i>Grafo computacional: forward vs backward
                     </h4>
-                    <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" style={{ minWidth: 280 }}>
+                    <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" style={{ minWidth: 280 }} role="img"
+                        aria-label="Grafo computacional con los nodos producto x·w, suma del sesgo, activación, predicción y pérdida. En la fase forward el flujo avanza de izquierda a derecha para calcular la predicción; en la fase backward el gradiente regresa de derecha a izquierda aplicando la regla de la cadena.">
+
                         <defs>
                             <marker id="arrF" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
                                 <path d="M0,0 L6,3 L0,6 Z" fill="#2563EB" />
@@ -1246,6 +1252,8 @@
                         <i className="fas fa-chart-line text-secondary mr-2"></i>Curvas de aprendizaje: la firma del overfitting
                     </h4>
                     <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} className="svg-chart cursor-crosshair"
+                        role="img"
+                        aria-label="Curvas de aprendizaje a lo largo de 50 épocas: la pérdida de entrenamiento sigue bajando, mientras que la pérdida de validación deja de mejorar y empieza a subir a partir de la época 22, marcada con una línea de Early Stop como punto ideal para detener el entrenamiento."
                         onMouseMove={handleMouse} onMouseLeave={() => setHoveredEpoch(null)}>
                         <defs>
                             <linearGradient id="overfitGrad" x1="0" y1="0" x2="1" y2="0">
@@ -1423,7 +1431,7 @@
                     opciones: [
                         { texto: 'Porque requiere más memoria RAM de la disponible.', correcta: false, justificacion: 'La limitación no es de cómputo sino de capacidad representacional: una sola capa solo traza rectas.' },
                         { texto: 'Porque XOR no es linealmente separable: una sola capa solo traza una frontera recta.', correcta: true, justificacion: 'Correcto. Las clases 0 (en (0,0) y (1,1)) y 1 (en (0,1) y (1,0)) se alternan; ninguna línea recta las separa. Se requieren capas ocultas para fronteras curvas.' },
-                        { texto: 'Porque la función XOR no es derivable.', correcta: false, justificacion: 'XOR sí es una función bien definida y derivable como función indicadora; el problema es de separabilidad, no de diferenciabilidad.' },
+                        { texto: 'Porque la función XOR no es derivable.', correcta: false, justificacion: 'XOR es una función lógica bien definida: el problema de XOR es de separabilidad lineal, no de diferenciabilidad.' },
                         { texto: 'Porque necesita más datos de los que existían en 1969.', correcta: false, justificacion: 'La limitación es geométrica (separabilidad lineal), no de cantidad de datos.' },
                     ],
                 },
@@ -1473,7 +1481,8 @@
                             <strong>ReLU (Rectified Linear Unit)</strong> es brutalmente simple: si z &gt; 0,
                             devuelve z; si z ≤ 0, devuelve 0. Su derivada es exactamente 1 para z &gt; 0.
                             Esto significa que el gradiente <strong>fluye sin reducirse</strong> por todas las
-                            capas positivas, permitiendo entrenar redes de cientos de capas.
+                            capas positivas, permitiendo entrenar redes mucho más profundas (para llegar a
+                            cientos de capas se requieren además conexiones residuales y normalización).
                         </p>
                     </div>
                 ),
@@ -1548,7 +1557,7 @@
                 video: {
                     titulo: 'What is backpropagation really doing? | Deep Learning cap. 4',
                     url: 'https://www.youtube.com/watch?v=Ilg3gGewQ5U',
-                    descripcion: 'Una walkthrough intuitiva de backpropagation: cómo se distribuye el error hacia atrás capa por capa usando la regla de la cadena, el corazón del aprendizaje profundo.',
+                    descripcion: 'Un recorrido intuitivo de backpropagation: cómo se distribuye el error hacia atrás capa por capa usando la regla de la cadena, el corazón del aprendizaje profundo.',
                 },
                 objetivo: 'Entender cómo la retropropagación distribuye la responsabilidad del error entre las neuronas usando la regla de la cadena.',
                 analogia: {
@@ -1646,10 +1655,10 @@
                 ),
                 formula: null,
                 mcq: {
-                    pregunta: 'Si la pérdida de validación sube desde la época 50 mientras la de entrenamiento sigue bajando, lo correcto es…',
+                    pregunta: 'Si la pérdida de validación sube desde la época 22 mientras la de entrenamiento sigue bajando, lo correcto es…',
                     opciones: [
                         { texto: 'Entrenar 1.000 épocas más, ya que el modelo seguirá mejorando.', correcta: false, justificacion: 'Entrenar más solo empeorará el sobreajuste. La curva de validación subiendo es una señal clara de que el modelo está memorizando, no aprendiendo.' },
-                        { texto: 'Implementar Early Stopping, guardando los pesos de la época 50.', correcta: true, justificacion: 'Correcto. La "U" invertida en validación es la firma del overfitting. Early Stopping detiene el entrenamiento justo antes de que el modelo empiece a memorizar ruido, preservando los mejores pesos.' },
+                        { texto: 'Implementar Early Stopping, guardando los pesos de la época 22.', correcta: true, justificacion: 'Correcto. La "U" invertida en validación es la firma del overfitting. Early Stopping detiene el entrenamiento justo antes de que el modelo empiece a memorizar ruido, preservando los mejores pesos.' },
                         { texto: 'Eliminar el conjunto de validación para simplificar.', correcta: false, justificacion: 'Sin validación perdemos la única señal que nos permite detectar el sobreajuste a tiempo.' },
                         { texto: 'Aumentar la tasa de aprendizaje.', correcta: false, justificacion: 'Una tasa mayor no detiene el sobreajuste; solo cambia la trayectoria del descenso. La solución correcta es la parada anticipada.' },
                     ],
@@ -1780,7 +1789,7 @@
         const Header = ({ progress, pct, completedCount, total, onReset }) => (
             <header className="usta-header text-white">
                 {/* Neural network SVG pattern */}
-                <svg className="neural-bg" viewBox="0 0 800 120" preserveAspectRatio="xMidYMid slice">
+                <svg className="neural-bg" viewBox="0 0 800 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
                     {/* Nodes */}
                     {[[80,30],[80,60],[80,90],[200,20],[200,45],[200,70],[200,95],[350,25],[350,55],[350,85],[500,35],[500,65],[500,95],[650,30],[650,60],[650,90],[750,50],[750,80]].map(([x,y],i) => (
                         <circle key={i} cx={x} cy={y} r="3" fill="white" opacity="0.5" />
@@ -1896,7 +1905,7 @@
                         </div>
                     )}
                     <header className="usta-header text-white">
-                        <svg className="neural-bg" viewBox="0 0 800 120" preserveAspectRatio="xMidYMid slice">
+                        <svg className="neural-bg" viewBox="0 0 800 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
                             {[[150,30],[300,50],[450,30],[600,60],[250,80],[500,80]].map(([x,y],i) => (
                                 <circle key={i} cx={x} cy={y} r="3" fill="white" opacity="0.4" />
                             ))}
@@ -1978,9 +1987,15 @@
                             </div>
                         </div>
                         {/* Footer credits */}
-                        <div className="text-center mt-8 text-xs text-gray-400">
-                            <p>Universidad Santo Tomás · Profundización I: Redes Neuronales – Deep Learning</p>
-                            <p className="mt-0.5">Módulo 1 — Fundamentos del Aprendizaje Profundo</p>
+                        <div className="text-center mt-8 rounded-2xl px-6 py-6 text-white shadow-lg"
+                            style={{ background: 'linear-gradient(180deg, #001A4D 0%, #002868 100%)' }}>
+                            <p className="text-sm italic font-semibold text-gold leading-relaxed max-w-xl mx-auto">
+                                Metodología "Ingeniería de Trinchera": si una arquitectura no corre en Google Colab, no existe.
+                            </p>
+                            <div className="mt-4 pt-4 border-t border-white/15 text-xs text-white/70 leading-relaxed">
+                                <p>Universidad Santo Tomás · Maestría en Ciencia de Datos</p>
+                                <p className="mt-1">Profundización I: Redes Neuronales — Deep Learning (EA-N-F-004) · Experto temático: Javier Mauricio Sierra</p>
+                            </div>
                         </div>
                     </main>
                 </div>

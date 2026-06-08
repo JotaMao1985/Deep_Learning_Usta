@@ -59,6 +59,7 @@
                         secondary: '#ED1E79',
                         navy: '#001A4D',
                         gold: '#FDB913',
+                        teal: '#0E7490',
                         bg: '#F8FAFC',
                         surface: '#FFFFFF',
                     }
@@ -1119,7 +1120,8 @@ def caracteristicas_manuales(imagen):
         /* Diagrama SVG: la neurona artificial y su relación con el perceptrón */
         const NeuronaPerceptronSVG = () => (
             <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
-                <svg viewBox="0 0 700 300" className="w-full" style={{ minWidth: 560 }}>
+                <svg viewBox="0 0 700 300" className="w-full" style={{ minWidth: 560 }} role="img" aria-label="Diagrama de un perceptrón: tres entradas x1, x2, x3 con sus pesos w1, w2, w3 convergen en una neurona que suma, aplica el sesgo y produce una salida.">
+                    <title>Perceptrón: entradas ponderadas que se suman y producen una salida</title>
                     {/* entradas (dendritas) */}
                     {[{ y: 55, l: 'x₁' }, { y: 150, l: 'x₂' }, { y: 245, l: 'x₃' }].map((n, i) => (
                         <g key={i}>
@@ -1371,7 +1373,7 @@ def caracteristicas_manuales(imagen):
                             { texto: 'una red profunda entrenada desde cero.', correcta: false },
                             { texto: 'un Transformer gigante.', correcta: false },
                         ],
-                        justificacion: 'El ML clásico brilla con datos tabulares y conjuntos pequeños; el DM profundo necesita volúmenes grandes de datos.'
+                        justificacion: 'El ML clásico brilla con datos tabulares y conjuntos pequeños; el DL profundo necesita volúmenes grandes de datos.'
                     },
                     {
                         pregunta: '¿Qué algoritmo de 1986 permitió entrenar las capas ocultas y reactivó el campo?',
@@ -1463,8 +1465,8 @@ def caracteristicas_manuales(imagen):
                         </button>
                     </div>
                     <ChartFrame id="chart-activaciones" caption={deriv
-                        ? "Derivadas: la de Sigmoide/Tanh ≈ 0 en los extremos (origen del desvanecimiento del gradiente); la de ReLU vale 1 para z>0."
-                        : "ReLU no satura para valores positivos; Sigmoide y Tanh se aplanan en los extremos. (Softmax es multivariante; ver el acordeón abajo.)"} />
+                        ? "Derivadas: la de Sigmoide/Tanh ≈ 0 en los extremos (origen del desvanecimiento del gradiente); la de ReLU vale 1 para z>0. (En Leaky ReLU la pendiente negativa se dibuja en 0,1, exagerada para visibilidad; el valor típico es 0,01.)"
+                        : "ReLU no satura para valores positivos; Sigmoide y Tanh se aplanan en los extremos. (Softmax es multivariante; ver el acordeón abajo.) En Leaky ReLU la pendiente negativa se dibuja en 0,1, exagerada para visibilidad; el valor típico es 0,01."} />
                 </div>
             );
         };
@@ -3268,7 +3270,8 @@ opt_adam = torch.optim.Adam(modelo.parameters(), lr=0.001)
         ============================================================ */
         const GrafoAritmetico = () => (
             <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
-                <svg viewBox="0 0 600 222" className="w-full" style={{ minWidth: 520 }}>
+                <svg viewBox="0 0 600 222" className="w-full" style={{ minWidth: 520 }} role="img" aria-label="Grafo aritmético que ilustra la retropropagación: en la pasada hacia adelante (forward, azul) los valores avanzan y se calcula la función f; en la pasada hacia atrás (backward, rojo) los gradientes parciales regresan en una sola pasada.">
+                    <title>Grafo aritmético: pasada hacia adelante (forward) y hacia atrás (backward)</title>
                     <defs>
                         <marker id="arrF2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2563EB" /></marker>
                         <marker id="arrB2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#DC2626" /></marker>
@@ -3337,7 +3340,8 @@ opt_adam = torch.optim.Adam(modelo.parameters(), lr=0.001)
             ];
             return (
                 <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
-                    <svg viewBox="0 0 660 170" className="w-full" style={{ minWidth: 560 }}>
+                    <svg viewBox="0 0 660 170" className="w-full" style={{ minWidth: 560 }} role="img" aria-label="Grafo computacional de una neurona: la entrada se multiplica por el peso, se suma el sesgo, pasa por la activación ReLU, produce la predicción y se compara con el objetivo para calcular el error L; las flechas azules son la pasada hacia adelante y las rojas la retropropagación.">
+                        <title>Grafo computacional: producto, suma, ReLU, predicción y error</title>
                         <defs>
                             <marker id="arrF" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2563EB" /></marker>
                             <marker id="arrB" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#DC2626" /></marker>
@@ -4216,7 +4220,9 @@ red = nn.Sequential(
                                 <footer className="mt-16 pt-8 border-t border-gray-200">
                                     <div className="usta-header rounded-xl p-6 text-center">
                                         <p className="text-white font-medium text-sm"><strong>Módulo 1 · Fundamentos del Aprendizaje Profundo</strong></p>
-                                        <p className="text-xs mt-1 text-white/70">Maestría en Ciencia de Datos · Universidad Santo Tomás · Profundización I: Redes Neuronales - Deep Learning</p>
+                                        <p className="text-xs mt-1 text-white/80 italic">Metodología «Ingeniería de Trinchera»: si una arquitectura no corre en Google Colab, no existe.</p>
+                                        <p className="text-xs mt-2 text-white/70">Universidad Santo Tomás · Maestría en Ciencia de Datos</p>
+                                        <p className="text-xs text-white/70">Profundización I: Redes Neuronales — Deep Learning (EA-N-F-004) · Experto temático: Javier Mauricio Sierra</p>
                                         <p className="text-[10px] mt-2 text-white/50">Material de aprendizaje autónomo. Analogías contextualizadas al entorno colombiano.</p>
                                     </div>
                                 </footer>
