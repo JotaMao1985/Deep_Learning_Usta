@@ -98,11 +98,45 @@
             background: #0F172A; color: #E2E8F0; border-radius: 12px;
             padding: 1rem 1.1rem; font-family: 'Fira Code', monospace;
             font-size: .82rem; line-height: 1.7; overflow-x: auto;
+            white-space: pre; tab-size: 4;
         }
         .codeblock .cm { color: #64748B; }
         .codeblock .kw { color: #F472B6; }
         .codeblock .fn { color: #7DD3FC; }
         .codeblock .st { color: #FDE68A; }
+
+        /* ====== Ventana de código (cromo tipo terminal · marca USTA) ====== */
+        .code-window {
+            position: relative; background: #0F172A; border: 1px solid #1E293B;
+            border-radius: 14px; overflow: hidden; box-shadow: 0 12px 32px rgba(2,6,23,.30);
+        }
+        .code-window::before {
+            content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; z-index: 2;
+            background: linear-gradient(90deg, #3D008D 0%, #ED1E79 60%, #FDB913 100%);
+        }
+        .code-window-bar {
+            display: flex; align-items: center; gap: .55rem;
+            padding: .62rem .95rem; padding-top: calc(.62rem + 3px);
+            background: #0B1326; border-bottom: 1px solid #1E293B;
+        }
+        .code-window-dots { display: flex; gap: .42rem; }
+        .code-window-dots span { width: 11px; height: 11px; border-radius: 50%; display: block; }
+        .code-window-dots .d-r { background: #FF5F56; }
+        .code-window-dots .d-y { background: #FFBD2E; }
+        .code-window-dots .d-g { background: #27C93F; }
+        .code-window-title { font-family: 'Fira Code', monospace; font-size: .72rem; color: #94A3B8; letter-spacing: .01em; }
+        .code-window-lang {
+            margin-left: auto; font-family: 'Fira Code', monospace; font-size: .67rem;
+            color: #FDE68A; background: rgba(253,185,19,.13); padding: .14rem .55rem;
+            border-radius: 999px; white-space: nowrap;
+        }
+        .code-copy {
+            margin-left: .55rem; background: transparent; border: none; color: #94A3B8;
+            cursor: pointer; font-size: .82rem; line-height: 1; padding: .2rem .35rem;
+            border-radius: 7px; transition: color .15s ease, background .15s ease;
+        }
+        .code-copy:hover { color: #E2E8F0; background: rgba(148,163,184,.16); }
+        .code-window .codeblock { border-radius: 0; box-shadow: none; }
 
         /* Píldoras de fórmula */
         .eq {
@@ -318,7 +352,7 @@
                 </div>
             </div>
             <div class="callout callout-warn mt-5">
-                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i>El escenario de referencia <strong>"Centinela del Café"</strong> clasifica el estado de la hoja (<strong>Sana</strong> vs. <strong>Enferma</strong> por roya) a partir de un vector de características (promedios de intensidad RGB e Infrarrojo) del conjunto <strong>RoCoLe</strong> —la versión tabular de la modalidad <strong>imagen</strong>. Sirve de ejemplo; el estudiante puede adoptarlo o proponer el suyo con la misma lógica.</p>
+                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i>El escenario de referencia <strong>"Centinela del Café"</strong> clasifica el estado de la hoja (<strong>Sana</strong> vs. <strong>Enferma</strong> por roya) a partir de un vector de características (promedios de intensidad RGB e Infrarrojo) del conjunto <strong>RoCoLe</strong> (la versión tabular de la modalidad <strong>imagen</strong>). Sirve de ejemplo; el estudiante puede adoptarlo o proponer el suyo con la misma lógica.</p>
             </div>
             <div class="callout callout-eth mt-4">
                 <p class="text-sm"><i class="fas fa-scale-balanced text-teal-600 mr-2"></i><strong>Datos honestos.</strong> En esta fase se modela <strong>una sola modalidad</strong> en su forma tabular. Si en la Fase 2 el escenario del café se fusiona con datos de <strong>clima</strong>, la alineación imagen↔clima es <strong>agregada</strong> (por región y periodo), <strong>no muestra a muestra</strong>: una foto de una hoja no tiene su propio registro climático individual. Esa limitación de alineación se profundiza en la Fase 2; aquí solo se deja declarada.</p>
@@ -366,7 +400,9 @@
                     <div class="eq">$$ \mathrm{ReLU}(z) = \max(0,\,z) \qquad \sigma(z) = \dfrac{1}{1 + e^{-z}} $$</div>
                 </div>
                 <figure class="card p-5">
-                    <svg viewBox="0 0 360 210" width="100%" role="img" aria-label="Una neurona suma las entradas ponderadas por sus pesos, añade un sesgo y aplica una activación">
+                    <svg viewBox="0 0 360 210" width="100%" role="img" aria-labelledby="neuronaTitle neuronaDesc">
+                        <title id="neuronaTitle">Anatomía de una neurona</title>
+                        <desc id="neuronaDesc">Una neurona suma las entradas ponderadas por sus pesos, añade un sesgo y aplica una activación</desc>
                         <defs>
                             <marker id="arrowNeur" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
                                 <path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/>
@@ -396,7 +432,14 @@
                     <figcaption>Figura 2. Anatomía de una neurona: la suma ponderada de las entradas más el sesgo (\(z\)) pasa por la activación \(\phi\) para producir la salida \(a\). El MLP de la Figura 1 apila muchas de estas unidades.</figcaption>
                 </figure>
             </div>
-            <div class="codeblock"><span class="cm"># Arquitectura: MLP con dos capas ocultas (PyTorch)</span>
+            <div class="code-window">
+                <div class="code-window-bar">
+                    <span class="code-window-dots"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></span>
+                    <span class="code-window-title">modelo.py</span>
+                    <span class="code-window-lang">Python · PyTorch</span>
+                    <button class="code-copy" type="button" aria-label="Copiar código" title="Copiar"><i class="fas fa-copy"></i></button>
+                </div>
+                <div class="codeblock"><span class="cm"># Arquitectura: MLP con dos capas ocultas (PyTorch)</span>
 <span class="cm"># La salida es un LOGIT (sin sigmoide en el modelo): la sigmoide vive en la pérdida.</span>
 <span class="kw">class</span> <span class="fn">MLP</span>(nn.Module):
     <span class="kw">def</span> <span class="fn">__init__</span>(self):
@@ -404,9 +447,10 @@
         self.red = nn.<span class="fn">Sequential</span>(
             nn.<span class="fn">Linear</span>(n_feat, 16), nn.<span class="fn">ReLU</span>(),   <span class="cm"># capa oculta 1</span>
             nn.<span class="fn">Linear</span>(16, 8),      nn.<span class="fn">ReLU</span>(),   <span class="cm"># capa oculta 2</span>
-            nn.<span class="fn">Linear</span>(8, 1))                  <span class="cm"># salida: logit (1 valor, sin activacion)</span>
+            nn.<span class="fn">Linear</span>(8, 1))                  <span class="cm"># salida: logit (1 valor, sin activación)</span>
     <span class="kw">def</span> <span class="fn">forward</span>(self, x):
-        <span class="kw">return</span> self.red(x)              <span class="cm"># devuelve el logit; sigmoide solo en evaluacion</span></div>
+        <span class="kw">return</span> self.red(x)              <span class="cm"># devuelve el logit; sigmoide solo en evaluación</span></div>
+            </div>
 
             <div class="callout callout-danger mt-4">
                 <p class="text-sm"><i class="fas fa-bolt text-red-600 mr-2"></i><strong>Antipatrón: la doble sigmoide.</strong> Dejar <span class="icode">nn.Sigmoid()</span> dentro del modelo <em>y</em> usar <span class="icode">BCEWithLogitsLoss</span> aplica la sigmoide <strong>dos veces</strong> y rompe el entrenamiento. La ruta recomendada deja la última capa como <span class="icode">nn.Linear(8, 1)</span> (un <strong>logit</strong>) y combina sigmoide y entropía cruzada en un solo paso numéricamente estable con <span class="icode">BCEWithLogitsLoss</span>; la sigmoide solo se aplica con <span class="icode">torch.sigmoid</span> <strong>en la evaluación</strong>. La alternativa válida es <span class="icode">nn.Sigmoid()</span> en el modelo con <span class="icode">nn.BCELoss()</span>; lo prohibido es mezclarlas.</p>
@@ -416,7 +460,7 @@
             <div class="flex gap-4 mb-2 mt-8"><span class="step-num">3</span>
                 <div class="flex-1">
                     <h3 class="font-bold text-navy text-lg">Configuración del entrenamiento</h3>
-                    <p class="text-sm text-slate-600 mt-1">Selección de una <strong>función de pérdida</strong> adecuada (por ejemplo, <em>Binary Cross Entropy</em> para clasificación binaria), de un <strong>optimizador</strong> (SGD o Adam) y de una <strong>tasa de aprendizaje</strong>. El corazón de la fase es escribir el <strong>bucle de entrenamiento explícito</strong>.</p>
+                    <p class="text-sm text-slate-600 mt-1">Selección de una <strong>función de pérdida</strong> adecuada (por ejemplo, la entropía cruzada binaria o <em>Binary Cross Entropy</em>), de un <strong>optimizador</strong> (SGD o Adam) y de una <strong>tasa de aprendizaje</strong>. El corazón de la fase es escribir el <strong>bucle de entrenamiento explícito</strong>.</p>
                 </div>
             </div>
             <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
@@ -427,7 +471,9 @@
                     <div class="eq">$$ \theta \leftarrow \theta - \eta\,\nabla_\theta \mathcal{L} $$</div>
                 </div>
                 <figure class="card p-5">
-                    <svg viewBox="0 0 380 230" width="100%" role="img" aria-label="Ciclo de entrenamiento: forward, cálculo de la pérdida, backward y actualización de los pesos">
+                    <svg viewBox="0 0 380 230" width="100%" role="img" aria-labelledby="bucleTitle bucleDesc">
+                        <title id="bucleTitle">Bucle de entrenamiento</title>
+                        <desc id="bucleDesc">Ciclo de entrenamiento: forward, cálculo de la pérdida, backward y actualización de los pesos</desc>
                         <defs>
                             <marker id="arrowLoop" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
                                 <path d="M0,0 L7,3 L0,6 Z" fill="#3D008D"/>
@@ -457,7 +503,14 @@
                     <figcaption>Figura 3. El bucle de entrenamiento repite cincuenta veces el ciclo <em>forward → pérdida → backward → actualización</em>. Limpiar los gradientes (<span class="icode">zero_grad</span>) antes de cada paso es imprescindible.</figcaption>
                 </figure>
             </div>
-            <div class="codeblock"><span class="cm"># Configuración: pérdida sobre LOGITS (sigmoide + BCE estable en un solo paso)</span>
+            <div class="code-window">
+                <div class="code-window-bar">
+                    <span class="code-window-dots"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></span>
+                    <span class="code-window-title">entrenamiento.py</span>
+                    <span class="code-window-lang">Python · PyTorch</span>
+                    <button class="code-copy" type="button" aria-label="Copiar código" title="Copiar"><i class="fas fa-copy"></i></button>
+                </div>
+                <div class="codeblock"><span class="cm"># Configuración: pérdida sobre LOGITS (sigmoide + BCE estable en un solo paso)</span>
 criterio = nn.<span class="fn">BCEWithLogitsLoss</span>()
 y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(-1, 1)     <span class="cm"># etiqueta (N,1) flotante, igual forma que el logit</span>
 
@@ -471,6 +524,7 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
 
     <span class="kw">if</span> epoca % 10 == 0:                 <span class="cm"># Colab puede desconectarse: guarda checkpoints</span>
         torch.<span class="fn">save</span>(modelo.<span class="fn">state_dict</span>(), <span class="st">"centinela_fase1.pt"</span>)</div>
+            </div>
 
             <div class="callout callout-warn mt-4">
                 <p class="text-sm"><i class="fas fa-floppy-disk text-amber-500 mr-2"></i><strong>Cómputo en Colab.</strong> El entorno puede desconectarse o agotar la cuota a mitad del entrenamiento. Conviene <strong>guardar el modelo periódicamente</strong> (<span class="icode">torch.save(modelo.state_dict(), ...)</span>) para reanudar sin reentrenar desde cero.</p>
@@ -485,7 +539,9 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
             </div>
             <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
                 <figure class="card p-5">
-                    <svg viewBox="0 0 430 240" width="100%" role="img" aria-label="Curvas de pérdida de entrenamiento y validación que ilustran el sobreajuste y su corrección con Dropout; cada curva está rotulada al final con su nombre">
+                    <svg viewBox="0 0 430 240" width="100%" role="img" aria-labelledby="overfitTitle overfitDesc">
+                        <title id="overfitTitle">Curvas de pérdida y sobreajuste</title>
+                        <desc id="overfitDesc">Curvas de pérdida de entrenamiento y validación que ilustran el sobreajuste y su corrección con Dropout; cada curva está rotulada al final con su nombre</desc>
                         <!-- ejes -->
                         <line x1="55" y1="20" x2="55" y2="195" stroke="#94A3B8" stroke-width="1.5"/>
                         <line x1="55" y1="195" x2="360" y2="195" stroke="#94A3B8" stroke-width="1.5"/>
@@ -504,14 +560,14 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                         <polyline points="60,74 120,116 200,142 270,150 320,152 355,153" fill="none" stroke="#0E7490" stroke-width="2.2" stroke-dasharray="5 3"/>
                         <!-- etiquetas de texto al final de cada curva (no depender solo del color) -->
                         <text x="362" y="181" font-size="9.5" font-weight="700" fill="#3D008D">train</text>
-                        <text x="362" y="85"  font-size="9.5" font-weight="700" fill="#C71663">val</text>
+                        <text x="362" y="85"  font-size="9.5" font-weight="700" fill="#ED1E79">val</text>
                         <text x="362" y="156" font-size="9.5" font-weight="700" fill="#0E7490">val + Dropout</text>
                         <!-- leyenda -->
                         <line x1="240" y1="55" x2="262" y2="55" stroke="#3D008D" stroke-width="2.5"/><text x="266" y="58" font-size="9" fill="#334155">entrenamiento</text>
                         <line x1="240" y1="68" x2="262" y2="68" stroke="#ED1E79" stroke-width="2.5"/><text x="266" y="71" font-size="9" fill="#334155">validación</text>
                         <line x1="240" y1="81" x2="262" y2="81" stroke="#0E7490" stroke-width="2.2" stroke-dasharray="5 3"/><text x="266" y="84" font-size="9" fill="#334155">val. + Dropout</text>
                     </svg>
-                    <figcaption>Figura 4. Cuando la pérdida de validación deja de bajar y empieza a subir mientras la de entrenamiento sigue cayendo, hay sobreajuste. El Dropout (línea punteada) mantiene la validación más baja y estable. Cada curva se rotula al final (<strong>train</strong> / <strong>val</strong> / <strong>val + Dropout</strong>) para no depender solo del color.</figcaption>
+                    <figcaption>Figura 4. Cuando la pérdida de validación deja de bajar y empieza a subir mientras la de entrenamiento sigue cayendo, hay sobreajuste. El Dropout (línea punteada) mantiene la validación estable y evita que vuelva a subir. Cada curva se rotula al final (<strong>train</strong> / <strong>val</strong> / <strong>val + Dropout</strong>) para no depender solo del color.</figcaption>
                 </figure>
                 <div>
                     <div class="callout callout-danger mb-4">
@@ -520,7 +576,7 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                     <p class="text-sm text-slate-700 mb-2">Herramientas de regularización exigidas en esta fase:</p>
                     <ul class="text-sm text-slate-700 space-y-1.5 list-disc pl-5">
                         <li><strong>Dropout:</strong> apaga aleatoriamente una fracción de neuronas en cada paso, forzando representaciones redundantes.</li>
-                        <li><strong>Detención temprana</strong> (<em>early stopping</em>): conservar el modelo del punto óptimo de validación.</li>
+                        <li><strong>Detención temprana</strong> (<em>early stopping</em>): identificar la época del punto óptimo de validación y conservar ese modelo como versión final (criterio de selección, sin necesidad de detener el bucle).</li>
                         <li>Ajuste de la <strong>tasa de aprendizaje</strong> y del número de neuronas.</li>
                     </ul>
                 </div>
@@ -535,7 +591,9 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
             </div>
             <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
                 <figure class="card p-5">
-                    <svg viewBox="0 0 360 250" width="100%" role="img" aria-label="Matriz de confusión dos por dos con verdaderos y falsos positivos y negativos">
+                    <svg viewBox="0 0 360 250" width="100%" role="img" aria-labelledby="matrizTitle matrizDesc">
+                        <title id="matrizTitle">Matriz de confusión</title>
+                        <desc id="matrizDesc">Matriz de confusión dos por dos con verdaderos y falsos positivos y negativos</desc>
                         <!-- encabezado de columnas: Predicho -->
                         <text x="215" y="28" text-anchor="middle" font-size="11" font-weight="700" fill="#3D008D">Predicho</text>
                         <text x="170" y="46" text-anchor="middle" font-size="10" fill="#475569">Positivo</text>
@@ -766,6 +824,22 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
             });
         }, { rootMargin: '-45% 0px -50% 0px' });
         secs.forEach(s => navIO.observe(s));
+
+        // Copiar el código de las ventanas de código
+        document.querySelectorAll('.code-copy').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var win = btn.closest('.code-window');
+                var body = win && win.querySelector('.codeblock');
+                if (!body) return;
+                navigator.clipboard.writeText(body.innerText).then(function () {
+                    var icon = btn.querySelector('i');
+                    var prev = icon.className;
+                    icon.className = 'fas fa-check';
+                    btn.style.color = '#27C93F';
+                    setTimeout(function () { icon.className = prev; btn.style.color = ''; }, 1400);
+                });
+            });
+        });
     </script>
 
 </body>

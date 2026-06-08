@@ -99,11 +99,45 @@
             background: #0F172A; color: #E2E8F0; border-radius: 12px;
             padding: 1rem 1.1rem; font-family: 'Fira Code', monospace;
             font-size: .82rem; line-height: 1.7; overflow-x: auto;
+            white-space: pre; tab-size: 4;
         }
         .codeblock .cm { color: #64748B; }
         .codeblock .kw { color: #F472B6; }
         .codeblock .fn { color: #7DD3FC; }
         .codeblock .st { color: #FDE68A; }
+
+        /* ====== Ventana de código (cromo tipo terminal · marca USTA) ====== */
+        .code-window {
+            position: relative; background: #0F172A; border: 1px solid #1E293B;
+            border-radius: 14px; overflow: hidden; box-shadow: 0 12px 32px rgba(2,6,23,.30);
+        }
+        .code-window::before {
+            content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; z-index: 2;
+            background: linear-gradient(90deg, #3D008D 0%, #ED1E79 60%, #FDB913 100%);
+        }
+        .code-window-bar {
+            display: flex; align-items: center; gap: .55rem;
+            padding: .62rem .95rem; padding-top: calc(.62rem + 3px);
+            background: #0B1326; border-bottom: 1px solid #1E293B;
+        }
+        .code-window-dots { display: flex; gap: .42rem; }
+        .code-window-dots span { width: 11px; height: 11px; border-radius: 50%; display: block; }
+        .code-window-dots .d-r { background: #FF5F56; }
+        .code-window-dots .d-y { background: #FFBD2E; }
+        .code-window-dots .d-g { background: #27C93F; }
+        .code-window-title { font-family: 'Fira Code', monospace; font-size: .72rem; color: #94A3B8; letter-spacing: .01em; }
+        .code-window-lang {
+            margin-left: auto; font-family: 'Fira Code', monospace; font-size: .67rem;
+            color: #FDE68A; background: rgba(253,185,19,.13); padding: .14rem .55rem;
+            border-radius: 999px; white-space: nowrap;
+        }
+        .code-copy {
+            margin-left: .55rem; background: transparent; border: none; color: #94A3B8;
+            cursor: pointer; font-size: .82rem; line-height: 1; padding: .2rem .35rem;
+            border-radius: 7px; transition: color .15s ease, background .15s ease;
+        }
+        .code-copy:hover { color: #E2E8F0; background: rgba(148,163,184,.16); }
+        .code-window .codeblock { border-radius: 0; box-shadow: none; }
 
         /* Píldoras de fórmula */
         .eq {
@@ -205,7 +239,7 @@
         <section id="contexto" class="reveal">
             <div class="callout callout-info">
                 <p class="font-bold text-primary mb-1"><i class="fas fa-link mr-2"></i>Esta actividad continúa un proyecto que ya está en marcha</p>
-                <p class="text-sm leading-relaxed">El <strong>Proyecto Centinela</strong> es un sistema de alerta temprana que el estudiante construye una sola vez y hace crecer a lo largo del curso. En la <strong>Fase 1 (Módulo 1)</strong> se levantó una línea base tabular con un Perceptrón Multicapa (MLP), que <strong>aplanó una</strong> de las dos modalidades a una tabla. En esta <strong>Fase 2 (Módulo 2)</strong>, el mismo problema y el mismo cliente se conservan, y el sistema da dos pasos: (i) <strong>reemplaza ese aplanamiento por la arquitectura especializada nativa</strong> de esa modalidad —convolucional para imagen, recurrente para series de tiempo— y (ii) <strong>incorpora por primera vez la segunda modalidad</strong>, para finalmente <strong>fusionar ambas</strong> en una sola predicción.</p>
+                <p class="text-sm leading-relaxed">El <strong>Proyecto Centinela</strong> es un sistema de alerta temprana que el estudiante construye una sola vez y hace crecer a lo largo del curso. En la <strong>Fase 1 (Módulo 1)</strong> se levantó una línea base tabular con un Perceptrón Multicapa (MLP), que <strong>aplanó una de las dos modalidades</strong> en una tabla. En esta <strong>Fase 2 (Módulo 2)</strong>, el mismo problema y el mismo cliente se conservan, y el sistema da dos pasos: (i) <strong>reemplaza ese aplanamiento por la arquitectura especializada nativa</strong> de esa modalidad —convolucional para imagen, recurrente para series de tiempo— y (ii) <strong>incorpora por primera vez la segunda modalidad</strong>, para finalmente <strong>fusionar ambas</strong> en una sola predicción.</p>
             </div>
 
             <div class="grid md:grid-cols-3 gap-4 mt-6">
@@ -280,7 +314,7 @@
                     <rect x="200" y="35" width="150" height="70" rx="12" fill="url(#gA)"/>
                     <text x="275" y="62" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">CNN</text>
                     <text x="275" y="80" text-anchor="middle" font-size="10.5" fill="#E9D5FF">Transfer Learning</text>
-                    <line x1="350" y1="70" x2="430" y2="120" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow)"/>
+                    <line x1="350" y1="70" x2="432" y2="142" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow)"/>
                     <text x="370" y="60" font-size="10.5" fill="#475569">embedding <tspan font-style="italic">z</tspan><tspan baseline-shift="sub" font-size="8">img</tspan></text>
 
                     <!-- Rama B: serie -> RNN -->
@@ -291,7 +325,7 @@
                     <rect x="200" y="210" width="150" height="70" rx="12" fill="url(#gB)"/>
                     <text x="275" y="237" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">LSTM / GRU</text>
                     <text x="275" y="255" text-anchor="middle" font-size="10.5" fill="#CFFAFE">recurrente</text>
-                    <line x1="350" y1="245" x2="430" y2="195" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow)"/>
+                    <line x1="350" y1="245" x2="432" y2="178" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow)"/>
                     <text x="362" y="285" font-size="10.5" fill="#475569">embedding <tspan font-style="italic">z</tspan><tspan baseline-shift="sub" font-size="8">seq</tspan></text>
 
                     <!-- Fusión -->
@@ -362,7 +396,9 @@
                         <div class="eq">$$ O = \left\lfloor \dfrac{W - F + 2P}{S} \right\rfloor + 1 $$</div>
                     </div>
                     <figure class="card p-5">
-                        <svg viewBox="0 0 360 220" width="100%" role="img" aria-label="Un filtro de 3 por 3 se desliza sobre una rejilla de entrada y produce una celda del mapa de características">
+                        <svg viewBox="0 0 360 220" width="100%" role="img" aria-labelledby="convTitle convDesc">
+                            <title id="convTitle">Operación de convolución</title>
+                            <desc id="convDesc">Un filtro de 3 por 3 se desliza sobre una rejilla de entrada y produce una celda del mapa de características</desc>
                             <!-- rejilla de entrada (5x5 celdas de 30 px) -->
                             <g stroke="#CBD5E1" fill="#F8FAFC">
                                 <rect x="10" y="20" width="150" height="150"/>
@@ -407,12 +443,20 @@
                     <li class="flex gap-4"><span class="step-num">4</span><div><p class="font-semibold text-navy">Evaluación e interpretabilidad</p><p class="text-sm text-slate-600">Matriz de confusión, precisión/recall/F1 por clase, análisis de errores con ejemplos visuales y <strong>Grad-CAM</strong> para verificar que la red mira la región correcta (la lesión, no el fondo).</p></div></li>
                 </ol>
 
-                <div class="codeblock mt-6"><span class="cm"># Transfer Learning — Feature Extraction (Keras)</span>
+                <div class="code-window mt-6">
+                    <div class="code-window-bar">
+                        <span class="code-window-dots"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></span>
+                        <span class="code-window-title">transfer_learning.py</span>
+                        <span class="code-window-lang">Python · Keras</span>
+                        <button class="code-copy" type="button" aria-label="Copiar código" title="Copiar"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div class="codeblock"><span class="cm"># Transfer Learning — Feature Extraction (Keras)</span>
 <span class="kw">from</span> tensorflow.keras.applications <span class="kw">import</span> ResNet50
 base = <span class="fn">ResNet50</span>(weights=<span class="st">"imagenet"</span>, include_top=<span class="kw">False</span>, pooling=<span class="st">"avg"</span>)
 base.trainable = <span class="kw">False</span>            <span class="cm"># se congelan los pesos preentrenados</span>
 salida = <span class="fn">Dense</span>(n_clases, activation=<span class="st">"softmax"</span>)(base.output)
 modelo = <span class="fn">Model</span>(base.input, salida)   <span class="cm"># solo se entrena la cabeza</span></div>
+                </div>
 
                 <div class="callout callout-info mt-6">
                     <p class="text-sm"><i class="fas fa-circle-info text-primary mr-2"></i><strong>La optimización para borde se trabaja en la Fase 3.</strong> La cuantización, la poda y la destilación —orientadas al despliegue <em>offline</em> en dispositivos con recursos limitados— quedan fuera del alcance de esta fase y se abordan en la Fase 3, donde se industrializa principalmente la rama visual.</p>
@@ -438,7 +482,9 @@ modelo = <span class="fn">Model</span>(base.input, salida)   <span class="cm"># 
                         <div class="eq">$$ \dfrac{\partial h_t}{\partial h_k} = \prod_{\tau=k+1}^{t} \dfrac{\partial h_\tau}{\partial h_{\tau-1}} \;\xrightarrow[\;t-k \text{ grande}\;]{}\; 0 $$</div>
                     </div>
                     <figure class="card p-5">
-                        <svg viewBox="0 0 360 210" width="100%" role="img" aria-label="Celda LSTM con compuerta de olvido, de entrada y de salida actuando sobre el estado de celda">
+                        <svg viewBox="0 0 360 210" width="100%" role="img" aria-labelledby="lstmTitle lstmDesc">
+                            <title id="lstmTitle">Celda LSTM</title>
+                            <desc id="lstmDesc">Celda LSTM con compuerta de olvido, de entrada y de salida actuando sobre el estado de celda</desc>
                             <defs>
                                 <marker id="arrowB" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
                                     <path d="M0,0 L7,3 L0,6 Z" fill="#0E7490"/>
@@ -474,7 +520,7 @@ modelo = <span class="fn">Model</span>(base.input, salida)   <span class="cm"># 
                             <line x1="300" y1="142" x2="300" y2="172" stroke="#0E7490" stroke-width="2" marker-end="url(#arrowB)"/>
                             <text x="300" y="185" text-anchor="middle" font-size="11" fill="#0E7490"><tspan font-style="italic">h</tspan><tspan baseline-shift="sub" font-size="8">t</tspan></text>
                         </svg>
-                        <figcaption>Figura 3. La autopista del estado de celda (de \(C_{t-1}\) a \(C_t\)) permite que la información fluya casi sin alteración: la compuerta de olvido \(f_t\) multiplica lo que se conserva, la de entrada \(i_t\) suma lo que se escribe y la de salida \(o_t\) lee \(\tanh(C_t)\) para emitir \(h_t\). Así se mitiga el desvanecimiento del gradiente.</figcaption>
+                        <figcaption>Figura 3. La autopista del estado de celda (de C<sub>t−1</sub> a C<sub>t</sub>) permite que la información fluya casi sin alteración: la compuerta de olvido f<sub>t</sub> multiplica lo que se conserva, la de entrada i<sub>t</sub> suma lo que se escribe y la de salida o<sub>t</sub> lee tanh(C<sub>t</sub>) para emitir h<sub>t</sub>. Las tres compuertas (f<sub>t</sub>, i<sub>t</sub>, o<sub>t</sub>) se calculan a partir de [h<sub>t−1</sub>, x<sub>t</sub>] —como detallan las ecuaciones de abajo—; el diagrama resalta solo el flujo del estado de celda. Así se mitiga el desvanecimiento del gradiente.</figcaption>
                     </figure>
                 </div>
 
@@ -507,15 +553,23 @@ modelo = <span class="fn">Model</span>(base.input, salida)   <span class="cm"># 
                 <ol class="space-y-4">
                     <li class="flex gap-4"><span class="step-num">1</span><div><p class="font-semibold text-navy">Análisis exploratorio de la serie</p><p class="text-sm text-slate-600">Tendencia, estacionalidad y ruido; estadísticas móviles y autocorrelación (ACF/PACF); detección de atípicos, faltantes y periodicidades. Justificación del uso de modelos recurrentes frente a alternativas clásicas (ARIMA).</p></div></li>
                     <li class="flex gap-4"><span class="step-num">2</span><div><p class="font-semibold text-navy">Preprocesamiento y ventaneo</p><p class="text-sm text-slate-600">Normalización; construcción de secuencias con <em>ventana deslizante</em> de un <strong>tamaño por defecto</strong> (p. ej. 14 pasos); explorar otros tamaños (7, 30) es <strong>opcional</strong>. Partición que <strong>respeta el orden temporal</strong>; variables exógenas si aplica (día de semana, festivos, indicadores).</p></div></li>
-                    <li class="flex gap-4"><span class="step-num">3</span><div><p class="font-semibold text-navy">Implementación comparativa</p><p class="text-sm text-slate-600">Entrenamiento <strong>obligatorio de LSTM y GRU</strong>, con una <strong>RNN simple solo como contraste</strong> para evidenciar el desvanecimiento (no es un barrido de tres arquitecturas). Hiperparámetros comparables (estado oculto 64–128, <em>learning rate</em> 0,001, <em>batch</em> 32) y <em>early stopping</em>.</p></div></li>
+                    <li class="flex gap-4"><span class="step-num">3</span><div><p class="font-semibold text-navy">Implementación comparativa</p><p class="text-sm text-slate-600">Entrenamiento <strong>obligatorio de LSTM y GRU</strong>, con una <strong>RNN simple solo como contraste</strong> para evidenciar el desvanecimiento (no es un barrido de tres arquitecturas). Hiperparámetros comparables (estado oculto 64–128, <em>learning rate</em> ≈0,001, <em>batch</em> 32) y <em>early stopping</em>.</p></div></li>
                     <li class="flex gap-4"><span class="step-num">4</span><div><p class="font-semibold text-navy">Evaluación y evidencia del desvanecimiento</p><p class="text-sm text-slate-600">Comparación con RMSE, MAE y MAPE; predicciones vs. valores reales. Para evidenciar el desvanecimiento basta <strong>una</strong> vía: una traza de las normas de gradiente <strong>o</strong> la diferencia de desempeño de la RNN frente a LSTM/GRU en dependencias largas (opcionalmente con una secuencia sintética larga). Se justifica cuándo usar cada celda.</p></div></li>
                 </ol>
 
-                <div class="codeblock mt-6"><span class="cm"># Comparativa de celdas recurrentes (PyTorch)</span>
+                <div class="code-window mt-6">
+                    <div class="code-window-bar">
+                        <span class="code-window-dots"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></span>
+                        <span class="code-window-title">celdas_recurrentes.py</span>
+                        <span class="code-window-lang">Python · PyTorch</span>
+                        <button class="code-copy" type="button" aria-label="Copiar código" title="Copiar"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div class="codeblock"><span class="cm"># Comparativa de celdas recurrentes (PyTorch)</span>
 <span class="kw">import</span> torch.nn <span class="kw">as</span> nn
 rnn  = nn.<span class="fn">RNN</span>(n_feat, hidden, batch_first=<span class="kw">True</span>)   <span class="cm"># sufre desvanecimiento</span>
 lstm = nn.<span class="fn">LSTM</span>(n_feat, hidden, batch_first=<span class="kw">True</span>)  <span class="cm"># compuertas f, i, o</span>
 gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="kw">True</span>)   <span class="cm"># compuertas z, r (más liviana)</span></div>
+                </div>
             </div>
 
             <!-- ============ PANEL C: FUSIÓN ============ -->
@@ -532,7 +586,9 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
                         <p class="text-sm text-slate-700">donde \(z_{img}\) proviene de la CNN, \(z_{seq}\) de la red recurrente, y \(\Vert\) denota concatenación. La <strong>fusión temprana</strong> (combinar antes de procesar) y la <strong>fusión por atención</strong> se admiten como extensiones de nivel avanzado.</p>
                     </div>
                     <figure class="card p-5">
-                        <svg viewBox="0 0 360 210" width="100%" role="img" aria-label="Dos embeddings se concatenan y pasan por una cabeza densa que produce la predicción">
+                        <svg viewBox="0 0 360 210" width="100%" role="img" aria-labelledby="fusionTitle fusionDesc">
+                            <title id="fusionTitle">Fusión multimodal</title>
+                            <desc id="fusionDesc">Dos embeddings se concatenan y pasan por una cabeza densa que produce la predicción</desc>
                             <defs>
                                 <marker id="arrowC" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
                                     <path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/>
@@ -769,6 +825,22 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
             });
         }, { rootMargin: '-45% 0px -50% 0px' });
         secs.forEach(s => navIO.observe(s));
+
+        // Copiar el código de las ventanas de código
+        document.querySelectorAll('.code-copy').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var win = btn.closest('.code-window');
+                var body = win && win.querySelector('.codeblock');
+                if (!body) return;
+                navigator.clipboard.writeText(body.innerText).then(function () {
+                    var icon = btn.querySelector('i');
+                    var prev = icon.className;
+                    icon.className = 'fas fa-check';
+                    btn.style.color = '#27C93F';
+                    setTimeout(function () { icon.className = prev; btn.style.color = ''; }, 1400);
+                });
+            });
+        });
     </script>
 
 </body>

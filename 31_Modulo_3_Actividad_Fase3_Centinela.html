@@ -98,11 +98,45 @@
             background: #0F172A; color: #E2E8F0; border-radius: 12px;
             padding: 1rem 1.1rem; font-family: 'Fira Code', monospace;
             font-size: .82rem; line-height: 1.7; overflow-x: auto;
+            white-space: pre; tab-size: 4;
         }
         .codeblock .cm { color: #64748B; }
         .codeblock .kw { color: #F472B6; }
         .codeblock .fn { color: #7DD3FC; }
         .codeblock .st { color: #FDE68A; }
+
+        /* ====== Ventana de código (cromo tipo terminal · marca USTA) ====== */
+        .code-window {
+            position: relative; background: #0F172A; border: 1px solid #1E293B;
+            border-radius: 14px; overflow: hidden; box-shadow: 0 12px 32px rgba(2,6,23,.30);
+        }
+        .code-window::before {
+            content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; z-index: 2;
+            background: linear-gradient(90deg, #3D008D 0%, #ED1E79 60%, #FDB913 100%);
+        }
+        .code-window-bar {
+            display: flex; align-items: center; gap: .55rem;
+            padding: .62rem .95rem; padding-top: calc(.62rem + 3px);
+            background: #0B1326; border-bottom: 1px solid #1E293B;
+        }
+        .code-window-dots { display: flex; gap: .42rem; }
+        .code-window-dots span { width: 11px; height: 11px; border-radius: 50%; display: block; }
+        .code-window-dots .d-r { background: #FF5F56; }
+        .code-window-dots .d-y { background: #FFBD2E; }
+        .code-window-dots .d-g { background: #27C93F; }
+        .code-window-title { font-family: 'Fira Code', monospace; font-size: .72rem; color: #94A3B8; letter-spacing: .01em; }
+        .code-window-lang {
+            margin-left: auto; font-family: 'Fira Code', monospace; font-size: .67rem;
+            color: #FDE68A; background: rgba(253,185,19,.13); padding: .14rem .55rem;
+            border-radius: 999px; white-space: nowrap;
+        }
+        .code-copy {
+            margin-left: .55rem; background: transparent; border: none; color: #94A3B8;
+            cursor: pointer; font-size: .82rem; line-height: 1; padding: .2rem .35rem;
+            border-radius: 7px; transition: color .15s ease, background .15s ease;
+        }
+        .code-copy:hover { color: #E2E8F0; background: rgba(148,163,184,.16); }
+        .code-window .codeblock { border-radius: 0; box-shadow: none; }
 
         /* Píldoras de fórmula */
         .eq {
@@ -204,7 +238,7 @@
 
             <div class="callout callout-info mt-5">
                 <p class="font-bold text-primary mb-1"><i class="fas fa-code-branch mr-2"></i>Qué rama se lleva al borde y cuál a la nube</p>
-                <p class="text-sm leading-relaxed">El sistema de la Fase 2 tenía dos ramas: una <strong>visual</strong> (convolucional) y una <strong>temporal</strong> (recurrente, con LSTM/GRU). En la Fase 3 se industrializa <strong>principalmente la rama visual</strong> para el borde: la tablet captura fotos de las hojas y ejecuta el modelo de imagen <strong>offline</strong> con LiteRT. La <strong>rama temporal se sirve por API REST en la nube</strong>, porque exportar capas <strong>LSTM/GRU a LiteRT es frágil</strong> (operadores no siempre soportados, comportamiento variable entre versiones). Servir la rama recurrente en la nube es una decisión de MLOps legítima que aprovecha la conectividad intermitente del escenario y resuelve la aparente ruptura con la arquitectura multimodal de la Fase 2.</p>
+                <p class="text-sm leading-relaxed">El sistema de la Fase 2 tenía dos ramas: una <strong>visual</strong> (convolucional) y una <strong>temporal</strong> (recurrente, con LSTM/GRU). En la Fase 3 se industrializa <strong>principalmente la rama visual</strong> para el borde: la tablet captura fotos de las hojas y ejecuta el modelo de imagen <strong>offline</strong> con LiteRT. La <strong>rama temporal se sirve por API REST en la nube</strong>, porque la exportación de capas <strong>LSTM/GRU a LiteRT es poco fiable</strong> (operadores no siempre soportados, comportamiento variable entre versiones). Servir la rama recurrente en la nube es una decisión de MLOps legítima: aprovecha la conectividad intermitente del escenario. Además, resuelve la aparente ruptura con la arquitectura multimodal de la Fase 2.</p>
             </div>
 
             <div class="grid md:grid-cols-3 gap-4 mt-6">
@@ -232,7 +266,7 @@
             <div class="grid md:grid-cols-2 gap-5">
                 <div class="card p-6">
                     <h3 class="font-bold text-primary mb-2">Propósito</h3>
-                    <p class="text-sm leading-relaxed text-slate-700">El ejercicio consiste en <strong>industrializar</strong> el sistema construido en las fases anteriores. En el rol de ingeniero de MLOps contratado por una entidad como <strong>AGROSAVIA</strong>, el estudiante construye un <em>pipeline</em> completo que aprovecha la GPU gratuita de la nube y prepara un despliegue que funcione <strong>offline en una tablet en campo</strong>, donde la conectividad es escasa. El escenario de referencia clasifica hojas de café (Sana vs. Roya), pero la lógica aplica al sistema propio del estudiante.</p>
+                    <p class="text-sm leading-relaxed text-slate-700">El ejercicio consiste en <strong>industrializar</strong> el sistema construido en las fases anteriores. En el rol de ingeniero de MLOps contratado por una entidad como <strong>AGROSAVIA</strong>, el estudiante construye un <em>pipeline</em> completo que aprovecha la GPU gratuita en la nube y prepara un despliegue que funcione <strong>offline en una tablet en campo</strong>, donde la conectividad es escasa. El escenario de referencia clasifica hojas de café (Sana vs. Roya), pero la lógica aplica al sistema propio del estudiante.</p>
                 </div>
                 <div class="card p-6">
                     <h3 class="font-bold text-primary mb-2">Competencias</h3>
@@ -339,7 +373,9 @@
                     <p class="text-sm text-slate-700">En <span class="icode">tf.data</span> esto se logra con <span class="icode">.cache()</span>, <span class="icode">.shuffle()</span>, <span class="icode">.batch()</span> y <span class="icode">.prefetch(AUTOTUNE)</span>; en PyTorch, con <span class="icode">num_workers</span>, <span class="icode">pin_memory</span> y <span class="icode">prefetch_factor</span>.</p>
                 </div>
                 <figure class="card p-5">
-                    <svg viewBox="0 0 360 210" width="100%" role="img" aria-label="Comparación de la línea de tiempo sin prefetch y con prefetch, mostrando el solapamiento de la CPU y la GPU">
+                    <svg viewBox="0 0 360 210" width="100%" role="img" aria-labelledby="prefetchTitle prefetchDesc">
+                        <title id="prefetchTitle">Prefetch: solapamiento CPU/GPU</title>
+                        <desc id="prefetchDesc">Comparación de la línea de tiempo sin prefetch y con prefetch, mostrando el solapamiento de la CPU y la GPU</desc>
                         <!-- sin prefetch -->
                         <text x="14" y="32" font-size="11" font-weight="700" fill="#475569">Sin prefetch · la GPU espera</text>
                         <rect x="14"  y="42" width="42" height="22" fill="#FDE68A" stroke="#FACC15"/><text x="35"  y="57" text-anchor="middle" font-size="9" fill="#92400E">CPU</text>
@@ -366,7 +402,14 @@
                     <figcaption>Figura 2. El <em>prefetch</em> solapa la carga de datos (CPU) con el cómputo (GPU). La GPU deja de quedarse ociosa y el tiempo por época se reduce.</figcaption>
                 </figure>
             </div>
-            <div class="codeblock"><span class="cm"># Pipeline de datos — la misma idea en ambos frameworks</span>
+            <div class="code-window">
+                <div class="code-window-bar">
+                    <span class="code-window-dots"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></span>
+                    <span class="code-window-title">pipeline.py</span>
+                    <span class="code-window-lang">Python · tf.data + PyTorch</span>
+                    <button class="code-copy" type="button" aria-label="Copiar código" title="Copiar"><i class="fas fa-copy"></i></button>
+                </div>
+                <div class="codeblock"><span class="cm"># Pipeline de datos — la misma idea en ambos frameworks</span>
 ds = (ds.<span class="fn">map</span>(carga, num_parallel_calls=AUTOTUNE)   <span class="cm"># tf.data</span>
         .<span class="fn">cache</span>().<span class="fn">shuffle</span>(1_000)
         .<span class="fn">batch</span>(32).<span class="fn">prefetch</span>(AUTOTUNE))
@@ -374,6 +417,7 @@ ds = (ds.<span class="fn">map</span>(carga, num_parallel_calls=AUTOTUNE)   <span
 loader = <span class="fn">DataLoader</span>(dataset, batch_size=32,        <span class="cm"># PyTorch</span>
                     num_workers=4, pin_memory=<span class="kw">True</span>,
                     prefetch_factor=2)</div>
+            </div>
             <div class="callout callout-warn mt-3">
                 <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i><strong>Buffer de <span class="icode">shuffle</span>.</strong> En <span class="icode">tf.data</span>, el tamaño del buffer de <span class="icode">.shuffle()</span> debe ser comparable al tamaño del dataset para un mezclado efectivo; un buffer pequeño solo baraja localmente. Si el dataset no cabe en memoria, conviene <strong>barajar a nivel de archivos</strong> (orden de los ficheros) antes de cargarlos.</p>
             </div>
@@ -382,7 +426,7 @@ loader = <span class="fn">DataLoader</span>(dataset, batch_size=32,        <span
             <div class="flex gap-4 mb-2 mt-8"><span class="step-num">3</span>
                 <div class="flex-1">
                     <h3 class="font-bold text-navy text-lg">Data Augmentation</h3>
-                    <p class="text-sm text-slate-600 mt-1">Aplicación de al menos <strong>cuatro transformaciones</strong> (<span class="icode">RandomHorizontalFlip</span>, <span class="icode">ColorJitter</span>, <span class="icode">RandomRotation</span>, <span class="icode">RandomResizedCrop</span>), justificando cuáles convienen al problema y cuáles serían contraproducentes (por ejemplo, un <span class="icode">ColorJitter</span> excesivo que altere el tono amarillo-naranja característico de la roya y borre la señal diagnóstica). Como técnica avanzada se implementa <strong>Mixup</strong> o <strong>CutMix</strong>, y se compara el <em>accuracy</em> de validación con y sin aumento tras diez épocas, con una comparación visual (grilla de 3×3) de imágenes originales frente a aumentadas.</p>
+                    <p class="text-sm text-slate-600 mt-1">Aplicación de al menos <strong>cuatro transformaciones</strong> (<span class="icode">RandomHorizontalFlip</span>, <span class="icode">ColorJitter</span>, <span class="icode">RandomRotation</span>, <span class="icode">RandomResizedCrop</span>), justificando cuáles convienen al problema y cuáles serían contraproducentes (por ejemplo, un <span class="icode">ColorJitter</span> excesivo que altere el tono amarillo-naranja característico de la roya y borre la señal diagnóstica). Como técnica avanzada se implementa <strong>Mixup</strong> o <strong>CutMix</strong>. Finalmente, se compara el <em>accuracy</em> de validación con y sin aumento tras diez épocas, mediante una comparación visual (grilla de 3×3) de imágenes originales frente a aumentadas.</p>
                     <div class="callout callout-tip mt-3">
                         <p class="text-sm"><i class="fas fa-lightbulb text-emerald-600 mr-2"></i>El aumento de datos multiplica artificialmente el conjunto y reduce el sobreajuste, pero solo si las transformaciones <strong>respetan la semántica</strong> del problema: una transformación que cambia la etiqueta real hace más daño que bien.</p>
                     </div>
@@ -398,7 +442,9 @@ loader = <span class="fn">DataLoader</span>(dataset, batch_size=32,        <span
             </div>
             <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
                 <figure class="card p-5">
-                    <svg viewBox="0 0 360 220" width="100%" role="img" aria-label="Comparación de VRAM y tiempo por época entre precisión simple FP32 y precisión mixta FP16">
+                    <svg viewBox="0 0 360 220" width="100%" role="img" aria-labelledby="fp16Title fp16Desc">
+                        <title id="fp16Title">VRAM y tiempo: FP32 vs FP16</title>
+                        <desc id="fp16Desc">Comparación de VRAM y tiempo por época entre precisión simple FP32 y precisión mixta FP16</desc>
                         <!-- ejes -->
                         <line x1="48" y1="30" x2="48" y2="178" stroke="#94A3B8" stroke-width="1.2"/>
                         <line x1="48" y1="178" x2="340" y2="178" stroke="#94A3B8" stroke-width="1.2"/>
@@ -430,7 +476,14 @@ loader = <span class="fn">DataLoader</span>(dataset, batch_size=32,        <span
                     </div>
                 </div>
             </div>
-            <div class="codeblock"><span class="cm"># Entrenamiento con precisión mixta (PyTorch AMP)</span>
+            <div class="code-window">
+                <div class="code-window-bar">
+                    <span class="code-window-dots"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></span>
+                    <span class="code-window-title">amp_train.py</span>
+                    <span class="code-window-lang">Python · PyTorch</span>
+                    <button class="code-copy" type="button" aria-label="Copiar código" title="Copiar"><i class="fas fa-copy"></i></button>
+                </div>
+                <div class="codeblock"><span class="cm"># Entrenamiento con precisión mixta (PyTorch AMP)</span>
 scaler = torch.amp.<span class="fn">GradScaler</span>()
 <span class="kw">for</span> X, y <span class="kw">in</span> loader:
     optim.<span class="fn">zero_grad</span>()
@@ -438,6 +491,7 @@ scaler = torch.amp.<span class="fn">GradScaler</span>()
         perdida = <span class="fn">criterio</span>(<span class="fn">modelo</span>(X), y)
     scaler.<span class="fn">scale</span>(perdida).<span class="fn">backward</span>()        <span class="cm"># escala para evitar underflow</span>
     scaler.<span class="fn">step</span>(optim); scaler.<span class="fn">update</span>()</div>
+            </div>
 
             <!-- Paso 5: Optimización para el borde (Edge) -->
             <div id="edge" class="flex gap-4 mb-2 mt-8"><span class="step-num">5</span>
@@ -448,7 +502,9 @@ scaler = torch.amp.<span class="fn">GradScaler</span>()
             </div>
             <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
                 <figure class="card p-5">
-                    <svg viewBox="0 0 360 210" width="100%" role="img" aria-label="Comparación del modelo antes y después de la optimización para el borde en tamaño, latencia y precisión">
+                    <svg viewBox="0 0 360 210" width="100%" role="img" aria-labelledby="edgeTitle edgeDesc">
+                        <title id="edgeTitle">Efecto de la cuantización</title>
+                        <desc id="edgeDesc">Comparación del modelo antes y después de la optimización para el borde en tamaño, latencia y precisión</desc>
                         <!-- ejes -->
                         <line x1="40" y1="20" x2="40" y2="168" stroke="#94A3B8" stroke-width="1.2"/>
                         <line x1="40" y1="168" x2="344" y2="168" stroke="#94A3B8" stroke-width="1.2"/>
@@ -463,12 +519,12 @@ scaler = torch.amp.<span class="fn">GradScaler</span>()
                         <!-- grupo Precisión -->
                         <rect x="256" y="44"  width="30" height="124" fill="#001A4D"/><text x="271" y="38" text-anchor="middle" font-size="9" font-weight="700" fill="#1E293B">94 %</text>
                         <rect x="290" y="50"  width="30" height="118" fill="#0E9F6E"/><text x="305" y="44" text-anchor="middle" font-size="9" font-weight="700" fill="#1E293B">92 %</text>
-                        <text x="288" y="186" text-anchor="middle" font-size="10" font-weight="600" fill="#475569">Precisión</text>
+                        <text x="288" y="186" text-anchor="middle" font-size="10" font-weight="600" fill="#475569">Exactitud</text>
                         <!-- leyenda -->
                         <rect x="150" y="196" width="11" height="11" fill="#001A4D"/><text x="166" y="205" font-size="9" fill="#475569">Antes (FP32)</text>
                         <rect x="248" y="196" width="11" height="11" fill="#0E9F6E"/><text x="264" y="205" font-size="9" fill="#475569">Después (INT8)</text>
                     </svg>
-                    <figcaption>Figura 4. Efecto de la cuantización sobre la rama visual: el tamaño y la latencia caen con fuerza y la precisión apenas baja. Los valores son ilustrativos; cada estudiante reporta los suyos.</figcaption>
+                    <figcaption>Figura 4. Efecto de la cuantización sobre la rama visual: el tamaño y la latencia caen con fuerza y la exactitud (<em>accuracy</em>) apenas baja. Los valores son ilustrativos; cada estudiante reporta los suyos.</figcaption>
                 </figure>
                 <div>
                     <p class="text-sm text-slate-700 mb-3">El entregable es una <strong>tabla comparativa antes/después</strong> con tres métricas mínimas:</p>
@@ -477,7 +533,7 @@ scaler = torch.amp.<span class="fn">GradScaler</span>()
                         <tbody>
                             <tr><td>Tamaño del modelo (MB)</td><td>—</td><td>—</td></tr>
                             <tr><td>Latencia de inferencia (ms/imagen)</td><td>—</td><td>—</td></tr>
-                            <tr><td>Precisión (accuracy/F1 en test)</td><td>—</td><td>—</td></tr>
+                            <tr><td>Exactitud (accuracy/F1 en test)</td><td>—</td><td>—</td></tr>
                         </tbody>
                     </table>
                     <div class="callout callout-tip">
@@ -495,7 +551,9 @@ scaler = torch.amp.<span class="fn">GradScaler</span>()
             </div>
             <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
                 <figure class="card p-5">
-                    <svg viewBox="0 0 380 250" width="100%" role="img" aria-label="Dos implementaciones equivalentes (PyTorch y Keras) producen cada una su propio formato; ONNX actúa como puente portable hacia el despliegue en la nube y en una tablet offline">
+                    <svg viewBox="0 0 380 250" width="100%" role="img" aria-labelledby="deployTitle deployDesc">
+                        <title id="deployTitle">Exportación y despliegue dual</title>
+                        <desc id="deployDesc">Dos implementaciones equivalentes (PyTorch y Keras) producen cada una su propio formato; ONNX actúa como puente portable hacia el despliegue en la nube y en una tablet offline</desc>
                         <defs>
                             <marker id="arrowDep" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
                                 <path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/>
@@ -527,7 +585,7 @@ scaler = torch.amp.<span class="fn">GradScaler</span>()
                         <line x1="244" y1="115" x2="284" y2="80"  stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
                         <line x1="244" y1="120" x2="284" y2="170" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
                     </svg>
-                    <figcaption>Figura 5. <span class="icode">.pth</span> y <span class="icode">.keras</span> provienen de <strong>dos implementaciones equivalentes</strong>, no del mismo objeto. ONNX es el puente portable. La rama visual se despliega offline con LiteRT y la temporal por API REST en la nube.</figcaption>
+                    <figcaption>Figura 5. <span class="icode">.pth</span> y <span class="icode">.keras</span> provienen de <strong>dos implementaciones equivalentes</strong>, no del mismo objeto. ONNX es el puente portable. La rama visual se despliega offline con LiteRT y la temporal por API REST en la nube. (La conversión a LiteRT puede partir directamente del modelo Keras/TF, sin pasar necesariamente por ONNX.)</figcaption>
                 </figure>
                 <div>
                     <div class="callout callout-eth mb-4">
@@ -539,7 +597,14 @@ scaler = torch.amp.<span class="fn">GradScaler</span>()
                     <p class="text-sm text-slate-700">La verificación de <strong>consistencia de predicciones</strong> entre formatos es imprescindible: un modelo que predice distinto tras exportarse no es desplegable. Esa comprobación cierra el ciclo de vida del proyecto.</p>
                 </div>
             </div>
-            <div class="codeblock"><span class="cm"># Exportación a ONNX — ruta estable y verificación de consistencia</span>
+            <div class="code-window">
+                <div class="code-window-bar">
+                    <span class="code-window-dots"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></span>
+                    <span class="code-window-title">exportar.py</span>
+                    <span class="code-window-lang">Python · PyTorch</span>
+                    <button class="code-copy" type="button" aria-label="Copiar código" title="Copiar"><i class="fas fa-copy"></i></button>
+                </div>
+                <div class="codeblock"><span class="cm"># Exportación a ONNX — ruta estable y verificación de consistencia</span>
 modelo.<span class="fn">eval</span>()                                       <span class="cm"># 1 · modo evaluación antes de exportar</span>
 torch.onnx.<span class="fn">export</span>(                                  <span class="cm"># 2 · ruta estable</span>
     modelo, X, <span class="st">"centinela.onnx"</span>,
@@ -551,6 +616,7 @@ torch.onnx.<span class="fn">export</span>(                                  <spa
 sess = onnxruntime.<span class="fn">InferenceSession</span>(<span class="st">"centinela.onnx"</span>)
 salida_onnx = sess.<span class="fn">run</span>(<span class="kw">None</span>, {<span class="st">"entrada"</span>: X.<span class="fn">numpy</span>()})[<span class="st">0</span>]
 <span class="kw">assert</span> np.<span class="fn">allclose</span>(salida_torch, salida_onnx, atol=<span class="st">1e-4</span>)</div>
+            </div>
             <div class="callout callout-tip mt-3">
                 <p class="text-sm"><i class="fas fa-robot text-emerald-600 mr-2"></i><strong>Caso de auditoría a la IA.</strong> Si la herramienta propone <span class="icode">dynamo=True</span> como única vía y falla en una versión que no lo soporta, corregir hacia la ruta estable (<span class="icode">torch.onnx.export</span> con <span class="icode">input_names</span>/<span class="icode">output_names</span>/<span class="icode">dynamic_axes</span>) es un buen caso de auditoría documentada.</p>
             </div>
@@ -756,6 +822,22 @@ salida_onnx = sess.<span class="fn">run</span>(<span class="kw">None</span>, {<s
             });
         }, { rootMargin: '-45% 0px -50% 0px' });
         secs.forEach(s => navIO.observe(s));
+
+        // Copiar el código de las ventanas de código
+        document.querySelectorAll('.code-copy').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var win = btn.closest('.code-window');
+                var body = win && win.querySelector('.codeblock');
+                if (!body) return;
+                navigator.clipboard.writeText(body.innerText).then(function () {
+                    var icon = btn.querySelector('i');
+                    var prev = icon.className;
+                    icon.className = 'fas fa-check';
+                    btn.style.color = '#27C93F';
+                    setTimeout(function () { icon.className = prev; btn.style.color = ''; }, 1400);
+                });
+            });
+        });
     </script>
 
 </body>
