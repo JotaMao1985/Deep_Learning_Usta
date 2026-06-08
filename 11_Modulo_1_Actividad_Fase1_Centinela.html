@@ -293,7 +293,7 @@
                     <text x="590" y="255" text-anchor="middle" font-size="11" font-weight="600" fill="#ED1E79">Salida</text>
                     <text x="590" y="270" text-anchor="middle" font-size="9.5" fill="#94A3B8">Sigmoide</text>
                 </svg>
-                <figcaption>Figura 1. Arquitectura objetivo de la Fase 1: un MLP con dos capas ocultas (ReLU) y una salida sigmoide. Es la imagen-guía que articula toda la actividad.</figcaption>
+                <figcaption>Figura 1. Arquitectura objetivo de la Fase 1: un MLP con dos capas ocultas (ReLU). El nodo σ de la salida representa la activación sigmoide de <strong>inferencia</strong> (logit → probabilidad); durante el entrenamiento esa sigmoide vive dentro de <span class="icode">BCEWithLogitsLoss</span> y no en el modelo. El diagrama es <strong>esquemático</strong>: el conteo de neuronas (3 → 3 → 2 → 1) ilustra la idea y <strong>no coincide</strong> con el del código de referencia (16 → 8 → 1).</figcaption>
             </figure>
         </section>
 
@@ -308,8 +308,8 @@
                 </div>
                 <div class="card p-5">
                     <div class="text-secondary text-2xl mb-2"><i class="fas fa-table-list"></i></div>
-                    <h3 class="font-bold text-navy mb-1">Fase 1 = versión tabular</h3>
-                    <p class="text-sm text-slate-600">En este módulo se trabaja con <strong>características numéricas</strong> (por ejemplo, promedios espectrales de una imagen o clima agregado a una tabla). La propuesta debe mostrar el camino hacia imagen y serie en la Fase 2.</p>
+                    <h3 class="font-bold text-navy mb-1">Fase 1 = versión tabular de una modalidad</h3>
+                    <p class="text-sm text-slate-600">En este módulo se trabaja con <strong>características numéricas</strong> de <strong>una sola</strong> de las dos modalidades (por ejemplo, promedios espectrales de una imagen). La propuesta declara cuál se aplana y muestra el camino hacia imagen y serie en la Fase 2.</p>
                 </div>
                 <div class="card p-5">
                     <div class="text-red-600 text-2xl mb-2"><i class="fas fa-ban"></i></div>
@@ -318,7 +318,10 @@
                 </div>
             </div>
             <div class="callout callout-warn mt-5">
-                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i>El escenario de referencia <strong>"Centinela del Café"</strong> clasifica el estado de la hoja (<strong>Sana</strong> vs. <strong>Enferma</strong> por roya) a partir de un vector de características (promedios de intensidad RGB e Infrarrojo) del conjunto <strong>RoCoLe</strong>. Sirve de ejemplo; el estudiante puede adoptarlo o proponer el suyo con la misma lógica.</p>
+                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i>El escenario de referencia <strong>"Centinela del Café"</strong> clasifica el estado de la hoja (<strong>Sana</strong> vs. <strong>Enferma</strong> por roya) a partir de un vector de características (promedios de intensidad RGB e Infrarrojo) del conjunto <strong>RoCoLe</strong> —la versión tabular de la modalidad <strong>imagen</strong>. Sirve de ejemplo; el estudiante puede adoptarlo o proponer el suyo con la misma lógica.</p>
+            </div>
+            <div class="callout callout-eth mt-4">
+                <p class="text-sm"><i class="fas fa-scale-balanced text-teal-600 mr-2"></i><strong>Datos honestos.</strong> En esta fase se modela <strong>una sola modalidad</strong> en su forma tabular. Si en la Fase 2 el escenario del café se fusiona con datos de <strong>clima</strong>, la alineación imagen↔clima es <strong>agregada</strong> (por región y periodo), <strong>no muestra a muestra</strong>: una foto de una hoja no tiene su propio registro climático individual. Esa limitación de alineación se profundiza en la Fase 2; aquí solo se deja declarada.</p>
             </div>
         </section>
 
@@ -331,6 +334,9 @@
                 <div class="flex-1">
                     <h3 class="font-bold text-navy text-lg">Propuesta de Datos (puerta de aprobación)</h3>
                     <p class="text-sm text-slate-600 mt-1">Antes de modelar se entrega una página que define problema y cliente, las dos modalidades previstas para el sistema completo (imagen + serie), las fuentes elegidas con enlaces y licencia, <strong>por qué no es un reto ya resuelto</strong> y los riesgos éticos. El docente la aprueba o pide ajustes. Esta propuesta es la primera defensa de autoría y, a la vez, una competencia evaluable de <em>framing</em> de problemas.</p>
+                    <div class="callout callout-info mt-3">
+                        <p class="text-sm"><i class="fas fa-arrow-right-arrow-left text-primary mr-2"></i><strong>Continuidad Fase 1 → Fase 2.</strong> La propuesta debe <strong>declarar cuál de las dos modalidades</strong> (imagen <em>o</em> serie temporal) se <strong>aplanará a una tabla</strong> en esta fase. En la Fase 2 ese aplanamiento se reemplaza por la <strong>arquitectura nativa</strong> de la modalidad (CNN para imagen, RNN/LSTM/GRU para serie) y se <strong>incorpora la segunda modalidad</strong> mediante fusión.</p>
+                    </div>
                 </div>
             </div>
 
@@ -391,15 +397,20 @@
                 </figure>
             </div>
             <div class="codeblock"><span class="cm"># Arquitectura: MLP con dos capas ocultas (PyTorch)</span>
+<span class="cm"># La salida es un LOGIT (sin sigmoide en el modelo): la sigmoide vive en la pérdida.</span>
 <span class="kw">class</span> <span class="fn">MLP</span>(nn.Module):
     <span class="kw">def</span> <span class="fn">__init__</span>(self):
         <span class="kw">super</span>().<span class="fn">__init__</span>()
         self.red = nn.<span class="fn">Sequential</span>(
             nn.<span class="fn">Linear</span>(n_feat, 16), nn.<span class="fn">ReLU</span>(),   <span class="cm"># capa oculta 1</span>
             nn.<span class="fn">Linear</span>(16, 8),      nn.<span class="fn">ReLU</span>(),   <span class="cm"># capa oculta 2</span>
-            nn.<span class="fn">Linear</span>(8, 1),       nn.<span class="fn">Sigmoid</span>())  <span class="cm"># salida binaria</span>
+            nn.<span class="fn">Linear</span>(8, 1))                  <span class="cm"># salida: logit (1 valor, sin activacion)</span>
     <span class="kw">def</span> <span class="fn">forward</span>(self, x):
-        <span class="kw">return</span> self.red(x)</div>
+        <span class="kw">return</span> self.red(x)              <span class="cm"># devuelve el logit; sigmoide solo en evaluacion</span></div>
+
+            <div class="callout callout-danger mt-4">
+                <p class="text-sm"><i class="fas fa-bolt text-red-600 mr-2"></i><strong>Antipatrón: la doble sigmoide.</strong> Dejar <span class="icode">nn.Sigmoid()</span> dentro del modelo <em>y</em> usar <span class="icode">BCEWithLogitsLoss</span> aplica la sigmoide <strong>dos veces</strong> y rompe el entrenamiento. La ruta recomendada deja la última capa como <span class="icode">nn.Linear(8, 1)</span> (un <strong>logit</strong>) y combina sigmoide y entropía cruzada en un solo paso numéricamente estable con <span class="icode">BCEWithLogitsLoss</span>; la sigmoide solo se aplica con <span class="icode">torch.sigmoid</span> <strong>en la evaluación</strong>. La alternativa válida es <span class="icode">nn.Sigmoid()</span> en el modelo con <span class="icode">nn.BCELoss()</span>; lo prohibido es mezclarlas.</p>
+            </div>
 
             <!-- Paso 3 + figura bucle -->
             <div class="flex gap-4 mb-2 mt-8"><span class="step-num">3</span>
@@ -446,13 +457,24 @@
                     <figcaption>Figura 3. El bucle de entrenamiento repite cincuenta veces el ciclo <em>forward → pérdida → backward → actualización</em>. Limpiar los gradientes (<span class="icode">zero_grad</span>) antes de cada paso es imprescindible.</figcaption>
                 </figure>
             </div>
-            <div class="codeblock"><span class="cm"># Bucle de entrenamiento explícito — 50 épocas (PyTorch)</span>
+            <div class="codeblock"><span class="cm"># Configuración: pérdida sobre LOGITS (sigmoide + BCE estable en un solo paso)</span>
+criterio = nn.<span class="fn">BCEWithLogitsLoss</span>()
+y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(-1, 1)     <span class="cm"># etiqueta (N,1) flotante, igual forma que el logit</span>
+
+<span class="cm"># Bucle de entrenamiento explícito — 50 épocas (PyTorch)</span>
 <span class="kw">for</span> epoca <span class="kw">in</span> <span class="fn">range</span>(50):
     optim.<span class="fn">zero_grad</span>()                  <span class="cm"># 1 · limpia los gradientes previos</span>
-    y_hat   = <span class="fn">modelo</span>(X_train)            <span class="cm"># 2 · forward pass</span>
-    perdida = <span class="fn">criterio</span>(y_hat, y_train)     <span class="cm"># 3 · cálculo del error (BCE)</span>
+    logits  = <span class="fn">modelo</span>(X_train)            <span class="cm"># 2 · forward pass (devuelve logits)</span>
+    perdida = <span class="fn">criterio</span>(logits, y_train)    <span class="cm"># 3 · cálculo del error (BCEWithLogitsLoss)</span>
     perdida.<span class="fn">backward</span>()                 <span class="cm"># 4 · backward pass (retropropagación)</span>
-    optim.<span class="fn">step</span>()                      <span class="cm"># 5 · actualiza los pesos</span></div>
+    optim.<span class="fn">step</span>()                      <span class="cm"># 5 · actualiza los pesos</span>
+
+    <span class="kw">if</span> epoca % 10 == 0:                 <span class="cm"># Colab puede desconectarse: guarda checkpoints</span>
+        torch.<span class="fn">save</span>(modelo.<span class="fn">state_dict</span>(), <span class="st">"centinela_fase1.pt"</span>)</div>
+
+            <div class="callout callout-warn mt-4">
+                <p class="text-sm"><i class="fas fa-floppy-disk text-amber-500 mr-2"></i><strong>Cómputo en Colab.</strong> El entorno puede desconectarse o agotar la cuota a mitad del entrenamiento. Conviene <strong>guardar el modelo periódicamente</strong> (<span class="icode">torch.save(modelo.state_dict(), ...)</span>) para reanudar sin reentrenar desde cero.</p>
+            </div>
 
             <!-- Paso 4 + figura overfitting -->
             <div class="flex gap-4 mb-2 mt-8"><span class="step-num">4</span>
@@ -463,7 +485,7 @@
             </div>
             <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
                 <figure class="card p-5">
-                    <svg viewBox="0 0 380 240" width="100%" role="img" aria-label="Curvas de pérdida de entrenamiento y validación que ilustran el sobreajuste y su corrección con Dropout">
+                    <svg viewBox="0 0 430 240" width="100%" role="img" aria-label="Curvas de pérdida de entrenamiento y validación que ilustran el sobreajuste y su corrección con Dropout; cada curva está rotulada al final con su nombre">
                         <!-- ejes -->
                         <line x1="55" y1="20" x2="55" y2="195" stroke="#94A3B8" stroke-width="1.5"/>
                         <line x1="55" y1="195" x2="360" y2="195" stroke="#94A3B8" stroke-width="1.5"/>
@@ -472,20 +494,24 @@
                         <!-- región de sobreajuste -->
                         <rect x="210" y="20" width="150" height="175" fill="#FEF2F2" opacity="0.7"/>
                         <line x1="210" y1="20" x2="210" y2="195" stroke="#DC2626" stroke-width="1.2" stroke-dasharray="4 3"/>
-                        <text x="285" y="36" text-anchor="middle" font-size="9.5" fill="#DC2626" font-weight="600">sobreajuste</text>
-                        <text x="210" y="14" text-anchor="middle" font-size="8.5" fill="#DC2626">punto óptimo</text>
+                        <text x="285" y="36" text-anchor="middle" font-size="10" fill="#B91C1C" font-weight="700">sobreajuste</text>
+                        <text x="210" y="13" text-anchor="middle" font-size="9" fill="#B91C1C" font-weight="600">punto óptimo</text>
                         <!-- curva de entrenamiento (desciende siempre) -->
                         <polyline points="60,55 105,95 150,125 200,148 255,163 310,172 355,178" fill="none" stroke="#3D008D" stroke-width="2.5"/>
                         <!-- curva de validación (U: baja y vuelve a subir) -->
                         <polyline points="60,68 105,108 150,135 210,143 260,128 310,104 355,82" fill="none" stroke="#ED1E79" stroke-width="2.5"/>
                         <!-- validación con Dropout (se mantiene baja) -->
                         <polyline points="60,74 120,116 200,142 270,150 320,152 355,153" fill="none" stroke="#0E7490" stroke-width="2.2" stroke-dasharray="5 3"/>
+                        <!-- etiquetas de texto al final de cada curva (no depender solo del color) -->
+                        <text x="362" y="181" font-size="9.5" font-weight="700" fill="#3D008D">train</text>
+                        <text x="362" y="85"  font-size="9.5" font-weight="700" fill="#C71663">val</text>
+                        <text x="362" y="156" font-size="9.5" font-weight="700" fill="#0E7490">val + Dropout</text>
                         <!-- leyenda -->
-                        <line x1="240" y1="55" x2="262" y2="55" stroke="#3D008D" stroke-width="2.5"/><text x="266" y="58" font-size="9" fill="#475569">entrenamiento</text>
-                        <line x1="240" y1="68" x2="262" y2="68" stroke="#ED1E79" stroke-width="2.5"/><text x="266" y="71" font-size="9" fill="#475569">validación</text>
-                        <line x1="240" y1="81" x2="262" y2="81" stroke="#0E7490" stroke-width="2.2" stroke-dasharray="5 3"/><text x="266" y="84" font-size="9" fill="#475569">val. + Dropout</text>
+                        <line x1="240" y1="55" x2="262" y2="55" stroke="#3D008D" stroke-width="2.5"/><text x="266" y="58" font-size="9" fill="#334155">entrenamiento</text>
+                        <line x1="240" y1="68" x2="262" y2="68" stroke="#ED1E79" stroke-width="2.5"/><text x="266" y="71" font-size="9" fill="#334155">validación</text>
+                        <line x1="240" y1="81" x2="262" y2="81" stroke="#0E7490" stroke-width="2.2" stroke-dasharray="5 3"/><text x="266" y="84" font-size="9" fill="#334155">val. + Dropout</text>
                     </svg>
-                    <figcaption>Figura 4. Cuando la pérdida de validación deja de bajar y empieza a subir mientras la de entrenamiento sigue cayendo, hay sobreajuste. El Dropout (línea punteada) mantiene la validación más baja y estable.</figcaption>
+                    <figcaption>Figura 4. Cuando la pérdida de validación deja de bajar y empieza a subir mientras la de entrenamiento sigue cayendo, hay sobreajuste. El Dropout (línea punteada) mantiene la validación más baja y estable. Cada curva se rotula al final (<strong>train</strong> / <strong>val</strong> / <strong>val + Dropout</strong>) para no depender solo del color.</figcaption>
                 </figure>
                 <div>
                     <div class="callout callout-danger mb-4">
@@ -504,7 +530,7 @@
             <div class="flex gap-4 mb-2 mt-8"><span class="step-num">5</span>
                 <div class="flex-1">
                     <h3 class="font-bold text-navy text-lg">Evaluación, análisis de errores y ética</h3>
-                    <p class="text-sm text-slate-600 mt-1">Evaluación en el conjunto de <strong>prueba</strong> con <strong>matriz de confusión</strong>, precisión, <em>recall</em> y F1; análisis de <strong>falsos positivos vs. falsos negativos</strong>. Con el <strong>Marco Ético para la IA en Colombia (Minciencias, 2021)</strong> se discute el costo real de cada tipo de error para el cliente.</p>
+                    <p class="text-sm text-slate-600 mt-1">Como el modelo devuelve un <strong>logit</strong>, en la evaluación se aplica <span class="icode">torch.sigmoid</span> para obtener la probabilidad y umbralizarla (por ejemplo, en 0,5) en la clase predicha. Evaluación en el conjunto de <strong>prueba</strong> con <strong>matriz de confusión</strong>, precisión, <em>recall</em> y F1; análisis de <strong>falsos positivos vs. falsos negativos</strong>. Con el <strong>Marco Ético para la IA en Colombia (Minciencias, 2021)</strong> se discute el costo real de cada tipo de error para el cliente.</p>
                 </div>
             </div>
             <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
@@ -604,51 +630,58 @@
             <p class="text-slate-600 mb-5 max-w-3xl">Niveles de desempeño: <strong>Estratégico</strong> (4,6–5,0) · <strong>Autónomo</strong> (4,0–4,5) · <strong>Básico</strong> (3,0–3,9) · <strong>Inicial</strong> (1,0–2,9) · <strong>Nulo</strong> — sin entrega (0,0). Los pesos suman 100 %.</p>
 
             <div class="overflow-x-auto card p-1">
-                <table class="tbl" style="min-width:760px">
+                <table class="tbl" style="min-width:960px">
                     <thead>
                         <tr style="background:#001A4D">
-                            <th style="width:26%">Criterio (peso)</th>
-                            <th>Estratégico (4,6–5,0)</th>
-                            <th>Autónomo (4,0–4,5)</th>
-                            <th>Básico / Inicial</th>
+                            <th style="width:20%">Criterio (peso)</th>
+                            <th style="width:20%">Estratégico (4,6–5,0)</th>
+                            <th style="width:20%">Autónomo (4,0–4,5)</th>
+                            <th style="width:20%">Básico (3,0–3,9)</th>
+                            <th style="width:20%">Inicial (1,0–2,9)</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td><strong>1. Propuesta de datos y EDA (15 %)</strong></td>
-                            <td>Problema y cliente bien delimitados; fuentes no-Kaggle pertinentes con las dos modalidades previstas; EDA exhaustivo que detecta desbalance, escala y faltantes y guía decisiones.</td>
-                            <td>Propuesta clara y aprobada; fuentes válidas; EDA correcto con visualizaciones y partición justificada.</td>
-                            <td><strong>Básico:</strong> propuesta con vacíos, EDA superficial. <strong>Inicial:</strong> fuente inadmisible (Kaggle) o EDA ausente/erróneo.</td>
+                            <td>Declara problema, cliente y las dos modalidades, e <strong>indica cuál se aplana a tabla</strong>; fuentes no-Kaggle con enlace y licencia; el EDA reporta clases, escalas y faltantes, y <strong>cada hallazgo decide</strong> la partición o el preprocesamiento.</td>
+                            <td>Propuesta aprobada con fuentes válidas y modalidad aplanada declarada; el EDA incluye gráficas de distribución y una partición train/val/test justificada.</td>
+                            <td>La propuesta omite la modalidad que se aplana o la licencia; el EDA muestra solo una gráfica de clases y la partición no se justifica.</td>
+                            <td>Usa una fuente de Kaggle o un reto ya resuelto, <strong>o</strong> no hay EDA, <strong>o</strong> mezcla datos de prueba en el ajuste (fuga).</td>
                         </tr>
                         <tr>
                             <td><strong>2. Diseño e implementación del MLP (30 %)</strong></td>
-                            <td>MLP ≥2 capas con activaciones justificadas; bucle de entrenamiento explícito impecable; código modular, documentado y reproducible (semilla fija).</td>
-                            <td>MLP correcto; bucle explícito funcional; código organizado y comentado.</td>
-                            <td><strong>Básico:</strong> red entrenable con errores menores. <strong>Inicial:</strong> no ejecuta o falta <span class="icode">zero_grad</span>/dimensiones incorrectas.</td>
+                            <td>MLP con ≥2 capas ocultas y activaciones justificadas; la <strong>salida es un logit</strong> (<span class="icode">nn.Linear(8,1)</span>, sin sigmoide en el <span class="icode">forward</span>) con <span class="icode">BCEWithLogitsLoss</span>; etiqueta <span class="icode">y.float().view(-1,1)</span>; semilla fija y el notebook <strong>corre de principio a fin sin editar</strong>.</td>
+                            <td>El bucle de entrenamiento explícito ejecuta y converge; la combinación pérdida-activación es coherente (logit + <span class="icode">BCEWithLogitsLoss</span> o sigmoide + <span class="icode">BCELoss</span>); el código está comentado por secciones.</td>
+                            <td>La red entrena pero con un defecto menor: sin semilla fija, código sin comentar o forma de la etiqueta corregida a mano al ejecutar.</td>
+                            <td>El notebook <strong>no ejecuta</strong>, falta <span class="icode">zero_grad</span>, hay <strong>doble sigmoide</strong> (sigmoide en el modelo + <span class="icode">BCEWithLogitsLoss</span>) o las dimensiones no concuerdan.</td>
                         </tr>
                         <tr>
                             <td><strong>3. Regularización y experimentación (15 %)</strong></td>
-                            <td>Induce y corrige el sobreajuste con evidencia gráfica clara (train vs. val) y analiza el efecto del Dropout o de la tasa de aprendizaje.</td>
-                            <td>Muestra sobreajuste y su corrección con curvas adecuadas e interpretación correcta.</td>
-                            <td><strong>Básico:</strong> curvas con interpretación superficial. <strong>Inicial:</strong> sin evidencia de sobreajuste ni regularización.</td>
+                            <td>Muestra dos curvas (sin y con regularización) donde la validación cruza al alza y luego se estabiliza con Dropout/LR, <strong>y nombra la época</strong> del punto óptimo.</td>
+                            <td>Las curvas train vs. val. evidencian el sobreajuste y su corrección, con una interpretación correcta del cruce.</td>
+                            <td>Presenta las curvas pero describe el sobreajuste sin señalar dónde la validación deja de bajar.</td>
+                            <td>Una sola curva, o curvas sin sobreajuste visible, o gráficas sin texto que las interprete.</td>
                         </tr>
                         <tr>
                             <td><strong>4. Evaluación, errores y ética (15 %)</strong></td>
-                            <td>Matriz de confusión y métricas por clase; prioriza falsos negativos/positivos según el costo real; reflexión ética sólida anclada al Marco Ético.</td>
-                            <td>Métricas principales y matriz de confusión interpretadas; reflexión ética pertinente al cliente.</td>
-                            <td><strong>Básico:</strong> solo precisión global; ética sin integrar. <strong>Inicial:</strong> evaluación en <em>training set</em>; ética ausente.</td>
+                            <td>Reporta matriz de confusión y precisión/recall/F1 <strong>por clase</strong>, <strong>convirtiendo el logit con <span class="icode">torch.sigmoid</span> en evaluación</strong>; argumenta qué error (FN o FP) priorizar por su costo para el cliente, citando el Marco Ético.</td>
+                            <td>Incluye matriz de confusión y las métricas principales interpretadas, con una reflexión ética pertinente al cliente.</td>
+                            <td>Reporta solo la exactitud global y menciona la ética sin ligarla a FN/FP ni a una decisión.</td>
+                            <td><strong>Evalúa en el training set</strong>, o no hay matriz de confusión, o la ética está ausente.</td>
                         </tr>
                         <tr>
                             <td><strong>5. Uso responsable de IA (15 %)</strong></td>
-                            <td>Bitácora con decisiones deliberadas (casos <em>Modificada/Rechazada</em> bien fundamentados); defiende cada decisión como propia; auditoría con un fallo no trivial corregido.</td>
-                            <td>Bitácora completa y verificada; sustenta la mayoría de sus decisiones; la auditoría documenta y corrige un fallo real.</td>
-                            <td><strong>Básico:</strong> registro superficial, titubea. <strong>Inicial:</strong> bitácora ausente o señales de delegación ciega.</td>
+                            <td>La bitácora registra casos <strong>Aceptada / Modificada / Rechazada</strong> con su motivo; en la sustentación responde sin notas por qué tomó cada decisión; la auditoría <strong>reproduce un fallo concreto de la IA</strong> (p. ej. bucle sin <span class="icode">zero_grad</span>) y muestra la corrección.</td>
+                            <td>Bitácora completa y verificable; explica la mayoría de sus decisiones en la sustentación; la auditoría documenta y corrige un fallo real.</td>
+                            <td>La bitácora solo lista <em>prompts</em> sin el motivo de aceptar o rechazar; titubea al explicar una decisión; la auditoría describe un fallo genérico.</td>
+                            <td>No hay bitácora o se redactó después; <strong>no puede explicar</strong> una parte sustancial de su propio código (delegación ciega).</td>
                         </tr>
                         <tr>
                             <td><strong>6. Comunicación y storytelling (10 %)</strong></td>
-                            <td>Informe riguroso y claro para audiencia no especializada; narrativa de datos sólida; citas APA correctas.</td>
-                            <td>Informe bien estructurado y comprensible con visualizaciones adecuadas.</td>
-                            <td><strong>Básico:</strong> estructura incompleta o visualizaciones poco claras. <strong>Inicial:</strong> informe desorganizado, sin referencias.</td>
+                            <td>El informe (≤4 págs.) explica el resultado a una audiencia no técnica con un hilo problema→modelo→error→decisión, gráficas rotuladas y citas APA completas.</td>
+                            <td>Informe estructurado y comprensible, con visualizaciones legibles y referencias citadas.</td>
+                            <td>Informe con secciones faltantes o gráficas sin rótulos ni leyenda.</td>
+                            <td>Informe sin estructura, sin referencias o con afirmaciones sin respaldo en los resultados.</td>
                         </tr>
                     </tbody>
                 </table>

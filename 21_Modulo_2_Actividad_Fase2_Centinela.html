@@ -205,7 +205,7 @@
         <section id="contexto" class="reveal">
             <div class="callout callout-info">
                 <p class="font-bold text-primary mb-1"><i class="fas fa-link mr-2"></i>Esta actividad continúa un proyecto que ya está en marcha</p>
-                <p class="text-sm leading-relaxed">El <strong>Proyecto Centinela</strong> es un sistema de alerta temprana que el estudiante construye una sola vez y hace crecer a lo largo del curso. En la <strong>Fase 1 (Módulo 1)</strong> se levantó una línea base tabular con un Perceptrón Multicapa (MLP). En esta <strong>Fase 2 (Módulo 2)</strong>, el mismo problema y el mismo cliente se conservan, pero la evidencia deja de ser un puñado de características hechas a mano: el sistema aprende directamente de <strong>datos crudos</strong> mediante arquitecturas especializadas —convolucionales para imagen, recurrentes para series de tiempo— y finalmente <strong>fusiona ambas modalidades</strong> en una sola predicción.</p>
+                <p class="text-sm leading-relaxed">El <strong>Proyecto Centinela</strong> es un sistema de alerta temprana que el estudiante construye una sola vez y hace crecer a lo largo del curso. En la <strong>Fase 1 (Módulo 1)</strong> se levantó una línea base tabular con un Perceptrón Multicapa (MLP), que <strong>aplanó una</strong> de las dos modalidades a una tabla. En esta <strong>Fase 2 (Módulo 2)</strong>, el mismo problema y el mismo cliente se conservan, y el sistema da dos pasos: (i) <strong>reemplaza ese aplanamiento por la arquitectura especializada nativa</strong> de esa modalidad —convolucional para imagen, recurrente para series de tiempo— y (ii) <strong>incorpora por primera vez la segunda modalidad</strong>, para finalmente <strong>fusionar ambas</strong> en una sola predicción.</p>
             </div>
 
             <div class="grid md:grid-cols-3 gap-4 mt-6">
@@ -217,12 +217,12 @@
                 <div class="card p-5 ring-2 ring-secondary">
                     <div class="text-xs font-bold uppercase tracking-wider text-secondary mb-1">Fase 2 · Módulo 2 · <em>aquí</em></div>
                     <div class="font-bold text-navy mb-1"><i class="fas fa-network-wired text-secondary mr-1.5"></i>Sistema multimodal</div>
-                    <p class="text-sm text-slate-600">CNN (imagen) + RNN/LSTM/GRU (serie) + <strong>fusión</strong>. La evidencia pasa a ser el dato crudo.</p>
+                    <p class="text-sm text-slate-600">CNN (imagen) + LSTM/GRU (serie) + <strong>fusión</strong>. La modalidad aplanada estrena arquitectura nativa y entra la segunda modalidad.</p>
                 </div>
                 <div class="card p-5">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Fase 3 · Módulo 3</div>
                     <div class="font-bold text-navy mb-1"><i class="fas fa-microchip text-primary mr-1.5"></i>Pipeline y despliegue</div>
-                    <p class="text-sm text-slate-600">Industrialización con GPU, precisión mixta y despliegue <em>offline</em> en campo.</p>
+                    <p class="text-sm text-slate-600">Industrializa sobre todo la <strong>rama visual</strong> para el despliegue <em>offline</em> (la temporal se sirve por API); GPU, precisión mixta y optimización para borde.</p>
                 </div>
             </div>
         </section>
@@ -330,7 +330,8 @@
                 </div>
             </div>
             <div class="callout callout-warn mt-5">
-                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i>El escenario de referencia <strong>"Centinela del Café"</strong> combina imágenes de hoja (rama A) con la serie climática del municipio —donde la temperatura, la humedad y la lluvia condicionan el brote de roya— (rama B). Sirve de ejemplo; el problema propio del estudiante se rige por la misma lógica multimodal.</p>
+                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i>El escenario de referencia <strong>"Centinela del Café"</strong> combina imágenes de hoja (RoCoLe, rama A) con la serie climática del municipio —donde la temperatura, la humedad y la lluvia condicionan el brote de roya— (NASA POWER / IDEAM, rama B). Sirve de ejemplo; el problema propio del estudiante se rige por la misma lógica multimodal.</p>
+                <p class="text-sm mt-2"><i class="fas fa-circle-exclamation text-amber-600 mr-2"></i><strong>Honestidad sobre la alineación.</strong> En este escenario, imagen y clima <strong>solo se alinean a nivel agregado</strong> (región/periodo): RoCoLe <strong>no trae fecha ni GPS por imagen</strong>, así que <strong>no</strong> existe una clave genuina por muestra. Emparejar artificialmente cada hoja con una ventana climática, o adjuntar una <em>feature</em> climática <strong>constante</strong> a todas las muestras, es <strong>fuga de datos</strong> (leakage). La alineación agregada es <strong>aceptable si se declara con sus limitaciones</strong>; el detalle se trabaja en la rama C.</p>
             </div>
         </section>
 
@@ -348,7 +349,7 @@
             <!-- ============ PANEL A: CNN ============ -->
             <div class="tab-panel" data-panel="a">
                 <div class="callout callout-info mb-6">
-                    <p class="text-sm"><strong>Meta de la rama A.</strong> Sustituir las características visuales hechas a mano de la Fase 1 por una <strong>red convolucional preentrenada</strong> que aprende los filtros por sí misma. El núcleo conceptual es la <em>convolución</em>: un mismo filtro recorre la imagen detectando un patrón local (bordes, manchas, texturas) sin importar dónde aparezca.</p>
+                    <p class="text-sm"><strong>Meta de la rama A.</strong> Reemplazar el <strong>aplanamiento</strong> con que la Fase 1 redujo la imagen a una tabla por la <strong>arquitectura nativa</strong> de esta modalidad: una <strong>red convolucional preentrenada</strong> que aprende los filtros por sí misma. El núcleo conceptual es la <em>convolución</em>: un mismo filtro recorre la imagen detectando un patrón local (bordes, manchas, texturas) sin importar dónde aparezca.</p>
                 </div>
 
                 <div class="grid md:grid-cols-2 gap-6 mb-7 items-start">
@@ -356,6 +357,7 @@
                         <h3 class="font-bold text-primary mb-2">La operación de convolución</h3>
                         <p class="text-sm text-slate-700 mb-3">Un filtro (o <em>kernel</em>) \(K\) se desliza sobre la imagen \(I\); en cada posición calcula un producto punto que mide cuánto se parece la región a ese patrón:</p>
                         <div class="eq mb-3">$$ S(i,j) = (I * K)(i,j) = \sum_{m}\sum_{n} I(i+m,\, j+n)\, K(m,n) $$</div>
+                        <p class="text-xs text-slate-500 mb-3"><i class="fas fa-circle-info text-teal-600 mr-1"></i>Las librerías (PyTorch/Keras) implementan en realidad la <strong>correlación cruzada</strong> (no invierten el <em>kernel</em>); por convención se la llama convolución. La convolución estricta usaría \(I(i-m,\, j-n)\).</p>
                         <p class="text-sm text-slate-700 mb-2">El tamaño del mapa de características de salida depende del tamaño de entrada \(W\), el filtro \(F\), el relleno (<em>padding</em>) \(P\) y el paso (<em>stride</em>) \(S\):</p>
                         <div class="eq">$$ O = \left\lfloor \dfrac{W - F + 2P}{S} \right\rfloor + 1 $$</div>
                     </div>
@@ -412,8 +414,12 @@ base.trainable = <span class="kw">False</span>            <span class="cm"># se 
 salida = <span class="fn">Dense</span>(n_clases, activation=<span class="st">"softmax"</span>)(base.output)
 modelo = <span class="fn">Model</span>(base.input, salida)   <span class="cm"># solo se entrena la cabeza</span></div>
 
-                <div class="callout callout-eth mt-6">
-                    <p class="text-sm"><i class="fas fa-scale-balanced text-teal-600 mr-2"></i><strong>Optimización para borde (Edge).</strong> Se aplica al menos una técnica (cuantización, poda o destilación) y se compara tamaño, latencia y precisión antes/después, anticipando el despliegue de campo de la Fase 3.</p>
+                <div class="callout callout-info mt-6">
+                    <p class="text-sm"><i class="fas fa-circle-info text-primary mr-2"></i><strong>La optimización para borde se trabaja en la Fase 3.</strong> La cuantización, la poda y la destilación —orientadas al despliegue <em>offline</em> en dispositivos con recursos limitados— quedan fuera del alcance de esta fase y se abordan en la Fase 3, donde se industrializa principalmente la rama visual.</p>
+                </div>
+
+                <div class="callout callout-warn mt-4">
+                    <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i><strong>Cómputo en Colab y <em>checkpointing</em>.</strong> La fase exige entregar los <strong>pesos entrenados</strong> (<span class="icode">.h5</span> / <span class="icode">.pth</span>) y el entrenamiento de la CNN puede <strong>no caber en una sola sesión</strong> de Google Colab por su cuota de uso. Conviene guardar <em>checkpoints</em> periódicos en Google Drive y reanudar desde ellos.</p>
                 </div>
             </div>
 
@@ -488,9 +494,9 @@ modelo = <span class="fn">Model</span>(base.input, salida)   <span class="cm"># 
                     <div class="eq text-sm">
                         <p class="font-semibold text-teal-700 mb-1 mono">GRU</p>
                         $$\begin{aligned}
-                        z_t &= \sigma(W_z[h_{t-1},x_t])\\
-                        r_t &= \sigma(W_r[h_{t-1},x_t])\\
-                        \tilde{h}_t &= \tanh(W[r_t \odot h_{t-1},\,x_t])\\
+                        z_t &= \sigma(W_z[h_{t-1},x_t]+b_z)\\
+                        r_t &= \sigma(W_r[h_{t-1},x_t]+b_r)\\
+                        \tilde{h}_t &= \tanh(W[r_t \odot h_{t-1},\,x_t]+b)\\
                         h_t &= (1-z_t)\odot h_{t-1} + z_t \odot \tilde{h}_t
                         \end{aligned}$$
                         <p class="text-xs text-slate-500 mt-2">La GRU fusiona memoria y estado oculto y usa menos parámetros: más eficiente, frecuentemente comparable en desempeño.</p>
@@ -500,9 +506,9 @@ modelo = <span class="fn">Model</span>(base.input, salida)   <span class="cm"># 
                 <h3 class="font-bold text-primary mb-4 text-lg">Pasos de la rama B</h3>
                 <ol class="space-y-4">
                     <li class="flex gap-4"><span class="step-num">1</span><div><p class="font-semibold text-navy">Análisis exploratorio de la serie</p><p class="text-sm text-slate-600">Tendencia, estacionalidad y ruido; estadísticas móviles y autocorrelación (ACF/PACF); detección de atípicos, faltantes y periodicidades. Justificación del uso de modelos recurrentes frente a alternativas clásicas (ARIMA).</p></div></li>
-                    <li class="flex gap-4"><span class="step-num">2</span><div><p class="font-semibold text-navy">Preprocesamiento y ventaneo</p><p class="text-sm text-slate-600">Normalización; construcción de secuencias con <em>ventana deslizante</em> (se experimenta con 7, 14 y 30 pasos); partición que <strong>respeta el orden temporal</strong>; variables exógenas si aplica (día de semana, festivos, indicadores).</p></div></li>
-                    <li class="flex gap-4"><span class="step-num">3</span><div><p class="font-semibold text-navy">Implementación comparativa</p><p class="text-sm text-slate-600">Entrenamiento de <strong>RNN simple, LSTM y GRU</strong> con hiperparámetros comparables (estado oculto 64–128, <em>learning rate</em> 0,001, <em>batch</em> 32) y <em>early stopping</em>.</p></div></li>
-                    <li class="flex gap-4"><span class="step-num">4</span><div><p class="font-semibold text-navy">Evaluación y evidencia del desvanecimiento</p><p class="text-sm text-slate-600">Comparación con RMSE, MAE y MAPE; predicciones vs. valores reales; evidencia empírica del desvanecimiento (curvas o normas de gradiente) en RNN frente a LSTM/GRU, con la justificación de cuándo usar cada una.</p></div></li>
+                    <li class="flex gap-4"><span class="step-num">2</span><div><p class="font-semibold text-navy">Preprocesamiento y ventaneo</p><p class="text-sm text-slate-600">Normalización; construcción de secuencias con <em>ventana deslizante</em> de un <strong>tamaño por defecto</strong> (p. ej. 14 pasos); explorar otros tamaños (7, 30) es <strong>opcional</strong>. Partición que <strong>respeta el orden temporal</strong>; variables exógenas si aplica (día de semana, festivos, indicadores).</p></div></li>
+                    <li class="flex gap-4"><span class="step-num">3</span><div><p class="font-semibold text-navy">Implementación comparativa</p><p class="text-sm text-slate-600">Entrenamiento <strong>obligatorio de LSTM y GRU</strong>, con una <strong>RNN simple solo como contraste</strong> para evidenciar el desvanecimiento (no es un barrido de tres arquitecturas). Hiperparámetros comparables (estado oculto 64–128, <em>learning rate</em> 0,001, <em>batch</em> 32) y <em>early stopping</em>.</p></div></li>
+                    <li class="flex gap-4"><span class="step-num">4</span><div><p class="font-semibold text-navy">Evaluación y evidencia del desvanecimiento</p><p class="text-sm text-slate-600">Comparación con RMSE, MAE y MAPE; predicciones vs. valores reales. Para evidenciar el desvanecimiento basta <strong>una</strong> vía: una traza de las normas de gradiente <strong>o</strong> la diferencia de desempeño de la RNN frente a LSTM/GRU en dependencias largas (opcionalmente con una secuencia sintética larga). Se justifica cuándo usar cada celda.</p></div></li>
                 </ol>
 
                 <div class="codeblock mt-6"><span class="cm"># Comparativa de celdas recurrentes (PyTorch)</span>
@@ -551,10 +557,10 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
 
                 <h3 class="font-bold text-primary mb-4 text-lg">Pasos de la rama C</h3>
                 <ol class="space-y-4">
-                    <li class="flex gap-4"><span class="step-num">1</span><div><p class="font-semibold text-navy">Alineación de las modalidades</p><p class="text-sm text-slate-600">Definición de la unidad de predicción común (p. ej. una observación = una hoja fotografiada + la ventana climática previa) y verificación de que no hay <em>fuga temporal</em> entre ramas.</p></div></li>
+                    <li class="flex gap-4"><span class="step-num">1</span><div><p class="font-semibold text-navy">Alineación de las modalidades <span class="text-secondary">(la decisión más importante)</span></p><p class="text-sm text-slate-600">Definir la <strong>clave de alineación</strong>: qué campo (entidad), fecha e identificador unen la imagen con la serie. El <strong>ideal</strong> es el <em>co-registro real por muestra</em> —misma entidad, misma ventana espaciotemporal—, p. ej. unidad = <strong>(finca, semana)</strong> cuando hay datos georreferenciados y fechados (típicamente recolectados por el estudiante). Cuando esa clave no existe (como en RoCoLe, sin fecha ni GPS por imagen), la alineación <strong>agregada</strong> (región/periodo) es <strong>aceptable si se declara con sus limitaciones</strong>; lo que <strong>no</strong> se admite es el pareo artificial por muestra ni una <em>feature</em> climática <strong>constante</strong> (ambos son fuga de datos).</p></div></li>
                     <li class="flex gap-4"><span class="step-num">2</span><div><p class="font-semibold text-navy">Construcción del modelo fusionado</p><p class="text-sm text-slate-600">Reutilización de las ramas A y B como extractores de <em>embeddings</em>, concatenación y cabeza densa de decisión; entrenamiento conjunto o por etapas, con regularización.</p></div></li>
                     <li class="flex gap-4"><span class="step-num">3</span><div><p class="font-semibold text-navy">Estudio de ablación</p><p class="text-sm text-slate-600">Comparación de tres modelos: <strong>solo imagen</strong>, <strong>solo serie</strong> y <strong>fusionado</strong>. La pregunta a responder es <em>cuánto</em> y <em>cuándo</em> aporta cada modalidad.</p></div></li>
-                    <li class="flex gap-4"><span class="step-num">4</span><div><p class="font-semibold text-navy">Comunicación al cliente</p><p class="text-sm text-slate-600"><em>Dashboard</em> (Plotly, Streamlit o Dash) e informe que narre el valor del sistema integrado para la toma de decisiones, en lenguaje no técnico.</p></div></li>
+                    <li class="flex gap-4"><span class="step-num">4</span><div><p class="font-semibold text-navy">Comunicación al cliente</p><p class="text-sm text-slate-600">Visualizaciones estáticas comentadas (bastan para el nivel Autónomo) o, como <em>bonus</em>, un <em>dashboard</em> interactivo (Plotly, Streamlit o Dash), más un informe que narre el valor del sistema integrado para la toma de decisiones, en lenguaje no técnico.</p></div></li>
                 </ol>
 
                 <div class="callout callout-tip mt-6">
@@ -595,7 +601,7 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
                     <ul class="text-sm text-slate-700 space-y-2">
                         <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Notebook</strong> ejecutable (.ipynb) con las ramas A, B y la fusión C, documentado.</li>
                         <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Informe técnico</strong> (PDF) con metodología, resultados, ablación y limitaciones.</li>
-                        <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Dashboard</strong> de visualización para el cliente.</li>
+                        <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Visualizaciones</strong> estáticas comentadas para el cliente (<em>dashboard</em> interactivo opcional/bonus).</li>
                         <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Pesos</strong> de los modelos entrenados (.h5 / .pth).</li>
                         <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Bitácora de IA</strong> diligenciada.</li>
                     </ul>
@@ -624,45 +630,51 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
             <p class="text-slate-600 mb-5 max-w-3xl">Niveles de desempeño: <strong>Estratégico</strong> (4,6–5,0) · <strong>Autónomo</strong> (4,0–4,5) · <strong>Básico</strong> (3,0–3,9) · <strong>Inicial</strong> (1,0–2,9) · <strong>Nulo</strong> — sin entrega (0,0). Los pesos suman 100 %.</p>
 
             <div class="overflow-x-auto card p-1">
-                <table class="tbl" style="min-width:760px">
+                <table class="tbl" style="min-width:920px">
                     <thead>
                         <tr style="background:#001A4D">
-                            <th style="width:26%">Criterio (peso)</th>
+                            <th style="width:18%">Criterio (peso)</th>
                             <th>Estratégico (4,6–5,0)</th>
                             <th>Autónomo (4,0–4,5)</th>
-                            <th>Básico / Inicial</th>
+                            <th>Básico (3,0–3,9)</th>
+                            <th>Inicial (1,0–2,9)</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><strong>1. Rama visual — CNN y Transfer Learning (25 %)</strong></td>
-                            <td>Compara 3+ arquitecturas con análisis de parámetros y costo (FLOPs); justifica <em>Feature Extraction</em> vs <em>Fine-Tuning</em> con evidencia empírica; Grad-CAM y optimización Edge.</td>
-                            <td>Compara 2 arquitecturas; justifica la estrategia según tamaño/similitud del conjunto; <em>data augmentation</em> y evaluación correctas.</td>
-                            <td><strong>Básico:</strong> una arquitectura sin comparación rigurosa. <strong>Inicial:</strong> sin justificación o error grave (p. ej. MLP para imágenes).</td>
+                            <td><strong>1. Rama visual — CNN y Transfer Learning (20 %)</strong></td>
+                            <td>Compara 2 arquitecturas preentrenadas analizando parámetros, profundidad y velocidad de inferencia; justifica <em>Feature Extraction</em> vs <em>Fine-Tuning</em> con evidencia empírica; aporta Grad-CAM.</td>
+                            <td>Compara 2 arquitecturas; justifica la estrategia según tamaño/similitud con ImageNet; <em>data augmentation</em> y evaluación por clase correctas.</td>
+                            <td>Usa una sola arquitectura sin comparación rigurosa; justificación superficial; no distingue las estrategias de Transfer Learning.</td>
+                            <td>Selecciona arquitectura sin justificación o con error grave (p. ej. MLP para imágenes).</td>
                         </tr>
                         <tr>
-                            <td><strong>2. Rama temporal — RNN/LSTM/GRU (25 %)</strong></td>
-                            <td>Implementa las tres celdas con ventaneo justificado; evidencia empírica del desvanecimiento; explica las compuertas y decide GRU vs LSTM con criterio.</td>
-                            <td>Implementa las tres celdas correctamente; respeta el orden temporal; compara con 2+ métricas e interpreta resultados.</td>
-                            <td><strong>Básico:</strong> 2 de 3 celdas o sin evidencia del desvanecimiento. <strong>Inicial:</strong> mezcla datos temporales o confunde las arquitecturas.</td>
+                            <td><strong>2. Rama temporal — LSTM/GRU (RNN de contraste) (20 %)</strong></td>
+                            <td>Implementa LSTM y GRU con ventana por defecto justificada y RNN simple de contraste; evidencia el desvanecimiento (normas de gradiente o diferencia de desempeño en dependencias largas); decide GRU vs LSTM con criterio.</td>
+                            <td>Implementa LSTM y GRU correctamente más la RNN de contraste; respeta el orden temporal; compara con 2+ métricas e interpreta.</td>
+                            <td>Implementa solo una celda con compuertas, o prescinde de la RNN de contraste, o no aporta evidencia del desvanecimiento.</td>
+                            <td>Mezcla datos temporales (sin respetar el orden), confunde las arquitecturas o ninguna celda con compuertas funciona.</td>
                         </tr>
                         <tr>
-                            <td><strong>3. Fusión multimodal y ablación (20 %)</strong></td>
-                            <td>Fusión funcional con estudio de ablación (solo-imagen / solo-serie / fusionado); analiza honestamente cuándo aporta cada modalidad, incluso resultados negativos.</td>
-                            <td>Fusión funcional con comparación frente a al menos una rama individual; interpretación correcta.</td>
-                            <td><strong>Básico:</strong> concatena sin análisis. <strong>Inicial:</strong> fusión no funcional o ausente.</td>
+                            <td><strong>3. Fusión, ablación y alineación legítima (30 %)</strong></td>
+                            <td>Demuestra la clave de alineación entre modalidades (qué campo/fecha/id las une), con co-registro por muestra cuando hay datos georreferenciados y fechados; fusión funcional con ablación (solo-imagen / solo-serie / fusionado) y análisis honesto del aporte de cada modalidad, incluso resultados negativos.</td>
+                            <td>Fusión funcional comparada frente a al menos una rama individual; declara la alineación agregada (región/periodo) con sus limitaciones; interpretación correcta.</td>
+                            <td>Concatena sin estudio de ablación, o usa alineación agregada sin declarar sus limitaciones.</td>
+                            <td>Fusión no funcional o ausente; pareo artificial por muestra o <em>feature</em> climática constante (fuga de datos) sin advertirlo.</td>
                         </tr>
                         <tr>
                             <td><strong>4. Uso responsable de IA (15 %)</strong></td>
                             <td>Bitácora con decisiones deliberadas (casos <em>Modificada/Rechazada</em> bien fundamentados); defiende cada decisión como propia en la sustentación; auditoría con un fallo no trivial corregido.</td>
                             <td>Bitácora completa y verificada; sustenta la mayoría de sus decisiones; la auditoría documenta y corrige un fallo real.</td>
-                            <td><strong>Básico:</strong> registro superficial, titubea en detalles. <strong>Inicial:</strong> bitácora ausente o señales de delegación ciega.</td>
+                            <td>Registro superficial; titubea en la sustentación; auditoría débil o genérica.</td>
+                            <td>Bitácora ausente o señales de delegación ciega; no defiende sus decisiones.</td>
                         </tr>
                         <tr>
-                            <td><strong>5. Comunicación y dashboard (15 %)</strong></td>
-                            <td><em>Dashboard</em> profesional e interactivo; informe con narrativa, recomendaciones accionables y citación APA correcta.</td>
-                            <td><em>Dashboard</em> funcional; informe bien estructurado y comprensible para audiencia no técnica.</td>
-                            <td><strong>Básico:</strong> visualizaciones estáticas, recomendaciones genéricas. <strong>Inicial:</strong> sin dashboard o informe desorganizado.</td>
+                            <td><strong>5. Comunicación de resultados (15 %)</strong></td>
+                            <td>Comunicación profesional; visualizaciones estáticas claras y, como <em>bonus</em>, dashboard interactivo; informe con narrativa, recomendaciones accionables y citación APA correcta.</td>
+                            <td>Visualizaciones estáticas bien comentadas para audiencia no técnica; informe claro y bien estructurado con recomendaciones.</td>
+                            <td>Visualizaciones básicas; informe con estructura incompleta; recomendaciones genéricas.</td>
+                            <td>Visualizaciones ausentes o ilegibles; informe desorganizado o sin recomendaciones.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -707,7 +719,7 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
                     </div>
                     <div class="bg-white/10 rounded-xl p-4">
                         <p class="font-bold mb-1">Fase siguiente</p>
-                        <p class="text-white/85">Fase 3 (Módulo 3): pipeline con GPU, precisión mixta y despliegue <em>offline</em> en campo.</p>
+                        <p class="text-white/85">Fase 3 (Módulo 3): industrializa sobre todo la rama visual para el despliegue <em>offline</em> (la temporal se sirve por API); pipeline con GPU, precisión mixta y optimización para borde.</p>
                     </div>
                 </div>
             </div>

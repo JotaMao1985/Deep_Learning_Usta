@@ -185,6 +185,7 @@
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#mapa"><i class="fas fa-sitemap mr-1"></i>Mapa de la fase</a>
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#datos"><i class="fas fa-database mr-1"></i>Datos</a>
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#desarrollo"><i class="fas fa-list-ol mr-1"></i>Desarrollo</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#edge"><i class="fas fa-compress mr-1"></i>Edge</a>
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#ia"><i class="fas fa-robot mr-1"></i>Uso de IA</a>
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#entrega"><i class="fas fa-box-open mr-1"></i>Entrega</a>
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#rubrica"><i class="fas fa-table-list mr-1"></i>Rúbrica</a>
@@ -199,6 +200,11 @@
             <div class="callout callout-info">
                 <p class="font-bold text-primary mb-1"><i class="fas fa-flag-checkered mr-2"></i>El último eslabón: poner el sistema en producción</p>
                 <p class="text-sm leading-relaxed">El <strong>Proyecto Centinela</strong> cierra aquí su ciclo de vida. La <strong>Fase 1</strong> levantó la línea base con un MLP y la <strong>Fase 2</strong> la convirtió en un sistema multimodal. En esta <strong>Fase 3 (Módulo 3)</strong>, el estudiante asume el rol de ingeniero de <strong>MLOps</strong> y <strong>industrializa</strong> ese sistema: construye un <em>pipeline</em> de datos eficiente, entrena en <strong>GPU</strong> con precisión mixta y <em>checkpointing</em>, y prepara un <strong>despliegue que funcione offline en campo</strong>. El modelo deja de ser un experimento de cuaderno para convertirse en una herramienta usable.</p>
+            </div>
+
+            <div class="callout callout-info mt-5">
+                <p class="font-bold text-primary mb-1"><i class="fas fa-code-branch mr-2"></i>Qué rama se lleva al borde y cuál a la nube</p>
+                <p class="text-sm leading-relaxed">El sistema de la Fase 2 tenía dos ramas: una <strong>visual</strong> (convolucional) y una <strong>temporal</strong> (recurrente, con LSTM/GRU). En la Fase 3 se industrializa <strong>principalmente la rama visual</strong> para el borde: la tablet captura fotos de las hojas y ejecuta el modelo de imagen <strong>offline</strong> con LiteRT. La <strong>rama temporal se sirve por API REST en la nube</strong>, porque exportar capas <strong>LSTM/GRU a LiteRT es frágil</strong> (operadores no siempre soportados, comportamiento variable entre versiones). Servir la rama recurrente en la nube es una decisión de MLOps legítima que aprovecha la conectividad intermitente del escenario y resuelve la aparente ruptura con la arquitectura multimodal de la Fase 2.</p>
             </div>
 
             <div class="grid md:grid-cols-3 gap-4 mt-6">
@@ -368,6 +374,9 @@ ds = (ds.<span class="fn">map</span>(carga, num_parallel_calls=AUTOTUNE)   <span
 loader = <span class="fn">DataLoader</span>(dataset, batch_size=32,        <span class="cm"># PyTorch</span>
                     num_workers=4, pin_memory=<span class="kw">True</span>,
                     prefetch_factor=2)</div>
+            <div class="callout callout-warn mt-3">
+                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i><strong>Buffer de <span class="icode">shuffle</span>.</strong> En <span class="icode">tf.data</span>, el tamaño del buffer de <span class="icode">.shuffle()</span> debe ser comparable al tamaño del dataset para un mezclado efectivo; un buffer pequeño solo baraja localmente. Si el dataset no cabe en memoria, conviene <strong>barajar a nivel de archivos</strong> (orden de los ficheros) antes de cargarlos.</p>
+            </div>
 
             <!-- Paso 3 -->
             <div class="flex gap-4 mb-2 mt-8"><span class="step-num">3</span>
@@ -393,13 +402,13 @@ loader = <span class="fn">DataLoader</span>(dataset, batch_size=32,        <span
                         <!-- ejes -->
                         <line x1="48" y1="30" x2="48" y2="178" stroke="#94A3B8" stroke-width="1.2"/>
                         <line x1="48" y1="178" x2="340" y2="178" stroke="#94A3B8" stroke-width="1.2"/>
-                        <!-- grupo VRAM -->
-                        <rect x="80"  y="48"  width="40" height="130" fill="#001A4D"/><text x="100" y="42" text-anchor="middle" font-size="9.5" fill="#001A4D">100%</text>
-                        <rect x="128" y="113" width="40" height="65"  fill="#ED1E79"/><text x="148" y="107" text-anchor="middle" font-size="9.5" fill="#ED1E79">≈50%</text>
+                        <!-- grupo VRAM (etiquetas de valor en color de alto contraste; no se depende solo del color) -->
+                        <rect x="80"  y="48"  width="40" height="130" fill="#001A4D"/><text x="100" y="42" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B">100%</text>
+                        <rect x="128" y="113" width="40" height="65"  fill="#ED1E79"/><text x="148" y="107" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B">≈50%</text>
                         <text x="124" y="196" text-anchor="middle" font-size="10" font-weight="600" fill="#475569">VRAM</text>
                         <!-- grupo tiempo -->
-                        <rect x="220" y="48"  width="40" height="130" fill="#001A4D"/><text x="240" y="42" text-anchor="middle" font-size="9.5" fill="#001A4D">100%</text>
-                        <rect x="268" y="92"  width="40" height="86"  fill="#ED1E79"/><text x="288" y="86" text-anchor="middle" font-size="9.5" fill="#ED1E79">≈65%</text>
+                        <rect x="220" y="48"  width="40" height="130" fill="#001A4D"/><text x="240" y="42" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B">100%</text>
+                        <rect x="268" y="92"  width="40" height="86"  fill="#ED1E79"/><text x="288" y="86" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B">≈65%</text>
                         <text x="264" y="196" text-anchor="middle" font-size="10" font-weight="600" fill="#475569">Tiempo / época</text>
                         <!-- leyenda -->
                         <rect x="250" y="26" width="11" height="11" fill="#001A4D"/><text x="266" y="35" font-size="9" fill="#475569">FP32</text>
@@ -408,8 +417,14 @@ loader = <span class="fn">DataLoader</span>(dataset, batch_size=32,        <span
                     <figcaption>Figura 3. La precisión mixta (FP16) reduce el uso de VRAM a cerca de la mitad y acelera el entrenamiento al activar los Tensor Cores. Los valores son ilustrativos; cada estudiante reporta los suyos.</figcaption>
                 </figure>
                 <div>
-                    <p class="text-sm text-slate-700 mb-2">Al representar cada número con 16 bits en lugar de 32, la memoria por tensor se reduce a la mitad y el cómputo se acelera:</p>
-                    <div class="eq mb-3">$$ \text{VRAM}_{16} \approx \tfrac{1}{2}\,\text{VRAM}_{32} \qquad \text{aceleración} = \dfrac{t_{32}}{t_{16}} $$</div>
+                    <p class="text-sm text-slate-700 mb-2">Al representar las <strong>activaciones</strong> con 16 bits en lugar de 32, la memoria de esos tensores se reduce a la mitad y el cómputo se acelera:</p>
+                    <div class="eq mb-3">$$ \text{VRAM}_{16}^{\text{activaciones}} \approx \tfrac{1}{2}\,\text{VRAM}_{32}^{\text{activaciones}} \qquad \text{aceleración} = \dfrac{t_{32}}{t_{16}} $$</div>
+                    <div class="callout callout-info mb-3">
+                        <p class="text-sm"><i class="fas fa-circle-info text-primary mr-2"></i><strong>Matiz importante.</strong> El ahorro de memoria se da sobre todo en las <strong>activaciones</strong>. El ahorro <strong>total</strong> es <em>menor</em> que la mitad porque la precisión mixta automática (AMP) mantiene una copia de los <strong>pesos maestros en FP32</strong> para la actualización del optimizador.</p>
+                    </div>
+                    <div class="callout callout-tip mb-3">
+                        <p class="text-sm"><i class="fas fa-microchip text-emerald-600 mr-2"></i><strong>FP16 vs bfloat16.</strong> En GPUs Ampere o superiores (L4/A100) suele preferirse <strong>bfloat16</strong> (mayor rango, sin necesidad de <span class="icode">GradScaler</span>); en la <strong>T4</strong> se usa <strong>float16</strong> con escalado de pérdida.</p>
+                    </div>
                     <div class="callout callout-warn">
                         <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i><strong>Desafío.</strong> Conviene comparar el tiempo por época con y sin precisión mixta y graficar las curvas de pérdida. Si aparece un error de memoria (<strong>CUDA OOM</strong>), se documenta la solución aplicada (reducir el tamaño de lote, <em>gradient checkpointing</em>, etc.).</p>
                     </div>
@@ -424,57 +439,121 @@ scaler = torch.amp.<span class="fn">GradScaler</span>()
     scaler.<span class="fn">scale</span>(perdida).<span class="fn">backward</span>()        <span class="cm"># escala para evitar underflow</span>
     scaler.<span class="fn">step</span>(optim); scaler.<span class="fn">update</span>()</div>
 
-            <!-- Paso 5 + figura despliegue -->
-            <div class="flex gap-4 mb-2 mt-8"><span class="step-num">5</span>
+            <!-- Paso 5: Optimización para el borde (Edge) -->
+            <div id="edge" class="flex gap-4 mb-2 mt-8"><span class="step-num">5</span>
                 <div class="flex-1">
-                    <h3 class="font-bold text-navy text-lg">Guardado, exportación y ruta de despliegue</h3>
-                    <p class="text-sm text-slate-600 mt-1">Guardado del modelo en al menos dos formatos estándar —<span class="icode">state_dict</span> de PyTorch, <span class="icode">.keras</span>/SavedModel y <strong>ONNX</strong>—, verificando que cada archivo se carga y produce <strong>predicciones consistentes</strong>. Después se documenta una <strong>ruta de despliegue</strong> para el escenario AGROSAVIA: una API REST en la nube para los puntos con conectividad y <strong>LiteRT offline</strong> para la tablet en campo.</p>
+                    <h3 class="font-bold text-navy text-lg">Optimización para el borde (Edge)</h3>
+                    <p class="text-sm text-slate-600 mt-1">Antes de llevar la <strong>rama visual</strong> a la tablet, se aplica al menos una técnica de compresión —<strong>cuantización</strong> (por ejemplo, post-entrenamiento a INT8, la vía más directa para LiteRT), <strong>poda</strong> de pesos de baja magnitud o <strong>destilación</strong> hacia un modelo más pequeño— y se mide el efecto. Esto es lo que hace viable ejecutar el modelo <strong>offline</strong> en un dispositivo de recursos limitados, y es el puente natural entre el entrenamiento en GPU y el despliegue con LiteRT.</p>
                 </div>
             </div>
             <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
                 <figure class="card p-5">
-                    <svg viewBox="0 0 380 230" width="100%" role="img" aria-label="El modelo entrenado se exporta a tres formatos y se despliega en la nube y en una tablet offline">
+                    <svg viewBox="0 0 360 210" width="100%" role="img" aria-label="Comparación del modelo antes y después de la optimización para el borde en tamaño, latencia y precisión">
+                        <!-- ejes -->
+                        <line x1="40" y1="20" x2="40" y2="168" stroke="#94A3B8" stroke-width="1.2"/>
+                        <line x1="40" y1="168" x2="344" y2="168" stroke="#94A3B8" stroke-width="1.2"/>
+                        <!-- grupo Tamaño -->
+                        <rect x="64"  y="40"  width="30" height="128" fill="#001A4D"/><text x="79"  y="34" text-anchor="middle" font-size="9" font-weight="700" fill="#1E293B">45 MB</text>
+                        <rect x="98"  y="120" width="30" height="48"  fill="#0E9F6E"/><text x="113" y="114" text-anchor="middle" font-size="9" font-weight="700" fill="#1E293B">12 MB</text>
+                        <text x="96"  y="186" text-anchor="middle" font-size="10" font-weight="600" fill="#475569">Tamaño</text>
+                        <!-- grupo Latencia -->
+                        <rect x="160" y="48"  width="30" height="120" fill="#001A4D"/><text x="175" y="42" text-anchor="middle" font-size="9" font-weight="700" fill="#1E293B">120 ms</text>
+                        <rect x="194" y="108" width="30" height="60"  fill="#0E9F6E"/><text x="209" y="102" text-anchor="middle" font-size="9" font-weight="700" fill="#1E293B">55 ms</text>
+                        <text x="192" y="186" text-anchor="middle" font-size="10" font-weight="600" fill="#475569">Latencia</text>
+                        <!-- grupo Precisión -->
+                        <rect x="256" y="44"  width="30" height="124" fill="#001A4D"/><text x="271" y="38" text-anchor="middle" font-size="9" font-weight="700" fill="#1E293B">94 %</text>
+                        <rect x="290" y="50"  width="30" height="118" fill="#0E9F6E"/><text x="305" y="44" text-anchor="middle" font-size="9" font-weight="700" fill="#1E293B">92 %</text>
+                        <text x="288" y="186" text-anchor="middle" font-size="10" font-weight="600" fill="#475569">Precisión</text>
+                        <!-- leyenda -->
+                        <rect x="150" y="196" width="11" height="11" fill="#001A4D"/><text x="166" y="205" font-size="9" fill="#475569">Antes (FP32)</text>
+                        <rect x="248" y="196" width="11" height="11" fill="#0E9F6E"/><text x="264" y="205" font-size="9" fill="#475569">Después (INT8)</text>
+                    </svg>
+                    <figcaption>Figura 4. Efecto de la cuantización sobre la rama visual: el tamaño y la latencia caen con fuerza y la precisión apenas baja. Los valores son ilustrativos; cada estudiante reporta los suyos.</figcaption>
+                </figure>
+                <div>
+                    <p class="text-sm text-slate-700 mb-3">El entregable es una <strong>tabla comparativa antes/después</strong> con tres métricas mínimas:</p>
+                    <table class="tbl mb-3">
+                        <thead><tr style="background:#3D008D"><th>Métrica</th><th>Antes</th><th>Después</th></tr></thead>
+                        <tbody>
+                            <tr><td>Tamaño del modelo (MB)</td><td>—</td><td>—</td></tr>
+                            <tr><td>Latencia de inferencia (ms/imagen)</td><td>—</td><td>—</td></tr>
+                            <tr><td>Precisión (accuracy/F1 en test)</td><td>—</td><td>—</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="callout callout-tip">
+                        <p class="text-sm"><i class="fas fa-scale-balanced text-emerald-600 mr-2"></i><strong>Trade-off.</strong> La clave está en justificar cuánta precisión se sacrifica a cambio de cuánto tamaño y latencia se ganan, y si el resultado es aceptable para el uso offline en campo.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Paso 6 + figura despliegue -->
+            <div class="flex gap-4 mb-2 mt-8"><span class="step-num">6</span>
+                <div class="flex-1">
+                    <h3 class="font-bold text-navy text-lg">Guardado, exportación y ruta de despliegue</h3>
+                    <p class="text-sm text-slate-600 mt-1">Guardado del modelo en al menos dos formatos estándar, verificando que cada archivo se carga y produce <strong>predicciones consistentes</strong>. Conviene tener claro que <span class="icode">.pth</span> sale del modelo <strong>PyTorch</strong> y <span class="icode">.keras</span> del modelo <strong>Keras</strong>: son <strong>dos implementaciones equivalentes</strong>, no el mismo objeto serializado en dos archivos. La alternativa limpia es usar <strong>un solo framework</strong> y <strong>ONNX como puente portable</strong>. Después se documenta una <strong>ruta de despliegue</strong> para el escenario AGROSAVIA: la <strong>rama visual</strong> corre con <strong>LiteRT offline</strong> en la tablet y la <strong>rama temporal</strong> se sirve por <strong>API REST en la nube</strong>.</p>
+                </div>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
+                <figure class="card p-5">
+                    <svg viewBox="0 0 380 250" width="100%" role="img" aria-label="Dos implementaciones equivalentes (PyTorch y Keras) producen cada una su propio formato; ONNX actúa como puente portable hacia el despliegue en la nube y en una tablet offline">
                         <defs>
                             <marker id="arrowDep" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
                                 <path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/>
                             </marker>
                         </defs>
-                        <!-- modelo -->
-                        <rect x="10" y="92" width="86" height="46" rx="10" fill="url(#mlopsGrad)"/>
-                        <text x="53" y="111" text-anchor="middle" font-size="10.5" font-weight="700" fill="#fff">Modelo</text>
-                        <text x="53" y="126" text-anchor="middle" font-size="9" fill="#E9D5FF">entrenado</text>
-                        <!-- formatos -->
-                        <rect x="140" y="20"  width="108" height="34" rx="8" fill="#0F172A"/><text x="194" y="41" text-anchor="middle" font-size="10" fill="#fff">.pth (PyTorch)</text>
-                        <rect x="140" y="98"  width="108" height="34" rx="8" fill="#0F172A"/><text x="194" y="119" text-anchor="middle" font-size="10" fill="#fff">.keras</text>
-                        <rect x="140" y="176" width="108" height="34" rx="8" fill="#0F172A"/><text x="194" y="197" text-anchor="middle" font-size="10" fill="#fff">ONNX</text>
-                        <line x1="96" y1="108" x2="136" y2="40"  stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
-                        <line x1="96" y1="115" x2="136" y2="115" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
-                        <line x1="96" y1="122" x2="136" y2="190" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
+                        <!-- dos implementaciones equivalentes -->
+                        <rect x="8" y="46" width="96" height="40" rx="10" fill="url(#mlopsGrad)"/>
+                        <text x="56" y="63" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">Modelo PyTorch</text>
+                        <text x="56" y="78" text-anchor="middle" font-size="8.5" fill="#E9D5FF">implementación A</text>
+                        <rect x="8" y="150" width="96" height="40" rx="10" fill="#0E7490"/>
+                        <text x="56" y="167" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">Modelo Keras</text>
+                        <text x="56" y="182" text-anchor="middle" font-size="8.5" fill="#CFFAFE">implementación B</text>
+                        <text x="56" y="118" text-anchor="middle" font-size="9" font-weight="700" fill="#475569">≈ equivalentes</text>
+                        <!-- formatos propios -->
+                        <rect x="140" y="48"  width="104" height="34" rx="8" fill="#0F172A"/><text x="192" y="69" text-anchor="middle" font-size="10" fill="#fff">.pth</text>
+                        <rect x="140" y="154" width="104" height="34" rx="8" fill="#0F172A"/><text x="192" y="175" text-anchor="middle" font-size="10" fill="#fff">.keras</text>
+                        <rect x="140" y="101" width="104" height="34" rx="8" fill="#3D008D"/><text x="192" y="122" text-anchor="middle" font-size="10" fill="#fff">ONNX (puente)</text>
+                        <line x1="104" y1="66"  x2="136" y2="66"  stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
+                        <line x1="104" y1="170" x2="136" y2="170" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
+                        <line x1="104" y1="74"  x2="136" y2="112" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
+                        <line x1="104" y1="162" x2="136" y2="124" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
                         <!-- destinos -->
-                        <rect x="288" y="40"  width="84" height="48" rx="9" fill="#0E7490"/>
-                        <text x="330" y="60" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">Nube</text>
-                        <text x="330" y="74" text-anchor="middle" font-size="8.5" fill="#CFFAFE">API REST</text>
-                        <rect x="288" y="140" width="84" height="48" rx="9" fill="#ED1E79"/>
-                        <text x="330" y="160" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">Tablet</text>
-                        <text x="330" y="174" text-anchor="middle" font-size="8.5" fill="#fff">LiteRT · offline</text>
-                        <line x1="248" y1="115" x2="284" y2="66"  stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
-                        <line x1="248" y1="193" x2="284" y2="170" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
-                        <line x1="248" y1="37"  x2="284" y2="58"  stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
+                        <rect x="288" y="54"  width="84" height="48" rx="9" fill="#0E7490"/>
+                        <text x="330" y="74" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">Nube</text>
+                        <text x="330" y="88" text-anchor="middle" font-size="8.5" fill="#CFFAFE">API REST · temporal</text>
+                        <rect x="288" y="148" width="84" height="48" rx="9" fill="#ED1E79"/>
+                        <text x="330" y="168" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">Tablet</text>
+                        <text x="330" y="182" text-anchor="middle" font-size="8.5" fill="#fff">LiteRT · visual</text>
+                        <line x1="244" y1="115" x2="284" y2="80"  stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
+                        <line x1="244" y1="120" x2="284" y2="170" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
                     </svg>
-                    <figcaption>Figura 4. El modelo se exporta a formatos estándar y se despliega por dos vías: una API REST en la nube y LiteRT ejecutándose offline en la tablet de campo.</figcaption>
+                    <figcaption>Figura 5. <span class="icode">.pth</span> y <span class="icode">.keras</span> provienen de <strong>dos implementaciones equivalentes</strong>, no del mismo objeto. ONNX es el puente portable. La rama visual se despliega offline con LiteRT y la temporal por API REST en la nube.</figcaption>
                 </figure>
                 <div>
                     <div class="callout callout-eth mb-4">
                         <p class="text-sm"><i class="fas fa-scale-balanced text-teal-600 mr-2"></i><strong>Despliegue responsable.</strong> La ruta de despliegue explicita los principios de <strong>Transparencia</strong> y <strong>Beneficio Social</strong> y propone mitigaciones concretas para los <strong>falsos positivos y negativos</strong> en producción: un sistema que se equivoca en campo afecta decisiones reales del agricultor.</p>
                     </div>
+                    <div class="callout callout-warn mb-4">
+                        <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i><strong>Costo de VRAM.</strong> Cargar <strong>TensorFlow y PyTorch en el mismo runtime</strong> consume memoria de ambos y puede precipitar un CUDA OOM. Si solo se necesita exportar, conviene mantener un único framework activo y usar ONNX como puente.</p>
+                    </div>
                     <p class="text-sm text-slate-700">La verificación de <strong>consistencia de predicciones</strong> entre formatos es imprescindible: un modelo que predice distinto tras exportarse no es desplegable. Esa comprobación cierra el ciclo de vida del proyecto.</p>
                 </div>
             </div>
-            <div class="codeblock"><span class="cm"># Exportación en formatos estándar</span>
-torch.<span class="fn">save</span>(modelo.<span class="fn">state_dict</span>(), <span class="st">"centinela.pth"</span>)        <span class="cm"># 1 · PyTorch</span>
-modelo_tf.<span class="fn">save</span>(<span class="st">"centinela.keras"</span>)                       <span class="cm"># 2 · Keras / SavedModel</span>
-torch.onnx.<span class="fn">export</span>(modelo, X, <span class="st">"centinela.onnx"</span>,           <span class="cm"># 3 · ONNX</span>
-                  dynamo=<span class="kw">True</span>)</div>
+            <div class="codeblock"><span class="cm"># Exportación a ONNX — ruta estable y verificación de consistencia</span>
+modelo.<span class="fn">eval</span>()                                       <span class="cm"># 1 · modo evaluación antes de exportar</span>
+torch.onnx.<span class="fn">export</span>(                                  <span class="cm"># 2 · ruta estable</span>
+    modelo, X, <span class="st">"centinela.onnx"</span>,
+    input_names=[<span class="st">"entrada"</span>], output_names=[<span class="st">"salida"</span>],
+    dynamic_axes={<span class="st">"entrada"</span>: {<span class="st">0</span>: <span class="st">"lote"</span>}, <span class="st">"salida"</span>: {<span class="st">0</span>: <span class="st">"lote"</span>}})
+<span class="cm"># Opción: dynamo=True solo si tu versión de PyTorch lo soporta (no es la única vía).</span>
+
+<span class="cm"># 3 · verificación con onnxruntime</span>
+sess = onnxruntime.<span class="fn">InferenceSession</span>(<span class="st">"centinela.onnx"</span>)
+salida_onnx = sess.<span class="fn">run</span>(<span class="kw">None</span>, {<span class="st">"entrada"</span>: X.<span class="fn">numpy</span>()})[<span class="st">0</span>]
+<span class="kw">assert</span> np.<span class="fn">allclose</span>(salida_torch, salida_onnx, atol=<span class="st">1e-4</span>)</div>
+            <div class="callout callout-tip mt-3">
+                <p class="text-sm"><i class="fas fa-robot text-emerald-600 mr-2"></i><strong>Caso de auditoría a la IA.</strong> Si la herramienta propone <span class="icode">dynamo=True</span> como única vía y falla en una versión que no lo soporta, corregir hacia la ruta estable (<span class="icode">torch.onnx.export</span> con <span class="icode">input_names</span>/<span class="icode">output_names</span>/<span class="icode">dynamic_axes</span>) es un buen caso de auditoría documentada.</p>
+            </div>
         </section>
 
         <!-- ====================== USO DE IA ====================== -->
@@ -509,7 +588,7 @@ torch.onnx.<span class="fn">export</span>(modelo, X, <span class="st">"centinela
                     <ul class="text-sm text-slate-700 space-y-2">
                         <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Notebook</strong> ejecutado en Colab con todas las salidas visibles.</li>
                         <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Archivos del modelo</strong> exportado (.pth, .keras, .onnx).</li>
-                        <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Informe técnico de despliegue</strong> (PDF, máx. 4 páginas): comparativa de pipelines, rendimiento GPU y ruta de despliegue.</li>
+                        <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Informe técnico de despliegue</strong> (PDF, máx. 4 páginas): comparativa de pipelines, rendimiento GPU, <strong>tabla de optimización Edge</strong> (tamaño/latencia/precisión antes y después) y ruta de despliegue con su justificación de ingeniería.</li>
                         <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Bitácora de IA</strong> diligenciada.</li>
                     </ul>
                     <p class="text-xs text-slate-500 mt-4">Repositorio en GitHub o carpeta comprimida: <span class="icode">Apellido_Nombre_Centinela_Fase3.zip</span>. La sustentación se agenda aparte.</p>
@@ -534,54 +613,67 @@ torch.onnx.<span class="fn">export</span>(modelo, X, <span class="st">"centinela
         <!-- ====================== RÚBRICA ====================== -->
         <section id="rubrica" class="reveal">
             <h2 class="sec-title text-2xl md:text-3xl text-navy mb-3"><i class="fas fa-table-list text-secondary mr-2"></i>Rúbrica de evaluación</h2>
-            <p class="text-slate-600 mb-5 max-w-3xl">Niveles de desempeño: <strong>Estratégico</strong> (4,6–5,0) · <strong>Autónomo</strong> (4,0–4,5) · <strong>Básico</strong> (3,0–3,9) · <strong>Inicial</strong> (1,0–2,9) · <strong>Nulo</strong> — sin entrega (0,0). Los pesos suman 100 %.</p>
+            <p class="text-slate-600 mb-5 max-w-3xl">Cuatro niveles de desempeño observables: <strong>Estratégico</strong> (4,6–5,0) · <strong>Autónomo</strong> (4,0–4,5) · <strong>Básico</strong> (3,0–3,9) · <strong>Inicial</strong> (1,0–2,9). El nivel <strong>Nulo</strong> (0,0) se detalla en la nota al pie. Los pesos suman 100 %.</p>
 
             <div class="overflow-x-auto card p-1">
-                <table class="tbl" style="min-width:760px">
+                <table class="tbl" style="min-width:900px">
                     <thead>
                         <tr style="background:#001A4D">
-                            <th style="width:26%">Criterio (peso)</th>
+                            <th style="width:20%">Criterio (peso)</th>
                             <th>Estratégico (4,6–5,0)</th>
                             <th>Autónomo (4,0–4,5)</th>
-                            <th>Básico / Inicial</th>
+                            <th>Básico (3,0–3,9)</th>
+                            <th>Inicial (1,0–2,9)</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td><strong>1. Pipeline de datos y Data Augmentation (25 %)</strong></td>
+                            <td><strong>1. Pipeline + Augmentation (20 %)</strong></td>
                             <td>Pipelines optimizados en ambos <em>frameworks</em> (<span class="icode">tf.data</span> y <span class="icode">DataLoader</span>) con <em>prefetch</em>/<em>cache</em> y ≥4 aumentos justificados; comparativa de rendimiento documentada; código modular.</td>
-                            <td>Pipeline funcional con aumento básico y comparación de tiempos; código organizado y comentado.</td>
-                            <td><strong>Básico:</strong> pipeline sin optimizaciones o desordenado. <strong>Inicial:</strong> errores que impiden ejecutar o pipeline no funcional.</td>
+                            <td>Pipeline funcional en al menos un <em>framework</em> con <em>prefetch</em>/<em>cache</em> y aumento básico; compara tiempos; código organizado.</td>
+                            <td>Pipeline sin optimizaciones (sin <em>prefetch</em>/<em>cache</em>) o código desordenado/redundante.</td>
+                            <td>Errores que impiden la ejecución completa o pipeline no funcional.</td>
                         </tr>
                         <tr>
-                            <td><strong>2. Entrenamiento GPU y gestión de recursos (25 %)</strong></td>
-                            <td>Precisión mixta (FP16) con ahorro de VRAM y aceleración documentados; <em>checkpointing</em> robusto; resuelve CUDA OOM con evidencia; comparativa de tiempos y curvas claras.</td>
-                            <td>Entrena en GPU con al menos una optimización (FP16 o <em>checkpointing</em>); curvas de pérdida e interpretación del comportamiento.</td>
-                            <td><strong>Básico:</strong> GPU sin optimizaciones de memoria. <strong>Inicial:</strong> sin gráficas ni análisis (caja negra).</td>
+                            <td><strong>2. Entrenamiento GPU + gestión de recursos (20 %)</strong></td>
+                            <td>Precisión mixta (FP16/bfloat16) con ahorro de VRAM y aceleración documentados; <em>checkpointing</em> robusto; resuelve CUDA OOM con evidencia; comparativa de tiempos y curvas claras.</td>
+                            <td>Entrena en GPU con al menos una optimización (precisión mixta o <em>checkpointing</em>); curvas de pérdida e interpretación del comportamiento.</td>
+                            <td>Entrena en GPU sin optimizaciones de memoria; curvas con interpretación superficial.</td>
+                            <td>Sin gráficas de desempeño ni análisis del entrenamiento (caja negra total).</td>
                         </tr>
                         <tr>
-                            <td><strong>3. Exportación y ruta de despliegue (20 %)</strong></td>
-                            <td>Exporta en 3 formatos con verificación de consistencia; ruta de despliegue completa (API REST + LiteRT offline) con principios de Transparencia y Beneficio Social y mitigaciones de falsos positivos/negativos.</td>
-                            <td>Exporta en ≥2 formatos verificados; ruta de despliegue coherente con las herramientas correctas (TF Serving, ONNX Runtime, LiteRT).</td>
-                            <td><strong>Básico:</strong> un solo formato; despliegue genérico sin ruta concreta. <strong>Inicial:</strong> sin exportar o sin proponer despliegue.</td>
+                            <td><strong>3. Optimización Edge + exportación (20 %)</strong></td>
+                            <td>Técnica de compresión (cuantización/poda/destilación) con tabla antes/después de tamaño, latencia y precisión y discusión del <em>trade-off</em>; exporta en 3 formatos con verificación ONNX (<span class="icode">np.allclose</span>, <span class="icode">atol=1e-4</span>) por la ruta estable.</td>
+                            <td>Aplica una técnica de compresión con al menos dos métricas comparadas; exporta en ≥2 formatos verificados (incluida la verificación ONNX).</td>
+                            <td>Intenta la optimización Edge sin métricas claras; exporta en un solo formato o sin verificar consistencia.</td>
+                            <td>No optimiza para el borde y no exporta en ningún formato estándar, o la exportación falla.</td>
                         </tr>
                         <tr>
-                            <td><strong>4. Uso responsable de IA (15 %)</strong></td>
-                            <td>Bitácora con decisiones deliberadas (casos <em>Modificada/Rechazada</em> bien fundamentados); defiende cada decisión como propia; auditoría con un fallo no trivial corregido.</td>
+                            <td><strong>4. Ruta de despliegue + justificación de ingeniería (20 %)</strong></td>
+                            <td>Ruta completa (rama visual offline con LiteRT + rama temporal por API REST); <strong>justifica</strong> los <em>trade-offs</em> VRAM/batch/velocidad y la elección de <em>framework</em>/formato para este cliente offline; principios de Transparencia y Beneficio Social y mitigaciones de falsos positivos/negativos.</td>
+                            <td>Ruta coherente con las herramientas correctas (LiteRT, ONNX Runtime, API REST) y justificación de las decisiones principales, sin profundizar en todos los <em>trade-offs</em>.</td>
+                            <td>Despliegue genérico sin ruta concreta ni justificación de ingeniería, o sin considerar las restricciones del contexto.</td>
+                            <td>No propone ruta de despliegue ni justifica decisión alguna.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>5. Uso responsable de IA (10 %)</strong></td>
+                            <td>Bitácora con decisiones deliberadas (casos <em>Modificada/Rechazada</em> bien fundamentados); defiende cada decisión como propia; auditoría con un fallo no trivial corregido (p. ej. <span class="icode">dynamo=True</span> como única vía).</td>
                             <td>Bitácora completa y verificada; sustenta la mayoría de sus decisiones; la auditoría documenta y corrige un fallo real.</td>
-                            <td><strong>Básico:</strong> registro superficial, titubea. <strong>Inicial:</strong> bitácora ausente o señales de delegación ciega.</td>
+                            <td>Registro superficial de la IA; titubea al sustentar la autoría de algunas decisiones.</td>
+                            <td>Bitácora ausente o con señales de delegación ciega.</td>
                         </tr>
                         <tr>
-                            <td><strong>5. Comunicación (informe técnico) (15 %)</strong></td>
-                            <td>Informe riguroso con comparativa de pipelines, análisis de rendimiento GPU y ruta de despliegue; narrativa clara y citación APA correcta.</td>
+                            <td><strong>6. Comunicación (informe técnico) (10 %)</strong></td>
+                            <td>Informe riguroso con comparativa de pipelines, rendimiento GPU, tabla de optimización Edge y ruta de despliegue; narrativa clara y citación APA correcta.</td>
                             <td>Informe bien estructurado y comprensible, con las secciones completas y visualizaciones adecuadas.</td>
-                            <td><strong>Básico:</strong> estructura incompleta o poco clara. <strong>Inicial:</strong> informe desorganizado, sin referencias.</td>
+                            <td>Estructura incompleta o poco clara; faltan secciones o visualizaciones.</td>
+                            <td>Informe desorganizado, sin referencias.</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
             <div class="callout callout-danger mt-4">
-                <p class="text-sm"><i class="fas fa-circle-exclamation text-red-600 mr-2"></i><strong>Nivel Nulo (0,0):</strong> sin entrega del producto. En el Criterio 4 constituye además falta de integridad ocultar el uso de IA o presentar como propio material que no se comprende ni se puede defender.</p>
+                <p class="text-sm"><i class="fas fa-circle-exclamation text-red-600 mr-2"></i><strong>Nivel Nulo (0,0):</strong> sin entrega del producto. En el Criterio 5 (Uso de IA) constituye además falta de integridad ocultar el uso de IA o presentar como propio material que no se comprende ni se puede defender.</p>
             </div>
         </section>
 
@@ -648,7 +740,11 @@ torch.onnx.<span class="fn">export</span>(modelo, X, <span class="st">"centinela
         document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
         // Realce del enlace de navegación activo según la sección visible.
-        const secs = document.querySelectorAll('main section[id]');
+        // Se observan las secciones con id y, además, el paso "Edge" (un bloque dentro
+        // de #desarrollo con su propia ancla #edge) para que su enlace también se resalte.
+        const secs = [...document.querySelectorAll('main section[id]')];
+        const edgeBlock = document.getElementById('edge');
+        if (edgeBlock) secs.push(edgeBlock);
         const links = document.querySelectorAll('.navlink');
         const navIO = new IntersectionObserver((entries) => {
             entries.forEach(e => {
