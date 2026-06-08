@@ -218,7 +218,7 @@
             mcqAciertos:   { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
             videosVistos:  { seccion: false, profundizacion: false },
             guia1Pasos:    { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false },
-            act1Pasos:     { 1: false, 2: false, 3: false, 4: false, 5: false },
+            act1Pasos:     { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
             guia1Entregada:  false,
             act1Entregada:   false,
             resetAt: new Date().toISOString(),
@@ -263,7 +263,7 @@
             const g1 = Object.values(p.guia1Pasos).filter(Boolean).length;
             pct += (g1 / 6) * 10;
             const a1 = Object.values(p.act1Pasos).filter(Boolean).length;
-            pct += (a1 / 5) * 10;
+            pct += (a1 / 7) * 10;
             if (p.guia1Entregada) pct += 5;
             if (p.act1Entregada)  pct += 5;
             return Math.min(100, Math.round(pct));
@@ -935,27 +935,31 @@
             },
             act1: {
                 tipo: 'actividad',
-                titulo: 'Actividad 1: "El Guardián del Cafetal" — Diseño, Entrenamiento y Auditoría Ética de un MLP',
+                titulo: 'Proyecto Centinela · Fase 1 — Línea Base: MLP sobre Datos Tabulares para Alerta Temprana',
                 peso: 20,
                 horas: 40,
                 desglose: '4 h directo · 4 h indirecto · 32 h autónomo',
-                entregable: 'Notebook (.ipynb) + Informe técnico-ético en PDF (máx. 3 págs.) en un .zip o repositorio GitHub',
-                caso: 'Cooperativa cafetera le contrata como ingeniero de IA para clasificar hojas de café (Sana vs. Con Roya) usando datos espectrales del dataset RoCoLe.',
+                entregable: 'Notebook (.ipynb) + Informe técnico-ético en PDF (máx. 4 págs.) + Bitácora de IA + Propuesta de Datos, todo en un .zip (Apellido_Nombre_Centinela_Fase1.zip) o repositorio GitHub.',
+                caso: 'Usted es ingeniero de IA y construye la línea base de un sistema de alerta temprana "Centinela": un MLP sobre datos tabulares. Escenario guía: clasificar hoja de café (Sana vs. Enferma por roya) con la versión tabular del dataset RoCoLe (promedios RGB/IR), o un problema multimodal propio aprobado.',
                 pasos: [
-                    'Prepare el entorno: suba el CSV pre-procesado de RoCoLe a Google Colab e importe PyTorch, Pandas, Scikit-Learn y Matplotlib.',
-                    'Diseñe la arquitectura: defina una clase Python con ≥ 2 capas ocultas; justifique ReLU en ocultas y Sigmoid en salida.',
-                    'Configure el entrenamiento: elija Binary Cross-Entropy, optimizador (SGD o Adam) y learning rate inicial; escriba el training loop explícito (5 pasos).',
-                    'Entrene 50 épocas, grafique pérdida de entrenamiento vs. validación, induzca overfitting a propósito y luego corríjalo con Dropout o ajuste de LR.',
-                    'Auditoría ética: responda con base en el Marco Ético de IA Colombia qué sucedería con falsos positivos (gasto innecesario en fungicidas para el caficultor).',
+                    'Propuesta de Datos (compuerta): declare el problema y el cliente, las dos modalidades del sistema, las fuentes reales no provenientes de Kaggle y cuál modalidad se aplana a tabla en esta fase.',
+                    'Prepare el entorno y realice el EDA del conjunto tabular: revise clases, escalas, faltantes y la partición en train/val/test.',
+                    'Diseñe el MLP con ≥ 2 capas ocultas; la salida es un logit (nn.Linear(..., 1) sin sigmoide dentro del modelo) y justifique las funciones de activación.',
+                    'Configure el entrenamiento con BCEWithLogitsLoss (estable; evita la doble sigmoide), optimizador y learning rate; escriba el training loop explícito (zero_grad → forward → loss → backward → step).',
+                    'Entrene 50 épocas, grafique la pérdida de entrenamiento vs. validación, induzca overfitting a propósito y corríjalo con Dropout o ajuste de LR.',
+                    'Evalúe con matriz de confusión y métricas; analice falsos positivos/negativos (en alerta temprana los falsos negativos suelen ser los más costosos) y realice la auditoría ética con el Marco Ético de IA Colombia.',
+                    'Documente la Bitácora de IA (qué pidió, aceptó y rechazó) y la Auditoría a la IA (un fallo de la IA que detectó y corrigió); prepárese para la sustentación oral.',
                 ],
                 rubrica: [
-                    { criterio: 'Justificación arquitectónica (capas, activaciones)', peso: 20 },
-                    { criterio: 'Implementación del training loop', peso: 25 },
-                    { criterio: 'Análisis de curvas y diagnóstico de overfitting', peso: 20 },
-                    { criterio: 'Aplicación de regularización (Dropout / L2 / ajuste LR)', peso: 20 },
-                    { criterio: 'Auditoría ética con Marco Ético IA Colombia', peso: 15 },
+                    { criterio: 'Propuesta de datos y EDA', peso: 15 },
+                    { criterio: 'Diseño e implementación del MLP', peso: 30 },
+                    { criterio: 'Regularización y experimentación', peso: 15 },
+                    { criterio: 'Evaluación, errores y ética', peso: 15 },
+                    { criterio: 'Uso responsable de IA', peso: 15 },
+                    { criterio: 'Comunicación', peso: 10 },
                 ],
                 linkMd: 'modulos/modulo-1-fundamentos/actividades/actividad-1.md',
+                linkHtml: '11_Modulo_1_Actividad_Fase1_Centinela.html',
             },
         };
 
@@ -1072,7 +1076,7 @@
                     { fecha: '10/06', hora: '19:30 – 21:00', tipo: 'Encuentro 3', tipoColor: '#3D008D', titulo: 'Matemática del Error y Optimización', desc: 'Funciones de Costo (MSE, BCE), Descenso del Gradiente y Tasa de Aprendizaje.', link: TEAMS_URL, linkLabel: 'Teams Sincrónico' },
                     { fecha: '11/06', hora: '19:30 – 21:00', tipo: 'Encuentro 4', tipoColor: '#3D008D', titulo: 'Retropropagación (Backpropagation)', desc: 'Regla de la Cadena, Grafos Computacionales y Autograd en PyTorch.', link: TEAMS_URL, linkLabel: 'Teams Sincrónico' },
                     { fecha: 'Toda la semana', tipo: 'Asincrónico', tipoColor: '#FDB913', titulo: 'Videoconferencia asincrónica 2 — El Proceso de Entrenamiento', desc: 'Grabación sobre regularización, dropout, batch norm, evaluación y ética en salud.' },
-                    { fecha: '15/06', hora: '23:59', tipo: 'Entrega', tipoColor: '#BE185D', titulo: 'Momento 2: 1ra entrega', desc: 'Notebook + Informe técnico-ético de la Actividad 1 "El Guardián del Cafetal".', link: 'https://campus.usta.edu.co', linkLabel: 'Campus Virtual' },
+                    { fecha: '15/06', hora: '23:59', tipo: 'Entrega', tipoColor: '#BE185D', titulo: 'Momento 2: 1ra entrega', desc: 'Notebook + Informe técnico-ético de la Fase 1 del Proyecto Centinela.', link: 'https://campus.usta.edu.co', linkLabel: 'Campus Virtual' },
                 ],
             },
         };
@@ -1142,7 +1146,7 @@
                 { label: 'Video Sec.', done: progress.videosVistos.seccion },
                 { label: 'Video Prof.', done: progress.videosVistos.profundizacion },
                 { label: 'Guía 1', done: progress.guia1Entregada },
-                { label: 'Act 1', done: progress.act1Entregada },
+                { label: 'Fase 1', done: progress.act1Entregada },
             ];
             return (
                 <section id="inicio" className="grid lg:grid-cols-3 gap-5">
@@ -1174,7 +1178,7 @@
                     </div>
                     <div className="grid grid-cols-3 lg:grid-cols-1 gap-3">
                         <Stat value="48 h" label="Carga total" sub="5 directo · 5 indirecto · 38 autónomo" icon="fa-clock" color="primary" />
-                        <Stat value="25 %" label="Peso evaluativo" sub="Guía 1 (5%) + Actividad 1 (20%)" icon="fa-percent" color="secondary" />
+                        <Stat value="25 %" label="Peso evaluativo" sub="Guía 1 (5%) + Fase 1 (20%)" icon="fa-percent" color="secondary" />
                         <Stat value="5" label="Capítulos" sub="3 sincronías + 2 asincronías" icon="fa-book" color="gold" />
                     </div>
                 </section>
@@ -1219,7 +1223,7 @@
         );
 
         /* ============================================================
-           SECCIÓN 3 — HITOS EVALUATIVOS (Guía 1 + Actividad 1)
+           SECCIÓN 3 — HITOS EVALUATIVOS (Guía 1 + Fase 1 · Proyecto Centinela)
         ============================================================ */
         const HitoCard = ({ act, progress, onTogglePaso, onToggleEntregada, checklistKey }) => {
             const totalPasos = act.pasos.length;
@@ -1256,10 +1260,16 @@
                                 checked={!!progress[act.tipo === 'guia' ? 'guia1Entregada' : 'act1Entregada']}
                                 onChange={(e) => onToggleEntregada(e.target.checked)}
                                 className="w-4 h-4 accent-secondary cursor-pointer" />
-                            {act.tipo === 'guia' ? 'Marcar Guía 1 como entregada' : 'Marcar Actividad 1 como entregada'}
+                            {act.tipo === 'guia' ? 'Marcar Guía 1 como entregada' : 'Marcar la Fase 1 como entregada'}
                         </label>
+                        {act.linkHtml && (
+                            <a href={act.linkHtml}
+                                className="ml-auto inline-flex items-center gap-1.5 text-xs font-bold text-white usta-gradient px-3 py-1.5 rounded-full shadow-sm hover:shadow transition-shadow">
+                                <i className="fas fa-up-right-from-square"></i>Abrir la actividad
+                            </a>
+                        )}
                         <a href={`obsidian://open?vault=Deep%20learning%20course&file=${encodeURIComponent(act.linkMd)}`}
-                            className="ml-auto text-xs font-semibold text-primary hover:text-secondary transition-colors">
+                            className={`${act.linkHtml ? '' : 'ml-auto '}text-xs font-semibold text-primary hover:text-secondary transition-colors`}>
                             <i className="fas fa-file-lines mr-1"></i>Abrir ficha .md
                         </a>
                     </div>

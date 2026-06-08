@@ -1922,7 +1922,7 @@
                                     <p className="text-gray-700 mt-2 leading-relaxed max-w-md mx-auto">
                                         Ha completado las 5 cápsulas del microlearning y ha respondido correctamente
                                         todas las preguntas de autoevaluación. Tiene una base sólida para enfrentar
-                                        las actividades del Módulo 1.
+                                        el <strong>Proyecto Centinela · Fase 1</strong>, la actividad evaluable del Módulo 1.
                                     </p>
                                 </div>
                             ) : (
@@ -1933,7 +1933,8 @@
                                     <h2 className="text-2xl md:text-3xl font-extrabold text-navy mt-4">Progreso: {pct}%</h2>
                                     <p className="text-gray-700 mt-2 leading-relaxed max-w-md mx-auto">
                                         Ha llegado al final del recorrido. Le recomendamos volver a las cápsulas
-                                        pendientes para reforzar los conceptos antes de la Actividad 1.
+                                        pendientes para reforzar los conceptos antes de la <strong>Fase 1</strong> del
+                                        <strong>Proyecto Centinela</strong>.
                                     </p>
                                 </div>
                             )}
@@ -1962,8 +1963,12 @@
                                 })}
                             </div>
                             <div className="flex flex-wrap items-center justify-center gap-3">
-                                <button onClick={onAgain}
+                                <a href="11_Modulo_1_Actividad_Fase1_Centinela.html"
                                     className="text-sm font-bold px-6 py-2.5 rounded-full text-white usta-gradient hover:opacity-90 transition-all shadow-lg hover:shadow-xl">
+                                    <i className="fas fa-laptop-code mr-1"></i>Ir a la actividad
+                                </a>
+                                <button onClick={onAgain}
+                                    className="text-sm font-bold px-6 py-2.5 rounded-full border-2 border-primary text-primary hover:bg-primary/5 transition-all">
                                     <i className="fas fa-rotate-left mr-1"></i>Repetir microlearning
                                 </button>
                                 <a href="00_ruta-aprendizaje-modulo-1.html"
