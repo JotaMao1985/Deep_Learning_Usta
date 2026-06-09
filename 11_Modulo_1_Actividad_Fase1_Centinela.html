@@ -222,6 +222,7 @@
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#ia"><i class="fas fa-robot mr-1"></i>Uso de IA</a>
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#entrega"><i class="fas fa-box-open mr-1"></i>Entrega</a>
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#rubrica"><i class="fas fa-table-list mr-1"></i>Rúbrica</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#autoevaluacion"><i class="fas fa-calculator mr-1"></i>Autoevaluación</a>
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#recursos"><i class="fas fa-book mr-1"></i>Recursos</a>
         </div>
     </nav>
@@ -680,12 +681,117 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                     <p class="text-sm text-slate-600 mt-3"><strong>Modalidad:</strong> individual. <strong>Peso:</strong> 20 % del curso (Fase 1; primera de las tres fases del proyecto).</p>
                 </div>
             </div>
+
+            <!-- ✅ Antes de entregar — checklist explícito y sin ambigüedad -->
+            <div class="card p-6 mt-6 border-l-4" style="border-color:#0E9F6E">
+                <h3 class="font-bold text-primary mb-1 text-lg"><i class="fas fa-clipboard-check text-emerald-600 mr-2"></i>✅ Antes de entregar</h3>
+                <p class="text-sm text-slate-600 mb-4">Revisa que tu envío cumpla <strong>todos</strong> estos puntos. Sin todos los entregables la actividad puede quedar incompleta (Nivel Nulo = sin entrega).</p>
+                <ul class="space-y-3 text-sm text-slate-700">
+                    <li class="flex gap-3">
+                        <i class="fas fa-square-check text-emerald-500 mt-0.5"></i>
+                        <span><strong>Notebook (.ipynb)</strong> que incluye, de forma visible: la <strong>clase del MLP</strong>, el <strong>bucle de entrenamiento explícito</strong>, las <strong>curvas de pérdida</strong> (entrenamiento vs. validación) y la <strong>matriz de confusión</strong>.</span>
+                    </li>
+                    <li class="flex gap-3">
+                        <i class="fas fa-square-check text-emerald-500 mt-0.5"></i>
+                        <span><strong>Informe técnico-ético</strong> en <strong>PDF</strong> (máx. 4 páginas).</span>
+                    </li>
+                    <li class="flex gap-3">
+                        <i class="fas fa-square-check text-emerald-500 mt-0.5"></i>
+                        <span><strong>Bitácora de IA</strong> diligenciada (Aceptada / Modificada / Rechazada, con su motivo).</span>
+                    </li>
+                    <li class="flex gap-3">
+                        <i class="fas fa-square-check text-emerald-500 mt-0.5"></i>
+                        <span><strong>Propuesta de Datos</strong> aprobada por el docente.</span>
+                    </li>
+                    <li class="flex gap-3">
+                        <i class="fas fa-square-check text-emerald-500 mt-0.5"></i>
+                        <span><strong>Empaque en un único archivo:</strong> <span class="icode">Apellido_Nombre_Centinela_Fase1.zip</span> (o enlace a un <strong>repositorio GitHub</strong>).</span>
+                    </li>
+                </ul>
+                <div class="callout callout-warn mt-4">
+                    <p class="text-sm"><i class="fas fa-circle-info text-amber-500 mr-2"></i><strong>Recordatorio:</strong> la <strong>sustentación oral</strong> se agenda aparte (no va dentro del .zip). El <strong>Nivel Nulo (0,0)</strong> corresponde a la <strong>ausencia de entrega</strong> del producto.</p>
+                </div>
+            </div>
         </section>
 
         <!-- ====================== RÚBRICA ====================== -->
         <section id="rubrica" class="reveal">
             <h2 class="sec-title text-2xl md:text-3xl text-navy mb-3"><i class="fas fa-table-list text-secondary mr-2"></i>Rúbrica de evaluación</h2>
             <p class="text-slate-600 mb-5 max-w-3xl">Niveles de desempeño: <strong>Estratégico</strong> (4,6–5,0) · <strong>Autónomo</strong> (4,0–4,5) · <strong>Básico</strong> (3,0–3,9) · <strong>Inicial</strong> (1,0–2,9) · <strong>Nulo</strong> — sin entrega (0,0). Los pesos suman 100 %.</p>
+
+            <!-- Resumen claro por criterio -->
+            <div class="card p-6 mb-6">
+                <h3 class="font-bold text-primary text-lg mb-1"><i class="fas fa-list-check text-secondary mr-2"></i>Resumen claro por criterio</h3>
+                <p class="text-sm text-slate-600 mb-4">En una mirada: qué se espera de cada criterio y la evidencia mínima para <strong>aprobar</strong> (nivel Básico). El detalle por nivel está en la tabla de abajo.</p>
+
+                <!-- Leyenda de bandas -->
+                <div class="flex flex-wrap items-center gap-2 mb-5 text-xs">
+                    <span class="font-semibold text-slate-500 mr-1">Bandas:</span>
+                    <span class="rounded-full px-3 py-1 font-semibold" style="background:#F3E8FF;color:#3D008D">Estratégico 4,6–5,0</span>
+                    <span class="rounded-full px-3 py-1 font-semibold" style="background:#E0F2FE;color:#0E7490">Autónomo 4,0–4,5</span>
+                    <span class="rounded-full px-3 py-1 font-semibold" style="background:#DCFCE7;color:#15803D">Básico 3,0–3,9</span>
+                    <span class="rounded-full px-3 py-1 font-semibold" style="background:#FEF3C7;color:#B45309">Inicial 1,0–2,9</span>
+                    <span class="rounded-full px-3 py-1 font-semibold" style="background:#FEE2E2;color:#B91C1C">Nulo 0,0</span>
+                    <span class="rounded-full px-3 py-1 font-bold text-white" style="background:#0E9F6E"><i class="fas fa-check mr-1"></i>Aprueba con ≥ 3,0</span>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <!-- C1 -->
+                    <div class="border border-slate-200 rounded-xl p-4">
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <span class="font-bold text-navy text-sm">1. Propuesta de datos y EDA</span>
+                            <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">15 %</span>
+                        </div>
+                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> un problema y un cliente claros, fuentes reales no-Kaggle con licencia, y un EDA que justifique tu partición y tu preprocesamiento.</p>
+                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> propuesta con modalidad aplanada y fuente, una gráfica de clases y una partición train/val/test (aunque no esté del todo justificada).</p>
+                    </div>
+                    <!-- C2 -->
+                    <div class="border border-slate-200 rounded-xl p-4">
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <span class="font-bold text-navy text-sm">2. Diseño e implementación del MLP</span>
+                            <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">30 %</span>
+                        </div>
+                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> un MLP con ≥2 capas ocultas y un bucle de entrenamiento explícito que ejecuta y converge, con la pérdida y la activación coherentes.</p>
+                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> la red entrena con un defecto menor (sin semilla fija, sin comentarios o un ajuste manual de la etiqueta al ejecutar).</p>
+                    </div>
+                    <!-- C3 -->
+                    <div class="border border-slate-200 rounded-xl p-4">
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <span class="font-bold text-navy text-sm">3. Regularización y experimentación</span>
+                            <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">15 %</span>
+                        </div>
+                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> curvas train vs. val. que evidencien el sobreajuste y su corrección con Dropout/LR, bien interpretadas.</p>
+                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> presentas las curvas, pero describes el sobreajuste sin señalar dónde la validación deja de bajar.</p>
+                    </div>
+                    <!-- C4 -->
+                    <div class="border border-slate-200 rounded-xl p-4">
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <span class="font-bold text-navy text-sm">4. Evaluación, errores y ética</span>
+                            <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">15 %</span>
+                        </div>
+                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> matriz de confusión y métricas (precisión/recall/F1) interpretadas, con una reflexión ética ligada al costo de FN/FP para el cliente.</p>
+                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> reportas solo la exactitud global y mencionas la ética sin ligarla a FN/FP ni a una decisión.</p>
+                    </div>
+                    <!-- C5 -->
+                    <div class="border border-slate-200 rounded-xl p-4">
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <span class="font-bold text-navy text-sm">5. Uso responsable de IA</span>
+                            <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">15 %</span>
+                        </div>
+                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> bitácora completa y verificable (Aceptada/Modificada/Rechazada con motivo), saber explicar tus decisiones y una auditoría que corrige un fallo real de la IA.</p>
+                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> la bitácora lista prompts sin el motivo, titubeas al explicar una decisión y la auditoría describe un fallo genérico.</p>
+                    </div>
+                    <!-- C6 -->
+                    <div class="border border-slate-200 rounded-xl p-4">
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <span class="font-bold text-navy text-sm">6. Comunicación y storytelling</span>
+                            <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">10 %</span>
+                        </div>
+                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> un informe (≤4 págs.) estructurado y comprensible para audiencia no técnica, con visualizaciones legibles y referencias citadas.</p>
+                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> informe con algunas secciones faltantes o gráficas sin rótulos ni leyenda.</p>
+                    </div>
+                </div>
+            </div>
 
             <div class="overflow-x-auto card p-1">
                 <table class="tbl" style="min-width:960px">
@@ -746,6 +852,51 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
             </div>
             <div class="callout callout-danger mt-4">
                 <p class="text-sm"><i class="fas fa-circle-exclamation text-red-600 mr-2"></i><strong>Nivel Nulo (0,0):</strong> sin entrega del producto. En el Criterio 5 constituye además falta de integridad ocultar el uso de IA o presentar como propio material que no se comprende ni se puede defender.</p>
+            </div>
+        </section>
+
+        <!-- ====================== AUTOEVALUACIÓN ====================== -->
+        <section id="autoevaluacion" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-3"><i class="fas fa-calculator text-secondary mr-2"></i>Calculadora de autoevaluación</h2>
+            <p class="text-slate-600 mb-4 max-w-3xl">Selecciona, con honestidad, el nivel que mejor describe tu entregable en cada criterio. La nota estimada se calcula <strong>en vivo</strong> con los pesos de la rúbrica oficial. Úsala para detectar qué mejorar antes de entregar.</p>
+
+            <div class="callout callout-warn mb-6">
+                <p class="text-sm"><i class="fas fa-circle-info text-amber-500 mr-2"></i><strong>Herramienta orientativa.</strong> Esta autoevaluación se basa en la rúbrica oficial, pero <strong>la calificación definitiva la asigna el docente</strong>; no reemplaza la sustentación ni la revisión del entregable.</p>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-6 items-start">
+                <!-- Criterios -->
+                <div class="lg:col-span-2 space-y-4" id="ae-criterios"><!-- generado por JS --></div>
+
+                <!-- Panel de resultado (sticky en escritorio) -->
+                <div class="lg:sticky lg:top-20 space-y-4">
+                    <div class="card p-6 text-center">
+                        <p class="text-xs uppercase tracking-wider text-slate-400 font-bold mb-1">Nota estimada</p>
+                        <div class="flex items-end justify-center gap-1">
+                            <span id="ae-nota" class="text-6xl font-extrabold usta-gradient-text leading-none">0,0</span>
+                            <span class="text-2xl font-bold text-slate-400 mb-1">/5,0</span>
+                        </div>
+                        <div class="mt-3 flex flex-col items-center gap-2">
+                            <span id="ae-banda" class="rounded-full px-4 py-1 text-sm font-bold">—</span>
+                            <span id="ae-estado" class="text-sm font-semibold" role="status" aria-live="polite">Selecciona un nivel en cada criterio</span>
+                        </div>
+                        <button id="ae-reset" type="button" class="mt-5 w-full rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+                            <i class="fas fa-rotate-left mr-1.5"></i>Reiniciar
+                        </button>
+                    </div>
+
+                    <!-- Checklist de entregables -->
+                    <div class="card p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-bold text-primary text-sm"><i class="fas fa-clipboard-check text-emerald-600 mr-1.5"></i>Entregables</h3>
+                            <span id="ae-check-count" class="text-xs font-bold text-slate-500">0/5 listos</span>
+                        </div>
+                        <div id="ae-checklist" class="space-y-2.5 text-sm text-slate-700"><!-- generado por JS --></div>
+                        <p id="ae-check-warn" class="callout callout-warn text-xs mt-3 mb-0">
+                            <i class="fas fa-triangle-exclamation text-amber-500 mr-1.5"></i>Sin todos los entregables la actividad puede quedar incompleta (Nivel Nulo = sin entrega).
+                        </p>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -840,6 +991,238 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                 });
             });
         });
+
+        /* ====================== CALCULADORA DE AUTOEVALUACIÓN ======================
+           SPEC: escala 0,0–5,0 (coma decimal); aprueba con ≥ 3,0.
+           notaEstimada = Σ(nota_nivel_i × peso_i) / 100, redondeada a 1 decimal. */
+        (function () {
+            // Niveles: etiqueta · nota representativa (punto medio de la banda)
+            var NIVELES = [
+                { id: 'estrategico', etq: 'Estratégico', rango: '4,6–5,0', nota: 4.8 },
+                { id: 'autonomo',    etq: 'Autónomo',    rango: '4,0–4,5', nota: 4.25 },
+                { id: 'basico',      etq: 'Básico',      rango: '3,0–3,9', nota: 3.45 },
+                { id: 'inicial',     etq: 'Inicial',     rango: '1,0–2,9', nota: 1.95 },
+                { id: 'nulo',        etq: 'Nulo (sin entrega)', rango: '0,0', nota: 0 }
+            ];
+
+            // Descriptores VERBATIM por criterio (índice = posición del nivel; Nulo = "Sin entrega del producto.")
+            var SIN_ENTREGA = 'Sin entrega del producto.';
+            var CRITERIOS = [
+                {
+                    nombre: 'Propuesta de datos y EDA', peso: 15,
+                    desc: [
+                        'Declara problema, cliente y las dos modalidades, e indica cuál se aplana a tabla; fuentes no-Kaggle con enlace y licencia; el EDA reporta clases, escalas y faltantes, y cada hallazgo decide la partición o el preprocesamiento.',
+                        'Propuesta aprobada con fuentes válidas y modalidad aplanada declarada; el EDA incluye gráficas de distribución y una partición train/val/test justificada.',
+                        'La propuesta omite la modalidad que se aplana o la licencia; el EDA muestra solo una gráfica de clases y la partición no se justifica.',
+                        'Usa una fuente de Kaggle o un reto ya resuelto, o no hay EDA, o mezcla datos de prueba en el ajuste (fuga).',
+                        SIN_ENTREGA
+                    ]
+                },
+                {
+                    nombre: 'Diseño e implementación del MLP', peso: 30,
+                    desc: [
+                        'MLP con ≥2 capas ocultas y activaciones justificadas; la salida es un logit (nn.Linear(8,1), sin sigmoide en el forward) con BCEWithLogitsLoss; etiqueta y.float().view(-1,1); semilla fija y el notebook corre de principio a fin sin editar.',
+                        'El bucle de entrenamiento explícito ejecuta y converge; la combinación pérdida-activación es coherente (logit + BCEWithLogitsLoss o sigmoide + BCELoss); el código está comentado por secciones.',
+                        'La red entrena pero con un defecto menor: sin semilla fija, código sin comentar o forma de la etiqueta corregida a mano al ejecutar.',
+                        'El notebook no ejecuta, falta zero_grad, hay doble sigmoide o las dimensiones no concuerdan.',
+                        SIN_ENTREGA
+                    ]
+                },
+                {
+                    nombre: 'Regularización y experimentación', peso: 15,
+                    desc: [
+                        'Muestra dos curvas (sin y con regularización) donde la validación cruza al alza y luego se estabiliza con Dropout/LR, y nombra la época del punto óptimo.',
+                        'Las curvas train vs. val. evidencian el sobreajuste y su corrección, con una interpretación correcta del cruce.',
+                        'Presenta las curvas pero describe el sobreajuste sin señalar dónde la validación deja de bajar.',
+                        'Una sola curva, o curvas sin sobreajuste visible, o gráficas sin texto que las interprete.',
+                        SIN_ENTREGA
+                    ]
+                },
+                {
+                    nombre: 'Evaluación, errores y ética', peso: 15,
+                    desc: [
+                        'Reporta matriz de confusión y precisión/recall/F1 por clase, convirtiendo el logit con torch.sigmoid en evaluación; argumenta qué error (FN o FP) priorizar por su costo para el cliente, citando el Marco Ético.',
+                        'Incluye matriz de confusión y las métricas principales interpretadas, con una reflexión ética pertinente al cliente.',
+                        'Reporta solo la exactitud global y menciona la ética sin ligarla a FN/FP ni a una decisión.',
+                        'Evalúa en el training set, o no hay matriz de confusión, o la ética está ausente.',
+                        SIN_ENTREGA
+                    ]
+                },
+                {
+                    nombre: 'Uso responsable de IA', peso: 15,
+                    desc: [
+                        'La bitácora registra casos Aceptada/Modificada/Rechazada con su motivo; en la sustentación responde sin notas por qué tomó cada decisión; la auditoría reproduce un fallo concreto de la IA y muestra la corrección.',
+                        'Bitácora completa y verificable; explica la mayoría de sus decisiones en la sustentación; la auditoría documenta y corrige un fallo real.',
+                        'La bitácora solo lista prompts sin el motivo de aceptar o rechazar; titubea al explicar una decisión; la auditoría describe un fallo genérico.',
+                        'No hay bitácora o se redactó después; no puede explicar una parte sustancial de su propio código (delegación ciega).',
+                        SIN_ENTREGA
+                    ]
+                },
+                {
+                    nombre: 'Comunicación y storytelling', peso: 10,
+                    desc: [
+                        'El informe (≤4 págs.) explica el resultado a una audiencia no técnica con un hilo problema→modelo→error→decisión, gráficas rotuladas y citas APA completas.',
+                        'Informe estructurado y comprensible, con visualizaciones legibles y referencias citadas.',
+                        'Informe con secciones faltantes o gráficas sin rótulos ni leyenda.',
+                        'Informe sin estructura, sin referencias o con afirmaciones sin respaldo en los resultados.',
+                        SIN_ENTREGA
+                    ]
+                }
+            ];
+
+            var ENTREGABLES = [
+                'Notebook (.ipynb): clase del MLP, bucle de entrenamiento explícito, curvas de pérdida y matriz de confusión.',
+                'Informe técnico-ético en PDF (máx. 4 páginas).',
+                'Bitácora de IA diligenciada.',
+                'Propuesta de Datos aprobada.',
+                'Empaque único: Apellido_Nombre_Centinela_Fase1.zip (o enlace a repositorio GitHub).'
+            ];
+
+            var cont = document.getElementById('ae-criterios');
+            if (!cont) return; // sección ausente: no hacer nada
+
+            // Estado: índice de nivel elegido por criterio (-1 = sin elegir)
+            var seleccion = CRITERIOS.map(function () { return -1; });
+
+            function fmt(n) { return n.toFixed(1).replace('.', ','); } // 4.8 -> "4,8"
+
+            // Estilos de banda por id de banda
+            var BANDAS = {
+                estrategico: { bg: '#F3E8FF', fg: '#3D008D' },
+                autonomo:    { bg: '#E0F2FE', fg: '#0E7490' },
+                basico:      { bg: '#DCFCE7', fg: '#15803D' },
+                inicial:     { bg: '#FEF3C7', fg: '#B45309' },
+                nulo:        { bg: '#FEE2E2', fg: '#B91C1C' }
+            };
+            function bandaDe(nota) {
+                if (nota >= 4.6) return { id: 'estrategico', etq: 'Estratégico' };
+                if (nota >= 4.0) return { id: 'autonomo', etq: 'Autónomo' };
+                if (nota >= 3.0) return { id: 'basico', etq: 'Básico' };
+                if (nota >= 1.0) return { id: 'inicial', etq: 'Inicial' };
+                return { id: 'nulo', etq: 'Nulo' };
+            }
+
+            // Construcción de los criterios
+            CRITERIOS.forEach(function (c, i) {
+                var card = document.createElement('div');
+                card.className = 'card p-5';
+                var selId = 'ae-sel-' + i;
+                var opciones = NIVELES.map(function (n, j) {
+                    return '<option value="' + j + '">' + n.etq + ' · ' + n.rango + '</option>';
+                }).join('');
+                card.innerHTML =
+                    '<div class="flex items-start justify-between gap-3 mb-2">' +
+                        '<label for="' + selId + '" class="font-bold text-navy text-sm">' + (i + 1) + '. ' + c.nombre + '</label>' +
+                        '<span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">' + c.peso + ' %</span>' +
+                    '</div>' +
+                    '<select id="' + selId + '" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary" aria-describedby="ae-desc-' + i + '">' +
+                        '<option value="-1" selected>— Elige un nivel —</option>' + opciones +
+                    '</select>' +
+                    '<p id="ae-desc-' + i + '" class="text-sm text-slate-600 mt-3 leading-relaxed" aria-live="polite"></p>' +
+                    '<p id="ae-feed-' + i + '" class="text-sm mt-2 leading-relaxed font-medium"></p>';
+                cont.appendChild(card);
+
+                card.querySelector('#' + selId).addEventListener('change', function (ev) {
+                    seleccion[i] = parseInt(ev.target.value, 10);
+                    pintarCriterio(i);
+                    recalcular();
+                });
+            });
+
+            function pintarCriterio(i) {
+                var desc = document.getElementById('ae-desc-' + i);
+                var feed = document.getElementById('ae-feed-' + i);
+                var idx = seleccion[i];
+                if (idx < 0) { desc.textContent = ''; feed.textContent = ''; return; }
+                desc.innerHTML = '<i class="fas fa-quote-left text-slate-300 mr-1.5"></i>' + CRITERIOS[i].desc[idx];
+                // Retroalimentación: subir al nivel inmediatamente superior (índice menor)
+                if (idx === 0) {
+                    feed.style.color = '#0E9F6E';
+                    feed.innerHTML = '✓ Nivel máximo alcanzado';
+                } else {
+                    var sig = NIVELES[idx - 1];
+                    feed.style.color = '#3D008D';
+                    feed.innerHTML = '▲ Para subir a ' + sig.etq + ': ' + CRITERIOS[i].desc[idx - 1];
+                }
+            }
+
+            function recalcular() {
+                var elegidos = seleccion.filter(function (s) { return s >= 0; }).length;
+                var notaEl = document.getElementById('ae-nota');
+                var bandaEl = document.getElementById('ae-banda');
+                var estadoEl = document.getElementById('ae-estado');
+
+                if (elegidos === 0) {
+                    notaEl.textContent = '0,0';
+                    bandaEl.textContent = '—';
+                    bandaEl.style.background = '#F1F5F9';
+                    bandaEl.style.color = '#64748B';
+                    estadoEl.textContent = 'Selecciona un nivel en cada criterio';
+                    estadoEl.style.color = '#64748B';
+                    return;
+                }
+
+                var suma = 0;
+                CRITERIOS.forEach(function (c, i) {
+                    var idx = seleccion[i];
+                    if (idx >= 0) suma += NIVELES[idx].nota * c.peso;
+                });
+                var nota = Math.round((suma / 100) * 10) / 10; // 1 decimal
+
+                notaEl.textContent = fmt(nota);
+                var b = bandaDe(nota);
+                bandaEl.textContent = b.etq;
+                bandaEl.style.background = BANDAS[b.id].bg;
+                bandaEl.style.color = BANDAS[b.id].fg;
+
+                if (nota >= 3.0) {
+                    estadoEl.innerHTML = '<i class="fas fa-circle-check mr-1.5"></i>Aprobado (estimado)';
+                    estadoEl.style.color = '#0E9F6E';
+                } else {
+                    estadoEl.innerHTML = '<i class="fas fa-circle-exclamation mr-1.5"></i>Aún no aprueba';
+                    estadoEl.style.color = '#DC2626';
+                }
+
+                if (elegidos < CRITERIOS.length) {
+                    estadoEl.innerHTML += ' <span style="color:#94A3B8;font-weight:500">(' + elegidos + '/' + CRITERIOS.length + ' criterios)</span>';
+                }
+            }
+
+            // Checklist de entregables
+            var lista = document.getElementById('ae-checklist');
+            ENTREGABLES.forEach(function (txt, i) {
+                var row = document.createElement('label');
+                row.className = 'flex gap-2.5 items-start cursor-pointer';
+                row.setAttribute('for', 'ae-chk-' + i);
+                row.innerHTML =
+                    '<input type="checkbox" id="ae-chk-' + i + '" class="mt-0.5 accent-emerald-600 w-4 h-4 flex-shrink-0">' +
+                    '<span>' + txt + '</span>';
+                lista.appendChild(row);
+                row.querySelector('input').addEventListener('change', actualizarCheck);
+            });
+            function actualizarCheck() {
+                var total = ENTREGABLES.length;
+                var hechos = lista.querySelectorAll('input[type="checkbox"]:checked').length;
+                var counter = document.getElementById('ae-check-count');
+                counter.textContent = hechos + '/' + total + ' listos';
+                counter.style.color = (hechos === total) ? '#0E9F6E' : '#64748B';
+                document.getElementById('ae-check-warn').style.display = (hechos === total) ? 'none' : '';
+            }
+
+            // Reiniciar
+            document.getElementById('ae-reset').addEventListener('click', function () {
+                seleccion = CRITERIOS.map(function () { return -1; });
+                cont.querySelectorAll('select').forEach(function (s) { s.value = '-1'; });
+                CRITERIOS.forEach(function (_, i) { pintarCriterio(i); });
+                lista.querySelectorAll('input[type="checkbox"]').forEach(function (c) { c.checked = false; });
+                actualizarCheck();
+                recalcular();
+            });
+
+            // Estado inicial
+            recalcular();
+            actualizarCheck();
+        })();
     </script>
 
 </body>

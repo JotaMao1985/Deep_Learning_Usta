@@ -941,6 +941,16 @@
                 horas: 40,
                 desglose: '4 h directo · 4 h indirecto · 32 h autónomo',
                 entregable: 'Notebook (.ipynb) + Informe técnico-ético en PDF (máx. 4 págs.) + Bitácora de IA + Propuesta de Datos, todo en un .zip (Apellido_Nombre_Centinela_Fase1.zip) o repositorio GitHub.',
+                /* Checklist de entrega cristalino (solo Fase 1) — sin ambigüedad para el estudiante */
+                entregables: [
+                    { titulo: 'Notebook (.ipynb)', detalle: 'Clase MLP + bucle de entrenamiento explícito + curvas de pérdida (train vs. val) + matriz de confusión. Debe correr de principio a fin sin editar.' },
+                    { titulo: 'Informe técnico-ético (PDF)', detalle: 'Máximo 4 páginas, con citas APA y la auditoría ética ligada a falsos positivos/negativos.' },
+                    { titulo: 'Bitácora de IA', detalle: 'Registro de qué se pidió a la IA y qué se Aceptó / Modificó / Rechazó, con el motivo.' },
+                    { titulo: 'Propuesta de Datos aprobada', detalle: 'Problema, cliente, dos modalidades, fuentes reales no-Kaggle con licencia y la modalidad que se aplana a tabla.' },
+                    { titulo: 'Empaque final', detalle: 'Apellido_Nombre_Centinela_Fase1.zip o un repositorio GitHub con todo lo anterior.' },
+                ],
+                /* Nota de entrega (solo Fase 1) */
+                entregaNota: 'La sustentación oral se evalúa aparte. Nivel Nulo = sin entrega del producto.',
                 caso: 'Usted es ingeniero de IA y construye la línea base de un sistema de alerta temprana "Centinela": un MLP sobre datos tabulares. Escenario guía: clasificar hoja de café (Sana vs. Enferma por roya) con la versión tabular del dataset RoCoLe (promedios RGB/IR), o un problema multimodal propio aprobado.',
                 pasos: [
                     'Propuesta de Datos (compuerta): declare el problema y el cliente, las dos modalidades del sistema, las fuentes reales no provenientes de Kaggle y cuál modalidad se aplana a tabla en esta fase.',
@@ -952,16 +962,276 @@
                     'Documente la Bitácora de IA (qué pidió, aceptó y rechazó) y la Auditoría a la IA (un fallo de la IA que detectó y corrigió); prepárese para la sustentación oral.',
                 ],
                 rubrica: [
-                    { criterio: 'Propuesta de datos y EDA', peso: 15 },
-                    { criterio: 'Diseño e implementación del MLP', peso: 30 },
-                    { criterio: 'Regularización y experimentación', peso: 15 },
-                    { criterio: 'Evaluación, errores y ética', peso: 15 },
-                    { criterio: 'Uso responsable de IA', peso: 15 },
-                    { criterio: 'Comunicación', peso: 10 },
+                    { criterio: 'Propuesta de datos y EDA', peso: 15, espera: 'Propuesta aprobada con fuentes no-Kaggle y modalidad aplanada declarada; EDA con clases, escalas, faltantes y partición train/val/test justificada.' },
+                    { criterio: 'Diseño e implementación del MLP', peso: 30, espera: 'MLP con ≥ 2 capas ocultas, salida en logit con BCEWithLogitsLoss, semilla fija y bucle de entrenamiento explícito que corre de principio a fin.' },
+                    { criterio: 'Regularización y experimentación', peso: 15, espera: 'Dos curvas (sin y con regularización) que evidencian el sobreajuste y su corrección con Dropout/LR, con la época del punto óptimo.' },
+                    { criterio: 'Evaluación, errores y ética', peso: 15, espera: 'Matriz de confusión y precisión/recall/F1 por clase; argumenta qué error (FN o FP) priorizar citando el Marco Ético.' },
+                    { criterio: 'Uso responsable de IA', peso: 15, espera: 'Bitácora con casos Aceptada/Modificada/Rechazada y su motivo; explica sus decisiones en la sustentación; auditoría de un fallo real de la IA.' },
+                    { criterio: 'Comunicación y storytelling', peso: 10, espera: 'Informe (≤ 4 págs.) para audiencia no técnica con hilo problema→modelo→error→decisión, gráficas rotuladas y citas APA.' },
                 ],
                 linkMd: 'modulos/modulo-1-fundamentos/actividades/actividad-1.md',
                 linkHtml: '11_Modulo_1_Actividad_Fase1_Centinela.html',
             },
+        };
+
+        /* ============================================================
+           RÚBRICA OFICIAL · CENTINELA FASE 1 (datos para el calificador)
+           - Bandas en escala colombiana 0,0–5,0 (coma decimal). Aprueba ≥ 3,0.
+           - 6 criterios con peso; 5 niveles con rango y "nota" = punto medio.
+           - Descriptores VERBATIM del documento hermano 11_.
+        ============================================================ */
+        const FASE1_BANDAS = [
+            { id: 'estrategico', etiqueta: 'Estratégico', rango: '4,6–5,0', nota: 4.8,  color: '#15803D', bg: '#F0FDF4' },
+            { id: 'autonomo',    etiqueta: 'Autónomo',    rango: '4,0–4,5', nota: 4.25, color: '#3D008D', bg: '#F5F0FA' },
+            { id: 'basico',      etiqueta: 'Básico',      rango: '3,0–3,9', nota: 3.45, color: '#B45309', bg: '#FFFBEB' },
+            { id: 'inicial',     etiqueta: 'Inicial',     rango: '1,0–2,9', nota: 1.95, color: '#BE185D', bg: '#FCE7F1' },
+            { id: 'nulo',        etiqueta: 'Nulo (sin entrega)', rango: '0,0', nota: 0, color: '#64748B', bg: '#F1F5F9' },
+        ];
+
+        const FASE1_CRITERIOS = [
+            {
+                id: 'c1', nombre: 'Propuesta de datos y EDA', peso: 15,
+                desc: {
+                    estrategico: 'Declara problema, cliente y las dos modalidades, e indica cuál se aplana a tabla; fuentes no-Kaggle con enlace y licencia; el EDA reporta clases, escalas y faltantes, y cada hallazgo decide la partición o el preprocesamiento.',
+                    autonomo:    'Propuesta aprobada con fuentes válidas y modalidad aplanada declarada; el EDA incluye gráficas de distribución y una partición train/val/test justificada.',
+                    basico:      'La propuesta omite la modalidad que se aplana o la licencia; el EDA muestra solo una gráfica de clases y la partición no se justifica.',
+                    inicial:     'Usa una fuente de Kaggle o un reto ya resuelto, o no hay EDA, o mezcla datos de prueba en el ajuste (fuga).',
+                    nulo:        'Sin entrega del producto.',
+                },
+            },
+            {
+                id: 'c2', nombre: 'Diseño e implementación del MLP', peso: 30,
+                desc: {
+                    estrategico: 'MLP con ≥2 capas ocultas y activaciones justificadas; la salida es un logit (nn.Linear(8,1), sin sigmoide en el forward) con BCEWithLogitsLoss; etiqueta y.float().view(-1,1); semilla fija y el notebook corre de principio a fin sin editar.',
+                    autonomo:    'El bucle de entrenamiento explícito ejecuta y converge; la combinación pérdida-activación es coherente (logit + BCEWithLogitsLoss o sigmoide + BCELoss); el código está comentado por secciones.',
+                    basico:      'La red entrena pero con un defecto menor: sin semilla fija, código sin comentar o forma de la etiqueta corregida a mano al ejecutar.',
+                    inicial:     'El notebook no ejecuta, falta zero_grad, hay doble sigmoide o las dimensiones no concuerdan.',
+                    nulo:        'Sin entrega del producto.',
+                },
+            },
+            {
+                id: 'c3', nombre: 'Regularización y experimentación', peso: 15,
+                desc: {
+                    estrategico: 'Muestra dos curvas (sin y con regularización) donde la validación cruza al alza y luego se estabiliza con Dropout/LR, y nombra la época del punto óptimo.',
+                    autonomo:    'Las curvas train vs. val. evidencian el sobreajuste y su corrección, con una interpretación correcta del cruce.',
+                    basico:      'Presenta las curvas pero describe el sobreajuste sin señalar dónde la validación deja de bajar.',
+                    inicial:     'Una sola curva, o curvas sin sobreajuste visible, o gráficas sin texto que las interprete.',
+                    nulo:        'Sin entrega del producto.',
+                },
+            },
+            {
+                id: 'c4', nombre: 'Evaluación, errores y ética', peso: 15,
+                desc: {
+                    estrategico: 'Reporta matriz de confusión y precisión/recall/F1 por clase, convirtiendo el logit con torch.sigmoid en evaluación; argumenta qué error (FN o FP) priorizar por su costo para el cliente, citando el Marco Ético.',
+                    autonomo:    'Incluye matriz de confusión y las métricas principales interpretadas, con una reflexión ética pertinente al cliente.',
+                    basico:      'Reporta solo la exactitud global y menciona la ética sin ligarla a FN/FP ni a una decisión.',
+                    inicial:     'Evalúa en el training set, o no hay matriz de confusión, o la ética está ausente.',
+                    nulo:        'Sin entrega del producto.',
+                },
+            },
+            {
+                id: 'c5', nombre: 'Uso responsable de IA', peso: 15,
+                desc: {
+                    estrategico: 'La bitácora registra casos Aceptada/Modificada/Rechazada con su motivo; en la sustentación responde sin notas por qué tomó cada decisión; la auditoría reproduce un fallo concreto de la IA y muestra la corrección.',
+                    autonomo:    'Bitácora completa y verificable; explica la mayoría de sus decisiones en la sustentación; la auditoría documenta y corrige un fallo real.',
+                    basico:      'La bitácora solo lista prompts sin el motivo de aceptar o rechazar; titubea al explicar una decisión; la auditoría describe un fallo genérico.',
+                    inicial:     'No hay bitácora o se redactó después; no puede explicar una parte sustancial de su propio código (delegación ciega).',
+                    nulo:        'Sin entrega del producto.',
+                },
+            },
+            {
+                id: 'c6', nombre: 'Comunicación y storytelling', peso: 10,
+                desc: {
+                    estrategico: 'El informe (≤4 págs.) explica el resultado a una audiencia no técnica con un hilo problema→modelo→error→decisión, gráficas rotuladas y citas APA completas.',
+                    autonomo:    'Informe estructurado y comprensible, con visualizaciones legibles y referencias citadas.',
+                    basico:      'Informe con secciones faltantes o gráficas sin rótulos ni leyenda.',
+                    inicial:     'Informe sin estructura, sin referencias o con afirmaciones sin respaldo en los resultados.',
+                    nulo:        'Sin entrega del producto.',
+                },
+            },
+        ];
+
+        /* Niveles ordenados de mayor a menor (para el <select> y la lógica de "subir") */
+        const FASE1_NIVELES = [
+            { id: 'estrategico', etiqueta: 'Estratégico', rango: '4,6–5,0', nota: 4.8 },
+            { id: 'autonomo',    etiqueta: 'Autónomo',    rango: '4,0–4,5', nota: 4.25 },
+            { id: 'basico',      etiqueta: 'Básico',      rango: '3,0–3,9', nota: 3.45 },
+            { id: 'inicial',     etiqueta: 'Inicial',     rango: '1,0–2,9', nota: 1.95 },
+            { id: 'nulo',        etiqueta: 'Nulo (sin entrega)', rango: '0,0', nota: 0 },
+        ];
+
+        /* Formato colombiano: 1 decimal con coma */
+        const fmtNota = (n) => (Math.round(n * 10) / 10).toFixed(1).replace('.', ',');
+
+        /* Banda del total según la nota estimada (escala 0,0–5,0) */
+        const bandaDeTotal = (nota) => {
+            if (nota >= 4.6) return FASE1_BANDAS[0];           // Estratégico
+            if (nota >= 4.0) return FASE1_BANDAS[1];           // Autónomo
+            if (nota >= 3.0) return FASE1_BANDAS[2];           // Básico
+            if (nota >= 1.0) return FASE1_BANDAS[3];           // Inicial
+            return FASE1_BANDAS[4];                            // Nulo
+        };
+
+        /* ============================================================
+           CALCULADORA DE AUTOEVALUACIÓN · CENTINELA FASE 1
+           Herramienta orientativa basada en la rúbrica oficial.
+        ============================================================ */
+        const CalculadoraAutoevaluacion = () => {
+            // Estado: nivel elegido por criterio (por defecto, Autónomo) + checklist de entregables
+            const nivelInicial = () => {
+                const o = {};
+                FASE1_CRITERIOS.forEach(c => { o[c.id] = 'autonomo'; });
+                return o;
+            };
+            const [niveles, setNiveles] = useState(nivelInicial);
+            const [entregas, setEntregas] = useState([false, false, false, false, false]);
+            const ref = useRef(null);
+            useTypeset(ref, [niveles]);
+
+            const setNivel = (cid, nid) => setNiveles(prev => ({ ...prev, [cid]: nid }));
+            const toggleEntrega = (i) => setEntregas(prev => prev.map((v, k) => k === i ? !v : v));
+            const reiniciar = () => { setNiveles(nivelInicial()); setEntregas([false, false, false, false, false]); };
+
+            // Cálculo: Σ(nota_nivel × peso)/100
+            const notaEstimada = useMemo(() => {
+                let acc = 0;
+                FASE1_CRITERIOS.forEach(c => {
+                    const niv = FASE1_NIVELES.find(n => n.id === niveles[c.id]) || FASE1_NIVELES[1];
+                    acc += niv.nota * c.peso;
+                });
+                return acc / 100;
+            }, [niveles]);
+
+            const banda = bandaDeTotal(notaEstimada);
+            const aprobado = notaEstimada >= 3.0;
+
+            const ENTREGABLES = [
+                'Notebook (.ipynb): clase MLP + bucle explícito + curvas + matriz de confusión.',
+                'Informe técnico-ético en PDF (≤ 4 págs.).',
+                'Bitácora de IA (Aceptada / Modificada / Rechazada + motivo).',
+                'Propuesta de Datos aprobada (fuentes no-Kaggle, modalidad aplanada).',
+                'Empaque Apellido_Nombre_Centinela_Fase1.zip o repositorio GitHub.',
+            ];
+            const entregasListas = entregas.filter(Boolean).length;
+
+            // Etiqueta del nivel inmediatamente superior (para la retroalimentación "▲ Para subir a…")
+            const nivelSuperior = (nid) => {
+                const idx = FASE1_NIVELES.findIndex(n => n.id === nid);
+                return idx > 0 ? FASE1_NIVELES[idx - 1] : null;
+            };
+
+            return (
+                <div ref={ref} className="rounded-2xl border border-gray-200 bg-white p-5 md:p-6 shadow-sm">
+                    <div className="flex items-center gap-2.5 mb-1">
+                        <div className="usta-gradient p-2 rounded-lg shadow-sm text-white">
+                            <i className="fas fa-calculator"></i>
+                        </div>
+                        <h4 className="text-base md:text-lg font-extrabold text-navy">Calculadora de autoevaluación</h4>
+                    </div>
+                    <p className="text-xs text-gray-500 mb-4">
+                        Escala 0,0–5,0 (aprueba con ≥ 3,0). Elija el nivel que mejor describe su entregable en cada criterio.
+                    </p>
+
+                    {/* Criterios */}
+                    <div className="space-y-3">
+                        {FASE1_CRITERIOS.map(c => {
+                            const nid = niveles[c.id];
+                            const sup = nivelSuperior(nid);
+                            return (
+                                <div key={c.id} className="rounded-xl border border-gray-200 p-3.5 bg-gray-50/50">
+                                    <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                                        <span className="text-sm font-bold text-navy">{c.nombre}</span>
+                                        <span className="text-[0.72rem] font-semibold text-secondary bg-pink-50 px-2 py-0.5 rounded-full">Peso {c.peso} %</span>
+                                    </div>
+                                    <label className="block">
+                                        <span className="sr-only">Nivel para {c.nombre}</span>
+                                        <select
+                                            value={nid}
+                                            onChange={(e) => setNivel(c.id, e.target.value)}
+                                            className="w-full text-sm rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-secondary focus:ring-1 focus:ring-secondary outline-none">
+                                            {FASE1_NIVELES.map(n => (
+                                                <option key={n.id} value={n.id}>{n.etiqueta} · {n.rango}</option>
+                                            ))}
+                                        </select>
+                                    </label>
+                                    {/* Descriptor del nivel elegido */}
+                                    <p className="mt-2 text-[0.85rem] text-gray-700 leading-relaxed">
+                                        <i className="fas fa-quote-left text-gray-300 text-[0.65rem] mr-1.5"></i>
+                                        {c.desc[nid]}
+                                    </p>
+                                    {/* Retroalimentación: cómo subir o nivel máximo */}
+                                    {sup ? (
+                                        <p className="mt-2 text-[0.82rem] text-primary bg-primary/5 rounded-lg px-3 py-2 leading-relaxed">
+                                            <span className="font-bold">▲ Para subir a {sup.etiqueta}: </span>{c.desc[sup.id]}
+                                        </p>
+                                    ) : (
+                                        <p className="mt-2 text-[0.82rem] text-green-700 bg-green-50 rounded-lg px-3 py-2 font-semibold">
+                                            ✓ Nivel máximo alcanzado
+                                        </p>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Resultado en vivo */}
+                    <div className="mt-5 rounded-xl border p-4 flex flex-wrap items-center gap-4" style={{ borderColor: banda.color, background: banda.bg }}>
+                        <div className="flex items-baseline gap-1">
+                            <span className="text-4xl font-extrabold" style={{ color: banda.color }}>{fmtNota(notaEstimada)}</span>
+                            <span className="text-lg font-bold text-gray-400">/ 5,0</span>
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold text-white w-fit" style={{ background: banda.color }}>
+                                <i className="fas fa-award"></i>Banda: {banda.etiqueta}
+                            </span>
+                            <span className={`inline-flex items-center gap-1.5 text-sm font-bold ${aprobado ? 'text-green-600' : 'text-red-500'}`}>
+                                <i className={`fas ${aprobado ? 'fa-circle-check' : 'fa-circle-xmark'}`}></i>
+                                {aprobado ? 'Aprobado (estimado)' : 'Aún no aprueba'}
+                            </span>
+                        </div>
+                        <span className="text-[0.72rem] text-gray-500 ml-auto">Nota estimada = Σ(nota del nivel × peso) / 100</span>
+                    </div>
+
+                    {/* Checklist de entregables */}
+                    <div className="mt-5">
+                        <div className="flex items-center gap-2 mb-2 text-navy font-semibold text-sm">
+                            <i className="fas fa-box-open text-secondary"></i>Entregables
+                            <span className="ml-auto text-xs font-bold text-primary">{entregasListas}/5 listos</span>
+                        </div>
+                        <ul className="space-y-2">
+                            {ENTREGABLES.map((it, i) => (
+                                <li key={i}>
+                                    <label className={`flex items-start gap-2.5 cursor-pointer p-2 rounded-lg transition-colors ${entregas[i] ? 'bg-green-50/60' : 'hover:bg-gray-50'}`}>
+                                        <input type="checkbox" checked={entregas[i]}
+                                            onChange={() => toggleEntrega(i)}
+                                            className="mt-0.5 w-4 h-4 accent-secondary cursor-pointer flex-shrink-0" />
+                                        <span className={`text-[0.88rem] leading-snug ${entregas[i] ? 'text-gray-400 line-through' : 'text-gray-700'}`}>{it}</span>
+                                    </label>
+                                </li>
+                            ))}
+                        </ul>
+                        {entregasListas < 5 && (
+                            <p className="mt-2 text-[0.8rem] text-amber-700 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg px-3 py-2 leading-relaxed">
+                                <i className="fas fa-triangle-exclamation mr-1"></i>
+                                Sin todos los entregables la actividad puede quedar incompleta (Nivel Nulo = sin entrega).
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Acciones + aviso */}
+                    <div className="mt-5 flex flex-wrap items-center gap-3">
+                        <button onClick={reiniciar}
+                            className="text-sm font-bold px-4 py-1.5 rounded-full border border-primary text-primary hover:bg-primary/5 transition-colors">
+                            <i className="fas fa-rotate-left mr-1.5"></i>Reiniciar
+                        </button>
+                    </div>
+                    <p className="mt-4 text-[0.78rem] text-gray-500 italic leading-relaxed border-t border-gray-100 pt-3">
+                        <i className="fas fa-circle-info mr-1 text-gray-400"></i>
+                        Herramienta de autoevaluación orientativa basada en la rúbrica oficial. La calificación definitiva la asigna
+                        el docente; no reemplaza la sustentación ni la revisión del entregable.
+                    </p>
+                </div>
+            );
         };
 
         /* 2 videos — serie Deep Learning de 3Blue1Brown */
@@ -1244,9 +1514,34 @@
                     <Box type="info" label="Caso problematizador">
                         <p className="text-[0.88rem]">{act.caso}</p>
                     </Box>
-                    <div className="text-sm text-gray-700 mb-2">
-                        <strong className="text-navy">Entregable:</strong> {act.entregable}
-                    </div>
+                    {act.entregables ? (
+                        /* Requisitos de entrega cristalinos — solo Fase 1 */
+                        <div className="text-sm text-gray-700 mb-2 rounded-xl border border-gray-200 bg-gray-50/60 p-3.5">
+                            <div className="flex items-center gap-2 mb-2 text-navy font-bold">
+                                <i className="fas fa-box-open text-secondary"></i>Requisitos de entrega
+                            </div>
+                            <ul className="space-y-2">
+                                {act.entregables.map((e, i) => (
+                                    <li key={i} className="flex items-start gap-2.5">
+                                        <i className="fas fa-square-check text-secondary mt-0.5 flex-shrink-0"></i>
+                                        <span className="leading-snug">
+                                            <strong className="text-navy">{e.titulo}.</strong>{' '}
+                                            <span className="text-gray-600 text-[0.85rem]">{e.detalle}</span>
+                                        </span>
+                                    </li>
+                                ))}
+                            </ul>
+                            {act.entregaNota && (
+                                <p className="mt-2.5 text-[0.8rem] text-gray-500 italic border-t border-gray-200 pt-2">
+                                    <i className="fas fa-circle-info mr-1 text-gray-400"></i>{act.entregaNota}
+                                </p>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="text-sm text-gray-700 mb-2">
+                            <strong className="text-navy">Entregable:</strong> {act.entregable}
+                        </div>
+                    )}
                     <Checklist
                         titulo={`Pasos (${pasosHechos}/${totalPasos})`}
                         items={act.pasos}
@@ -1276,7 +1571,38 @@
                     </div>
                     <Accordion items={[
                         { titulo: `Rúbrica resumida (${act.rubrica.length} criterios)`, icono: 'fa-table-list',
-                          contenido: (
+                          contenido: act.tipo === 'actividad' ? (
+                            /* Rúbrica enriquecida — solo Fase 1: leyenda de bandas + "Qué se espera" */
+                            <div className="space-y-3">
+                                <div>
+                                    <p className="text-xs font-bold text-navy uppercase tracking-wide mb-1.5">Bandas de calificación (aprueba con ≥ 3,0)</p>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {FASE1_BANDAS.map(b => (
+                                            <span key={b.id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.7rem] font-semibold"
+                                                style={{ background: b.bg, color: b.color }}>
+                                                <span className="w-2 h-2 rounded-full" style={{ background: b.color }}></span>
+                                                {b.etiqueta} · {b.rango}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                                <ul className="space-y-2.5">
+                                    {act.rubrica.map((r, i) => (
+                                        <li key={i} className="border-l-2 border-secondary/40 pl-3">
+                                            <div className="flex items-center justify-between text-sm gap-2">
+                                                <span className="font-semibold text-navy">{r.criterio}</span>
+                                                <span className="font-bold text-secondary flex-shrink-0">{r.peso} %</span>
+                                            </div>
+                                            {r.espera && (
+                                                <p className="text-[0.82rem] text-gray-600 mt-0.5 leading-snug">
+                                                    <span className="font-semibold text-gray-500">Qué se espera: </span>{r.espera}
+                                                </p>
+                                            )}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                          ) : (
                             <ul className="space-y-1.5">
                                 {act.rubrica.map((r, i) => (
                                     <li key={i} className="flex items-center justify-between text-sm">
@@ -1288,6 +1614,12 @@
                           ),
                         },
                     ]} />
+                    {/* Calculadora de autoevaluación — solo Fase 1 */}
+                    {act.tipo === 'actividad' && (
+                        <div className="mt-4">
+                            <CalculadoraAutoevaluacion />
+                        </div>
+                    )}
                 </div>
             );
         };
