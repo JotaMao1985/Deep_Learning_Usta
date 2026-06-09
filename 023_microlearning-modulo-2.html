@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="Microlearning del Módulo 2 — Arquitecturas del Aprendizaje Profundo. 5 cápsulas de 3-5 minutos sobre los conceptos esenciales: convolución vs. capa densa, compuertas LSTM, mecanismo de atención, modelos generativos (VAE/GAN/Difusión) y transfer learning. Universidad Santo Tomás.">
+        content="Microlearning del Módulo 2 — Arquitecturas del Aprendizaje Profundo. 5 cápsulas de 4-5 minutos sobre los conceptos esenciales: convolución vs. capa densa, compuertas LSTM, mecanismo de atención, modelos generativos (VAE/GAN/Difusión) y transfer learning. Universidad Santo Tomás.">
     <title>Microlearning · Módulo 2 — Arquitecturas del Deep Learning · USTA</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1106,8 +1106,9 @@
                         <>
                             <p>
                                 El estado de celda {String.raw`\(C_t\)`} es como una <strong>cinta transportadora</strong>
-                                que recorre toda la secuencia con interacciones casi lineales (sumas, no multiplicaciones).
-                                La información puede viajar “intacta” a lo largo de muchos pasos:
+                                que recorre toda la secuencia con pocas interacciones lineales: un ajuste multiplicativo de la
+                                compuerta de olvido y una <strong>suma</strong> de información nueva. Gracias a esa suma, la
+                                información puede viajar “intacta” a lo largo de muchos pasos:
                             </p>
                             <ul>
                                 <li><strong>Compuerta de olvido (f):</strong> decide qué se descarta de la memoria previa.</li>
@@ -1246,8 +1247,8 @@
                         <p>
                             Una <strong>GAN</strong> enfrenta dos redes en un juego de suma cero: el generador {String.raw`\(G\)`}
                             crea muestras falsas y el discriminador {String.raw`\(D\)`} intenta distinguirlas de las reales.
-                            Produce imágenes muy nítidas, pero su entrenamiento es <strong>inestable</strong> (mode collapse,
-                            oscilaciones) y su pérdida no es monótona.
+                            Produce imágenes muy nítidas, pero su entrenamiento es <strong>inestable</strong> (<em>colapso de modos</em>,
+                            es decir, el generador produce siempre la misma muestra; y oscilaciones) y su pérdida no es monótona.
                         </p>
                         <p>
                             Un <strong>modelo de difusión</strong> añade ruido a la imagen paso a paso (proceso fijo) y
@@ -1263,7 +1264,7 @@
                     opciones: [
                         { texto: 'Un proceso fijo que añade ruido y una red que aprende a quitarlo paso a paso.', correcta: false, justificacion: 'Eso describe un modelo de difusión, no una GAN. La difusión revierte un proceso conocido de adición de ruido.' },
                         { texto: 'La codificación de la entrada en una distribución gaussiana latente y su posterior decodificación.', correcta: false, justificacion: 'Eso describe un VAE, que optimiza la cota ELBO con una regularización KL. No hay juego adversario.' },
-                        { texto: 'Un juego adversario de suma cero entre un generador que crea muestras falsas y un discriminador que intenta detectarlas.', correcta: true, justificacion: 'El generador G busca engañar al discriminador D, y D busca no dejarse engañar. En el equilibrio teórico, D queda reducido a “lanzar una moneda” (D(x)=1/2). Este juego produce nitidez pero es inestable (mode collapse).' },
+                        { texto: 'Un juego adversario de suma cero entre un generador que crea muestras falsas y un discriminador que intenta detectarlas.', correcta: true, justificacion: 'El generador G busca engañar al discriminador D, y D busca no dejarse engañar. En el equilibrio teórico, D queda reducido a “lanzar una moneda” (D(x)=1/2). Este juego produce nitidez pero es inestable (colapso de modos, o mode collapse).' },
                         { texto: 'La aplicación de la regla de la cadena hacia atrás en el tiempo (BPTT).', correcta: false, justificacion: 'BPTT es el algoritmo de entrenamiento de las RNN/LSTM sobre secuencias, no el mecanismo generativo de una GAN.' },
                     ],
                 },
