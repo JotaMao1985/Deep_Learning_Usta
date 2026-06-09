@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="Portal del Módulo 1 — Fundamentos del Aprendizaje Profundo, con acceso al Proyecto Centinela (Fases 1–3). Maestría en Ciencia de Datos, Universidad Santo Tomás. Acceso al material de aprendizaje autónomo, la ruta de aprendizaje y el material de consulta.">
-    <title>Portal · Módulo 1 — Fundamentos del Aprendizaje Profundo · Proyecto Centinela (Fases 1–3) · USTA</title>
+        content="Portal del curso Profundización I: Redes Neuronales — Deep Learning. Acceso a los materiales de aprendizaje autónomo de los Módulos 1 (Fundamentos) y 2 (Arquitecturas Especializadas), y al Proyecto Centinela (Fases 1–3). Maestría en Ciencia de Datos, Universidad Santo Tomás.">
+    <title>Portal del curso · Profundización I: Redes Neuronales — Deep Learning · Módulos 1 y 2 · Proyecto Centinela · USTA</title>
 
     <!-- Preconnect para rendimiento de fuentes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,7 +27,7 @@
 
     <!-- NOTA: este portal solo navega entre archivos; no incluye Plotly ni MathJax
          (no hay gráficas ni LaTeX que renderizar). El resto del stack es idéntico al
-         material principal 01_Modulo_1_Fundamentos_Deep_Learning.html. -->
+         material principal de cada módulo. -->
 
     <!-- Google Fonts: Montserrat (texto) y Fira Code (código) -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap"
@@ -114,18 +114,30 @@
         <noscript>
             <div style="max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; font-family: 'Montserrat', sans-serif; color: #1E293B;">
                 <h1 style="color: #3D008D; font-size: 1.5rem; margin-bottom: 0.5rem;">
-                    Módulo 1 — Fundamentos del Aprendizaje Profundo
+                    Profundización I: Redes Neuronales — Deep Learning
                 </h1>
                 <p style="margin-bottom: 1.5rem; color: #475569;">
                     Este portal requiere JavaScript para mostrarse en su versión completa. Mientras tanto,
-                    accede directamente a los materiales principales del módulo y al Proyecto Centinela:
+                    accede directamente a los materiales de los módulos y al Proyecto Centinela:
                 </p>
-                <ul style="line-height: 2; padding-left: 1.2rem;">
+                <h2 style="color: #001A4D; font-size: 1.05rem; margin-bottom: 0.3rem;">Módulo 1 — Fundamentos</h2>
+                <ul style="line-height: 2; padding-left: 1.2rem; margin-bottom: 1rem;">
                     <li><a href="01_Modulo_1_Fundamentos_Deep_Learning.html">Material principal · Fundamentos del Aprendizaje Profundo</a></li>
-                    <li><a href="00_ruta-aprendizaje-modulo-1.html">Ruta de Aprendizaje</a></li>
-                    <li><a href="011_material-consulta-modulo-1.html">Material de Consulta</a></li>
-                    <li><a href="012_infografia-contenidos-modulo-1.html">Infografía de Contenidos</a></li>
-                    <li><a href="013_microlearning-modulo-1.html">Microlearning</a></li>
+                    <li><a href="00_ruta-aprendizaje-modulo-1.html">Ruta de Aprendizaje (M1)</a></li>
+                    <li><a href="011_material-consulta-modulo-1.html">Material de Consulta (M1)</a></li>
+                    <li><a href="012_infografia-contenidos-modulo-1.html">Infografía de Contenidos (M1)</a></li>
+                    <li><a href="013_microlearning-modulo-1.html">Microlearning (M1)</a></li>
+                </ul>
+                <h2 style="color: #001A4D; font-size: 1.05rem; margin-bottom: 0.3rem;">Módulo 2 — Arquitecturas Especializadas</h2>
+                <ul style="line-height: 2; padding-left: 1.2rem; margin-bottom: 1rem;">
+                    <li><a href="02_Modulo_2_Arquitecturas_Deep_Learning.html">Material principal · Arquitecturas Especializadas de Deep Learning</a></li>
+                    <li><a href="020_ruta-aprendizaje-modulo-2.html">Ruta de Aprendizaje (M2)</a></li>
+                    <li><a href="021_material-consulta-modulo-2.html">Material de Consulta (M2)</a></li>
+                    <li><a href="022_infografia-contenidos-modulo-2.html">Infografía de Contenidos (M2)</a></li>
+                    <li><a href="023_microlearning-modulo-2.html">Microlearning (M2)</a></li>
+                </ul>
+                <h2 style="color: #001A4D; font-size: 1.05rem; margin-bottom: 0.3rem;">Proyecto Centinela</h2>
+                <ul style="line-height: 2; padding-left: 1.2rem;">
                     <li><a href="11_Modulo_1_Actividad_Fase1_Centinela.html">Centinela · Fase 1 (Módulo 1)</a></li>
                     <li><a href="21_Modulo_2_Actividad_Fase2_Centinela.html">Centinela · Fase 2 (Módulo 2)</a></li>
                     <li><a href="31_Modulo_3_Actividad_Fase3_Centinela.html">Centinela · Fase 3 (Módulo 3)</a></li>
@@ -136,71 +148,143 @@
     </div>
 
     <script type="text/babel">
+        const { useState } = React;
+
         /* ============================================================
-           DATOS DEL PORTAL — Módulo 1
-           El "núcleo" (01) es el material padre; la Ruta (00), la
-           Consulta (011), la Infografía (012), el Microlearning (013)
-           y los notebooks son recursos hijos que lo acompañan.
+           DATOS DEL PORTAL — Módulos del curso
+           Cada módulo tiene un "núcleo" (material principal) y un
+           conjunto de "recursos" hijos (ruta, consulta, infografía,
+           microlearning y notebooks). El Proyecto Centinela es
+           longitudinal y se muestra aparte, compartido por todos.
         ============================================================ */
-        const TEMAS = ['Historia', 'MLP', 'Optimización', 'Backpropagation', 'Regularización', 'Ética'];
-
-        const NUCLEO = {
-            archivo: '01_Modulo_1_Fundamentos_Deep_Learning.html',
-            eyebrow: 'Material principal · Aprendizaje autónomo',
-            titulo: 'Fundamentos del Aprendizaje Profundo',
-            desc: 'Recorrido completo y autónomo de los 5 capítulos del módulo: de la neurona de McCulloch-Pitts al perceptrón multicapa, la matemática del error, la retropropagación, la regularización y la ética. Con teoría breve, analogías colombianas, diagramas, código comentado y cuestionarios.',
-            cta: 'Abrir material',
-            icon: 'fa-graduation-cap',
+        const MODULOS = {
+            1: {
+                id: 1,
+                etiqueta: 'Módulo 1',
+                titulo: 'Fundamentos del Aprendizaje Profundo',
+                subtitulo: 'De la neurona de McCulloch-Pitts al perceptrón multicapa: activaciones, optimización, retropropagación, regularización y ética.',
+                temas: ['Historia', 'MLP', 'Optimización', 'Backpropagation', 'Regularización', 'Ética'],
+                nucleo: {
+                    archivo: '01_Modulo_1_Fundamentos_Deep_Learning.html',
+                    eyebrow: 'Material principal · Aprendizaje autónomo',
+                    titulo: 'Fundamentos del Aprendizaje Profundo',
+                    desc: 'Recorrido completo y autónomo de los 5 capítulos del módulo: de la neurona de McCulloch-Pitts al perceptrón multicapa, la matemática del error, la retropropagación, la regularización y la ética. Con teoría breve, analogías colombianas, diagramas, código comentado y cuestionarios.',
+                    cta: 'Abrir material',
+                    icon: 'fa-graduation-cap',
+                },
+                recursos: [
+                    {
+                        archivo: '00_ruta-aprendizaje-modulo-1.html',
+                        titulo: 'Ruta de Aprendizaje',
+                        desc: 'Mapa navegable del módulo: 5 capítulos, 2 actividades, 2 videos, glosario y cronograma. El punto de partida para la orientación inicial.',
+                        cta: 'Ver la ruta',
+                        icon: 'fa-route',
+                    },
+                    {
+                        archivo: '011_material-consulta-modulo-1.html',
+                        titulo: 'Material de Consulta',
+                        desc: 'Recursos de referencia y bibliografía del módulo, listos para consulta rápida durante el estudio del material principal.',
+                        cta: 'Abrir consulta',
+                        icon: 'fa-book-open',
+                    },
+                    {
+                        archivo: '012_infografia-contenidos-modulo-1.html',
+                        titulo: 'Infografía de Contenidos',
+                        desc: 'Síntesis visual del módulo en una mirada: el mapa de los 5 capítulos, las cifras clave (carga horaria, peso evaluativo, glosario) y el ciclo de vida del modelo.',
+                        cta: 'Ver infografía',
+                        icon: 'fa-chart-pie',
+                    },
+                    {
+                        archivo: '013_microlearning-modulo-1.html',
+                        titulo: 'Microlearning',
+                        desc: 'Píldoras de aprendizaje interactivas: repasa los conceptos clave del módulo en sesiones cortas con ejemplos y verificación inmediata.',
+                        cta: 'Empezar microlearning',
+                        icon: 'fa-bolt',
+                    },
+                    {
+                        archivo: 'notebooks/01-lab-fundamentos-modulo-1.ipynb',
+                        href: 'https://colab.research.google.com/github/JotaMao1985/Deep_Learning_Usta/blob/main/notebooks/01-lab-fundamentos-modulo-1.ipynb',
+                        externo: true,
+                        titulo: 'Laboratorio en Python (Notebook)',
+                        desc: 'Cuaderno ejecutable que acompaña los capítulos: de una neurona en NumPy a entrenar un MLP en PyTorch, con frontera de decisión, curvas de pérdida y el reto de sobreajuste y Dropout. Se abre en Google Colab.',
+                        cta: 'Abrir en Colab',
+                        icon: 'fa-flask',
+                    },
+                    {
+                        archivo: 'notebooks/02-scaffold-centinela-fase1.ipynb',
+                        href: 'https://colab.research.google.com/github/JotaMao1985/Deep_Learning_Usta/blob/main/notebooks/02-scaffold-centinela-fase1.ipynb',
+                        externo: true,
+                        titulo: 'Scaffold Centinela · Fase 1 (Notebook)',
+                        desc: 'Andamiaje de partida para la actividad evaluativa de la Fase 1: estructura del proyecto, carga de datos y plantillas del bucle de entrenamiento del MLP listas para completar. Se abre en Google Colab.',
+                        cta: 'Abrir en Colab',
+                        icon: 'fa-screwdriver-wrench',
+                    },
+                ],
+            },
+            2: {
+                id: 2,
+                etiqueta: 'Módulo 2',
+                titulo: 'Arquitecturas Especializadas de Deep Learning',
+                subtitulo: 'Redes convolucionales y Vision Transformers; modelos secuenciales (RNN, LSTM, GRU) y atención; y modelos generativos (autoencoders, VAE, GAN y difusión).',
+                temas: ['Convolución', 'CNN / ViT', 'RNN / LSTM / GRU', 'Atención', 'Autoencoders', 'VAE / GAN', 'Difusión', 'Transformers'],
+                nucleo: {
+                    archivo: '02_Modulo_2_Arquitecturas_Deep_Learning.html',
+                    eyebrow: 'Material principal · Aprendizaje autónomo',
+                    titulo: 'Arquitecturas Especializadas de Deep Learning',
+                    desc: 'Recorrido completo y autónomo de los 3 capítulos del módulo: redes convolucionales y Vision Transformers; modelos secuenciales (RNN, LSTM, GRU) y el mecanismo de atención; y modelos generativos (autoencoders, VAE, GAN y difusión). Con teoría, analogías colombianas, diagramas SVG, código y cuestionarios con puntaje.',
+                    cta: 'Abrir material',
+                    icon: 'fa-graduation-cap',
+                },
+                recursos: [
+                    {
+                        archivo: '020_ruta-aprendizaje-modulo-2.html',
+                        titulo: 'Ruta de Aprendizaje',
+                        desc: 'Mapa navegable del Módulo 2: los 3 capítulos, el video de profundización, la Guía 2 y la actividad del Proyecto Centinela (Fase 2), con tiempos y progreso.',
+                        cta: 'Ver la ruta',
+                        icon: 'fa-route',
+                    },
+                    {
+                        archivo: '021_material-consulta-modulo-2.html',
+                        titulo: 'Material de Consulta',
+                        desc: 'Bibliografía y recursos del módulo: papers seminales por familia (CNN/ViT, secuencias, generativos), herramientas interactivas (CNN Explainer, Transformer Explainer) y datasets.',
+                        cta: 'Abrir consulta',
+                        icon: 'fa-book-open',
+                    },
+                    {
+                        archivo: '022_infografia-contenidos-modulo-2.html',
+                        titulo: 'Infografía de Contenidos',
+                        desc: 'Síntesis visual del módulo: el mapa de las tres familias de arquitecturas, diagramas de convolución, compuertas LSTM y espacios latentes, y las cifras clave.',
+                        cta: 'Ver infografía',
+                        icon: 'fa-chart-pie',
+                    },
+                    {
+                        archivo: '023_microlearning-modulo-2.html',
+                        titulo: 'Microlearning',
+                        desc: 'Cinco cápsulas interactivas: convolución vs. capa densa, compuertas LSTM, el mecanismo de atención, VAE/GAN/difusión y transfer learning, con verificación inmediata.',
+                        cta: 'Empezar microlearning',
+                        icon: 'fa-bolt',
+                    },
+                    {
+                        archivo: 'notebooks/03-lab-arquitecturas-modulo-2.ipynb',
+                        href: 'https://colab.research.google.com/github/JotaMao1985/Deep_Learning_Usta/blob/main/notebooks/03-lab-arquitecturas-modulo-2.ipynb',
+                        externo: true,
+                        titulo: 'Laboratorio en Python (Notebook)',
+                        desc: 'Cuaderno ejecutable que acompaña los capítulos: una CNN sobre FashionMNIST, una LSTM para una serie temporal sintética y un autoencoder, con datos toy. Se abre en Google Colab.',
+                        cta: 'Abrir en Colab',
+                        icon: 'fa-flask',
+                    },
+                    {
+                        archivo: 'notebooks/04-scaffold-centinela-fase2.ipynb',
+                        href: 'https://colab.research.google.com/github/JotaMao1985/Deep_Learning_Usta/blob/main/notebooks/04-scaffold-centinela-fase2.ipynb',
+                        externo: true,
+                        titulo: 'Scaffold Centinela · Fase 2 (Notebook)',
+                        desc: 'Andamiaje de partida para la Fase 2: ramas A (clasificación con CNN), B (series con RNN/LSTM/GRU) y C (fusión multimodal), con helpers de datos listos y los pasos clave como TODO. Se abre en Google Colab.',
+                        cta: 'Abrir en Colab',
+                        icon: 'fa-screwdriver-wrench',
+                    },
+                ],
+            },
         };
-
-        const RECURSOS = [
-            {
-                archivo: '00_ruta-aprendizaje-modulo-1.html',
-                titulo: 'Ruta de Aprendizaje',
-                desc: 'Mapa navegable del módulo: 5 capítulos, 2 actividades, 2 videos, glosario y cronograma. El punto de partida para orientarte.',
-                cta: 'Ver la ruta',
-                icon: 'fa-route',
-            },
-            {
-                archivo: '011_material-consulta-modulo-1.html',
-                titulo: 'Material de Consulta',
-                desc: 'Recursos de referencia y bibliografía del módulo, listos para consulta rápida mientras estudias el material principal.',
-                cta: 'Abrir consulta',
-                icon: 'fa-book-open',
-            },
-            {
-                archivo: '012_infografia-contenidos-modulo-1.html',
-                titulo: 'Infografía de Contenidos',
-                desc: 'Síntesis visual del módulo en una mirada: el mapa de los 5 capítulos, las cifras clave (carga horaria, peso evaluativo, glosario) y el ciclo de vida del modelo.',
-                cta: 'Ver infografía',
-                icon: 'fa-chart-pie',
-            },
-            {
-                archivo: '013_microlearning-modulo-1.html',
-                titulo: 'Microlearning',
-                desc: 'Píldoras de aprendizaje interactivas: repasa los conceptos clave del módulo en sesiones cortas con ejemplos y verificación inmediata.',
-                cta: 'Empezar microlearning',
-                icon: 'fa-bolt',
-            },
-            {
-                archivo: 'notebooks/01-lab-fundamentos-modulo-1.ipynb',
-                href: 'https://colab.research.google.com/github/JotaMao1985/Deep_Learning_Usta/blob/main/notebooks/01-lab-fundamentos-modulo-1.ipynb',
-                externo: true,
-                titulo: 'Laboratorio en Python (Notebook)',
-                desc: 'Cuaderno ejecutable que acompaña los capítulos: de una neurona en NumPy a entrenar un MLP en PyTorch, con frontera de decisión, curvas de pérdida y el reto de sobreajuste y Dropout. Se abre en Google Colab.',
-                cta: 'Abrir en Colab',
-                icon: 'fa-flask',
-            },
-            {
-                archivo: 'notebooks/02-scaffold-centinela-fase1.ipynb',
-                href: 'https://colab.research.google.com/github/JotaMao1985/Deep_Learning_Usta/blob/main/notebooks/02-scaffold-centinela-fase1.ipynb',
-                externo: true,
-                titulo: 'Scaffold Centinela · Fase 1 (Notebook)',
-                desc: 'Andamiaje de partida para la actividad evaluativa de la Fase 1: estructura del proyecto, carga de datos y plantillas del bucle de entrenamiento del MLP listas para completar. Se abre en Google Colab.',
-                cta: 'Abrir en Colab',
-                icon: 'fa-screwdriver-wrench',
-            },
-        ];
 
         /* Proyecto Integrador Centinela — actividades que crecen módulo a módulo. */
         const PROYECTO = [
@@ -228,9 +312,29 @@
         ];
 
         /* ============================================================
-           HERO — cabecera institucional navy
+           SELECTOR DE MÓDULO — pestañas M1 / M2
         ============================================================ */
-        const Hero = () => (
+        const SelectorModulo = ({ activo, onSelect }) => (
+            <div className="flex justify-center flex-wrap gap-2 mt-7" role="tablist" aria-label="Selección de módulo">
+                {Object.values(MODULOS).map(m => {
+                    const seleccionado = activo === m.id;
+                    return (
+                        <button key={m.id} role="tab" aria-selected={seleccionado}
+                            onClick={() => onSelect(m.id)}
+                            className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${seleccionado
+                                ? 'bg-white text-primary shadow-md'
+                                : 'bg-white/10 text-white border border-white/20 hover:bg-white/20'}`}>
+                            {m.etiqueta}
+                        </button>
+                    );
+                })}
+            </div>
+        );
+
+        /* ============================================================
+           HERO — cabecera institucional navy (se adapta al módulo)
+        ============================================================ */
+        const Hero = ({ modulo, activo, onSelect }) => (
             <header className="usta-header">
                 <div className="max-w-5xl mx-auto px-6 py-14 lg:py-20 text-center">
                     <p className="text-xs uppercase tracking-[0.25em] text-gold font-bold mb-3">
@@ -240,15 +344,16 @@
                         Profundización I: Redes Neuronales — Deep Learning
                     </p>
                     <h1 className="text-3xl lg:text-5xl font-extrabold text-white tracking-tight">
-                        Módulo 1 — Fundamentos del Aprendizaje Profundo
+                        {modulo.etiqueta} — {modulo.titulo}
                     </h1>
                     <p className="text-white/70 font-light mt-4 max-w-2xl mx-auto">
-                        Portal del módulo. Desde aquí accedes al material de aprendizaje autónomo,
-                        la ruta de aprendizaje, el material de consulta y al Proyecto Centinela (Fases 1–3).
+                        {modulo.subtitulo}
                     </p>
 
+                    <SelectorModulo activo={activo} onSelect={onSelect} />
+
                     <div className="flex justify-center flex-wrap gap-2 mt-6">
-                        {TEMAS.map(t => (
+                        {modulo.temas.map(t => (
                             <span key={t}
                                 className="px-3 py-1 rounded-full text-xs text-white bg-white/10 border border-white/15">
                                 {t}
@@ -264,7 +369,7 @@
         );
 
         /* ============================================================
-           TARJETA DESTACADA — núcleo del módulo (01)
+           TARJETA DESTACADA — núcleo del módulo
         ============================================================ */
         const TarjetaNucleo = ({ data }) => (
             <a href={data.archivo}
@@ -290,7 +395,7 @@
         );
 
         /* ============================================================
-           TARJETA DE RECURSO — hijos del módulo (00, 011)
+           TARJETA DE RECURSO — hijos del módulo (ruta, consulta, etc.)
         ============================================================ */
         const TarjetaRecurso = ({ data }) => (
             <a href={data.href || data.archivo}
@@ -311,62 +416,67 @@
         );
 
         /* ============================================================
-           APP — portal de una sola página
+           APP — portal multi-módulo de una sola página
         ============================================================ */
-        const App = () => (
-            <div className="min-h-screen flex flex-col">
-                <Hero />
+        const App = () => {
+            const [activo, setActivo] = useState(1);
+            const modulo = MODULOS[activo];
 
-                <main className="flex-1 max-w-5xl w-full mx-auto px-6 py-12 animate-fade-in">
-                    <TarjetaNucleo data={NUCLEO} />
+            return (
+                <div className="min-h-screen flex flex-col">
+                    <Hero modulo={modulo} activo={activo} onSelect={setActivo} />
 
-                    <div className="mt-12">
-                        <div className="flex items-center gap-3 mb-5">
-                            <span className="usta-gradient text-white p-2 rounded-lg">
-                                <i className="fas fa-layer-group" aria-hidden="true"></i>
-                            </span>
-                            <h2 className="text-xl font-bold text-navy">Recursos del módulo</h2>
-                        </div>
-                        <div className="grid md:grid-cols-2 gap-5">
-                            {RECURSOS.map(r => <TarjetaRecurso key={r.archivo} data={r} />)}
-                        </div>
-                    </div>
+                    <main key={activo} className="flex-1 max-w-5xl w-full mx-auto px-6 py-12 animate-fade-in">
+                        <TarjetaNucleo data={modulo.nucleo} />
 
-                    <div className="mt-12">
-                        <div className="flex items-center gap-3 mb-2">
-                            <span className="usta-gradient text-white p-2 rounded-lg">
-                                <i className="fas fa-diagram-project" aria-hidden="true"></i>
-                            </span>
-                            <h2 className="text-xl font-bold text-navy">Proyecto integrador · crece con el curso</h2>
+                        <div className="mt-12">
+                            <div className="flex items-center gap-3 mb-5">
+                                <span className="usta-gradient text-white p-2 rounded-lg">
+                                    <i className="fas fa-layer-group" aria-hidden="true"></i>
+                                </span>
+                                <h2 className="text-xl font-bold text-navy">Recursos del {modulo.etiqueta.toLowerCase()}</h2>
+                            </div>
+                            <div className="grid md:grid-cols-2 gap-5">
+                                {modulo.recursos.map(r => <TarjetaRecurso key={r.archivo} data={r} />)}
+                            </div>
                         </div>
-                        <p className="text-sm text-gray-600 mb-5 ml-1">
-                            Proyecto longitudinal Centinela. La Fase 1 pertenece a este Módulo 1; las Fases 2 y 3 corresponden a los Módulos 2 y 3.
-                        </p>
-                        <div className="grid md:grid-cols-2 gap-5">
-                            {PROYECTO.map(p => <TarjetaRecurso key={p.archivo} data={p} />)}
-                        </div>
-                    </div>
-                </main>
 
-                <footer className="max-w-5xl w-full mx-auto px-6 pb-12">
-                    <div className="usta-header rounded-xl p-6 text-center">
-                        <p className="text-white font-medium text-sm">
-                            <strong>Módulo 1 · Fundamentos del Aprendizaje Profundo</strong>
-                            <span className="text-white/70"> · con acceso al Proyecto Centinela (Fases 1–3)</span>
-                        </p>
-                        <p className="text-xs mt-1 text-white/70">
-                            Maestría en Ciencia de Datos · Universidad Santo Tomás · Profundización I: Redes Neuronales - Deep Learning
-                        </p>
-                        <p className="text-[11px] mt-3 text-white/70 italic max-w-2xl mx-auto">
-                            Metodología «Ingeniería de Trinchera»: si una arquitectura no corre en Google Colab, no existe.
-                        </p>
-                        <p className="text-[10px] mt-3 text-white/70">
-                            Material de aprendizaje autónomo. Analogías contextualizadas al entorno colombiano.
-                        </p>
-                    </div>
-                </footer>
-            </div>
-        );
+                        <div className="mt-12">
+                            <div className="flex items-center gap-3 mb-2">
+                                <span className="usta-gradient text-white p-2 rounded-lg">
+                                    <i className="fas fa-diagram-project" aria-hidden="true"></i>
+                                </span>
+                                <h2 className="text-xl font-bold text-navy">Proyecto integrador · crece con el curso</h2>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-5 ml-1">
+                                Proyecto longitudinal Centinela. La Fase 1 pertenece al Módulo 1, la Fase 2 al Módulo 2 y la Fase 3 al Módulo 3.
+                            </p>
+                            <div className="grid md:grid-cols-2 gap-5">
+                                {PROYECTO.map(p => <TarjetaRecurso key={p.archivo} data={p} />)}
+                            </div>
+                        </div>
+                    </main>
+
+                    <footer className="max-w-5xl w-full mx-auto px-6 pb-12">
+                        <div className="usta-header rounded-xl p-6 text-center">
+                            <p className="text-white font-medium text-sm">
+                                <strong>Profundización I: Redes Neuronales — Deep Learning</strong>
+                                <span className="text-white/70"> · Módulos 1 y 2 · Proyecto Centinela (Fases 1–3)</span>
+                            </p>
+                            <p className="text-xs mt-1 text-white/70">
+                                Maestría en Ciencia de Datos · Universidad Santo Tomás
+                            </p>
+                            <p className="text-[11px] mt-3 text-white/70 italic max-w-2xl mx-auto">
+                                Metodología «Ingeniería de Trinchera»: si una arquitectura no corre en Google Colab, no existe.
+                            </p>
+                            <p className="text-[10px] mt-3 text-white/70">
+                                Material de aprendizaje autónomo. Analogías contextualizadas al entorno colombiano.
+                            </p>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
 
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);
     </script>

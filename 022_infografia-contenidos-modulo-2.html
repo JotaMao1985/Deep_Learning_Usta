@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Infografía detallada de los contenidos del Módulo 2 — Arquitecturas del Aprendizaje Profundo. Maestría en Ciencia de Datos, Universidad Santo Tomás. Síntesis visual de los 3 capítulos: redes convolucionales (CNN), datos secuenciales (RNN/LSTM/GRU) y modelos generativos (AE/VAE/GAN/Difusión/Transformers).">
+    <title>Infografía · Contenidos del Módulo 2 — Arquitecturas del Aprendizaje Profundo · USTA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Tailwind CSS (utilidades) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome (iconografía de apoyo) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- MathJax 3 — el contenido es matemáticamente denso; aquí es estático (no se revela
+         dinámicamente), por lo que MathJax tipografía una sola vez al cargar, sin re-typeset. -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <!-- Google Fonts: Montserrat (texto) y Fira Code (código) -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Montserrat', 'Helvetica Neue', 'Arial', 'sans-serif'] },
+                    colors: {
+                        primary: '#3D008D',
+                        secondary: '#ED1E79',
+                        navy: '#001A4D',
+                        gold: '#FDB913',
+                        teal: '#0E7490',
+                        bg: '#F8FAFC',
+                        surface: '#FFFFFF',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #F8FAFC;
+            color: #1E293B;
+            scroll-behavior: smooth;
+        }
+        code, pre, .mono { font-family: 'Fira Code', monospace; }
+
+        /* Gradientes institucionales USTA */
+        .usta-gradient { background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%); }
+        .usta-gradient-text {
+            background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .usta-header { background: linear-gradient(135deg, #001A4D 0%, #3D008D 60%, #5B1C9E 100%); }
+
+        /* Tarjeta base */
+        .card {
+            background: #fff; border-radius: 16px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+            transition: box-shadow .25s ease, transform .25s ease;
+        }
+        .card:hover { box-shadow: 0 12px 30px rgba(0,0,0,0.11); transform: translateY(-3px); }
+
+        /* Barra de desplazamiento */
+        ::-webkit-scrollbar { width: 9px; height: 9px; }
+        ::-webkit-scrollbar-track { background: #eef2f7; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg,#3D008D,#ED1E79); border-radius: 5px; }
+
+        /* Aparición progresiva: SOLO una entrada sutil que nunca oculta el contenido.
+           (El contenido es 100% visible siempre; la animación es un realce opcional.) */
+        @keyframes riseIn { from { opacity: .35; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        .js .reveal.in { animation: riseIn .5s ease-out both; }
+
+        /* Código en línea */
+        .icode {
+            background: #F1F5F9; color: #0F172A; padding: .08rem .42rem;
+            border-radius: 5px; font-size: .85em; font-family: 'Fira Code', monospace;
+        }
+        .codeblock {
+            background: #0F172A; color: #E2E8F0; border-radius: 12px;
+            padding: 1rem 1.1rem; font-family: 'Fira Code', monospace;
+            font-size: .82rem; line-height: 1.7; overflow-x: auto;
+            white-space: pre; tab-size: 4;
+        }
+        .codeblock .cm { color: #64748B; }
+        .codeblock .kw { color: #F472B6; }
+        .codeblock .fn { color: #7DD3FC; }
+        .codeblock .st { color: #FDE68A; }
+
+        /* ====== Ventana de código (cromo tipo terminal · marca USTA) ====== */
+        .code-window { position: relative; background: #0F172A; border: 1px solid #1E293B; border-radius: 14px; overflow: hidden; box-shadow: 0 12px 32px rgba(2,6,23,.30); }
+        .code-window::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; z-index: 2; background: linear-gradient(90deg, #3D008D 0%, #ED1E79 60%, #FDB913 100%); }
+        .code-window-bar { display: flex; align-items: center; gap: .55rem; padding: .62rem .95rem; padding-top: calc(.62rem + 3px); background: #0B1326; border-bottom: 1px solid #1E293B; }
+        .code-window-dots { display: flex; gap: .42rem; }
+        .code-window-dots span { width: 11px; height: 11px; border-radius: 50%; display: block; }
+        .code-window-dots .d-r { background: #FF5F56; } .code-window-dots .d-y { background: #FFBD2E; } .code-window-dots .d-g { background: #27C93F; }
+        .code-window-title { font-family: 'Fira Code', monospace; font-size: .72rem; color: #94A3B8; letter-spacing: .01em; }
+        .code-window-lang { margin-left: auto; font-family: 'Fira Code', monospace; font-size: .67rem; color: #FDE68A; background: rgba(253,185,19,.13); padding: .14rem .55rem; border-radius: 999px; white-space: nowrap; }
+        .code-copy { margin-left: .55rem; background: transparent; border: none; color: #94A3B8; cursor: pointer; font-size: .82rem; line-height: 1; padding: .2rem .35rem; border-radius: 7px; transition: color .15s ease, background .15s ease; }
+        .code-copy:hover { color: #E2E8F0; background: rgba(148,163,184,.16); }
+        .code-window .codeblock { border-radius: 0; box-shadow: none; }
+
+        /* Píldoras de fórmula */
+        .eq {
+            background: #FAF8FF; border: 1px solid rgba(61,0,141,.14);
+            border-radius: 12px; padding: .55rem 1rem; overflow-x: auto;
+        }
+
+        /* Callout / analogía */
+        .callout { border-left: 4px solid; border-radius: 12px; padding: .9rem 1.1rem; }
+
+        /* Cinta de capítulo */
+        .ribbon { writing-mode: vertical-rl; text-orientation: mixed; letter-spacing: .15em; }
+
+        /* Navegación sticky */
+        .navlink.active { color: #fff; }
+        .navlink.active .dot { transform: scale(1.6); }
+
+        h2.sec-title { font-weight: 800; letter-spacing: -.02em; }
+
+        /* Impresión / PDF */
+        @media print {
+            body { background: #fff; }
+            .no-print { display: none !important; }
+            .card { box-shadow: none; border: 1px solid #e5e7eb; break-inside: avoid; }
+            section { break-inside: avoid-page; }
+            .js .reveal { opacity: 1 !important; transform: none !important; }
+            a { color: #1E293B; text-decoration: none; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ====================== ENCABEZADO ====================== -->
+    <header class="usta-header text-white">
+        <div class="max-w-6xl mx-auto px-5 md:px-8 py-10 md:py-14">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="usta-gradient p-2.5 rounded-xl shadow-lg"><i class="fas fa-diagram-project text-lg"></i></span>
+                <span class="text-[11px] md:text-xs uppercase tracking-[0.25em] text-gold font-bold">Universidad Santo Tomás · Maestría en Ciencia de Datos</span>
+            </div>
+            <p class="text-secondary font-semibold text-sm md:text-base mb-1">Profundización I: Redes Neuronales — Deep Learning · EA-N-F-004</p>
+            <h1 class="text-3xl md:text-5xl font-extrabold leading-tight tracking-tight">
+                Infografía de Contenidos<br class="hidden md:block"> · Módulo 2
+            </h1>
+            <p class="text-xl md:text-2xl font-light text-white/90 mt-2">Arquitecturas del Aprendizaje Profundo</p>
+            <p class="text-white/70 mt-4 max-w-3xl leading-relaxed text-sm md:text-base">
+                Síntesis visual de los <strong class="text-white">3 capítulos</strong> del módulo, pensada para
+                <strong class="text-white"> analizar y repasar de un vistazo</strong>: de la convolución que enseña a
+                la máquina a <em>ver</em>, a la memoria que le permite <em>recordar</em> secuencias, hasta la
+                imaginación que le permite <em>crear</em>. Todas las analogías están contextualizadas a Colombia.
+            </p>
+
+            <!-- estadísticas rápidas -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8">
+                <div class="bg-white/10 border border-white/15 rounded-xl px-4 py-3">
+                    <div class="text-2xl md:text-3xl font-extrabold text-gold">3</div>
+                    <div class="text-xs text-white/75 mt-0.5">capítulos de contenido</div>
+                </div>
+                <div class="bg-white/10 border border-white/15 rounded-xl px-4 py-3">
+                    <div class="text-2xl md:text-3xl font-extrabold text-gold">48 h</div>
+                    <div class="text-xs text-white/75 mt-0.5">carga total del módulo</div>
+                </div>
+                <div class="bg-white/10 border border-white/15 rounded-xl px-4 py-3">
+                    <div class="text-2xl md:text-3xl font-extrabold text-gold">30 %</div>
+                    <div class="text-xs text-white/75 mt-0.5">del peso de la nota final (2 actividades)</div>
+                </div>
+                <div class="bg-white/10 border border-white/15 rounded-xl px-4 py-3">
+                    <div class="text-2xl md:text-3xl font-extrabold text-gold">40</div>
+                    <div class="text-xs text-white/75 mt-0.5">términos clave del módulo</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ====================== NAV STICKY ====================== -->
+    <nav class="no-print sticky top-0 z-40 bg-navy/95 backdrop-blur border-b border-white/10 shadow-lg">
+        <div class="max-w-6xl mx-auto px-2 md:px-6 overflow-x-auto">
+            <ul class="flex items-center gap-1 py-2 text-[11px] md:text-sm font-semibold whitespace-nowrap text-white/70">
+                <li><a href="#mapa" class="navlink flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition"><span class="dot w-2 h-2 rounded-full bg-gold inline-block transition-transform"></span>Mapa</a></li>
+                <li><a href="#cap1" class="navlink flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition"><span class="dot w-2 h-2 rounded-full bg-primary inline-block transition-transform"></span>1 · CNN / Visión</a></li>
+                <li><a href="#cap2" class="navlink flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition"><span class="dot w-2 h-2 rounded-full bg-secondary inline-block transition-transform"></span>2 · Secuencias</a></li>
+                <li><a href="#cap3" class="navlink flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition"><span class="dot w-2 h-2 rounded-full bg-gold inline-block transition-transform"></span>3 · Generativos</a></li>
+                <li><a href="#cheatsheet" class="navlink flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition"><span class="dot w-2 h-2 rounded-full bg-white inline-block transition-transform"></span>Fórmulas</a></li>
+                <li class="ml-auto"><button onclick="window.print()" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gold text-navy font-bold hover:opacity-90 transition"><i class="fas fa-print"></i><span class="hidden md:inline">Imprimir / PDF</span></button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 md:px-8 py-10">
+
+        <!-- ====================== MAPA CONCEPTUAL ====================== -->
+        <section id="mapa" class="scroll-mt-20">
+            <div class="flex items-center gap-3 mb-5">
+                <span class="usta-gradient text-white p-2.5 rounded-xl shadow"><i class="fas fa-sitemap"></i></span>
+                <h2 class="sec-title text-2xl md:text-3xl text-navy">Mapa del módulo en una mirada</h2>
+            </div>
+            <p class="text-gray-600 max-w-3xl mb-6 text-[0.95rem]">El Módulo 1 mostró que un MLP fracasa con imágenes, texto y audio. El Módulo 2 introduce las <strong>arquitecturas especializadas</strong> que sí los dominan: la <em>convolución</em> aprovecha la estructura espacial para <em>ver</em>; la <em>recurrencia con compuertas</em> aprovecha el orden temporal para <em>recordar</em>; y los <em>modelos generativos</em> aprenden la distribución de los datos para <em>crear</em> instancias nuevas.</p>
+
+            <div class="grid md:grid-cols-3 gap-3">
+                <!-- flujo -->
+                <a href="#cap1" class="card p-4 border-t-4 border-primary block">
+                    <div class="flex items-center justify-between"><span class="text-3xl font-extrabold text-primary/25">2.1</span><i class="fas fa-eye text-primary"></i></div>
+                    <h3 class="font-bold text-navy mt-1 leading-tight">Visión: CNN</h3>
+                    <p class="text-xs text-gray-500 mt-1">Convolución, pooling, LeNet→ResNet, ViT, Transfer Learning, Edge AI</p>
+                </a>
+                <a href="#cap2" class="card p-4 border-t-4 border-secondary block">
+                    <div class="flex items-center justify-between"><span class="text-3xl font-extrabold text-secondary/25">2.2</span><i class="fas fa-wave-square text-secondary"></i></div>
+                    <h3 class="font-bold text-navy mt-1 leading-tight">Secuencias: RNN / LSTM / GRU</h3>
+                    <p class="text-xs text-gray-500 mt-1">Memoria, compuertas, encoder-decoder, atención</p>
+                </a>
+                <a href="#cap3" class="card p-4 border-t-4 border-gold block">
+                    <div class="flex items-center justify-between"><span class="text-3xl font-extrabold text-gold/40">2.3</span><i class="fas fa-wand-magic-sparkles" style="color:#B45309"></i></div>
+                    <h3 class="font-bold text-navy mt-1 leading-tight">Generación: AE/VAE/GAN/Difusión</h3>
+                    <p class="text-xs text-gray-500 mt-1">Espacio latente, juego adversario, Transformers</p>
+                </a>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-3 mt-3">
+                <div class="card p-4 text-center"><div class="text-secondary font-bold text-sm"><i class="fas fa-eye mr-1"></i>VER</div><p class="text-[0.78rem] text-gray-600 mt-1">Identificar roya en hojas de café o jaguares en cámaras trampa.</p></div>
+                <div class="card p-4 text-center"><div class="text-secondary font-bold text-sm"><i class="fas fa-clock-rotate-left mr-1"></i>RECORDAR</div><p class="text-[0.78rem] text-gray-600 mt-1">Predecir lluvia, detectar fraude transaccional o entender "dar papaya".</p></div>
+                <div class="card p-4 text-center"><div class="text-secondary font-bold text-sm"><i class="fas fa-lightbulb mr-1"></i>CREAR</div><p class="text-[0.78rem] text-gray-600 mt-1">Sintetizar imágenes de plagas raras o limpiar audios de la selva.</p></div>
+            </div>
+
+            <div class="card p-5 mt-5 bg-gradient-to-br from-[#FAF8FF] to-[#FCE7F1]">
+                <p class="text-sm text-gray-700"><i class="fas fa-quote-left text-secondary mr-2"></i><strong>Idea-fuerza del módulo:</strong> «La arquitectura no es decoración: es el <strong>sesgo inductivo</strong> que se le regala a la red.» Cada familia incorpora un supuesto sobre los datos —localidad espacial en la CNN, orden temporal en la RNN, distribución de probabilidad en los generativos— y ese supuesto es justo lo que permite aprender con menos datos y menos cómputo.</p>
+            </div>
+        </section>
+
+        <!-- ====================== CAPÍTULO 1 ====================== -->
+        <section id="cap1" class="scroll-mt-20 mt-14 reveal">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-14 h-14 rounded-2xl usta-gradient text-white flex items-center justify-center text-xl font-extrabold shadow-lg flex-shrink-0">2.1</div>
+                <div>
+                    <p class="text-xs uppercase tracking-widest text-primary font-bold">Capítulo 2.1 · #tema/cnn · #tema/vision</p>
+                    <h2 class="sec-title text-2xl md:text-3xl text-navy">Redes Convolucionales (CNN) y Visión Artificial</h2>
+                </div>
+            </div>
+
+            <!-- Por qué fracasa el MLP -->
+            <div class="callout mb-5" style="border-color:#3D008D; background:#F5F0FA">
+                <p class="text-[0.9rem] text-gray-700"><i class="fas fa-triangle-exclamation text-primary mr-1"></i><strong>¿Por qué un MLP fracasa con imágenes?</strong> Una imagen de \(1000\times 1000\) píxeles conectada a una capa oculta de 1.000 neuronas exige <strong>mil millones de pesos</strong> solo en la primera capa. Además, aplanar la imagen <strong>destruye la estructura espacial</strong> (pierde "arriba", "cerca", "lejos") y no ofrece <strong>invarianza a la traslación</strong>. La CNN resuelve los tres problemas con <strong>conexiones locales</strong>, <strong>pesos compartidos</strong> y <strong>submuestreo</strong>.</p>
+            </div>
+
+            <!-- Convolución + Pooling -->
+            <div class="grid lg:grid-cols-2 gap-5 mb-5">
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-border-all text-primary"></i>La operación de convolución</h3>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">Un <strong>filtro</strong> (kernel) se desliza sobre la imagen; en cada posición se multiplica elemento a elemento y se suma, produciendo un <strong>mapa de características</strong>. Los valores del filtro <strong>se aprenden</strong> por retropropagación: la red descubre sola qué bordes o curvas detectar.</p>
+                    <div class="eq text-center my-3">$$S(i,j) = (I * K)(i,j) = \sum_{m}\sum_{n} I(i+m,\,j+n)\,K(m,n)$$</div>
+                    <!-- SVG convolución -->
+                    <svg viewBox="0 0 420 180" class="w-full" role="img" aria-labelledby="convTitle convDesc">
+                        <title id="convTitle">Operación de convolución sobre una imagen</title>
+                        <desc id="convDesc">Una imagen de entrada en forma de cuadrícula con un filtro de tres por tres resaltado se multiplica y suma para producir una sola celda de un mapa de características más pequeño a la derecha.</desc>
+                        <!-- entrada 5x5 -->
+                        <g>
+                            <text x="62" y="14" text-anchor="middle" font-size="10" fill="#64748B" font-family="Montserrat">Entrada 5×5</text>
+                            <g stroke="#CBD5E1" fill="#F8FAFC">
+                                <rect x="20" y="22" width="84" height="84"/>
+                            </g>
+                            <g stroke="#E2E8F0" stroke-width="1">
+                                <line x1="20" y1="38.8" x2="104" y2="38.8"/><line x1="20" y1="55.6" x2="104" y2="55.6"/><line x1="20" y1="72.4" x2="104" y2="72.4"/><line x1="20" y1="89.2" x2="104" y2="89.2"/>
+                                <line x1="36.8" y1="22" x2="36.8" y2="106"/><line x1="53.6" y1="22" x2="53.6" y2="106"/><line x1="70.4" y1="22" x2="70.4" y2="106"/><line x1="87.2" y1="22" x2="87.2" y2="106"/>
+                            </g>
+                            <!-- ventana del filtro 3x3 resaltada -->
+                            <rect x="20" y="22" width="50.4" height="50.4" fill="rgba(237,30,121,0.14)" stroke="#ED1E79" stroke-width="2"/>
+                        </g>
+                        <!-- filtro -->
+                        <g>
+                            <text x="200" y="14" text-anchor="middle" font-size="10" fill="#64748B" font-family="Montserrat">Filtro 3×3</text>
+                            <rect x="170" y="34" width="60" height="60" fill="#FFF7ED" stroke="#B45309" stroke-width="1.5"/>
+                            <g stroke="#FBBF77">
+                                <line x1="190" y1="34" x2="190" y2="94"/><line x1="210" y1="34" x2="210" y2="94"/>
+                                <line x1="170" y1="54" x2="230" y2="54"/><line x1="170" y1="74" x2="230" y2="74"/>
+                            </g>
+                            <text x="200" y="112" text-anchor="middle" font-size="14" fill="#B45309">⊛</text>
+                        </g>
+                        <!-- flecha -->
+                        <line x1="244" y1="64" x2="300" y2="64" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrConv)"/>
+                        <defs>
+                            <marker id="arrConv" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker>
+                        </defs>
+                        <!-- salida 3x3 -->
+                        <g>
+                            <text x="356" y="14" text-anchor="middle" font-size="10" fill="#64748B" font-family="Montserrat">Mapa 3×3</text>
+                            <rect x="326" y="34" width="60" height="60" fill="#F5F0FA" stroke="#3D008D" stroke-width="1.5"/>
+                            <g stroke="#D6BCEF">
+                                <line x1="346" y1="34" x2="346" y2="94"/><line x1="366" y1="34" x2="366" y2="94"/>
+                                <line x1="326" y1="54" x2="386" y2="54"/><line x1="326" y1="74" x2="386" y2="74"/>
+                            </g>
+                            <rect x="326" y="34" width="20" height="20" fill="rgba(237,30,121,0.25)"/>
+                            <text x="356" y="112" text-anchor="middle" font-size="9" fill="#3D008D">una celda = Σ productos</text>
+                        </g>
+                        <line x1="70" y1="40" x2="336" y2="44" stroke="#ED1E79" stroke-width="1" stroke-dasharray="3 3" opacity="0.55"/>
+                    </svg>
+                    <p class="text-center text-[0.78rem] text-gray-500 mt-1">Tamaño de salida: \(O=\left\lfloor\frac{W-K+2P}{S}\right\rfloor+1\)</p>
+                    <div class="callout mt-2" style="border-color:#B45309; background:#FFFBEB">
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-magnifying-glass mr-1" style="color:#B45309"></i><strong>Hiperparámetros:</strong> el <strong>stride</strong> (\(S\)) es cuánto salta el filtro; el <strong>padding</strong> (\(P\)) rellena los bordes con ceros para no encoger la imagen (<em>same padding</em>: \(P=\frac{K-1}{2}\)).</p>
+                    </div>
+                </div>
+
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-compress text-primary"></i>Max Pooling: invarianza y reducción</h3>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">El pooling divide el mapa en regiones (p. ej. \(2\times 2\)) y conserva el <strong>máximo</strong> de cada una. Reduce el cómputo y aporta <strong>invarianza a pequeñas traslaciones</strong>: si el ojo del jaguar se movió un píxel, el valor máximo de la ventana sigue siendo el mismo.</p>
+                    <!-- SVG max pooling -->
+                    <svg viewBox="0 0 420 160" class="w-full" role="img" aria-labelledby="poolTitle poolDesc">
+                        <title id="poolTitle">Operación de Max Pooling 2 por 2</title>
+                        <desc id="poolDesc">Una cuadrícula de cuatro por cuatro se divide en cuatro bloques de dos por dos; de cada bloque se toma el valor máximo, produciendo una cuadrícula de dos por dos a la derecha.</desc>
+                        <!-- entrada 4x4 con numeros -->
+                        <g font-family="Fira Code" font-size="11" fill="#334155" text-anchor="middle">
+                            <rect x="30" y="22" width="120" height="120" fill="#F8FAFC" stroke="#CBD5E1"/>
+                            <rect x="30" y="22" width="60" height="60" fill="rgba(237,30,121,0.10)"/>
+                            <rect x="90" y="22" width="60" height="60" fill="rgba(61,0,141,0.08)"/>
+                            <rect x="30" y="82" width="60" height="60" fill="rgba(14,116,144,0.08)"/>
+                            <rect x="90" y="82" width="60" height="60" fill="rgba(253,185,19,0.14)"/>
+                            <g stroke="#E2E8F0"><line x1="60" y1="22" x2="60" y2="142"/><line x1="120" y1="22" x2="120" y2="142"/><line x1="30" y1="52" x2="150" y2="52"/><line x1="30" y1="112" x2="150" y2="112"/><line x1="30" y1="82" x2="150" y2="82" stroke="#CBD5E1"/><line x1="90" y1="22" x2="90" y2="142" stroke="#CBD5E1"/></g>
+                            <text x="45" y="41">1</text><text x="75" y="41" font-weight="700" fill="#ED1E79">8</text><text x="105" y="41">3</text><text x="135" y="41">2</text>
+                            <text x="45" y="71">4</text><text x="75" y="71">2</text><text x="105" y="71" font-weight="700" fill="#3D008D">9</text><text x="135" y="71">1</text>
+                            <text x="45" y="101">6</text><text x="75" y="101">3</text><text x="105" y="101">1</text><text x="135" y="101" font-weight="700" fill="#FDB913">7</text>
+                            <text x="45" y="131" font-weight="700" fill="#0E7490">5</text><text x="75" y="131">0</text><text x="105" y="131">4</text><text x="135" y="131">2</text>
+                        </g>
+                        <text x="90" y="155" text-anchor="middle" font-size="10" fill="#64748B" font-family="Montserrat">Entrada 4×4</text>
+                        <!-- flecha -->
+                        <line x1="170" y1="82" x2="240" y2="82" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrPool)"/>
+                        <text x="205" y="74" text-anchor="middle" font-size="9" fill="#64748B" font-family="Montserrat">máx 2×2</text>
+                        <defs><marker id="arrPool" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker></defs>
+                        <!-- salida 2x2 -->
+                        <g font-family="Fira Code" font-size="14" text-anchor="middle">
+                            <rect x="262" y="42" width="100" height="100" fill="#F8FAFC" stroke="#CBD5E1"/>
+                            <rect x="262" y="42" width="50" height="50" fill="rgba(237,30,121,0.18)"/>
+                            <rect x="312" y="42" width="50" height="50" fill="rgba(61,0,141,0.14)"/>
+                            <rect x="262" y="92" width="50" height="50" fill="rgba(14,116,144,0.14)"/>
+                            <rect x="312" y="92" width="50" height="50" fill="rgba(253,185,19,0.22)"/>
+                            <line x1="312" y1="42" x2="312" y2="142" stroke="#CBD5E1"/><line x1="262" y1="92" x2="362" y2="92" stroke="#CBD5E1"/>
+                            <text x="287" y="74" font-weight="700" fill="#ED1E79">8</text><text x="337" y="74" font-weight="700" fill="#3D008D">9</text>
+                            <text x="287" y="124" font-weight="700" fill="#0E7490">5</text><text x="337" y="124" font-weight="700" fill="#FDB913">7</text>
+                        </g>
+                        <text x="312" y="155" text-anchor="middle" font-size="10" fill="#64748B" font-family="Montserrat">Salida 2×2</text>
+                    </svg>
+                    <div class="callout mt-2" style="border-color:#0E7490; background:#ECFEFF">
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-industry mr-1 text-teal"></i><strong>La fábrica visual:</strong> la imagen avanza por una línea de ensamblaje — inspectores-robot (convolución) detectan patrones, ReLU filtra lo útil, el pooling resume, y la sala de decisiones (capas densas) emite el veredicto «Gato: 95%».</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Línea de tiempo de arquitecturas -->
+            <div class="card p-6 mb-5">
+                <h3 class="font-bold text-navy mb-1 flex items-center gap-2"><i class="fas fa-timeline text-primary"></i>De LeNet a ResNet: la carrera por la profundidad</h3>
+                <p class="text-sm text-gray-500 mb-5">Cada arquitectura resolvió un cuello de botella de la anterior.</p>
+                <!-- SVG timeline -->
+                <svg viewBox="0 0 680 120" class="w-full" role="img" aria-labelledby="evoTitle evoDesc">
+                    <title id="evoTitle">Evolución histórica de las arquitecturas CNN</title>
+                    <desc id="evoDesc">Línea de tiempo horizontal con cinco hitos: LeNet en 1998, AlexNet en 2012, VGG e Inception en 2014, y ResNet en 2015, con su profundidad creciente en número de capas.</desc>
+                    <line x1="40" y1="62" x2="650" y2="62" stroke="#CBD5E1" stroke-width="2"/>
+                    <g font-family="Montserrat" text-anchor="middle">
+                        <g><circle cx="70" cy="62" r="8" fill="#3D008D"/><text x="70" y="40" font-size="11" font-weight="700" fill="#001A4D">LeNet-5</text><text x="70" y="86" font-size="9" fill="#64748B">1998 · 7 capas</text><text x="70" y="100" font-size="8" fill="#94A3B8">cheques MNIST</text></g>
+                        <g><circle cx="210" cy="62" r="8" fill="#ED1E79"/><text x="210" y="40" font-size="11" font-weight="700" fill="#001A4D">AlexNet</text><text x="210" y="86" font-size="9" fill="#64748B">2012 · 8 capas</text><text x="210" y="100" font-size="8" fill="#94A3B8">ReLU + GPU + Dropout</text></g>
+                        <g><circle cx="350" cy="62" r="8" fill="#0E7490"/><text x="350" y="40" font-size="11" font-weight="700" fill="#001A4D">VGG</text><text x="350" y="86" font-size="9" fill="#64748B">2014 · 16 capas</text><text x="350" y="100" font-size="8" fill="#94A3B8">filtros 3×3 apilados</text></g>
+                        <g><circle cx="490" cy="62" r="8" fill="#B45309"/><text x="490" y="40" font-size="11" font-weight="700" fill="#001A4D">Inception</text><text x="490" y="86" font-size="9" fill="#64748B">2014 · módulos ∥</text><text x="490" y="100" font-size="8" fill="#94A3B8">conv 1×1, 4M params</text></g>
+                        <g><circle cx="630" cy="62" r="9" fill="#5B1C9E"/><text x="630" y="40" font-size="11" font-weight="700" fill="#001A4D">ResNet</text><text x="630" y="86" font-size="9" fill="#64748B">2015 · 152 capas</text><text x="630" y="100" font-size="8" fill="#94A3B8">skip connections</text></g>
+                    </g>
+                </svg>
+                <div class="callout mt-3" style="border-color:#5B1C9E; background:#FAF8FF">
+                    <p class="text-[0.86rem] text-gray-700"><i class="fas fa-link mr-1" style="color:#5B1C9E"></i><strong>Conexiones residuales (ResNet):</strong> al superar las 20 capas, el gradiente se degradaba. ResNet aprende una función residual \(\mathcal{F}(x)\) y suma la identidad: salida \(=\mathcal{F}(x)+x\). Si una capa no aporta, basta con \(\mathcal{F}(x)=0\). Así se entrenaron 152 capas, superando al humano en ImageNet (error 3,57 %). Sigue siendo el <em>backbone</em> más usado en Transfer Learning.</p>
+                </div>
+            </div>
+
+            <!-- ViT + comparativa -->
+            <div class="grid lg:grid-cols-2 gap-5 mb-5">
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-table-cells text-primary"></i>Vision Transformer (ViT): la imagen como secuencia de parches</h3>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">En vez de deslizar filtros, el ViT trocea la imagen en <strong>parches</strong> cuadrados, los trata como "palabras visuales" y deja que la <strong>autoatención</strong> relacione cada parche con todos los demás: campo receptivo <strong>global</strong> desde la primera capa.</p>
+                    <div class="eq text-center my-2">$$N = \frac{H\cdot W}{P^2}\quad(224\times224,\;P{=}16 \Rightarrow N{=}196)$$</div>
+                    <!-- SVG parches -->
+                    <svg viewBox="0 0 360 130" class="w-full" role="img" aria-labelledby="vitTitle vitDesc">
+                        <title id="vitTitle">Una imagen dividida en parches para un Vision Transformer</title>
+                        <desc id="vitDesc">Una imagen cuadrada se divide en una cuadrícula de parches numerados que luego se aplanan en una fila de tokens, ilustrando el tratamiento de la imagen como una secuencia.</desc>
+                        <g font-family="Fira Code" font-size="9" fill="#475569" text-anchor="middle">
+                            <rect x="20" y="14" width="100" height="100" fill="#F5F0FA" stroke="#3D008D"/>
+                            <g stroke="#C4B5FD"><line x1="45" y1="14" x2="45" y2="114"/><line x1="70" y1="14" x2="70" y2="114"/><line x1="95" y1="14" x2="95" y2="114"/><line x1="20" y1="39" x2="120" y2="39"/><line x1="20" y1="64" x2="120" y2="64"/><line x1="20" y1="89" x2="120" y2="89"/></g>
+                            <text x="32" y="30">1</text><text x="57" y="30">2</text><text x="82" y="30">3</text><text x="107" y="30">4</text>
+                            <text x="32" y="80">9</text>
+                        </g>
+                        <text x="70" y="128" text-anchor="middle" font-size="9" fill="#64748B" font-family="Montserrat">Imagen → parches</text>
+                        <line x1="128" y1="64" x2="158" y2="64" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrVit)"/>
+                        <defs><marker id="arrVit" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker></defs>
+                        <g font-family="Fira Code" font-size="8" fill="#fff" text-anchor="middle">
+                            <rect x="168" y="50" width="24" height="28" rx="3" fill="#ED1E79"/><text x="180" y="68">t1</text>
+                            <rect x="196" y="50" width="24" height="28" rx="3" fill="#3D008D"/><text x="208" y="68">t2</text>
+                            <rect x="224" y="50" width="24" height="28" rx="3" fill="#0E7490"/><text x="236" y="68">t3</text>
+                            <rect x="252" y="50" width="24" height="28" rx="3" fill="#B45309"/><text x="264" y="68">…</text>
+                            <rect x="280" y="50" width="34" height="28" rx="3" fill="#5B1C9E"/><text x="297" y="68">t196</text>
+                        </g>
+                        <text x="240" y="98" text-anchor="middle" font-size="9" fill="#64748B" font-family="Montserrat">+ codificación posicional → autoatención</text>
+                    </svg>
+                    <div class="callout mt-2" style="border-color:#B45309; background:#FFFBEB">
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-database mr-1" style="color:#B45309"></i><strong>Hambre de datos:</strong> el ViT carece del <em>sesgo inductivo</em> de la convolución, así que necesita millones de imágenes (JFT-300M) o pre-entrenamiento masivo. Con pocos datos, una ResNet suele ganarle.</p>
+                    </div>
+                </div>
+
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-3 flex items-center gap-2"><i class="fas fa-code-compare text-primary"></i>CNN vs. ViT — ¿cuál elegir?</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-[0.78rem] border-collapse">
+                            <thead>
+                                <tr class="bg-[#F5F0FA] text-primary">
+                                    <th class="text-left p-2 border border-gray-200">Criterio</th>
+                                    <th class="text-left p-2 border border-gray-200">CNN (ResNet)</th>
+                                    <th class="text-left p-2 border border-gray-200">ViT</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-700">
+                                <tr><td class="p-2 border border-gray-200 font-semibold">Sesgo inductivo</td><td class="p-2 border border-gray-200">Fuerte (local)</td><td class="p-2 border border-gray-200">Débil (lo aprende)</td></tr>
+                                <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Datos</td><td class="p-2 border border-gray-200">Miles bastan</td><td class="p-2 border border-gray-200">Millones</td></tr>
+                                <tr><td class="p-2 border border-gray-200 font-semibold">Campo receptivo</td><td class="p-2 border border-gray-200">Local, crece</td><td class="p-2 border border-gray-200">Global desde capa 1</td></tr>
+                                <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Costo (datos pequeños)</td><td class="p-2 border border-gray-200">Menor</td><td class="p-2 border border-gray-200">Alto</td></tr>
+                                <tr><td class="p-2 border border-gray-200 font-semibold">Interpretabilidad</td><td class="p-2 border border-gray-200">Grad-CAM</td><td class="p-2 border border-gray-200">Mapas de atención</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="callout mt-3" style="border-color:#15803D; background:#F0FDF4">
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-leaf mr-1" style="color:#15803D"></i><strong>Para campo (cámaras trampa, hojas de café):</strong> partir de una CNN pre-entrenada (ResNet, EfficientNet) por su eficiencia muestral. El ViT brilla con pre-entrenamiento a gran escala o arquitecturas híbridas.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transfer learning -->
+            <div class="card p-6 mb-5">
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-recycle text-primary"></i>Transfer Learning: reciclar conocimiento</h3>
+                <p class="text-[0.86rem] text-gray-600 mb-4">Las capas iniciales aprenden bordes y texturas <strong>universales</strong>: un borde en una foto de perro es igual a uno en una radiografía. Se reutiliza una red entrenada en ImageNet (1,2 millones de imágenes) y se adapta a la tarea local.</p>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="rounded-xl border border-primary/15 bg-[#FAF8FF] p-4">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-primary"><i class="fas fa-lock mr-1"></i>Extracción de características</span>
+                        <ul class="text-[0.84rem] text-gray-600 mt-2 space-y-1.5">
+                            <li><strong>Cuándo:</strong> dataset pequeño y similar a ImageNet.</li>
+                            <li><strong>Cómo:</strong> congelar (<em>freeze</em>) todos los pesos base; reemplazar y entrenar solo la capa de clasificación final.</li>
+                            <li><strong>Ejemplo:</strong> clasificar 100 fotos de flores locales.</li>
+                        </ul>
+                    </div>
+                    <div class="rounded-xl border border-secondary/15 bg-[#FCE7F1]/40 p-4">
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-secondary"><i class="fas fa-unlock mr-1"></i>Fine-Tuning (ajuste fino)</span>
+                        <ul class="text-[0.84rem] text-gray-600 mt-2 space-y-1.5">
+                            <li><strong>Cuándo:</strong> dataset grande o muy distinto (médico, satelital).</li>
+                            <li><strong>Cómo:</strong> descongelar las últimas capas convolucionales y reentrenar con tasa de aprendizaje <strong>muy baja</strong>.</li>
+                            <li><strong>Ejemplo:</strong> detectar tuberculosis en 5.000 radiografías.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edge AI + Colombia -->
+            <div class="grid lg:grid-cols-2 gap-5">
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-microchip text-primary"></i>Edge AI: llevar el modelo a la selva</h3>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">Sin internet, con batería solar y procesadores diminutos, hay que comprimir el modelo:</p>
+                    <ul class="space-y-2 text-[0.84rem] text-gray-700">
+                        <li class="flex gap-2"><span class="font-bold text-primary">·</span><span><strong>Cuantización</strong> (FP32→INT8): \(\approx 4\times\) más pequeño. \(25{\cdot}10^{6}\) params: 100 MB → 25 MB.</span></li>
+                        <li class="flex gap-2"><span class="font-bold text-primary">·</span><span><strong>Pruning</strong> (poda): elimina pesos cercanos a cero (red <em>sparse</em>), como podar un cafetal.</span></li>
+                        <li class="flex gap-2"><span class="font-bold text-primary">·</span><span><strong>Destilación</strong>: un modelo "estudiante" pequeño imita al "maestro" grande.</span></li>
+                        <li class="flex gap-2"><span class="font-bold text-primary">·</span><span><strong>Eficientes por diseño</strong>: MobileNet (conv. separables), EfficientNet (escalado compuesto).</span></li>
+                    </ul>
+                    <div class="callout mt-3" style="border-color:#B45309; background:#FFFBEB">
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-scale-unbalanced mr-1" style="color:#B45309"></i><strong>Trade-off precisión ↔ tamaño:</strong> una compresión agresiva puede confundir un tigrillo con un ocelote. Verificar la caída de sensibilidad antes de desplegar.</p>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-3 flex items-center gap-2"><i class="fas fa-earth-americas text-primary"></i>Ojos digitales en la biodiversidad colombiana</h3>
+                    <div class="grid sm:grid-cols-1 gap-3 text-[0.84rem]">
+                        <div class="bg-gray-50 rounded-lg p-3"><strong class="text-primary">Wildlife Insights</strong> — CNN que filtra los falsos positivos de cámaras trampa (más de 13.000 imágenes en una campaña de 2023, Instituto Humboldt + Red Otus).</div>
+                        <div class="bg-gray-50 rounded-lg p-3"><strong class="text-primary">Re-identificación</strong> — las manchas únicas del jaguar permiten rastrear individuos ("Jaguar #04") y verificar corredores biológicos Andes-Amazonía.</div>
+                        <div class="bg-gray-50 rounded-lg p-3"><strong class="text-secondary">Especies monitoreadas</strong> — oso andino, danta, jaguar y tigrillo en la Orinoquía y los Andes.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== CAPÍTULO 2 ====================== -->
+        <section id="cap2" class="scroll-mt-20 mt-14 reveal">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-14 h-14 rounded-2xl bg-secondary text-white flex items-center justify-center text-xl font-extrabold shadow-lg flex-shrink-0">2.2</div>
+                <div>
+                    <p class="text-xs uppercase tracking-widest text-secondary font-bold">Capítulo 2.2 · #tema/rnn · #tema/secuencias</p>
+                    <h2 class="sec-title text-2xl md:text-3xl text-navy">Datos Secuenciales: RNN, LSTM y GRU</h2>
+                </div>
+            </div>
+
+            <div class="callout mb-5" style="border-color:#ED1E79; background:#FFF1F7">
+                <p class="text-[0.9rem] text-gray-700"><i class="fas fa-clock-rotate-left text-secondary mr-1"></i>Las redes <em>feedforward</em> suponen entradas independientes, pero la realidad es <strong>secuencial</strong>: la lluvia de mayo depende de ciclos anuales (\(t{-}12\)); "dar papaya" no significa entregar una fruta sino <em>exponerse a un riesgo</em>; una transacción en Miami una hora después de otra en Bogotá es sospechosa. Se requiere una red con <strong>memoria</strong> que procese token por token.</p>
+            </div>
+
+            <!-- RNN diagrama -->
+            <div class="card p-6 mb-5">
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-arrows-spin text-secondary"></i>La RNN: una red con bucle de retroalimentación</h3>
+                <p class="text-[0.86rem] text-gray-600 mb-3">La RNN es la misma celda copiada en el tiempo: en cada paso recibe la entrada \(x_t\) y el estado oculto anterior \(h_{t-1}\), y produce un nuevo estado \(h_t\) que actúa como su "memoria".</p>
+                <div class="eq text-center my-3">$$h_t = \tanh(W_{xh}\,x_t + W_{hh}\,h_{t-1} + b_h)\qquad \hat{y}_t = \operatorname{softmax}(W_{hy}\,h_t + b_y)$$</div>
+                <!-- SVG RNN desenrollada -->
+                <svg viewBox="0 0 640 150" class="w-full" role="img" aria-labelledby="rnnTitle rnnDesc">
+                    <title id="rnnTitle">Red neuronal recurrente desenrollada en el tiempo</title>
+                    <desc id="rnnDesc">Cuatro celdas recurrentes idénticas conectadas en cadena; cada una recibe una entrada en su instante de tiempo y pasa su estado oculto a la siguiente, produciendo una salida en cada paso.</desc>
+                    <defs><marker id="arrRnn" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker></defs>
+                    <g font-family="Montserrat" text-anchor="middle">
+                        <!-- celdas -->
+                        <g>
+                            <rect x="50" y="55" width="56" height="44" rx="8" fill="#FCE7F1" stroke="#ED1E79" stroke-width="2"/><text x="78" y="82" font-size="14" fill="#ED1E79" font-weight="700">h₁</text>
+                            <rect x="194" y="55" width="56" height="44" rx="8" fill="#FCE7F1" stroke="#ED1E79" stroke-width="2"/><text x="222" y="82" font-size="14" fill="#ED1E79" font-weight="700">h₂</text>
+                            <rect x="338" y="55" width="56" height="44" rx="8" fill="#FCE7F1" stroke="#ED1E79" stroke-width="2"/><text x="366" y="82" font-size="14" fill="#ED1E79" font-weight="700">h₃</text>
+                            <rect x="510" y="55" width="56" height="44" rx="8" fill="#FCE7F1" stroke="#ED1E79" stroke-width="2"/><text x="538" y="82" font-size="14" fill="#ED1E79" font-weight="700">hₜ</text>
+                        </g>
+                        <!-- estado oculto entre celdas -->
+                        <g stroke="#3D008D" stroke-width="2" fill="none" marker-end="url(#arrRnn)">
+                            <line x1="106" y1="77" x2="192" y2="77"/><line x1="250" y1="77" x2="336" y2="77"/>
+                        </g>
+                        <line x1="394" y1="77" x2="430" y2="77" stroke="#3D008D" stroke-width="2"/>
+                        <text x="462" y="81" font-size="16" fill="#3D008D">···</text>
+                        <line x1="478" y1="77" x2="508" y2="77" stroke="#3D008D" stroke-width="2" marker-end="url(#arrRnn)"/>
+                        <!-- entradas -->
+                        <g stroke="#94A3B8" stroke-width="1.5" fill="none" marker-end="url(#arrRnn)">
+                            <line x1="78" y1="128" x2="78" y2="101"/><line x1="222" y1="128" x2="222" y2="101"/><line x1="366" y1="128" x2="366" y2="101"/><line x1="538" y1="128" x2="538" y2="101"/>
+                        </g>
+                        <g font-size="11" fill="#64748B"><text x="78" y="142">x₁</text><text x="222" y="142">x₂</text><text x="366" y="142">x₃</text><text x="538" y="142">xₜ</text></g>
+                        <!-- salidas -->
+                        <g stroke="#15803D" stroke-width="1.5" fill="none" marker-end="url(#arrRnn)">
+                            <line x1="78" y1="55" x2="78" y2="30"/><line x1="222" y1="55" x2="222" y2="30"/><line x1="366" y1="55" x2="366" y2="30"/><line x1="538" y1="55" x2="538" y2="30"/>
+                        </g>
+                        <g font-size="11" fill="#15803D"><text x="78" y="22">ŷ₁</text><text x="222" y="22">ŷ₂</text><text x="366" y="22">ŷ₃</text><text x="538" y="22">ŷₜ</text></g>
+                        <text x="149" y="68" font-size="9" fill="#3D008D" font-style="italic">W₍ₕₕ₎</text>
+                    </g>
+                </svg>
+                <div class="callout mt-3" style="border-color:#DC2626; background:#FEF2F2">
+                    <p class="text-[0.86rem] text-gray-700"><i class="fas fa-phone-slash mr-1 text-red-600"></i><strong>El "teléfono roto" (desvanecimiento del gradiente):</strong> al entrenar con <strong>BPTT</strong>, el término \(\frac{\partial h_t}{\partial h_k}=\prod \operatorname{diag}(1-\tanh^2)\,W_{hh}^{\top}\) multiplica muchas matrices. Si sus valores son \(<1\), el gradiente tiende <strong>exponencialmente a cero</strong>: la red aprende lo reciente pero <strong>olvida lo lejano</strong> (el sujeto plural "estudiantes" al inicio de una frase larga).</p>
+                </div>
+            </div>
+
+            <!-- LSTM celda + estado de celda -->
+            <div class="grid lg:grid-cols-2 gap-5 mb-5">
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-door-closed text-secondary"></i>LSTM: la cinta transportadora con compuertas</h3>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">La LSTM (1997) separa la memoria a <strong>largo plazo</strong> (estado de celda \(C_t\)) de la de <strong>corto plazo</strong> (\(h_t\)). Tres compuertas sigmoides regulan el flujo: valores entre 0 (olvidar) y 1 (recordar).</p>
+                    <!-- SVG compuertas LSTM -->
+                    <svg viewBox="0 0 380 170" class="w-full" role="img" aria-labelledby="lstmTitle lstmDesc">
+                        <title id="lstmTitle">Celda LSTM con sus tres compuertas y el estado de la celda</title>
+                        <desc id="lstmDesc">El estado de la celda recorre la parte superior como una cinta transportadora; debajo, las compuertas de olvido, entrada y salida regulan qué información se descarta, se añade y se expone.</desc>
+                        <!-- cinta transportadora (cell state) -->
+                        <line x1="20" y1="34" x2="360" y2="34" stroke="#001A4D" stroke-width="4" marker-end="url(#arrLstm)"/>
+                        <defs><marker id="arrLstm" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#001A4D"/></marker></defs>
+                        <text x="20" y="24" font-size="10" fill="#001A4D" font-family="Montserrat" font-weight="700">C₍ₜ₋₁₎</text>
+                        <text x="340" y="24" font-size="10" fill="#001A4D" font-family="Montserrat" font-weight="700" text-anchor="end">Cₜ</text>
+                        <text x="190" y="24" font-size="9" fill="#475569" font-family="Montserrat" text-anchor="middle">estado de celda (memoria larga)</text>
+                        <!-- operadores sobre la cinta -->
+                        <circle cx="110" cy="34" r="10" fill="#fff" stroke="#DC2626" stroke-width="1.5"/><text x="110" y="38" font-size="11" fill="#DC2626" text-anchor="middle">⊙</text>
+                        <circle cx="230" cy="34" r="10" fill="#fff" stroke="#15803D" stroke-width="1.5"/><text x="230" y="39" font-size="13" fill="#15803D" text-anchor="middle">+</text>
+                        <!-- compuertas -->
+                        <g font-family="Montserrat" text-anchor="middle">
+                            <rect x="92" y="92" width="48" height="34" rx="6" fill="#FEF2F2" stroke="#DC2626"/><text x="116" y="108" font-size="11" fill="#DC2626" font-weight="700">fₜ</text><text x="116" y="120" font-size="7.5" fill="#9A3412">olvido</text>
+                            <rect x="166" y="92" width="48" height="34" rx="6" fill="#F0FDF4" stroke="#15803D"/><text x="190" y="108" font-size="11" fill="#15803D" font-weight="700">iₜ</text><text x="190" y="120" font-size="7.5" fill="#166534">entrada</text>
+                            <rect x="240" y="92" width="48" height="34" rx="6" fill="#FFFBEB" stroke="#B45309"/><text x="264" y="108" font-size="11" fill="#B45309" font-weight="700">C̃ₜ</text><text x="264" y="120" font-size="7.5" fill="#92400E">candidato</text>
+                            <rect x="308" y="92" width="48" height="34" rx="6" fill="#EFF6FF" stroke="#2563EB"/><text x="332" y="108" font-size="11" fill="#2563EB" font-weight="700">oₜ</text><text x="332" y="120" font-size="7.5" fill="#1D4ED8">salida</text>
+                        </g>
+                        <!-- conexiones compuerta->cinta -->
+                        <g stroke="#94A3B8" stroke-width="1.2" fill="none" stroke-dasharray="3 2">
+                            <line x1="116" y1="92" x2="110" y2="46"/><line x1="190" y1="92" x2="225" y2="46"/><line x1="264" y1="92" x2="235" y2="46"/>
+                        </g>
+                        <!-- hidden state salida -->
+                        <line x1="332" y1="126" x2="332" y2="150" stroke="#2563EB" stroke-width="1.5" marker-end="url(#arrLstm)"/>
+                        <text x="332" y="164" font-size="10" fill="#2563EB" text-anchor="middle" font-family="Montserrat" font-weight="700">hₜ</text>
+                    </svg>
+                    <div class="text-[0.78rem] text-gray-600 space-y-1 mt-2">
+                        <div class="eq text-center">$$C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$$</div>
+                        <p class="text-center text-gray-500">La <strong>suma</strong> (no multiplicación) deja fluir el gradiente "intacto": ese es el «carrusel de error constante».</p>
+                    </div>
+                </div>
+
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-chart-line text-secondary"></i>El estado de celda preserva la memoria</h3>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">Mientras la RNN simple <strong>diluye</strong> la señal de pasos lejanos, la "autopista" aditiva de la LSTM la <strong>conserva</strong>. Las curvas comparan cuánta señal del paso inicial sobrevive a lo largo de la secuencia (generadas a partir de funciones reales).</p>
+                    <div class="plot-mem" role="img" aria-label="Gráfica comparativa: la señal de la RNN simple decae exponencialmente hasta casi cero a lo largo de los pasos de tiempo, mientras que la de la LSTM se mantiene cercana a uno gracias al estado de la celda aditivo."></div>
+                    <div class="grid grid-cols-2 gap-2 text-[0.76rem] text-center mt-2">
+                        <div class="bg-[#FEF2F2] rounded p-1.5 text-red-700"><strong>RNN simple</strong><br>la memoria se desvanece</div>
+                        <div class="bg-[#F0FDF4] rounded p-1.5 text-green-700"><strong>LSTM</strong><br>la memoria persiste</div>
+                    </div>
+                    <div class="callout mt-3" style="border-color:#0E7490; background:#ECFEFF">
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-shield-halved mr-1 text-teal"></i><strong>Bancolombia / Nubank:</strong> la LSTM mantiene el perfil de gasto del usuario; al ver "compra grande en Miami 1 hora después de Bogotá", detecta la discrepancia con el estado oculto y dispara verificación. <em>Precog</em> de Nubank predice incluso la intención del cliente.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GRU vs LSTM -->
+            <div class="card p-6 mb-5">
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-bolt-lightning text-secondary"></i>GRU: la simplificación veloz</h3>
+                <p class="text-[0.86rem] text-gray-600 mb-3">La GRU (2014) fusiona el estado de celda y el oculto en un solo vector, y combina olvido+entrada en una sola <strong>compuerta de actualización</strong> \(z_t\). Menos parámetros → entrena más rápido.</p>
+                <div class="grid md:grid-cols-2 gap-4 items-center">
+                    <div class="text-[0.8rem] text-gray-700 space-y-1.5">
+                        <div class="eq text-center">$$z_t = \sigma(W_{xz}x_t + W_{hz}h_{t-1}+b_z)$$</div>
+                        <div class="eq text-center">$$h_t = (1-z_t)\odot h_{t-1} + z_t\odot \tilde{h}_t$$</div>
+                        <p class="text-center text-gray-500">Interpolación lineal entre el pasado y el candidato.</p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-[0.78rem] border-collapse">
+                            <thead><tr class="bg-[#FFF1F7] text-secondary"><th class="text-left p-2 border border-gray-200">Criterio</th><th class="text-left p-2 border border-gray-200">LSTM</th><th class="text-left p-2 border border-gray-200">GRU</th></tr></thead>
+                            <tbody class="text-gray-700">
+                                <tr><td class="p-2 border border-gray-200 font-semibold">Compuertas / estados</td><td class="p-2 border border-gray-200">3 / 2</td><td class="p-2 border border-gray-200">2 / 1</td></tr>
+                                <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Parámetros</td><td class="p-2 border border-gray-200">Más</td><td class="p-2 border border-gray-200">Menos (ligero)</td></tr>
+                                <tr><td class="p-2 border border-gray-200 font-semibold">Velocidad</td><td class="p-2 border border-gray-200">Lenta</td><td class="p-2 border border-gray-200">Rápida</td></tr>
+                                <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Mejor en</td><td class="p-2 border border-gray-200">Secuencias muy largas</td><td class="p-2 border border-gray-200">Medias/cortas, edge</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="callout mt-3" style="border-color:#B45309; background:#FFFBEB">
+                    <p class="text-[0.82rem] text-gray-700"><i class="fas fa-motorcycle mr-1" style="color:#B45309"></i><strong>Rappi "Turbo":</strong> predecir pedidos en Chapinero Alto en los próximos 20 minutos exige <strong>latencia de milisegundos</strong>. La GRU, más ligera, gana: lo de hace 30 minutos importa más que lo de hace 6 meses. IDEAM, en cambio, usa LSTM para el ciclo de El Niño.</p>
+                </div>
+            </div>
+
+            <!-- Encoder-decoder + atención -->
+            <div class="card p-6">
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-right-left text-secondary"></i>Del cuello de botella seq2seq a la atención</h3>
+                <p class="text-[0.86rem] text-gray-600 mb-4">El <strong>encoder-decoder</strong> comprime toda la frase de entrada en un único vector de contexto \(c\). En frases largas ese vector se satura (el "mensajero que solo puede memorizar una frase"). La <strong>atención</strong> (Bahdanau, 2015) deja que el decodificador <strong>mire de regreso</strong> a todos los estados del encoder y pondere los relevantes.</p>
+                <!-- SVG atención -->
+                <svg viewBox="0 0 600 160" class="w-full" role="img" aria-labelledby="attnTitle attnDesc">
+                    <title id="attnTitle">Mecanismo de atención entre encoder y decoder</title>
+                    <desc id="attnDesc">Una fila de estados del codificador en la parte inferior se conecta mediante pesos de atención de distinto grosor a un paso del decodificador en la parte superior; las conexiones más gruesas indican mayor atención.</desc>
+                    <g font-family="Montserrat" text-anchor="middle">
+                        <!-- encoder states -->
+                        <g>
+                            <rect x="40" y="110" width="44" height="34" rx="6" fill="#FCE7F1" stroke="#ED1E79"/><text x="62" y="132" font-size="11" fill="#ED1E79" font-weight="700">h₁</text>
+                            <rect x="140" y="110" width="44" height="34" rx="6" fill="#FCE7F1" stroke="#ED1E79"/><text x="162" y="132" font-size="11" fill="#ED1E79" font-weight="700">h₂</text>
+                            <rect x="240" y="110" width="44" height="34" rx="6" fill="#FCE7F1" stroke="#ED1E79"/><text x="262" y="132" font-size="11" fill="#ED1E79" font-weight="700">h₃</text>
+                            <rect x="340" y="110" width="44" height="34" rx="6" fill="#FCE7F1" stroke="#ED1E79"/><text x="362" y="132" font-size="11" fill="#ED1E79" font-weight="700">h₄</text>
+                            <rect x="440" y="110" width="44" height="34" rx="6" fill="#FCE7F1" stroke="#ED1E79"/><text x="462" y="132" font-size="11" fill="#ED1E79" font-weight="700">h₅</text>
+                        </g>
+                        <text x="262" y="158" font-size="9" fill="#64748B">Estados del encoder (entrada completa, disponible)</text>
+                        <!-- decoder step -->
+                        <rect x="500" y="20" width="60" height="40" rx="8" fill="#F5F0FA" stroke="#3D008D" stroke-width="2"/><text x="530" y="38" font-size="11" fill="#3D008D" font-weight="700">sₜ</text><text x="530" y="52" font-size="8" fill="#475569">decoder</text>
+                        <!-- pesos de atención: grosor distinto -->
+                        <g fill="none" stroke="#3D008D">
+                            <line x1="62" y1="110" x2="510" y2="58" stroke-width="0.8" opacity="0.45"/>
+                            <line x1="162" y1="110" x2="512" y2="56" stroke-width="1.2" opacity="0.55"/>
+                            <line x1="262" y1="110" x2="514" y2="54" stroke-width="4.5" opacity="0.9"/>
+                            <line x1="362" y1="110" x2="516" y2="52" stroke-width="1.6" opacity="0.6"/>
+                            <line x1="462" y1="110" x2="518" y2="50" stroke-width="0.8" opacity="0.45"/>
+                        </g>
+                        <text x="300" y="80" font-size="9" fill="#3D008D" font-style="italic">αₜ,ᵢ (pesos de atención)</text>
+                    </g>
+                </svg>
+                <div class="grid md:grid-cols-2 gap-4 mt-3">
+                    <div class="text-[0.8rem] text-gray-700">
+                        <div class="eq text-center mb-1">$$c_t = \sum_{i=1}^{T}\alpha_{t,i}\,h_i,\quad \alpha_{t,i}=\frac{\exp(\mathrm{score})}{\sum_j \exp(\mathrm{score})}$$</div>
+                        <p class="text-center text-gray-500 text-[0.76rem]">El contexto deja de ser fijo: es un promedio ponderado que enfatiza las posiciones pertinentes.</p>
+                    </div>
+                    <div class="callout" style="border-color:#15803D; background:#F0FDF4">
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-highlighter mr-1" style="color:#15803D"></i><strong>El examen con apuntes abiertos:</strong> en vez de resumir todo en una hoja mental, el estudiante vuelve a recorrer el documento y resalta lo relevante para <em>cada</em> pregunta. Los pesos \(\alpha_{t,i}\) son la intensidad del resaltador.</p>
+                    </div>
+                </div>
+                <div class="callout mt-3" style="border-color:#5B1C9E; background:#FAF8FF">
+                    <p class="text-[0.84rem] text-gray-700"><i class="fas fa-arrow-right-long mr-1" style="color:#5B1C9E"></i><strong>Puente a los Transformers:</strong> ¿y si una secuencia se "presta atención a sí misma" y se elimina por completo la recurrencia? Esa <strong>autoatención</strong> es el corazón del Transformer, que se desarrolla en el Capítulo 2.3.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== CAPÍTULO 3 ====================== -->
+        <section id="cap3" class="scroll-mt-20 mt-14 reveal">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-14 h-14 rounded-2xl text-white flex items-center justify-center text-xl font-extrabold shadow-lg flex-shrink-0" style="background:#B45309">2.3</div>
+                <div>
+                    <p class="text-xs uppercase tracking-widest font-bold" style="color:#B45309">Capítulo 2.3 · #tema/generativos</p>
+                    <h2 class="sec-title text-2xl md:text-3xl text-navy">Modelos Generativos y Espacios Latentes</h2>
+                </div>
+            </div>
+
+            <div class="callout mb-5" style="border-color:#B45309; background:#FFFBEB">
+                <p class="text-[0.9rem] text-gray-700"><i class="fas fa-guitar mr-1" style="color:#B45309"></i><strong>La piquería vallenata:</strong> un verseador no recita canciones memorizadas (eso sería <em>overfitting</em>); interioriza la <strong>distribución de probabilidad</strong> del género (métrica, rima, ritmo) y, ante un pie forzado, improvisa una estrofa nueva pero coherente. Un modelo generativo aprende \(p_{\text{data}}(x)\) para crear instancias \(\tilde{x}\) inéditas pero plausibles.</p>
+            </div>
+
+            <!-- AE + VAE -->
+            <div class="grid lg:grid-cols-2 gap-5 mb-5">
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-compress-arrows-alt" style="color:#B45309"></i>Autoencoder (AE): comprimir y reconstruir</h3>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">El "reloj de arena": un <strong>encoder</strong> comprime hasta el <strong>cuello de botella</strong> (código latente \(z\)) y un <strong>decoder</strong> reconstruye. La restricción impide copiar la identidad: la red conserva solo lo esencial.</p>
+                    <!-- SVG AE hourglass -->
+                    <svg viewBox="0 0 380 150" class="w-full" role="img" aria-labelledby="aeTitle aeDesc">
+                        <title id="aeTitle">Arquitectura de reloj de arena de un autoencoder</title>
+                        <desc id="aeDesc">Una columna de muchos nodos a la izquierda (entrada) se estrecha hacia un cuello de botella central de pocos nodos (código latente) y se vuelve a expandir a la derecha (reconstrucción).</desc>
+                        <g fill="#FCE7F1" stroke="#ED1E79">
+                            <circle cx="36" cy="30" r="9"/><circle cx="36" cy="55" r="9"/><circle cx="36" cy="80" r="9"/><circle cx="36" cy="105" r="9"/><circle cx="36" cy="130" r="9"/>
+                        </g>
+                        <g fill="#F5F0FA" stroke="#3D008D">
+                            <circle cx="110" cy="55" r="9"/><circle cx="110" cy="80" r="9"/><circle cx="110" cy="105" r="9"/>
+                        </g>
+                        <!-- bottleneck -->
+                        <g fill="#FEF9E7" stroke="#B45309" stroke-width="2">
+                            <circle cx="190" cy="68" r="11"/><circle cx="190" cy="92" r="11"/>
+                        </g>
+                        <g fill="#F5F0FA" stroke="#3D008D">
+                            <circle cx="270" cy="55" r="9"/><circle cx="270" cy="80" r="9"/><circle cx="270" cy="105" r="9"/>
+                        </g>
+                        <g fill="#DCFCE7" stroke="#15803D">
+                            <circle cx="344" cy="30" r="9"/><circle cx="344" cy="55" r="9"/><circle cx="344" cy="80" r="9"/><circle cx="344" cy="105" r="9"/><circle cx="344" cy="130" r="9"/>
+                        </g>
+                        <g font-family="Montserrat" text-anchor="middle" font-size="9" fill="#64748B">
+                            <text x="36" y="148">x (entrada)</text>
+                            <text x="110" y="138" fill="#3D008D">encoder f</text>
+                            <text x="190" y="118" fill="#B45309" font-weight="700">z (latente)</text>
+                            <text x="270" y="138" fill="#3D008D">decoder g</text>
+                            <text x="344" y="148" fill="#15803D">x̂</text>
+                        </g>
+                    </svg>
+                    <div class="eq text-center my-2 text-sm">$$\mathcal{L}_{\text{rec}} = \lVert x - g(f(x))\rVert^2$$</div>
+                    <div class="callout mt-1" style="border-color:#0E7490; background:#ECFEFF">
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-bus mr-1 text-teal"></i><strong>TransMilenio:</strong> los alimentadores (encoder) canalizan pasajeros dispersos hacia el bus articulado rojo (vector latente \(z\)); al llegar, se dispersan (decoder). Un <strong>elefante</strong> que intenta entrar no se comprime → alto error de reconstrucción → <strong>detección de anomalías</strong> (fraude en Nequi, denoising de audio bioacústico).</p>
+                    </div>
+                </div>
+
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-circle-nodes" style="color:#B45309"></i>VAE: un espacio latente continuo y navegable</h3>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">El VAE mapea la entrada a una <strong>distribución</strong> (\(\mu,\sigma\)) en vez de a un punto fijo. Esto dota al espacio latente de <strong>continuidad</strong>: entre dos datos válidos hay infinitos estados intermedios igualmente válidos. Permite <strong>interpolar</strong> y generar.</p>
+                    <!-- SVG interpolación latente -->
+                    <svg viewBox="0 0 380 150" class="w-full" role="img" aria-labelledby="vaeTitle vaeDesc">
+                        <title id="vaeTitle">Interpolación en el espacio latente de un VAE</title>
+                        <desc id="vaeDesc">Dos nubes de probabilidad gaussianas etiquetadas como mu uno y mu dos se conectan mediante una trayectoria de puntos intermedios; cada punto representa una muestra válida generada al navegar suavemente entre ambas distribuciones.</desc>
+                        <!-- nubes -->
+                        <ellipse cx="70" cy="80" rx="38" ry="30" fill="rgba(237,30,121,0.12)" stroke="#ED1E79" stroke-dasharray="4 3"/>
+                        <ellipse cx="310" cy="60" rx="38" ry="30" fill="rgba(61,0,141,0.12)" stroke="#3D008D" stroke-dasharray="4 3"/>
+                        <circle cx="70" cy="80" r="5" fill="#ED1E79"/><circle cx="310" cy="60" r="5" fill="#3D008D"/>
+                        <!-- trayectoria de interpolación -->
+                        <path d="M70,80 Q190,40 310,60" fill="none" stroke="#B45309" stroke-width="2" stroke-dasharray="2 3"/>
+                        <g fill="#FDB913" stroke="#B45309" stroke-width="0.8">
+                            <circle cx="130" cy="64" r="4"/><circle cx="190" cy="55" r="4"/><circle cx="250" cy="55" r="4"/>
+                        </g>
+                        <g font-family="Montserrat" text-anchor="middle" font-size="9" fill="#64748B">
+                            <text x="70" y="125">μ₁ (ajiaco espeso)</text>
+                            <text x="310" y="105">μ₂ (ajiaco ligero)</text>
+                            <text x="190" y="38" fill="#B45309">interpolación válida</text>
+                        </g>
+                    </svg>
+                    <div class="eq text-center my-2 text-[0.82rem]">$$\mathcal{L}_{\text{ELBO}}=\mathbb{E}[\log p_\theta(x|z)] - D_{\text{KL}}(q_\phi(z|x)\,\|\,p(z))$$</div>
+                    <p class="text-center text-[0.74rem] text-gray-500 -mt-1">Truco de reparametrización: \(z=\mu+\sigma\odot\epsilon\) (para que fluya el gradiente).</p>
+                    <div class="callout mt-2" style="border-color:#B45309; background:#FFFBEB">
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-bowl-food mr-1" style="color:#B45309"></i><strong>El ajiaco como distribución:</strong> \(\mu\) es el arquetipo (papa, pollo, guascas); \(\sigma\) la tolerancia cultural (más crema sí, fideos no). Aplicaciones: modelar fermentación del café, interpolar rasgos genéticos, mapas de fertilidad de suelos.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GAN -->
+            <div class="card p-6 mb-5">
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-masks-theater" style="color:#B45309"></i>GAN: el juego adversario de dos redes</h3>
+                <p class="text-[0.86rem] text-gray-600 mb-4">Un <strong>Generador</strong> (\(G\), el verseador) crea muestras falsas a partir de ruido; un <strong>Discriminador</strong> (\(D\), el jurado) intenta distinguir reales de falsas. Compiten en un juego <strong>minimax</strong> hasta que \(D\) no puede distinguir (\(D(x)=1/2\)).</p>
+                <svg viewBox="0 0 600 140" class="w-full" role="img" aria-labelledby="ganTitle ganDesc">
+                    <title id="ganTitle">Arquitectura adversaria de una GAN</title>
+                    <desc id="ganDesc">Un vector de ruido entra al generador que produce una muestra falsa; junto con datos reales, alimenta al discriminador, que emite la probabilidad de ser real o falso y devuelve una señal de error a ambas redes.</desc>
+                    <defs><marker id="arrGan" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker></defs>
+                    <g font-family="Montserrat" text-anchor="middle">
+                        <!-- ruido -->
+                        <circle cx="40" cy="50" r="18" fill="#F1F5F9" stroke="#94A3B8"/><text x="40" y="48" font-size="11" fill="#475569">z</text><text x="40" y="60" font-size="7" fill="#64748B">ruido</text>
+                        <!-- G -->
+                        <rect x="100" y="28" width="70" height="44" rx="8" fill="#FEF9E7" stroke="#B45309" stroke-width="2"/><text x="135" y="48" font-size="13" fill="#B45309" font-weight="700">G</text><text x="135" y="62" font-size="8" fill="#92400E">Generador</text>
+                        <!-- muestra falsa -->
+                        <rect x="210" y="30" width="64" height="40" rx="6" fill="#FFFBEB" stroke="#FBBF24"/><text x="242" y="48" font-size="9" fill="#92400E">G(z)</text><text x="242" y="60" font-size="7" fill="#A16207">falsa</text>
+                        <!-- datos reales -->
+                        <rect x="210" y="92" width="64" height="40" rx="6" fill="#DCFCE7" stroke="#15803D"/><text x="242" y="110" font-size="9" fill="#166534">x</text><text x="242" y="122" font-size="7" fill="#15803D">real</text>
+                        <!-- D -->
+                        <rect x="330" y="50" width="70" height="44" rx="8" fill="#F5F0FA" stroke="#3D008D" stroke-width="2"/><text x="365" y="70" font-size="13" fill="#3D008D" font-weight="700">D</text><text x="365" y="84" font-size="8" fill="#5B1C9E">Discriminador</text>
+                        <!-- salida -->
+                        <text x="475" y="70" font-size="10" fill="#475569">D(x) ∈ [0,1]</text>
+                        <text x="475" y="84" font-size="8" fill="#64748B">¿real o falsa?</text>
+                        <!-- flechas -->
+                        <g stroke="#94A3B8" stroke-width="1.5" fill="none" marker-end="url(#arrGan)">
+                            <line x1="58" y1="50" x2="98" y2="50"/><line x1="170" y1="50" x2="208" y2="50"/>
+                            <line x1="274" y1="50" x2="328" y2="62"/><line x1="274" y1="112" x2="328" y2="82"/>
+                            <line x1="400" y1="72" x2="442" y2="72"/>
+                        </g>
+                        <!-- realimentación adversaria -->
+                        <path d="M365,94 C365,128 135,128 135,74" fill="none" stroke="#DC2626" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#arrGan)"/>
+                        <text x="250" y="125" font-size="8" fill="#DC2626">señal de error (entrena G para engañar a D)</text>
+                    </g>
+                </svg>
+                <div class="eq text-center my-2">$$\min_G \max_D V(D,G) = \mathbb{E}_{x\sim p_{\text{data}}}[\log D(x)] + \mathbb{E}_{z\sim p_z}[\log(1 - D(G(z)))]$$</div>
+                <div class="grid md:grid-cols-2 gap-3 mt-2">
+                    <div class="callout" style="border-color:#DC2626; background:#FEF2F2">
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-clone mr-1 text-red-600"></i><strong>Mode collapse:</strong> el verseador repite siempre su única estrofa ganadora. Soluciones: <em>non-saturating loss</em> (maximizar \(\log D(G(z))\)), DCGAN (convoluciones) y WGAN (distancia de Wasserstein).</p>
+                    </div>
+                    <div class="callout" style="border-color:#B45309; background:#FFFBEB">
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-triangle-exclamation mr-1" style="color:#B45309"></i><strong>Entrenamiento frágil:</strong> no hay pérdida monótona que interpretar. Una pérdida que baja no garantiza mejores muestras. La <strong>inspección visual</strong> periódica suele ser más informativa.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Difusión -->
+            <div class="card p-6 mb-5">
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-water" style="color:#B45309"></i>Modelos de Difusión: destruir para aprender a reconstruir</h3>
+                <p class="text-[0.86rem] text-gray-600 mb-4">El proceso <strong>forward</strong> (fijo, sin parámetros) añade ruido gaussiano paso a paso hasta convertir la imagen en estática pura. El proceso <strong>reverse</strong> (aprendido) entrena una red para <strong>quitar</strong> ese ruido y recuperar la imagen. Generar = partir de ruido y aplicar el reverse \(T\) veces.</p>
+                <!-- SVG difusión -->
+                <svg viewBox="0 0 600 130" class="w-full" role="img" aria-labelledby="diffTitle diffDesc">
+                    <title id="diffTitle">Procesos forward y reverse de un modelo de difusión</title>
+                    <desc id="diffDesc">Una imagen nítida se degrada progresivamente en cuatro pasos hacia la izquierda hasta convertirse en ruido puro (proceso forward, en rojo); el proceso reverse, en verde, recorre la cadena en sentido inverso reconstruyendo la imagen.</desc>
+                    <g>
+                        <!-- estados con niveles de ruido crecientes -->
+                        <rect x="30" y="40" width="60" height="60" rx="6" fill="#DCFCE7" stroke="#15803D"/><text x="60" y="74" text-anchor="middle" font-size="9" fill="#166534" font-family="Montserrat">x₀</text>
+                        <rect x="160" y="40" width="60" height="60" rx="6" fill="#E7F6E9" stroke="#86C99A"/><text x="190" y="74" text-anchor="middle" font-size="9" fill="#475569" font-family="Montserrat">x₁</text>
+                        <rect x="290" y="40" width="60" height="60" rx="6" fill="#EEF2F7" stroke="#B0B9C6"/><text x="320" y="74" text-anchor="middle" font-size="9" fill="#475569" font-family="Montserrat">x₂</text>
+                        <rect x="420" y="40" width="60" height="60" rx="6" fill="#F1F5F9" stroke="#94A3B8"/><text x="450" y="74" text-anchor="middle" font-size="9" fill="#475569" font-family="Montserrat">…</text>
+                        <rect x="510" y="40" width="60" height="60" rx="6" fill="#E2E8F0" stroke="#64748B" stroke-dasharray="3 2"/><text x="540" y="74" text-anchor="middle" font-size="9" fill="#334155" font-family="Montserrat">xₜ ruido</text>
+                    </g>
+                    <defs>
+                        <marker id="arrFwd" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#DC2626"/></marker>
+                        <marker id="arrRev" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#15803D"/></marker>
+                    </defs>
+                    <!-- forward (rojo, arriba) -->
+                    <g stroke="#DC2626" stroke-width="2" fill="none" marker-end="url(#arrFwd)">
+                        <line x1="92" y1="34" x2="158" y2="34"/><line x1="222" y1="34" x2="288" y2="34"/><line x1="352" y1="34" x2="418" y2="34"/><line x1="482" y1="34" x2="508" y2="34"/>
+                    </g>
+                    <text x="300" y="20" text-anchor="middle" font-size="10" fill="#DC2626" font-weight="600" font-family="Montserrat">▶ Forward: añadir ruido (fijo)</text>
+                    <!-- reverse (verde, abajo) -->
+                    <g stroke="#15803D" stroke-width="2" fill="none" marker-end="url(#arrRev)">
+                        <line x1="508" y1="106" x2="482" y2="106"/><line x1="418" y1="106" x2="352" y2="106"/><line x1="288" y1="106" x2="222" y2="106"/><line x1="158" y1="106" x2="92" y2="106"/>
+                    </g>
+                    <text x="300" y="124" text-anchor="middle" font-size="10" fill="#15803D" font-weight="600" font-family="Montserrat">◀ Reverse: quitar ruido (aprendido, pθ)</text>
+                </svg>
+                <div class="callout mt-2" style="border-color:#5B1C9E; background:#FAF8FF">
+                    <p class="text-[0.84rem] text-gray-700"><i class="fas fa-hammer mr-1" style="color:#5B1C9E"></i><strong>La escultura inversa / el Río Bogotá:</strong> la planta de tratamiento aprende a revertir la contaminación por etapas. Hoy <strong>dominan</strong> la generación de imágenes (DALL·E, Stable Diffusion, Midjourney): entrenamiento estable, gran diversidad y control texto-a-imagen. Desventaja: muestreo lento (cientos de pasos).</p>
+                </div>
+            </div>
+
+            <!-- Comparativa generativos + Transformers -->
+            <div class="grid lg:grid-cols-2 gap-5 mb-5">
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-3 flex items-center gap-2"><i class="fas fa-scale-balanced" style="color:#B45309"></i>GAN vs. VAE vs. Difusión</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-[0.76rem] border-collapse">
+                            <thead>
+                                <tr class="bg-[#FEF9E7]" style="color:#B45309">
+                                    <th class="text-left p-2 border border-gray-200">Criterio</th>
+                                    <th class="text-left p-2 border border-gray-200">GAN</th>
+                                    <th class="text-left p-2 border border-gray-200">VAE</th>
+                                    <th class="text-left p-2 border border-gray-200">Difusión</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-700">
+                                <tr><td class="p-2 border border-gray-200 font-semibold">Calidad</td><td class="p-2 border border-gray-200">Alta</td><td class="p-2 border border-gray-200">Media (borrosa)</td><td class="p-2 border border-gray-200">Muy alta</td></tr>
+                                <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Diversidad</td><td class="p-2 border border-gray-200">Baja</td><td class="p-2 border border-gray-200">Alta</td><td class="p-2 border border-gray-200">Muy alta</td></tr>
+                                <tr><td class="p-2 border border-gray-200 font-semibold">Estabilidad</td><td class="p-2 border border-gray-200">Baja</td><td class="p-2 border border-gray-200">Alta</td><td class="p-2 border border-gray-200">Alta</td></tr>
+                                <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Muestreo</td><td class="p-2 border border-gray-200">1 pasada</td><td class="p-2 border border-gray-200">1 pasada</td><td class="p-2 border border-gray-200">Cientos de pasos</td></tr>
+                                <tr><td class="p-2 border border-gray-200 font-semibold">Latente navegable</td><td class="p-2 border border-gray-200">Parcial</td><td class="p-2 border border-gray-200">Sí</td><td class="p-2 border border-gray-200">No directo</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-key" style="color:#B45309"></i>Transformers: autoatención con Q, K, V</h3>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">El significado de una palabra depende de su relación con todas las demás <strong>en paralelo</strong>. Cada token emite una <strong>Query</strong> ("¿qué soy aquí?"), las demás ofrecen sus <strong>Keys</strong>, y si encajan se transfiere su <strong>Value</strong>.</p>
+                    <div class="eq text-center my-3">$$\operatorname{Attention}(Q,K,V) = \operatorname{softmax}\!\left(\frac{QK^{\top}}{\sqrt{d_k}}\right)V$$</div>
+                    <div class="callout" style="border-color:#B45309; background:#FFFBEB">
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-comment-dots mr-1" style="color:#B45309"></i><strong>La palabra "vaina":</strong> en "pásame esa vaina" la atención la liga a un objeto; en "¡qué vaina tan buena!" a una situación. <strong>Multi-Head</strong> mira la frase de varias formas a la vez (gramática, tono, tiempo); el <strong>positional encoding</strong> (senos y cosenos) le devuelve el orden perdido.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aplicaciones generativas en Colombia -->
+            <div class="card p-6 bg-gradient-to-br from-[#FFFBEB] to-white border-l-4" style="border-color:#B45309">
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-flask" style="color:#B45309"></i>Generación de datos donde escasean</h3>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 text-[0.82rem]">
+                    <div class="bg-white rounded-lg p-3 border border-amber-200"><strong style="color:#B45309">Café (roya)</strong><div class="text-gray-600 mt-1">Imágenes sintéticas de hojas enfermas para robustecer el monitoreo antes de la plaga.</div></div>
+                    <div class="bg-white rounded-lg p-3 border border-amber-200"><strong style="color:#B45309">Bioacústica</strong><div class="text-gray-600 mt-1">Audios sintéticos de fauna elusiva (jaguar) para clasificadores en alto ruido.</div></div>
+                    <div class="bg-white rounded-lg p-3 border border-amber-200"><strong style="color:#B45309">Clima y agro</strong><div class="text-gray-600 mt-1">Escenarios climáticos sintéticos para planificar el sombrío del café.</div></div>
+                    <div class="bg-white rounded-lg p-3 border border-amber-200"><strong style="color:#B45309">Lenguas indígenas</strong><div class="text-gray-600 mt-1">Traducción wayuunaiki/nasa yuwe con Transformers <em>low-resource</em>.</div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== CHEAT SHEET / FÓRMULAS ====================== -->
+        <section id="cheatsheet" class="scroll-mt-20 mt-14 reveal">
+            <div class="flex items-center gap-3 mb-5">
+                <span class="usta-gradient text-white p-2.5 rounded-xl shadow"><i class="fas fa-square-root-variable"></i></span>
+                <h2 class="sec-title text-2xl md:text-3xl text-navy">Hoja de fórmulas &amp; glosario rápido</h2>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-5">
+                <!-- formulas -->
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-3 text-sm uppercase tracking-wider">Fórmulas esenciales</h3>
+                    <div class="space-y-2 text-[0.86rem]">
+                        <div class="eq">Convolución \(\;S=I*K=\sum_m\sum_n I(i{+}m,j{+}n)K(m,n)\)</div>
+                        <div class="eq">Salida conv. \(\;O=\lfloor\frac{W-K+2P}{S}\rfloor+1\)</div>
+                        <div class="eq">Parches ViT \(\;N=\frac{H\cdot W}{P^2}\)</div>
+                        <div class="eq">RNN \(\;h_t=\tanh(W_{xh}x_t+W_{hh}h_{t-1}+b_h)\)</div>
+                        <div class="eq">Celda LSTM \(\;C_t=f_t\odot C_{t-1}+i_t\odot\tilde C_t\)</div>
+                        <div class="eq">Estado GRU \(\;h_t=(1-z_t)\odot h_{t-1}+z_t\odot\tilde h_t\)</div>
+                        <div class="eq">Atención \(\;c_t=\sum_i \alpha_{t,i}h_i\)</div>
+                        <div class="eq">Autoencoder \(\;\mathcal{L}=\lVert x-g(f(x))\rVert^2\)</div>
+                        <div class="eq">VAE \(\;\mathcal{L}_{\text{ELBO}}=\mathbb{E}[\log p_\theta(x|z)]-D_{\text{KL}}\)</div>
+                        <div class="eq">GAN \(\;\min_G\max_D \mathbb{E}[\log D(x)]+\mathbb{E}[\log(1{-}D(G(z)))]\)</div>
+                        <div class="eq">Transformer \(\;\operatorname{softmax}(\frac{QK^{\top}}{\sqrt{d_k}})V\)</div>
+                    </div>
+                </div>
+                <!-- glosario -->
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-3 text-sm uppercase tracking-wider">Glosario relámpago (analogías)</h3>
+                    <dl class="text-[0.83rem] space-y-2">
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Convolución</dt><dd class="text-gray-600">un escáner deslizante que detecta bordes y texturas.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Pooling</dt><dd class="text-gray-600">resumir un cuadrante quedándose con lo más fuerte.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Transfer Learning</dt><dd class="text-gray-600">reciclar el "ojo" de una red entrenada en ImageNet.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Vanishing gradient</dt><dd class="text-gray-600">el teléfono roto que diluye el mensaje del gerente.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Estado de celda</dt><dd class="text-gray-600">la cinta transportadora que conserva la memoria.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Atención</dt><dd class="text-gray-600">el examen con apuntes abiertos: resaltar lo pertinente.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Espacio latente</dt><dd class="text-gray-600">el bus rojo de TransMilenio que comprime al esencial.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">GAN</dt><dd class="text-gray-600">el verseador vs. el jurado en la piquería vallenata.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Difusión</dt><dd class="text-gray-600">limpiar el Río Bogotá por etapas hasta volverlo cristalino.</dd></div>
+                    </dl>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== FOOTER ====================== -->
+        <footer class="mt-14 reveal">
+            <div class="card p-6 md:p-8 usta-gradient text-white">
+                <div class="flex flex-wrap items-center gap-3 mb-2">
+                    <i class="fas fa-book-open-reader text-gold text-2xl"></i>
+                    <h2 class="text-xl md:text-2xl font-extrabold">Esta infografía resume el Módulo 2 completo</h2>
+                </div>
+                <p class="text-white/85 text-sm leading-relaxed max-w-3xl">El <strong>material principal de aprendizaje autónomo</strong> permite profundizar en cada tema y preparar los dos hitos evaluativos del módulo, que conforman la <strong>Fase 2 del Proyecto Centinela</strong>: la <strong>Actividad 2.1</strong> (clasificación con CNN / Transfer Learning, 15 %) y la <strong>Actividad 2.2</strong> (series temporales con RNN/LSTM/GRU, 15 %), integradas en una rama multimodal de fusión.</p>
+                <div class="flex flex-wrap gap-2 mt-5 no-print">
+                    <a href="02_Modulo_2_Arquitecturas_Deep_Learning.html" class="inline-flex items-center gap-2 bg-white text-primary text-sm font-bold px-4 py-2 rounded-full hover:opacity-90 transition"><i class="fas fa-graduation-cap"></i>Material principal</a>
+                    <a href="21_Modulo_2_Actividad_Fase2_Centinela.html" class="inline-flex items-center gap-2 bg-white/15 border border-white/30 text-white text-sm font-bold px-4 py-2 rounded-full hover:bg-white/25 transition"><i class="fas fa-flask-vial"></i>Actividad · Centinela Fase 2</a>
+                    <a href="index.html" class="inline-flex items-center gap-2 bg-white/15 border border-white/30 text-white text-sm font-bold px-4 py-2 rounded-full hover:bg-white/25 transition"><i class="fas fa-house"></i>Portal del curso</a>
+                </div>
+            </div>
+            <div class="text-navy bg-navy/[0.04] border border-navy/10 rounded-xl px-4 py-3 mt-6">
+                <p class="text-center text-[0.82rem] italic text-navy/80"><i class="fas fa-helmet-safety text-gold mr-1"></i>Metodología «Ingeniería de Trinchera»: si una arquitectura no corre en Google Colab, no existe.</p>
+            </div>
+            <div class="text-center text-xs text-gray-500 mt-4 space-y-1">
+                <p><strong class="text-navy">Experto temático:</strong> Javier Mauricio Sierra · <i class="fas fa-envelope mr-1"></i>javiersierra@usta.edu.co · <i class="fas fa-phone mr-1"></i>311 241 3858</p>
+                <p>Universidad Santo Tomás · Maestría en Ciencia de Datos · Espacio académico EA-N-F-004 · Documento HTML autocontenido (Tailwind + MathJax 3).</p>
+            </div>
+        </footer>
+    </main>
+
+    <!-- Botón volver arriba -->
+    <button id="topBtn" class="no-print fixed right-5 bottom-5 z-50 usta-gradient text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center opacity-0 pointer-events-none transition-opacity" aria-label="Volver arriba">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script>
+        document.documentElement.classList.add('js');
+
+        /* ---------- Generación de mini-gráficas SVG a partir de funciones ---------- */
+        function buildPlot(fns, o) {
+            o = Object.assign({ xmin: -5, xmax: 5, ymin: -1.3, ymax: 1.6, w: 200, h: 120, pad: 14 }, o);
+            const X = x => o.pad + (x - o.xmin) / (o.xmax - o.xmin) * (o.w - 2 * o.pad);
+            const Y = y => o.h - o.pad - (y - o.ymin) / (o.ymax - o.ymin) * (o.h - 2 * o.pad);
+            let svg = '<svg viewBox="0 0 ' + o.w + ' ' + o.h + '" preserveAspectRatio="none" style="width:100%;height:112px;display:block">';
+            // línea base y=0 (punteada) y eje x=0
+            if (o.ymin <= 0 && o.ymax >= 0) svg += '<line x1="' + o.pad + '" y1="' + Y(0).toFixed(1) + '" x2="' + (o.w - o.pad) + '" y2="' + Y(0).toFixed(1) + '" stroke="#CBD5E1" stroke-width="1" stroke-dasharray="3 3"/>';
+            if (o.xmin <= 0 && o.xmax >= 0) svg += '<line x1="' + X(0).toFixed(1) + '" y1="' + o.pad + '" x2="' + X(0).toFixed(1) + '" y2="' + (o.h - o.pad) + '" stroke="#E2E8F0" stroke-width="1"/>';
+            fns.forEach(function (f) {
+                const pts = [];
+                for (let i = 0; i <= 120; i++) {
+                    const x = o.xmin + (o.xmax - o.xmin) * i / 120;
+                    let y = f.fn(x);
+                    if (!isFinite(y)) continue;
+                    y = Math.max(o.ymin, Math.min(o.ymax, y));
+                    pts.push([X(x), Y(y)]);
+                }
+                if (!pts.length) return;
+                const line = 'M' + pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' L');
+                const baseY = Y(o.ymin).toFixed(1);
+                const area = line + ' L' + pts[pts.length - 1][0].toFixed(1) + ',' + baseY + ' L' + pts[0][0].toFixed(1) + ',' + baseY + ' Z';
+                svg += '<path d="' + area + '" fill="' + f.color + '" opacity="0.13"/>';
+                svg += '<path d="' + line + '" fill="none" stroke="' + f.color + '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
+            });
+            return svg + '</svg>';
+        }
+
+        /* ---------- Memoria: decaimiento de la señal RNN vs persistencia LSTM ---------- */
+        (function () {
+            const el = document.querySelector('.plot-mem');
+            if (!el) return;
+            const w = 360, h = 150, pad = 30, tMax = 50;
+            // señal que sobrevive del paso inicial, normalizada a [0,1]
+            const rnn = t => Math.exp(-t / 7);                       // se desvanece exponencialmente
+            const lstm = t => 0.30 + 0.70 * Math.exp(-t / 120);      // se mantiene cerca de 1 (carrusel aditivo)
+            const X = x => pad + x / tMax * (w - 2 * pad);
+            const Y = y => h - pad - y * (h - 2 * pad);
+            let svg = '<svg viewBox="0 0 ' + w + ' ' + h + '" class="w-full">';
+            svg += '<line x1="' + pad + '" y1="' + (h - pad) + '" x2="' + (w - pad) + '" y2="' + (h - pad) + '" stroke="#CBD5E1"/>';
+            svg += '<line x1="' + pad + '" y1="' + pad + '" x2="' + pad + '" y2="' + (h - pad) + '" stroke="#CBD5E1"/>';
+            svg += '<text x="' + (w / 2) + '" y="' + (h - 6) + '" font-size="9" fill="#64748B" text-anchor="middle">Pasos de tiempo &#8594;</text>';
+            svg += '<text x="10" y="' + (h / 2) + '" font-size="9" fill="#64748B" transform="rotate(-90 10 ' + (h / 2) + ')" text-anchor="middle">Se&#241;al conservada</text>';
+            function curve(fn, color) { let d = ''; for (let t = 0; t <= tMax; t++) { d += (t ? ' L' : 'M') + X(t).toFixed(1) + ',' + Y(fn(t)).toFixed(1); } return '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="2.5"/>'; }
+            svg += curve(lstm, '#15803D');
+            svg += curve(rnn, '#DC2626');
+            // leyenda
+            svg += '<circle cx="' + (w - 92) + '" cy="' + (pad + 2) + '" r="3.5" fill="#15803D"/><text x="' + (w - 85) + '" y="' + (pad + 5) + '" font-size="9" fill="#475569">LSTM</text>';
+            svg += '<circle cx="' + (w - 92) + '" cy="' + (pad + 16) + '" r="3.5" fill="#DC2626"/><text x="' + (w - 85) + '" y="' + (pad + 19) + '" font-size="9" fill="#475569">RNN simple</text>';
+            el.innerHTML = svg + '</svg>';
+        })();
+
+        /* ---------- Scroll-spy nav + botón arriba + reveal ---------- */
+        const sections = ['mapa', 'cap1', 'cap2', 'cap3', 'cheatsheet'].map(id => document.getElementById(id)).filter(Boolean);
+        const links = {};
+        document.querySelectorAll('.navlink').forEach(a => { links[a.getAttribute('href').slice(1)] = a; });
+        function onScroll() {
+            let cur = sections[0] ? sections[0].id : null;
+            sections.forEach(s => { if (s.getBoundingClientRect().top <= 130) cur = s.id; });
+            Object.values(links).forEach(a => a.classList.remove('active', 'bg-white/10'));
+            if (links[cur]) { links[cur].classList.add('active', 'bg-white/10'); }
+            const btn = document.getElementById('topBtn');
+            if (window.scrollY > 500) { btn.classList.remove('opacity-0', 'pointer-events-none'); }
+            else { btn.classList.add('opacity-0', 'pointer-events-none'); }
+        }
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+        document.getElementById('topBtn').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+        // reveal on scroll
+        if ('IntersectionObserver' in window) {
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+            }, { threshold: 0.08 });
+            document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+        } else {
+            document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+        }
+
+        /* ---------- Botón "copiar" de las ventanas de código ---------- */
+        document.querySelectorAll('.code-copy').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var win = btn.closest('.code-window'); var body = win && win.querySelector('.codeblock'); if (!body) return;
+                navigator.clipboard.writeText(body.innerText).then(function () {
+                    var icon = btn.querySelector('i'); var prev = icon.className; icon.className = 'fas fa-check'; btn.style.color = '#27C93F';
+                    setTimeout(function () { icon.className = prev; btn.style.color = ''; }, 1400);
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

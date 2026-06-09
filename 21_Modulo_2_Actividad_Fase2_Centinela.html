@@ -229,6 +229,7 @@
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#ia"><i class="fas fa-robot mr-1"></i>Uso de IA</a>
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#entrega"><i class="fas fa-box-open mr-1"></i>Entrega</a>
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#rubrica"><i class="fas fa-table-list mr-1"></i>Rúbrica</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#autoevaluacion"><i class="fas fa-calculator mr-1"></i>Autoevaluación</a>
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#recursos"><i class="fas fa-book mr-1"></i>Recursos</a>
         </div>
     </nav>
@@ -678,12 +679,112 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
                     <p class="text-sm text-slate-600 mt-3"><strong>Modalidad:</strong> individual. <strong>Peso:</strong> 30 % del curso (Fase 2 = ramas A+B+C; reemplaza las Actividades 2.1 y 2.2).</p>
                 </div>
             </div>
+
+            <!-- ✅ Antes de entregar — checklist explícito y sin ambigüedad -->
+            <div class="card p-6 mt-6 border-l-4" style="border-color:#0E9F6E">
+                <h3 class="font-bold text-primary mb-1 text-lg"><i class="fas fa-clipboard-check text-emerald-600 mr-2"></i>✅ Antes de entregar</h3>
+                <p class="text-sm text-slate-600 mb-4">Revisa que tu envío cumpla <strong>todos</strong> estos puntos. Sin todos los entregables la actividad puede quedar incompleta (Nivel Nulo = sin entrega).</p>
+                <ul class="space-y-3 text-sm text-slate-700">
+                    <li class="flex gap-3">
+                        <i class="fas fa-square-check text-emerald-500 mt-0.5"></i>
+                        <span><strong>Notebook ejecutable (.ipynb)</strong> con las <strong>ramas A (CNN), B (LSTM/GRU) y la fusión C</strong>, documentado y que corre de principio a fin.</span>
+                    </li>
+                    <li class="flex gap-3">
+                        <i class="fas fa-square-check text-emerald-500 mt-0.5"></i>
+                        <span><strong>Informe técnico</strong> en <strong>PDF</strong> con metodología, resultados, <strong>ablación</strong> y limitaciones.</span>
+                    </li>
+                    <li class="flex gap-3">
+                        <i class="fas fa-square-check text-emerald-500 mt-0.5"></i>
+                        <span><strong>Visualizaciones estáticas comentadas</strong> para el cliente (<em>dashboard</em> interactivo opcional/bonus).</span>
+                    </li>
+                    <li class="flex gap-3">
+                        <i class="fas fa-square-check text-emerald-500 mt-0.5"></i>
+                        <span><strong>Pesos de los modelos entrenados</strong> (<span class="icode">.h5</span> / <span class="icode">.pth</span>).</span>
+                    </li>
+                    <li class="flex gap-3">
+                        <i class="fas fa-square-check text-emerald-500 mt-0.5"></i>
+                        <span><strong>Bitácora de IA</strong> diligenciada (Aceptada / Modificada / Rechazada, con su motivo).</span>
+                    </li>
+                    <li class="flex gap-3">
+                        <i class="fas fa-square-check text-emerald-500 mt-0.5"></i>
+                        <span><strong>Empaque en un único archivo:</strong> <span class="icode">Apellido_Nombre_Centinela_Fase2.zip</span> (o enlace a un <strong>repositorio GitHub</strong>).</span>
+                    </li>
+                </ul>
+                <div class="callout callout-warn mt-4">
+                    <p class="text-sm"><i class="fas fa-circle-info text-amber-500 mr-2"></i><strong>Recordatorio:</strong> la <strong>sustentación oral</strong> se agenda aparte (no va dentro del .zip). El <strong>Nivel Nulo (0,0)</strong> corresponde a la <strong>ausencia de entrega</strong> del producto.</p>
+                </div>
+            </div>
         </section>
 
         <!-- ====================== RÚBRICA ====================== -->
         <section id="rubrica" class="reveal">
             <h2 class="sec-title text-2xl md:text-3xl text-navy mb-3"><i class="fas fa-table-list text-secondary mr-2"></i>Rúbrica de evaluación</h2>
             <p class="text-slate-600 mb-5 max-w-3xl">Niveles de desempeño: <strong>Estratégico</strong> (4,6–5,0) · <strong>Autónomo</strong> (4,0–4,5) · <strong>Básico</strong> (3,0–3,9) · <strong>Inicial</strong> (1,0–2,9) · <strong>Nulo</strong> — sin entrega (0,0). Los pesos suman 100 %.</p>
+
+            <!-- Resumen claro por criterio -->
+            <div class="card p-6 mb-6">
+                <h3 class="font-bold text-primary text-lg mb-1"><i class="fas fa-list-check text-secondary mr-2"></i>Resumen claro por criterio</h3>
+                <p class="text-sm text-slate-600 mb-4">En una mirada: qué se espera de cada criterio y la evidencia mínima para <strong>aprobar</strong> (nivel Básico). El detalle por nivel está en la tabla de abajo.</p>
+
+                <!-- Leyenda de bandas -->
+                <div class="flex flex-wrap items-center gap-2 mb-5 text-xs">
+                    <span class="font-semibold text-slate-500 mr-1">Bandas:</span>
+                    <span class="rounded-full px-3 py-1 font-semibold" style="background:#F3E8FF;color:#3D008D">Estratégico 4,6–5,0</span>
+                    <span class="rounded-full px-3 py-1 font-semibold" style="background:#E0F2FE;color:#0E7490">Autónomo 4,0–4,5</span>
+                    <span class="rounded-full px-3 py-1 font-semibold" style="background:#DCFCE7;color:#15803D">Básico 3,0–3,9</span>
+                    <span class="rounded-full px-3 py-1 font-semibold" style="background:#FEF3C7;color:#B45309">Inicial 1,0–2,9</span>
+                    <span class="rounded-full px-3 py-1 font-semibold" style="background:#FEE2E2;color:#B91C1C">Nulo 0,0</span>
+                    <span class="rounded-full px-3 py-1 font-bold text-white" style="background:#0E9F6E"><i class="fas fa-check mr-1"></i>Aprueba con ≥ 3,0</span>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <!-- C1 -->
+                    <div class="border border-slate-200 rounded-xl p-4">
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <span class="font-bold text-navy text-sm">1. Rama visual — CNN y Transfer Learning</span>
+                            <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">20 %</span>
+                        </div>
+                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> comparar 2 arquitecturas preentrenadas, justificar <em>Feature Extraction</em> vs <em>Fine-Tuning</em> con evidencia y aportar Grad-CAM.</p>
+                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> una CNN preentrenada que entrena y clasifica, aunque uses una sola arquitectura con justificación superficial.</p>
+                    </div>
+                    <!-- C2 -->
+                    <div class="border border-slate-200 rounded-xl p-4">
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <span class="font-bold text-navy text-sm">2. Rama temporal — LSTM/GRU (RNN de contraste)</span>
+                            <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">20 %</span>
+                        </div>
+                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> LSTM y GRU más una RNN simple de contraste, con evidencia del desvanecimiento y decisión razonada GRU vs LSTM.</p>
+                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> al menos una celda con compuertas que entrena respetando el orden temporal, aunque falte la RNN de contraste o la evidencia del desvanecimiento.</p>
+                    </div>
+                    <!-- C3 -->
+                    <div class="border border-slate-200 rounded-xl p-4">
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <span class="font-bold text-navy text-sm">3. Fusión, ablación y alineación legítima</span>
+                            <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">30 %</span>
+                        </div>
+                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> clave de alineación legítima entre modalidades, fusión funcional con ablación (solo-imagen / solo-serie / fusionado) y análisis honesto del aporte de cada una.</p>
+                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> una fusión que concatena y funciona, aunque sin estudio de ablación o con alineación agregada sin declarar sus limitaciones.</p>
+                    </div>
+                    <!-- C4 -->
+                    <div class="border border-slate-200 rounded-xl p-4">
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <span class="font-bold text-navy text-sm">4. Uso responsable de IA</span>
+                            <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">15 %</span>
+                        </div>
+                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> bitácora con decisiones deliberadas (Aceptada/Modificada/Rechazada), defensa de cada decisión en la sustentación y una auditoría que corrige un fallo no trivial.</p>
+                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> un registro superficial, titubeos en la sustentación y una auditoría débil o genérica.</p>
+                    </div>
+                    <!-- C5 -->
+                    <div class="border border-slate-200 rounded-xl p-4">
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <span class="font-bold text-navy text-sm">5. Comunicación de resultados</span>
+                            <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">15 %</span>
+                        </div>
+                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> visualizaciones estáticas claras para audiencia no técnica e informe con narrativa, recomendaciones accionables y citación APA correcta.</p>
+                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> visualizaciones básicas e informe con estructura incompleta y recomendaciones genéricas.</p>
+                    </div>
+                </div>
+            </div>
 
             <div class="overflow-x-auto card p-1">
                 <table class="tbl" style="min-width:920px">
@@ -737,6 +838,51 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
             </div>
             <div class="callout callout-danger mt-4">
                 <p class="text-sm"><i class="fas fa-circle-exclamation text-red-600 mr-2"></i><strong>Nivel Nulo (0,0):</strong> sin entrega del producto. En el Criterio 4 constituye además falta de integridad ocultar el uso de IA o presentar como propio material que no se comprende ni se puede defender.</p>
+            </div>
+        </section>
+
+        <!-- ====================== AUTOEVALUACIÓN ====================== -->
+        <section id="autoevaluacion" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-3"><i class="fas fa-calculator text-secondary mr-2"></i>Calculadora de autoevaluación</h2>
+            <p class="text-slate-600 mb-4 max-w-3xl">Selecciona, con honestidad, el nivel que mejor describe tu entregable en cada criterio. La nota estimada se calcula <strong>en vivo</strong> con los pesos de la rúbrica oficial. Úsala para detectar qué mejorar antes de entregar.</p>
+
+            <div class="callout callout-warn mb-6">
+                <p class="text-sm"><i class="fas fa-circle-info text-amber-500 mr-2"></i><strong>Herramienta orientativa.</strong> Esta autoevaluación se basa en la rúbrica oficial, pero <strong>la calificación definitiva la asigna el docente</strong>; no reemplaza la sustentación ni la revisión del entregable.</p>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-6 items-start">
+                <!-- Criterios -->
+                <div class="lg:col-span-2 space-y-4" id="ae-criterios"><!-- generado por JS --></div>
+
+                <!-- Panel de resultado (sticky en escritorio) -->
+                <div class="lg:sticky lg:top-20 space-y-4">
+                    <div class="card p-6 text-center">
+                        <p class="text-xs uppercase tracking-wider text-slate-400 font-bold mb-1">Nota estimada</p>
+                        <div class="flex items-end justify-center gap-1">
+                            <span id="ae-nota" class="text-6xl font-extrabold usta-gradient-text leading-none">0,0</span>
+                            <span class="text-2xl font-bold text-slate-400 mb-1">/5,0</span>
+                        </div>
+                        <div class="mt-3 flex flex-col items-center gap-2">
+                            <span id="ae-banda" class="rounded-full px-4 py-1 text-sm font-bold">—</span>
+                            <span id="ae-estado" class="text-sm font-semibold" role="status" aria-live="polite">Selecciona un nivel en cada criterio</span>
+                        </div>
+                        <button id="ae-reset" type="button" class="mt-5 w-full rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+                            <i class="fas fa-rotate-left mr-1.5"></i>Reiniciar
+                        </button>
+                    </div>
+
+                    <!-- Checklist de entregables -->
+                    <div class="card p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-bold text-primary text-sm"><i class="fas fa-clipboard-check text-emerald-600 mr-1.5"></i>Entregables</h3>
+                            <span id="ae-check-count" class="text-xs font-bold text-slate-500">0/5 listos</span>
+                        </div>
+                        <div id="ae-checklist" class="space-y-2.5 text-sm text-slate-700"><!-- generado por JS --></div>
+                        <p id="ae-check-warn" class="callout callout-warn text-xs mt-3 mb-0">
+                            <i class="fas fa-triangle-exclamation text-amber-500 mr-1.5"></i>Sin todos los entregables la actividad puede quedar incompleta (Nivel Nulo = sin entrega).
+                        </p>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -841,6 +987,228 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
                 });
             });
         });
+
+        /* ====================== CALCULADORA DE AUTOEVALUACIÓN ======================
+           SPEC: escala 0,0–5,0 (coma decimal); aprueba con ≥ 3,0.
+           notaEstimada = Σ(nota_nivel_i × peso_i) / 100, redondeada a 1 decimal. */
+        (function () {
+            // Niveles: etiqueta · nota representativa (punto medio de la banda)
+            var NIVELES = [
+                { id: 'estrategico', etq: 'Estratégico', rango: '4,6–5,0', nota: 4.8 },
+                { id: 'autonomo',    etq: 'Autónomo',    rango: '4,0–4,5', nota: 4.25 },
+                { id: 'basico',      etq: 'Básico',      rango: '3,0–3,9', nota: 3.45 },
+                { id: 'inicial',     etq: 'Inicial',     rango: '1,0–2,9', nota: 1.95 },
+                { id: 'nulo',        etq: 'Nulo (sin entrega)', rango: '0,0', nota: 0 }
+            ];
+
+            // Descriptores VERBATIM por criterio (índice = posición del nivel; Nulo = "Sin entrega del producto.")
+            var SIN_ENTREGA = 'Sin entrega del producto.';
+            var CRITERIOS = [
+                {
+                    nombre: 'Rama visual — CNN y Transfer Learning', peso: 20,
+                    desc: [
+                        'Compara 2 arquitecturas preentrenadas analizando parámetros, profundidad y velocidad de inferencia; justifica Feature Extraction vs Fine-Tuning con evidencia empírica; aporta Grad-CAM.',
+                        'Compara 2 arquitecturas; justifica la estrategia según tamaño/similitud con ImageNet; data augmentation y evaluación por clase correctas.',
+                        'Usa una sola arquitectura sin comparación rigurosa; justificación superficial; no distingue las estrategias de Transfer Learning.',
+                        'Selecciona arquitectura sin justificación o con error grave (p. ej. MLP para imágenes).',
+                        SIN_ENTREGA
+                    ]
+                },
+                {
+                    nombre: 'Rama temporal — LSTM/GRU (RNN de contraste)', peso: 20,
+                    desc: [
+                        'Implementa LSTM y GRU con ventana por defecto justificada y RNN simple de contraste; evidencia el desvanecimiento (normas de gradiente o diferencia de desempeño en dependencias largas); decide GRU vs LSTM con criterio.',
+                        'Implementa LSTM y GRU correctamente más la RNN de contraste; respeta el orden temporal; compara con 2+ métricas e interpreta.',
+                        'Implementa solo una celda con compuertas, o prescinde de la RNN de contraste, o no aporta evidencia del desvanecimiento.',
+                        'Mezcla datos temporales (sin respetar el orden), confunde las arquitecturas o ninguna celda con compuertas funciona.',
+                        SIN_ENTREGA
+                    ]
+                },
+                {
+                    nombre: 'Fusión, ablación y alineación legítima', peso: 30,
+                    desc: [
+                        'Demuestra la clave de alineación entre modalidades (qué campo/fecha/id las une), con co-registro por muestra cuando hay datos georreferenciados y fechados; fusión funcional con ablación (solo-imagen / solo-serie / fusionado) y análisis honesto del aporte de cada modalidad, incluso resultados negativos.',
+                        'Fusión funcional comparada frente a al menos una rama individual; declara la alineación agregada (región/periodo) con sus limitaciones; interpretación correcta.',
+                        'Concatena sin estudio de ablación, o usa alineación agregada sin declarar sus limitaciones.',
+                        'Fusión no funcional o ausente; pareo artificial por muestra o feature climática constante (fuga de datos) sin advertirlo.',
+                        SIN_ENTREGA
+                    ]
+                },
+                {
+                    nombre: 'Uso responsable de IA', peso: 15,
+                    desc: [
+                        'Bitácora con decisiones deliberadas (casos Modificada/Rechazada bien fundamentados); defiende cada decisión como propia en la sustentación; auditoría con un fallo no trivial corregido.',
+                        'Bitácora completa y verificada; sustenta la mayoría de sus decisiones; la auditoría documenta y corrige un fallo real.',
+                        'Registro superficial; titubea en la sustentación; auditoría débil o genérica.',
+                        'Bitácora ausente o señales de delegación ciega; no defiende sus decisiones.',
+                        SIN_ENTREGA
+                    ]
+                },
+                {
+                    nombre: 'Comunicación de resultados', peso: 15,
+                    desc: [
+                        'Comunicación profesional; visualizaciones estáticas claras y, como bonus, dashboard interactivo; informe con narrativa, recomendaciones accionables y citación APA correcta.',
+                        'Visualizaciones estáticas bien comentadas para audiencia no técnica; informe claro y bien estructurado con recomendaciones.',
+                        'Visualizaciones básicas; informe con estructura incompleta; recomendaciones genéricas.',
+                        'Visualizaciones ausentes o ilegibles; informe desorganizado o sin recomendaciones.',
+                        SIN_ENTREGA
+                    ]
+                }
+            ];
+
+            var ENTREGABLES = [
+                'Notebook ejecutable (.ipynb) con las ramas A, B y la fusión C, documentado.',
+                'Informe técnico (PDF) con metodología, resultados, ablación y limitaciones.',
+                'Visualizaciones estáticas comentadas para el cliente (dashboard interactivo opcional/bonus).',
+                'Pesos de los modelos entrenados (.h5 / .pth).',
+                'Bitácora de IA diligenciada.'
+            ];
+
+            var cont = document.getElementById('ae-criterios');
+            if (!cont) return; // sección ausente: no hacer nada
+
+            // Estado: índice de nivel elegido por criterio (-1 = sin elegir)
+            var seleccion = CRITERIOS.map(function () { return -1; });
+
+            function fmt(n) { return n.toFixed(1).replace('.', ','); } // 4.8 -> "4,8"
+
+            // Estilos de banda por id de banda
+            var BANDAS = {
+                estrategico: { bg: '#F3E8FF', fg: '#3D008D' },
+                autonomo:    { bg: '#E0F2FE', fg: '#0E7490' },
+                basico:      { bg: '#DCFCE7', fg: '#15803D' },
+                inicial:     { bg: '#FEF3C7', fg: '#B45309' },
+                nulo:        { bg: '#FEE2E2', fg: '#B91C1C' }
+            };
+            function bandaDe(nota) {
+                if (nota >= 4.6) return { id: 'estrategico', etq: 'Estratégico' };
+                if (nota >= 4.0) return { id: 'autonomo', etq: 'Autónomo' };
+                if (nota >= 3.0) return { id: 'basico', etq: 'Básico' };
+                if (nota >= 1.0) return { id: 'inicial', etq: 'Inicial' };
+                return { id: 'nulo', etq: 'Nulo' };
+            }
+
+            // Construcción de los criterios
+            CRITERIOS.forEach(function (c, i) {
+                var card = document.createElement('div');
+                card.className = 'card p-5';
+                var selId = 'ae-sel-' + i;
+                var opciones = NIVELES.map(function (n, j) {
+                    return '<option value="' + j + '">' + n.etq + ' · ' + n.rango + '</option>';
+                }).join('');
+                card.innerHTML =
+                    '<div class="flex items-start justify-between gap-3 mb-2">' +
+                        '<label for="' + selId + '" class="font-bold text-navy text-sm">' + (i + 1) + '. ' + c.nombre + '</label>' +
+                        '<span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">' + c.peso + ' %</span>' +
+                    '</div>' +
+                    '<select id="' + selId + '" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary" aria-describedby="ae-desc-' + i + '">' +
+                        '<option value="-1" selected>— Elige un nivel —</option>' + opciones +
+                    '</select>' +
+                    '<p id="ae-desc-' + i + '" class="text-sm text-slate-600 mt-3 leading-relaxed" aria-live="polite"></p>' +
+                    '<p id="ae-feed-' + i + '" class="text-sm mt-2 leading-relaxed font-medium"></p>';
+                cont.appendChild(card);
+
+                card.querySelector('#' + selId).addEventListener('change', function (ev) {
+                    seleccion[i] = parseInt(ev.target.value, 10);
+                    pintarCriterio(i);
+                    recalcular();
+                });
+            });
+
+            function pintarCriterio(i) {
+                var desc = document.getElementById('ae-desc-' + i);
+                var feed = document.getElementById('ae-feed-' + i);
+                var idx = seleccion[i];
+                if (idx < 0) { desc.textContent = ''; feed.textContent = ''; return; }
+                desc.innerHTML = '<i class="fas fa-quote-left text-slate-300 mr-1.5"></i>' + CRITERIOS[i].desc[idx];
+                // Retroalimentación: subir al nivel inmediatamente superior (índice menor)
+                if (idx === 0) {
+                    feed.style.color = '#0E9F6E';
+                    feed.innerHTML = '✓ Nivel máximo alcanzado';
+                } else {
+                    var sig = NIVELES[idx - 1];
+                    feed.style.color = '#3D008D';
+                    feed.innerHTML = '▲ Para subir a ' + sig.etq + ': ' + CRITERIOS[i].desc[idx - 1];
+                }
+            }
+
+            function recalcular() {
+                var elegidos = seleccion.filter(function (s) { return s >= 0; }).length;
+                var notaEl = document.getElementById('ae-nota');
+                var bandaEl = document.getElementById('ae-banda');
+                var estadoEl = document.getElementById('ae-estado');
+
+                if (elegidos === 0) {
+                    notaEl.textContent = '0,0';
+                    bandaEl.textContent = '—';
+                    bandaEl.style.background = '#F1F5F9';
+                    bandaEl.style.color = '#64748B';
+                    estadoEl.textContent = 'Selecciona un nivel en cada criterio';
+                    estadoEl.style.color = '#64748B';
+                    return;
+                }
+
+                var suma = 0;
+                CRITERIOS.forEach(function (c, i) {
+                    var idx = seleccion[i];
+                    if (idx >= 0) suma += NIVELES[idx].nota * c.peso;
+                });
+                var nota = Math.round((suma / 100) * 10) / 10; // 1 decimal
+
+                notaEl.textContent = fmt(nota);
+                var b = bandaDe(nota);
+                bandaEl.textContent = b.etq;
+                bandaEl.style.background = BANDAS[b.id].bg;
+                bandaEl.style.color = BANDAS[b.id].fg;
+
+                if (nota >= 3.0) {
+                    estadoEl.innerHTML = '<i class="fas fa-circle-check mr-1.5"></i>Aprobado (estimado)';
+                    estadoEl.style.color = '#0E9F6E';
+                } else {
+                    estadoEl.innerHTML = '<i class="fas fa-circle-exclamation mr-1.5"></i>Aún no aprueba';
+                    estadoEl.style.color = '#DC2626';
+                }
+
+                if (elegidos < CRITERIOS.length) {
+                    estadoEl.innerHTML += ' <span style="color:#94A3B8;font-weight:500">(' + elegidos + '/' + CRITERIOS.length + ' criterios)</span>';
+                }
+            }
+
+            // Checklist de entregables
+            var lista = document.getElementById('ae-checklist');
+            ENTREGABLES.forEach(function (txt, i) {
+                var row = document.createElement('label');
+                row.className = 'flex gap-2.5 items-start cursor-pointer';
+                row.setAttribute('for', 'ae-chk-' + i);
+                row.innerHTML =
+                    '<input type="checkbox" id="ae-chk-' + i + '" class="mt-0.5 accent-emerald-600 w-4 h-4 flex-shrink-0">' +
+                    '<span>' + txt + '</span>';
+                lista.appendChild(row);
+                row.querySelector('input').addEventListener('change', actualizarCheck);
+            });
+            function actualizarCheck() {
+                var total = ENTREGABLES.length;
+                var hechos = lista.querySelectorAll('input[type="checkbox"]:checked').length;
+                var counter = document.getElementById('ae-check-count');
+                counter.textContent = hechos + '/' + total + ' listos';
+                counter.style.color = (hechos === total) ? '#0E9F6E' : '#64748B';
+                document.getElementById('ae-check-warn').style.display = (hechos === total) ? 'none' : '';
+            }
+
+            // Reiniciar
+            document.getElementById('ae-reset').addEventListener('click', function () {
+                seleccion = CRITERIOS.map(function () { return -1; });
+                cont.querySelectorAll('select').forEach(function (s) { s.value = '-1'; });
+                CRITERIOS.forEach(function (_, i) { pintarCriterio(i); });
+                lista.querySelectorAll('input[type="checkbox"]').forEach(function (c) { c.checked = false; });
+                actualizarCheck();
+                recalcular();
+            });
+
+            // Estado inicial
+            recalcular();
+            actualizarCheck();
+        })();
     </script>
 
 </body>

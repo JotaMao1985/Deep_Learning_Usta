@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Microlearning del Módulo 2 — Arquitecturas del Aprendizaje Profundo. 5 cápsulas de 3-5 minutos sobre los conceptos esenciales: convolución vs. capa densa, compuertas LSTM, mecanismo de atención, modelos generativos (VAE/GAN/Difusión) y transfer learning. Universidad Santo Tomás.">
+    <title>Microlearning · Módulo 2 — Arquitecturas del Deep Learning · USTA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+            svg: { fontCache: 'global' },
+            startup: { typeset: false }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Montserrat', 'Helvetica Neue', 'Arial', 'sans-serif'] },
+                    colors: {
+                        primary: '#3D008D', secondary: '#ED1E79',
+                        navy: '#001A4D', gold: '#FDB913',
+                        teal: '#0E7490',
+                        bg: '#F8FAFC', surface: '#FFFFFF',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* ===== BASE ===== */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #F0F2F8;
+            color: #1E293B;
+            background-image:
+                radial-gradient(circle at 1px 1px, rgba(61,0,141,0.04) 1px, transparent 0);
+            background-size: 28px 28px;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(61,0,141,0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(237,30,121,0.03) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        code, pre { font-family: 'Fira Code', monospace; }
+
+        /* ===== GRADIENTS ===== */
+        .usta-gradient { background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%); }
+        .usta-gradient-text {
+            background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ===== HEADER ===== */
+        .usta-header {
+            background: linear-gradient(180deg, #001A4D 0%, #002868 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .usta-header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(circle at 20% 50%, rgba(61,0,141,0.25) 0%, transparent 50%),
+                radial-gradient(circle at 80% 30%, rgba(237,30,121,0.15) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        .neural-bg {
+            position: absolute; inset: 0; pointer-events: none; opacity: 0.08;
+        }
+
+        /* ===== GLASSMORPHISM CARD ===== */
+        .usta-card {
+            background: rgba(255,255,255,0.82);
+            backdrop-filter: blur(16px) saturate(1.6);
+            -webkit-backdrop-filter: blur(16px) saturate(1.6);
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.6);
+            box-shadow:
+                0 4px 6px rgba(0,0,0,0.04),
+                0 12px 40px rgba(61,0,141,0.08),
+                0 0 0 1px rgba(61,0,141,0.03);
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+        .usta-card:hover {
+            box-shadow:
+                0 8px 12px rgba(0,0,0,0.06),
+                0 20px 60px rgba(61,0,141,0.12),
+                0 0 0 1px rgba(61,0,141,0.05);
+            transform: translateY(-2px);
+        }
+
+        /* ===== ANIMATIONS ===== */
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide-in { animation: slideIn 0.5s cubic-bezier(0.16,1,0.3,1) forwards; }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(40px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        .animate-slide-out { animation: slideOut 0.3s ease-in forwards; }
+        @keyframes slideOut {
+            from { opacity: 1; transform: translateX(0); }
+            to   { opacity: 0; transform: translateX(-40px); }
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(237,30,121,0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(237,30,121,0); }
+        }
+        @keyframes draw-stroke {
+            from { stroke-dashoffset: var(--path-length, 1000); }
+            to   { stroke-dashoffset: 0; }
+        }
+        @keyframes confetti-fall {
+            0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(80px) rotate(720deg); opacity: 0; }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .reveal { opacity: 0; transform: translateY(20px); transition: all 0.6s cubic-bezier(0.16,1,0.3,1); }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        /* ===== INLINE CODE ===== */
+        .inline-code {
+            background: #F1F5F9; color: #0F172A;
+            padding: 0.1rem 0.4rem; border-radius: 6px;
+            font-size: 0.88em; font-family: 'Fira Code', monospace;
+            border: 1px solid rgba(0,0,0,0.06);
+        }
+
+        /* ===== EQUATION BLOCK ===== */
+        .eq-block {
+            background: linear-gradient(135deg, #FAF8FF 0%, #F5F0FA 100%);
+            border: 1px solid rgba(61, 0, 141, 0.12);
+            border-radius: 16px;
+            padding: 0.8rem 1.2rem;
+            overflow-x: auto;
+            text-align: center;
+            box-shadow: inset 0 1px 3px rgba(61,0,141,0.04);
+        }
+
+        /* ===== CALLOUTS ===== */
+        .callout {
+            border-left: 5px solid #3D008D;
+            background: linear-gradient(135deg, #F5F0FA 0%, #FAF8FF 100%);
+            padding: 16px 20px;
+            border-radius: 0 16px 16px 0;
+            margin: 1rem 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .callout.tip    { border-left-color: #15803D; background: linear-gradient(135deg, #F0FDF4 0%, #F7FEF9 100%); }
+        .callout.warn   { border-left-color: #B45309; background: linear-gradient(135deg, #FFFBEB 0%, #FFFDF5 100%); }
+        .callout.ethics { border-left-color: #0E7490; background: linear-gradient(135deg, #ECFEFF 0%, #F5FEFF 100%); }
+        .callout-label {
+            display: inline-block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 6px;
+            color: white;
+            background: linear-gradient(140deg, #3D008D, #6B21A8);
+            margin-bottom: 8px;
+            box-shadow: 0 2px 4px rgba(61,0,141,0.2);
+        }
+        .callout.tip .callout-label    { background: linear-gradient(140deg, #15803D, #22C55E); }
+        .callout.warn .callout-label   { background: linear-gradient(140deg, #B45309, #F59E0B); }
+        .callout.ethics .callout-label { background: linear-gradient(140deg, #0E7490, #06B6D4); }
+
+        /* ===== PILLS ===== */
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            border: 1px solid rgba(0,0,0,0.06);
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.6);
+        }
+
+        /* ===== STEP INDICATOR ===== */
+        .step-dot {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.85rem;
+            transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+        }
+        .step-dot.done {
+            background: linear-gradient(140deg, #15803D, #22C55E);
+            color: white;
+            box-shadow: 0 4px 12px rgba(21,128,61,0.3);
+        }
+        .step-dot.active {
+            background: linear-gradient(140deg, #3D008D, #ED1E79);
+            color: white;
+            box-shadow: 0 4px 16px rgba(61,0,141,0.4);
+            transform: scale(1.18);
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        .step-dot.future { background: #E2E8F0; color: #94A3B8; }
+        .step-line { flex: 1; height: 3px; background: #E2E8F0; border-radius: 9999px; transition: background 0.5s ease; }
+        .step-line.done { background: linear-gradient(90deg, #15803D, #3D008D); }
+
+        /* ===== FOCUS ===== */
+        button:focus-visible, a:focus-visible { outline: 2px solid #ED1E79; outline-offset: 2px; }
+
+        /* ===== SVG SHARED ===== */
+        .svg-chart { width: 100%; border-radius: 12px; }
+        .svg-chart text { font-family: 'Montserrat', sans-serif; }
+        .axis-line { stroke: #94A3B8; stroke-width: 1; }
+        .grid-line { stroke: #E2E8F0; stroke-width: 0.5; stroke-dasharray: 3,4; }
+        .draw-animated {
+            stroke-dasharray: var(--path-length, 1000);
+            stroke-dashoffset: var(--path-length, 1000);
+            animation: draw-stroke 1.5s ease-out forwards;
+        }
+        .draw-animated-slow {
+            stroke-dasharray: var(--path-length, 1000);
+            stroke-dashoffset: var(--path-length, 1000);
+            animation: draw-stroke 2.5s ease-out forwards;
+        }
+
+        /* ===== VISUAL CONTAINERS ===== */
+        .visual-container {
+            background: linear-gradient(135deg, #FFFFFF 0%, #FAFBFF 100%);
+            border: 1px solid rgba(61,0,141,0.08);
+            border-radius: 20px;
+            padding: 1.25rem;
+            margin: 1rem 0;
+            box-shadow:
+                0 4px 12px rgba(0,0,0,0.04),
+                0 1px 3px rgba(61,0,141,0.06);
+            overflow: hidden;
+            position: relative;
+        }
+        .visual-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3D008D, #ED1E79, #FDB913);
+            opacity: 0.6;
+        }
+        .visual-title {
+            text-align: center;
+            color: #001A4D;
+            font-weight: 700;
+            font-size: 0.88rem;
+            margin-bottom: 0.75rem;
+        }
+
+        /* ===== CONFETTI ===== */
+        .confetti-piece {
+            position: absolute;
+            width: 8px; height: 8px;
+            border-radius: 2px;
+            animation: confetti-fall 1.2s ease-out forwards;
+            pointer-events: none;
+        }
+
+        /* ===== MCQ ===== */
+        .mcq-shake { animation: shake 0.4s ease-in-out; }
+        .mcq-option { position: relative; overflow: hidden; }
+        .mcq-option::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.3) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .mcq-option:hover::after { opacity: 1; }
+
+        /* ===== PROGRESS SEGMENTS ===== */
+        .progress-segment {
+            height: 6px;
+            border-radius: 3px;
+            transition: all 0.5s ease;
+            flex: 1;
+        }
+        .progress-segment:hover { transform: scaleY(1.5); }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+        /* ============================================================
+           MathJax lazy typeset
+        ============================================================ */
+        const typesetMath = (ref) => {
+            setTimeout(() => {
+                if (ref.current && window.MathJax && window.MathJax.typesetPromise) {
+                    window.MathJax.typesetPromise([ref.current]).catch(() => {});
+                }
+            }, 50);
+        };
+
+        /* ============================================================
+           IntersectionObserver for scroll reveal
+        ============================================================ */
+        const useReveal = () => {
+            const ref = useRef(null);
+            useEffect(() => {
+                const el = ref.current;
+                if (!el) return;
+                const obs = new IntersectionObserver(
+                    ([entry]) => { if (entry.isIntersecting) { el.classList.add('visible'); obs.unobserve(el); } },
+                    { threshold: 0.15 }
+                );
+                obs.observe(el);
+                return () => obs.disconnect();
+            }, []);
+            return ref;
+        };
+
+        /* ============================================================
+           Re-tipografiado de LaTeX revelado dinámicamente
+        ============================================================ */
+        const useTypeset = (deps) => {
+            const ref = useRef(null);
+            useEffect(() => {
+                typesetMath(ref);
+            }, deps);
+            return ref;
+        };
+
+        /* ============================================================
+           Persistencia del progreso — CLAVE PROPIA DEL MÓDULO 2
+        ============================================================ */
+        const STORAGE_KEY = 'microlearning_progress_m2';
+
+        const defaultMicro = () => ({
+            capsVistas: { 1: false, 2: false, 3: false, 4: false, 5: false },
+            mcqAciertos: { 1: false, 2: false, 3: false, 4: false, 5: false },
+            startedAt: new Date().toISOString(),
+        });
+
+        const useMicroProgress = () => {
+            const [progress, setProgress] = useState(() => {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (!raw) return defaultMicro();
+                    const parsed = JSON.parse(raw);
+                    return {
+                        ...defaultMicro(),
+                        ...parsed,
+                        capsVistas:  { ...defaultMicro().capsVistas,  ...(parsed.capsVistas  || {}) },
+                        mcqAciertos: { ...defaultMicro().mcqAciertos, ...(parsed.mcqAciertos || {}) },
+                    };
+                } catch (e) { return defaultMicro(); }
+            });
+            useEffect(() => {
+                try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch (e) {}
+            }, [progress]);
+            const update = useCallback((patch) => {
+                setProgress(prev => ({ ...prev, ...(typeof patch === 'function' ? patch(prev) : patch) }));
+            }, []);
+            const reset = useCallback(() => setProgress(defaultMicro()), []);
+            return [progress, update, reset];
+        };
+
+        /* ============================================================
+           SUBCOMPONENTES
+        ============================================================ */
+
+        const Pill = ({ children, color = 'primary', icon }) => {
+            const palette = {
+                primary:   { bg: '#F5F0FA', fg: '#3D008D' },
+                secondary: { bg: '#FCE7F1', fg: '#BE185D' },
+                gold:      { bg: '#FEF3C7', fg: '#B45309' },
+                navy:      { bg: '#DBEAFE', fg: '#001A4D' },
+                green:     { bg: '#DCFCE7', fg: '#15803D' },
+            }[color] || { bg: '#F5F0FA', fg: '#3D008D' };
+            return (
+                <span className="pill" style={{ background: palette.bg, color: palette.fg }}>
+                    {icon && <i className={`fas ${icon} text-[0.65rem]`}></i>}{children}
+                </span>
+            );
+        };
+
+        const Eq = ({ children }) => {
+            const ref = useTypeset([children]);
+            return <div ref={ref} className="eq-block my-3">{children}</div>;
+        };
+
+        const Callout = ({ type = 'info', label, children }) => {
+            const revRef = useReveal();
+            const tsRef = useTypeset([children]);
+            return (
+                <div ref={revRef} className={`callout reveal ${type !== 'info' ? type : ''}`}>
+                    {label && <span className="callout-label">{label}</span>}
+                    <div ref={tsRef} className="text-gray-700 leading-relaxed text-[0.95rem]">{children}</div>
+                </div>
+            );
+        };
+
+        /* ============================================================
+           CONFETTI
+        ============================================================ */
+        const Confetti = ({ show }) => {
+            if (!show) return null;
+            const colors = ['#3D008D', '#ED1E79', '#FDB913', '#15803D', '#2563EB', '#F59E0B'];
+            const pieces = Array.from({ length: 18 }, (_, i) => ({
+                id: i,
+                color: colors[i % colors.length],
+                left: `${10 + Math.random() * 80}%`,
+                delay: `${Math.random() * 0.5}s`,
+                size: 6 + Math.random() * 6,
+            }));
+            return (
+                <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 10 }}>
+                    {pieces.map(p => (
+                        <div key={p.id} className="confetti-piece"
+                            style={{
+                                background: p.color, left: p.left, top: '10%',
+                                animationDelay: p.delay,
+                                width: p.size, height: p.size,
+                                borderRadius: Math.random() > 0.5 ? '50%' : '2px',
+                            }} />
+                    ))}
+                </div>
+            );
+        };
+
+        /* ============================================================
+           MCQ con confetti y shake
+        ============================================================ */
+        const MCQ = ({ pregunta, opciones, onCorrect, id }) => {
+            const [sel, setSel] = useState(null);
+            const [checked, setChecked] = useState(false);
+            const [showConfetti, setShowConfetti] = useState(false);
+            const [shaking, setShaking] = useState(false);
+            const correctIdx = opciones.findIndex(o => o.correcta);
+            const ok = sel === correctIdx;
+            const mcqRef = useTypeset([pregunta, opciones, checked]);
+
+            useEffect(() => {
+                if (checked && ok) {
+                    setShowConfetti(true);
+                    if (onCorrect) onCorrect();
+                    const t = setTimeout(() => setShowConfetti(false), 1500);
+                    return () => clearTimeout(t);
+                }
+                if (checked && !ok) {
+                    setShaking(true);
+                    const t = setTimeout(() => setShaking(false), 400);
+                    return () => clearTimeout(t);
+                }
+            }, [checked, ok, onCorrect]);
+
+            return (
+                <div ref={mcqRef} className={`relative my-4 rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-white/90 to-purple-50/40 p-5 shadow-sm ${shaking ? 'mcq-shake' : ''}`}
+                    style={{ backdropFilter: 'blur(8px)' }}>
+                    <Confetti show={showConfetti} />
+                    <div className="flex items-start gap-2 font-bold text-navy mb-3">
+                        <i className="fas fa-circle-question text-secondary mt-0.5"></i>
+                        <span className="text-[0.98rem]">{pregunta}</span>
+                    </div>
+                    <div className="space-y-2">
+                        {opciones.map((o, i) => {
+                            let cls = 'border-gray-200 hover:border-primary/40 hover:shadow-sm';
+                            if (checked) {
+                                if (i === correctIdx) cls = 'border-green-500 bg-green-50 shadow-sm shadow-green-100';
+                                else if (i === sel) cls = 'border-red-400 bg-red-50';
+                                else cls = 'border-gray-200 opacity-50';
+                            } else if (i === sel) cls = 'border-secondary bg-pink-50 shadow-sm shadow-pink-100';
+                            return (
+                                <button key={i} onClick={() => !checked && setSel(i)}
+                                    disabled={checked}
+                                    className={`w-full text-left px-4 py-2.5 rounded-xl border text-[0.92rem] flex items-center gap-3 transition-all duration-200 ${cls}`}>
+                                    <span className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${i === sel ? 'usta-gradient text-white shadow-md' : 'bg-gray-100 text-gray-500'}`}>
+                                        {String.fromCharCode(97 + i)}
+                                    </span>
+                                    <span className="flex-1 text-gray-700">{o.texto}</span>
+                                    {checked && i === correctIdx && <i className="fas fa-check-circle text-green-600 text-lg"></i>}
+                                    {checked && i === sel && i !== correctIdx && <i className="fas fa-times-circle text-red-500 text-lg"></i>}
+                                </button>
+                            );
+                        })}
+                    </div>
+                    <div className="mt-3 flex items-center gap-3 flex-wrap">
+                        {!checked
+                            ? <button onClick={() => sel !== null && setChecked(true)} disabled={sel === null}
+                                className="text-sm font-bold px-5 py-2 rounded-full text-white usta-gradient disabled:opacity-40 shadow-md hover:shadow-lg transition-shadow">
+                                Comprobar</button>
+                            : <button onClick={() => { setChecked(false); setSel(null); }}
+                                className="text-sm font-bold px-5 py-2 rounded-full border-2 border-primary text-primary hover:bg-primary/5 transition-colors">Reintentar</button>}
+                        {checked && (
+                            <span className={`text-sm font-bold ${ok ? 'text-green-600' : 'text-red-500'}`}>
+                                <i className={`fas ${ok ? 'fa-circle-check' : 'fa-circle-xmark'} mr-1`}></i>
+                                {ok ? '¡Correcto!' : 'Revisa la explicación abajo'}
+                            </span>
+                        )}
+                    </div>
+                    {checked && (
+                        <div className="mt-3 text-[0.9rem] text-gray-700 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-4 border-l-4 border-gold animate-fade-in shadow-sm">
+                            <strong>Explicación: </strong>{opciones[correctIdx].justificacion}
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        /* Step Indicator (5 dots conectados) */
+        const StepIndicator = ({ current, total, completed }) => {
+            return (
+                <div className="flex items-center gap-2 mb-6">
+                    {Array.from({ length: total }).map((_, i) => {
+                        const n = i + 1;
+                        const status = n < current ? 'done' : n === current ? 'active' : 'future';
+                        return (
+                            <React.Fragment key={n}>
+                                <div className={`step-dot ${status}`}>
+                                    {status === 'done' ? <i className="fas fa-check text-[0.7rem]"></i> : n}
+                                </div>
+                                {n < total && <div className={`step-line ${n < current ? 'done' : ''}`}></div>}
+                            </React.Fragment>
+                        );
+                    })}
+                </div>
+            );
+        };
+
+        /* ============================================================
+           VISUALES SVG
+        ============================================================ */
+
+        /* ——— Cápsula 1: Conexión densa vs. convolución (explosión de parámetros) ——— */
+        const ConvVisual = () => {
+            const [modo, setModo] = useState('densa'); // densa | conv
+            const revRef = useReveal();
+            const W = 360, H = 290;
+
+            // Rejilla de entrada 5x5 (la "imagen")
+            const gs = 26, ox = 40, oy = 50;
+            const inputCells = [];
+            for (let r = 0; r < 5; r++) for (let c = 0; c < 5; c++) inputCells.push({ r, c });
+
+            // Neurona de salida (densa) o filtro (conv)
+            const outX = 270, outY = 145;
+
+            // En densa, la salida se conecta a TODAS las celdas; en conv, solo a un parche 3x3 central
+            const kernel = [];
+            for (let r = 1; r <= 3; r++) for (let c = 1; c <= 3; c++) kernel.push({ r, c });
+            const conectadas = modo === 'densa' ? inputCells : kernel;
+
+            return (
+                <div ref={revRef} className="visual-container reveal">
+                    <h4 className="visual-title">
+                        <i className="fas fa-table-cells text-secondary mr-2"></i>Conexiones: capa densa vs. convolución
+                    </h4>
+                    <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
+                        aria-label="Comparación entre una capa densa y una capa convolucional sobre una rejilla de imagen de cinco por cinco. En modo densa, una neurona de salida se conecta a las veinticinco celdas de entrada. En modo convolución, la neurona solo se conecta a un parche local de tres por tres, gracias a la conectividad local y los pesos compartidos.">
+                        <defs>
+                            <linearGradient id="convCellGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#F5F0FA" />
+                                <stop offset="100%" stopColor="#EDE5F7" />
+                            </linearGradient>
+                            <radialGradient id="convOutGlow" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stopColor="#ED1E79" stopOpacity="0.35" />
+                                <stop offset="100%" stopColor="#ED1E79" stopOpacity="0" />
+                            </radialGradient>
+                        </defs>
+                        {/* Conexiones */}
+                        {conectadas.map((cell, i) => {
+                            const x1 = ox + cell.c * gs + gs / 2;
+                            const y1 = oy + cell.r * gs + gs / 2;
+                            return (
+                                <line key={`ln${i}`} x1={x1} y1={y1} x2={outX} y2={outY}
+                                    stroke={modo === 'densa' ? '#CBD5E1' : '#15803D'}
+                                    strokeWidth={modo === 'densa' ? 0.6 : 1.3}
+                                    opacity={modo === 'densa' ? 0.55 : 0.85}
+                                    style={{ transition: 'all 0.4s' }} />
+                            );
+                        })}
+                        {/* Rejilla de entrada */}
+                        {inputCells.map((cell, i) => {
+                            const x = ox + cell.c * gs;
+                            const y = oy + cell.r * gs;
+                            const enParche = modo === 'conv' && cell.r >= 1 && cell.r <= 3 && cell.c >= 1 && cell.c <= 3;
+                            return (
+                                <rect key={`c${i}`} x={x} y={y} width={gs - 3} height={gs - 3} rx="4"
+                                    fill={enParche ? '#DCFCE7' : 'url(#convCellGrad)'}
+                                    stroke={enParche ? '#15803D' : '#C4B5D6'}
+                                    strokeWidth={enParche ? 2 : 1}
+                                    style={{ transition: 'all 0.4s' }} />
+                            );
+                        })}
+                        {/* Neurona de salida */}
+                        <circle cx={outX} cy={outY} r="20" fill="url(#convOutGlow)" />
+                        <circle cx={outX} cy={outY} r="13" fill={modo === 'densa' ? '#ED1E79' : '#15803D'}
+                            stroke="white" strokeWidth="3" style={{ transition: 'fill 0.4s' }} />
+                        <text x={outX} y={outY + 4} textAnchor="middle" fontSize="11" fontWeight="bold" fill="white">+</text>
+                        {/* Etiquetas */}
+                        <text x={ox + 2 * gs} y={oy - 14} textAnchor="middle" fontSize="10" fill="#64748B" fontWeight="600">Imagen 5×5 (25 píxeles)</text>
+                        <text x={outX} y={outY + 36} textAnchor="middle" fontSize="9" fill="#64748B" fontWeight="600">salida</text>
+                        {/* Contador de pesos */}
+                        <rect x={ox} y={H - 40} width={W - 2 * ox} height="28" rx="8" fill="white" stroke="#E2E8F0" />
+                        <text x={W / 2} y={H - 22} textAnchor="middle" fontSize="11" fontWeight="bold"
+                            fill={modo === 'densa' ? '#ED1E79' : '#15803D'}>
+                            {modo === 'densa' ? 'Pesos para esta salida: 25 (uno por píxel)' : 'Pesos compartidos: 9 (parche 3×3) en toda la imagen'}
+                        </text>
+                    </svg>
+                    <div className="flex gap-2 mt-3 justify-center flex-wrap">
+                        <button onClick={() => setModo('densa')}
+                            className={`text-xs font-bold px-4 py-1.5 rounded-full border-2 transition-all ${modo === 'densa' ? 'border-secondary text-secondary bg-pink-50' : 'border-gray-300 text-gray-600 hover:border-secondary hover:text-secondary'}`}>
+                            <i className="fas fa-circle-nodes mr-1"></i>Capa densa (MLP)
+                        </button>
+                        <button onClick={() => setModo('conv')}
+                            className={`text-xs font-bold px-4 py-1.5 rounded-full border-2 transition-all ${modo === 'conv' ? 'border-green-500 text-green-700 bg-green-50' : 'border-gray-300 text-gray-600 hover:border-green-500 hover:text-green-700'}`}>
+                            <i className="fas fa-border-all mr-1"></i>Convolución (CNN)
+                        </button>
+                    </div>
+                    <p className="text-center text-xs text-gray-500 mt-3 italic leading-relaxed">
+                        En una imagen real de 1.000×1.000 píxeles la capa densa necesitaría <strong>mil millones de pesos</strong> solo en la primera capa.
+                        La convolución reutiliza el mismo parche pequeño en toda la imagen: <strong>conectividad local</strong> y <strong>pesos compartidos</strong>.
+                    </p>
+                </div>
+            );
+        };
+
+        /* ——— Cápsula 2: Celda LSTM con compuertas interactivas ——— */
+        const LstmVisual = () => {
+            const revRef = useReveal();
+            const [forget, setForget] = useState(0.8);
+            const [input, setInput] = useState(0.6);
+            const [output, setOutput] = useState(0.7);
+
+            const W = 380, H = 230;
+            // Estado de celda anterior y candidato (valores ilustrativos)
+            const Cprev = 1.0, Ccand = 0.9;
+            const Cnew = forget * Cprev + input * Ccand;
+            const hOut = output * Math.tanh(Cnew);
+
+            // Ancho de la "cinta transportadora" proporcional al flujo conservado
+            const beltY = 55;
+            const beltX1 = 30, beltX2 = 350;
+
+            const Gate = ({ x, label, val, color, sub }) => (
+                <g>
+                    <circle cx={x} cy={150} r="22" fill="white" stroke={color} strokeWidth="2.5" />
+                    <text x={x} y={146} textAnchor="middle" fontSize="13" fontWeight="bold" fill={color}>{label}</text>
+                    <text x={x} y={160} textAnchor="middle" fontSize="9" fill={color}>{val.toFixed(2)}</text>
+                    <text x={x} y={188} textAnchor="middle" fontSize="8.5" fill="#64748B" fontWeight="600">{sub}</text>
+                </g>
+            );
+
+            return (
+                <div ref={revRef} className="visual-container reveal">
+                    <h4 className="visual-title">
+                        <i className="fas fa-conveyor-belt-empty text-secondary mr-2"></i>La celda LSTM: tres compuertas y el estado de celda
+                    </h4>
+                    <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
+                        aria-label="Esquema de una celda LSTM. En la parte superior, una cinta transportadora representa el estado de celda, la memoria a largo plazo que fluye con sumas en lugar de multiplicaciones. Debajo, tres compuertas sigmoide: olvido, entrada y salida, controlan qué se descarta, qué se almacena y qué se expone como salida.">
+                        <defs>
+                            <linearGradient id="beltGrad" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stopColor="#15803D" />
+                                <stop offset="100%" stopColor="#22C55E" />
+                            </linearGradient>
+                            <marker id="lstmArr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                                <path d="M0,0 L6,3 L0,6 Z" fill="#15803D" />
+                            </marker>
+                        </defs>
+                        {/* Cinta transportadora (estado de celda) */}
+                        <line x1={beltX1} y1={beltY} x2={beltX2} y2={beltY}
+                            stroke="url(#beltGrad)" strokeWidth={2 + Cnew * 6} strokeLinecap="round"
+                            markerEnd="url(#lstmArr)" style={{ transition: 'stroke-width 0.3s' }} />
+                        <text x={beltX1} y={beltY - 14} fontSize="9" fill="#15803D" fontWeight="700">C(t-1)</text>
+                        <text x={beltX2 - 28} y={beltY - 14} fontSize="9" fill="#15803D" fontWeight="700">C(t)</text>
+                        <text x={W / 2} y={beltY - 14} textAnchor="middle" fontSize="9.5" fill="#15803D" fontWeight="700">Estado de celda (memoria larga · sumas)</text>
+                        {/* Operación de olvido (multiplicación) sobre la cinta */}
+                        <circle cx="110" cy={beltY} r="9" fill="white" stroke="#B45309" strokeWidth="2" />
+                        <text x="110" y={beltY + 4} textAnchor="middle" fontSize="11" fill="#B45309" fontWeight="bold">×</text>
+                        {/* Operación de entrada (suma) sobre la cinta */}
+                        <circle cx="230" cy={beltY} r="9" fill="white" stroke="#3D008D" strokeWidth="2" />
+                        <text x="230" y={beltY + 4} textAnchor="middle" fontSize="12" fill="#3D008D" fontWeight="bold">+</text>
+                        {/* Líneas de las compuertas hacia la cinta */}
+                        <line x1="110" y1="128" x2="110" y2={beltY + 9} stroke="#B45309" strokeWidth="1.5" strokeDasharray="3,3" />
+                        <line x1="230" y1="128" x2="230" y2={beltY + 9} stroke="#3D008D" strokeWidth="1.5" strokeDasharray="3,3" />
+                        {/* Compuertas */}
+                        <Gate x={110} label="f" val={forget} color="#B45309" sub="olvido" />
+                        <Gate x={230} label="i" val={input} color="#3D008D" sub="entrada" />
+                        <Gate x={330} label="o" val={output} color="#0E7490" sub="salida" />
+                        {/* Salida h(t) */}
+                        <line x1="330" y1="172" x2="330" y2="210" stroke="#0E7490" strokeWidth="1.5" strokeDasharray="3,3" />
+                        <text x="330" y="222" textAnchor="middle" fontSize="9" fill="#0E7490" fontWeight="700">h(t)={hOut.toFixed(2)}</text>
+                    </svg>
+                    <div className="grid grid-cols-3 gap-2 mt-3">
+                        <div>
+                            <label className="block text-[0.62rem] font-bold text-amber-700 text-center mb-1">Olvido (f)</label>
+                            <input type="range" min="0" max="1" step="0.05" value={forget}
+                                onChange={e => setForget(parseFloat(e.target.value))}
+                                className="w-full accent-amber-600" />
+                        </div>
+                        <div>
+                            <label className="block text-[0.62rem] font-bold text-primary text-center mb-1">Entrada (i)</label>
+                            <input type="range" min="0" max="1" step="0.05" value={input}
+                                onChange={e => setInput(parseFloat(e.target.value))}
+                                className="w-full accent-purple-700" />
+                        </div>
+                        <div>
+                            <label className="block text-[0.62rem] font-bold text-teal text-center mb-1">Salida (o)</label>
+                            <input type="range" min="0" max="1" step="0.05" value={output}
+                                onChange={e => setOutput(parseFloat(e.target.value))}
+                                className="w-full accent-cyan-700" />
+                        </div>
+                    </div>
+                    <p className="text-center text-xs text-gray-500 mt-3 italic leading-relaxed">
+                        Mueva las compuertas (valores de 0 a 1). Con olvido cercano a 1 la memoria pasada se conserva;
+                        cerca de 0 se descarta. La actualización del estado usa <strong>sumas</strong>, lo que deja fluir el gradiente sin desvanecerse.
+                    </p>
+                </div>
+            );
+        };
+
+        /* ——— Cápsula 3: Mecanismo de atención (pesos sobre la secuencia) ——— */
+        const AttentionVisual = () => {
+            const revRef = useReveal();
+            // La palabra que se está generando "consulta" la secuencia de entrada
+            const tokens = ['El', 'café', 'de', 'Colombia', 'es', 'suave'];
+            // Distintos focos de atención según la palabra objetivo
+            const escenarios = [
+                { objetivo: 'coffee', pesos: [0.04, 0.62, 0.05, 0.20, 0.04, 0.05] },
+                { objetivo: 'smooth', pesos: [0.03, 0.10, 0.03, 0.06, 0.08, 0.70] },
+                { objetivo: 'Colombian', pesos: [0.04, 0.18, 0.06, 0.62, 0.05, 0.05] },
+            ];
+            const [idx, setIdx] = useState(0);
+            const esc = escenarios[idx];
+
+            const W = 360, H = 220;
+            const colW = (W - 40) / tokens.length;
+            const baseY = 150;
+
+            return (
+                <div ref={revRef} className="visual-container reveal">
+                    <h4 className="visual-title">
+                        <i className="fas fa-highlighter text-secondary mr-2"></i>Atención: ¿a qué palabra mirar en cada paso?
+                    </h4>
+                    <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
+                        aria-label="Visualización del mecanismo de atención. Una palabra que se está generando reparte su atención sobre las palabras de la frase de entrada. La intensidad del resaltador muestra qué tanto peso recibe cada palabra; el peso total suma uno. Al cambiar la palabra objetivo, el foco se desplaza hacia la palabra de entrada más relevante.">
+                        {/* Token objetivo (consulta) */}
+                        <rect x={W / 2 - 55} y="18" width="110" height="30" rx="10" fill="#3D008D" />
+                        <text x={W / 2} y="38" textAnchor="middle" fontSize="12" fill="white" fontWeight="bold">
+                            {esc.objetivo}
+                        </text>
+                        <text x={W / 2} y="62" textAnchor="middle" fontSize="8.5" fill="#64748B" fontWeight="600">palabra a generar (Query)</text>
+                        {/* Tokens de entrada con barras de atención */}
+                        {tokens.map((tk, i) => {
+                            const cx = 20 + i * colW + colW / 2;
+                            const peso = esc.pesos[i];
+                            const barH = peso * 70;
+                            // Línea de atención cuyo grosor depende del peso
+                            return (
+                                <g key={i}>
+                                    <line x1={W / 2} y1="48" x2={cx} y2={baseY - 20}
+                                        stroke="#ED1E79" strokeWidth={0.5 + peso * 6}
+                                        opacity={0.25 + peso * 0.7}
+                                        style={{ transition: 'all 0.4s' }} />
+                                    {/* Barra de peso */}
+                                    <rect x={cx - 11} y={baseY - 20 - barH} width="22" height={barH} rx="3"
+                                        fill="#ED1E79" opacity={0.35 + peso * 0.6}
+                                        style={{ transition: 'all 0.4s' }} />
+                                    <text x={cx} y={baseY - 24 - barH} textAnchor="middle" fontSize="8" fill="#BE185D" fontWeight="700">
+                                        {peso.toFixed(2)}
+                                    </text>
+                                    {/* Caja del token */}
+                                    <rect x={cx - colW / 2 + 4} y={baseY - 18} width={colW - 8} height="26" rx="7"
+                                        fill="#F5F0FA" stroke="#C4B5D6" strokeWidth="1" />
+                                    <text x={cx} y={baseY - 1} textAnchor="middle" fontSize="9.5" fill="#3D008D" fontWeight="600">{tk}</text>
+                                </g>
+                            );
+                        })}
+                        <text x={W / 2} y={H - 8} textAnchor="middle" fontSize="8.5" fill="#64748B" fontWeight="600">
+                            secuencia de entrada (Keys / Values) — los pesos suman 1
+                        </text>
+                    </svg>
+                    <div className="flex gap-2 mt-3 justify-center flex-wrap">
+                        {escenarios.map((e, i) => (
+                            <button key={i} onClick={() => setIdx(i)}
+                                className={`text-xs font-bold px-4 py-1.5 rounded-full border-2 transition-all ${idx === i ? 'border-secondary text-secondary bg-pink-50' : 'border-gray-300 text-gray-600 hover:border-secondary hover:text-secondary'}`}>
+                                Generar “{e.objetivo}”
+                            </button>
+                        ))}
+                    </div>
+                    <p className="text-center text-xs text-gray-500 mt-3 italic leading-relaxed">
+                        Al traducir cada palabra, el modelo “alinea” su atención hacia la palabra de entrada correspondiente,
+                        en vez de comprimir toda la frase en un único vector fijo.
+                    </p>
+                </div>
+            );
+        };
+
+        /* ——— Cápsula 4: VAE vs GAN vs Difusión ——— */
+        const GenerativeVisual = () => {
+            const revRef = useReveal();
+            const [familia, setFamilia] = useState('vae');
+            const W = 380, H = 200;
+
+            const Box = ({ x, y, w, h, label, fill, stroke }) => (
+                <g>
+                    <rect x={x} y={y} width={w} height={h} rx="10" fill={fill} stroke={stroke} strokeWidth="1.8" />
+                    <text x={x + w / 2} y={y + h / 2 + 4} textAnchor="middle" fontSize="10.5" fontWeight="bold" fill={stroke}>{label}</text>
+                </g>
+            );
+            const Arrow = ({ x1, y1, x2, y2, color }) => (
+                <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={color} strokeWidth="2" markerEnd="url(#genArr)" />
+            );
+
+            return (
+                <div ref={revRef} className="visual-container reveal">
+                    <h4 className="visual-title">
+                        <i className="fas fa-shapes text-secondary mr-2"></i>Tres formas de generar: VAE, GAN y Difusión
+                    </h4>
+                    <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
+                        aria-label="Diagrama comparativo de tres familias generativas. El VAE codifica la entrada en una distribución de probabilidad y la decodifica. La GAN enfrenta un generador y un discriminador en un juego adversario. El modelo de difusión añade ruido a una imagen y aprende a quitarlo paso a paso.">
+                        <defs>
+                            <marker id="genArr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                                <path d="M0,0 L6,3 L0,6 Z" fill="#3D008D" />
+                            </marker>
+                        </defs>
+                        {familia === 'vae' && (
+                            <>
+                                <Box x={20} y={75} w={60} h={48} label="x" fill="#F5F0FA" stroke="#3D008D" />
+                                <Arrow x1={80} y1={99} x2={120} y2={99} color="#3D008D" />
+                                <Box x={120} y={70} w={70} h={58} label="Encoder" fill="#EDE5F7" stroke="#3D008D" />
+                                <Box x={210} y={78} w={60} h={42} label="μ, σ → z" fill="#FCE7F1" stroke="#BE185D" />
+                                <Arrow x1={190} y1={99} x2={210} y2={99} color="#3D008D" />
+                                <Arrow x1={270} y1={99} x2={300} y2={99} color="#3D008D" />
+                                <Box x={300} y={70} w={60} h={58} label="Decoder" fill="#EDE5F7" stroke="#3D008D" />
+                                <text x={W / 2} y="22" textAnchor="middle" fontSize="10" fill="#64748B" fontWeight="700">Comprime a una distribución latente y reconstruye</text>
+                                <text x={240} y="150" textAnchor="middle" fontSize="8.5" fill="#BE185D">espacio latente continuo</text>
+                            </>
+                        )}
+                        {familia === 'gan' && (
+                            <>
+                                <Box x={20} y={75} w={62} h={48} label="ruido z" fill="#FEF3C7" stroke="#B45309" />
+                                <Arrow x1={82} y1={99} x2={110} y2={99} color="#B45309" />
+                                <Box x={110} y={70} w={78} h={58} label="Generador G" fill="#EDE5F7" stroke="#3D008D" />
+                                <Arrow x1={188} y1={99} x2={218} y2={99} color="#3D008D" />
+                                <Box x={218} y={70} w={86} h={58} label="Discrim. D" fill="#FCE7F1" stroke="#BE185D" />
+                                <Box x={218} y={20} w={86} h={32} label="datos reales" fill="#DCFCE7" stroke="#15803D" />
+                                <Arrow x1={261} y1={52} x2={261} y2={70} color="#15803D" />
+                                <text x={332} y="100" textAnchor="middle" fontSize="10" fill="#BE185D" fontWeight="700">¿real / falso?</text>
+                                <text x={W / 2} y="160" textAnchor="middle" fontSize="9.5" fill="#64748B" fontWeight="700">Juego adversario: G engaña, D juzga</text>
+                            </>
+                        )}
+                        {familia === 'diff' && (
+                            <>
+                                <text x={W / 2} y="22" textAnchor="middle" fontSize="10" fill="#64748B" fontWeight="700">Añade ruido (forward) y aprende a quitarlo (reverse)</text>
+                                {[0, 1, 2, 3].map(i => {
+                                    const x = 30 + i * 90;
+                                    const op = 1 - i * 0.28; // de imagen nítida a ruido
+                                    return (
+                                        <g key={i}>
+                                            <rect x={x} y={60} width="56" height="56" rx="8"
+                                                fill={`rgba(61,0,141,${op * 0.5})`} stroke="#3D008D" strokeWidth="1.5" />
+                                            <text x={x + 28} y={132} textAnchor="middle" fontSize="8" fill="#64748B">
+                                                {i === 0 ? 'imagen' : i === 3 ? 'ruido' : 'paso ' + i}
+                                            </text>
+                                            {i < 3 && <Arrow x1={x + 56} y1={88} x2={x + 90} y2={88} color="#B45309" />}
+                                        </g>
+                                    );
+                                })}
+                                <text x={W / 2} y="160" textAnchor="middle" fontSize="9" fill="#15803D" fontWeight="700">◀ El reverse (denoising) reconstruye paso a paso</text>
+                            </>
+                        )}
+                    </svg>
+                    <div className="flex gap-2 mt-3 justify-center flex-wrap">
+                        <button onClick={() => setFamilia('vae')}
+                            className={`text-xs font-bold px-4 py-1.5 rounded-full border-2 transition-all ${familia === 'vae' ? 'border-primary text-primary bg-purple-50' : 'border-gray-300 text-gray-600 hover:border-primary'}`}>VAE</button>
+                        <button onClick={() => setFamilia('gan')}
+                            className={`text-xs font-bold px-4 py-1.5 rounded-full border-2 transition-all ${familia === 'gan' ? 'border-secondary text-secondary bg-pink-50' : 'border-gray-300 text-gray-600 hover:border-secondary'}`}>GAN</button>
+                        <button onClick={() => setFamilia('diff')}
+                            className={`text-xs font-bold px-4 py-1.5 rounded-full border-2 transition-all ${familia === 'diff' ? 'border-amber-600 text-amber-700 bg-amber-50' : 'border-gray-300 text-gray-600 hover:border-amber-600'}`}>Difusión</button>
+                    </div>
+                    <p className="text-center text-xs text-gray-500 mt-3 italic leading-relaxed">
+                        El VAE optimiza una reconstrucción regularizada; la GAN, un juego adversario inestable pero nítido;
+                        la difusión, un objetivo de regresión estable que hoy domina la generación de imágenes.
+                    </p>
+                </div>
+            );
+        };
+
+        /* ——— Cápsula 5: Transfer learning vs fine-tuning (capas congeladas) ——— */
+        const TransferVisual = () => {
+            const revRef = useReveal();
+            const [modo, setModo] = useState('extract'); // extract | finetune
+            const W = 360, H = 260;
+
+            // Pila de capas: 0..3 convolucionales (base) + 4 clasificador nuevo
+            const capas = [
+                { label: 'Conv 1 (bordes, colores)', tipo: 'base' },
+                { label: 'Conv 2 (texturas)', tipo: 'base' },
+                { label: 'Conv 3 (formas)', tipo: 'base' },
+                { label: 'Conv 4 (alto nivel)', tipo: 'top' },
+                { label: 'Clasificador NUEVO', tipo: 'nuevo' },
+            ];
+
+            const congelada = (c, i) => {
+                if (c.tipo === 'nuevo') return false; // siempre se entrena
+                if (modo === 'extract') return true;  // toda la base congelada
+                return c.tipo === 'base' && i < 3;     // fine-tuning: solo las profundas siguen congeladas
+            };
+
+            const lh = 38, lx = 60, lw = 240;
+
+            return (
+                <div ref={revRef} className="visual-container reveal">
+                    <h4 className="visual-title">
+                        <i className="fas fa-snowflake text-secondary mr-2"></i>Transfer learning: ¿qué capas congelar?
+                    </h4>
+                    <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
+                        aria-label="Pila de capas de una red pre-entrenada. En extracción de características, todas las capas base están congeladas y solo se entrena un clasificador nuevo. En fine-tuning, las últimas capas se descongelan y se reentrenan con una tasa de aprendizaje baja, junto con el clasificador nuevo.">
+                        {capas.map((c, i) => {
+                            const y = 18 + i * (lh + 8);
+                            const fr = congelada(c, i);
+                            const fill = c.tipo === 'nuevo' ? '#FCE7F1' : (fr ? '#DBEAFE' : '#DCFCE7');
+                            const stroke = c.tipo === 'nuevo' ? '#BE185D' : (fr ? '#2563EB' : '#15803D');
+                            return (
+                                <g key={i}>
+                                    <rect x={lx} y={y} width={lw} height={lh} rx="9" fill={fill} stroke={stroke} strokeWidth="1.8"
+                                        style={{ transition: 'all 0.4s' }} />
+                                    <text x={lx + 14} y={y + lh / 2 + 4} fontSize="10" fill={stroke} fontWeight="600">{c.label}</text>
+                                    <text x={lx + lw - 16} y={y + lh / 2 + 5} textAnchor="middle" fontSize="14">
+                                        {c.tipo === 'nuevo' ? '🎯' : (fr ? '🔒' : '🔥')}
+                                    </text>
+                                </g>
+                            );
+                        })}
+                        <text x={W / 2} y={H - 8} textAnchor="middle" fontSize="8.5" fill="#64748B" fontWeight="600">
+                            🔒 congelada · 🔥 reentrenable (lr baja) · 🎯 nueva
+                        </text>
+                    </svg>
+                    <div className="flex gap-2 mt-3 justify-center flex-wrap">
+                        <button onClick={() => setModo('extract')}
+                            className={`text-xs font-bold px-4 py-1.5 rounded-full border-2 transition-all ${modo === 'extract' ? 'border-blue-500 text-blue-700 bg-blue-50' : 'border-gray-300 text-gray-600 hover:border-blue-500'}`}>
+                            <i className="fas fa-lock mr-1"></i>Extracción (pocos datos)
+                        </button>
+                        <button onClick={() => setModo('finetune')}
+                            className={`text-xs font-bold px-4 py-1.5 rounded-full border-2 transition-all ${modo === 'finetune' ? 'border-green-500 text-green-700 bg-green-50' : 'border-gray-300 text-gray-600 hover:border-green-500'}`}>
+                            <i className="fas fa-fire mr-1"></i>Fine-tuning (más datos)
+                        </button>
+                    </div>
+                    <p className="text-center text-xs text-gray-500 mt-3 italic leading-relaxed">
+                        Las capas iniciales aprenden detectores universales (bordes, texturas) que se reutilizan tal cual.
+                        Con <strong>pocos datos</strong> conviene congelar la base; con <strong>más datos o un dominio distinto</strong> se descongelan las capas superiores.
+                    </p>
+                </div>
+            );
+        };
+
+        /* ============================================================
+           VIDEO CARD
+        ============================================================ */
+        const VideoCard = ({ video }) => {
+            const revRef = useReveal();
+            return (
+                <div ref={revRef} className="reveal my-5 rounded-2xl border-2 border-red-100 bg-gradient-to-br from-red-50/60 via-white to-orange-50/40 p-4 shadow-sm"
+                    style={{ backdropFilter: 'blur(8px)' }}>
+                    <div className="flex items-center gap-2 mb-2">
+                        <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-red-500 to-red-600 text-white flex items-center justify-center shadow-md">
+                            <i className="fab fa-youtube text-sm"></i>
+                        </div>
+                        <div>
+                            <span className="text-[0.7rem] uppercase tracking-wider font-bold text-red-600 block">Video recomendado</span>
+                            <span className="text-[0.65rem] text-gray-500 font-semibold">{video.canal}</span>
+                        </div>
+                    </div>
+                    <p className="text-[0.88rem] text-gray-700 font-semibold leading-snug mb-1">{video.titulo}</p>
+                    <p className="text-[0.78rem] text-gray-500 mb-3">{video.descripcion}</p>
+                    <a href={video.url} target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-sm font-bold px-4 py-2 rounded-full bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 transition-all shadow-md hover:shadow-lg">
+                        <i className="fab fa-youtube"></i>
+                        Ver en YouTube
+                        <i className="fas fa-arrow-up-right-from-square text-[0.65rem] opacity-70"></i>
+                    </a>
+                </div>
+            );
+        };
+
+        /* ============================================================
+           5 CÁPSULAS
+        ============================================================ */
+
+        const capsules = [
+            {
+                id: 1, num: '01', icon: 'fa-table-cells', badgeColor: 'primary',
+                title: 'Convolución vs. capa densa: por qué la CNN gana en imágenes',
+                duracion: '~ 4 min',
+                video: {
+                    titulo: 'But what is a convolution?',
+                    canal: '3Blue1Brown · Convoluciones',
+                    url: 'https://www.youtube.com/watch?v=KuXjwB4LzSA',
+                    descripcion: 'Explica visualmente la operación de convolución: cómo un filtro pequeño se desliza sobre la señal, la base matemática que distingue a una CNN de una red densa.',
+                },
+                objetivo: 'Comprender por qué un perceptrón multicapa (MLP) fracasa con imágenes y cómo la convolución resuelve la explosión de parámetros mediante conectividad local y pesos compartidos.',
+                analogia: {
+                    tipo: 'warn',
+                    titulo: 'Analogía: el inspector que no recuerda dónde estaban las cosas',
+                    contenido: (
+                        <p>
+                            Un MLP, para procesar una imagen, debe <strong>aplanarla</strong> en una larga fila de píxeles.
+                            Es como darle a un inspector una lista desordenada de 1.000.000 de números sin decirle cuáles
+                            estaban juntos: pierde por completo la noción de “arriba”, “abajo”, “cerca” o “lejos”. La CNN,
+                            en cambio, mira <strong>pequeños parches vecinos</strong> y reutiliza el mismo detector en toda
+                            la imagen, conservando la estructura espacial.
+                        </p>
+                    ),
+                },
+                visual: <ConvVisual />,
+                contenidoExtra: (
+                    <div>
+                        <p>
+                            Una imagen digital es una matriz de píxeles. Una imagen modesta de 1.000×1.000 representa
+                            1.000.000 de entradas. En una capa totalmente conectada (densa), cada una de las 1.000
+                            neuronas de la primera capa oculta se conectaría a <strong>cada</strong> píxel, lo que da
+                            mil millones de pesos solo en la primera capa: un número astronómico que conduce casi
+                            inevitablemente al sobreajuste.
+                        </p>
+                        <p>
+                            Las CNN resuelven esto con tres ideas. La <strong>conectividad local</strong>: cada neurona
+                            solo observa un pequeño parche (por ejemplo, 3×3). Los <strong>pesos compartidos</strong>:
+                            el mismo filtro se aplica en toda la imagen, porque si un detector de bordes es útil en una
+                            zona, lo es en cualquier otra. Y el <strong>submuestreo</strong> (pooling), que aporta
+                            invarianza a pequeñas traslaciones. Así, un gato sigue siendo un gato en cualquier esquina.
+                        </p>
+                        <p>
+                            La operación de convolución desliza un filtro aprendible sobre la imagen y produce un mapa
+                            de características; sus valores no se diseñan a mano (como los antiguos Sobel o Canny), sino
+                            que la red los ajusta por retropropagación.
+                        </p>
+                    </div>
+                ),
+                formula: String.raw`$$S(i, j) = (I * K)(i, j) = \sum_{m} \sum_{n} I(i + m, j + n) \cdot K(m, n)$$`,
+                mcq: {
+                    pregunta: '¿Por qué una CNN supera a un MLP al procesar imágenes?',
+                    opciones: [
+                        { texto: 'Porque usa más neuronas y, por tanto, más memoria.', correcta: false, justificacion: 'Al contrario: la CNN usa muchos menos parámetros que un MLP gracias a la compartición de pesos. La ventaja no es tener más capacidad bruta.' },
+                        { texto: 'Porque aplica conectividad local y pesos compartidos, preservando la estructura espacial y reduciendo drásticamente los parámetros.', correcta: true, justificacion: 'El MLP debe aplanar la imagen (pierde la topología) y conectar todo con todo (mil millones de pesos). La CNN reutiliza un filtro pequeño en toda la imagen, conserva la vecindad de los píxeles y logra invarianza a la traslación.' },
+                        { texto: 'Porque no necesita función de activación no lineal.', correcta: false, justificacion: 'Las CNN sí usan no linealidades (típicamente ReLU). Eso no las diferencia del MLP.' },
+                        { texto: 'Porque entrena sin retropropagación.', correcta: false, justificacion: 'Las CNN se entrenan con retropropagación, igual que los MLP. Los filtros son parámetros aprendibles.' },
+                    ],
+                },
+            },
+            {
+                id: 2, num: '02', icon: 'fa-conveyor-belt-empty', badgeColor: 'secondary',
+                title: 'Compuertas LSTM: olvido, entrada, salida y el estado de celda',
+                duracion: '~ 5 min',
+                video: {
+                    titulo: 'Long Short-Term Memory (LSTM), Clearly Explained',
+                    canal: 'StatQuest with Josh Starmer',
+                    url: 'https://www.youtube.com/watch?v=YCzL96nL7j0',
+                    descripcion: 'Recorre paso a paso las tres compuertas de una LSTM y el estado de celda, mostrando cómo la red decide qué recordar y qué olvidar.',
+                },
+                objetivo: 'Entender cómo las tres compuertas de una LSTM (olvido, entrada y salida) y el estado de celda resuelven el desvanecimiento del gradiente de las RNN simples.',
+                analogia: {
+                    tipo: 'tip',
+                    titulo: 'Analogía: la cinta transportadora de la memoria',
+                    contenido: (
+                        <>
+                            <p>
+                                El estado de celda {String.raw`\(C_t\)`} es como una <strong>cinta transportadora</strong>
+                                que recorre toda la secuencia con interacciones casi lineales (sumas, no multiplicaciones).
+                                La información puede viajar “intacta” a lo largo de muchos pasos:
+                            </p>
+                            <ul>
+                                <li><strong>Compuerta de olvido (f):</strong> decide qué se descarta de la memoria previa.</li>
+                                <li><strong>Compuerta de entrada (i):</strong> decide qué información nueva se almacena.</li>
+                                <li><strong>Compuerta de salida (o):</strong> decide qué parte de la memoria se expone como salida.</li>
+                            </ul>
+                            <p>
+                                Cada compuerta es una sigmoide que emite valores entre 0 (cerrado) y 1 (abierto).
+                            </p>
+                        </>
+                    ),
+                },
+                visual: <LstmVisual />,
+                contenidoExtra: (
+                    <div>
+                        <p>
+                            Una RNN simple sufre el <strong>desvanecimiento del gradiente</strong>: al propagar el error
+                            hacia atrás a través de muchos pasos temporales, se multiplican muchas derivadas menores que 1
+                            y la señal se diluye (el “teléfono roto”). La red aprende dependencias cortas, pero olvida el
+                            inicio de una oración larga o un ciclo climático de hace meses.
+                        </p>
+                        <p>
+                            La LSTM (Hochreiter y Schmidhuber, 1997) introduce un <strong>estado de celda</strong> separado
+                            del estado oculto. El paso clave es la actualización aditiva del estado:
+                        </p>
+                    </div>
+                ),
+                formula: String.raw`$$C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$$`,
+                mcq: {
+                    pregunta: '¿Cuál es la función de la compuerta de olvido (forget gate) en una LSTM?',
+                    opciones: [
+                        { texto: 'Generar los valores candidatos que se sumarán al estado.', correcta: false, justificacion: 'Eso lo hace el generador de candidatos (la rama tanh) junto con la compuerta de entrada, no la de olvido.' },
+                        { texto: 'Decidir qué parte de la información del estado de celda anterior se descarta.', correcta: true, justificacion: 'La compuerta de olvido emite valores entre 0 y 1 que multiplican al estado anterior C(t-1): un 0 borra esa información, un 1 la conserva. Por ejemplo, “olvidar” la ubicación geográfica previa de un usuario que se mudó de ciudad.' },
+                        { texto: 'Exponer la memoria interna como salida del paso actual.', correcta: false, justificacion: 'Esa es la compuerta de salida (output gate), que filtra el estado de celda para producir el estado oculto h(t).' },
+                        { texto: 'Reemplazar la retropropagación por una regla de suma.', correcta: false, justificacion: 'La LSTM sigue entrenándose con retropropagación (BPTT). Lo que ayuda al gradiente es la actualización aditiva del estado de celda, no la compuerta de olvido por sí sola.' },
+                    ],
+                },
+            },
+            {
+                id: 3, num: '03', icon: 'fa-highlighter', badgeColor: 'gold',
+                title: 'El mecanismo de atención: a qué “mirar” en cada paso',
+                duracion: '~ 5 min',
+                video: {
+                    titulo: 'Attention in transformers, step-by-step | Deep Learning cap. 6',
+                    canal: '3Blue1Brown · Deep Learning',
+                    url: 'https://www.youtube.com/watch?v=eMlx5fFNoYc',
+                    descripcion: 'Desarrolla intuitivamente el mecanismo de atención y los vectores Query, Key y Value que sostienen los Transformers.',
+                },
+                objetivo: 'Comprender cómo la atención permite al modelo consultar dinámicamente toda la secuencia de entrada, superando el cuello de botella del vector de contexto fijo.',
+                analogia: {
+                    tipo: 'tip',
+                    titulo: 'Analogía: el examen con apuntes abiertos',
+                    contenido: (
+                        <>
+                            <p>
+                                El esquema seq2seq clásico equivale a un <strong>examen de memoria</strong>: el estudiante
+                                lee todo el material, lo resume en una sola hoja mental (el vector de contexto {String.raw`\(c\)`})
+                                y responde sin volver a consultarlo. Si el texto es largo, el resumen se satura.
+                            </p>
+                            <p>
+                                La atención equivale a un <strong>examen con apuntes abiertos</strong>: para responder cada
+                                pregunta, el estudiante recorre de nuevo el documento y subraya con resaltador las frases
+                                relevantes para <em>esa</em> pregunta. Los pesos {String.raw`\(\alpha_{t,i}\)`} son
+                                justamente la intensidad del resaltador sobre cada parte del texto.
+                            </p>
+                        </>
+                    ),
+                },
+                visual: <AttentionVisual />,
+                contenidoExtra: (
+                    <div>
+                        <p>
+                            En la arquitectura encoder-decoder original, todo el mensaje de entrada debía comprimirse en
+                            un único <strong>vector de contexto</strong> de tamaño fijo. En secuencias largas ese vector
+                            se satura: los primeros elementos quedan diluidos. La atención (Bahdanau et al., 2015) rompe
+                            ese cuello de botella permitiendo al decodificador <strong>mirar de regreso a toda la entrada</strong>
+                            en cada paso.
+                        </p>
+                        <p>
+                            En lugar de un solo vector, se construye un <strong>contexto dinámico</strong> {String.raw`\(c_t\)`}
+                            como una suma ponderada de todos los estados del encoder. Los pesos {String.raw`\(\alpha_{t,i}\)`}
+                            —obtenidos con softmax sobre una puntuación de afinidad— indican cuánta atención presta el
+                            modelo a cada palabra de entrada y <strong>suman 1</strong>:
+                        </p>
+                    </div>
+                ),
+                formula: String.raw`$$c_t = \sum_{i=1}^{T} \alpha_{t,i}\, h_i \qquad \text{con} \qquad \alpha_{t,i} = \frac{\exp(\mathrm{score}(s_{t-1}, h_i))}{\sum_{j=1}^{T} \exp(\mathrm{score}(s_{t-1}, h_j))}$$`,
+                mcq: {
+                    pregunta: '¿Qué hace exactamente el mecanismo de atención al generar cada palabra de salida?',
+                    opciones: [
+                        { texto: 'Comprime toda la oración en un único vector fijo al inicio del proceso.', correcta: false, justificacion: 'Eso es precisamente el cuello de botella del seq2seq clásico que la atención resuelve. La atención NO usa un vector único y estático.' },
+                        { texto: 'Calcula una puntuación de relevancia entre el paso actual y todas las palabras de la entrada, y pondera cuánto contexto importar de cada una.', correcta: true, justificacion: 'La atención asigna pesos α (que suman 1, vía softmax) a cada elemento de la entrada, construyendo un contexto dinámico distinto en cada paso. Así “alinea” la palabra que genera con la región relevante de la entrada.' },
+                        { texto: 'Procesa la oración palabra por palabra, en estricto orden, sin mirar hacia adelante.', correcta: false, justificacion: 'Eso describe el procesamiento recurrente secuencial. La atención permite relacionar cada elemento con todos los demás simultáneamente, sin importar la distancia.' },
+                        { texto: 'Genera significados aleatorios y deja que un discriminador elija el mejor.', correcta: false, justificacion: 'Eso describe el esquema adversario de una GAN, que no tiene relación con el mecanismo de atención.' },
+                    ],
+                },
+            },
+            {
+                id: 4, num: '04', icon: 'fa-shapes', badgeColor: 'primary',
+                title: 'VAE vs. GAN vs. Difusión: cómo genera cada uno',
+                duracion: '~ 5 min',
+                video: {
+                    titulo: 'How AI Image Generators Work (Stable Diffusion / DALL-E)',
+                    canal: 'Computerphile',
+                    url: 'https://www.youtube.com/watch?v=1CIpzeNxIhU',
+                    descripcion: 'Explica el proceso de difusión: cómo se añade ruido a una imagen y cómo la red aprende a revertirlo paso a paso para generar imágenes nuevas.',
+                },
+                objetivo: 'Distinguir las tres grandes familias generativas por su mecanismo: reconstrucción regularizada (VAE), juego adversario (GAN) y reversión del ruido (Difusión).',
+                analogia: {
+                    tipo: 'ethics',
+                    titulo: 'Analogía: el escultor de Miguel Ángel (difusión)',
+                    contenido: (
+                        <>
+                            <p>
+                                Miguel Ángel decía que la escultura ya estaba dentro del bloque de mármol y que su tarea
+                                era solo retirar lo que sobraba. Un modelo de difusión hace eso al revés en el tiempo:
+                            </p>
+                            <ul>
+                                <li>El proceso <strong>forward</strong> convierte una figura nítida en un “mármol ruidoso” añadiendo polvo estático grano a grano (proceso fijo, sin aprendizaje).</li>
+                                <li>El proceso <strong>reverse</strong> es el escultor que aprendió a retirar ese ruido cincelada a cincelada, hasta que de la nube informe emerge una figura.</li>
+                            </ul>
+                            <p>La red nunca memoriza esculturas: aprende el oficio de quitar polvo, y por eso talla figuras que nunca existieron.</p>
+                        </>
+                    ),
+                },
+                visual: <GenerativeVisual />,
+                contenidoExtra: (
+                    <div>
+                        <p>
+                            Un <strong>VAE</strong> codifica la entrada no en un punto fijo, sino en una <em>distribución</em>
+                            de probabilidad (media {String.raw`\(\mu\)`} y desviación {String.raw`\(\sigma\)`}), y la
+                            decodifica. Esto le da un espacio latente <strong>continuo</strong>, ideal para interpolar
+                            (perfiles de fermentación de café, mapas de fertilidad). Optimiza la cota ELBO, que equilibra
+                            reconstrucción y una regularización por divergencia KL.
+                        </p>
+                        <p>
+                            Una <strong>GAN</strong> enfrenta dos redes en un juego de suma cero: el generador {String.raw`\(G\)`}
+                            crea muestras falsas y el discriminador {String.raw`\(D\)`} intenta distinguirlas de las reales.
+                            Produce imágenes muy nítidas, pero su entrenamiento es <strong>inestable</strong> (mode collapse,
+                            oscilaciones) y su pérdida no es monótona.
+                        </p>
+                        <p>
+                            Un <strong>modelo de difusión</strong> añade ruido a la imagen paso a paso (proceso fijo) y
+                            entrena una red para <strong>predecir y quitar ese ruido</strong>. Al optimizar un objetivo de
+                            regresión simple, su entrenamiento es estable y cubre bien la diversidad de los datos: por eso
+                            sustenta hoy a DALL·E, Stable Diffusion y Midjourney.
+                        </p>
+                    </div>
+                ),
+                formula: String.raw`$$\mathcal{L}_{\text{ELBO}}(\theta, \phi; x) = \mathbb{E}_{q_\phi(z|x)}[\log p_\theta(x|z)] - D_{\text{KL}}(q_\phi(z|x) \,\|\, p(z))$$`,
+                mcq: {
+                    pregunta: 'Una GAN genera imágenes mediante…',
+                    opciones: [
+                        { texto: 'Un proceso fijo que añade ruido y una red que aprende a quitarlo paso a paso.', correcta: false, justificacion: 'Eso describe un modelo de difusión, no una GAN. La difusión revierte un proceso conocido de adición de ruido.' },
+                        { texto: 'La codificación de la entrada en una distribución gaussiana latente y su posterior decodificación.', correcta: false, justificacion: 'Eso describe un VAE, que optimiza la cota ELBO con una regularización KL. No hay juego adversario.' },
+                        { texto: 'Un juego adversario de suma cero entre un generador que crea muestras falsas y un discriminador que intenta detectarlas.', correcta: true, justificacion: 'El generador G busca engañar al discriminador D, y D busca no dejarse engañar. En el equilibrio teórico, D queda reducido a “lanzar una moneda” (D(x)=1/2). Este juego produce nitidez pero es inestable (mode collapse).' },
+                        { texto: 'La aplicación de la regla de la cadena hacia atrás en el tiempo (BPTT).', correcta: false, justificacion: 'BPTT es el algoritmo de entrenamiento de las RNN/LSTM sobre secuencias, no el mecanismo generativo de una GAN.' },
+                    ],
+                },
+            },
+            {
+                id: 5, num: '05', icon: 'fa-snowflake', badgeColor: 'secondary',
+                title: 'Transfer learning y fine-tuning: reutilizar el conocimiento',
+                duracion: '~ 4 min',
+                video: {
+                    titulo: 'Transfer Learning - explained',
+                    canal: 'deeplizard',
+                    url: 'https://www.youtube.com/watch?v=5T-iXNNiwIs',
+                    descripcion: 'Explica qué es el transfer learning, por qué reutilizar redes pre-entrenadas ahorra datos y cómo se diferencia de un fine-tuning completo.',
+                },
+                objetivo: 'Saber cuándo congelar la red base (extracción de características) y cuándo descongelar capas para reentrenarlas (fine-tuning), según el tamaño y la similitud de los datos.',
+                analogia: {
+                    tipo: 'tip',
+                    titulo: 'Analogía: el experto que ya sabe lo básico',
+                    contenido: (
+                        <>
+                            <p>
+                                Entrenar una red desde cero es como formar a un profesional desde la primaria. El
+                                <strong> transfer learning</strong> aprovecha que las capas iniciales de una red entrenada
+                                en millones de imágenes (ImageNet) ya aprendieron a detectar <strong>bordes, colores y
+                                texturas universales</strong>: un borde en una foto de un perro es igual a un borde en una
+                                radiografía.
+                            </p>
+                            <ul>
+                                <li><strong>Extracción de características:</strong> con pocos datos, se congela toda la base y solo se entrena un clasificador nuevo al final.</li>
+                                <li><strong>Fine-tuning:</strong> con más datos o un dominio muy distinto, se descongelan las capas superiores y se reentrenan con una tasa de aprendizaje muy baja.</li>
+                            </ul>
+                        </>
+                    ),
+                },
+                visual: <TransferVisual />,
+                contenidoExtra: (
+                    <div>
+                        <p>
+                            En contextos con cómputo y datos limitados —clasificar fauna con unos pocos miles de imágenes
+                            de cámaras trampa, o detectar roya en hojas de café— entrenar una red profunda desde cero es
+                            inviable y provoca sobreajuste inmediato. La solución pragmática y estándar es reutilizar una
+                            red pre-entrenada (ResNet, EfficientNet, MobileNet).
+                        </p>
+                        <p>
+                            La decisión entre <strong>extracción de características</strong> y <strong>fine-tuning</strong>
+                            depende de dos variables: el tamaño del conjunto de datos y su similitud con el dataset original.
+                            Con un dataset pequeño y similar, se congelan los pesos base y se entrena solo el clasificador.
+                            Con un dataset grande o muy diferente (imágenes médicas, satelitales), se descongelan las últimas
+                            capas convolucionales. La precaución clave: usar una tasa de aprendizaje <strong>baja</strong>
+                            en las capas descongeladas, para no destruir con gradientes grandes el conocimiento ya adquirido.
+                        </p>
+                    </div>
+                ),
+                formula: null,
+                mcq: {
+                    pregunta: 'Se dispone de solo 100 fotos etiquetadas de flores locales y una ResNet pre-entrenada en ImageNet. ¿Qué estrategia es la más adecuada?',
+                    opciones: [
+                        { texto: 'Entrenar la ResNet completa desde cero con las 100 fotos.', correcta: false, justificacion: 'Con tan pocos datos, entrenar millones de parámetros desde cero produce sobreajuste inmediato. El conocimiento pre-entrenado se desperdicia.' },
+                        { texto: 'Extracción de características: congelar la base pre-entrenada y entrenar solo un clasificador nuevo al final.', correcta: true, justificacion: 'Con un dataset pequeño y similar al original, la red actúa como extractor de características fijo. Se congelan todos los pesos base (que ya detectan bordes y texturas universales) y solo se entrena la nueva capa de clasificación, minimizando el riesgo de sobreajuste.' },
+                        { texto: 'Descongelar y reentrenar todas las capas con una tasa de aprendizaje alta.', correcta: false, justificacion: 'Una tasa alta sobre toda la red destruiría con gradientes grandes los pesos pre-entrenados útiles. El fine-tuning agresivo solo se justifica con muchos datos y siempre con tasa de aprendizaje baja.' },
+                        { texto: 'Aplicar un modelo de difusión para generar más flores.', correcta: false, justificacion: 'Generar datos sintéticos es otra técnica; la pregunta es sobre cómo reutilizar la red pre-entrenada. La respuesta directa es la extracción de características.' },
+                    ],
+                },
+            },
+        ];
+
+        /* ============================================================
+           APP
+        ============================================================ */
+        const App = () => {
+            const [progress, update, reset] = useMicroProgress();
+            const [current, setCurrent] = useState(() => {
+                for (let i = 0; i < capsules.length; i++) {
+                    if (!progress.capsVistas[i + 1]) return i;
+                }
+                return capsules.length - 1;
+            });
+            const [showFinal, setShowFinal] = useState(false);
+            const [animKey, setAnimKey] = useState(0);
+            const contentRef = useRef(null);
+            const cap = capsules[current];
+            const totalCaps = capsules.length;
+            const completedCount = Object.values(progress.capsVistas).filter(Boolean).length;
+            const pct = Math.round((completedCount / totalCaps) * 100);
+
+            useEffect(() => {
+                typesetMath(contentRef);
+            }, [current, animKey]);
+
+            const goNext = () => {
+                if (current < totalCaps - 1) {
+                    setCurrent(current + 1);
+                } else {
+                    setShowFinal(true);
+                }
+                setAnimKey(k => k + 1);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+            const goPrev = () => {
+                setShowFinal(false);
+                if (current > 0) setCurrent(current - 1);
+                setAnimKey(k => k + 1);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+            const markVisto = () => {
+                update(prev => ({ ...prev, capsVistas: { ...prev.capsVistas, [cap.id]: true } }));
+            };
+            const onM_correct = () => {
+                update(prev => ({ ...prev, mcqAciertos: { ...prev.mcqAciertos, [cap.id]: true } }));
+            };
+
+            if (showFinal) {
+                return (
+                    <div className="min-h-screen">
+                        <FinalScreen
+                            progress={progress}
+                            pct={pct}
+                            onRestart={() => { setShowFinal(false); setCurrent(0); update(() => defaultMicro()); }}
+                            onAgain={() => { setShowFinal(false); setCurrent(0); }}
+                        />
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen">
+                    <Header progress={progress} pct={pct} completedCount={completedCount} total={totalCaps} onReset={reset} />
+                    <main className="max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-10">
+                        <StepIndicator current={current + 1} total={totalCaps} completed={progress.capsVistas} />
+                        <article ref={contentRef} className="usta-card p-5 md:p-8 animate-slide-in" key={animKey}>
+                            <CapsuleHeader cap={cap} visto={progress.capsVistas[cap.id]} onMarkVisto={markVisto} />
+                            <h2 className="text-xl md:text-2xl font-extrabold text-navy leading-snug mb-2 mt-1">
+                                {cap.title}
+                            </h2>
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 mb-4">
+                                <span><i className="far fa-clock mr-1"></i>{cap.duracion}</span>
+                                <span>·</span>
+                                <span>Cápsula {cap.num} de 0{totalCaps}</span>
+                            </div>
+                            <Callout type="info" label="Objetivo de esta cápsula">
+                                <p>{cap.objetivo}</p>
+                            </Callout>
+                            <div className="prose-usta text-[0.95rem] text-gray-700 leading-relaxed">
+                                {cap.contenidoExtra}
+                            </div>
+                            {cap.formula && <Eq>{cap.formula}</Eq>}
+                            {cap.visual}
+                            {cap.video && <VideoCard video={cap.video} />}
+                            <Callout type={cap.analogia.tipo} label={cap.analogia.titulo}>
+                                {cap.analogia.contenido}
+                            </Callout>
+                            <div className="mt-5">
+                                <h3 className="text-navy font-bold text-base mb-1">
+                                    <i className="fas fa-circle-question text-secondary mr-2"></i>
+                                    Autoevaluación
+                                </h3>
+                                <MCQ
+                                    id={cap.id}
+                                    pregunta={cap.mcq.pregunta}
+                                    opciones={cap.mcq.opciones}
+                                    onCorrect={onM_correct}
+                                />
+                            </div>
+                            <Navigation
+                                current={current}
+                                total={totalCaps}
+                                onPrev={goPrev}
+                                onNext={goNext}
+                                isLast={current === totalCaps - 1}
+                            />
+                        </article>
+                        <div className="text-center mt-6">
+                            <button onClick={() => {
+                                if (window.confirm('¿Reiniciar todo el progreso del microlearning? Esta acción no se puede deshacer.')) reset();
+                            }} className="text-xs font-semibold text-gray-400 hover:text-secondary transition-colors">
+                                <i className="fas fa-rotate-left mr-1"></i>Reiniciar progreso
+                            </button>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        /* ============================================================
+           HEADER con patrón neural
+        ============================================================ */
+        const Header = ({ progress, pct, completedCount, total, onReset }) => (
+            <header className="usta-header text-white">
+                <svg className="neural-bg" viewBox="0 0 800 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    {[[80,30],[80,60],[80,90],[200,20],[200,45],[200,70],[200,95],[350,25],[350,55],[350,85],[500,35],[500,65],[500,95],[650,30],[650,60],[650,90],[750,50],[750,80]].map(([x,y],i) => (
+                        <circle key={i} cx={x} cy={y} r="3" fill="white" opacity="0.5" />
+                    ))}
+                    {[[80,30,200,20],[80,30,200,45],[80,60,200,45],[80,60,200,70],[80,90,200,70],[80,90,200,95],[200,20,350,25],[200,45,350,25],[200,45,350,55],[200,70,350,55],[200,70,350,85],[200,95,350,85],[350,25,500,35],[350,55,500,35],[350,55,500,65],[350,85,500,65],[350,85,500,95],[500,35,650,30],[500,35,650,60],[500,65,650,60],[500,65,650,90],[500,95,650,90],[650,30,750,50],[650,60,750,50],[650,60,750,80],[650,90,750,80]].map(([x1,y1,x2,y2],i) => (
+                        <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="white" strokeWidth="0.5" opacity="0.2" />
+                    ))}
+                </svg>
+                <div className="relative max-w-3xl mx-auto px-4 md:px-6 py-5">
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="usta-gradient p-2.5 rounded-xl shadow-lg">
+                            <i className="fas fa-layer-group text-lg"></i>
+                        </div>
+                        <div>
+                            <span className="text-[0.65rem] uppercase tracking-widest text-gold font-bold block">Universidad Santo Tomás</span>
+                            <span className="text-[0.6rem] uppercase tracking-wider text-white/50 font-semibold">Profundización I · Deep Learning</span>
+                        </div>
+                    </div>
+                    <h1 className="text-xl md:text-2xl font-extrabold">Microlearning · Módulo 2</h1>
+                    <p className="text-xs md:text-sm text-white/80 mt-0.5">5 cápsulas · ~ 23 min · Arquitecturas del Aprendizaje Profundo</p>
+                    <div className="mt-4">
+                        <div className="flex justify-between text-[0.7rem] font-semibold mb-1.5">
+                            <span>{completedCount} / {total} cápsulas completadas</span>
+                            <span className="text-gold">{pct}%</span>
+                        </div>
+                        <div className="flex gap-1.5">
+                            {Array.from({ length: total }).map((_, i) => (
+                                <div key={i} className="progress-segment"
+                                    style={{
+                                        background: progress.capsVistas[i + 1]
+                                            ? 'linear-gradient(90deg, #FDB913, #F59E0B)'
+                                            : 'rgba(255,255,255,0.15)',
+                                        boxShadow: progress.capsVistas[i + 1] ? '0 0 8px rgba(253,185,19,0.4)' : 'none',
+                                    }} />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </header>
+        );
+
+        const CapsuleHeader = ({ cap, visto, onMarkVisto }) => (
+            <div className="flex flex-wrap items-start gap-3 mb-1">
+                <div className={`flex-shrink-0 w-14 h-14 rounded-2xl text-white font-extrabold text-2xl flex items-center justify-center shadow-lg usta-gradient`}>
+                    {cap.num}
+                </div>
+                <div className="flex-1 min-w-[200px]">
+                    <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                        <Pill color={cap.badgeColor} icon={cap.icon}>Cápsula {cap.num}</Pill>
+                        <Pill color="green" icon="fa-circle-check">{visto ? 'Vista' : 'Por ver'}</Pill>
+                    </div>
+                </div>
+                <button onClick={onMarkVisto} disabled={visto}
+                    className={`text-xs font-bold px-3 py-1.5 rounded-full border-2 transition-all ${visto
+                        ? 'border-green-500 text-green-700 bg-green-50 shadow-sm shadow-green-100'
+                        : 'border-primary text-primary hover:bg-primary/5 hover:shadow-sm'}`}>
+                    <i className={`fas ${visto ? 'fa-check' : 'fa-bookmark'} mr-1`}></i>
+                    {visto ? 'Vista' : 'Marcar como vista'}
+                </button>
+            </div>
+        );
+
+        const Navigation = ({ current, total, onPrev, onNext, isLast }) => (
+            <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
+                <button onClick={onPrev} disabled={current === 0}
+                    className="text-sm font-semibold px-5 py-2.5 rounded-full border-2 border-gray-300 text-gray-600 hover:border-primary hover:text-primary disabled:opacity-30 disabled:hover:border-gray-300 disabled:hover:text-gray-600 transition-all">
+                    <i className="fas fa-arrow-left mr-1"></i>Anterior
+                </button>
+                <div className="text-xs text-gray-400 font-semibold">
+                    {current + 1} / {total}
+                </div>
+                <button onClick={onNext}
+                    className="text-sm font-bold px-6 py-2.5 rounded-full text-white usta-gradient hover:opacity-90 transition-all shadow-lg hover:shadow-xl">
+                    {isLast ? 'Finalizar' : 'Siguiente'}<i className={`fas ${isLast ? 'fa-flag-checkered' : 'fa-arrow-right'} ml-1`}></i>
+                </button>
+            </div>
+        );
+
+        /* ============================================================
+           FINAL SCREEN con confetti
+        ============================================================ */
+        const FinalScreen = ({ progress, pct, onRestart, onAgain }) => {
+            const allDone = pct === 100;
+            const [showConfetti, setShowConfetti] = useState(allDone);
+            useEffect(() => { if (allDone) { const t = setTimeout(() => setShowConfetti(false), 3000); return () => clearTimeout(t); } }, [allDone]);
+
+            const confettiColors = ['#3D008D', '#ED1E79', '#FDB913', '#15803D', '#2563EB', '#F59E0B', '#DC2626'];
+            const confettiPieces = Array.from({ length: 40 }, (_, i) => ({
+                id: i,
+                color: confettiColors[i % confettiColors.length],
+                left: `${Math.random() * 100}%`,
+                delay: `${Math.random() * 1}s`,
+                size: 6 + Math.random() * 8,
+                duration: `${1 + Math.random() * 1.5}s`,
+            }));
+
+            return (
+                <div className="min-h-screen relative">
+                    {showConfetti && (
+                        <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 50 }}>
+                            {confettiPieces.map(p => (
+                                <div key={p.id} className="absolute"
+                                    style={{
+                                        left: p.left, top: '-5%',
+                                        width: p.size, height: p.size,
+                                        background: p.color,
+                                        borderRadius: Math.random() > 0.5 ? '50%' : '2px',
+                                        animation: `confetti-fall ${p.duration} ease-out ${p.delay} forwards`,
+                                    }} />
+                            ))}
+                        </div>
+                    )}
+                    <header className="usta-header text-white">
+                        <svg className="neural-bg" viewBox="0 0 800 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                            {[[150,30],[300,50],[450,30],[600,60],[250,80],[500,80]].map(([x,y],i) => (
+                                <circle key={i} cx={x} cy={y} r="3" fill="white" opacity="0.4" />
+                            ))}
+                        </svg>
+                        <div className="relative max-w-3xl mx-auto px-4 md:px-6 py-6 text-center">
+                            <div className="flex justify-center mb-3">
+                                <div className="usta-gradient p-4 rounded-2xl shadow-xl">
+                                    <i className="fas fa-trophy text-3xl"></i>
+                                </div>
+                            </div>
+                            <h1 className="text-2xl md:text-3xl font-extrabold">¡Microlearning completado!</h1>
+                            <p className="text-sm text-white/80 mt-1">5 cápsulas · ~ 23 min · Arquitecturas del Deep Learning</p>
+                        </div>
+                    </header>
+                    <main className="max-w-3xl mx-auto px-4 md:px-6 py-10">
+                        <div className="usta-card p-6 md:p-8 text-center animate-fade-in">
+                            {allDone ? (
+                                <div className="mb-6">
+                                    <div className="w-24 h-24 rounded-full usta-gradient text-white text-5xl flex items-center justify-center mx-auto shadow-xl">
+                                        <i className="fas fa-medal"></i>
+                                    </div>
+                                    <h2 className="text-2xl md:text-3xl font-extrabold text-navy mt-4">¡Felicitaciones!</h2>
+                                    <p className="text-gray-700 mt-2 leading-relaxed max-w-md mx-auto">
+                                        Microlearning del Módulo 2 completado: las 5 cápsulas (convolución, LSTM,
+                                        atención, modelos generativos y <strong>transfer learning</strong>) quedan repasadas,
+                                        cubriendo las cuatro grandes familias de arquitecturas. Queda una base sólida
+                                        para enfrentar el <strong>Proyecto Centinela · Fase 2</strong>.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="mb-6">
+                                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 text-primary text-4xl flex items-center justify-center mx-auto">
+                                        <span className="font-extrabold">{pct}%</span>
+                                    </div>
+                                    <h2 className="text-2xl md:text-3xl font-extrabold text-navy mt-4">Progreso: {pct}%</h2>
+                                    <p className="text-gray-700 mt-2 leading-relaxed max-w-md mx-auto">
+                                        Ha llegado al final del recorrido. Le recomendamos volver a las cápsulas
+                                        pendientes para reforzar los conceptos antes de la <strong>Fase 2</strong> del
+                                        <strong>Proyecto Centinela</strong>.
+                                    </p>
+                                </div>
+                            )}
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 my-6 text-left">
+                                {capsules.map(c => {
+                                    const v = progress.capsVistas[c.id];
+                                    const m = progress.mcqAciertos[c.id];
+                                    return (
+                                        <div key={c.id} className={`rounded-xl p-3 border-2 transition-all ${v ? 'bg-green-50 border-green-200 shadow-sm shadow-green-100' : 'bg-gray-50 border-gray-200'}`}>
+                                            <div className="flex items-center gap-2">
+                                                <i className={`fas ${v ? 'fa-circle-check text-green-600' : 'fa-circle text-gray-300'}`}></i>
+                                                <span className="text-[0.7rem] font-bold text-navy">Cápsula {c.num}</span>
+                                            </div>
+                                            <div className="text-[0.65rem] text-gray-600 mt-1 leading-tight truncate">
+                                                {c.title}
+                                            </div>
+                                            <div className="flex gap-2 mt-1.5">
+                                                <span className={`text-[0.6rem] font-bold px-1.5 py-0.5 rounded ${v ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'}`}>
+                                                    {v ? '✓ Vista' : 'Pendiente'}
+                                                </span>
+                                                {m && <span className="text-[0.6rem] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">MCQ ✓</span>}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <div className="flex flex-wrap items-center justify-center gap-3">
+                                <a href="020_ruta-aprendizaje-modulo-2.html"
+                                    className="text-sm font-bold px-6 py-2.5 rounded-full text-white usta-gradient hover:opacity-90 transition-all shadow-lg hover:shadow-xl">
+                                    <i className="fas fa-route mr-1"></i>Ir a la ruta del Módulo 2
+                                </a>
+                                <button onClick={onAgain}
+                                    className="text-sm font-bold px-6 py-2.5 rounded-full border-2 border-primary text-primary hover:bg-primary/5 transition-all">
+                                    <i className="fas fa-rotate-left mr-1"></i>Repetir microlearning
+                                </button>
+                                <a href="022_infografia-contenidos-modulo-2.html"
+                                    className="text-sm font-bold px-6 py-2.5 rounded-full border-2 border-primary text-primary hover:bg-primary/5 transition-all">
+                                    <i className="fas fa-diagram-project mr-1"></i>Infografía de contenidos
+                                </a>
+                            </div>
+                        </div>
+                        <div className="text-center mt-8 rounded-2xl px-6 py-6 text-white shadow-lg"
+                            style={{ background: 'linear-gradient(180deg, #001A4D 0%, #002868 100%)' }}>
+                            <p className="text-sm italic font-semibold text-gold leading-relaxed max-w-xl mx-auto">
+                                Metodología "Ingeniería de Trinchera": si una arquitectura no corre en Google Colab, no existe.
+                            </p>
+                            <div className="mt-4 pt-4 border-t border-white/15 text-xs text-white/70 leading-relaxed">
+                                <p>Universidad Santo Tomás · Maestría en Ciencia de Datos</p>
+                                <p className="mt-1">Profundización I: Redes Neuronales — Deep Learning (EA-N-F-004) · Experto temático: Javier Mauricio Sierra</p>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
