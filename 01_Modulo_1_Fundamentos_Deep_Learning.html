@@ -2681,6 +2681,15 @@ opt_adam = torch.optim.Adam(modelo.parameters(), lr=0.001)
 # momentum=0.9 acumula "inercia" de los gradientes previos: baja más recto
 # y atraviesa pequeños baches (ruido del mini-batch) sin desviarse.`;
 
+        const regresLosses = `import torch.nn as nn
+
+# Tres pérdidas de regresión, listas para el bucle de entrenamiento
+mse   = nn.MSELoss()             # error cuadrático medio: sensible a atípicos
+mae   = nn.L1Loss()              # error absoluto medio: robusto a atípicos
+huber = nn.HuberLoss(delta=1.0)  # cuadrática si |error| <= delta, lineal si no
+
+perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los datos`;
+
         /* Playground interactivo: efecto de la tasa de aprendizaje (η) */
         const LRPlayground = () => {
             const [lr, setLr] = useState(0.20);
@@ -2902,6 +2911,34 @@ opt_adam = torch.optim.Adam(modelo.parameters(), lr=0.001)
                     problemático cuando son ruido que conviene ignorar.
                 </p>
 
+                <h4>Error Absoluto Medio (MAE) y pérdida de Huber — regresión robusta</h4>
+                <Eq>{String.raw`$$ \text{MAE} = \frac{1}{N}\sum_{i=1}^{N}|y_i - \hat{y}_i| $$`}</Eq>
+                <p>
+                    El <strong>MAE</strong> mide el error en línea recta, sin elevarlo al cuadrado, de modo que cada fallo pesa en
+                    proporción exacta a su tamaño. Retomando el ejemplo del Magdalena, ese {String.raw`\(\approx 14.3\)`} que ya
+                    apareció <em>es</em> precisamente el MAE: el evento extremo de Barrancabermeja deja de dominar (frente a los 535 del
+                    MSE). Por eso el MAE es <strong>robusto a los valores atípicos</strong> y conviene cuando esos extremos son ruido que
+                    no debe marcar el rumbo del entrenamiento.
+                </p>
+                <Box type="warn" label="El precio del MAE: un gradiente que no se suaviza">
+                    El valor absoluto <strong>no es diferenciable en 0</strong>: su derivada salta de {String.raw`\(-1\)`} a
+                    {String.raw` \(+1\)`} sin pasar por valores intermedios. Cerca del óptimo, el gradiente conserva magnitud constante en
+                    vez de menguar, de modo que el descenso (sección siguiente) tiende a oscilar alrededor del mínimo en lugar de asentarse
+                    con suavidad.
+                </Box>
+                <p>
+                    La <strong>pérdida de Huber</strong> busca lo mejor de ambos mundos: se comporta como el <strong>MSE</strong> para
+                    errores pequeños —suave y diferenciable— y como el <strong>MAE</strong> para errores grandes —robusta a atípicos—. Un
+                    umbral {String.raw`\(\delta\)`} marca la frontera entre ambos regímenes:
+                </p>
+                <Eq>{String.raw`$$ L_\delta(e) = \begin{cases} \tfrac{1}{2}\,e^2 & \text{si } |e| \le \delta, \\ \delta\,(|e| - \tfrac{1}{2}\delta) & \text{si } |e| > \delta, \end{cases} \qquad e = y - \hat{y} $$`}</Eq>
+                <p>
+                    Por debajo de {String.raw`\(\delta\)`} la curva es una parábola (penaliza con fuerza y entrega un gradiente que se
+                    desvanece cerca del óptimo); por encima, se vuelve una recta (no deja que un solo atípico domine). El propio
+                    {String.raw` \(\delta\)`} es un hiperparámetro: valores pequeños acercan Huber al MAE; grandes, al MSE.
+                </p>
+                <CodeBlock title="MSE, MAE y Huber en PyTorch" code={regresLosses} lang="pytorch" />
+
                 <h4>Entropía Cruzada Binaria (BCE) — clasificación</h4>
                 <Eq>{String.raw`$$ \text{BCE} = -\frac{1}{N}\sum_{i=1}^{N}\big[\,y_i\log(\hat{y}_i) + (1-y_i)\log(1-\hat{y}_i)\,\big] $$`}</Eq>
                 <p>
@@ -2971,6 +3008,7 @@ opt_adam = torch.optim.Adam(modelo.parameters(), lr=0.001)
                         </thead>
                         <tbody>
                             <tr><td className="p-2 border-b border-gray-100"><strong>Regresión</strong></td><td className="p-2 border-b border-gray-100">1 neurona lineal</td><td className="p-2 border-b border-gray-100">MSE</td><td className="p-2 border-b border-gray-100">mm de lluvia en el Magdalena</td></tr>
+                            <tr><td className="p-2 border-b border-gray-100"><strong>Regresión robusta</strong></td><td className="p-2 border-b border-gray-100">1 neurona lineal</td><td className="p-2 border-b border-gray-100">MAE / Huber</td><td className="p-2 border-b border-gray-100">lluvia con atípicos (ruido)</td></tr>
                             <tr><td className="p-2 border-b border-gray-100"><strong>Clasif. binaria</strong></td><td className="p-2 border-b border-gray-100">1 neurona + Sigmoide</td><td className="p-2 border-b border-gray-100">BCE</td><td className="p-2 border-b border-gray-100">¿la hoja tiene roya? (sí / no)</td></tr>
                             <tr><td className="p-2"><strong>Clasif. multiclase</strong></td><td className="p-2">C neuronas + Softmax</td><td className="p-2">CCE</td><td className="p-2">tipo de enfermedad (4 clases)</td></tr>
                         </tbody>
@@ -3170,6 +3208,24 @@ opt_adam = torch.optim.Adam(modelo.parameters(), lr=0.001)
                     En la práctica conviene empezar con <strong>Adam</strong> ({String.raw`\(\eta \approx 0.001\)`}): converge rápido y tolera una mala elección de la tasa de aprendizaje.
                     <strong>SGD con momentum</strong> a veces generaliza un poco mejor en visión por computador, pero exige ajustar con más cuidado la
                     tasa de aprendizaje. Ante la duda, Adam es un punto de partida seguro.
+                </Box>
+
+                <h3>Laboratorio: el descenso del gradiente en acción</h3>
+                <p>
+                    Es el mismo laboratorio interactivo de la arquitectura del Capítulo 2, pero ahora conviene mirarlo con los ojos de
+                    este capítulo. La red se entrena <strong>desde cero y dentro del navegador</strong> mediante descenso del gradiente:
+                    en cada época los pesos se ajustan en dirección opuesta al gradiente y la <strong>pérdida (BCE)</strong>, que aparece
+                    en vivo, debería descender. En lugar de la frontera de decisión, la atención se centra ahora en esa curva de pérdida
+                    y, sobre todo, en la <strong>tasa de aprendizaje</strong>.
+                </p>
+                <RedFrontera />
+                <Box type="tip" label="Qué conviene observar (desde el Capítulo 3)">
+                    <ul>
+                        <li>Con una <strong>tasa de aprendizaje diminuta</strong> ({String.raw`\(\eta \approx 0.001\)`}), la pérdida baja con una lentitud exasperante: muchas épocas para avanzar muy poco.</li>
+                        <li>Al <strong>subirla</strong> de forma moderada, la pérdida cae con rapidez: es el «punto dulce» del descenso.</li>
+                        <li>Con una <strong>tasa demasiado alta</strong> (cercana a {String.raw`\(1.0\)`}), la pérdida <strong>oscila o se dispara</strong>: el paso es tan grande que el algoritmo «rebota» entre las paredes del valle —la divergencia del Páramo de Letras, ahora sobre una red real—.</li>
+                        <li>El botón <strong>«Reiniciar pesos»</strong> repite el experimento desde otro punto de partida aleatorio: conviene comprobar que la conclusión sobre la tasa de aprendizaje se mantiene.</li>
+                    </ul>
                 </Box>
 
                 <Reto titulo="Reto · Un paso de descenso a mano (MSE)"
@@ -3417,6 +3473,14 @@ print(w.grad)       # tensor(0.) -> reproduce el cálculo a mano de arriba`;
                     resultado final hacia atrás, capa por capa, calculando la contribución exacta de cada neurona al desastre.
                 </p>
 
+                <Box type="tip" label="Recurso en video · explicación visual (en español)">
+                    Antes de entrar en el formalismo, conviene ver la retropropagación <em>en movimiento</em>. DotCSV —el mismo
+                    divulgador citado en el Capítulo 3— la explica de forma visual e intuitiva en{' '}
+                    <a className="text-primary underline" href="https://www.youtube.com/watch?v=eNIqz_noix8" target="_blank" rel="noopener noreferrer">«¿Qué es una Red Neuronal? · Parte 3: Backpropagation»</a>:
+                    cómo el error se reparte hacia atrás, capa por capa, mediante la regla de la cadena. Es un complemento ideal para
+                    afianzar la intuición antes de revisar los grafos y las fórmulas de este capítulo.
+                </Box>
+
                 <h3>Pensar en grafos, no en neuronas</h3>
                 <p>
                     Antes de aplicar la idea a la red conviene precisar el término. Un <strong>grafo</strong> es un conjunto de
@@ -3445,6 +3509,14 @@ print(w.grad)       # tensor(0.) -> reproduce el cálculo a mano de arriba`;
                     adelante (forward) para predecir; la <strong>responsabilidad (el gradiente) fluye hacia atrás (backward)</strong>.
                 </p>
                 <GrafoComputacional />
+                <Box type="info" label="Cuando un valor influye por varios caminos: los gradientes se suman">
+                    En el grafo aritmético anterior cada entrada llega a la salida por un <strong>único</strong> camino. Pero en una red
+                    real una misma neurona suele alimentar a <strong>muchas</strong> de la capa siguiente, de modo que influye en el error
+                    por <strong>varias rutas</strong> a la vez. La regla es sencilla: <strong>dentro</strong> de cada ruta se
+                    <em> multiplican</em> las derivadas locales (la cadena de siempre), y <strong>entre</strong> rutas que parten del mismo
+                    valor se <em>suman</em> esas contribuciones. Es la versión precisa de la analogía del crédito: si una decisión temprana
+                    provocó el retraso por <em>dos</em> vías distintas, su responsabilidad total es la suma de ambas.
+                </Box>
 
                 <h3>La regla de la cadena: el efecto dominó</h3>
                 <p>
