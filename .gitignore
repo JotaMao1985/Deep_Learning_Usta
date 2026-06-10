@@ -1,5 +1,6 @@
 .DS_Store
 .claude/
-notebooks/data/
+notebooks/data/*
+!notebooks/data/knmi_273_marknesse.csv
 __pycache__/
 .ipynb_checkpoints/
