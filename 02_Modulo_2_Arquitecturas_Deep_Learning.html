@@ -1033,7 +1033,7 @@
                     ].map((c, i) => (
                         <div key={i} className="usta-card p-4 flex flex-col gap-2">
                             <span className="inline-flex items-center gap-2 text-primary font-bold">
-                                <span className="usta-gradient text-white p-1.5 rounded-lg" style={{ width: 32, height: 32 }}>{renderIcon(c.icon, 18)}</span>
+                                <span className="usta-gradient text-white p-1.5 rounded-lg" style={{ width: 32, height: 32 }}>{renderIcon(c.icon, 18)}</span>{' '}
                                 Cap. {c.n}
                             </span>
                             <span className="text-sm text-gray-700">{c.t}</span>
@@ -1102,7 +1102,7 @@
 
             return (
                 <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
-                    <svg viewBox="0 0 740 320" className="w-full" style={{ minWidth: 620 }} role="img"
+                    <svg viewBox="0 0 740 336" className="w-full" style={{ minWidth: 620 }} role="img"
                         aria-label="Operación de convolución: un kernel 3 por 3 se desliza sobre una matriz de entrada 5 por 5 y produce un mapa de características 3 por 3.">
                         <title>La ventana 3×3 resaltada sobre la entrada se multiplica elemento a elemento por el kernel; la suma de los productos genera un valor del mapa de características.</title>
 
@@ -1154,7 +1154,10 @@
                             S<tspan baselineShift="sub" fontSize="9">0,0</tspan> = Σ ( I × K ) = (3·1 + 0·0 + 1·(−1)) + (1·1 + 5·0 + 8·(−1)) + (2·1 + 7·0 + 2·(−1)) = −5
                         </text>
                         <text x={40} y={y0 + 5 * cel + 58} textAnchor="start" fontSize="11" fill="#94A3B8" fontStyle="italic">
-                            La ventana rosa se multiplica elemento a elemento por el kernel; la suma de productos llena una celda del mapa y luego la ventana se desplaza (stride).
+                            La ventana rosa se multiplica elemento a elemento por el kernel;
+                        </text>
+                        <text x={40} y={y0 + 5 * cel + 74} textAnchor="start" fontSize="11" fill="#94A3B8" fontStyle="italic">
+                            la suma de productos llena una celda del mapa y luego la ventana se desplaza (stride).
                         </text>
                     </svg>
                     <p className="text-xs text-gray-500 italic text-center mt-1">
@@ -1163,6 +1166,42 @@
                 </div>
             );
         };
+
+        /* ============================================================
+           DIAGRAMA SVG: convolución multicanal
+           Un filtro con la profundidad de la entrada (3 canales RGB)
+           produce UN mapa; N filtros producen N mapas (profundidad N).
+        ============================================================ */
+        const MultiChannelConvSVG = () => (
+            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                <svg viewBox="0 0 740 250" className="w-full" style={{ minWidth: 640 }} role="img"
+                    aria-label="Convolución multicanal: un filtro con la misma profundidad que la entrada RGB de tres canales produce un único mapa de características; aplicar N filtros distintos genera N mapas que se apilan en un volumen de profundidad N.">
+                    <title>Cada filtro abarca los tres canales de la entrada y produce un solo mapa 2D; el número de filtros N fija la profundidad del volumen de salida.</title>
+                    <text x="95" y="38" textAnchor="middle" fontSize="13" fill="#3D008D" fontWeight="bold">Entrada RGB</text>
+                    <rect x="60" y="70" width="70" height="70" fill="#DBEAFE" stroke="#1D4ED8" strokeWidth="1.6" />
+                    <rect x="75" y="85" width="70" height="70" fill="#DCFCE7" stroke="#15803D" strokeWidth="1.6" />
+                    <rect x="90" y="100" width="70" height="70" fill="#FEE2E2" stroke="#B91C1C" strokeWidth="1.6" />
+                    <text x="125" y="190" textAnchor="middle" fontSize="11" fill="#64748B" fontStyle="italic">3 canales</text>
+                    <text x="200" y="142" textAnchor="middle" fontSize="22" fill="#001A4D" fontWeight="bold">∗</text>
+                    <text x="270" y="38" textAnchor="middle" fontSize="13" fill="#0E7490" fontWeight="bold">Filtro 3×3×3</text>
+                    <rect x="240" y="78" width="48" height="48" fill="#ECFEFF" stroke="#0E7490" strokeWidth="1.4" />
+                    <rect x="252" y="90" width="48" height="48" fill="#ECFEFF" stroke="#0E7490" strokeWidth="1.4" />
+                    <rect x="264" y="102" width="48" height="48" fill="#ECFEFF" stroke="#0E7490" strokeWidth="1.6" />
+                    <text x="288" y="186" textAnchor="middle" fontSize="11" fill="#64748B" fontStyle="italic">misma profundidad</text>
+                    <text x="360" y="142" textAnchor="middle" fontSize="22" fill="#15803D" fontWeight="bold">→</text>
+                    <rect x="392" y="95" width="60" height="60" fill="#DCFCE7" stroke="#15803D" strokeWidth="2" />
+                    <text x="422" y="175" textAnchor="middle" fontSize="11" fill="#15803D" fontWeight="bold">1 mapa</text>
+                    <text x="512" y="138" textAnchor="middle" fontSize="14" fill="#ED1E79" fontWeight="bold">× N</text>
+                    <text x="512" y="156" textAnchor="middle" fontSize="10" fill="#64748B">filtros</text>
+                    <text x="645" y="38" textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="bold">N mapas</text>
+                    {[0, 1, 2, 3].map((i) => (
+                        <rect key={`m-${i}`} x={585 + i * 14} y={70 + i * 14} width="60" height="60" fill="#DCFCE7" stroke="#15803D" strokeWidth="1.6" />
+                    ))}
+                    <text x="650" y="192" textAnchor="middle" fontSize="11" fill="#64748B" fontStyle="italic">profundidad N</text>
+                </svg>
+                <p className="text-xs text-gray-500 italic text-center mt-1">Convolución multicanal: cada filtro abarca los tres canales y produce un único mapa; el número de filtros N determina la profundidad del volumen de salida. Fuente: elaboración propia.</p>
+            </div>
+        );
 
         const Cap21Section = () => {
             const ref = useRef(null);
@@ -1185,8 +1224,9 @@
                         El diseño de las <Termino def="Convolutional Neural Networks: redes que aplican filtros aprendibles sobre rejillas de píxeles.">CNN</Termino> no
                         es arbitrario; es una abstracción matemática de cómo el cerebro procesa lo visual. La luz incide en la retina,
                         viaja por el nervio óptico hacia el núcleo geniculado lateral y llega a la corteza visual primaria (V1) del
-                        lóbulo occipital. Las investigaciones de Hubel y Wiesel (1962), galardonadas con el Nobel, revelaron una
-                        jerarquía de procesamiento con dos tipos de células:
+                        lóbulo occipital. Las investigaciones de Hubel y Wiesel sobre la corteza visual (1962), cuyos hallazgos
+                        les valieron el Premio Nobel de Fisiología o Medicina en 1981, revelaron una jerarquía de
+                        procesamiento con dos tipos de células:
                     </p>
                     <ul>
                         <li><strong>Células simples:</strong> responden a patrones de luz muy específicos —bordes con cierta orientación dentro de un campo receptivo pequeño.</li>
@@ -1197,6 +1237,30 @@
                         intermedias forman texturas y formas (V2, V4) y las finales reconocen objetos completos (corteza temporal
                         inferior).
                     </p>
+
+                    <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {[
+                                { src: 'images/modulo-2/hier-1-bordes.png', t: '1 · Bordes', d: 'Capas iniciales (≈ V1)' },
+                                { src: 'images/modulo-2/hier-2-textura.png', t: '2 · Texturas', d: 'Capas intermedias (≈ V2)' },
+                                { src: 'images/modulo-2/hier-3-partes.png', t: '3 · Partes', d: 'Capas profundas (≈ V4)' },
+                                { src: 'images/modulo-2/hier-4-objeto.png', t: '4 · Objeto', d: 'Capas finales (≈ IT)' },
+                            ].map((p, i) => (
+                                <figure key={i} className="m-0">
+                                    <img src={p.src} alt={`Jaguar — ${p.t}: ${p.d}`} className="w-full rounded-lg border border-gray-200" loading="lazy" />
+                                    <figcaption className="text-center mt-1">
+                                        <span className="block text-sm font-bold text-primary">{p.t}</span>
+                                        <span className="block text-xs text-gray-500">{p.d}</span>
+                                    </figcaption>
+                                </figure>
+                            ))}
+                        </div>
+                        <p className="text-xs text-gray-500 italic text-center mt-3">
+                            Jerarquía de características: una CNN compone su comprensión de lo simple a lo complejo —bordes → texturas →
+                            partes → objeto—, reflejando la jerarquía del córtex visual (V1 → V2 → V4 → corteza temporal inferior). El
+                            mapa de bordes y los recortes proceden de la misma fotografía. Fuente: elaboración propia (imagen base generada localmente).
+                        </p>
+                    </div>
 
                     <Box type="eth" label="Diferencias con el cerebro">
                         Aunque inspiradas en la biología, las CNN difieren en eficiencia y aprendizaje. El cerebro opera con unos
@@ -1268,6 +1332,48 @@
                         produce un mapa de {String.raw`\(\lfloor(224-3)/1\rfloor + 1 = 222\)`} de lado.
                     </p>
 
+                    <h4>Convolución multicanal: de un canal a la profundidad</h4>
+                    <p>
+                        El ejemplo anterior usa un único canal, pero una imagen a color tiene <strong>tres</strong> (rojo, verde
+                        y azul). La convolución se adapta de forma natural: el filtro adquiere la misma profundidad que la entrada.
+                        Para una entrada de 3 canales, cada filtro es un volumen {String.raw`\(3\times 3\times 3\)`} que se desliza
+                        sobre el alto y el ancho, multiplica elemento a elemento <em>los tres canales a la vez</em> y suma todos los
+                        productos en un <strong>único</strong> número por posición. Así, un filtro —por muchos canales que tenga—
+                        produce siempre <strong>un</strong> mapa de características bidimensional.
+                    </p>
+                    <p>
+                        La profundidad de la salida no la fija la entrada, sino el <strong>número de filtros</strong>: aplicar
+                        {String.raw` \(N\)`} filtros independientes genera {String.raw`\(N\)`} mapas que se apilan en un volumen de
+                        profundidad {String.raw`\(N\)`}. Cada filtro aprende a detectar un patrón distinto (un borde diagonal, una
+                        mancha de color, una textura). El número de parámetros de la capa es, por tanto:
+                    </p>
+                    <Eq>{String.raw`$$ \text{parámetros} = \big(\underbrace{K \times K \times C_{\text{in}}}_{\text{un filtro}} + 1\big)\times N $$`}</Eq>
+                    <p>
+                        donde {String.raw`\(K\)`} es el tamaño del kernel, {String.raw`\(C_{\text{in}}\)`} los canales de entrada,
+                        el {String.raw`\(+1\)`} el sesgo y {String.raw`\(N\)`} el número de filtros. Una capa {String.raw`\(3\times 3\)`} con 3 canales de entrada y 16 filtros usa apenas
+                        {String.raw` \((3\cdot 3\cdot 3 + 1)\times 16 = 448\)`} parámetros, frente a los mil millones del MLP del inicio.
+                    </p>
+
+                    <MultiChannelConvSVG />
+
+                    <CodeBlock title="CNN: cómo cambian las dimensiones" lang="pytorch" code={`import torch
+import torch.nn as nn
+
+# Imagen RGB simulada: (lote=1, canales=3, alto=224, ancho=224)
+x = torch.randn(1, 3, 224, 224)
+print(x.shape)  # torch.Size([1, 3, 224, 224])
+
+# Convolución 3->16 filtros, kernel 3x3, sin padding, stride 1
+# Fórmula: O = floor((W - K + 2P) / S) + 1
+conv = nn.Conv2d(in_channels=3, out_channels=16, kernel_size=3)
+x = conv(x)
+print(x.shape)  # torch.Size([1, 16, 222, 222])  -> 222 = (224 - 3) / 1 + 1
+
+# Submuestreo (pooling): la mitad de la resolución espacial
+pool = nn.MaxPool2d(2)
+x = pool(x)
+print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
+
                     <h4>Tipos de capa en una CNN</h4>
                     <div className="overflow-x-auto my-4">
                         <table>
@@ -1298,6 +1404,11 @@
                         { year: '2014 · GoogLeNet', text: 'El módulo Inception aplica varios tamaños de filtro en paralelo y usa convoluciones 1×1 como cuello de botella, bajando a ~4 millones de parámetros frente a los 60M de AlexNet.' },
                         { year: '2015 · ResNet', text: 'He et al. introducen conexiones de salto: la red aprende F(x) y entrega F(x)+x. Permite entrenar 152 capas y supera el desempeño humano en ImageNet (3,57 %). Sigue siendo el backbone más usado.' },
                     ]} />
+                    <p className="text-xs text-gray-500 italic">
+                        Nota sobre las fechas: se indica el año de presentación de cada trabajo (el preprint o la competición ImageNet).
+                        Las referencias finales pueden citar el año de publicación formal en actas o revista; así, VGG —presentada en
+                        2014— aparece como Simonyan &amp; Zisserman (2015), y ResNet —2015— como He et al. (2016).
+                    </p>
                     <Box type="info" label="La intuición de ResNet">
                         Las conexiones de salto permiten que la señal «brinque» capas. La red aprende una función residual
                         {String.raw` \(\mathcal{F}(x)\)`} y la salida es {String.raw`\(\mathcal{F}(x)+x\)`}: si las capas extra no aportan,
@@ -1325,11 +1436,17 @@
                         (autoatención) para captar la composición global. Así, el ViT vincula una oreja en una esquina con una cola en la
                         opuesta para confirmar que se trata del mismo jaguar.
                     </Box>
+                    <p className="text-sm text-gray-600">
+                        El mecanismo de <strong>atención</strong> que hace posible esta comparación global no es exclusivo de la visión:
+                        se formaliza en el <strong>Capítulo 2.2 §7</strong> (atención de Bahdanau, sobre secuencias) y se generaliza
+                        como <strong>autoatención</strong> en el <strong>Capítulo 2.3 §6</strong> (Transformers), donde se introducen
+                        los vectores Query, Key y Value que aquí operan, implícitamente, entre parches.
+                    </p>
                     <Box type="warn" label="Sesgo inductivo y hambre de datos">
                         La convolución trae «de fábrica» dos supuestos útiles —localidad e invarianza a la traslación—: su
                         <strong> sesgo inductivo</strong>. El ViT casi no lo tiene y debe aprenderlo todo desde los datos, por lo que
-                        exige conjuntos masivos (de 14 a 300 millones de imágenes, como JFT-300M) o pre-entrenamiento. Con datasets
-                        pequeños y sin pre-entrenamiento, una ResNet suele ganarle al ViT.
+                        exige conjuntos masivos (de 14 a 300 millones de imágenes, como JFT-300M) o preentrenamiento. Con datasets
+                        pequeños y sin preentrenamiento, una ResNet suele ganarle al ViT.
                     </Box>
 
                     <h4>CNN vs. ViT: ¿cuál elegir?</h4>
@@ -1340,7 +1457,7 @@
                             </thead>
                             <tbody>
                                 <tr><td><strong>Sesgo inductivo</strong></td><td>Fuerte (localidad e invarianza)</td><td>Débil (aprende la estructura)</td></tr>
-                                <tr><td><strong>Datos necesarios</strong></td><td>Moderados (miles de imágenes)</td><td>Muy altos (millones) o pre-entrenamiento</td></tr>
+                                <tr><td><strong>Datos necesarios</strong></td><td>Moderados (miles de imágenes)</td><td>Muy altos (millones) o preentrenamiento</td></tr>
                                 <tr><td><strong>Campo receptivo</strong></td><td>Local, crece con la profundidad</td><td>Global desde la 1.ª capa (atención)</td></tr>
                                 <tr><td><strong>Costo de entrenamiento</strong></td><td>Menor en datasets pequeños</td><td>Alto; escala con datos y cómputo</td></tr>
                                 <tr><td><strong>Latencia en inferencia</strong></td><td>Baja y predecible</td><td>Sensible al n.º de parches (N)</td></tr>
@@ -1351,7 +1468,7 @@
                     </div>
                     <Box type="tip" label="¿CNN o ViT para un proyecto de campo?">
                         Para clasificar fauna con unos pocos miles de imágenes de cámaras trampa, conviene partir de una CNN
-                        pre-entrenada (ResNet, EfficientNet) por su eficiencia muestral. El ViT brilla con pre-entrenamiento a gran escala
+                        preentrenada (ResNet, EfficientNet) por su eficiencia muestral. El ViT brilla con preentrenamiento a gran escala
                         o en arquitecturas híbridas (convolución inicial + atención posterior), capturando lo mejor de ambos mundos.
                     </Box>
 
@@ -1369,7 +1486,7 @@
                             content: (
                                 <div>
                                     <p className="!mt-0"><strong>Cuándo:</strong> dataset pequeño y similar al original.</p>
-                                    <p><strong>Técnica:</strong> se <em>congelan</em> todos los pesos de la red pre-entrenada (ej. ResNet50), se quita la última capa de 1.000 clases y se reemplaza por una nueva adaptada al problema (ej. enfermo/sano). Solo se entrena esa capa final.</p>
+                                    <p><strong>Técnica:</strong> se <em>congelan</em> todos los pesos de la red preentrenada (ej. ResNet50), se quita la última capa de 1.000 clases y se reemplaza por una nueva adaptada al problema (ej. enfermo/sano). Solo se entrena esa capa final.</p>
                                     <p className="!mb-0"><strong>Por qué:</strong> con pocos datos, reentrenar todo causaría sobreajuste inmediato; la red actúa como extractor fijo de características.</p>
                                 </div>
                             )
@@ -1379,7 +1496,7 @@
                             content: (
                                 <div>
                                     <p className="!mt-0"><strong>Cuándo:</strong> dataset grande o muy distinto (imágenes médicas, satelitales, espectrales).</p>
-                                    <p><strong>Técnica:</strong> se parte de los pesos pre-entrenados y se <em>descongelan</em> algunas (o todas) las últimas capas convolucionales, entrenando con una tasa de aprendizaje muy baja.</p>
+                                    <p><strong>Técnica:</strong> se parte de los pesos preentrenados y se <em>descongelan</em> algunas (o todas) las últimas capas convolucionales, entrenando con una tasa de aprendizaje muy baja.</p>
                                     <p className="!mb-0"><strong>Por qué:</strong> los rasgos de alto nivel de ImageNet (ojos de perro, llantas) no sirven para tumores en rayos X; la red debe reajustar sus filtros superiores al nuevo dominio.</p>
                                 </div>
                             )
@@ -1387,7 +1504,7 @@
                     ]} />
                     <Box type="warn" label="Precaución con la tasa de aprendizaje">
                         Las capas descongeladas requieren una tasa de aprendizaje <strong>menor</strong> que la nueva capa de
-                        clasificación, para no destruir con gradientes grandes los pesos pre-entrenados útiles al inicio del ajuste.
+                        clasificación, para no destruir con gradientes grandes los pesos preentrenados útiles al inicio del ajuste.
                     </Box>
 
                     {/* ============== 6. Biodiversidad ============== */}
@@ -1478,11 +1595,11 @@
                         {
                             pregunta: 'Con unos pocos miles de imágenes de cámaras trampa y sin grandes recursos, lo más sensato es…',
                             opciones: [
-                                { texto: 'partir de una CNN pre-entrenada (ResNet/EfficientNet) y aplicar transfer learning.', correcta: true },
+                                { texto: 'partir de una CNN preentrenada (ResNet/EfficientNet) y aplicar transfer learning.', correcta: true },
                                 { texto: 'entrenar un ViT desde cero, por su campo receptivo global.', correcta: false },
-                                { texto: 'usar un MLP gigante sin pre-entrenamiento.', correcta: false },
+                                { texto: 'usar un MLP gigante sin preentrenamiento.', correcta: false },
                             ],
-                            justificacion: 'El ViT necesita datos masivos o pre-entrenamiento; con datasets pequeños la CNN pre-entrenada es más eficiente en muestras.'
+                            justificacion: 'El ViT necesita datos masivos o preentrenamiento; con datasets pequeños la CNN preentrenada es más eficiente en muestras.'
                         },
                     ]} />
                 </div>
@@ -1511,7 +1628,7 @@
                     <polygon points="720,120 708,114 708,126" fill="#15803D" />
                     <text x="20" y="124" textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="bold">C<tspan baselineShift="sub" fontSize="9">t−1</tspan></text>
                     <text x="742" y="124" textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="bold">C<tspan baselineShift="sub" fontSize="9">t</tspan></text>
-                    <text x="380" y="110" textAnchor="middle" fontSize="11" fill="#15803D" fontStyle="italic">estado de celda (memoria a largo plazo)</text>
+                    <text x="380" y="101" textAnchor="middle" fontSize="11" fill="#15803D" fontStyle="italic">estado de celda (memoria a largo plazo)</text>
 
                     {/* --- Operador ⊙ (olvido sobre la cinta) --- */}
                     <circle cx="210" cy="120" r="15" fill="#FEF2F2" stroke="#B91C1C" strokeWidth="2" />
@@ -1541,7 +1658,7 @@
                     <rect x="560" y="210" width="100" height="56" rx="10" fill="#F5F0FA" stroke="#3D008D" strokeWidth="1.8" />
                     <text x="610" y="232" textAnchor="middle" fontSize="12" fill="#3D008D" fontWeight="bold">Salida</text>
                     <text x="610" y="250" textAnchor="middle" fontSize="13" fill="#3D008D">σ</text>
-                    <text x="610" y="288" textAnchor="middle" fontSize="12" fill="#3D008D" fontWeight="bold">o<tspan baselineShift="sub" fontSize="8">t</tspan></text>
+                    <text x="578" y="290" textAnchor="middle" fontSize="12" fill="#3D008D" fontWeight="bold">o<tspan baselineShift="sub" fontSize="8">t</tspan></text>
                     {/* o_t toma C_t (vía tanh) para producir h_t */}
                     <text x="610" y="150" textAnchor="middle" fontSize="13" fill="#3D008D">tanh</text>
                     <line x1="610" y1="158" x2="610" y2="205" stroke="#3D008D" strokeWidth="2" strokeDasharray="4 3" />
@@ -1631,6 +1748,172 @@
             );
         };
 
+        /* ============================================================
+           DIAGRAMA SVG: RNN desenrollada en el tiempo
+           Copias de la misma red (pesos W compartidos) que pasan el
+           estado oculto h de un paso temporal al siguiente.
+        ============================================================ */
+        const RNNUnrolledSVG = () => {
+            const steps = [1, 2, 3, 4];
+            const colX = [170, 320, 470, 620];
+            return (
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                    <svg viewBox="0 0 760 320" className="w-full" style={{ minWidth: 700 }} role="img"
+                        aria-label="Red neuronal recurrente desenrollada en cuatro pasos temporales. En cada paso, la entrada x sub t entra por abajo, una caja RNN con pesos W la procesa, el estado oculto h fluye horizontalmente de izquierda a derecha y la salida y gorro sub t sale por arriba. Los mismos pesos W se comparten en todos los pasos.">
+                        <title>RNN desenrollada: el estado oculto h se propaga hacia la derecha mientras la misma caja de pesos W se reutiliza en cada paso temporal.</title>
+                        <rect x="230" y="14" width="300" height="26" rx="13" fill="#F5F0FA" stroke="#3D008D" strokeWidth="1.5" />
+                        <text x="380" y="31" textAnchor="middle" fontSize="12" fill="#3D008D" fontWeight="bold">Mismos pesos W compartidos en cada paso</text>
+                        <line x1="50" y1="160" x2="715" y2="160" stroke="#15803D" strokeWidth="4" />
+                        <polygon points="715,160 703,154 703,166" fill="#15803D" />
+                        <text x="40" y="155" textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="bold">h<tspan baselineShift="sub" fontSize="9">0</tspan></text>
+                        {steps.map((t, i) => {
+                            const cx = colX[i];
+                            return (
+                                <g key={`step-${t}`}>
+                                    <rect x={cx - 45} y={135} width="90" height="50" rx="12" fill="#F5F0FA" stroke="#3D008D" strokeWidth="2" />
+                                    <text x={cx} y={158} textAnchor="middle" fontSize="13" fill="#3D008D" fontWeight="bold">RNN</text>
+                                    <text x={cx} y={175} textAnchor="middle" fontSize="11" fill="#3D008D">(W)</text>
+                                    <text x={cx + 75} y={153} textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="bold">h<tspan baselineShift="sub" fontSize="9">{t}</tspan></text>
+                                    <rect x={cx - 25} y={250} width="50" height="36" rx="8" fill="#E8EDF7" stroke="#001A4D" strokeWidth="1.8" />
+                                    <text x={cx} y={273} textAnchor="middle" fontSize="13" fill="#001A4D" fontWeight="bold">x<tspan baselineShift="sub" fontSize="9">{t}</tspan></text>
+                                    <line x1={cx} y1={250} x2={cx} y2={189} stroke="#001A4D" strokeWidth="2" />
+                                    <polygon points={`${cx},187 ${cx - 6},199 ${cx + 6},199`} fill="#001A4D" />
+                                    <rect x={cx - 25} y={66} width="50" height="36" rx="8" fill="#E8EDF7" stroke="#001A4D" strokeWidth="1.8" />
+                                    <text x={cx} y={89} textAnchor="middle" fontSize="13" fill="#001A4D" fontWeight="bold">ŷ<tspan baselineShift="sub" fontSize="9">{t}</tspan></text>
+                                    <line x1={cx} y1={131} x2={cx} y2={104} stroke="#001A4D" strokeWidth="2" />
+                                    <polygon points={`${cx},102 ${cx - 6},114 ${cx + 6},114`} fill="#001A4D" />
+                                </g>
+                            );
+                        })}
+                    </svg>
+                    <p className="text-xs text-gray-500 italic text-center mt-1">RNN desenrollada en el tiempo: la misma caja de pesos W procesa cada entrada x<sub>t</sub>, propaga el estado oculto h<sub>t</sub> (cinta verde) y emite ŷ<sub>t</sub>. Fuente: elaboración propia.</p>
+                </div>
+            );
+        };
+
+        /* ============================================================
+           DIAGRAMA SVG: desvanecimiento del gradiente
+           La retropropagación viaja de derecha a izquierda y su
+           magnitud (y color) decae exponencialmente con la distancia.
+        ============================================================ */
+        const VanishingGradientSVG = () => {
+            const nodes = [
+                { x: 110, label: '1' },
+                { x: 260, label: '2' },
+                { x: 410, label: '3' },
+                { x: 560, label: '4' },
+                { x: 700, label: '5' },
+            ];
+            const backArrows = [
+                { from: 4, to: 3, color: '#ED1E79', mag: '1.0' },
+                { from: 3, to: 2, color: '#A855C7', mag: '0.25' },
+                { from: 2, to: 1, color: '#94A3B8', mag: '0.06' },
+                { from: 1, to: 0, color: '#CBD5E1', mag: '0.015' },
+            ];
+            return (
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                    <svg viewBox="0 0 760 300" className="w-full" style={{ minWidth: 700 }} role="img"
+                        aria-label="Desvanecimiento del gradiente en una RNN desenrollada de cinco pasos. La retropropagación viaja de derecha a izquierda y su color se desvanece de rosa intenso a gris claro, mientras la magnitud del gradiente decae exponencialmente de 1.0 a 0.25, 0.06, 0.015 y 0.004.">
+                        <title>El gradiente parte con magnitud 1.0 en el último paso y se desvanece exponencialmente al retroceder en el tiempo, perdiendo casi toda su intensidad antes de alcanzar los primeros pasos.</title>
+                        <line x1="70" y1="150" x2="730" y2="150" stroke="#15803D" strokeWidth="3" />
+                        {nodes.map((n) => (
+                            <g key={`node-${n.label}`}>
+                                <circle cx={n.x} cy="150" r="22" fill="#F5F0FA" stroke="#3D008D" strokeWidth="2" />
+                                <text x={n.x} y={147} textAnchor="middle" fontSize="12" fill="#3D008D" fontWeight="bold">h<tspan baselineShift="sub" fontSize="9">{n.label}</tspan></text>
+                                <text x={n.x} y={162} textAnchor="middle" fontSize="9" fill="#475569">paso {n.label}</text>
+                            </g>
+                        ))}
+                        {backArrows.map((a, i) => {
+                            const xs = nodes[a.from].x;
+                            const xe = nodes[a.to].x;
+                            const yTop = 95;
+                            const xMid = (xs + xe) / 2;
+                            return (
+                                <g key={`back-${i}`}>
+                                    <path d={`M ${xs - 18} 132 C ${xs - 18} ${yTop}, ${xe + 18} ${yTop}, ${xe + 18} 132`} fill="none" stroke={a.color} strokeWidth={4 - i * 0.6} />
+                                    <polygon points={`${xe + 18},134 ${xe + 11},122 ${xe + 25},122`} fill={a.color} />
+                                    <rect x={xMid - 24} y={yTop - 22} width="48" height="20" rx="6" fill="#FFFFFF" stroke={a.color} strokeWidth="1.4" />
+                                    <text x={xMid} y={yTop - 8} textAnchor="middle" fontSize="11" fill={a.color} fontWeight="bold">{a.mag}</text>
+                                </g>
+                            );
+                        })}
+                        <text x={nodes[4].x} y={108} textAnchor="middle" fontSize="11" fill="#ED1E79" fontWeight="bold">∂L (1.0)</text>
+                        <line x1={nodes[4].x} y1={113} x2={nodes[4].x} y2={129} stroke="#ED1E79" strokeWidth="3" />
+                        <polygon points={`${nodes[4].x},131 ${nodes[4].x - 6},119 ${nodes[4].x + 6},119`} fill="#ED1E79" />
+                        <text x="44" y="118" textAnchor="middle" fontSize="11" fill="#CBD5E1" fontWeight="bold">0.004</text>
+                        <rect x="180" y="232" width="400" height="30" rx="14" fill="#FCE9F3" stroke="#ED1E79" strokeWidth="1.4" />
+                        <text x="380" y="251" textAnchor="middle" fontSize="12" fill="#B91C1C" fontWeight="bold">∂L/∂h decae exponencialmente al retroceder en el tiempo</text>
+                    </svg>
+                    <p className="text-xs text-gray-500 italic text-center mt-1">Desvanecimiento del gradiente: al retropropagar de derecha a izquierda, ∂L/∂h<sub>t</sub> decae exponencialmente (1.0 → 0.25 → 0.06 → 0.015 → 0.004), impidiendo aprender dependencias de largo plazo. Fuente: elaboración propia.</p>
+                </div>
+            );
+        };
+
+        /* ============================================================
+           DIAGRAMA SVG: celda GRU (gemelo visual de LSTMCellSVG)
+           Un solo estado h y dos compuertas: reinicio r y
+           actualización z. Notablemente más simple que la LSTM.
+        ============================================================ */
+        const GRUCellSVG = () => (
+            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                <svg viewBox="0 0 760 360" className="w-full" style={{ minWidth: 660 }} role="img"
+                    aria-label="Celda GRU: variante simplificada de la LSTM con un único estado oculto h y solo dos compuertas. La compuerta de reinicio r y la de actualización z, ambas sigmoides, regulan cómo se combina el estado anterior con el candidato (tangente hiperbólica). El estado final es una interpolación lineal entre el estado anterior y el candidato.">
+                    <title>La GRU usa un solo estado h: la compuerta de reinicio r decide cuánto del pasado entra al candidato, y la compuerta de actualización z interpola entre el estado anterior y el candidato para producir h sub t.</title>
+                    <rect x="40" y="70" width="680" height="240" rx="16" fill="#FBF8FF" stroke="#3D008D" strokeWidth="2" />
+                    <text x="58" y="98" fontSize="13" fill="#3D008D" fontWeight="bold">Celda GRU · paso t · 1 estado, 2 compuertas (más simple que la LSTM)</text>
+
+                    {/* Cinta única del estado oculto h */}
+                    <line x1="40" y1="130" x2="720" y2="130" stroke="#15803D" strokeWidth="4" />
+                    <polygon points="720,130 708,124 708,136" fill="#15803D" />
+                    <text x="22" y="134" textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="bold">h<tspan baselineShift="sub" fontSize="9">t−1</tspan></text>
+                    <text x="740" y="134" textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="bold">h<tspan baselineShift="sub" fontSize="9">t</tspan></text>
+
+                    {/* Operadores sobre la cinta: (1−z)⊙h_{t-1} y la suma final + */}
+                    <circle cx="560" cy="130" r="15" fill="#FEF2F2" stroke="#B91C1C" strokeWidth="2" />
+                    <text x="560" y="135" textAnchor="middle" fontSize="14" fill="#B91C1C" fontWeight="bold">⊙</text>
+                    <text x="560" y="110" textAnchor="middle" fontSize="10" fill="#B91C1C" fontWeight="bold">(1−z<tspan baselineShift="sub" fontSize="8">t</tspan>)</text>
+                    <circle cx="650" cy="130" r="15" fill="#F5F0FA" stroke="#3D008D" strokeWidth="2" />
+                    <text x="650" y="136" textAnchor="middle" fontSize="17" fill="#3D008D" fontWeight="bold">+</text>
+
+                    {/* Compuerta de reinicio r */}
+                    <rect x="150" y="218" width="96" height="56" rx="10" fill="#FEF2F2" stroke="#B91C1C" strokeWidth="1.8" />
+                    <text x="198" y="240" textAnchor="middle" fontSize="12" fill="#B91C1C" fontWeight="bold">Reinicio</text>
+                    <text x="198" y="258" textAnchor="middle" fontSize="13" fill="#B91C1C">r · σ</text>
+                    <line x1="198" y1="218" x2="198" y2="135" stroke="#94A3B8" strokeWidth="1.6" strokeDasharray="4 3" />
+
+                    {/* Candidato h̃ (tanh) */}
+                    <rect x="300" y="218" width="110" height="56" rx="10" fill="#F0FDF4" stroke="#15803D" strokeWidth="1.8" />
+                    <text x="355" y="240" textAnchor="middle" fontSize="12" fill="#15803D" fontWeight="bold">Candidato</text>
+                    <text x="355" y="258" textAnchor="middle" fontSize="13" fill="#15803D">h̃<tspan baselineShift="sub" fontSize="8">t</tspan> · tanh</text>
+                    {/* la compuerta de reinicio modula cuánto del pasado entra al candidato */}
+                    <line x1="246" y1="246" x2="298" y2="246" stroke="#B91C1C" strokeWidth="2" />
+                    <polygon points="300,246 288,240 288,252" fill="#B91C1C" />
+
+                    {/* Compuerta de actualización z */}
+                    <rect x="464" y="218" width="110" height="56" rx="10" fill="#FEF2F2" stroke="#B91C1C" strokeWidth="1.8" />
+                    <text x="519" y="240" textAnchor="middle" fontSize="12" fill="#B91C1C" fontWeight="bold">Actualización</text>
+                    <text x="519" y="258" textAnchor="middle" fontSize="13" fill="#B91C1C">z · σ</text>
+                    <line x1="519" y1="218" x2="519" y2="145" stroke="#94A3B8" strokeWidth="1.6" strokeDasharray="4 3" />
+
+                    {/* rama z⊙h̃ que asciende a la suma, ruteada por debajo de las cajas */}
+                    <line x1="355" y1="274" x2="355" y2="292" stroke="#15803D" strokeWidth="2" />
+                    <line x1="355" y1="292" x2="650" y2="292" stroke="#15803D" strokeWidth="2" />
+                    <line x1="650" y1="292" x2="650" y2="147" stroke="#15803D" strokeWidth="2" />
+                    <polygon points="650,145 644,157 656,157" fill="#15803D" />
+                    <text x="500" y="286" textAnchor="middle" fontSize="10" fill="#15803D" fontWeight="bold">z<tspan baselineShift="sub" fontSize="8">t</tspan> ⊙ h̃<tspan baselineShift="sub" fontSize="8">t</tspan> → suma</text>
+
+                    {/* Entrada x_t alimentando las compuertas */}
+                    <text x="110" y="300" textAnchor="middle" fontSize="13" fill="#001A4D" fontWeight="bold">x<tspan baselineShift="sub" fontSize="9">t</tspan></text>
+                    <line x1="110" y1="290" x2="110" y2="246" stroke="#001A4D" strokeWidth="1.6" strokeDasharray="3 3" />
+                    <line x1="110" y1="246" x2="148" y2="246" stroke="#001A4D" strokeWidth="1.6" strokeDasharray="3 3" />
+
+                    {/* Fórmula de la interpolación lineal */}
+                    <text x="380" y="340" textAnchor="middle" fontSize="13" fill="#3D008D" fontWeight="bold">h<tspan baselineShift="sub" fontSize="9">t</tspan> = (1−z<tspan baselineShift="sub" fontSize="9">t</tspan>) ⊙ h<tspan baselineShift="sub" fontSize="9">t−1</tspan> + z<tspan baselineShift="sub" fontSize="9">t</tspan> ⊙ h̃<tspan baselineShift="sub" fontSize="9">t</tspan></text>
+                </svg>
+                <p className="text-xs text-gray-500 italic text-center mt-1">Celda GRU: un único estado h<sub>t</sub> y dos compuertas (reinicio r, actualización z). El estado final es la interpolación h<sub>t</sub> = (1−z<sub>t</sub>) ⊙ h<sub>t−1</sub> + z<sub>t</sub> ⊙ h̃<sub>t</sub>, notablemente más simple que la LSTM. Fuente: elaboración propia.</p>
+            </div>
+        );
+
         const Cap22Section = () => {
             const ref = useRef(null);
             useTypeset(ref, []);
@@ -1659,9 +1942,12 @@
                     <h4>Series hidrometeorológicas</h4>
                     <p>
                         La ubicación ecuatorial y la trisección de los Andes generan en Colombia regímenes de lluvia bimodales y
-                        unimodales que no caben en el patrón de cuatro estaciones. La precipitación mensual de Bogotá oscila entre
-                        promedios de 40 mm en enero y picos de 199 mm en mayo: el estado del clima en un mes <em>t</em> está
-                        correlacionado no solo con <em>t−1</em>, sino con la estacionalidad de <em>t−12</em>. Un modelo de riego de
+                        unimodales que no caben en el patrón de cuatro estaciones. La precipitación de Bogotá sigue un
+                        régimen bimodal documentado por el IDEAM: promedia alrededor de 40 mm en los meses secos (enero) y
+                        asciende a cerca de 100–120 mm en las temporadas lluviosas (abril-mayo y octubre-noviembre), con
+                        máximos históricos que pueden acercarse a 199 mm en años particularmente húmedos. Así, el estado del
+                        clima en un mes <em>t</em> está correlacionado no solo con <em>t−1</em>, sino con la estacionalidad
+                        de <em>t−12</em>. Un modelo de riego de
                         precisión para café o flores que ignore la secuencia de lluvias de las dos semanas previas recomendaría
                         riegos innecesarios.
                     </p>
@@ -1696,6 +1982,9 @@
                         acumulada:
                     </p>
                     <Eq>{String.raw`$$ h_t = \tanh\!\big(W_{xh}\, x_t + W_{hh}\, h_{t-1} + b_h\big) \qquad \hat{y}_t = \mathrm{softmax}\!\big(W_{hy}\, h_t + b_y\big) $$`}</Eq>
+
+                    <RNNUnrolledSVG />
+
                     <p>
                         El entrenamiento usa <strong>retropropagación a través del tiempo</strong> (BPTT): como los pesos se comparten
                         en todos los pasos, el gradiente total es la suma de los gradientes de cada paso. El problema aparece en el
@@ -1708,6 +1997,9 @@
                         <strong> exponencialmente a cero</strong>: el <strong>desvanecimiento del gradiente</strong>. La red aprende
                         dependencias cortas, pero olvida las largas.
                     </p>
+
+                    <VanishingGradientSVG />
+
                     <Box type="tip" label="Analogía local — el «Teléfono Roto»">
                         El gerente (entrada inicial) dicta «aumentar la producción de café suave». La instrucción atraviesa 50 niveles
                         jerárquicos (pasos temporales) y en cada uno se atenúa un poco (multiplicación por un factor &lt; 1). Al llegar
@@ -1718,6 +2010,24 @@
                         <strong>Clima:</strong> una RNN predice la lluvia de mañana a partir de la de hoy, pero no captura el ciclo de
                         «El Niño», que depende de temperaturas oceánicas de hace meses. <strong>Lenguaje:</strong> en «Los
                         estudiantes… que estudiaron toda la noche, están…», la RNN olvida el sujeto plural y rompe la concordancia.
+                    </Box>
+
+                    <h4>La otra cara: la explosión del gradiente</h4>
+                    <p>
+                        El mismo producto de jacobianas explica el fenómeno opuesto. Si los valores singulares de
+                        {String.raw` \(W_{hh}\)`} son <strong>mayores</strong> que 1, el producto de {String.raw`\(t-k\)`} matrices
+                        crece <strong>exponencialmente</strong>: el <strong>gradiente explota</strong>, las actualizaciones se
+                        vuelven enormes y la pérdida diverge (suelen aparecer valores <span className="inline-code">NaN</span>).
+                        Es la imagen especular del desvanecimiento: con {String.raw`\(\lVert W_{hh}\rVert < 1\)`} la señal se
+                        diluye y con {String.raw`\(\lVert W_{hh}\rVert > 1\)`} puede amplificarse sin control (condición necesaria de la explosión).
+                    </p>
+                    <Box type="warn" label="Remedio estándar — recorte de gradiente (gradient clipping)">
+                        El <strong>recorte de gradiente</strong> acota la norma del gradiente a un umbral {String.raw`\(\tau\)`} antes de cada actualización: si
+                        {String.raw` \(\lVert g\rVert > \tau\)`}, se reescala
+                        {String.raw` \(g \leftarrow \tau\, g/\lVert g\rVert\)`}, conservando la <em>dirección</em> del gradiente
+                        pero limitando su <em>magnitud</em>. Es la salvaguarda habitual al entrenar redes recurrentes con
+                        secuencias largas: barata, sencilla y muy eficaz frente a la divergencia. El desvanecimiento, en cambio,
+                        no se corrige recortando: exige el rediseño arquitectónico que introduce la LSTM.
                     </Box>
 
                     {/* ============== 3. LSTM ============== */}
@@ -1773,6 +2083,17 @@
                     </p>
                     <Eq>{String.raw`$$ z_t = \sigma\!\big(W_{xz} x_t + W_{hz} h_{t-1} + b_z\big) \qquad r_t = \sigma\!\big(W_{xr} x_t + W_{hr} h_{t-1} + b_r\big) $$`}</Eq>
                     <Eq>{String.raw`$$ \tilde{h}_t = \tanh\!\big(W_{xh} x_t + W_{hh}\,(r_t \odot h_{t-1}) + b_h\big) \qquad h_t = (1 - z_t)\odot h_{t-1} + z_t \odot \tilde{h}_t $$`}</Eq>
+
+                    <GRUCellSVG />
+
+                    <p className="text-xs text-gray-500 italic">
+                        Nota de convención: este material —como el libro de Goodfellow et al.— escribe
+                        {String.raw` \(h_t = (1 - z_t)\odot h_{t-1} + z_t \odot \tilde{h}_t\)`}, con {String.raw`\(z_t\)`} ponderando
+                        el candidato. PyTorch (<span className="inline-code">nn.GRU</span>) y Cho et al. (2014) usan la convención
+                        espejo, con {String.raw`\(z_t\)`} ponderando {String.raw`\(h_{t-1}\)`}; ambas son equivalentes sin más que
+                        renombrar {String.raw`\(z_t \leftrightarrow 1 - z_t\)`}.
+                    </p>
+
                     <p>El estado nuevo es una <strong>interpolación lineal</strong> entre el pasado y el candidato. ¿LSTM o GRU?</p>
 
                     <Tabs tabs={[
@@ -1806,10 +2127,34 @@
                         },
                     ]} />
 
+                    <CodeBlock title="LSTM vs GRU: huella de parámetros" lang="pytorch" code={`import torch
+import torch.nn as nn
+
+# Mismo tamaño de entrada y de estado oculto para comparar de forma justa
+lstm = nn.LSTM(input_size=10, hidden_size=20, batch_first=True)
+gru  = nn.GRU(input_size=10, hidden_size=20, batch_first=True)
+
+# Contamos los parámetros entrenables de cada celda recurrente
+n_lstm = sum(p.numel() for p in lstm.parameters())
+n_gru  = sum(p.numel() for p in gru.parameters())
+print("LSTM:", n_lstm)              # 2560 = 4 * (20*10 + 20*20 + 2*20)
+print("GRU :", n_gru)               # 1920 = 3 * (20*10 + 20*20 + 2*20)
+print("Ratio GRU/LSTM:", n_gru / n_lstm)  # 0.75  -> la GRU usa 3/4
+
+# LSTM: 4 conjuntos de pesos (puertas de entrada, olvido, salida y candidato)
+# GRU : 3 conjuntos (puertas de actualización, de reinicio y candidato)
+
+# Secuencia de ejemplo: (lote=1, pasos=5, características=10)
+seq = torch.randn(1, 5, 10)
+out_lstm, _ = lstm(seq)
+out_gru,  _ = gru(seq)
+print(out_lstm.shape)  # torch.Size([1, 5, 20])
+print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
+
                     {/* ============== 5. Caso Rappi ============== */}
                     <h3>5. Caso de estudio: «Turbo» de Rappi y la logística de última milla</h3>
                     <p>
-                        Rappi, el primer unicornio colombiano, promete con su servicio <em>Turbo</em> entregas en menos de 10–15
+                        Rappi, el primer unicornio colombiano, promete con su servicio <em>Turbo</em> entregas en 10–15
                         minutos. La predicción de demanda no puede ser un proceso por lotes nocturno: debe ocurrir en tiempo real.
                     </p>
                     <Box type="warn" label="El problema en tiempo real">
@@ -1856,7 +2201,7 @@
                     <h3>7. El mecanismo de atención (Bahdanau, 2015)</h3>
                     <p>
                         Bahdanau et al. (2015) propusieron una idea a la vez simple y profunda: en lugar de obligar al decodificador a
-                        depender de un único vector estático, se le permite <strong>mirar de regreso a toda la secuencia de entrada</strong>
+                        depender de un único vector estático, se le permite <strong>mirar de regreso a toda la secuencia de entrada</strong>{' '}
                         en cada paso y decidir dinámicamente qué partes son relevantes. El encoder ya no descarta sus estados
                         intermedios: conserva todos los {String.raw`\(h_1, h_2, \ldots, h_T\)`}. En cada paso {String.raw`\(t\)`} del decodificador se
                         construye un <strong>vector de contexto dinámico</strong> {String.raw`\(c_t\)`} como suma ponderada:
@@ -1882,12 +2227,12 @@
 
                     {/* ============== 8. Puente a Transformers ============== */}
                     <h3>8. Puente hacia los Transformers</h3>
-                    <CalloutPro tema="info" titulo="De la atención a la auto-atención" subtitulo="La pregunta que abrió la era de los Transformers" icon="fa-arrow-right-arrow-left">
+                    <CalloutPro tema="info" titulo="De la atención a la autoatención" subtitulo="La pregunta que abrió la era de los Transformers" icon="fa-arrow-right-arrow-left">
                         El mecanismo de Bahdanau conecta <em>dos</em> secuencias distintas (entrada y salida) y todavía descansa sobre
                         una red recurrente que procesa los datos paso a paso. La pregunta natural fue: ¿qué ocurre si una secuencia se
                         «presta atención a sí misma», relacionando cada elemento con todos los demás dentro del mismo texto, y se
-                        elimina por completo la recurrencia? Esa generalización —la <strong>auto-atención</strong> (self-attention)— es
-                        el corazón de la arquitectura <strong>Transformer</strong>, que se desarrolla en el <strong>Capítulo 2.3</strong>
+                        elimina por completo la recurrencia? Esa generalización —la <strong>autoatención</strong> (self-attention)— es
+                        el corazón de la arquitectura <strong>Transformer</strong>, que se desarrolla en el <strong>Capítulo 2.3</strong>{' '}
                         junto con sus vectores Query, Key y Value.
                     </CalloutPro>
 
@@ -1897,7 +2242,7 @@
                         {
                             pregunta: 'El desvanecimiento del gradiente en una RNN simple se debe a…',
                             opciones: [
-                                { texto: 'el producto encadenado de jacobianas con derivadas de tanh acotadas en [0,1], que tiende a cero al crecer la distancia temporal.', correcta: true },
+                                { texto: 'el producto encadenado de jacobianas con derivadas de tanh acotadas en (0,1], que tiende a cero al crecer la distancia temporal.', correcta: true },
                                 { texto: 'que las RNN no comparten pesos entre pasos de tiempo.', correcta: false },
                                 { texto: 'el uso de la función softmax en la salida.', correcta: false },
                             ],
@@ -2018,7 +2363,7 @@
 
                     {/* --- Generador G --- */}
                     <rect x="150" y="85" width="120" height="70" rx="12" fill="#3D008D" stroke="#001A4D" strokeWidth="2" />
-                    <text x="210" y="118" textAnchor="middle" fontSize="16" fill="#FFFFFF" fontWeight="bold">Generador G</text>
+                    <text x="210" y="118" textAnchor="middle" fontSize="13" fill="#FFFFFF" fontWeight="bold">Generador G</text>
                     <text x="210" y="138" textAnchor="middle" fontSize="10" fill="#E9D5FF" fontStyle="italic">verseador</text>
 
                     {/* --- Muestra falsa G(z) --- */}
@@ -2032,9 +2377,9 @@
                     <text x="375" y="274" textAnchor="middle" fontSize="10" fill="#64748B">dato real (p<tspan baselineShift="sub" fontSize="7">data</tspan>)</text>
 
                     {/* --- Discriminador D --- */}
-                    <rect x="500" y="150" width="120" height="70" rx="12" fill="#001A4D" stroke="#001A4D" strokeWidth="2" />
-                    <text x="560" y="183" textAnchor="middle" fontSize="16" fill="#FFFFFF" fontWeight="bold">Discriminador D</text>
-                    <text x="560" y="203" textAnchor="middle" fontSize="10" fill="#FDB913" fontStyle="italic">jurado/público</text>
+                    <rect x="460" y="150" width="160" height="70" rx="12" fill="#001A4D" stroke="#001A4D" strokeWidth="2" />
+                    <text x="540" y="183" textAnchor="middle" fontSize="13" fill="#FFFFFF" fontWeight="bold">Discriminador D</text>
+                    <text x="540" y="203" textAnchor="middle" fontSize="10" fill="#FDB913" fontStyle="italic">jurado/público</text>
 
                     {/* --- Veredicto --- */}
                     <text x="700" y="170" textAnchor="middle" fontSize="12" fill="#15803D" fontWeight="bold">real</text>
@@ -2046,10 +2391,10 @@
                     <polygon points="150,120 140,115 140,125" fill="#94A3B8" />
                     <line x1="270" y1="120" x2="316" y2="120" stroke="#94A3B8" strokeWidth="2" />
                     <polygon points="320,120 310,115 310,125" fill="#94A3B8" />
-                    <line x1="430" y1="120" x2="498" y2="172" stroke="#ED1E79" strokeWidth="2" />
-                    <polygon points="500,174 489,170 494,162" fill="#ED1E79" />
-                    <line x1="430" y1="260" x2="498" y2="200" stroke="#15803D" strokeWidth="2" />
-                    <polygon points="500,198 494,209 489,201" fill="#15803D" />
+                    <line x1="430" y1="120" x2="458" y2="172" stroke="#ED1E79" strokeWidth="2" />
+                    <polygon points="460,174 449,170 454,162" fill="#ED1E79" />
+                    <line x1="430" y1="260" x2="458" y2="200" stroke="#15803D" strokeWidth="2" />
+                    <polygon points="460,198 454,209 449,201" fill="#15803D" />
                     <line x1="620" y1="185" x2="668" y2="185" stroke="#94A3B8" strokeWidth="2" />
                     <polygon points="672,185 662,180 662,190" fill="#94A3B8" />
 
@@ -2127,6 +2472,117 @@
             );
         };
 
+        /* ============================================================
+           DIAGRAMA SVG: espacio latente AE vs VAE
+           AE: puntos fijos aislados con huecos. VAE: distribuciones
+           gaussianas solapadas que cubren un espacio continuo.
+        ============================================================ */
+        const AEvsVAELatentSVG = () => {
+            const aePoints = [
+                { x: 85, y: 128 }, { x: 165, y: 118 }, { x: 240, y: 132 }, { x: 305, y: 150 },
+                { x: 120, y: 200 }, { x: 200, y: 190 }, { x: 275, y: 205 },
+                { x: 100, y: 262 }, { x: 180, y: 268 }, { x: 258, y: 258 },
+            ];
+            const aeGaps = [
+                { x: 135, y: 168 }, { x: 225, y: 172 }, { x: 300, y: 230 },
+            ];
+            const vaeClouds = [
+                { x: 470, y: 150, r: 44, op: 0.22 }, { x: 550, y: 205, r: 52, op: 0.18 },
+                { x: 465, y: 250, r: 36, op: 0.24 }, { x: 620, y: 160, r: 46, op: 0.20 },
+                { x: 665, y: 235, r: 40, op: 0.22 }, { x: 570, y: 252, r: 33, op: 0.20 },
+                { x: 695, y: 190, r: 33, op: 0.24 },
+            ];
+            const interpStops = [
+                { x: 465, y: 250 }, { x: 510, y: 225 }, { x: 555, y: 200 },
+                { x: 615, y: 165 }, { x: 665, y: 235 },
+            ];
+            return (
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                    <svg viewBox="0 0 760 340" className="w-full" style={{ minWidth: 700 }} role="img"
+                        aria-label="Comparación del espacio latente. A la izquierda, un Autoencoder produce puntos fijos y aislados con huecos vacíos entre ellos: espacio discontinuo. A la derecha, un Autoencoder variacional produce distribuciones gaussianas solapadas que cubren el espacio sin huecos, permitiendo una interpolación suave y navegable.">
+                        <title>El Autoencoder mapea cada entrada a un punto fijo dejando huecos sin sentido, mientras el VAE codifica distribuciones gaussianas que se solapan y cubren un espacio latente continuo y navegable.</title>
+                        <rect x="30" y="50" width="330" height="250" rx="12" fill="#F8FAFC" stroke="#475569" strokeWidth="1.5" />
+                        <text x="195" y="72" textAnchor="middle" fontSize="14" fill="#001A4D" fontWeight="bold">Autoencoder (AE)</text>
+                        {aePoints.map((p, i) => (
+                            <circle key={`ae-${i}`} cx={p.x} cy={p.y} r="6" fill="#001A4D" />
+                        ))}
+                        {aeGaps.map((g, i) => (
+                            <text key={`gap-${i}`} x={g.x} y={g.y} textAnchor="middle" fontSize="16" fill="#CBD5E1" fontWeight="bold">∅</text>
+                        ))}
+                        <text x="195" y="320" textAnchor="middle" fontSize="11" fill="#B91C1C" fontWeight="bold">discontinuo · interpolar cae en el vacío</text>
+                        <rect x="400" y="50" width="330" height="250" rx="12" fill="#FBF8FF" stroke="#3D008D" strokeWidth="1.5" />
+                        <text x="565" y="72" textAnchor="middle" fontSize="14" fill="#3D008D" fontWeight="bold">VAE · 𝒩(μ, σ)</text>
+                        {vaeClouds.map((c, i) => (
+                            <g key={`vae-${i}`}>
+                                <circle cx={c.x} cy={c.y} r={c.r} fill={`rgba(61,0,141,${c.op})`} stroke="#7C3AED" strokeWidth="1" />
+                                <circle cx={c.x} cy={c.y} r="3" fill="#3D008D" />
+                            </g>
+                        ))}
+                        <polyline points={interpStops.map((s) => `${s.x},${s.y}`).join(' ')} fill="none" stroke="#ED1E79" strokeWidth="2.5" strokeDasharray="6 4" />
+                        {interpStops.map((s, i) => (
+                            <circle key={`stop-${i}`} cx={s.x} cy={s.y} r="4" fill="#ED1E79" />
+                        ))}
+                        <text x="565" y="320" textAnchor="middle" fontSize="11" fill="#15803D" fontWeight="bold">continuo · interpolar transita suave</text>
+                    </svg>
+                    <p className="text-xs text-gray-500 italic text-center mt-1">Espacio latente AE vs VAE: el AE deja huecos sin significado entre puntos aislados; el VAE codifica distribuciones 𝒩(μ,σ) solapadas que forman un espacio continuo donde interpolar produce transiciones graduales. Fuente: elaboración propia.</p>
+                </div>
+            );
+        };
+
+        /* ============================================================
+           DIAGRAMA SVG: mode collapse de una GAN
+           p_data multimodal (4 picos) vs generador colapsado (1 pico).
+        ============================================================ */
+        const ModeCollapseSVG = () => {
+            const bell = (cx, baseY, h, w) =>
+                `M ${cx - w} ${baseY} C ${cx - w * 0.45} ${baseY}, ${cx - w * 0.4} ${baseY - h}, ${cx} ${baseY - h} C ${cx + w * 0.4} ${baseY - h}, ${cx + w * 0.45} ${baseY}, ${cx + w} ${baseY}`;
+            const realModes = [
+                { cx: 75, h: 75 }, { cx: 150, h: 95 }, { cx: 225, h: 70 }, { cx: 300, h: 88 },
+            ];
+            const genModes = [
+                { cx: 470, h: 0 }, { cx: 545, h: 0 }, { cx: 620, h: 130 }, { cx: 695, h: 0 },
+            ];
+            const baseY = 240;
+            return (
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                    <svg viewBox="0 0 760 320" className="w-full" style={{ minWidth: 700 }} role="img"
+                        aria-label="Colapso de modos en una GAN. A la izquierda, la distribución real de datos es multimodal con cuatro picos bien separados que representan diversidad. A la derecha, el generador colapsado concentra toda su masa en un único pico y deja los otros tres modos vacíos, perdiendo la diversidad.">
+                        <title>La distribución real tiene cuatro modos distintos; el generador colapsado produce solo uno, abandonando los demás y empobreciendo la diversidad de las muestras generadas.</title>
+                        <rect x="30" y="50" width="330" height="230" rx="12" fill="#F0FDF4" stroke="#15803D" strokeWidth="1.5" />
+                        <text x="195" y="74" textAnchor="middle" fontSize="14" fill="#15803D" fontWeight="bold">Distribución real p<tspan baselineShift="sub" fontSize="9">data</tspan></text>
+                        <line x1="45" y1={baseY} x2="345" y2={baseY} stroke="#475569" strokeWidth="1.5" />
+                        {realModes.map((m, i) => (
+                            <g key={`real-${i}`}>
+                                <path d={bell(m.cx, baseY, m.h, 36)} fill="rgba(61,0,141,0.25)" stroke="#3D008D" strokeWidth="2" />
+                                <text x={m.cx} y={baseY + 16} textAnchor="middle" fontSize="10" fill="#475569">modo {i + 1}</text>
+                            </g>
+                        ))}
+                        <text x="195" y={baseY + 34} textAnchor="middle" fontSize="11" fill="#15803D" fontWeight="bold">4 modos → diversidad</text>
+                        <rect x="400" y="50" width="330" height="230" rx="12" fill="#FCE7F3" stroke="#ED1E79" strokeWidth="1.5" />
+                        <text x="565" y="74" textAnchor="middle" fontSize="14" fill="#ED1E79" fontWeight="bold">Generador colapsado</text>
+                        <line x1="415" y1={baseY} x2="715" y2={baseY} stroke="#475569" strokeWidth="1.5" />
+                        {genModes.map((m, i) => (
+                            <g key={`gen-${i}`}>
+                                {m.h > 0 ? (
+                                    <path d={bell(m.cx, baseY, m.h, 40)} fill="rgba(237,30,121,0.35)" stroke="#ED1E79" strokeWidth="2.5" />
+                                ) : (
+                                    <g>
+                                        <circle cx={m.cx} cy={baseY - 14} r="9" fill="none" stroke="#CBD5E1" strokeWidth="2" strokeDasharray="3 3" />
+                                        <line x1={m.cx - 6} y1={baseY - 20} x2={m.cx + 6} y2={baseY - 8} stroke="#CBD5E1" strokeWidth="2" />
+                                    </g>
+                                )}
+                                <text x={m.cx} y={baseY + 16} textAnchor="middle" fontSize="10" fill={m.h > 0 ? '#ED1E79' : '#94A3B8'}>modo {i + 1}</text>
+                            </g>
+                        ))}
+                        <text x="565" y={baseY + 34} textAnchor="middle" fontSize="11" fill="#B91C1C" fontWeight="bold">1 solo modo → sin diversidad</text>
+                        <rect x="150" y="288" width="460" height="26" rx="13" fill="#FCE9F3" stroke="#ED1E79" strokeWidth="1.4" />
+                        <text x="380" y="305" textAnchor="middle" fontSize="12" fill="#B91C1C" fontStyle="italic">El verseador repite siempre su única estrofa ganadora.</text>
+                    </svg>
+                    <p className="text-xs text-gray-500 italic text-center mt-1">Mode collapse: frente a una p<sub>data</sub> multimodal y diversa, el generador colapsa toda la masa en un único modo y abandona los demás. Fuente: elaboración propia.</p>
+                </div>
+            );
+        };
+
         const Cap23Section = () => {
             const ref = useRef(null);
             useTypeset(ref, []);
@@ -2144,6 +2600,14 @@
                         los <strong>Transformers</strong>, sustento de la IA generativa moderna.
                     </p>
 
+                    <p>Las cuatro familias generativas que recorre el capítulo, de un vistazo:</p>
+                    <Pipeline steps={[
+                        { num: 1, title: 'AE / VAE', desc: 'Comprimir y reconstruir; espacio latente (continuo en el VAE)' },
+                        { num: 2, title: 'GAN', desc: 'Juego adversario: generador contra discriminador' },
+                        { num: 3, title: 'Difusión', desc: 'Añadir ruido y aprender a revertirlo paso a paso' },
+                        { num: 4, title: 'Transformer', desc: 'Atención y generación autorregresiva token a token' },
+                    ]} />
+
                     <Box type="tip" label="Analogía local — la Piqueria Vallenata">
                         En una piqueria del Festival de la Leyenda Vallenata, los verseadores no recitan canciones memorizadas
                         (eso sería <em>sobreajuste</em>): han interiorizado una «distribución de probabilidad» cultural —métrica,
@@ -2158,15 +2622,32 @@
                     <p>
                         La arquitectura de los modelos generativos modernos gira en torno a la manipulación de vectores en un
                         <strong> espacio latente</strong> {String.raw`\(z \in \mathbb{R}^{d}\)`}. La <strong>hipótesis del
-                        manifold</strong> sostiene que los datos de alta dimensión (una foto de {String.raw`\(1024 \times 1024\)`}
+                        manifold</strong> sostiene que los datos de alta dimensión (una foto de {String.raw`\(1024 \times 1024\)`}{' '}
                         píxeles) no llenan todo el espacio, sino que se concentran en una superficie curvada de dimensión mucho
                         menor incrustada en él. El modelo aprende a mapear puntos de ese manifold simplificado a la complejidad del
                         espacio de datos real.
                     </p>
+
+                    <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                        <img src="images/modulo-2/manifold-hipotesis.png" alt="Ilustración conceptual de un manifold: numerosos puntos de datos sobre una superficie curva enrollada de baja dimensión dentro de un espacio tridimensional." className="w-full rounded-lg" loading="lazy" />
+                        <p className="text-xs text-gray-500 italic text-center mt-2">
+                            Hipótesis del manifold: los datos reales (puntos) no llenan todo el espacio, sino que se concentran sobre una
+                            superficie curva de dimensión mucho menor incrustada en él. Ilustración conceptual generada localmente.
+                        </p>
+                    </div>
+
                     <ul>
                         <li><strong>Muestreo:</strong> para generar un dato, se toma un vector aleatorio {String.raw`\(z\)`} (ruido) y se pasa por una red profunda que aplica transformaciones no lineales sucesivas hasta convertir el ruido simple en una estructura compleja (imagen, audio).</li>
                         <li><strong>Navegabilidad:</strong> si el espacio latente es continuo, moverse suavemente por él produce transiciones graduales y coherentes entre datos —se puede «interpolar» entre dos conceptos.</li>
                     </ul>
+
+                    <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                        <img src="images/modulo-2/interpolacion-latente.png" alt="Fila de orquídeas que transita gradualmente de blanco a magenta, ilustrando la interpolación entre dos puntos del espacio latente." className="w-full rounded-lg" loading="lazy" />
+                        <p className="text-xs text-gray-500 italic text-center mt-2">
+                            Interpolación en el espacio latente: desplazarse suavemente entre dos puntos produce transiciones graduales y
+                            coherentes —aquí, entre dos variedades de orquídea—. Ilustración conceptual generada localmente.
+                        </p>
+                    </div>
 
                     {/* ============== 2. Autoencoders ============== */}
                     <h3>2. Autoencoders (AE): compresión y reconstrucción</h3>
@@ -2187,9 +2668,38 @@
                     </p>
                     <Eq>{String.raw`$$ \mathcal{L}_{\text{rec}} = \big\lVert\, x - g(f(x)) \,\big\rVert^{2} $$`}</Eq>
                     <p>
-                        donde {String.raw`\(f(x)\)`} es el codificador que produce {String.raw`\(z = f(x)\)`} y {String.raw`\(g(z)\)`}
+                        donde {String.raw`\(f(x)\)`} es el codificador que produce {String.raw`\(z = f(x)\)`} y {String.raw`\(g(z)\)`}{' '}
                         el decodificador que produce la reconstrucción {String.raw`\(\hat{x} = g(z)\)`}.
                     </p>
+
+                    <CodeBlock title="Autoencoder mínimo" lang="pytorch" code={`import torch
+import torch.nn as nn
+
+class Autoencoder(nn.Module):
+    def __init__(self):
+        super().__init__()
+        # Encoder: comprime 784 -> 128 -> 32
+        self.encoder = nn.Sequential(
+            nn.Linear(784, 128), nn.ReLU(),
+            nn.Linear(128, 32),  nn.ReLU(),   # 32 = código latente z (cuello de botella)
+        )
+        # Decoder: reconstruye 32 -> 128 -> 784
+        self.decoder = nn.Sequential(
+            nn.Linear(32, 128),  nn.ReLU(),
+            nn.Linear(128, 784), nn.Sigmoid(),  # Sigmoid -> píxeles en [0, 1]
+        )
+
+    def forward(self, x):
+        z = self.encoder(x)        # representación comprimida
+        return self.decoder(z)     # reconstrucción
+
+model = Autoencoder()
+x = torch.randn(1, 784)            # un dígito aplanado (28x28 = 784)
+x_rec = model(x)
+print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
+
+# El entrenamiento minimiza la reconstrucción: criterion = nn.MSELoss()
+# El cuello de botella (32 << 784) impide copiar la entrada (función identidad).`} />
 
                     <Box type="info" label="Analogía local — TransMilenio en hora pico">
                         El flujo de ciudadanos dispersos en miles de paraderos de Suba o Bosa es la entrada {String.raw`\(x\)`}: rica
@@ -2216,7 +2726,7 @@
                     </p>
                     <Box type="info" label="Aplicaciones en Colombia">
                         <strong>Nequi/Bancolombia</strong> entrena AE con transacciones normales: un fraude (patrón inusual) genera
-                        alto error de reconstrucción y dispara una alerta. El <strong>Instituto Humboldt</strong> usa <em>denoising</em>
+                        alto error de reconstrucción y dispara una alerta. El <strong>Instituto Humboldt</strong> usa <em>denoising</em>{' '}
                         AE para separar el canto de aves del ruido de lluvia y motores en la selva. En conectividad rural, el AE
                         comprime imágenes de cultivos a un vector minúsculo para transmitirlas por redes 2G/3G y reconstruirlas en la nube.
                     </Box>
@@ -2227,10 +2737,11 @@
                         El VAE introduce una modificación sutil pero revolucionaria. Mientras un AE mapea la entrada a un
                         <strong> punto fijo y determinista</strong>, el VAE la mapea a una <strong>distribución de
                         probabilidad</strong> (una Gaussiana definida por la media {String.raw`\(\mu\)`} y la desviación estándar
-                        {String.raw`\(\sigma\)`}). El modelo no memoriza una coordenada exacta, sino que aprende una «nube» donde es
-                        probable que el dato resida, dotando al espacio latente de dos propiedades vitales: <strong>continuidad</strong>
-                        y <strong>completitud</strong>.
+                        {String.raw` \(\sigma\)`}). El modelo no memoriza una coordenada exacta, sino que aprende una «nube» donde es
+                        probable que el dato resida, dotando al espacio latente de dos propiedades vitales: <strong>continuidad</strong> y <strong>completitud</strong>.
                     </p>
+
+                    <AEvsVAELatentSVG />
 
                     <Box type="tip" label="Analogía local — el Ajiaco Santafereño">
                         Un ajiaco de lata producido en fábrica es un <strong>AE</strong>: una receta exacta, un punto fijo, sin
@@ -2247,7 +2758,7 @@
                     </p>
                     <Eq>{String.raw`$$ \mathcal{L}_{\text{ELBO}}(\theta,\phi;\,x) = \underbrace{\mathbb{E}_{q_\phi(z|x)}\big[\log p_\theta(x|z)\big]}_{\text{reconstrucción}} - \underbrace{D_{\text{KL}}\!\big(q_\phi(z|x)\,\|\,p(z)\big)}_{\text{regularización}} $$`}</Eq>
                     <ul>
-                        <li><strong>Reconstrucción:</strong> maximiza el log-verosimilitud esperado {String.raw`\(\mathbb{E}_{q_\phi(z|x)}[\log p_\theta(x|z)]\)`} para que el dato generado se parezca al real.</li>
+                        <li><strong>Reconstrucción:</strong> maximiza la log-verosimilitud esperada {String.raw`\(\mathbb{E}_{q_\phi(z|x)}[\log p_\theta(x|z)]\)`} para que el dato generado se parezca al real.</li>
                         <li><strong>Regularización (divergencia KL):</strong> el término {String.raw`\(D_{\text{KL}}(q_\phi(z|x)\,\|\,p(z))\)`} fuerza a las distribuciones latentes a parecerse a una Normal estándar {String.raw`\(\mathcal{N}(0, I)\)`}, evitando que el modelo «haga trampa» dispersando las nubes de datos para memorizarlas.</li>
                     </ul>
 
@@ -2310,6 +2821,9 @@
                     </p>
 
                     <h4>Mode collapse e inestabilidad</h4>
+
+                    <ModeCollapseSVG />
+
                     <Accordion items={[
                         {
                             titulo: 'Mode collapse (colapso de modos)',
@@ -2416,11 +2930,11 @@
                     </div>
 
                     {/* ============== 6. Transformers ============== */}
-                    <h3>6. Transformers: auto-atención y contexto global</h3>
+                    <h3>6. Transformers: autoatención y contexto global</h3>
                     <p>
                         Los Transformers revolucionaron el procesamiento del lenguaje natural al superar las limitaciones de las RNN.
                         Mientras las RNN procesan la información secuencialmente (palabra por palabra) —dificultando las dependencias
-                        a larga distancia—, los Transformers introdujeron la <strong>auto-atención</strong> (<em>self-attention</em>),
+                        a larga distancia—, los Transformers introdujeron la <strong>autoatención</strong> (<em>self-attention</em>),
                         que analiza toda la secuencia simultáneamente (paralelización). La idea central: el significado de un elemento
                         no es fijo, sino que depende dinámicamente de su relación con todos los demás.
                     </p>
@@ -2455,6 +2969,21 @@
                         },
                     ]} />
 
+                    <h4>De la atención a la generación: el decodificador autorregresivo</h4>
+                    <p>
+                        La autoatención explica cómo un Transformer <em>entiende</em> una secuencia, pero ¿cómo la <em>genera</em>?
+                        Un Transformer generativo (como la familia GPT) funciona de forma <strong>autorregresiva</strong>: produce el
+                        texto <strong>un token a la vez</strong>, y cada token nuevo se reinyecta como entrada para predecir el
+                        siguiente. Formalmente, modela la probabilidad de la secuencia como un producto de condicionales:
+                    </p>
+                    <Eq>{String.raw`$$ p(x_1, x_2, \ldots, x_T) = \prod_{t=1}^{T} p_\theta\big(x_t \mid x_1, \ldots, x_{t-1}\big) $$`}</Eq>
+                    <p>
+                        En cada paso, la red estima una distribución sobre el vocabulario y se muestrea el siguiente token. Una
+                        <strong> máscara causal</strong> impide que la autoatención «mire hacia el futuro» —a tokens aún no
+                        generados—, de modo que la predicción en la posición {String.raw`\(t\)`} solo depende de lo ya escrito. Esta
+                        es la cuarta familia generativa del módulo y la que sustenta los grandes modelos de lenguaje actuales.
+                    </p>
+
                     {/* ============== 7. Aplicaciones ============== */}
                     <h3>7. Aplicaciones generativas en Colombia</h3>
                     <CalloutPro tema="info" titulo="De la escasez de datos a la preservación cultural" subtitulo="IA generativa al servicio del territorio" icon="fa-seedling">
@@ -2464,7 +2993,7 @@
                         clasificadores bioacústicos. En <strong>servicio al cliente</strong>, chatbots con Transformers entienden la
                         jerga local de usuarios de <strong>Nequi/Bancolombia</strong> («se me bloqueó la clave», «no me ha bajado la
                         plata»). En <strong>preservación cultural</strong>, modelos de traducción para lenguas indígenas de bajos
-                        recursos (Wayuunaiki, Nasa Yuwe, Embera) facilitan el acceso a derechos. El <strong>Instituto Humboldt</strong>
+                        recursos (wayuunaiki, nasa yuwe, embera) facilitan el acceso a derechos. El <strong>Instituto Humboldt</strong>{' '}
                         y <strong>Agrosavia</strong> aplican estas técnicas a la conservación y los mapas de fertilidad.
                     </CalloutPro>
 
@@ -2549,7 +3078,7 @@
                         <thead><tr><th>Arquitectura</th><th>Rasgo distintivo</th></tr></thead>
                         <tbody>
                             <tr><td>1. <span className="inline-code">ResNet</span></td><td>(H) Conexiones de salto (skip connections) que dejan fluir el gradiente en redes muy profundas.</td></tr>
-                            <tr><td>2. <span className="inline-code">Vision Transformer (ViT)</span></td><td>(K) Trocea la imagen en parches y aplica auto-atención global desde la primera capa.</td></tr>
+                            <tr><td>2. <span className="inline-code">Vision Transformer (ViT)</span></td><td>(K) Trocea la imagen en parches y aplica autoatención global desde la primera capa.</td></tr>
                             <tr><td>3. <span className="inline-code">GRU</span></td><td>(I) Fusiona estado de celda y oculto, y combina olvido y entrada en una sola compuerta de actualización.</td></tr>
                             <tr><td>4. <span className="inline-code">Modelo de difusión</span></td><td>(L) Aprende a revertir un proceso de adición gradual de ruido prediciéndolo paso a paso.</td></tr>
                             <tr><td>5. <span className="inline-code">MobileNet</span></td><td>(J) Convoluciones separables en profundidad para correr eficientemente en dispositivos de borde.</td></tr>
@@ -2593,11 +3122,11 @@
                         pregunta: 'Para clasificar unas pocas miles de imágenes de cámaras trampa con cómputo limitado, la estrategia más sensata es…',
                         opciones: [
                             { texto: 'Entrenar un Vision Transformer desde cero.', correcta: false },
-                            { texto: 'Partir de una CNN pre-entrenada (ResNet/EfficientNet) y aplicar transfer learning.', correcta: true },
+                            { texto: 'Partir de una CNN preentrenada (ResNet/EfficientNet) y aplicar transfer learning.', correcta: true },
                             { texto: 'Usar un MLP gigante totalmente conectado.', correcta: false },
                             { texto: 'Renunciar al aprendizaje profundo por falta de datos.', correcta: false },
                         ],
-                        justificacion: 'El ViT carece de sesgo inductivo y requiere datos masivos; con miles de imágenes conviene reutilizar una CNN pre-entrenada, eficiente en datos.'
+                        justificacion: 'El ViT carece de sesgo inductivo y requiere datos masivos; con miles de imágenes conviene reutilizar una CNN preentrenada, eficiente en datos.'
                     },
                     {
                         pregunta: 'En una RNN simple, el desvanecimiento del gradiente ocurre porque…',
@@ -2706,9 +3235,9 @@
             ['Invarianza a la traslación', 'Capacidad de reconocer un objeto sin importar su posición en la imagen; el pooling y los pesos compartidos contribuyen a ella.'],
             ['Campo receptivo', 'Región de la entrada que influye en una neurona. Local en las CNN (crece con la profundidad) y global desde la primera capa en los ViT.'],
             ['ResNet', 'Red residual con conexiones de salto (skip connections) que permiten entrenar redes muy profundas dejando fluir el gradiente; backbone habitual.'],
-            ['Vision Transformer (ViT)', 'Arquitectura que trocea la imagen en parches, los proyecta a embeddings y aplica auto-atención global; necesita datos masivos por su débil sesgo inductivo.'],
+            ['Vision Transformer (ViT)', 'Arquitectura que trocea la imagen en parches, los proyecta a embeddings y aplica autoatención global; necesita datos masivos por su débil sesgo inductivo.'],
             ['Sesgo inductivo', 'Supuestos incorporados de fábrica en una arquitectura (localidad e invarianza en la CNN); el ViT carece casi de él y debe aprenderlo de los datos.'],
-            ['Transfer learning', 'Reutilizar el conocimiento de un modelo pre-entrenado en un dataset masivo (ImageNet) para una tarea nueva con menos datos.'],
+            ['Transfer learning', 'Reutilizar el conocimiento de un modelo preentrenado en un dataset masivo (ImageNet) para una tarea nueva con menos datos.'],
             ['Fine-tuning (ajuste fino)', 'Estrategia de transfer learning que descongela y re-entrena algunas capas finales con una tasa de aprendizaje baja para adaptarlas a la nueva tarea.'],
             ['Cuantización', 'Reducir la precisión de los pesos (ej. de FP32 a INT8) para obtener un modelo ~4 veces más pequeño y rápido, con cierta pérdida de exactitud.'],
             ['Edge computing', 'Procesar los datos localmente en el dispositivo (dron, cámara trampa) en lugar de enviarlos a la nube; clave en zonas de baja conectividad.'],
@@ -2723,7 +3252,7 @@
             ['Encoder-decoder (seq2seq)', 'Esquema de dos redes recurrentes: el encoder comprime la entrada en un vector de contexto y el decoder genera la salida token por token.'],
             ['Vector de contexto', 'Resumen de tamaño fijo producido por el encoder; en secuencias largas se satura, motivando el mecanismo de atención.'],
             ['Atención', 'Mecanismo que pondera dinámicamente todas las posiciones de la entrada en cada paso, recuperando selectivamente la información relevante.'],
-            ['Auto-atención', 'Variante en la que cada elemento de una secuencia se relaciona con todos los demás dentro de la misma secuencia; corazón del Transformer.'],
+            ['Autoatención', 'Variante en la que cada elemento de una secuencia se relaciona con todos los demás dentro de la misma secuencia; corazón del Transformer.'],
             ['Query, Key, Value', 'Tríada de vectores de la atención: una Query se compara con las Keys para ponderar y recuperar los Values semánticos relevantes.'],
             ['Transformer', 'Arquitectura basada enteramente en atención que procesa secuencias en paralelo; base de la IA generativa moderna (BERT, GPT).'],
             ['Positional encoding', 'Señal (senos y cosenos) que se suma a cada embedding para indicar su orden, ya que la atención por sí sola es ciega a la posición.'],
