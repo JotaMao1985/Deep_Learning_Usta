@@ -1696,7 +1696,58 @@ modelo = nn.Sequential(
            en un <canvas> oscuro. Entrena por descenso del gradiente sobre la
            entropía cruzada binaria (BCE) y dibuja la frontera en tiempo real.
         ============================================================ */
-        const RedFrontera = () => {
+        // Auditor de Equidad (Cap 5): matrices de confusión por subgrupo protegido g, FNR/FPR, brecha y umbral LOCAL.
+        // Recibe `preds` = [{prob, t, g}] sobre el conjunto de validación (g nunca entró a la red).
+        const FairnessAuditor = ({ preds, costoFN, setCostoFN }) => {
+            const [umbral, setUmbral] = useState(0.5);
+            if (!preds || preds.length < 4) return null;
+            const stats = (g) => {
+                const sub = preds.filter(p => p.g === g);
+                let TP = 0, FP = 0, FN = 0, TN = 0;
+                for (const p of sub) { const yhat = p.prob >= umbral ? 1 : 0; if (p.t === 1 && yhat === 1) TP++; else if (p.t === 0 && yhat === 1) FP++; else if (p.t === 1 && yhat === 0) FN++; else TN++; }
+                const n = sub.length;
+                return { TP, FP, FN, TN, n, fnr: (FN + TP) > 0 ? FN / (FN + TP) : null, fpr: (FP + TN) > 0 ? FP / (FP + TN) : null, acc: n > 0 ? (TP + TN) / n : null };
+            };
+            const A = stats(0), B = stats(1);
+            const pct = v => v == null ? '—' : `${Math.round(v * 100)}%`;
+            const brechaFNR = (A.fnr != null && B.fnr != null) ? Math.abs(A.fnr - B.fnr) : null;
+            const matriz = (S, nombre, color) => (
+                <div className="rounded-lg border-2 p-2" style={{ borderColor: color }}>
+                    <div className="text-xs font-bold mb-1" style={{ color }}>Subgrupo {nombre} <span className="text-gray-400 font-normal">(n={S.n})</span></div>
+                    <div className="grid gap-1 text-[0.62rem]" style={{ gridTemplateColumns: 'auto 1fr 1fr' }}>
+                        <div></div><div className="text-center font-semibold text-gray-500">Pred +</div><div className="text-center font-semibold text-gray-500">Pred −</div>
+                        <div className="font-semibold text-gray-500 flex items-center">Real +</div>
+                        <div className="rounded text-center py-1 font-bold" style={{ background: '#F0FDF4', color: '#15803D' }}>VP {S.TP}</div>
+                        <div className="rounded text-center py-1 font-bold" style={{ background: '#FEF2F2', color: '#B91C1C' }}>FN {S.FN}</div>
+                        <div className="font-semibold text-gray-500 flex items-center">Real −</div>
+                        <div className="rounded text-center py-1 font-bold" style={{ background: '#FFFBEB', color: '#B45309' }}>FP {S.FP}</div>
+                        <div className="rounded text-center py-1 font-bold" style={{ background: '#F0FDF4', color: '#15803D' }}>VN {S.TN}</div>
+                    </div>
+                    <div className="text-[0.62rem] text-gray-600 mt-1 flex justify-between"><span>Exac. {pct(S.acc)}</span><span style={{ color: '#B91C1C' }}>FNR {pct(S.fnr)}</span><span style={{ color: '#B45309' }}>FPR {pct(S.fpr)}</span></div>
+                </div>
+            );
+            return (
+                <div className="px-5 pb-5">
+                    <div className="rounded-xl border-2 border-dashed p-4" style={{ borderColor: '#3D008D' }}>
+                        <div className="flex items-center gap-2 mb-1 flex-wrap"><i className="fas fa-scale-balanced text-primary"></i><span className="text-sm font-bold text-navy">Auditor de Equidad</span><span className="text-[0.55rem] font-bold text-white px-1.5 py-0.5 rounded-full" style={{ background: '#3D008D' }}>NUEVO · Cap 5 · ética</span></div>
+                        <p className="text-[0.72rem] text-gray-600 mb-3">El atributo protegido <strong>g</strong> (subgrupo A/B) <strong>no entra</strong> en la red; solo particiona la evaluación. Aun así, el modelo trata sistemáticamente peor al subgrupo con más ruido: el <strong>sesgo se hereda de los datos</strong>.</p>
+                        <div className="grid sm:grid-cols-2 gap-3">{matriz(A, 'A', '#15803D')}{matriz(B, 'B', '#B45309')}</div>
+                        <div className="mt-3">
+                            <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1"><span>Umbral de decisión <span className="text-gray-400">(local al auditor; no afecta la frontera)</span></span><span className="text-primary">{umbral.toFixed(2)}</span></div>
+                            <input type="range" min="0.05" max="0.95" step="0.05" value={umbral} onChange={e => setUmbral(+e.target.value)} className="usta-range" aria-label="Umbral de decisión del auditor" />
+                        </div>
+                        <div className="mt-3 rounded-lg p-3 text-[0.78rem]" style={{ background: '#FAF5FF', border: '1px solid rgba(61,0,141,0.15)' }}>
+                            <strong className="text-navy">Veredicto:</strong> con el umbral en {umbral.toFixed(2)}, el modelo deja sin alerta (falso negativo) al <strong style={{ color: '#B91C1C' }}>{pct(B.fnr)}</strong> de los casos positivos del <strong>subgrupo B</strong>, frente al <strong style={{ color: '#15803D' }}>{pct(A.fnr)}</strong> del subgrupo A{brechaFNR != null ? <> — una <strong>brecha de oportunidad de {Math.round(brechaFNR * 100)} puntos</strong>.</> : '.'}
+                        </div>
+                        <div className="mt-3 flex items-center justify-between gap-2 flex-wrap">
+                            <span className="text-[0.76rem] text-gray-700"><strong>Costo del error:</strong> penalizar el falso negativo <strong>6×</strong> (recall sobre exactitud). Tras activarlo, <strong>reinicia los pesos y reentrena</strong>.</span>
+                            <button onClick={() => setCostoFN(!costoFN)} className="px-3 py-1 rounded-full text-xs font-bold transition-all" style={costoFN ? { background: '#3D008D', color: '#fff' } : { background: '#F1F5F9', color: '#475569' }}>{costoFN ? 'Activado' : 'Desactivado'}</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        const RedFrontera = ({ chapter = 2 }) => {
             // --- Configuración de la arquitectura (estado de la UI) ---
             const [dataset, setDataset] = useState('lunas');        // 'lunas' | 'circulos'
             const [nCapas, setNCapas] = useState(2);                // capas ocultas: 1..3
@@ -1706,6 +1757,10 @@ modelo = nn.Sequential(
             const [corriendo, setCorriendo] = useState(false);      // animación activa
             const [metricas, setMetricas] = useState({ epoca: 0, perdida: NaN, acc: 0 });
             const [hayCongelada, setHayCongelada] = useState(false);
+            const [optim, setOptim] = useState('sgd');             // 'sgd' | 'momentum' | 'adam'  (revelado en Cap 3+)
+            const [lambda, setLambda] = useState(0);               // regularización L2 (revelado en Cap 5)
+            const [dropout, setDropout] = useState(0);             // dropout en capas ocultas (revelado en Cap 5)
+            const [costoFN, setCostoFN] = useState(false);         // ponderar el costo del falso negativo (Cap 5 ética)
 
             const lr = Math.pow(10, -3 + 3 * lrExp);                // escala logarítmica: 0.001 .. 1.0
 
@@ -1720,6 +1775,14 @@ modelo = nn.Sequential(
             const corriendoRef = useRef(false); // espejo de `corriendo` para el bucle
             const epocaRef = useRef(0);
             const lrRef = useRef(lr);
+            const curvaCanvasRef = useRef(null);  // sparkline de la pérdida (Cap 3+)
+            const lossHistRef = useRef([]);        // historial de pérdida por época
+            const optimRef = useRef('sgd');        // espejo de `optim` para el bucle (Cap 3+)
+            const linternaRef = useRef({ prog: 0, raf: null, gradNorm: null });  // estado del "modo linterna" (Cap 4)
+            const lambdaRef = useRef(0), dropoutRef = useRef(0);   // espejos de λ y dropout para el bucle (Cap 5)
+            const classWRef = useRef([1, 1]);      // pesos de clase [neg, pos] para el bucle (Cap 5 ética)
+            const valRef = useRef([]);             // conjunto de validación (Cap 5)
+            const valHistRef = useRef([]);         // historial de pérdida de validación (Cap 5)
 
             const DOM = 3.5;     // dominio del mundo: [-DOM, DOM] en X e Y
             const RES = 56;      // resolución del mapa de calor (RES×RES predicciones)
@@ -1737,21 +1800,25 @@ modelo = nn.Sequential(
                 while (v === 0) v = Math.random();
                 return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
             };
-            const genLunas = (n = 220, ruido = 0.18) => {   // dos medias lunas entrelazadas
+            // conG=true (Cap 5 ética): añade el atributo protegido g (0=A, 1=B). El subgrupo B lleva MÁS ruido →
+            // el modelo hereda un sesgo observable. g NUNCA entra en X (forward sigue usando solo x,y).
+            const genLunas = (n = 220, ruido = 0.18, conG = false) => {   // dos medias lunas entrelazadas
                 const pts = [], m = n / 2;
+                const mk = (bx, by, cls) => { const g = conG ? (Math.random() < 0.5 ? 1 : 0) : 0; const r = ruido * (conG && g ? 2.0 : 1); return { x: bx + gauss() * r, y: by + gauss() * r, t: cls, g }; };
                 for (let i = 0; i < m; i++) {
                     const t = Math.PI * i / m;
-                    pts.push({ x: (Math.cos(t) - 0.5) * 1.9 + gauss() * ruido, y: (Math.sin(t) - 0.25) * 1.9 + gauss() * ruido, t: 0 });
-                    pts.push({ x: (1 - Math.cos(t) - 0.5) * 1.9 + gauss() * ruido, y: (0.5 - Math.sin(t) - 0.25) * 1.9 + gauss() * ruido, t: 1 });
+                    pts.push(mk((Math.cos(t) - 0.5) * 1.9, (Math.sin(t) - 0.25) * 1.9, 0));
+                    pts.push(mk((1 - Math.cos(t) - 0.5) * 1.9, (0.5 - Math.sin(t) - 0.25) * 1.9, 1));
                 }
                 return pts;
             };
-            const genCirculos = (n = 220, ruido = 0.14) => {  // dos anillos concéntricos
+            const genCirculos = (n = 220, ruido = 0.14, conG = false) => {  // dos anillos concéntricos
                 const pts = [], m = n / 2;
+                const mk = (bx, by, cls) => { const g = conG ? (Math.random() < 0.5 ? 1 : 0) : 0; const r = ruido * (conG && g ? 2.2 : 1); return { x: bx + gauss() * r, y: by + gauss() * r, t: cls, g }; };
                 for (let i = 0; i < m; i++) {
                     const t = 2 * Math.PI * i / m;
-                    pts.push({ x: 2.4 * Math.cos(t) + gauss() * ruido, y: 2.4 * Math.sin(t) + gauss() * ruido, t: 0 });
-                    pts.push({ x: 1.1 * Math.cos(t) + gauss() * ruido, y: 1.1 * Math.sin(t) + gauss() * ruido, t: 1 });
+                    pts.push(mk(2.4 * Math.cos(t), 2.4 * Math.sin(t), 0));
+                    pts.push(mk(1.1 * Math.cos(t), 1.1 * Math.sin(t), 1));
                 }
                 return pts;
             };
@@ -1774,7 +1841,10 @@ modelo = nn.Sequential(
                     }
                     W.push(Wl); b.push(bl);
                 }
-                return { sizes, W, b, act: activacion };
+                // Acumuladores del optimizador (velocidad de Momentum; momentos de Adam), con la forma de W y b.
+                const cerosW = () => W.map(Wl => Wl.map(r => r.map(() => 0)));
+                const cerosB = () => b.map(bl => bl.map(() => 0));
+                return { sizes, W, b, act: activacion, velW: cerosW(), velB: cerosB(), mW: cerosW(), sW: cerosW(), mB: cerosB(), sB: cerosB(), t: 0 };
             };
 
             // ===== Forward pass: devuelve la activación de CADA capa =====
@@ -1796,14 +1866,44 @@ modelo = nn.Sequential(
             };
 
             // ===== Backward pass + actualización (descenso del gradiente, full-batch) =====
-            const entrenarEpoca = (red, datos, tasa) => {
+            // ===== Acumulación de gradientes (forward + backward, full-batch), SEPARADA del paso del
+            //       optimizador para poder leer las NORMAS por capa (Cap 4) sin alterar el entrenamiento =====
+            const acumularGradientes = (red, datos, dropout = 0, classW = [1, 1]) => {
                 const { W, b } = red;
                 const gW = W.map(Wl => Wl.map(row => row.map(() => 0)));   // gradientes acumulados
                 const gB = b.map(bl => bl.map(() => 0));
+                if (dropout > 0) {
+                    // Dropout (Cap 5): máscara por época sobre capas OCULTAS; inverted dropout (escala 1/(1-p)).
+                    // Solo en entrenamiento; la inferencia (evaluar/predecirGrilla) NO lleva dropout → es determinista.
+                    const keep = 1 - dropout;
+                    const masks = red.sizes.map((n, idx) => (idx > 0 && idx < red.sizes.length - 1)
+                        ? Array.from({ length: n }, () => Math.random() < dropout ? 0 : 1 / keep) : null);
+                    for (const p of datos) {
+                        let aM = [p.x, p.y]; const aRawL = [aM], aMaskL = [aM];   // activación cruda y enmascarada por capa
+                        for (let l = 0; l < W.length; l++) {
+                            const esSal = l === W.length - 1;
+                            const aRaw = b[l].map((bj, j) => { let z = bj; const wj = W[l][j]; for (let i = 0; i < aM.length; i++) z += wj[i] * aM[i]; return esSal ? sigmoide(z) : activar[red.act](z); });
+                            const m = masks[l + 1];
+                            const aMask = m ? aRaw.map((v, i) => v * m[i]) : aRaw;
+                            aRawL.push(aRaw); aMaskL.push(aMask); aM = aMask;
+                        }
+                        let delta = [classW[p.t] * (aMaskL[aMaskL.length - 1][0] - p.t)];
+                        for (let l = W.length - 1; l >= 0; l--) {
+                            const aPrev = aMaskL[l];
+                            for (let j = 0; j < W[l].length; j++) { gB[l][j] += delta[j]; for (let i = 0; i < aPrev.length; i++) gW[l][j][i] += delta[j] * aPrev[i]; }
+                            if (l > 0) {
+                                const nuevo = new Array(aPrev.length).fill(0), m = masks[l];
+                                for (let i = 0; i < aPrev.length; i++) { let s = 0; for (let j = 0; j < W[l].length; j++) s += delta[j] * W[l][j][i]; nuevo[i] = s * dActivar[red.act](aRawL[l][i]) * (m ? m[i] : 1); }
+                                delta = nuevo;
+                            }
+                        }
+                    }
+                    return { gW, gB };
+                }
                 for (const p of datos) {
                     const acts = adelante(red, p.x, p.y);
                     // delta de la capa de salida: con BCE + sigmoide se simplifica a (â - y)
-                    let delta = [acts[acts.length - 1][0] - p.t];
+                    let delta = [classW[p.t] * (acts[acts.length - 1][0] - p.t)];
                     for (let l = W.length - 1; l >= 0; l--) {
                         const aPrev = acts[l];                          // entrada de la capa l
                         for (let j = 0; j < W[l].length; j++) {
@@ -1821,12 +1921,42 @@ modelo = nn.Sequential(
                         }
                     }
                 }
+                return { gW, gB };
+            };
+
+            // Norma L2 del gradiente MEDIO de cada capa de conexiones (alimenta el "modo linterna" del Cap 4)
+            const normaDeCapa = (gW, N) => gW.map(Wl => Math.sqrt(Wl.reduce((s, row) => s + row.reduce((a, w) => a + w * w, 0), 0)) / N);
+            const normasGradiente = (red, datos) => normaDeCapa(acumularGradientes(red, datos).gW, Math.max(1, datos.length));
+
+            const entrenarEpoca = (red, datos, tasa, optim = 'sgd', beta = 0.9, lambda = 0, dropout = 0, classW = [1, 1]) => {
+                const { W, b } = red;
+                const { gW, gB } = acumularGradientes(red, datos, dropout, classW);
                 const N = datos.length;                                  // promedio del gradiente y paso
+                const b1 = 0.9, b2 = 0.999, eps = 1e-8;                  // hiperparámetros de Adam
+                red.t = (red.t || 0) + 1;
+                const c1 = 1 - Math.pow(b1, red.t), c2 = 1 - Math.pow(b2, red.t);   // corrección de sesgo de Adam
                 for (let l = 0; l < W.length; l++)
                     for (let j = 0; j < W[l].length; j++) {
-                        b[l][j] -= tasa * gB[l][j] / N;
-                        for (let i = 0; i < W[l][j].length; i++) W[l][j][i] -= tasa * gW[l][j][i] / N;
+                        // --- sesgo ---
+                        let g = gB[l][j] / N;
+                        if (optim === 'momentum') { red.velB[l][j] = beta * red.velB[l][j] - tasa * g; b[l][j] += red.velB[l][j]; }
+                        else if (optim === 'adam') {
+                            red.mB[l][j] = b1 * red.mB[l][j] + (1 - b1) * g;
+                            red.sB[l][j] = b2 * red.sB[l][j] + (1 - b2) * g * g;
+                            b[l][j] -= tasa * (red.mB[l][j] / c1) / (Math.sqrt(red.sB[l][j] / c2) + eps);
+                        } else b[l][j] -= tasa * g;                       // sgd (idéntico al comportamiento previo)
+                        // --- pesos ---
+                        for (let i = 0; i < W[l][j].length; i++) {
+                            g = gW[l][j][i] / N + lambda * W[l][j][i];   // + término L2 (decaimiento de pesos)
+                            if (optim === 'momentum') { red.velW[l][j][i] = beta * red.velW[l][j][i] - tasa * g; W[l][j][i] += red.velW[l][j][i]; }
+                            else if (optim === 'adam') {
+                                red.mW[l][j][i] = b1 * red.mW[l][j][i] + (1 - b1) * g;
+                                red.sW[l][j][i] = b2 * red.sW[l][j][i] + (1 - b2) * g * g;
+                                W[l][j][i] -= tasa * (red.mW[l][j][i] / c1) / (Math.sqrt(red.sW[l][j][i] / c2) + eps);
+                            } else W[l][j][i] -= tasa * g;
+                        }
                     }
+                red.gradNorm = normaDeCapa(gW, N);   // normas por capa, para el diagrama del Cap 4
             };
 
             // ===== Pérdida (BCE) y precisión sobre todo el conjunto =====
@@ -1900,7 +2030,7 @@ modelo = nn.Sequential(
                     ctx.fillStyle = p.t === 0 ? '#CBB6FF' : '#FF9DC8';
                     ctx.fill(); ctx.lineWidth = 1.4; ctx.strokeStyle = 'rgba(5,8,18,0.85)'; ctx.stroke();
                 }
-                pintarRed();   // mantener el diagrama de la red sincronizado con el estado actual
+                (chapter === 4 ? pintarLinterna() : pintarRed());   // Cap 4: linterna de gradientes; resto (incl. Cap 5): diagrama de pesos
             };
 
             // ===== Diagrama del "estado de la red": neuronas por capa y conexiones coloreadas por peso =====
@@ -1960,14 +2090,115 @@ modelo = nn.Sequential(
                 for (let l = 1; l < L - 1; l++) ctx.fillText('Oculta ' + l, xs[l], Hd - 8);
             };
 
+            // ===== "Modo linterna" (Cap 4): anima el flujo forward → pausa → backward sobre el diagrama;
+            //       en el backward, el grosor de cada capa ∝ su norma de gradiente (desvanecimiento visible) =====
+            const faseLinterna = (prog, nConn) => prog < nConn ? 'forward' : (prog < nConn + 1 ? 'pausa' : 'backward');
+            const pintarLinterna = () => {
+                const cv = redCanvasRef.current, red = redRef.current;
+                if (!cv || !red) return;
+                const ctx = cv.getContext('2d'), Wd = cv.width, Hd = cv.height;
+                ctx.clearRect(0, 0, Wd, Hd);
+                const sz = red.sizes, L = sz.length, padX = 52, padY = 30;
+                const maxN = Math.max(...sz);
+                const r = Math.max(5, Math.min(12, (Hd - 2 * padY) / (maxN * 2.3)));
+                const xs = sz.map((_, i) => padX + (Wd - 2 * padX) * (L === 1 ? 0.5 : i / (L - 1)));
+                const ys = sz.map(n => Array.from({ length: n }, (_, j) => padY + (Hd - 2 * padY) * (n === 1 ? 0.5 : j / (n - 1))));
+                const lin = linternaRef.current, nConn = red.W.length;
+                const fase = faseLinterna(lin.prog, nConn);
+                const activa = fase === 'forward' ? Math.floor(lin.prog)
+                    : fase === 'backward' ? nConn - 1 - Math.floor(lin.prog - (nConn + 1)) : -1;
+                const gn = lin.gradNorm || red.gradNorm || sz.slice(1).map(() => 1);
+                const gmax = Math.max(1e-12, ...gn);
+                // 1) todas las conexiones, como "fantasma" tenue
+                for (let l = 0; l < nConn; l++) {
+                    const Wl = red.W[l];
+                    for (let j = 0; j < Wl.length; j++) for (let i = 0; i < Wl[j].length; i++) {
+                        ctx.beginPath(); ctx.moveTo(xs[l], ys[l][i]); ctx.lineTo(xs[l + 1], ys[l + 1][j]);
+                        ctx.strokeStyle = 'rgba(120,120,140,0.10)'; ctx.lineWidth = 1; ctx.stroke();
+                    }
+                }
+                // 2) capa activa: azul plena en forward; rosa con intensidad ∝ gradiente en backward
+                if (activa >= 0) {
+                    const Wl = red.W[activa], esFwd = fase === 'forward';
+                    const rel = esFwd ? 1 : (gn[activa] / gmax), col = esFwd ? '59,130,246' : '237,30,121';
+                    for (let j = 0; j < Wl.length; j++) for (let i = 0; i < Wl[j].length; i++) {
+                        ctx.beginPath(); ctx.moveTo(xs[activa], ys[activa][i]); ctx.lineTo(xs[activa + 1], ys[activa + 1][j]);
+                        ctx.strokeStyle = `rgba(${col},${0.12 + 0.85 * rel})`; ctx.lineWidth = 0.5 + 4 * rel; ctx.stroke();
+                    }
+                }
+                // 3) neuronas
+                for (let l = 0; l < L; l++) {
+                    const esEnt = l === 0, esSal = l === L - 1;
+                    for (let j = 0; j < sz[l]; j++) {
+                        ctx.beginPath(); ctx.arc(xs[l], ys[l][j], r, 0, 2 * Math.PI);
+                        ctx.fillStyle = esEnt ? '#001A4D' : esSal ? '#15803D' : '#3D008D'; ctx.fill();
+                        ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke();
+                    }
+                }
+                // 4) etiqueta de la fase
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '700 12px Montserrat';
+                ctx.fillStyle = fase === 'forward' ? '#3b82f6' : fase === 'backward' ? '#ED1E79' : '#94A3B8';
+                ctx.fillText(fase === 'forward' ? '▶  Hacia adelante: la predicción fluye'
+                    : fase === 'backward' ? '◀  Retropropagación: grosor ∝ gradiente de la capa'
+                        : '·  ·  ·', Wd / 2, 14);
+            };
+            const avanzarLinterna = () => {
+                const red = redRef.current; if (!red) return;
+                const lin = linternaRef.current, nConn = red.W.length, total = 2 * nConn + 1;
+                const antes = faseLinterna(lin.prog, nConn);
+                lin.prog += 0.05; if (lin.prog >= total) lin.prog = 0;
+                if (faseLinterna(lin.prog, nConn) === 'backward' && antes !== 'backward') lin.gradNorm = red.gradNorm || normasGradiente(red, datosRef.current);
+                pintarLinterna();
+            };
+            const pasoLinterna = () => {
+                if (chapter !== 4 || !redRef.current || !redCanvasRef.current) { linternaRef.current.raf = null; return; }
+                avanzarLinterna();
+                linternaRef.current.raf = requestAnimationFrame(pasoLinterna);
+            };
+
+            // ===== Sparkline de la pérdida a lo largo de las épocas (visible en Cap 3+) =====
+            const pintarCurva = () => {
+                const cv = curvaCanvasRef.current; if (!cv) return;
+                const ctx = cv.getContext('2d'), Wd = cv.width, Hd = cv.height;
+                ctx.clearRect(0, 0, Wd, Hd);
+                const h = lossHistRef.current, hv = (chapter >= 5 ? valHistRef.current : []);
+                const padL = 36, padT = 8, padR = 8, padB = 16;
+                const plotW = Wd - padL - padR, plotH = Hd - padT - padB;
+                ctx.strokeStyle = '#E2E8F0'; ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, padT + plotH); ctx.lineTo(padL + plotW, padT + plotH); ctx.stroke();
+                ctx.fillStyle = '#94A3B8'; ctx.font = '9px Montserrat'; ctx.textBaseline = 'middle';
+                if (h.length < 2) { ctx.textAlign = 'center'; ctx.fillText('Pulsa «Entrenar» para ver caer la pérdida', Wd / 2, Hd / 2); return; }
+                let lo = Infinity, hi = -Infinity;
+                for (const v of h) { if (v < lo) lo = v; if (v > hi) hi = v; }
+                for (const v of hv) { if (v < lo) lo = v; if (v > hi) hi = v; }
+                if (hi - lo < 1e-9) hi = lo + 1e-9;
+                const Y = v => padT + plotH * (1 - (v - lo) / (hi - lo));
+                const traza = (arr, color) => {
+                    const n = arr.length; if (n < 2) return;
+                    ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath();
+                    for (let i = 0; i < n; i++) { const x = padL + plotW * (i / (n - 1)), y = Y(arr[i]); if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); }
+                    ctx.stroke();
+                };
+                ctx.textAlign = 'right';
+                ctx.fillText(hi.toFixed(2), padL - 4, padT);
+                ctx.fillText(lo.toFixed(2), padL - 4, padT + plotH);
+                traza(h, '#ED1E79');                          // entrenamiento (rosa)
+                if (hv.length >= 2) traza(hv, '#3D008D');      // validación (morado) — la «U»
+                ctx.fillStyle = '#64748B'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+                ctx.fillText(hv.length >= 2 ? 'BCE — rosa: entrenamiento · morado: validación (la «U»)' : 'Pérdida (BCE) vs. época', padL + plotW / 2, Hd - 3);
+            };
+
             // ===== Bucle de entrenamiento animado =====
             const bucle = () => {
                 const red = redRef.current;
                 if (!red || !corriendoRef.current) return;
-                for (let e = 0; e < 3; e++) { entrenarEpoca(red, datosRef.current, lrRef.current); epocaRef.current++; }
+                for (let e = 0; e < 3; e++) { entrenarEpoca(red, datosRef.current, lrRef.current, optimRef.current, 0.9, lambdaRef.current, dropoutRef.current, classWRef.current); epocaRef.current++; }
                 pintar();
                 const { perdida, acc } = evaluar(red, datosRef.current);
+                if (isFinite(perdida)) lossHistRef.current.push(perdida);
+                if (valRef.current.length) { const ve = evaluar(red, valRef.current); if (isFinite(ve.perdida)) valHistRef.current.push(ve.perdida); }
                 setMetricas({ epoca: epocaRef.current, perdida, acc });
+                pintarCurva();
                 if (corriendoRef.current) animRef.current = requestAnimationFrame(bucle);
             };
 
@@ -1983,25 +2214,138 @@ modelo = nn.Sequential(
                 detener();
                 redRef.current = crearRed();
                 epocaRef.current = 0;
+                lossHistRef.current = []; valHistRef.current = [];
                 if (datosRef.current.length) setMetricas({ epoca: 0, ...evaluar(redRef.current, datosRef.current) });
-                pintar();
+                pintar(); pintarCurva();
             };
             const congelar = () => { congeladaRef.current = predecirGrilla(redRef.current); setHayCongelada(true); pintar(); };
             const limpiar = () => { congeladaRef.current = null; setHayCongelada(false); pintar(); };
 
             // Regenerar datos al cambiar de conjunto
-            useEffect(() => { datosRef.current = dataset === 'lunas' ? genLunas() : genCirculos(); reconstruir(); }, [dataset]);
-            // Reconstruir la red al cambiar la arquitectura (capas, nodos o activación)
-            useEffect(() => { reconstruir(); }, [nCapas, nNodos, activacion]);
+            useEffect(() => {
+                if (chapter >= 5) {                       // Cap 5: datos MÁS RUIDOSOS (clases solapadas) + split train/val 70/30
+                    const all = dataset === 'lunas' ? genLunas(280, 0.42, true) : genCirculos(280, 0.34, true);
+                    const sh = all.slice(); for (let i = sh.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = sh[i]; sh[i] = sh[j]; sh[j] = t; }
+                    const cut = Math.floor(sh.length * 0.7);
+                    datosRef.current = sh.slice(0, cut); valRef.current = sh.slice(cut);
+                } else { datosRef.current = dataset === 'lunas' ? genLunas() : genCirculos(); valRef.current = []; }
+                reconstruir();
+            }, [dataset]);
+            // Reconstruir la red al cambiar la arquitectura (capas, nodos, activación u optimizador)
+            useEffect(() => { optimRef.current = optim; reconstruir(); }, [nCapas, nNodos, activacion, optim]);
             // La tasa de aprendizaje se ajusta en caliente, sin reiniciar
             useEffect(() => { lrRef.current = lr; }, [lr]);
+            // λ (L2) y dropout se ajustan en caliente (Cap 5)
+            useEffect(() => { lambdaRef.current = lambda; }, [lambda]);
+            useEffect(() => { dropoutRef.current = dropout; }, [dropout]);
+            useEffect(() => { classWRef.current = costoFN ? [1, 6] : [1, 1]; }, [costoFN]);
+            // "Modo linterna" del Cap 4: anima el flujo de gradientes de forma continua
+            useEffect(() => {
+                if (chapter !== 4) return;
+                const lin = linternaRef.current; lin.prog = 0;
+                if (redRef.current && datosRef.current.length) lin.gradNorm = normasGradiente(redRef.current, datosRef.current);
+                pasoLinterna();
+                return () => { if (lin.raf) cancelAnimationFrame(lin.raf); lin.raf = null; };
+            }, [chapter]);
             // Limpieza al desmontar
             useEffect(() => () => { corriendoRef.current = false; if (animRef.current) cancelAnimationFrame(animRef.current); }, []);
+            // Arnés de verificación (no altera el uso normal): expone estado + un paso síncrono para preview_eval
+            useEffect(() => {
+                window.__nnlab = {
+                    chapter, epoca: metricas.epoca, perdida: metricas.perdida, acc: metricas.acc,
+                    n: lossHistRef.current.length, lossHist: lossHistRef.current,
+                    _step: (k = 1) => {
+                        k = Math.min(k, 5000);   // tope defensivo (arnés de consola)
+                        for (let i = 0; i < k; i++) {
+                            entrenarEpoca(redRef.current, datosRef.current, lrRef.current, optimRef.current, 0.9, lambdaRef.current, dropoutRef.current, classWRef.current); epocaRef.current++;
+                            const { perdida } = evaluar(redRef.current, datosRef.current);
+                            if (isFinite(perdida)) lossHistRef.current.push(perdida);
+                            if (valRef.current.length) { const ve = evaluar(redRef.current, valRef.current); if (isFinite(ve.perdida)) valHistRef.current.push(ve.perdida); }
+                        }
+                        pintar(); pintarCurva();
+                        const r = evaluar(redRef.current, datosRef.current);
+                        setMetricas({ epoca: epocaRef.current, ...r });
+                        return { epoca: epocaRef.current, ...r, n: lossHistRef.current.length };
+                    },
+                    _reset: () => reconstruir(),
+                    optim: optimRef.current,
+                    // Verificación del optimizador sobre clones de UNA misma red base (comparación justa, sin azar entre corridas):
+                    _optimCheck: (k = 40) => {
+                        k = Math.min(k, 5000);
+                        const clon = () => JSON.parse(JSON.stringify(redRef.current));
+                        const correr = (net, op, be) => { for (let i = 0; i < k; i++) entrenarEpoca(net, datosRef.current, lrRef.current, op, be); return net; };
+                        const A = correr(clon(), 'sgd', 0), B = correr(clon(), 'momentum', 0);
+                        let maxDiff = 0;
+                        for (let l = 0; l < A.W.length; l++) for (let j = 0; j < A.W[l].length; j++) for (let i = 0; i < A.W[l][j].length; i++) maxDiff = Math.max(maxDiff, Math.abs(A.W[l][j][i] - B.W[l][j][i]));
+                        const AD = correr(clon(), 'adam', 0.95);
+                        let adamNaN = false;
+                        for (const Wl of AD.W) for (const row of Wl) for (const w of row) if (!isFinite(w)) adamNaN = true;
+                        return { sgdVsMomentumBeta0_maxDiff: maxDiff, adamNaN_beta095: adamNaN };
+                    },
+                    _compareOptims: (thr = 0.3, maxEp = 600) => {
+                        maxEp = Math.min(maxEp, 3000);
+                        const base = crearRed();
+                        const epocasHasta = (op) => { const net = JSON.parse(JSON.stringify(base)); for (let e = 1; e <= maxEp; e++) { entrenarEpoca(net, datosRef.current, lrRef.current, op, 0.9); if (evaluar(net, datosRef.current).perdida < thr) return e; } return -1; };
+                        return { thr, sgd: epocasHasta('sgd'), momentum: epocasHasta('momentum'), adam: epocasHasta('adam') };
+                    },
+                    // --- Cap 4: linterna de gradientes ---
+                    linterna: { prog: linternaRef.current.prog, gradNorm: linternaRef.current.gradNorm },
+                    _advanceLinterna: (k = 1) => { for (let i = 0; i < k; i++) avanzarLinterna(); const nConn = redRef.current.W.length; return { prog: linternaRef.current.prog, fase: faseLinterna(linternaRef.current.prog, nConn) }; },
+                    _gradNorms: () => normasGradiente(redRef.current, datosRef.current),
+                    // Desvanecimiento: con LOS MISMOS pesos, sigmoide atenúa el gradiente hacia la entrada mucho más que ReLU.
+                    _vanishingCheck: () => {
+                        const base = JSON.parse(JSON.stringify(redRef.current));
+                        const conAct = (act) => { const g = normasGradiente({ ...base, act }, datosRef.current); return { porCapa: g, ratioEntradaSalida: g[0] / g[g.length - 1] }; };
+                        return { sigmoide: conAct('sigmoide'), relu: conAct('relu') };
+                    },
+                    // --- Cap 5: validación, regularización ---
+                    nVal: valRef.current.length, valHist: valHistRef.current, lambda: lambdaRef.current, dropout: dropoutRef.current,
+                    _valLoss: () => valRef.current.length ? evaluar(redRef.current, valRef.current).perdida : null,
+                    // λ↑ ⇒ ‖W‖² final ↓ (misma red base, entrenada con Adam)
+                    _lambdaCheck: (ep = 300) => {
+                        ep = Math.min(ep, 3000);
+                        const base = crearRed();
+                        const norma2 = (net) => net.W.reduce((s, Wl) => s + Wl.reduce((a, row) => a + row.reduce((u, w) => u + w * w, 0), 0), 0);
+                        const correr = (lam) => { const net = JSON.parse(JSON.stringify(base)); for (let e = 0; e < ep; e++) entrenarEpoca(net, datosRef.current, lrRef.current, 'adam', 0.9, lam, 0); return +norma2(net).toFixed(3); };
+                        return { lambda0: correr(0), lambda001: correr(0.01), lambda01: correr(0.1) };
+                    },
+                    // Dropout solo en entrenamiento → la inferencia (evaluar) es determinista; sin NaN con p=0.5
+                    _dropoutDeterminista: () => {
+                        const net = crearRed();
+                        for (let e = 0; e < 30; e++) entrenarEpoca(net, datosRef.current, lrRef.current, 'sgd', 0.9, 0, 0.5);
+                        const a = evaluar(net, datosRef.current), b2 = evaluar(net, datosRef.current);
+                        let nan = false; for (const Wl of net.W) for (const row of Wl) for (const w of row) if (!isFinite(w)) nan = true;
+                        return { inferenciaDeterminista: a.perdida === b2.perdida && a.acc === b2.acc, sinNaNconP05: !nan };
+                    },
+                    // ¿Aparece la «U»? entrena (Adam) y reporta época del mínimo de validación y si repunta al final
+                    _uCheck: (ep = 500) => {
+                        ep = Math.min(ep, 3000);
+                        if (!valRef.current.length) return { hayVal: false };
+                        const net = crearRed(); const tr = [], va = [];
+                        for (let e = 0; e < ep; e++) { entrenarEpoca(net, datosRef.current, lrRef.current, 'adam', 0.9, 0, 0); tr.push(evaluar(net, datosRef.current).perdida); va.push(evaluar(net, valRef.current).perdida); }
+                        let mi = 0; for (let i = 1; i < va.length; i++) if (va[i] < va[mi]) mi = i;
+                        return { epocaMinVal: mi, valMin: +va[mi].toFixed(4), valFinal: +va[va.length - 1].toFixed(4), trainFinal: +tr[tr.length - 1].toFixed(4), hayU: mi < va.length - 1 && va[va.length - 1] > va[mi] * 1.03 };
+                    },
+                    // --- Cap 5 ética: auditoría de equidad por subgrupo g ---
+                    _fairness: (umbral = 0.5) => {
+                        if (!valRef.current.length) return { hayVal: false };
+                        const preds = valRef.current.map(p => { const a = adelante(redRef.current, p.x, p.y); return { prob: a[a.length - 1][0], t: p.t, g: p.g }; });
+                        const stat = (g) => { const sub = preds.filter(p => p.g === g); let TP = 0, FP = 0, FN = 0, TN = 0; for (const p of sub) { const y = p.prob >= umbral ? 1 : 0; if (p.t === 1 && y === 1) TP++; else if (p.t === 0 && y === 1) FP++; else if (p.t === 1 && y === 0) FN++; else TN++; } return { n: sub.length, suma: TP + FP + FN + TN, fnr: (FN + TP) > 0 ? FN / (FN + TP) : null, fpr: (FP + TN) > 0 ? FP / (FP + TN) : null }; };
+                        const A = stat(0), B = stat(1), gIn = valRef.current.some(p => p.g === 1);
+                        return { A, B, gExiste: gIn, sumaOk: A.suma === A.n && B.suma === B.n, brechaFNR: (A.fnr != null && B.fnr != null) ? +Math.abs(A.fnr - B.fnr).toFixed(3) : null };
+                    },
+                    _classW: () => classWRef.current,
+                };
+            });
 
             // Arquitectura y conteo de parámetros (pesos + sesgos) para mostrar
             const sizes = [2, ...Array(nCapas).fill(nNodos), 1];
             const nParams = sizes.slice(1).reduce((s, n, i) => s + sizes[i] * n + n, 0);
             const pillBtn = (activo) => `px-3 py-1 rounded-full text-xs font-bold transition-all ${activo ? 'usta-gradient text-white shadow' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`;
+            // Predicciones sobre validación para el Auditor de Equidad (Cap 5). g NUNCA entra en la red.
+            const valPreds = (chapter >= 5 && redRef.current && valRef.current.length)
+                ? valRef.current.map(p => { const a = adelante(redRef.current, p.x, p.y); return { prob: a[a.length - 1][0], t: p.t, g: p.g }; })
+                : null;
 
             return (
                 <div className="my-6 rounded-2xl overflow-hidden shadow-md border border-primary/15 bg-white not-prose">
@@ -2009,7 +2353,7 @@ modelo = nn.Sequential(
                         <span className="bg-white/20 rounded-lg p-2 text-white flex items-center justify-center flex-shrink-0"><i className="fas fa-vector-square"></i></span>
                         <div>
                             <div className="text-white font-bold text-base leading-tight">Laboratorio de fronteras de decisión</div>
-                            <div className="text-white/80 text-xs">Una red neuronal entrenándose desde cero, en vivo</div>
+                            <div className="text-white/80 text-xs">{chapter >= 3 ? 'Mira caer la curva de pérdida y experimenta con la tasa de aprendizaje' : 'Una red neuronal entrenándose desde cero, en vivo'}</div>
                         </div>
                     </div>
                     <div className="p-5 grid md:grid-cols-2 gap-5 items-start">
@@ -2051,6 +2395,39 @@ modelo = nn.Sequential(
                                 <input type="range" min="0" max="1" step="0.01" value={lrExp} onChange={e => setLrExp(+e.target.value)} className="usta-range" aria-label="Tasa de aprendizaje (escala logarítmica)" />
                                 <div className="flex justify-between text-[0.65rem] text-gray-400 mt-0.5"><span>0.001</span><span>escala logarítmica</span><span>1.0</span></div>
                             </div>
+                            {chapter >= 3 && (
+                                <div>
+                                    <div className="text-xs font-semibold text-gray-500 mb-1.5 flex items-center gap-2">
+                                        Optimizador
+                                        <span className="text-[0.58rem] font-bold text-white px-1.5 py-0.5 rounded-full" style={{ background: '#ED1E79' }}>NUEVO · Cap 3</span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        {[['sgd', 'SGD'], ['momentum', 'Momentum'], ['adam', 'Adam']].map(([k, lbl]) => (
+                                            <button key={k} onClick={() => setOptim(k)} className={pillBtn(optim === k)}>{lbl}</button>
+                                        ))}
+                                    </div>
+                                    <div className="text-[0.66rem] text-gray-500 mt-1">
+                                        {optim === 'sgd' ? 'Descenso simple: un paso fijo en contra del gradiente; zigzaguea en valles estrechos.'
+                                            : optim === 'momentum' ? 'Momentum (β = 0,9): acumula inercia y atraviesa los baches del paisaje.'
+                                                : 'Adam: paso adaptativo por parámetro (inercia + escala); suele converger en menos épocas.'}
+                                    </div>
+                                </div>
+                            )}
+                            {chapter >= 5 && (
+                                <div>
+                                    <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1">
+                                        <span className="flex items-center gap-2">Regularización L2 (λ) <span className="text-[0.55rem] font-bold text-white px-1.5 py-0.5 rounded-full" style={{ background: '#15803D' }}>NUEVO · Cap 5</span></span>
+                                        <span className="text-primary">{lambda.toFixed(3)}</span>
+                                    </div>
+                                    <input type="range" min="0" max="0.2" step="0.005" value={lambda} onChange={e => setLambda(+e.target.value)} className="usta-range" aria-label="Fuerza de regularización L2 (lambda)" />
+                                    <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1 mt-3">
+                                        <span className="flex items-center gap-2">Dropout (capas ocultas) <span className="text-[0.55rem] font-bold text-white px-1.5 py-0.5 rounded-full" style={{ background: '#15803D' }}>NUEVO · Cap 5</span></span>
+                                        <span className="text-primary">{Math.round(dropout * 100)}%</span>
+                                    </div>
+                                    <input type="range" min="0" max="0.9" step="0.05" value={dropout} onChange={e => setDropout(+e.target.value)} className="usta-range" aria-label="Probabilidad de dropout" />
+                                    <div className="text-[0.66rem] text-gray-500 mt-1">Sube la capacidad (nodos/capas) hasta <strong>sobreajustar</strong> y observa cómo <strong>λ</strong> y <strong>dropout</strong> reducen la brecha train/validación.</div>
+                                </div>
+                            )}
                             <div className="flex flex-wrap gap-2 pt-1">
                                 <button onClick={alternarEntrenar} className="px-3 py-1.5 rounded-lg text-xs font-bold text-white usta-gradient shadow hover:opacity-90 transition">
                                     <i className={`fas ${corriendo ? 'fa-pause' : 'fa-play'} mr-1`}></i>{corriendo ? 'Pausar' : (metricas.epoca > 0 ? 'Reanudar' : 'Entrenar')}
@@ -2083,6 +2460,12 @@ modelo = nn.Sequential(
                                 <span><span className="inline-block w-3 h-2 align-middle mr-1" style={{ background: '#D97706' }}></span>Frontera congelada</span>
                                 <span className="text-gray-400">Arquitectura {sizes.join('→')} · {nParams.toLocaleString('es-CO')} parámetros</span>
                             </div>
+                            {chapter >= 3 && (
+                                <div className="mt-3 rounded-lg border border-gray-200 bg-white p-2">
+                                    <div className="text-[0.7rem] font-bold text-navy mb-1 flex items-center gap-1"><i className="fas fa-chart-line text-secondary"></i>Curva de pérdida — la huella del descenso del gradiente</div>
+                                    <canvas ref={curvaCanvasRef} width={360} height={120} style={{ width: '100%', height: 'auto', display: 'block' }} aria-label="Curva de la pérdida BCE a lo largo de las épocas de entrenamiento" />
+                                </div>
+                            )}
                         </div>
                     </div>
                     {/* ---------- Estado de la red: diagrama de neuronas + explicación de componentes ---------- */}
@@ -2091,16 +2474,22 @@ modelo = nn.Sequential(
                             <div className="px-4 py-2 border-b border-gray-200 bg-white flex items-center gap-2 flex-wrap">
                                 <i className="fas fa-diagram-project text-primary"></i>
                                 <span className="text-xs font-bold text-navy">Estado de la red</span>
-                                <span className="text-[0.7rem] text-gray-400">— las conexiones son los pesos; se reajustan en cada época de entrenamiento</span>
+                                <span className="text-[0.7rem] text-gray-400">— {chapter === 4 ? 'el flujo recorre la red: azul hacia adelante, rosa la retropropagación' : 'las conexiones son los pesos; se reajustan en cada época de entrenamiento'}</span>
                             </div>
                             <div className="p-4 grid md:grid-cols-2 gap-4 items-center">
                                 {/* Diagrama de neuronas y conexiones */}
                                 <div className="rounded-lg border border-gray-200 bg-white p-2">
                                     <canvas ref={redCanvasRef} width={580} height={230} style={{ width: '100%', height: 'auto', display: 'block' }} aria-label="Diagrama de la red neuronal: neuronas por capa y conexiones (pesos)" />
                                     <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-[0.68rem] text-gray-500 mt-1">
-                                        <span><span className="inline-block w-4 align-middle mr-1" style={{ borderTop: '3px solid #7C4DC9' }}></span>Peso positivo</span>
-                                        <span><span className="inline-block w-4 align-middle mr-1" style={{ borderTop: '3px solid #ED1E79' }}></span>Peso negativo</span>
-                                        <span className="text-gray-400">grosor ∝ magnitud</span>
+                                        {chapter === 4 ? (<>
+                                            <span><span className="inline-block w-4 align-middle mr-1" style={{ borderTop: '3px solid #3b82f6' }}></span>Hacia adelante</span>
+                                            <span><span className="inline-block w-4 align-middle mr-1" style={{ borderTop: '3px solid #ED1E79' }}></span>Retropropagación</span>
+                                            <span className="text-gray-400">grosor ∝ gradiente de la capa</span>
+                                        </>) : (<>
+                                            <span><span className="inline-block w-4 align-middle mr-1" style={{ borderTop: '3px solid #7C4DC9' }}></span>Peso positivo</span>
+                                            <span><span className="inline-block w-4 align-middle mr-1" style={{ borderTop: '3px solid #ED1E79' }}></span>Peso negativo</span>
+                                            <span className="text-gray-400">grosor ∝ magnitud</span>
+                                        </>)}
                                     </div>
                                 </div>
                                 {/* Explicación de cada componente */}
@@ -2121,6 +2510,7 @@ modelo = nn.Sequential(
                             </div>
                         </div>
                     </div>
+                    {chapter >= 5 && <FairnessAuditor preds={valPreds} costoFN={costoFN} setCostoFN={setCostoFN} />}
                 </div>
             );
         };
@@ -2595,7 +2985,7 @@ modelo = nn.Sequential(
                     decisión</strong>. Conviene modificar la arquitectura y observar cómo esa frontera pasa de una recta rígida a
                     una curva capaz de envolver los datos.
                 </p>
-                <RedFrontera />
+                <RedFrontera chapter={2} />
                 <Box type="tip" label="Qué conviene observar en la frontera">
                     <ul>
                         <li>Con <strong>una sola capa y pocos nodos</strong>, la frontera es casi recta: no logra separar las lunas ni los círculos.</li>
@@ -3218,7 +3608,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                     en vivo, debería descender. En lugar de la frontera de decisión, la atención se centra ahora en esa curva de pérdida
                     y, sobre todo, en la <strong>tasa de aprendizaje</strong>.
                 </p>
-                <RedFrontera />
+                <RedFrontera chapter={3} />
                 <Box type="tip" label="Qué conviene observar (desde el Capítulo 3)">
                     <ul>
                         <li>Con una <strong>tasa de aprendizaje diminuta</strong> ({String.raw`\(\eta \approx 0.001\)`}), la pérdida baja con una lentitud exasperante: muchas épocas para avanzar muy poco.</li>
@@ -3456,6 +3846,26 @@ L = (a - 1.0) ** 2
 L.backward()        # autograd lee la bitácora al revés y aplica la regla de la cadena
 print(w.grad)       # tensor(0.) -> reproduce el cálculo a mano de arriba`;
 
+        const backpropNumpy = `import numpy as np
+
+# Mini-red:  x --[w1,b1]--> z1 --ReLU--> a1 --[w2,b2]--> z2 = y_hat ;  L = (y_hat - y)^2
+x, y = 2.0, 0.0
+w1, b1, w2, b2 = 0.5, 0.0, 2.0, 0.0
+
+# --- Forward (predicción) ---
+z1 = w1*x + b1                 # 1.0
+a1 = max(0.0, z1)              # ReLU -> 1.0
+z2 = w2*a1 + b2                # 2.0
+y_hat = z2                     # salida lineal -> 2.0
+L = (y_hat - y)**2            # (2 - 0)^2 = 4.0
+
+# --- Backward (recursión de delta, de atrás hacia adelante) ---
+d2 = 2*(y_hat - y)             # delta de salida = 4.0
+dW2, db2 = d2*a1, d2           # 4.0 , 4.0
+d1 = (w2*d2) * (1.0 if z1 > 0 else 0.0)   # delta oculta = (2*4)*1 = 8.0
+dW1, db1 = d1*x, d1            # 16.0 , 8.0
+print(dW1, dW2)               # -> 16.0  4.0  (la 1.ª capa recibe el mayor gradiente)`;
+
         const Cap4Section = () => (
             <div className="prose-usta">
                 <Box type="danger" label="El problema de la asignación de crédito">
@@ -3533,13 +3943,101 @@ print(w.grad)       # tensor(0.) -> reproduce el cálculo a mano de arriba`;
                 </Box>
                 <CodeBlock title="Regla de la cadena a mano (numpy)" code={chainNumpy} />
 
+                <h4>De la cadena escalar a la red: las ecuaciones del backprop</h4>
+                <p>
+                    Conviene separar dos cantidades en cada capa: la <strong>preactivación</strong> {String.raw`\(\mathbf{z}^{[l]}=\mathbf{W}^{[l]}\mathbf{a}^{[l-1]}+\mathbf{b}^{[l]}\)`}
+                    (la suma ponderada) y la <strong>activación</strong> {String.raw`\(\mathbf{a}^{[l]}=\sigma(\mathbf{z}^{[l]})\)`} (tras la no linealidad). La
+                    retropropagación define un vector de <strong>error por capa</strong> {String.raw`\(\delta^{[l]}=\partial L/\partial \mathbf{z}^{[l]}\)`}
+                    —cuánta responsabilidad del error carga la preactivación de esa capa— y lo calcula <strong>de atrás hacia adelante</strong> con tres reglas:
+                </p>
+                <Eq>{String.raw`$$ \delta^{[L]} = \nabla_{\mathbf{a}}L \;\odot\; \sigma'(\mathbf{z}^{[L]}) \qquad \text{(error en la salida)} $$`}</Eq>
+                <Eq>{String.raw`$$ \delta^{[l]} = \big((\mathbf{W}^{[l+1]})^{\top}\delta^{[l+1]}\big)\;\odot\;\sigma'(\mathbf{z}^{[l]}) \qquad \text{(propagar hacia atrás)} $$`}</Eq>
+                <Eq>{String.raw`$$ \frac{\partial L}{\partial \mathbf{W}^{[l]}} = \delta^{[l]}(\mathbf{a}^{[l-1]})^{\top}, \qquad \frac{\partial L}{\partial \mathbf{b}^{[l]}} = \delta^{[l]} $$`}</Eq>
+                <p>
+                    Es exactamente «el dominó», pero en matrices: {String.raw`\((\mathbf{W}^{[l+1]})^{\top}\delta^{[l+1]}\)`} reparte hacia atrás la
+                    responsabilidad de la capa siguiente, y el producto de Hadamard {String.raw`\(\odot\,\sigma'(\mathbf{z}^{[l]})\)`} la multiplica por el
+                    <strong> «factor de distorsión» local</strong> de la activación. Ese factor {String.raw`\(\sigma'(\mathbf{z}^{[l]})\)`} es la pieza decisiva: si es
+                    pequeño, la señal se apaga capa a capa. <em>Es el mismo cálculo que ejecuta el laboratorio de abajo en cada época.</em>
+                </p>
+                <Box type="info" label="Conexión con el Capítulo 3">
+                    Con <strong>salida sigmoide y pérdida BCE</strong> —el caso del laboratorio de clasificación— el primer renglón se simplifica
+                    al elegante {String.raw`\(\delta^{[L]}=\hat{\mathbf{y}}-\mathbf{y}\)`}: la derivada de la sigmoide y la de la BCE se
+                    cancelan. Por eso el «vector gigante de derivadas parciales» que dejó planteado el Capítulo 3 arranca, literalmente, de la diferencia
+                    entre lo predicho y lo real.
+                </Box>
+
                 <Box type="warn" label="Cuando la cadena se apaga: el desvanecimiento del gradiente">
                     El ejemplo anterior muestra el caso extremo: una ReLU apagada (factor 0) corta la cadena y anula por completo el
-                    gradiente. De forma más sutil, si la señal atraviesa muchas capas y cada una la multiplica por un factor local
+                    gradiente. De forma más sutil, si la señal atraviesa muchas capas y cada una la multiplica por su factor local {String.raw`\(\sigma'(z)\)`}
                     <strong> menor que 1</strong> —la sigmoide, por ejemplo, tiene una derivada máxima de 0,25—, el producto encadenado
                     se vuelve diminuto y las primeras capas apenas aprenden: es el <strong>desvanecimiento del gradiente</strong>,
                     anticipado en el Capítulo 1. ReLU, con derivada igual a 1 en su zona activa, lo mitiga (aunque a cambio arriesga
                     «morir» si una neurona queda apagada).
+                </Box>
+
+                <Box type="danger" label="El gemelo opuesto: la explosión del gradiente">
+                    Si en vez de atenuar, cada eslabón <strong>amplifica</strong> (factores locales mayores que 1, p. ej. pesos grandes), el
+                    producto encadenado <strong>crece sin control</strong>: los gradientes explotan, los pesos saltan a {String.raw`\(\pm\infty\)`} y la
+                    pérdida se vuelve <span className="inline-code">NaN</span>. Es típico de las redes recurrentes (Módulo 2). La cura habitual es el
+                    <strong> recorte de gradiente</strong> (<em>gradient clipping</em>): si la norma del gradiente supera un umbral, se reescala hacia
+                    abajo antes de dar el paso. <strong>Desvanecimiento</strong> y <strong>explosión</strong> son las dos caras de multiplicar muchos
+                    factores en cadena: el primero los hace {String.raw`\(\to 0\)`}; el segundo, {String.raw`\(\to\infty\)`}.
+                </Box>
+
+                <h3>Retropropaga a mano: una mini-red de dos capas</h3>
+                <p>
+                    El cálculo se vuelve mecánico al aplicar la recursión. Antes de ver la linterna animarlo, conviene hacerlo a mano
+                    <strong> una vez</strong> sobre la red más pequeña posible: una entrada, una neurona oculta (ReLU) y una salida lineal, con
+                    pérdida {String.raw`\(L=(\hat{y}-y)^2\)`}.
+                </p>
+                <Reto titulo="Reto · Retropropagación a mano (2 capas)"
+                    solucion={
+                        <div className="space-y-2 text-[0.95rem]">
+                            <p><strong>(a) Forward:</strong> {String.raw`\(z_1=w_1x+b_1=0{,}5\cdot2=1\)`}; {String.raw`\(a_1=\mathrm{ReLU}(1)=1\)`};
+                                {String.raw`\(z_2=w_2a_1+b_2=2\cdot1=2\)`}; {String.raw`\(\hat{y}=z_2=2\)`}. Error {String.raw`\(L=(2-0)^2=4\)`}.</p>
+                            <p><strong>(b) δ de salida:</strong> {String.raw`\(\delta_2=\dfrac{\partial L}{\partial z_2}=2(\hat{y}-y)=4\)`} (salida lineal).
+                                Gradientes: {String.raw`\(\partial L/\partial w_2=\delta_2\,a_1=4\)`}, {String.raw`\(\partial L/\partial b_2=\delta_2=4\)`}.</p>
+                            <p><strong>(c) Propagar a la oculta:</strong> {String.raw`\(\delta_1=(w_2\,\delta_2)\cdot\mathrm{ReLU}'(z_1)=(2\cdot4)\cdot1=8\)`}.
+                                Gradientes: {String.raw`\(\partial L/\partial w_1=\delta_1\,x=16\)`}, {String.raw`\(\partial L/\partial b_1=\delta_1=8\)`}.</p>
+                            <p style={{ color: '#B45309' }}><strong>Observa la recursión:</strong> {String.raw`\(\delta_1=w_2\,\delta_2\,\sigma'(z_1)\)`}. Si la
+                                oculta fuera <strong>sigmoide</strong>, {String.raw`\(\sigma'(z_1)\approx0{,}20\)`} en vez de {String.raw`\(1\)`}, y {String.raw`\(\delta_1\)`}
+                                caería de {String.raw`\(8\)`} a {String.raw`\(1{,}6\)`}: el <strong>desvanecimiento</strong>, visible en una sola capa.</p>
+                            <p style={{ color: '#15803D' }}><strong>Un paso (η = 0,1):</strong> {String.raw`\(w_2\leftarrow2-0{,}1\cdot4=1{,}6\)`};
+                                {String.raw`\(w_1\leftarrow0{,}5-0{,}1\cdot16=-1{,}1\)`}. ✓</p>
+                        </div>
+                    }>
+                    Una mini-red con {String.raw`\(x=2\)`}, objetivo {String.raw`\(y=0\)`} y pesos {String.raw`\(w_1=0{,}5,\ b_1=0,\ w_2=2,\ b_2=0\)`}
+                    (oculta ReLU, salida lineal). Calcula a mano: (a) el <strong>forward</strong> ({String.raw`\(z_1,a_1,z_2,\hat{y},L\)`}),
+                    (b) {String.raw`\(\delta_2\)`} y {String.raw`\(\partial L/\partial w_2\)`}, y (c) propaga para hallar {String.raw`\(\delta_1\)`} y {String.raw`\(\partial L/\partial w_1\)`}.
+                </Reto>
+                <CodeBlock title="La misma retropropagación, en código (numpy)" code={backpropNumpy} />
+                <MCQ
+                    pregunta="En la recursión \(\delta^{[l]}=(W^{[l+1]})^\top\delta^{[l+1]}\odot\sigma'(z^{[l]})\), ¿qué factor explica el desvanecimiento del gradiente con sigmoide?"
+                    opciones={[
+                        { texto: 'El factor \\(\\sigma\'(z^{[l]})\\): la derivada de la sigmoide nunca supera 0,25, y multiplicarla capa tras capa encoge la señal.', correcta: true, justificacion: 'Cada capa añade un factor \\(\\sigma\'(z)\\le0{,}25\\); el producto encadenado de muchos factores menores que 1 tiende a cero.' },
+                        { texto: 'La transpuesta \\((W^{[l+1]})^\\top\\), que invierte el signo del gradiente.', correcta: false },
+                        { texto: 'El producto de Hadamard, que siempre anula los vectores.', correcta: false },
+                    ]} />
+
+                <h3>El mismo laboratorio, ahora con el flujo de gradientes encendido</h3>
+                <p>
+                    Es la <strong>misma red</strong> de los Capítulos 2 y 3, pero el diagrama inferior pasa a <strong>«modo linterna»</strong>:
+                    primero la señal viaja <strong>hacia adelante</strong> (azul, de la entrada a la salida) y luego la <strong>responsabilidad
+                    retropropaga</strong> (rosa, de la salida hacia la entrada). En la fase de retropropagación, el <strong>grosor de cada
+                    capa es proporcional a la norma de su gradiente</strong>: así se <em>ve</em> qué capas reciben señal de aprendizaje y
+                    cuáles apenas la perciben.
+                </p>
+                <RedFrontera chapter={4} />
+                <Box type="tip" label="Qué conviene observar (desde el Capítulo 4)">
+                    <ul>
+                        <li>Con <strong>Sigmoide</strong> y varias <strong>capas ocultas</strong>, las flechas rosadas de la retropropagación
+                            <strong> se apagan</strong> al acercarse a la entrada: es el <strong>desvanecimiento del gradiente</strong> en vivo —las
+                            primeras capas casi no aprenden—.</li>
+                        <li>Cambia a <strong>ReLU</strong>: el flujo hacia atrás llega <strong>mucho más brillante</strong> a las capas iniciales (su
+                            derivada vale 1 en la zona activa).</li>
+                        <li>La fase <strong>azul</strong> (predicción) siempre se completa <strong>antes</strong> de que empiece la fase <strong>rosa</strong>
+                            (cálculo del gradiente): es el orden real <em>forward → backward</em>.</li>
+                    </ul>
                 </Box>
 
                 <h3>Autograd en PyTorch</h3>
@@ -3781,6 +4279,51 @@ red = nn.Sequential(
                 </p>
                 <CurvaAprendizajeChart />
 
+                <h3>La «U» en tu propia red: validación y regularización en vivo</h3>
+                <p>
+                    La curva anterior es ilustrativa; ahora se trata de <strong>provocar la «U» en la misma red</strong> de los capítulos
+                    previos. El laboratorio reserva un <strong>30 % de los datos como validación</strong> (que la red <em>no</em> usa para
+                    entrenar) y dibuja <strong>dos curvas</strong>: entrenamiento (rosa) y validación (morado). Sube la <strong>capacidad</strong>
+                    (nodos y capas) y entrena muchas épocas: la curva rosa seguirá bajando mientras la morada empieza a <strong>repuntar</strong>
+                    —ese despegue es el sobreajuste—. Luego activa <strong>λ (L2)</strong> o <strong>dropout</strong> y observa cómo la brecha se cierra.
+                </p>
+                <RedFrontera chapter={5} />
+                <Box type="tip" label="Qué conviene observar (desde el Capítulo 5)">
+                    <ul>
+                        <li><strong>Induce el sobreajuste:</strong> con muchos nodos y muchas épocas, la pérdida de <strong>validación (morada)</strong>
+                            forma una <strong>«U»</strong> mientras la de entrenamiento sigue cayendo: la red memoriza el ruido.</li>
+                        <li><strong>Regulariza:</strong> sube <strong>λ</strong> y la frontera se <em>suaviza</em>; el término L2 empuja los pesos hacia cero y la «U» se aplana.</li>
+                        <li><strong>Dropout:</strong> apaga neuronas al azar en cada época de entrenamiento; rompe la co-adaptación y reduce la brecha train/validación
+                            —pero la <strong>predicción sigue siendo determinista</strong> (no se aplica al evaluar)—.</li>
+                        <li><strong>Audita la equidad:</strong> al pie del laboratorio, el <strong>Auditor de Equidad</strong> reparte la validación en dos subgrupos (A y B).
+                            El subgrupo B —con datos más ruidosos— recibe sistemáticamente <strong>más falsos negativos</strong>: el sesgo no se programó, se <em>heredó</em>.
+                            Mover el umbral o activar el «costo del falso negativo» muestra que cerrar la brecha de un grupo casi siempre la abre en otro.</li>
+                    </ul>
+                </Box>
+
+                <h3>Partición honesta: entrenamiento, validación y prueba</h3>
+                <p>
+                    El laboratorio reservó un 30 % para validación, pero un proyecto serio parte los datos en <strong>tres</strong> conjuntos
+                    disjuntos, cada uno con un papel distinto:
+                </p>
+                <div className="grid md:grid-cols-3 gap-3 my-3">
+                    <div className="usta-card p-4"><h4 style={{ marginTop: 0 }}>Entrenamiento · ~70 %</h4><p className="text-sm !mb-0">Ajusta los <strong>pesos</strong> por descenso del gradiente. La red lo ve una y otra vez.</p></div>
+                    <div className="usta-card p-4"><h4 style={{ marginTop: 0 }}>Validación · ~15 %</h4><p className="text-sm !mb-0">Elige los <strong>hiperparámetros</strong> y decide el Early Stopping. La red no se entrena con él, pero el ingeniero sí lo «mira» para decidir.</p></div>
+                    <div className="usta-card p-4"><h4 style={{ marginTop: 0 }}>Prueba · ~15 %</h4><p className="text-sm !mb-0">Se toca <strong>una sola vez</strong>, al final, para estimar el desempeño real. Si se usa para decidir algo, deja de ser honesto.</p></div>
+                </div>
+                <p>
+                    La regla de oro: el conjunto de <strong>prueba</strong> permanece «en una caja sellada» hasta el final. En cuanto una decisión
+                    —qué modelo, qué umbral— se toma mirándolo, su estimación se contamina y se vuelve optimista.
+                </p>
+                <Box type="danger" label="El pecado capital: la fuga de datos (data leakage)">
+                    Ocurre cuando información del futuro —o del conjunto de prueba— se <strong>filtra</strong> al entrenamiento e infla el desempeño
+                    de forma ficticia. Casos típicos: <strong>(1)</strong> normalizar (restar la media, escalar) usando <em>todo</em> el dataset
+                    antes de partirlo, de modo que el train «ve» estadísticas del test; <strong>(2)</strong> incluir una variable que en realidad es
+                    <em> consecuencia</em> del objetivo (predecir dengue usando «días de hospitalización»); <strong>(3)</strong> en series temporales,
+                    barajar y mezclar pasado con futuro. El síntoma es siempre el mismo: <strong>95 % en validación, fracaso en producción</strong>.
+                    La regla: toda transformación (escalado, imputación) se <strong>ajusta solo con el train</strong> y luego se aplica a validación y prueba.
+                </Box>
+
                 <h3>Validación cruzada K-Fold e hiperparámetros</h3>
                 <p>
                     Reservar un único conjunto de validación puede sesgar la estimación. La <strong>validación cruzada K-Fold</strong>
@@ -3820,6 +4363,20 @@ red = nn.Sequential(
                     <div className="usta-card p-4 text-center"><Eq>{String.raw`\(\frac{VP}{VP+FP}\)`}</Eq><span className="text-xs font-bold text-navy">Precisión</span></div>
                     <div className="usta-card p-4 text-center"><Eq>{String.raw`\(\frac{VP}{VP+FN}\)`}</Eq><span className="text-xs font-bold text-navy">Recall / Sensibilidad</span></div>
                 </div>
+                <h4>Precisión vs. recall: un balancín (y el F1)</h4>
+                <p>
+                    Precisión y recall <strong>tiran en sentidos opuestos</strong>. <strong>Bajar</strong> el umbral de decisión declara más positivos:
+                    sube el recall (se escapan menos enfermos) pero baja la precisión (más falsas alarmas); <strong>subirlo</strong> hace lo contrario.
+                    No hay un punto óptimo universal —depende del costo de cada error—. Es exactamente lo que mueve el <strong>slider de umbral del
+                    Auditor de Equidad</strong> del laboratorio de arriba.
+                </p>
+                <p>Para resumir ambas en un solo número se usa el <strong>F1</strong>, su media armónica (penaliza que <em>cualquiera</em> de las dos sea baja):</p>
+                <Eq>{String.raw`$$ F_1 = 2\cdot\frac{\text{precisión}\cdot\text{recall}}{\text{precisión}+\text{recall}} $$`}</Eq>
+                <p>
+                    Y para juzgar el modelo en <em>todos</em> los umbrales a la vez está la <strong>curva ROC</strong> y su <strong>área bajo la curva
+                    (AUC)</strong>: {String.raw`\(\text{AUC}=1\)`} es perfecto, {String.raw`\(0{,}5\)`} es azar. Es útil porque no depende del umbral
+                    elegido ni del balance de clases.
+                </p>
                 <CalloutPro tema="eth" titulo="Marco Ético de la IA en Colombia" subtitulo="Transparencia, explicabilidad y sensibilidad">
                     Las métricas derivadas de la matriz de confusión (exactitud, recall) se calculan con <strong>conteos sobre un
                         umbral</strong>, por lo que su gradiente es nulo o indefinido y no pueden optimizarse directamente por descenso
@@ -3830,6 +4387,37 @@ red = nn.Sequential(
                     para la IA en Colombia (2021) exige <strong>transparencia y explicabilidad</strong>: una decisión que afecta derechos
                     fundamentales no puede ser una «caja negra».
                 </CalloutPro>
+
+                <h3>Equidad algorítmica: el sesgo que se hereda</h3>
+                <p>
+                    Un modelo puede ser muy preciso <em>en promedio</em> y aun así <strong>tratar peor a un subgrupo de personas</strong>. El sesgo
+                    casi nunca se programa: se <strong>hereda de los datos</strong> (subgrupos con menos ejemplos, registros de peor calidad o etiquetas
+                    históricamente injustas), y el descenso del gradiente —que solo minimiza la pérdida <em>promedio</em>— lo reproduce y a veces lo
+                    amplifica. Tres ideas para nombrarlo:
+                </p>
+                <Tabs tabs={[
+                    { label: 'Atributo protegido', content: <span>Una característica sobre la que es injusto o ilegal discriminar (sexo, etnia, región, edad). <strong>No debe entrar como variable</strong> del modelo… pero quitarla no basta (<em>«fairness through unawareness»</em>): otras variables actúan de <strong>proxy</strong> —el barrio o el municipio pueden codificar la etnia o el estrato—.</span> },
+                    { label: 'Impacto dispar', content: <span>(<em>disparate impact</em>) Cuando una decisión perjudica de forma <strong>desproporcionada</strong> a un grupo, aunque el atributo protegido no se haya usado de forma explícita. Se mide comparando tasas —de aprobación, de error— entre subgrupos.</span> },
+                    { label: 'Igualdad de oportunidad', content: <span>Que la tasa de acierto en los casos <strong>positivos</strong> (el recall) sea parecida entre subgrupos. Su incumplimiento es justo la <strong>brecha de falsos negativos</strong> que reporta el Auditor de Equidad: un grupo al que se le «escapan» más casos graves.</span> },
+                ]} />
+                <Box type="eth" label="Caso colombiano · alerta temprana de deslizamientos">
+                    Un modelo entrenado sobre todo con datos de zonas urbanas instrumentadas puede tener <strong>muchos menos —y más ruidosos—
+                    registros de veredas rurales y resguardos indígenas</strong>. Resultado: alta exactitud global, pero un <strong>recall bajo justo
+                    donde un falso negativo cuesta vidas</strong>. Auditar por subgrupo —y no solo el promedio— es un requisito ético, no un lujo.
+                </Box>
+                <p>
+                    El <strong>Auditor de Equidad</strong> del laboratorio encarna todo esto: el subgrupo B recibe más falsos negativos que el A, y al
+                    mover el umbral o activar el costo del error se ve que <strong>cerrar la brecha de un grupo casi siempre tiene un precio en el otro</strong>.
+                    De hecho, distintas definiciones de «justicia» (paridad demográfica frente a igualdad de oportunidad) pueden ser <strong>matemáticamente
+                    incompatibles</strong> entre sí: la equidad obliga a <em>elegir</em> qué se prioriza, de forma transparente y con las comunidades afectadas.
+                </p>
+                <MCQ
+                    pregunta="Un modelo de crédito no usa la etnia como variable, pero rechaza al doble de solicitantes de cierta región. Esto es…"
+                    opciones={[
+                        { texto: 'imposible: si no usa la etnia, no puede discriminar.', correcta: false },
+                        { texto: 'impacto dispar: variables proxy (la región) codifican el atributo protegido y reproducen el sesgo.', correcta: true, justificacion: 'Quitar el atributo no basta («fairness through unawareness»): otras variables correlacionadas actúan de proxy y el impacto sigue siendo desigual.' },
+                        { texto: 'un buen modelo, porque su exactitud global es alta.', correcta: false },
+                    ]} />
 
                 <MCQ
                     pregunta="Un modelo entrenado con datos de Medellín alcanza 98 % allí, pero al aplicarlo en Cúcuta cae a 55 %. ¿Qué ocurre?"
