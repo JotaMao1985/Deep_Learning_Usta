@@ -12,9 +12,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <!-- React & ReactDOM (UMD) -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- React & ReactDOM (UMD, builds de producción: carga más rápida y consola limpia) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
     <!-- Babel para transpilar JSX en el navegador -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -300,6 +300,9 @@
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
+
+        /* CONVENCIÓN DE NÚMEROS (es-CO): coma decimal en prosa y leyendas (p. ej. «0,5»);
+           punto solo en código, LaTeX y expresiones simbólicas con variable (p. ej. η=0.5). */
 
         /* ============================================================
            UTILIDAD: re-tipografiado de MathJax al cambiar de lección
@@ -978,6 +981,8 @@
         ============================================================ */
         const dlVsMlSnippet = `import numpy as np
 
+# NOTA: esquema ilustrativo (pseudocódigo); medir_largo/contar_amarillo no se implementan aquí.
+
 # ML clásico: el HUMANO diseña las características a mano
 # (ej. clasificar plátano Hartón del Urabá listo para exportar)
 def caracteristicas_manuales(imagen):
@@ -1171,6 +1176,56 @@ def caracteristicas_manuales(imagen):
             </div>
         );
 
+        /* Diagrama SVG: jerarquía de características (píxeles -> bordes -> texturas -> concepto) */
+        const JerarquiaCaracteristicasSVG = () => {
+            const cards = [
+                { x: 14, c: '#001A4D', t: 'Entrada', s: 'Píxeles crudos' },
+                { x: 198, c: '#3D008D', t: 'Capa 1', s: 'Bordes' },
+                { x: 382, c: '#ED1E79', t: 'Capas 2–3', s: 'Texturas y partes' },
+                { x: 566, c: '#15803D', t: 'Salida', s: '¿Apto para exportar?' },
+            ];
+            const W = 150, Y = 22, H = 120;
+            const pal = ['#FDE68A', '#FCD34D', '#E5E7EB', '#FBBF24', '#D1D5DB'];
+            return (
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                    <svg viewBox="0 0 730 210" className="w-full" style={{ minWidth: 620 }} role="img"
+                        aria-label="Jerarquía de características que aprende una red profunda sobre la imagen de un plátano: de los píxeles crudos a los bordes, luego texturas y partes, y finalmente el concepto de si es apto para exportación.">
+                        <title>De los píxeles al concepto: características cada vez más abstractas</title>
+                        <defs><marker id="jcArrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#94A3B8" /></marker></defs>
+                        {cards.slice(0, -1).map((cd, i) => (
+                            <line key={'a' + i} x1={cd.x + W + 4} y1={Y + H / 2} x2={cards[i + 1].x - 4} y2={Y + H / 2} stroke="#94A3B8" strokeWidth="2" markerEnd="url(#jcArrow)" />
+                        ))}
+                        {cards.map((cd, i) => (
+                            <g key={i}>
+                                <rect x={cd.x} y={Y} width={W} height={H} rx="12" fill="#fff" stroke={cd.c} strokeWidth="2.5" />
+                                <text x={cd.x + W / 2} y={Y + H + 22} textAnchor="middle" fontSize="12" fill={cd.c} fontWeight="bold">{cd.t}</text>
+                                <text x={cd.x + W / 2} y={Y + H + 38} textAnchor="middle" fontSize="10.5" fill="#64748B">{cd.s}</text>
+                            </g>
+                        ))}
+                        {/* tarjeta 1: rejilla de píxeles */}
+                        {Array.from({ length: 25 }).map((_, k) => { const r = Math.floor(k / 5), c = k % 5; return <rect key={'px' + k} x={14 + 22 + c * 21} y={Y + 16 + r * 18} width="18" height="15" fill={pal[(r + c) % pal.length]} />; })}
+                        {/* tarjeta 2: bordes */}
+                        <g stroke="#3D008D" strokeWidth="2.5" fill="none" strokeLinecap="round">
+                            <path d="M214 60 Q 250 38 286 70" />
+                            <path d="M214 96 Q 252 120 290 92" />
+                            <line x1="232" y1="46" x2="252" y2="118" />
+                        </g>
+                        {/* tarjeta 3: texturas */}
+                        <g stroke="#ED1E79" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.85">
+                            {Array.from({ length: 4 }).map((_, r) => <path key={'tx' + r} d={`M398 ${44 + r * 20} q 18 -10 36 0 t 36 0 t 36 0`} />)}
+                        </g>
+                        {/* tarjeta 4: plátano + check */}
+                        <path d="M590 110 Q 612 56 660 64 Q 636 110 590 110 Z" fill="#FDE047" stroke="#CA8A04" strokeWidth="2" />
+                        <circle cx="648" cy="98" r="14" fill="#15803D" />
+                        <path d="M641 98 l5 5 l9 -11" stroke="#fff" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <p className="text-xs text-gray-500 italic text-center">
+                        En Deep Learning nadie programa estas etapas: la red las aprende sola, capa a capa —de los píxeles crudos al concepto final—.
+                    </p>
+                </div>
+            );
+        };
+
         const Cap1Section = () => (
             <div className="prose-usta">
                 <p>
@@ -1194,6 +1249,7 @@ def caracteristicas_manuales(imagen):
                     { year: '1969', text: 'Minsky y Papert demuestran las limitaciones del perceptrón simple (problema XOR). Llega el primer invierno de la IA.' },
                     { year: '1986', text: 'Rumelhart, Hinton y Williams popularizan la retropropagación: se pueden entrenar capas ocultas.' },
                     { year: '1989-98', text: 'LeCun desarrolla las CNN (LeNet-5) que leen cheques bancarios.' },
+                    { year: 'Fin. de los 90', text: 'El auge de las máquinas de soporte vectorial (SVM) y los métodos estadísticos relega de nuevo a las redes neuronales; el financiamiento vuelve a enfriarse: es el segundo invierno de la IA.' },
                     { year: '2006', text: 'Hinton acuña el término «Deep Learning» con las Deep Belief Networks.' },
                     { year: '2012', text: 'AlexNet gana ImageNet con 15,3 % de error (frente a 26,2 % del segundo). El punto de inflexión.' },
                     { year: '2017+', text: 'Transformers, BERT, GPT-3, y modelos multimodales (GPT-4, Claude, Gemini).' },
@@ -1283,6 +1339,7 @@ def caracteristicas_manuales(imagen):
                     decide qué medir; en Deep Learning la red aprende sola las características, desde los píxeles crudos hasta los
                     conceptos abstractos.
                 </p>
+                <JerarquiaCaracteristicasSVG />
                 <CodeBlock title="ML clásico vs. Deep Learning (esquema en numpy)" code={dlVsMlSnippet} />
 
                 <p>El siguiente cuadro resume cuándo conviene cada enfoque:</p>
@@ -1385,6 +1442,16 @@ def caracteristicas_manuales(imagen):
                         justificacion: 'Backpropagation usa la regla de la cadena para propagar el error hacia atrás y calcular gradientes eficientemente.'
                     },
                 ]} />
+
+                <Box type="tip" label="Puntos clave del Capítulo 1">
+                    <ul>
+                        <li>La historia del Deep Learning avanza por <strong>ciclos</strong>: entusiasmo, «inviernos» y renacimiento cuando convergen datos, cómputo y algoritmos.</li>
+                        <li>Toda <strong>neurona</strong> comparte la estructura entradas × pesos + sesgo; el <strong>perceptrón</strong> es el caso particular con activación de escalón y salida binaria.</li>
+                        <li>Una sola neurona traza una <strong>frontera lineal</strong>: resuelve AND y OR, pero no el <strong>XOR</strong>, límite que motivó las capas ocultas.</li>
+                        <li>El punto de inflexión de 2012 surge de <strong>tres fuerzas que convergen</strong>: Big Data (ImageNet), GPUs y mejores algoritmos (ReLU, Dropout, BatchNorm).</li>
+                        <li>Frente al ML clásico, el Deep Learning <strong>aprende las características</strong> desde los datos crudos, a cambio de más datos, más cómputo y menos interpretabilidad.</li>
+                    </ul>
+                </Box>
             </div>
         );
 
@@ -1730,17 +1797,18 @@ modelo = nn.Sequential(
                 <div className="px-5 pb-5">
                     <div className="rounded-xl border-2 border-dashed p-4" style={{ borderColor: '#3D008D' }}>
                         <div className="flex items-center gap-2 mb-1 flex-wrap"><i className="fas fa-scale-balanced text-primary"></i><span className="text-sm font-bold text-navy">Auditor de Equidad</span><span className="text-[0.55rem] font-bold text-white px-1.5 py-0.5 rounded-full" style={{ background: '#3D008D' }}>NUEVO · Cap 5 · ética</span></div>
-                        <p className="text-[0.72rem] text-gray-600 mb-3">El atributo protegido <strong>g</strong> (subgrupo A/B) <strong>no entra</strong> en la red; solo particiona la evaluación. Aun así, el modelo trata sistemáticamente peor al subgrupo con más ruido: el <strong>sesgo se hereda de los datos</strong>.</p>
+                        <p className="text-[0.74rem] text-gray-600 mb-2">La validación se reparte en dos subgrupos, <strong>A</strong> y <strong>B</strong>, según un atributo protegido <strong>g</strong> (piénsese en dos regiones). <strong>g nunca entra a la red</strong>: solo separa la evaluación. Como los datos de B llevan más ruido, el modelo hereda un trato desigual que <strong>nadie programó</strong>.</p>
+                        <p className="text-[0.7rem] text-gray-500 mb-3 rounded-lg px-2 py-1.5" style={{ background: '#F8FAFC', border: '1px solid #E2E8F0' }}><i className="fas fa-book-open mr-1"></i><strong>Cómo leer cada tabla:</strong> <strong style={{ color: '#B91C1C' }}>FN</strong> = caso positivo real que quedó <em>sin alerta</em> (el error más grave aquí) · <strong style={{ color: '#B45309' }}>FP</strong> = falsa alarma · <strong>FNR</strong> = % de positivos reales sin alerta (cuanto más bajo, mejor).</p>
                         <div className="grid sm:grid-cols-2 gap-3">{matriz(A, 'A', '#15803D')}{matriz(B, 'B', '#B45309')}</div>
                         <div className="mt-3">
-                            <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1"><span>Umbral de decisión <span className="text-gray-400">(local al auditor; no afecta la frontera)</span></span><span className="text-primary">{umbral.toFixed(2)}</span></div>
+                            <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1"><span>Umbral de decisión <span className="text-gray-400">(probabilidad mínima para emitir la alerta; solo afecta al auditor)</span></span><span className="text-primary">{umbral.toFixed(2)}</span></div>
                             <input type="range" min="0.05" max="0.95" step="0.05" value={umbral} onChange={e => setUmbral(+e.target.value)} className="usta-range" aria-label="Umbral de decisión del auditor" />
                         </div>
                         <div className="mt-3 rounded-lg p-3 text-[0.78rem]" style={{ background: '#FAF5FF', border: '1px solid rgba(61,0,141,0.15)' }}>
-                            <strong className="text-navy">Veredicto:</strong> con el umbral en {umbral.toFixed(2)}, el modelo deja sin alerta (falso negativo) al <strong style={{ color: '#B91C1C' }}>{pct(B.fnr)}</strong> de los casos positivos del <strong>subgrupo B</strong>, frente al <strong style={{ color: '#15803D' }}>{pct(A.fnr)}</strong> del subgrupo A{brechaFNR != null ? <> — una <strong>brecha de oportunidad de {Math.round(brechaFNR * 100)} puntos</strong>.</> : '.'}
+                            <strong className="text-navy">Veredicto:</strong> con el umbral en {umbral.toFixed(2)}, quedan <em>sin alerta</em> el <strong style={{ color: '#B91C1C' }}>{pct(B.fnr)}</strong> de los casos positivos del <strong>subgrupo B</strong> y el <strong style={{ color: '#15803D' }}>{pct(A.fnr)}</strong> de los del subgrupo A.{brechaFNR != null && <> Esa diferencia —<strong>{Math.round(brechaFNR * 100)} puntos</strong>— es la <strong>brecha de igualdad de oportunidad</strong>.{Math.round(brechaFNR * 100) < 3 && <span className="text-gray-500"> (En esta corrida la brecha resultó pequeña: el sesgo es una <em>tendencia</em> estadística, no una constante. Al reiniciar pesos y reentrenar, o al mover el umbral, suele emerger con claridad.)</span>}</>}
                         </div>
                         <div className="mt-3 flex items-center justify-between gap-2 flex-wrap">
-                            <span className="text-[0.76rem] text-gray-700"><strong>Costo del error:</strong> penalizar el falso negativo <strong>6×</strong> (recall sobre exactitud). Tras activarlo, <strong>reinicia los pesos y reentrena</strong>.</span>
+                            <span className="text-[0.76rem] text-gray-700"><strong>Costo del falso negativo (6×):</strong> la pérdida castiga seis veces más dejar un positivo sin alerta (prioriza el recall sobre la exactitud). Tras activarlo, conviene <strong>reiniciar los pesos y reentrenar</strong> para ver su efecto.</span>
                             <button onClick={() => setCostoFN(!costoFN)} className="px-3 py-1 rounded-full text-xs font-bold transition-all" style={costoFN ? { background: '#3D008D', color: '#fff' } : { background: '#F1F5F9', color: '#475569' }}>{costoFN ? 'Activado' : 'Desactivado'}</button>
                         </div>
                     </div>
@@ -2809,8 +2877,15 @@ modelo = nn.Sequential(
                         <li>Por qué los problemas reales son <strong>no lineales</strong> y por qué una sola recta no basta.</li>
                         <li>La <strong>anatomía de una neurona</strong> (suma ponderada + sesgo + activación) y cómo encadenarla en capas.</li>
                         <li>Cómo una <strong>capa oculta</strong> resuelve el XOR y qué dice el <strong>Teorema de Aproximación Universal</strong>.</li>
-                        <li>Qué <strong>función de activación</strong> usar en cada caso y cómo cuesta una red en <strong>parámetros</strong>.</li>
+                        <li>Qué <strong>función de activación</strong> usar en cada caso y cuánto cuesta una red en <strong>parámetros</strong>.</li>
                     </ul>
+                </Box>
+
+                <Box type="tip" label="Sugerencia de estudio">
+                    Este es el capítulo más extenso del módulo y reúne varias herramientas interactivas. Se aprovecha mejor en
+                    <strong> dos sesiones</strong>: la primera, hasta la <em>neurona interactiva</em> (teoría y anatomía); la segunda, el
+                    <em> interpolador de curvas</em> y el <em>laboratorio de fronteras</em>. No es necesario completarlo de una sola
+                    vez: el material recuerda la última lección visitada.
                 </Box>
 
                 <h3>La ilusión de la línea recta</h3>
@@ -2979,11 +3054,12 @@ modelo = nn.Sequential(
                 <p>
                     Las ideas anteriores —capas, nodos y activaciones— cobran sentido al verlas operar sobre datos. El
                     siguiente laboratorio entrena, <strong>desde cero y dentro del navegador</strong> (sin librerías de aprendizaje
-                    automático), un MLP de clasificación binaria sobre dos conjuntos clásicos no lineales: <strong>dos lunas </strong>
+                    automático), un MLP de clasificación binaria sobre dos conjuntos clásicos no lineales: <strong>dos lunas</strong>
                     entrelazadas y <strong>círculos concéntricos</strong>. El fondo del lienzo es un mapa de calor de la predicción
                     de la red en cada punto del plano; la franja donde el color cambia de morado a rosa es la <strong>frontera de
                     decisión</strong>. Conviene modificar la arquitectura y observar cómo esa frontera pasa de una recta rígida a
-                    una curva capaz de envolver los datos.
+                    una curva capaz de envolver los datos. Este mismo laboratorio reaparecerá en los Capítulos 3, 4 y 5, ganando
+                    controles nuevos en cada uno.
                 </p>
                 <RedFrontera chapter={2} />
                 <Box type="tip" label="Qué conviene observar en la frontera">
@@ -3253,6 +3329,92 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
             );
         };
 
+        /* Figura: render 3D del paisaje de error no convexo con etiquetas superpuestas */
+        const PaisajeErrorFigura = () => (
+            <figure className="my-4 not-prose">
+                <div className="relative rounded-xl overflow-hidden border border-gray-200 shadow-sm mx-auto" style={{ maxWidth: 640 }}>
+                    <img src="images/paisaje-error-3d.jpg" className="w-full block"
+                        alt="Render 3D de una superficie de error no convexa: colinas y valles, con un valle profundo, mínimos locales más pequeños, una meseta plana y un paso tipo silla entre dos picos." />
+                    {[
+                        { l: 'Punto silla', x: 53, y: 25, c: '#B45309' },
+                        { l: 'Mínimo local', x: 39, y: 70, c: '#B91C1C' },
+                        { l: 'Meseta', x: 76, y: 60, c: '#0E7490' },
+                    ].map((m, i) => (
+                        <span key={i} className="absolute text-[0.6rem] sm:text-xs font-bold text-white px-2 py-0.5 rounded-full shadow"
+                            style={{ left: `${m.x}%`, top: `${m.y}%`, transform: 'translate(-50%,-50%)', background: m.c, whiteSpace: 'nowrap' }}>
+                            {m.l}
+                        </span>
+                    ))}
+                </div>
+                <figcaption className="text-xs text-gray-500 italic text-center mt-2">
+                    El paisaje de error de una red profunda es <strong>no convexo</strong>: una superficie rugosa con valles, mesetas y
+                    puntos silla. (Render ilustrativo; las etiquetas señalan ejemplos de cada accidente.)
+                </figcaption>
+            </figure>
+        );
+
+        /* Superficie 3D interactiva (Plotly): contrasta el cuenco convexo con el paisaje real */
+        const PaisajeInteractivo3D = () => {
+            const [modo, setModo] = useState('convexo');   // 'convexo' | 'real'
+            const gauss = (x, y, cx, cyy, s) => Math.exp(-(((x - cx) ** 2) + ((y - cyy) ** 2)) / (2 * s * s));
+            const fConvexo = (x, y) => 0.11 * (x * x + y * y);
+            const fReal = (x, y) =>
+                2.6
+                - 2.4 * gauss(x, y, 2.2, 2.0, 1.5)     // valle global (el más profundo)
+                - 1.5 * gauss(x, y, -2.6, -1.4, 1.4)   // mínimo local
+                - 1.1 * gauss(x, y, -1.2, 3.0, 1.2)    // mínimo local poco profundo (meseta)
+                + 0.45 * Math.sin(0.85 * x) * Math.cos(0.85 * y)   // ondulaciones (sillas)
+                + 0.015 * (x * x + y * y);             // ligero cuenco global hacia los bordes
+
+            usePlotly('chart-paisaje-3d', () => {
+                const f = modo === 'convexo' ? fConvexo : fReal;
+                const xs = []; for (let v = -6; v <= 6.0001; v += 0.4) xs.push(+v.toFixed(2));
+                const ys = xs.slice();
+                const z = ys.map(yy => xs.map(xx => f(xx, yy)));
+                let mx = 0, my = 0, mz = Infinity;       // mínimo global aproximado (malla fina)
+                for (let yy = -6; yy <= 6; yy += 0.2) for (let xx = -6; xx <= 6; xx += 0.2) { const zz = f(xx, yy); if (zz < mz) { mz = zz; mx = xx; my = yy; } }
+                return [
+                    {
+                        type: 'surface', x: xs, y: ys, z, showscale: false, hoverinfo: 'skip', opacity: 0.97,
+                        colorscale: [[0, '#2A0A5E'], [0.45, '#3D008D'], [0.78, '#9333EA'], [1, '#ED1E79']],
+                        contours: { z: { show: true, color: 'rgba(255,255,255,0.18)', width: 1 } }
+                    },
+                    {
+                        type: 'scatter3d', x: [mx], y: [my], z: [mz + 0.06], mode: 'markers', name: 'mínimo global',
+                        marker: { size: 5, color: '#FDB913', symbol: 'diamond', line: { color: '#3D008D', width: 1 } }, hoverinfo: 'name'
+                    },
+                ];
+            }, () => ({
+                margin: { l: 0, r: 0, t: 0, b: 0 }, showlegend: false, paper_bgcolor: 'rgba(0,0,0,0)',
+                scene: {
+                    xaxis: { showticklabels: false, title: '', showbackground: true, backgroundcolor: 'rgba(248,250,252,0.5)', gridcolor: '#E2E8F0' },
+                    yaxis: { showticklabels: false, title: '', showbackground: true, backgroundcolor: 'rgba(248,250,252,0.5)', gridcolor: '#E2E8F0' },
+                    zaxis: { showticklabels: false, title: 'error', gridcolor: '#E2E8F0' },
+                    camera: { eye: { x: 1.6, y: 1.5, z: 0.9 } }, aspectratio: { x: 1, y: 1, z: 0.55 },
+                },
+            }), [modo]);
+
+            return (
+                <div className="my-4">
+                    <div className="flex gap-2 mb-2 justify-center">
+                        {[['convexo', 'Convexo (ideal)'], ['real', 'No convexo (real)']].map(([k, lbl]) => (
+                            <button key={k} onClick={() => setModo(k)}
+                                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${modo === k ? 'usta-gradient text-white shadow' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+                                {lbl}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="bg-white border border-gray-200 rounded-xl p-2 shadow-sm">
+                        <div id="chart-paisaje-3d" className="chart-h-360" style={{ width: '100%' }}></div>
+                    </div>
+                    <p className="text-xs text-gray-500 italic text-center mt-2">
+                        Superficie interactiva: <strong>arrástrese para rotarla</strong>. El <strong>cuenco convexo</strong> tiene un único
+                        fondo; el <strong>paisaje real</strong>, varios valles, sillas y mesetas. El punto dorado marca el mínimo global.
+                    </p>
+                </div>
+            );
+        };
+
         const Cap3Section = () => (
             <div className="prose-usta">
                 <Box type="info" label="Idea central">
@@ -3431,6 +3593,13 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                 <GradienteChart />
                 <CodeBlock title="Descenso del gradiente en numpy" code={sgdNumpy} />
 
+                <Box type="tip" label="Recurso en video · explicación visual (en español)">
+                    Para fijar la intuición antes del formalismo, conviene ver el descenso <em>en movimiento</em>. DotCSV lo explica
+                    de forma visual e intuitiva en{' '}
+                    <a className="text-primary underline" href="https://www.youtube.com/watch?v=A6FiCDoz8_4" target="_blank" rel="noopener noreferrer">«¿Qué es el Descenso del Gradiente?»</a>:
+                    cómo el algoritmo tantea la pendiente y, paso a paso, desciende hacia el valle del error.
+                </Box>
+
                 <Box type="tip" label="De un parámetro a millones">
                     En esta analogía {String.raw`\(\theta\)`} es un solo número, pero en una red real es un <strong>vector con millones de
                     componentes</strong> (todos los pesos y sesgos). El gradiente {String.raw`\(\nabla_\theta L\)`} es entonces un vector de
@@ -3550,6 +3719,16 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                     <li><strong>Puntos silla (<Termino def="Punto donde el terreno sube en unas direcciones y baja en otras, como una silla de montar: el gradiente es casi cero pero no es un mínimo.">saddle points</Termino>):</strong> el gradiente es casi nulo y el avance se «estanca», aunque no sea un mínimo real.</li>
                     <li><strong>Mesetas:</strong> zonas casi planas donde el gradiente es diminuto y el aprendizaje se vuelve lentísimo.</li>
                 </ul>
+                <p>
+                    Las dos figuras siguientes lo contrastan: a un lado, un <strong>render ilustrativo</strong> del paisaje real con sus
+                    accidentes; al otro, una <strong>superficie interactiva</strong> que puede <strong>rotarse con el ratón</strong> y alternar
+                    entre el <strong>cuenco convexo ideal</strong> (un único fondo, como {String.raw`\(L(\theta)=\theta^2\)`}) y ese mismo
+                    <strong> paisaje no convexo</strong>.
+                </p>
+                <div className="grid md:grid-cols-2 gap-4 my-4 items-start">
+                    <PaisajeErrorFigura />
+                    <PaisajeInteractivo3D />
+                </div>
                 <Box type="info" label="Buenas noticias en alta dimensión">
                     Paradójicamente, con muchísimos parámetros los mínimos locales «malos» son raros: casi todos los puntos de gradiente nulo
                     resultan ser puntos silla, y la mayoría de los mínimos son casi tan buenos como el global. Además, el <strong>ruido del
@@ -3708,6 +3887,16 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                         justificacion: 'Softmax convierte los logits en probabilidades que suman 1, y la CCE penaliza la probabilidad dada a la clase verdadera. La BCE es solo el caso de 2 clases.'
                     },
                 ]} />
+
+                <Box type="tip" label="Puntos clave del Capítulo 3">
+                    <ul>
+                        <li>Aprender es <strong>minimizar una función de costo</strong> —el «altímetro» que mide la distancia al valle—: MSE/MAE/Huber en regresión; BCE/CCE en clasificación.</li>
+                        <li>El <strong>descenso del gradiente</strong> da pasos en dirección opuesta a la pendiente; la <strong>tasa de aprendizaje</strong> {String.raw`\(\eta\)`} decide entre converger, oscilar o divergir.</li>
+                        <li>El <strong>mini-batch</strong> (8–512 ejemplos) es el estándar de facto: equilibra ruido del gradiente, frecuencia de actualización y uso de la GPU.</li>
+                        <li>El paisaje real es <strong>no convexo</strong>; en alta dimensión abundan los puntos silla y el ruido del SGD ayuda a escapar de ellos.</li>
+                        <li><strong>Adam</strong> = momentum (inercia) + paso adaptativo por parámetro; es el optimizador por defecto. Cómo se calcula ese gradiente es el tema del Capítulo 4.</li>
+                    </ul>
+                </Box>
             </div>
         );
 
@@ -3864,7 +4053,7 @@ d2 = 2*(y_hat - y)             # delta de salida = 4.0
 dW2, db2 = d2*a1, d2           # 4.0 , 4.0
 d1 = (w2*d2) * (1.0 if z1 > 0 else 0.0)   # delta oculta = (2*4)*1 = 8.0
 dW1, db1 = d1*x, d1            # 16.0 , 8.0
-print(dW1, dW2)               # -> 16.0  4.0  (la 1.ª capa recibe el mayor gradiente)`;
+print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque w2=2 amplifica; con sigmoide se desvanecería)`;
 
         const Cap4Section = () => (
             <div className="prose-usta">
@@ -3984,9 +4173,9 @@ print(dW1, dW2)               # -> 16.0  4.0  (la 1.ª capa recibe el mayor grad
                     factores en cadena: el primero los hace {String.raw`\(\to 0\)`}; el segundo, {String.raw`\(\to\infty\)`}.
                 </Box>
 
-                <h3>Retropropaga a mano: una mini-red de dos capas</h3>
+                <h3>Retropropagación a mano: una mini-red de dos capas</h3>
                 <p>
-                    El cálculo se vuelve mecánico al aplicar la recursión. Antes de ver la linterna animarlo, conviene hacerlo a mano
+                    El cálculo se vuelve mecánico al aplicar la recursión. Antes de ver el cálculo animado en la linterna, conviene hacerlo a mano
                     <strong> una vez</strong> sobre la red más pequeña posible: una entrada, una neurona oculta (ReLU) y una salida lineal, con
                     pérdida {String.raw`\(L=(\hat{y}-y)^2\)`}.
                 </p>
@@ -3999,7 +4188,7 @@ print(dW1, dW2)               # -> 16.0  4.0  (la 1.ª capa recibe el mayor grad
                                 Gradientes: {String.raw`\(\partial L/\partial w_2=\delta_2\,a_1=4\)`}, {String.raw`\(\partial L/\partial b_2=\delta_2=4\)`}.</p>
                             <p><strong>(c) Propagar a la oculta:</strong> {String.raw`\(\delta_1=(w_2\,\delta_2)\cdot\mathrm{ReLU}'(z_1)=(2\cdot4)\cdot1=8\)`}.
                                 Gradientes: {String.raw`\(\partial L/\partial w_1=\delta_1\,x=16\)`}, {String.raw`\(\partial L/\partial b_1=\delta_1=8\)`}.</p>
-                            <p style={{ color: '#B45309' }}><strong>Observa la recursión:</strong> {String.raw`\(\delta_1=w_2\,\delta_2\,\sigma'(z_1)\)`}. Si la
+                            <p style={{ color: '#B45309' }}><strong>Conviene observar la recursión:</strong> {String.raw`\(\delta_1=w_2\,\delta_2\,\sigma'(z_1)\)`}. Si la
                                 oculta fuera <strong>sigmoide</strong>, {String.raw`\(\sigma'(z_1)\approx0{,}20\)`} en vez de {String.raw`\(1\)`}, y {String.raw`\(\delta_1\)`}
                                 caería de {String.raw`\(8\)`} a {String.raw`\(1{,}6\)`}: el <strong>desvanecimiento</strong>, visible en una sola capa.</p>
                             <p style={{ color: '#15803D' }}><strong>Un paso (η = 0,1):</strong> {String.raw`\(w_2\leftarrow2-0{,}1\cdot4=1{,}6\)`};
@@ -4007,8 +4196,8 @@ print(dW1, dW2)               # -> 16.0  4.0  (la 1.ª capa recibe el mayor grad
                         </div>
                     }>
                     Una mini-red con {String.raw`\(x=2\)`}, objetivo {String.raw`\(y=0\)`} y pesos {String.raw`\(w_1=0{,}5,\ b_1=0,\ w_2=2,\ b_2=0\)`}
-                    (oculta ReLU, salida lineal). Calcula a mano: (a) el <strong>forward</strong> ({String.raw`\(z_1,a_1,z_2,\hat{y},L\)`}),
-                    (b) {String.raw`\(\delta_2\)`} y {String.raw`\(\partial L/\partial w_2\)`}, y (c) propaga para hallar {String.raw`\(\delta_1\)`} y {String.raw`\(\partial L/\partial w_1\)`}.
+                    (oculta ReLU, salida lineal). Se pide calcular a mano: (a) el <strong>forward</strong> ({String.raw`\(z_1,a_1,z_2,\hat{y},L\)`}),
+                    (b) {String.raw`\(\delta_2\)`} y {String.raw`\(\partial L/\partial w_2\)`}, y (c) propagar para hallar {String.raw`\(\delta_1\)`} y {String.raw`\(\partial L/\partial w_1\)`}.
                 </Reto>
                 <CodeBlock title="La misma retropropagación, en código (numpy)" code={backpropNumpy} />
                 <MCQ
@@ -4033,7 +4222,7 @@ print(dW1, dW2)               # -> 16.0  4.0  (la 1.ª capa recibe el mayor grad
                         <li>Con <strong>Sigmoide</strong> y varias <strong>capas ocultas</strong>, las flechas rosadas de la retropropagación
                             <strong> se apagan</strong> al acercarse a la entrada: es el <strong>desvanecimiento del gradiente</strong> en vivo —las
                             primeras capas casi no aprenden—.</li>
-                        <li>Cambia a <strong>ReLU</strong>: el flujo hacia atrás llega <strong>mucho más brillante</strong> a las capas iniciales (su
+                        <li>Al cambiar a <strong>ReLU</strong>, el flujo hacia atrás llega <strong>mucho más brillante</strong> a las capas iniciales (su
                             derivada vale 1 en la zona activa).</li>
                         <li>La fase <strong>azul</strong> (predicción) siempre se completa <strong>antes</strong> de que empiece la fase <strong>rosa</strong>
                             (cálculo del gradiente): es el orden real <em>forward → backward</em>.</li>
@@ -4114,6 +4303,16 @@ print(dW1, dW2)               # -> 16.0  4.0  (la 1.ª capa recibe el mayor grad
                         justificacion: 'Con requires_grad=True, PyTorch registra cada operación para luego derivarla en backward().'
                     },
                 ]} />
+
+                <Box type="tip" label="Puntos clave del Capítulo 4">
+                    <ul>
+                        <li>La retropropagación resuelve la <strong>asignación de crédito</strong>: cuánta responsabilidad del error carga cada peso.</li>
+                        <li>Se apoya en la <strong>regla de la cadena</strong> sobre un grafo computacional: <em>se multiplican</em> las derivadas locales dentro de una ruta y <em>se suman</em> entre rutas que parten del mismo valor.</li>
+                        <li>El <strong>error por capa</strong> {String.raw`\(\delta^{[l]}\)`} se propaga de atrás hacia adelante; el factor {String.raw`\(\sigma'(z)\)`} explica el <strong>desvanecimiento</strong> (sigmoide) y la <strong>explosión</strong> del gradiente.</li>
+                        <li>Es <strong>eficiente</strong>: una sola pasada hacia atrás reutiliza los valores del forward para obtener todos los gradientes a la vez.</li>
+                        <li>En PyTorch, <span className="inline-code">loss.backward()</span> <strong>calcula</strong> el gradiente; <span className="inline-code">optimizer.step()</span> <strong>actualiza</strong> los pesos.</li>
+                    </ul>
+                </Box>
             </div>
         );
 
@@ -4157,6 +4356,61 @@ print(dW1, dW2)               # -> 16.0  4.0  (la 1.ª capa recibe el mayor grad
                         {cell('FP', 'Pasilla → Excelso. Daña la reputación de la marca.', '#FFFBEB', '#B45309')}
                         {cell('VN', 'Pasilla → Pasilla. Filtro correcto.', '#F0FDF4', '#15803D')}
                     </div>
+                </div>
+            );
+        };
+
+        /* ============================================================
+           GRÁFICA SVG NATIVA: curva ROC y AUC (sin Plotly)
+           Tres clasificadores sobre los mismos ejes: azar (AUC 0,5),
+           modelo real (AUC ≈ 0,85) y perfecto (AUC 1).
+        ============================================================ */
+        const ROCChart = () => {
+            const W = 520, H = 380;
+            const padL = 58, padR = 18, padT = 18, padB = 48;
+            const plotW = W - padL - padR;
+            const plotH = H - padT - padB;
+            const xPix = f => padL + f * plotW;            // FPR en [0,1]
+            const yPix = t => padT + plotH - t * plotH;    // TPR en [0,1]
+
+            // Modelo real: TPR = FPR^0.176  ->  AUC = 1/(0.176+1) ≈ 0,85
+            let dReal = '';
+            for (let i = 0; i <= 100; i++) {
+                const f = i / 100, t = Math.pow(f, 0.176);
+                dReal += (i === 0 ? 'M' : 'L') + xPix(f).toFixed(1) + ' ' + yPix(t).toFixed(1) + ' ';
+            }
+            const dArea = dReal + 'L' + xPix(1).toFixed(1) + ' ' + yPix(0).toFixed(1) + ' L' + xPix(0).toFixed(1) + ' ' + yPix(0).toFixed(1) + ' Z';
+            const ticks = [0, 0.25, 0.5, 0.75, 1];
+            const cy = padT + plotH / 2;
+
+            return (
+                <div className="my-4">
+                    <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img"
+                        aria-label="Curva ROC: relaciona la tasa de verdaderos positivos (recall) con la tasa de falsos positivos al variar el umbral de decisión. La diagonal es un clasificador al azar (AUC 0,5); una curva que se abomba hacia la esquina superior izquierda es un buen modelo (AUC 0,85); el ángulo recto perfecto alcanza AUC 1."
+                        style={{ display: 'block', maxWidth: '560px', margin: '0 auto', background: '#FAF8FF', borderRadius: '12px', border: '1px solid rgba(61,0,141,0.12)' }}>
+                        {ticks.map(t => (
+                            <g key={'g' + t}>
+                                <line x1={padL} y1={yPix(t)} x2={W - padR} y2={yPix(t)} stroke="#E2E8F0" strokeWidth="1" />
+                                <text x={padL - 8} y={yPix(t) + 4} textAnchor="end" fontSize="11" fill="#64748B" fontFamily="Montserrat">{t.toFixed(2)}</text>
+                                <text x={xPix(t)} y={padT + plotH + 18} textAnchor="middle" fontSize="11" fill="#64748B" fontFamily="Montserrat">{t.toFixed(2)}</text>
+                            </g>
+                        ))}
+                        <line x1={padL} y1={padT} x2={padL} y2={padT + plotH} stroke="#94A3B8" strokeWidth="1.5" />
+                        <line x1={padL} y1={padT + plotH} x2={W - padR} y2={padT + plotH} stroke="#94A3B8" strokeWidth="1.5" />
+                        <path d={dArea} fill="rgba(237,30,121,0.10)" stroke="none" />
+                        <path d={`M ${xPix(0)} ${yPix(0)} L ${xPix(0)} ${yPix(1)} L ${xPix(1)} ${yPix(1)}`} fill="none" stroke="#15803D" strokeWidth="2.5" />
+                        <line x1={xPix(0)} y1={yPix(0)} x2={xPix(1)} y2={yPix(1)} stroke="#94A3B8" strokeWidth="2" strokeDasharray="6,4" />
+                        <path d={dReal} fill="none" stroke="#ED1E79" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                        <text x={xPix(0.14)} y={yPix(0.965)} fontSize="11.5" fill="#15803D" fontFamily="Montserrat" fontWeight="700">Perfecto · AUC = 1</text>
+                        <text x={xPix(0.30)} y={yPix(0.66)} fontSize="11.5" fill="#ED1E79" fontFamily="Montserrat" fontWeight="700">Modelo real · AUC ≈ 0,85</text>
+                        <text x={xPix(0.58)} y={yPix(0.50)} textAnchor="middle" fontSize="11" fill="#64748B" fontFamily="Montserrat" fontWeight="700" transform={`rotate(-35 ${xPix(0.58)} ${yPix(0.50)})`}>Azar · AUC = 0,5</text>
+                        <text x={padL + plotW / 2} y={H - 8} textAnchor="middle" fontSize="12" fill="#334155" fontFamily="Montserrat" fontWeight="600">Tasa de falsos positivos — FPR = FP / (FP + VN)</text>
+                        <text transform={`rotate(-90 16 ${cy})`} x="16" y={cy} textAnchor="middle" fontSize="12" fill="#334155" fontFamily="Montserrat" fontWeight="600">Tasa de verdaderos positivos (recall)</text>
+                    </svg>
+                    <p className="text-xs text-gray-500 text-center mt-2" style={{ fontStyle: 'italic' }}>
+                        La curva ROC recorre todos los umbrales: cuanto más se abomba hacia la esquina superior izquierda, mejor separa las
+                        clases. El área bajo la curva (AUC) resume ese desempeño en un solo número, independiente del umbral y del balance de clases.
+                    </p>
                 </div>
             );
         };
@@ -4258,7 +4512,9 @@ red = nn.Sequential(
                     Analogía del <strong>Ajiaco Santafereño</strong>: las papas (sabanera, pastusa, criolla) llegan con tamaños muy
                     variables; si entran a la olla sin estandarizar, la cocción es impredecible. La solución es cortar todo a cubos
                     uniformes. Batch Norm hace lo mismo entre capas: re-escala las activaciones para que cada neurona reciba una
-                    distribución estable, permitiendo tasas de aprendizaje altas sin inestabilidad.
+                    distribución estable, permitiendo tasas de aprendizaje altas sin inestabilidad. El fenómeno que mitiga se conoce
+                    como <strong>desplazamiento de covariables interno</strong> (<em>internal covariate shift</em>): la distribución de
+                    las entradas de cada capa cambia conforme se actualizan los pesos de las capas previas.
                 </p>
                 <Accordion items={[
                     { titulo: '1. Centrado (restar la media del lote)', contenido: <span>{String.raw`\(\mu_{\mathcal{B}}=\frac{1}{m}\sum_i x_i\)`}. Es como lavar las papas: todas parten de una base limpia y centrada.</span> },
@@ -4278,33 +4534,17 @@ red = nn.Sequential(
                     quedan altos, hay <strong>subajuste (underfitting)</strong>. El <Termino def="Detener el entrenamiento en la época donde el error de validación toca su mínimo, conservando esos pesos, antes de que el modelo empiece a memorizar ruido.">Early Stopping</Termino> (parada temprana) aprovecha esa «U»: detiene el entrenamiento en el mínimo del error de validación y conserva esos pesos.
                 </p>
                 <CurvaAprendizajeChart />
-
-                <h3>La «U» en tu propia red: validación y regularización en vivo</h3>
                 <p>
-                    La curva anterior es ilustrativa; ahora se trata de <strong>provocar la «U» en la misma red</strong> de los capítulos
-                    previos. El laboratorio reserva un <strong>30 % de los datos como validación</strong> (que la red <em>no</em> usa para
-                    entrenar) y dibuja <strong>dos curvas</strong>: entrenamiento (rosa) y validación (morado). Sube la <strong>capacidad</strong>
-                    (nodos y capas) y entrena muchas épocas: la curva rosa seguirá bajando mientras la morada empieza a <strong>repuntar</strong>
-                    —ese despegue es el sobreajuste—. Luego activa <strong>λ (L2)</strong> o <strong>dropout</strong> y observa cómo la brecha se cierra.
+                    Esta curva es ilustrativa, pero no quedará en teoría: el <strong>laboratorio integrador</strong> que cierra el capítulo
+                    permitirá <strong>provocar la «U» en la propia red</strong> de los capítulos previos y, después, auditar sus consecuencias.
+                    Antes conviene reunir las herramientas que ese experimento necesita: una <strong>partición honesta</strong> de los datos y
+                    métricas más finas que la exactitud.
                 </p>
-                <RedFrontera chapter={5} />
-                <Box type="tip" label="Qué conviene observar (desde el Capítulo 5)">
-                    <ul>
-                        <li><strong>Induce el sobreajuste:</strong> con muchos nodos y muchas épocas, la pérdida de <strong>validación (morada)</strong>
-                            forma una <strong>«U»</strong> mientras la de entrenamiento sigue cayendo: la red memoriza el ruido.</li>
-                        <li><strong>Regulariza:</strong> sube <strong>λ</strong> y la frontera se <em>suaviza</em>; el término L2 empuja los pesos hacia cero y la «U» se aplana.</li>
-                        <li><strong>Dropout:</strong> apaga neuronas al azar en cada época de entrenamiento; rompe la co-adaptación y reduce la brecha train/validación
-                            —pero la <strong>predicción sigue siendo determinista</strong> (no se aplica al evaluar)—.</li>
-                        <li><strong>Audita la equidad:</strong> al pie del laboratorio, el <strong>Auditor de Equidad</strong> reparte la validación en dos subgrupos (A y B).
-                            El subgrupo B —con datos más ruidosos— recibe sistemáticamente <strong>más falsos negativos</strong>: el sesgo no se programó, se <em>heredó</em>.
-                            Mover el umbral o activar el «costo del falso negativo» muestra que cerrar la brecha de un grupo casi siempre la abre en otro.</li>
-                    </ul>
-                </Box>
 
                 <h3>Partición honesta: entrenamiento, validación y prueba</h3>
                 <p>
-                    El laboratorio reservó un 30 % para validación, pero un proyecto serio parte los datos en <strong>tres</strong> conjuntos
-                    disjuntos, cada uno con un papel distinto:
+                    Provocar la «U» exige reservar datos que la red <em>no</em> vea al entrenar. Un proyecto serio parte los datos en
+                    <strong> tres</strong> conjuntos disjuntos, cada uno con un papel distinto:
                 </p>
                 <div className="grid md:grid-cols-3 gap-3 my-3">
                     <div className="usta-card p-4"><h4 style={{ marginTop: 0 }}>Entrenamiento · ~70 %</h4><p className="text-sm !mb-0">Ajusta los <strong>pesos</strong> por descenso del gradiente. La red lo ve una y otra vez.</p></div>
@@ -4367,8 +4607,8 @@ red = nn.Sequential(
                 <p>
                     Precisión y recall <strong>tiran en sentidos opuestos</strong>. <strong>Bajar</strong> el umbral de decisión declara más positivos:
                     sube el recall (se escapan menos enfermos) pero baja la precisión (más falsas alarmas); <strong>subirlo</strong> hace lo contrario.
-                    No hay un punto óptimo universal —depende del costo de cada error—. Es exactamente lo que mueve el <strong>slider de umbral del
-                    Auditor de Equidad</strong> del laboratorio de arriba.
+                    No hay un punto óptimo universal —depende del costo de cada error—. Es exactamente lo que permitirá mover el <strong>deslizador
+                    de umbral del Auditor de Equidad</strong>, en el laboratorio integrador que cierra el capítulo.
                 </p>
                 <p>Para resumir ambas en un solo número se usa el <strong>F1</strong>, su media armónica (penaliza que <em>cualquiera</em> de las dos sea baja):</p>
                 <Eq>{String.raw`$$ F_1 = 2\cdot\frac{\text{precisión}\cdot\text{recall}}{\text{precisión}+\text{recall}} $$`}</Eq>
@@ -4377,15 +4617,19 @@ red = nn.Sequential(
                     (AUC)</strong>: {String.raw`\(\text{AUC}=1\)`} es perfecto, {String.raw`\(0{,}5\)`} es azar. Es útil porque no depende del umbral
                     elegido ni del balance de clases.
                 </p>
-                <CalloutPro tema="eth" titulo="Marco Ético de la IA en Colombia" subtitulo="Transparencia, explicabilidad y sensibilidad">
+                <ROCChart />
+                <Box type="info" label="Por qué no se optimiza la exactitud directamente">
                     Las métricas derivadas de la matriz de confusión (exactitud, recall) se calculan con <strong>conteos sobre un
-                        umbral</strong>, por lo que su gradiente es nulo o indefinido y no pueden optimizarse directamente por descenso
-                    del gradiente. Lo que sí se optimiza es la pérdida (p. ej. la entropía cruzada); las métricas <strong>guían las
-                        decisiones de ingeniería</strong>: ante muchos falsos negativos (ej. fraude en Bancolombia, o dengue), se asignan
-                    <em>pesos de clase</em> para penalizarlos más. En aplicaciones críticas para Colombia —deslizamientos,
-                    enfermedades, plagas— suele ser más ético priorizar la <strong>sensibilidad</strong>. El Marco Ético
-                    para la IA en Colombia (2021) exige <strong>transparencia y explicabilidad</strong>: una decisión que afecta derechos
-                    fundamentales no puede ser una «caja negra».
+                    umbral</strong>, por lo que su gradiente es nulo o indefinido y no pueden optimizarse directamente por descenso del
+                    gradiente. Lo que sí se optimiza es la <strong>pérdida</strong> (p. ej. la entropía cruzada); las métricas
+                    <strong> guían las decisiones de ingeniería</strong>: ante muchos falsos negativos (fraude en Bancolombia, o dengue),
+                    se asignan <em>pesos de clase</em> para penalizarlos más.
+                </Box>
+                <CalloutPro tema="eth" titulo="Marco Ético de la IA en Colombia" subtitulo="Transparencia, explicabilidad y sensibilidad">
+                    En aplicaciones críticas para Colombia —deslizamientos, enfermedades, plagas— suele ser más ético priorizar la
+                    <strong> sensibilidad</strong> (recall) sobre la exactitud global. El Marco Ético para la IA en Colombia (2021) exige
+                    <strong> transparencia y explicabilidad</strong>: una decisión que afecta derechos fundamentales no puede ser una
+                    «caja negra», sino que debe poder auditarse y explicarse ante las comunidades afectadas.
                 </CalloutPro>
 
                 <h3>Equidad algorítmica: el sesgo que se hereda</h3>
@@ -4405,9 +4649,46 @@ red = nn.Sequential(
                     registros de veredas rurales y resguardos indígenas</strong>. Resultado: alta exactitud global, pero un <strong>recall bajo justo
                     donde un falso negativo cuesta vidas</strong>. Auditar por subgrupo —y no solo el promedio— es un requisito ético, no un lujo.
                 </Box>
+                <h3>Laboratorio integrador: provocar la «U»… y auditar sus consecuencias</h3>
                 <p>
-                    El <strong>Auditor de Equidad</strong> del laboratorio encarna todo esto: el subgrupo B recibe más falsos negativos que el A, y al
-                    mover el umbral o activar el costo del error se ve que <strong>cerrar la brecha de un grupo casi siempre tiene un precio en el otro</strong>.
+                    Todo el capítulo converge aquí, en <strong>dos actos</strong> sobre la misma red de los capítulos previos. El laboratorio
+                    reserva un <strong>30 % de los datos como validación</strong> (la red <em>no</em> los usa para entrenar) y dibuja
+                    <strong> dos curvas</strong> de pérdida: entrenamiento (rosa) y validación (morado).
+                </p>
+                <p>
+                    <strong>Acto 1 · sobreajuste y regularización.</strong> Al subir la <strong>capacidad</strong> (nodos y capas) y entrenar
+                    muchas épocas, la curva rosa sigue bajando mientras la morada <strong>repunta</strong>: esa es la «U» de las curvas de
+                    aprendizaje. Al activar luego <strong>λ (L2)</strong> o <strong>dropout</strong>, la brecha se cierra.
+                </p>
+                <p>
+                    <strong>Acto 2 · auditoría de equidad.</strong> Al pie del laboratorio, el <strong>Auditor de Equidad</strong> calcula la
+                    matriz de confusión <em>por subgrupo</em> —la misma tabla de la trilladora, ahora dos veces— y compara la tasa de falsos
+                    negativos (FNR) entre A y B: la <strong>brecha de igualdad de oportunidad</strong> recién definida, medida en la propia red.
+                </p>
+                <RedFrontera chapter={5} />
+                <Box type="tip" label="Acto 1 · qué conviene observar (sobreajuste y regularización)">
+                    <ul>
+                        <li><strong>Para inducir el sobreajuste:</strong> con muchos nodos y muchas épocas, la pérdida de <strong>validación (morada)</strong>
+                            forma una <strong>«U»</strong> mientras la de entrenamiento sigue cayendo: la red memoriza el ruido.</li>
+                        <li><strong>Al regularizar:</strong> al subir <strong>λ</strong> la frontera se <em>suaviza</em>; el término L2 empuja los pesos hacia cero y la «U» se aplana.</li>
+                        <li><strong>Dropout:</strong> apaga neuronas al azar en cada época de entrenamiento; rompe la co-adaptación y reduce la brecha train/validación
+                            —pero la <strong>predicción sigue siendo determinista</strong> (no se aplica al evaluar)—.</li>
+                    </ul>
+                </Box>
+                <Box type="eth" label="Acto 2 · protocolo de auditoría, paso a paso">
+                    <ol>
+                        <li><strong>Entrenar</strong> hasta que la precisión se estabilice (botón «Entrenar»).</li>
+                        <li><strong>Comparar los falsos negativos:</strong> en las dos tablas del Auditor, el subgrupo B —cuyos datos llevan más
+                            ruido— acumula <strong>más casos positivos sin alerta</strong> (FNR mayor). Nadie programó ese sesgo: se <em>heredó</em> de los datos.</li>
+                        <li><strong>Mover el umbral:</strong> al bajarlo se emiten más alertas (menos FN, más falsas alarmas) en ambos grupos; la
+                            brecha cambia de tamaño, pero rara vez desaparece.</li>
+                        <li><strong>Activar el «costo del falso negativo» (6×)</strong> y, después, <strong>reiniciar pesos y reentrenar</strong>: la
+                            pérdida ahora castiga más dejar positivos sin alerta — el remedio técnico que anticipó el recuadro ético del Capítulo 3.</li>
+                    </ol>
+                    <p className="!mb-0">La lección de fondo: <strong>cerrar la brecha de un grupo casi siempre tiene un precio en el otro</strong> (o en
+                        las falsas alarmas globales). La equidad no es un ajuste gratuito, sino una <strong>decisión con costos</strong>.</p>
+                </Box>
+                <p>
                     De hecho, distintas definiciones de «justicia» (paridad demográfica frente a igualdad de oportunidad) pueden ser <strong>matemáticamente
                     incompatibles</strong> entre sí: la equidad obliga a <em>elegir</em> qué se prioriza, de forma transparente y con las comunidades afectadas.
                 </p>
@@ -4573,11 +4854,11 @@ red = nn.Sequential(
                     <table>
                         <thead><tr><th>Código</th><th>Acción</th></tr></thead>
                         <tbody>
-                            <tr><td>1. <span className="inline-code">optimizer.zero_grad()</span></td><td>(I) Borra el historial de "culpas" anteriores.</td></tr>
-                            <tr><td>2. <span className="inline-code">loss.backward()</span></td><td>(K) Calcula la derivada del error respecto a cada peso.</td></tr>
-                            <tr><td>3. <span className="inline-code">model(batch_x)</span></td><td>(H) Ejecuta la predicción inicial (forward pass).</td></tr>
-                            <tr><td>4. <span className="inline-code">nn.ReLU()</span></td><td>(L) Apaga los valores negativos (no-linealidad).</td></tr>
-                            <tr><td>5. <span className="inline-code">optimizer.step()</span></td><td>(J) Modifica los pesos restando una fracción del gradiente.</td></tr>
+                            <tr><td>1. <span className="inline-code">optimizer.zero_grad()</span></td><td>(H) Ejecuta la predicción inicial (forward pass).</td></tr>
+                            <tr><td>2. <span className="inline-code">loss.backward()</span></td><td>(J) Modifica los pesos restando una fracción del gradiente.</td></tr>
+                            <tr><td>3. <span className="inline-code">model(batch_x)</span></td><td>(L) Apaga los valores negativos (no-linealidad).</td></tr>
+                            <tr><td>4. <span className="inline-code">nn.ReLU()</span></td><td>(I) Borra el historial de "culpas" anteriores.</td></tr>
+                            <tr><td>5. <span className="inline-code">optimizer.step()</span></td><td>(K) Calcula la derivada del error respecto a cada peso.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -4697,7 +4978,7 @@ red = nn.Sequential(
                     {
                         titulo: 'Videos y herramientas por capítulo', contenido: <ul className="text-sm">
                             <li>Cap. 1 — StatQuest: <a className="text-primary underline" href="https://www.youtube.com/watch?v=CqOfi41LfDw" target="_blank" rel="noopener noreferrer">The Essential Main Ideas of Neural Networks</a>.</li>
-                            <li>Cap. 2 — <a className="text-primary underline" href="https://playground.tensorflow.org" target="_blank" rel="noopener noreferrer">TensorFlow Playground</a> (juegue con redes en tiempo real).</li>
+                            <li>Cap. 2 — <a className="text-primary underline" href="https://playground.tensorflow.org" target="_blank" rel="noopener noreferrer">TensorFlow Playground</a> (permite experimentar con redes en tiempo real).</li>
                             <li>Cap. 3 — Dot CSV: <a className="text-primary underline" href="https://www.youtube.com/watch?v=A6FiCDoz8_4" target="_blank" rel="noopener noreferrer">¿Qué es el Descenso del Gradiente?</a></li>
                             <li>Cap. 4 — Khan Academy: <a className="text-primary underline" href="https://es.khanacademy.org/math/multivariable-calculus" target="_blank" rel="noopener noreferrer">Cálculo multivariable y descenso del gradiente</a>.</li>
                             <li>Cap. 5 — MinCiencias: <a className="text-primary underline" href="https://minciencias.gov.co/sites/default/files/marco-etico-ia-colombia-2021.pdf" target="_blank" rel="noopener noreferrer">Marco Ético para la IA en Colombia</a>.</li>
