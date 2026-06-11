@@ -4460,6 +4460,12 @@ red = nn.Sequential(
                     { num: 4, title: 'backward', desc: 'Calcula los gradientes.' },
                     { num: 5, title: 'step', desc: 'Actualiza los pesos.' },
                 ]} />
+                <p>
+                    Conviene notar que el bucle no inventa nada nuevo: solo <strong>ensambla</strong> lo aprendido en los capítulos
+                    previos. El paso 1 (<em>forward</em>) es la propagación hacia adelante del Capítulo 2; el 2 (<em>loss</em>), la función
+                    de costo del Capítulo 3; el 4 (<em>backward</em>), la retropropagación del Capítulo 4; y el 5 (<em>step</em>), el
+                    descenso del gradiente que actualiza los pesos. El único paso realmente <strong>nuevo y «administrativo»</strong> es el 3.
+                </p>
                 <CodeBlock title="El training loop en PyTorch" code={trainingLoopTorch} lang="pytorch" />
                 <Box type="warn" label="¿Por qué zero_grad()?">
                     PyTorch <strong>acumula</strong> gradientes por defecto. Si no se limpian antes de cada paso, se sumarían los de
@@ -4468,7 +4474,13 @@ red = nn.Sequential(
                 </Box>
 
                 <h3>Sobreajuste vs. generalización (la analogía del ICFES)</h3>
-                <p>Dos estudiantes preparan el ICFES con un cuadernillo del año pasado:</p>
+                <p>
+                    Ya se sabe entrenar la red; ahora hay que entrenar <em>bien</em>. Y entrenar bien no es entrenar <em>mucho</em>: un error
+                    de entrenamiento casi nulo no garantiza nada, porque el objetivo real no es acertar en los datos ya vistos,
+                    sino <strong>generalizar</strong> a datos <em>nuevos</em>. Una red con demasiada capacidad para pocos datos
+                    puede <strong>memorizar</strong> en lugar de aprender —la misma diferencia que separa a dos estudiantes que
+                    preparan el ICFES con un cuadernillo del año pasado:
+                </p>
                 <div className="grid md:grid-cols-2 gap-4">
                     <div className="usta-card p-5">
                         <h4 style={{ marginTop: 0 }}>Estudiante A · memoriza</h4>
@@ -4480,8 +4492,8 @@ red = nn.Sequential(
                     </div>
                 </div>
                 <p>
-                    El <strong>sobreajuste (overfitting)</strong> es ser el Estudiante A: si una red tiene demasiada capacidad para
-                    pocos datos, memoriza el ruido (sombras de nubes, insectos) en lugar de los patrones reales de la enfermedad.
+                    El <strong>sobreajuste (overfitting)</strong> es ser el Estudiante A: la red <strong>memoriza el ruido</strong> de los datos
+                    de entrenamiento —sombras de nubes, un insecto en la foto de una hoja— en vez de los patrones reales de la enfermedad.
                 </p>
 
                 <h3>Regularización: la navaja de Ockham</h3>
