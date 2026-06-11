@@ -2291,8 +2291,8 @@ modelo = nn.Sequential(
 
             // Regenerar datos al cambiar de conjunto
             useEffect(() => {
-                if (chapter >= 5) {                       // Cap 5: datos MÁS RUIDOSOS (clases solapadas) + split train/val 70/30
-                    const all = dataset === 'lunas' ? genLunas(280, 0.42, true) : genCirculos(280, 0.34, true);
+                if (chapter >= 5) {                       // Cap 5: datos algo más ruidosos (clases que se solapan, sin perder la forma) + split train/val 70/30
+                    const all = dataset === 'lunas' ? genLunas(280, 0.28, true) : genCirculos(280, 0.20, true);
                     const sh = all.slice(); for (let i = sh.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = sh[i]; sh[i] = sh[j]; sh[j] = t; }
                     const cut = Math.floor(sh.length * 0.7);
                     datosRef.current = sh.slice(0, cut); valRef.current = sh.slice(cut);
@@ -4346,15 +4346,15 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
             );
             const hdr = (t) => <div className="font-semibold text-xs text-navy flex items-end justify-center pb-1">{t}</div>;
             return (
-                <div className="my-4 overflow-x-auto">
-                    <div className="inline-grid gap-2" style={{ gridTemplateColumns: 'auto 150px 150px', minWidth: 420 }}>
-                        <div></div>{hdr('Predicho: Excelso')}{hdr('Predicho: Pasilla')}
-                        <div className="font-semibold text-xs text-navy flex items-center" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Real: Excelso</div>
-                        {cell('VP', 'Excelso → Excelso. Beneficia a todos.', '#F0FDF4', '#15803D')}
-                        {cell('FN', 'Excelso → Pasilla. Pérdida para el caficultor.', '#FEF2F2', '#B91C1C')}
-                        <div className="font-semibold text-xs text-navy flex items-center" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Real: Pasilla</div>
-                        {cell('FP', 'Pasilla → Excelso. Daña la reputación de la marca.', '#FFFBEB', '#B45309')}
-                        {cell('VN', 'Pasilla → Pasilla. Filtro correcto.', '#F0FDF4', '#15803D')}
+                <div className="my-4 overflow-x-auto text-center">
+                    <div className="inline-grid gap-2 text-left" style={{ gridTemplateColumns: 'auto 150px 150px', minWidth: 420 }}>
+                        <div></div>{hdr('Predicho: Grave')}{hdr('Predicho: No grave')}
+                        <div className="font-semibold text-xs text-navy flex items-center" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Real: Grave</div>
+                        {cell('VP', 'Grave → Grave. Se detecta y atiende a tiempo.', '#F0FDF4', '#15803D')}
+                        {cell('FN', 'Grave → No grave. Un caso grave sin alerta (lo más costoso).', '#FEF2F2', '#B91C1C')}
+                        <div className="font-semibold text-xs text-navy flex items-center" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Real: No grave</div>
+                        {cell('FP', 'No grave → Grave. Falsa alarma: recursos de más.', '#FFFBEB', '#B45309')}
+                        {cell('VN', 'No grave → No grave. Descartado correctamente.', '#F0FDF4', '#15803D')}
                     </div>
                 </div>
             );
@@ -4485,12 +4485,32 @@ red = nn.Sequential(
                 </p>
 
                 <h3>Regularización: la navaja de Ockham</h3>
-                <p>Para evitar la «trampa» de memorizar, se penaliza la complejidad en la función objetivo:</p>
-                <Eq>{String.raw`$$ \text{Costo Total} = L(\hat{\mathbf{y}}, \mathbf{y}) + \lambda\,\Omega(\mathbf{w}) $$`}</Eq>
                 <p>
-                    donde {String.raw`\(\lambda \ge 0\)`} controla la fuerza de la regularización y {String.raw`\(\Omega(\mathbf{w})\)`}
-                    penaliza los pesos grandes.
+                    Hasta aquí el entrenamiento perseguía una sola meta: minimizar la <strong>pérdida</strong> {String.raw`\(L(\hat{\mathbf{y}},\mathbf{y})\)`},
+                    es decir, encajar los datos de entrenamiento lo mejor posible. Pero esa meta única premia a la red que
+                    <em> memoriza</em>: una función muy retorcida que pasa por todos los puntos —ruido incluido— logra una pérdida casi nula
+                    y, aun así, generaliza mal. La regularización añade un <strong>segundo término</strong> que cobra un «peaje» por la
+                    complejidad, de modo que el entrenamiento debe equilibrar <strong>dos objetivos a la vez</strong>:
                 </p>
+                <Eq>{String.raw`$$ \text{Costo total} \;=\; \underbrace{L(\hat{\mathbf{y}}, \mathbf{y})}_{\substack{\text{ajuste a} \\ \text{los datos}}} \;+\; \underbrace{\lambda\,\Omega(\mathbf{w})}_{\substack{\text{penalización por} \\ \text{complejidad}}} $$`}</Eq>
+                <ul>
+                    <li><strong>Ajuste a los datos</strong> — {String.raw`\(L(\hat{\mathbf{y}},\mathbf{y})\)`}: la pérdida de siempre (MSE, BCE…); baja cuando la red acierta en el entrenamiento.</li>
+                    <li><strong>Penalización por complejidad</strong> — {String.raw`\(\lambda\,\Omega(\mathbf{w})\)`}: {String.raw`\(\Omega(\mathbf{w})\)`} crece con los <strong>pesos grandes</strong> —los que producen fronteras abruptas y retorcidas—; reducirla empuja los pesos hacia cero y <strong>suaviza</strong> el modelo.</li>
+                </ul>
+                <p>
+                    El coeficiente {String.raw`\(\lambda \ge 0\)`} es la <strong>perilla</strong> que gradúa ese equilibrio. Con {String.raw`\(\lambda = 0\)`}{' '}
+                    se recupera el costo de antes (sin freno alguno → riesgo de <strong>sobreajuste</strong>); con un {String.raw`\(\lambda\)`} demasiado
+                    grande la simplicidad manda y la red ni siquiera llega a ajustar los datos (<strong>subajuste</strong>). El valor que mejor
+                    equilibra ambos extremos es un <strong>hiperparámetro</strong> que se busca en validación —y es justo el control
+                    {String.raw` \(\lambda\)`} del laboratorio integrador que cierra el capítulo—.
+                </p>
+                <Box type="tip" label="¿Por qué «navaja de Ockham»?">
+                    El principio de Ockham aconseja, entre dos explicaciones igual de buenas, quedarse con la <strong>más simple</strong>. El
+                    término {String.raw`\(\lambda\,\Omega(\mathbf{w})\)`} traduce esa idea a número: a igualdad de ajuste, gana el modelo de
+                    <strong> pesos más pequeños</strong>. En el descenso del gradiente, {String.raw`\(L2\)`} suma {String.raw`\(\lambda\,\mathbf{w}\)`}{' '}
+                    al gradiente de cada peso, de manera que cada paso <strong>descuenta una fracción del propio peso</strong> —de ahí su otro
+                    nombre, <em>decaimiento de pesos</em> (<span className="inline-code">weight_decay</span>)—.
+                </Box>
                 <Tabs tabs={[
                     { label: 'L2 (Ridge)', content: <span>{String.raw`\(\Omega(\mathbf{w})=\tfrac{1}{2}\sum_j w_j^2\)`}. Como un estudiante que repasa todos los capítulos por igual: empuja los pesos a ser pequeños pero <strong>ninguno se anula</strong>. Distribuye la importancia. En PyTorch se activa con el argumento <span className="inline-code">weight_decay</span> del optimizador (el {String.raw`\(\lambda\)`} de la fórmula).</span> },
                     { label: 'L1 (Lasso)', content: <span>{String.raw`\(\Omega(\mathbf{w})=\sum_j |w_j|\)`}. Como un estudiante pragmático que resalta solo lo esencial: fuerza a <strong>cero</strong> los pesos irrelevantes (ej. «color del vehículo»). Produce modelos dispersos e interpretables.</span> },
@@ -4509,17 +4529,19 @@ red = nn.Sequential(
 
                 <h3>Normalización por lotes (Batch Normalization)</h3>
                 <p>
-                    Analogía del <strong>Ajiaco Santafereño</strong>: las papas (sabanera, pastusa, criolla) llegan con tamaños muy
-                    variables; si entran a la olla sin estandarizar, la cocción es impredecible. La solución es cortar todo a cubos
-                    uniformes. Batch Norm hace lo mismo entre capas: re-escala las activaciones para que cada neurona reciba una
-                    distribución estable, permitiendo tasas de aprendizaje altas sin inestabilidad. El fenómeno que mitiga se conoce
-                    como <strong>desplazamiento de covariables interno</strong> (<em>internal covariate shift</em>): la distribución de
-                    las entradas de cada capa cambia conforme se actualizan los pesos de las capas previas.
+                    Imagínese una tabla que mezcla columnas en <strong>escalas muy distintas</strong> —estatura en metros ({String.raw`\(\approx 1{,}7\)`}),
+                    peso en kilos ({String.raw`\(\approx 70\)`}) e ingresos en miles—: las columnas de números grandes dominan y la comparación se
+                    vuelve injusta. La solución habitual es <strong>estandarizar</strong> cada columna: restarle su media y dividirla por su
+                    desviación, de modo que todas queden <strong>centradas en cero y con la misma escala</strong>. Batch Norm hace exactamente
+                    eso, pero <strong>entre capas</strong> y lote a lote: re-centra y re-escala las activaciones para que cada neurona reciba una
+                    distribución estable, lo que permite usar tasas de aprendizaje más altas sin que el entrenamiento se desestabilice. El
+                    fenómeno que mitiga se conoce como <strong>desplazamiento de covariables interno</strong> (<em>internal covariate shift</em>):
+                    la distribución de las entradas de cada capa cambia conforme se actualizan los pesos de las capas previas.
                 </p>
                 <Accordion items={[
-                    { titulo: '1. Centrado (restar la media del lote)', contenido: <span>{String.raw`\(\mu_{\mathcal{B}}=\frac{1}{m}\sum_i x_i\)`}. Es como lavar las papas: todas parten de una base limpia y centrada.</span> },
-                    { titulo: '2. Escalado (dividir por la desviación estándar)', contenido: <span>{String.raw`\(\hat{x}_i=\frac{x_i-\mu_{\mathcal{B}}}{\sqrt{\sigma_{\mathcal{B}}^2+\epsilon}}\)`}. Cortar las papas en cubos del mismo tamaño: todas con escala 1.</span> },
-                    { titulo: '3. Transformación aprendible (γ y β)', contenido: <span>{String.raw`\(y_i=\gamma\,\hat{x}_i+\beta\)`}. El chef añade sal ({String.raw`\(\beta\)`}) y ajusta el fuego ({String.raw`\(\gamma\)`}): la red decide cuánto deshacer la estandarización.</span> },
+                    { titulo: '1. Centrado (restar la media del lote)', contenido: <span>{String.raw`\(\mu_{\mathcal{B}}=\frac{1}{m}\sum_i x_i\)`}. Se le resta a cada valor la media de su lote: el conjunto queda <strong>centrado en cero</strong>.</span> },
+                    { titulo: '2. Escalado (dividir por la desviación estándar)', contenido: <span>{String.raw`\(\hat{x}_i=\frac{x_i-\mu_{\mathcal{B}}}{\sqrt{\sigma_{\mathcal{B}}^2+\epsilon}}\)`}. Dividir por la desviación lleva todo a la <strong>misma escala</strong> (varianza {String.raw`\(\approx 1\)`}): ninguna característica domina ya por su magnitud.</span> },
+                    { titulo: '3. Transformación aprendible (γ y β)', contenido: <span>{String.raw`\(y_i=\gamma\,\hat{x}_i+\beta\)`}. {String.raw`\(\gamma\)`} re-escala y {String.raw`\(\beta\)`} desplaza: la red decide cuánto conviene <em>deshacer</em> la estandarización, por si el rango original sí era útil.</span> },
                 ]} />
                 <Box type="info" label="Detalle clave: entrenamiento vs. inferencia">
                     Durante el entrenamiento, Batch Norm usa la media y la varianza <strong>del lote actual</strong>; en inferencia
@@ -4529,9 +4551,16 @@ red = nn.Sequential(
 
                 <h3>Curvas de aprendizaje y Early Stopping</h3>
                 <p>
-                    Graficar el error de entrenamiento y validación a lo largo de las épocas diagnostica la salud del modelo. Si el
-                    de entrenamiento baja pero el de validación sube (forma de «U»), hay <strong>sobreajuste</strong>. Si ambos
-                    quedan altos, hay <strong>subajuste (underfitting)</strong>. El <Termino def="Detener el entrenamiento en la época donde el error de validación toca su mínimo, conservando esos pesos, antes de que el modelo empiece a memorizar ruido.">Early Stopping</Termino> (parada temprana) aprovecha esa «U»: detiene el entrenamiento en el mínimo del error de validación y conserva esos pesos.
+                    Hasta aquí se ha definido el <strong>sobreajuste</strong> (la red que memoriza) y se han visto técnicas que actúan
+                    <em> durante</em> el entrenamiento: <strong>regularización</strong> y <strong>dropout</strong> para frenarlo, y
+                    <strong> normalización por lotes</strong> para estabilizarlo. Queda una pregunta práctica común a todas: ¿cómo saber si
+                    están funcionando —si el modelo realmente <strong>generaliza</strong>— y, sobre todo, <strong>cuándo conviene detener</strong> el
+                    entrenamiento? El instrumento para responderla son las <strong>curvas de aprendizaje</strong>.
+                </p>
+                <p>
+                    Consisten en graficar el error de <strong>entrenamiento</strong> y de <strong>validación</strong> a lo largo de las épocas;
+                    su forma diagnostica la salud del modelo. Si el de entrenamiento baja pero el de validación sube (la <strong>«U»</strong>),
+                    hay <strong>sobreajuste</strong>; si ambos quedan altos, hay <strong>subajuste (underfitting)</strong>. El <Termino def="Detener el entrenamiento en la época donde el error de validación toca su mínimo, conservando esos pesos, antes de que el modelo empiece a memorizar ruido.">Early Stopping</Termino> (parada temprana) aprovecha esa «U»: detiene el entrenamiento en el mínimo del error de validación y conserva esos pesos —un remedio que <em>depende</em> directamente de este diagnóstico—.
                 </p>
                 <CurvaAprendizajeChart />
                 <p>
@@ -4543,8 +4572,11 @@ red = nn.Sequential(
 
                 <h3>Partición honesta: entrenamiento, validación y prueba</h3>
                 <p>
-                    Provocar la «U» exige reservar datos que la red <em>no</em> vea al entrenar. Un proyecto serio parte los datos en
-                    <strong> tres</strong> conjuntos disjuntos, cada uno con un papel distinto:
+                    En la sección anterior ya apareció un conjunto de <strong>validación</strong>: es el que sirve para decidir <em>cuándo</em> detener el
+                    entrenamiento (Early Stopping) y para elegir hiperparámetros como la fuerza de la regularización {String.raw`\(\lambda\)`}. Pero ahí
+                    acecha una trampa sutil: <strong>en cuanto un conjunto se usa para tomar decisiones, su puntaje deja de ser una medida honesta</strong> del
+                    desempeño —aunque la red no entrene con él, el ingeniero lo «ajusta» a fuerza de mirarlo—. De ahí la necesidad de
+                    separar los datos según su <strong>papel</strong> en <strong>tres</strong> conjuntos disjuntos:
                 </p>
                 <div className="grid md:grid-cols-3 gap-3 my-3">
                     <div className="usta-card p-4"><h4 style={{ marginTop: 0 }}>Entrenamiento · ~70 %</h4><p className="text-sm !mb-0">Ajusta los <strong>pesos</strong> por descenso del gradiente. La red lo ve una y otra vez.</p></div>
@@ -4566,14 +4598,17 @@ red = nn.Sequential(
 
                 <h3>Validación cruzada K-Fold e hiperparámetros</h3>
                 <p>
-                    Reservar un único conjunto de validación puede sesgar la estimación. La <strong>validación cruzada K-Fold</strong>
-                    (ej. {String.raw`\(K=5\)`}) divide los datos en 5 pliegues; en cada iteración entrena con 4 y valida con 1, rotando.
-                    La métrica final es el promedio de las 5: estimación robusta del verdadero desempeño.
+                    La partición anterior reserva <em>un</em> conjunto de validación, pero con pocos datos —lo habitual en muchos
+                    problemas locales— ese conjunto es pequeño y su puntaje se vuelve una <strong>lotería</strong>: cambia según qué
+                    ejemplos cayeron, por azar, en la validación. La <strong>validación cruzada K-Fold</strong> reparte ese azar: divide
+                    los datos en {String.raw`\(K\)`} pliegues (p. ej. {String.raw`\(K=5\)`}) y los rota —en cada vuelta entrena con {String.raw`\(K-1\)`} y
+                    valida con el restante—, de modo que <strong>cada ejemplo valida exactamente una vez</strong>. La métrica final es el
+                    promedio de las {String.raw`\(K\)`} vueltas: una estimación mucho más estable y menos dependiente de la suerte del corte.
                 </p>
                 <p>
-                    K-Fold dice <strong>qué tan bien</strong> generaliza una configuración; pero antes hay que decidir
-                    <strong> qué configurar</strong>. Conviene entonces distinguir lo que el modelo aprende por sí solo de lo que el
-                    ingeniero fija de antemano:
+                    K-Fold dice <strong>qué tan bien</strong> generaliza <em>una</em> configuración —es la regla justa para compararlas
+                    y quedarse con la mejor—; pero antes hay que decidir <strong>qué configurar</strong>. Conviene distinguir lo que el
+                    modelo aprende por sí solo de lo que el ingeniero fija de antemano:
                 </p>
                 <div className="overflow-x-auto">
                     <table>
@@ -4592,10 +4627,12 @@ red = nn.Sequential(
 
                 <h3>Matriz de confusión y métricas</h3>
                 <p>
-                    Decir «mi modelo tiene 95 % de exactitud» puede ser una mentira peligrosa. En Urabá, si solo 5 de cada 100
-                    pacientes tienen dengue grave, un modelo que diga «nadie está grave» acierta el 95 % (los 95 que efectivamente
-                    no están graves)… pero <strong>omite todos los casos graves</strong>. Por eso se usa la matriz de confusión
-                    (analogía: trilladora de café Excelso/Pasilla):
+                    Las secciones anteriores afinaron <em>cómo</em> medir el desempeño —partición honesta, K-Fold—, pero siempre dieron por
+                    sentado <em>qué</em> medir: un único número, casi siempre la «exactitud». Y elegir ese número es el último engaño por
+                    desarmar. Decir «mi modelo tiene 95 % de exactitud» puede ser una mentira peligrosa: en Urabá, si solo 5 de cada 100
+                    pacientes tienen dengue grave, un modelo que diga «nadie está grave» acierta el 95 % (los 95 que efectivamente no están
+                    graves)… pero <strong>omite todos los casos graves</strong>. Por eso no basta un número: se desglosan los aciertos y
+                    errores en una <strong>matriz de confusión</strong>, aquí sobre el mismo caso del dengue (grave vs. no grave):
                 </p>
                 <ConfusionMatrix />
                 <div className="grid md:grid-cols-3 gap-3 my-3">
@@ -4603,6 +4640,14 @@ red = nn.Sequential(
                     <div className="usta-card p-4 text-center"><Eq>{String.raw`\(\frac{VP}{VP+FP}\)`}</Eq><span className="text-xs font-bold text-navy">Precisión</span></div>
                     <div className="usta-card p-4 text-center"><Eq>{String.raw`\(\frac{VP}{VP+FN}\)`}</Eq><span className="text-xs font-bold text-navy">Recall / Sensibilidad</span></div>
                 </div>
+                <Box type="tip" label="Cómo leer cada métrica · ejemplo del dengue (grave vs. no grave)">
+                    <ul>
+                        <li><strong>Exactitud</strong> — ¿qué fracción de <em>todas</em> las predicciones acerté? Fácil de leer, pero <strong>engañosa con clases desbalanceadas</strong>: «no alertar a nadie» da 95 % aunque no detecte ni un solo caso grave. Solo es fiable cuando las clases están equilibradas y todos los errores cuestan igual.</li>
+                        <li><strong>Precisión</strong> — cuando el modelo dice «grave», ¿cuántas veces acierta? (de los <em>predichos</em> graves, qué fracción lo era de verdad). Conviene priorizarla cuando una <strong>falsa alarma (FP)</strong> es costosa: alarmar a un sano gasta recursos y erosiona la confianza.</li>
+                        <li><strong>Recall (sensibilidad)</strong> — de todos los <em>casos graves reales</em>, ¿a cuántos detecté? Conviene priorizarlo cuando un <strong>falso negativo (FN)</strong> es peligroso —dejar a un grave sin alerta puede ser fatal (dengue, deslizamientos)—; es la métrica que vigila el <strong>Auditor de Equidad</strong>.</li>
+                        <li><strong>F1-score</strong> — la <strong>media armónica</strong> de precisión y recall: un único número que <strong>solo es alto si las dos lo son</strong> (castiga descuidar cualquiera). Útil con clases desbalanceadas cuando importan ambos errores a la vez.</li>
+                    </ul>
+                </Box>
                 <h4>Precisión vs. recall: un balancín (y el F1)</h4>
                 <p>
                     Precisión y recall <strong>tiran en sentidos opuestos</strong>. <strong>Bajar</strong> el umbral de decisión declara más positivos:
@@ -4613,9 +4658,13 @@ red = nn.Sequential(
                 <p>Para resumir ambas en un solo número se usa el <strong>F1</strong>, su media armónica (penaliza que <em>cualquiera</em> de las dos sea baja):</p>
                 <Eq>{String.raw`$$ F_1 = 2\cdot\frac{\text{precisión}\cdot\text{recall}}{\text{precisión}+\text{recall}} $$`}</Eq>
                 <p>
-                    Y para juzgar el modelo en <em>todos</em> los umbrales a la vez está la <strong>curva ROC</strong> y su <strong>área bajo la curva
-                    (AUC)</strong>: {String.raw`\(\text{AUC}=1\)`} es perfecto, {String.raw`\(0{,}5\)`} es azar. Es útil porque no depende del umbral
-                    elegido ni del balance de clases.
+                    El balancín anterior mueve <em>un</em> umbral; la <strong>curva ROC</strong> los recorre <em>todos</em>. Para cada umbral
+                    toma dos cantidades que ya vienen de la matriz de confusión —el <strong>recall</strong> (positivos detectados) frente a
+                    la <strong>tasa de falsas alarmas</strong>— y las dibuja como un punto; al barrer el umbral, esos puntos forman la curva.
+                    Su <strong>área bajo la curva (AUC)</strong> condensa todo en un solo número: con {String.raw`\(\text{AUC}=1\)`} el clasificador
+                    es perfecto y con {String.raw`\(0{,}5\)`} apenas iguala el azar. Y, a diferencia de la exactitud con que abrió esta sección,
+                    ese valor <strong>no se deja engañar por el desbalance de clases</strong> ni depende del umbral elegido: por eso es la
+                    medida resumen más confiable.
                 </p>
                 <ROCChart />
                 <Box type="info" label="Por qué no se optimiza la exactitud directamente">
@@ -4634,10 +4683,12 @@ red = nn.Sequential(
 
                 <h3>Equidad algorítmica: el sesgo que se hereda</h3>
                 <p>
-                    Un modelo puede ser muy preciso <em>en promedio</em> y aun así <strong>tratar peor a un subgrupo de personas</strong>. El sesgo
-                    casi nunca se programa: se <strong>hereda de los datos</strong> (subgrupos con menos ejemplos, registros de peor calidad o etiquetas
-                    históricamente injustas), y el descenso del gradiente —que solo minimiza la pérdida <em>promedio</em>— lo reproduce y a veces lo
-                    amplifica. Tres ideas para nombrarlo:
+                    Todas las métricas anteriores —exactitud, recall, AUC— se calcularon sobre <strong>toda la población</strong> a la vez.
+                    Pero un promedio brillante puede <strong>esconder</strong> que el modelo trata mucho peor a un subgrupo: basta volver a
+                    calcular esas mismas métricas <em>por grupo</em> para que la desigualdad salte a la vista. Y el sesgo casi nunca se
+                    programa: se <strong>hereda de los datos</strong> —subgrupos con menos ejemplos, registros de peor calidad o etiquetas
+                    históricamente injustas— y el descenso del gradiente, que solo minimiza la pérdida <em>promedio</em>, lo reproduce y a
+                    veces lo amplifica. Tres ideas para nombrarlo:
                 </p>
                 <Tabs tabs={[
                     { label: 'Atributo protegido', content: <span>Una característica sobre la que es injusto o ilegal discriminar (sexo, etnia, región, edad). <strong>No debe entrar como variable</strong> del modelo… pero quitarla no basta (<em>«fairness through unawareness»</em>): otras variables actúan de <strong>proxy</strong> —el barrio o el municipio pueden codificar la etnia o el estrato—.</span> },
@@ -4662,7 +4713,7 @@ red = nn.Sequential(
                 </p>
                 <p>
                     <strong>Acto 2 · auditoría de equidad.</strong> Al pie del laboratorio, el <strong>Auditor de Equidad</strong> calcula la
-                    matriz de confusión <em>por subgrupo</em> —la misma tabla de la trilladora, ahora dos veces— y compara la tasa de falsos
+                    matriz de confusión <em>por subgrupo</em> —la misma tabla de esta sección, ahora una por subgrupo— y compara la tasa de falsos
                     negativos (FNR) entre A y B: la <strong>brecha de igualdad de oportunidad</strong> recién definida, medida en la propia red.
                 </p>
                 <RedFrontera chapter={5} />
@@ -4733,8 +4784,8 @@ red = nn.Sequential(
                     {
                         pregunta: 'El paso optimizer.zero_grad() sirve para…',
                         opciones: [
-                            { texto: 'evitar que los gradientes del lote actual se sumen a los acumulados de lotes anteriores.', correcta: true },
                             { texto: 'reiniciar los pesos a valores aleatorios.', correcta: false },
+                            { texto: 'evitar que los gradientes del lote actual se sumen a los acumulados de lotes anteriores.', correcta: true },
                             { texto: 'liberar la RAM de la GPU.', correcta: false },
                         ],
                         justificacion: 'PyTorch acumula gradientes; sin limpiarlos se corrompe la dirección del descenso.'
@@ -4742,17 +4793,17 @@ red = nn.Sequential(
                     {
                         pregunta: 'Dropout combate el sobreajuste porque…',
                         opciones: [
-                            { texto: 'apaga neuronas al azar y rompe la co-adaptación, forzando representaciones redundantes.', correcta: true },
                             { texto: 'duplica las imágenes de entrenamiento.', correcta: false },
                             { texto: 'elimina permanentemente las neuronas con pesos negativos.', correcta: false },
+                            { texto: 'apaga neuronas al azar y rompe la co-adaptación, forzando representaciones redundantes.', correcta: true },
                         ],
                         justificacion: 'Al no poder depender de una "neurona estrella", la red aprende rasgos distribuidos y generaliza mejor.'
                     },
                     {
                         pregunta: 'En salud pública con clases desbalanceadas (dengue), usar solo la exactitud es engañoso; conviene optimizar…',
                         opciones: [
-                            { texto: 'la sensibilidad (recall), para detectar a los enfermos graves.', correcta: true },
                             { texto: 'el número de épocas.', correcta: false },
+                            { texto: 'la sensibilidad (recall), para detectar a los enfermos graves.', correcta: true },
                             { texto: 'el tamaño de la imagen.', correcta: false },
                         ],
                         justificacion: 'Un alto recall minimiza los falsos negativos, que en salud pueden ser fatales.'
@@ -4760,9 +4811,9 @@ red = nn.Sequential(
                     {
                         pregunta: 'La diferencia entre un PARÁMETRO y un HIPERPARÁMETRO es que…',
                         opciones: [
-                            { texto: 'el parámetro lo aprende el modelo (pesos); el hiperparámetro lo fija el ingeniero antes de entrenar (learning rate, λ).', correcta: true },
                             { texto: 'son sinónimos.', correcta: false },
                             { texto: 'el hiperparámetro se aprende con backpropagation.', correcta: false },
+                            { texto: 'el parámetro lo aprende el modelo (pesos); el hiperparámetro lo fija el ingeniero antes de entrenar (learning rate, λ).', correcta: true },
                         ],
                         justificacion: 'Los pesos se optimizan automáticamente; los hiperparámetros se buscan con Grid/Random Search.'
                     },
@@ -4774,6 +4825,36 @@ red = nn.Sequential(
                             { texto: 'maximizar la exactitud a cualquier costo.', correcta: false },
                         ],
                         justificacion: 'Las decisiones que afectan derechos fundamentales no pueden ser cajas negras.'
+                    },
+                    {
+                        pregunta: 'En Costo Total = L(ŷ, y) + λ·Ω(w), si se sube λ hasta un valor muy grande…',
+                        opciones: [
+                            { texto: 'los pesos crecen sin control y la red sobreajusta todavía más.', correcta: false },
+                            { texto: 'λ no afecta el entrenamiento, solo la inferencia.', correcta: false },
+                            { texto: 'desaparece la necesidad de un conjunto de validación.', correcta: false },
+                            { texto: 'la simplicidad domina: la red apenas ajusta los datos y puede caer en subajuste.', correcta: true },
+                        ],
+                        justificacion: 'λ es la perilla del equilibrio: con λ=0 hay riesgo de sobreajuste; con λ muy grande, el término λ·Ω(w) prioriza pesos pequeños sobre ajustar los datos y aparece el subajuste.'
+                    },
+                    {
+                        pregunta: 'Para evitar la fuga de datos (data leakage) al escalar las variables, lo correcto es…',
+                        opciones: [
+                            { texto: 'usar la media y la desviación de TODO el dataset antes de partirlo en train/val/test.', correcta: false },
+                            { texto: 'escalar cada conjunto (train, val, test) con sus propias estadísticas por separado.', correcta: false },
+                            { texto: 'no escalar nunca las variables, para no contaminar los datos.', correcta: false },
+                            { texto: 'ajustar el escalado SOLO con el train y aplicar esas mismas estadísticas a validación y prueba.', correcta: true },
+                        ],
+                        justificacion: 'Regla de oro: toda transformación se ajusta solo con el train y se aplica igual a val y prueba. Usar estadísticas de todo el dataset filtra información del test; escalar cada conjunto por separado le aplica transformaciones distintas y también distorsiona la evaluación.'
+                    },
+                    {
+                        pregunta: 'En el Auditor de Equidad, al mover el umbral para cerrar la brecha de falsos negativos de un subgrupo se observa que…',
+                        opciones: [
+                            { texto: 'suele empeorar otra métrica (las falsas alarmas, o la brecha del otro grupo): la equidad implica elegir, con costos.', correcta: true },
+                            { texto: 'se elimina por completo todo el sesgo, sin efectos secundarios.', correcta: false },
+                            { texto: 'queda demostrado que las distintas definiciones de justicia son siempre equivalentes.', correcta: false },
+                            { texto: 'el ajuste es innecesario si la exactitud global ya es alta.', correcta: false },
+                        ],
+                        justificacion: 'Distintas definiciones de justicia pueden ser matemáticamente incompatibles: cerrar la brecha de un grupo suele tener un precio en el otro o en las falsas alarmas. La equidad es una decisión con costos, no un ajuste gratuito.'
                     },
                 ]} />
 
