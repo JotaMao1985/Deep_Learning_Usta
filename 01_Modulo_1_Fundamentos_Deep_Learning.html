@@ -4416,6 +4416,120 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
         };
 
         /* ============================================================
+           GRÁFICA SVG NATIVA: tres regímenes de ajuste
+           Subajuste / ajuste óptimo / sobreajuste sobre los MISMOS puntos.
+        ============================================================ */
+        const AjusteTresPanelesSVG = () => {
+            const W = 210, H = 150;
+            const padL = 12, padR = 12, padT = 10, padB = 12;
+            const px = x => padL + x * (W - padL - padR);
+            const py = y => (H - padB) - Math.max(0, Math.min(1, y)) * (H - padT - padB);
+            const xs = [0.05, 0.14, 0.23, 0.32, 0.41, 0.50, 0.59, 0.68, 0.77, 0.86, 0.95];
+            const noise = [0.05, -0.06, 0.07, -0.04, 0.08, -0.07, 0.05, -0.05, 0.06, -0.06, 0.04];
+            const trend = x => 0.30 + 0.50 * x + 0.13 * Math.sin(2 * Math.PI * x);
+            const pts = xs.map((x, i) => ({ x, y: Math.max(0.05, Math.min(0.95, trend(x) + noise[i])) }));
+            const dots = () => pts.map((p, i) => <circle key={i} cx={px(p.x)} cy={py(p.y)} r="2.6" fill="#475569" />);
+
+            // Ajuste óptimo: la tendencia suave muestreada (no persigue cada punto)
+            const smooth = []; for (let i = 0; i <= 60; i++) { const x = i / 60; smooth.push({ x: px(x), y: py(trend(x)) }); }
+            const dGood = smooth.map((p, i) => (i ? 'L' : 'M') + p.x.toFixed(1) + ' ' + p.y.toFixed(1)).join(' ');
+            // Subajuste: una recta rígida que ignora la curvatura
+            const dUnder = `M ${px(0).toFixed(1)} ${py(0.34).toFixed(1)} L ${px(1).toFixed(1)} ${py(0.80).toFixed(1)}`;
+            // Sobreajuste: spline Catmull-Rom que pasa por TODOS los puntos (sobre-oscila con el ruido)
+            const ppx = pts.map(p => ({ x: px(p.x), y: py(p.y) }));
+            const catmull = (arr) => {
+                let d = `M ${arr[0].x.toFixed(1)} ${arr[0].y.toFixed(1)}`;
+                for (let i = 0; i < arr.length - 1; i++) {
+                    const p0 = arr[i - 1] || arr[i], p1 = arr[i], p2 = arr[i + 1], p3 = arr[i + 2] || arr[i + 1];
+                    const c1x = p1.x + (p2.x - p0.x) / 6, c1y = p1.y + (p2.y - p0.y) / 6;
+                    const c2x = p2.x - (p3.x - p1.x) / 6, c2y = p2.y - (p3.y - p1.y) / 6;
+                    d += ` C ${c1x.toFixed(1)} ${c1y.toFixed(1)}, ${c2x.toFixed(1)} ${c2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+                }
+                return d;
+            };
+            const dOver = catmull(ppx);
+
+            const panel = (titulo, sub, d, color, aria) => (
+                <figure className="m-0">
+                    <div className="bg-white border border-gray-200 rounded-xl p-1.5 shadow-sm">
+                        <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label={aria} style={{ display: 'block' }}>
+                            <rect x={padL} y={padT} width={W - padL - padR} height={H - padT - padB} fill="#FAF8FF" stroke="#EEE" />
+                            <path d={d} fill="none" stroke={color} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                            {dots()}
+                        </svg>
+                    </div>
+                    <figcaption className="text-center mt-1">
+                        <span className="block text-xs font-bold" style={{ color }}>{titulo}</span>
+                        <span className="block text-[0.68rem] text-gray-500">{sub}</span>
+                    </figcaption>
+                </figure>
+            );
+
+            return (
+                <div className="my-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {panel('Subajuste', 'sesgo alto · demasiado simple', dUnder, '#B45309', 'Subajuste: una recta rígida que no sigue la curvatura de los datos; falla tanto en entrenamiento como en validación.')}
+                        {panel('Ajuste óptimo', 'sigue la tendencia', dGood, '#15803D', 'Ajuste óptimo: una curva suave que sigue la tendencia general sin perseguir cada punto.')}
+                        {panel('Sobreajuste', 'varianza alta · memoriza el ruido', dOver, '#ED1E79', 'Sobreajuste: una curva que serpentea para pasar por todos los puntos, incluido el ruido, y generaliza mal.')}
+                    </div>
+                    <p className="text-xs text-gray-500 italic text-center mt-2">
+                        Los tres modelos ven los <strong>mismos</strong> puntos. El subajuste (izquierda) es demasiado rígido; el sobreajuste
+                        (derecha) memoriza el ruido; el ajuste óptimo (centro) sigue la tendencia sin perseguir cada dato.
+                    </p>
+                </div>
+            );
+        };
+
+        /* ============================================================
+           GRÁFICA SVG NATIVA: error vs. complejidad (sesgo–varianza)
+           Eje distinto al de épocas: entrenamiento ↓ monótono, validación en «U».
+        ============================================================ */
+        const ComplejidadUCurvaSVG = () => {
+            const W = 520, H = 300;
+            const padL = 54, padR = 18, padT = 20, padB = 54;
+            const plotW = W - padL - padR, plotH = H - padT - padB;
+            const px = x => padL + x * plotW;
+            const py = y => padT + plotH - Math.max(0, Math.min(1, y)) * plotH;
+            const bias = x => 0.85 * Math.exp(-3.0 * x);
+            const variance = x => 0.9 * Math.pow(x, 2.3);
+            const train = x => bias(x) + 0.05;
+            const val = x => bias(x) + variance(x) + 0.05;
+            const N = 80;
+            const xsamp = []; for (let i = 0; i <= N; i++) xsamp.push(i / N);
+            const path = f => xsamp.map((x, i) => (i ? 'L' : 'M') + px(x).toFixed(1) + ' ' + py(f(x)).toFixed(1)).join(' ');
+            let xmin = 0, vmin = Infinity;
+            xsamp.forEach(x => { const v = val(x); if (v < vmin) { vmin = v; xmin = x; } });
+
+            return (
+                <div className="my-4">
+                    <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img"
+                        aria-label="Error frente a complejidad del modelo. El error de entrenamiento siempre baja al aumentar la capacidad; el error de validación forma una U: a la izquierda hay subajuste (sesgo alto), a la derecha sobreajuste (varianza alta), y el mínimo marca la capacidad óptima. Este eje es la complejidad del modelo, distinto del eje de épocas."
+                        style={{ display: 'block', maxWidth: '560px', margin: '0 auto', background: '#FAF8FF', borderRadius: '12px', border: '1px solid rgba(61,0,141,0.12)' }}>
+                        <rect x={px(xmin - 0.08)} y={padT} width={px(xmin + 0.08) - px(xmin - 0.08)} height={plotH} fill="rgba(21,128,61,0.08)" />
+                        <line x1={padL} y1={padT} x2={padL} y2={padT + plotH} stroke="#94A3B8" strokeWidth="1.5" />
+                        <line x1={padL} y1={padT + plotH} x2={W - padR} y2={padT + plotH} stroke="#94A3B8" strokeWidth="1.5" />
+                        <path d={path(train)} fill="none" stroke="#3D008D" strokeWidth="3" strokeLinecap="round" />
+                        <path d={path(val)} fill="none" stroke="#ED1E79" strokeWidth="3" strokeLinecap="round" />
+                        <line x1={px(xmin)} y1={padT} x2={px(xmin)} y2={padT + plotH} stroke="#15803D" strokeWidth="2" strokeDasharray="5,4" />
+                        <circle cx={px(xmin)} cy={py(val(xmin))} r="4" fill="#15803D" />
+                        <text x={px(0.80)} y={py(train(0.80)) + 16} fontSize="11.5" fill="#3D008D" fontFamily="Montserrat" fontWeight="700">Entrenamiento</text>
+                        <text x={px(0.60)} y={py(val(0.60)) - 9} fontSize="11.5" fill="#ED1E79" fontFamily="Montserrat" fontWeight="700">Validación</text>
+                        <text x={px(0.15)} y={padT + 13} textAnchor="middle" fontSize="10.5" fill="#B45309" fontFamily="Montserrat" fontWeight="700">Subajuste</text>
+                        <text x={px(xmin)} y={padT + 13} textAnchor="middle" fontSize="10.5" fill="#15803D" fontFamily="Montserrat" fontWeight="700">Óptimo</text>
+                        <text x={px(0.86)} y={padT + 13} textAnchor="middle" fontSize="10.5" fill="#ED1E79" fontFamily="Montserrat" fontWeight="700">Sobreajuste</text>
+                        <text x={padL + plotW / 2} y={H - 12} textAnchor="middle" fontSize="12" fill="#334155" fontFamily="Montserrat" fontWeight="600">Complejidad del modelo (capacidad) →</text>
+                        <text transform={`rotate(-90 16 ${padT + plotH / 2})`} x="16" y={padT + plotH / 2} textAnchor="middle" fontSize="12" fill="#334155" fontFamily="Montserrat" fontWeight="600">Error</text>
+                    </svg>
+                    <p className="text-xs text-gray-500 italic text-center mt-2">
+                        A más capacidad, el error de <strong>entrenamiento</strong> siempre baja, pero el de <strong>validación</strong> forma una «U»:
+                        la zona izquierda es <strong>subajuste</strong> (sesgo alto) y la derecha <strong>sobreajuste</strong> (varianza alta). El mínimo
+                        marca la capacidad que mejor generaliza. Conviene no confundir este eje —la <em>complejidad</em>— con el de las <em>épocas</em>.
+                    </p>
+                </div>
+            );
+        };
+
+        /* ============================================================
            CAPÍTULO 5 — AJUSTE, EVALUACIÓN Y ÉTICA
         ============================================================ */
         const trainingLoopTorch = `# El bucle de entrenamiento: 5 pasos que se repiten en cada época
@@ -4439,6 +4553,23 @@ red = nn.Sequential(
     nn.Dropout(p=0.5),      # apaga el 50% de neuronas en cada paso de entrenamiento
     nn.Linear(128, 1),
 )`;
+
+        const earlyStoppingTorch = `# Early Stopping: guarda y restaura los mejores pesos
+mejor_val, espera, paciencia = float('inf'), 0, 7   # 7 = tope
+
+for epoch in range(epochs):
+    entrenar_una_epoca(modelo, train_loader)    # los 5 pasos
+    val_loss = evaluar(modelo, val_loader)      # error en validación
+
+    if val_loss < mejor_val:                    # ¿nuevo mínimo?
+        mejor_val, espera = val_loss, 0
+        torch.save(modelo.state_dict(), 'mejor.pt')   # mejores pesos
+    else:
+        espera += 1
+        if espera >= paciencia:                 # sin mejora N veces
+            break                               # parada temprana
+
+modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
 
         const Cap5Section = () => (
             <div className="prose-usta">
@@ -4495,6 +4626,15 @@ red = nn.Sequential(
                     El <strong>sobreajuste (overfitting)</strong> es ser el Estudiante A: la red <strong>memoriza el ruido</strong> de los datos
                     de entrenamiento —sombras de nubes, un insecto en la foto de una hoja— en vez de los patrones reales de la enfermedad.
                 </p>
+                <p>
+                    El extremo opuesto es igual de dañino. El <strong>subajuste (underfitting)</strong> aparece cuando el modelo es
+                    <em> demasiado simple</em> para la estructura de los datos: ni siquiera logra ajustar bien el entrenamiento y, por tanto,
+                    también falla con datos nuevos. Ambos fallos tienen nombre propio en la teoría del aprendizaje: el subajuste es exceso de
+                    <strong> sesgo</strong> —el modelo impone una forma demasiado rígida— y el sobreajuste es exceso de <strong>varianza</strong>
+                    —el modelo cambia demasiado con cada peculiaridad de los datos—. Entrenar bien es hallar el punto intermedio, ni rígido ni
+                    caprichoso, que mejor <strong>generaliza</strong>:
+                </p>
+                <AjusteTresPanelesSVG />
 
                 <h3>Regularización: la navaja de Ockham</h3>
                 <p>
@@ -4563,9 +4703,9 @@ red = nn.Sequential(
 
                 <h3>Curvas de aprendizaje y Early Stopping</h3>
                 <p>
-                    Hasta aquí se ha definido el <strong>sobreajuste</strong> (la red que memoriza) y se han visto técnicas que actúan
-                    <em> durante</em> el entrenamiento: <strong>regularización</strong> y <strong>dropout</strong> para frenarlo, y
-                    <strong> normalización por lotes</strong> para estabilizarlo. Queda una pregunta práctica común a todas: ¿cómo saber si
+                    Definido el <strong>sobreajuste</strong> (la red que memoriza) y vistas las técnicas que actúan
+                    <em> durante</em> el entrenamiento —<strong>regularización</strong> y <strong>dropout</strong> para frenarlo,
+                    <strong> normalización por lotes</strong> para estabilizarlo—, queda una pregunta práctica común a todas: ¿cómo saber si
                     están funcionando —si el modelo realmente <strong>generaliza</strong>— y, sobre todo, <strong>cuándo conviene detener</strong> el
                     entrenamiento? El instrumento para responderla son las <strong>curvas de aprendizaje</strong>.
                 </p>
@@ -4576,7 +4716,42 @@ red = nn.Sequential(
                 </p>
                 <CurvaAprendizajeChart />
                 <p>
-                    Esta curva es ilustrativa, pero no quedará en teoría: el <strong>laboratorio integrador</strong> que cierra el capítulo
+                    Conviene no confundir dos diagnósticos que comparten la misma forma de «U». El de arriba recorre el eje de las
+                    <strong> épocas</strong> y responde <em>cuándo</em> detener un modelo dado. Existe un segundo, complementario, que recorre el eje
+                    de la <strong>complejidad del modelo</strong> (su capacidad) y responde <em>qué</em> tamaño de red conviene elegir:
+                </p>
+                <ComplejidadUCurvaSVG />
+                <p>
+                    Es el mismo equilibrio sesgo–varianza visto antes, ahora como curva: el mínimo de la «U» de validación señala la capacidad
+                    que mejor generaliza —y es justo el punto que el hiperparámetro {String.raw`\(\lambda\)`} de la <strong>regularización</strong> ayuda a
+                    alcanzar sin cambiar la arquitectura—.
+                </p>
+                <p>
+                    Volviendo al eje de las épocas: el Early Stopping no es un truco, sino un procedimiento de tres pasos que se ejecuta dentro
+                    del propio bucle de entrenamiento.
+                </p>
+                <Pipeline steps={[
+                    { num: 1, title: 'Monitor', desc: 'Tras cada época, mide la pérdida en validación.' },
+                    { num: 2, title: 'Paciencia', desc: 'Cuenta las épocas sin mejora (típico: 5–10).' },
+                    { num: 3, title: 'Restaurar', desc: 'Al parar, recupera los pesos del mínimo de validación.' },
+                ]} />
+                <p>
+                    ¿Por qué se considera Early Stopping una forma de <strong>regularización</strong>? Porque limita <em>cuánto</em> pueden alejarse
+                    los pesos de su <strong>inicialización pequeña</strong>: cada época los empuja un poco más lejos, y detener pronto los mantiene
+                    cerca de cero —exactamente el efecto que persigue el término {String.raw`\(\lambda\,\Omega(\mathbf{w})\)`} de la
+                    <strong> navaja de Ockham</strong>—. En lugar de penalizar la complejidad en la función de costo, la acota a través del
+                    <strong> tiempo de entrenamiento</strong>: menos épocas ⇒ menor capacidad <em>efectiva</em>.
+                </p>
+                <CodeBlock title="Early Stopping en PyTorch" code={earlyStoppingTorch} lang="pytorch" />
+                <Box type="tip" label="Ventajas y límites del Early Stopping">
+                    <ul>
+                        <li><strong>A favor:</strong> reduce el sobreajuste, ahorra cómputo (menos épocas) y es trivial de implementar.</li>
+                        <li><strong>Cuidado · parar demasiado pronto:</strong> con una paciencia muy corta el entrenamiento se detiene antes de tiempo y se cae en <strong>subajuste</strong>.</li>
+                        <li><strong>Cuidado · depende de la validación:</strong> si el conjunto de validación es pequeño o poco representativo, ese «mínimo» se vuelve ruidoso. De ahí la importancia de una <strong>partición honesta</strong> (sección siguiente) y de la validación cruzada.</li>
+                    </ul>
+                </Box>
+                <p>
+                    Estas curvas son ilustrativas, pero no quedarán en teoría: el <strong>laboratorio integrador</strong> que cierra el capítulo
                     permitirá <strong>provocar la «U» en la propia red</strong> de los capítulos previos y, después, auditar sus consecuencias.
                     Antes conviene reunir las herramientas que ese experimento necesita: una <strong>partición honesta</strong> de los datos y
                     métricas más finas que la exactitud.
