@@ -1316,7 +1316,7 @@
                         },
                         {
                             titulo: 'Padding (relleno): proteger los bordes',
-                            contenido: <span>Aplicar convoluciones encoge la imagen y descuida los bordes. El <em>zero-padding</em> agrega ceros alrededor de la entrada. El <strong>valid padding</strong> no rellena ({String.raw`\(P=0\)`}); el <strong>same padding</strong> rellena para conservar el tamaño con {String.raw`\(P=\tfrac{K-1}{2}\)`}, clave en ResNet para sumar capas distantes.</span>
+                            contenido: <span>Aplicar convoluciones encoge la imagen y descuida los bordes. El <em>zero-padding</em> agrega ceros alrededor de la entrada. El <strong>valid padding</strong> no rellena ({String.raw`\(P=0\)`}); el <strong>same padding</strong> rellena para conservar el tamaño con {String.raw`\(P=\tfrac{K-1}{2}\)`}, clave en ResNet para mantener las dimensiones espaciales y permitir la suma residual {String.raw`\(F(x)+x\)`} dentro del bloque.</span>
                         },
                         {
                             titulo: 'Pooling (submuestreo): invarianza y reducción',
@@ -1399,10 +1399,10 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     </p>
                     <Timeline eventos={[
                         { year: '1998 · LeNet-5', text: 'LeCun et al. demuestran que una red aprende patrones visuales desde los píxeles. 7 capas, average pooling, tanh/sigmoide; leía dígitos de cheques (MNIST). Limitada a imágenes pequeñas en gris (32×32).' },
-                        { year: '2012 · AlexNet', text: 'Krizhevsky, Sutskever y Hinton ganan ImageNet bajando el error de 26 % a 15,3 %. 8 capas, ReLU, dos GPU en paralelo y Dropout para sus 60 millones de parámetros. El "Big Bang" del Deep Learning.' },
+                        { year: '2012 · AlexNet', text: 'Krizhevsky, Sutskever y Hinton ganan ImageNet bajando el error top-5 de ~26 % a 15,3 %. 8 capas, ReLU, dos GPU en paralelo y Dropout para sus 60 millones de parámetros. El "Big Bang" del Deep Learning.' },
                         { year: '2014 · VGGNet', text: 'Oxford apuesta por la uniformidad: pilas de filtros 3×3. Dos capas 3×3 igualan el campo receptivo de una 5×5 con menos parámetros y más no-linealidades. Desventaja: VGG-16 pesa ~138 millones de parámetros.' },
                         { year: '2014 · GoogLeNet', text: 'El módulo Inception aplica varios tamaños de filtro en paralelo y usa convoluciones 1×1 como cuello de botella, bajando a ~4 millones de parámetros frente a los 60M de AlexNet.' },
-                        { year: '2015 · ResNet', text: 'He et al. introducen conexiones de salto: la red aprende F(x) y entrega F(x)+x. Permite entrenar 152 capas y supera el desempeño humano en ImageNet (3,57 %). Sigue siendo el backbone más usado.' },
+                        { year: '2015 · ResNet', text: 'He et al. introducen conexiones de salto: la red aprende F(x) y entrega F(x)+x. Permite entrenar 152 capas y alcanza un error top-5 de 3,57 % (con un ensamble de modelos), por debajo del ~5 % humano de referencia. Sigue siendo el backbone más usado.' },
                     ]} />
                     <p className="text-xs text-gray-500 italic">
                         Nota sobre las fechas: se indica el año de presentación de cada trabajo (el preprint o la competición ImageNet).
@@ -1428,7 +1428,9 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                         Por ejemplo, una imagen de 224 × 224 con parches de 16 × 16 produce
                         {String.raw` \(N = (224 \cdot 224)/16^2 = 196\)`} parches. Cada parche se aplana, se proyecta linealmente
                         (<em>patch embedding</em>) y la imagen pasa a tratarse como una «frase» de 196 «palabras visuales». Como al trocear
-                        se pierde la posición, a cada <em>embedding</em> se le suma una <strong>codificación posicional</strong>.
+                        se pierde la posición, a cada <em>embedding</em> se le suma una <strong>codificación posicional</strong>. Además, al
+                        inicio de la secuencia se antepone un <strong>token de clasificación</strong> ([CLS]): tras pasar por el Transformer,
+                        su representación final resume la imagen completa y es la que alimenta la cabeza de clasificación.
                     </p>
                     <Box type="tip" label="Analogía local — el mural del Metro de Medellín">
                         En lugar de recorrer un mural con una lupa que solo ve un pequeño círculo a la vez (la convolución local), se lo
@@ -1516,7 +1518,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     </p>
                     <CalloutPro tema="info" titulo="Wildlife Insights y la re-identificación de individuos" subtitulo="CNN al servicio de la conservación" icon="fa-paw">
                         La plataforma <strong>Wildlife Insights</strong> (Conservation International + Google) usa CNN entrenadas con
-                        millones de imágenes globales para filtrar fotos vacías y clasificar especies crípticas como el oso andino,
+                        millones de imágenes globales para filtrar fotos vacías y clasificar especies elusivas como el oso andino,
                         la danta, el jaguar y el tigrillo en la Orinoquía y los Andes. Más allá de la especie, los patrones únicos de
                         pelaje permiten la <strong>re-identificación de individuos</strong> («Jaguar #04»), clave para estimar densidades
                         poblacionales reales y verificar corredores biológicos Andes–Amazonía.
@@ -1543,7 +1545,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <Accordion items={[
                         {
                             titulo: 'Pruning (poda): eliminar conexiones inútiles',
-                            contenido: <span>Elimina pesos o neuronas con contribución cercana a cero, generando una red dispersa (<em>sparse</em>). Es la misma navaja de Ockham de la regularización L1: si una conexión apenas aporta, retirarla aligera sin sacrificar precisión. Como podar un cafetal: se cortan las ramas improductivas para que la planta concentre su energía.</span>
+                            contenido: <span>Elimina pesos o neuronas con contribución cercana a cero, generando una red dispersa (<em>sparse</em>). Comparte el espíritu de la regularización L1 —favorecer modelos dispersos—, aunque difiere en el modo: L1 induce la dispersión <em>durante</em> el entrenamiento penalizando los pesos, mientras la poda retira pesos ya entrenados según su magnitud. Si una conexión apenas aporta, retirarla aligera sin sacrificar precisión. Como podar un cafetal: se cortan las ramas improductivas para que la planta concentre su energía.</span>
                         },
                         {
                             titulo: 'Knowledge distillation (destilación)',
@@ -1666,7 +1668,12 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     {/* --- Entradas inferiores: x_t y h_{t-1} --- */}
                     <text x="100" y="332" textAnchor="middle" fontSize="13" fill="#001A4D" fontWeight="bold">x<tspan baselineShift="sub" fontSize="9">t</tspan></text>
                     <text x="170" y="332" textAnchor="middle" fontSize="13" fill="#001A4D" fontWeight="bold">h<tspan baselineShift="sub" fontSize="9">t−1</tspan></text>
-                    <line x1="135" y1="322" x2="135" y2="266" stroke="#94A3B8" strokeWidth="1.4" strokeDasharray="3 3" />
+                    {/* Bus de entrada compartido: x_t y h_(t-1) alimentan las tres compuertas */}
+                    <line x1="135" y1="324" x2="135" y2="314" stroke="#94A3B8" strokeWidth="1.4" strokeDasharray="3 3" />
+                    <line x1="135" y1="314" x2="600" y2="314" stroke="#94A3B8" strokeWidth="1.4" strokeDasharray="3 3" />
+                    <line x1="240" y1="314" x2="240" y2="266" stroke="#94A3B8" strokeWidth="1.4" strokeDasharray="3 3" />
+                    <line x1="370" y1="314" x2="370" y2="266" stroke="#94A3B8" strokeWidth="1.4" strokeDasharray="3 3" />
+                    <line x1="600" y1="314" x2="600" y2="266" stroke="#94A3B8" strokeWidth="1.4" strokeDasharray="3 3" />
 
                     {/* --- Salida h_t --- */}
                     <line x1="610" y1="266" x2="610" y2="300" stroke="#3D008D" strokeWidth="3" />
@@ -1676,7 +1683,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                 </svg>
                 <p className="text-xs text-gray-500 italic text-center mt-1">
                     Celda LSTM: el estado de celda C<sub>t</sub> fluye por la cinta superior con interacciones lineales (⊙ y +);
-                    las tres compuertas σ deciden qué olvidar, qué incorporar y qué exponer como estado oculto h<sub>t</sub>.
+                    las tres compuertas σ —que comparten la misma entrada x<sub>t</sub>, h<sub>t−1</sub>— deciden qué olvidar, qué incorporar y qué exponer como estado oculto h<sub>t</sub>.
                 </p>
             </div>
         );
@@ -1886,6 +1893,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <text x="355" y="240" textAnchor="middle" fontSize="12" fill="#15803D" fontWeight="bold">Candidato</text>
                     <text x="355" y="258" textAnchor="middle" fontSize="13" fill="#15803D">h̃<tspan baselineShift="sub" fontSize="8">t</tspan> · tanh</text>
                     {/* la compuerta de reinicio modula cuánto del pasado entra al candidato */}
+                    <text x="273" y="212" textAnchor="middle" fontSize="8.5" fill="#B91C1C" fontWeight="bold">r<tspan baselineShift="sub" fontSize="6.5">t</tspan> ⊙ h<tspan baselineShift="sub" fontSize="6.5">t−1</tspan></text>
                     <line x1="246" y1="246" x2="298" y2="246" stroke="#B91C1C" strokeWidth="2" />
                     <polygon points="300,246 288,240 288,252" fill="#B91C1C" />
 
@@ -1929,7 +1937,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                         recurrentes (<strong>RNN</strong>) capturan esa memoria pero colapsan en secuencias largas, cómo la
                         <strong> LSTM</strong> y la <strong>GRU</strong> rescatan el gradiente con compuertas, y cómo el
                         <strong> mecanismo de atención</strong> de Bahdanau rompió el cuello de botella del esquema
-                        encoder-decoder, abriendo la puerta a los Transformers del <strong>Capítulo 2.3</strong>.
+                        encoder-decoder, abriendo la puerta a los Transformers del <strong>Capítulo 2.3 §6</strong>.
                     </p>
 
                     {/* ============== 1. Fenomenología de los datos secuenciales ============== */}
@@ -2180,7 +2188,7 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                     </p>
                     <Pipeline steps={[
                         { num: '1', title: 'Encoder', desc: 'Una RNN (LSTM/GRU) lee toda la entrada y la comprime en un solo vector de contexto c.' },
-                        { num: '2', title: 'Vector de contexto c', desc: 'Resumen de tamaño fijo de todo el mensaje: c = hₜ.' },
+                        { num: '2', title: 'Vector de contexto c', desc: 'Resumen de tamaño fijo de todo el mensaje: c = h_T.' },
                         { num: '3', title: 'Decoder', desc: 'Otra RNN se inicializa con c y genera la salida token por token.' },
                     ]} />
                     <Eq>{String.raw`$$ c = h_T = \mathrm{Encoder}(x_1, x_2, \ldots, x_T) \qquad P(y_t \mid y_1,\ldots,y_{t-1},\, c) = g(s_t,\, y_{t-1},\, c) $$`}</Eq>
@@ -2232,7 +2240,7 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                         una red recurrente que procesa los datos paso a paso. La pregunta natural fue: ¿qué ocurre si una secuencia se
                         «presta atención a sí misma», relacionando cada elemento con todos los demás dentro del mismo texto, y se
                         elimina por completo la recurrencia? Esa generalización —la <strong>autoatención</strong> (self-attention)— es
-                        el corazón de la arquitectura <strong>Transformer</strong>, que se desarrolla en el <strong>Capítulo 2.3</strong>{' '}
+                        el corazón de la arquitectura <strong>Transformer</strong>, que se desarrolla en el <strong>Capítulo 2.3 §6</strong>{' '}
                         junto con sus vectores Query, Key y Value.
                     </CalloutPro>
 
@@ -2295,12 +2303,12 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                     {/* --- Encoder: trapecio que se estrecha --- */}
                     <polygon points="90,60 200,110 200,230 90,280" fill="#F5F0FA" stroke="#3D008D" strokeWidth="2" />
                     <text x="145" y="170" textAnchor="middle" fontSize="14" fill="#3D008D" fontWeight="bold">Encoder</text>
-                    <text x="145" y="190" textAnchor="middle" fontSize="11" fill="#64748B" fontStyle="italic">q(z|x)</text>
+                    <text x="145" y="190" textAnchor="middle" fontSize="11" fill="#64748B" fontStyle="italic">z = f(x)</text>
 
                     {/* --- Decoder: trapecio que se ensancha --- */}
                     <polygon points="560,110 670,60 670,280 560,230" fill="#FCE9F3" stroke="#ED1E79" strokeWidth="2" />
                     <text x="615" y="170" textAnchor="middle" fontSize="14" fill="#ED1E79" fontWeight="bold">Decoder</text>
-                    <text x="615" y="190" textAnchor="middle" fontSize="11" fill="#64748B" fontStyle="italic">p(x|z)</text>
+                    <text x="615" y="190" textAnchor="middle" fontSize="11" fill="#64748B" fontStyle="italic">x̂ = g(z)</text>
 
                     {/* --- Cuello de botella: vector latente z --- */}
                     <rect x="350" y="120" width="60" height="100" rx="10" fill="#0E7490" stroke="#001A4D" strokeWidth="2" />
@@ -2382,9 +2390,10 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                     <text x="540" y="203" textAnchor="middle" fontSize="10" fill="#FDB913" fontStyle="italic">jurado/público</text>
 
                     {/* --- Veredicto --- */}
-                    <text x="700" y="170" textAnchor="middle" fontSize="12" fill="#15803D" fontWeight="bold">real</text>
-                    <text x="700" y="192" textAnchor="middle" fontSize="11" fill="#94A3B8">D(x) → 1</text>
-                    <text x="700" y="214" textAnchor="middle" fontSize="12" fill="#B91C1C" fontWeight="bold">falso → 0</text>
+                    <text x="700" y="164" textAnchor="middle" fontSize="12" fill="#15803D" fontWeight="bold">real</text>
+                    <text x="700" y="181" textAnchor="middle" fontSize="10.5" fill="#94A3B8">D(x) → 1</text>
+                    <text x="700" y="206" textAnchor="middle" fontSize="12" fill="#B91C1C" fontWeight="bold">falso</text>
+                    <text x="700" y="223" textAnchor="middle" fontSize="10.5" fill="#94A3B8">D(G(z)) → 0</text>
 
                     {/* --- Flechas de flujo --- */}
                     <line x1="90" y1="120" x2="146" y2="120" stroke="#94A3B8" strokeWidth="2" />
@@ -2583,6 +2592,68 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
             );
         };
 
+        /* ============================================================
+           DIAGRAMA SVG: autoatención (self-attention) — matriz Q·Kᵀ
+           Cada token (fila = consulta Q) atiende a todos (columna = clave K);
+           el peso = softmax(QKᵀ/√d_k) y mezcla los Value. Distinto del mapa
+           de calor de atención CRUZADA del Cap 2.2 (dos secuencias). Regla:
+           dentro de <text> solo texto nativo, <tspan baselineShift> y Unicode.
+        ============================================================ */
+        const SelfAttentionSVG = () => {
+            const toks = ['Pásame', 'esa', 'vaina'];
+            // filas = consulta (Q); columnas = clave (K); cada fila suma 1
+            const W = [
+                [0.60, 0.20, 0.20],
+                [0.25, 0.50, 0.25],
+                [0.45, 0.15, 0.40],
+            ];
+            const gx = 250, gy = 120, cell = 70, rh = 52;
+            return (
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                    <svg viewBox="0 0 700 350" className="w-full" style={{ minWidth: 620 }} role="img"
+                        aria-label="Matriz de autoatención: cada fila es un token que consulta (Query) y cada columna un token que ofrece su clave (Key). El peso de cada celda es softmax(Q por K traspuesta dividido por raíz de d_k): cuánta atención presta el token de la fila al de la columna. Los valores (Value) se mezclan según esos pesos para producir una representación de cada token sensible a su contexto. Se ilustra cómo la palabra vaina reparte su atención hacia pásame, ganando el sentido de objeto físico.">
+                        <title>Autoatención: la matriz de pesos softmax(QKᵀ/√d_k) indica cuánta atención presta cada token (fila, Query) a cada token (columna, Key); la mezcla ponderada de los Value produce la salida contextual.</title>
+
+                        <text x={gx + cell * 1.5} y={28} textAnchor="middle" fontSize="12" fill="#0E7490" fontWeight="bold">Claves (K) — ¿con quién se compara?</text>
+                        <text x={40} y={gy + rh * 1.5} textAnchor="middle" fontSize="12" fill="#3D008D" fontWeight="bold" transform={`rotate(-90 40 ${gy + rh * 1.5})`}>Consultas (Q)</text>
+
+                        {toks.map((t, j) => (
+                            <text key={'k' + j} x={gx + cell * j + (cell - 4) / 2} y={gy - 12} textAnchor="middle" fontSize="12" fill="#0E7490" fontWeight="bold">{t}</text>
+                        ))}
+                        {toks.map((t, i) => (
+                            <text key={'q' + i} x={gx - 12} y={gy + rh * i + rh / 2 + 4} textAnchor="end" fontSize="12" fill="#3D008D" fontWeight="bold">{t}</text>
+                        ))}
+
+                        {W.map((row, i) => row.map((w, j) => (
+                            <g key={'c' + i + '-' + j}>
+                                <rect x={gx + cell * j} y={gy + rh * i} width={cell - 4} height={rh - 4} rx="6" fill={`rgba(237,30,121,${(0.12 + w * 0.85).toFixed(3)})`} stroke="#ED1E79" strokeWidth="1" />
+                                <text x={gx + cell * j + (cell - 4) / 2} y={gy + rh * i + (rh - 4) / 2 + 4} textAnchor="middle" fontSize="12" fill={w > 0.45 ? '#FFFFFF' : '#7A1740'} fontWeight="bold">{w.toFixed(2)}</text>
+                            </g>
+                        )))}
+
+                        <line x1={gx + cell * 3 + 2} y1={gy + rh * 1.5} x2={gx + cell * 3 + 40} y2={gy + rh * 1.5} stroke="#94A3B8" strokeWidth="2" />
+                        <polygon points={`${gx + cell * 3 + 44},${gy + rh * 1.5} ${gx + cell * 3 + 34},${gy + rh * 1.5 - 5} ${gx + cell * 3 + 34},${gy + rh * 1.5 + 5}`} fill="#94A3B8" />
+                        <text x={gx + cell * 3 + 21} y={gy + rh * 1.5 - 8} textAnchor="middle" fontSize="12" fill="#15803D" fontWeight="bold">× V</text>
+
+                        {toks.map((t, i) => (
+                            <g key={'z' + i}>
+                                <rect x={gx + cell * 3 + 48} y={gy + rh * i + 6} width={64} height={rh - 16} rx="8" fill="#F0FDF4" stroke="#15803D" strokeWidth="1.6" />
+                                <text x={gx + cell * 3 + 80} y={gy + rh * i + rh / 2 + 2} textAnchor="middle" fontSize="12" fill="#15803D" fontWeight="bold">z<tspan baselineShift="sub" fontSize="8">{i + 1}</tspan></text>
+                            </g>
+                        ))}
+                        <text x={gx + cell * 3 + 80} y={gy + rh * 3 + 14} textAnchor="middle" fontSize="10" fill="#15803D" fontStyle="italic">salida contextual</text>
+
+                        <text x={gx + cell * 1.5} y={gy + rh * 3 + 34} textAnchor="middle" fontSize="13" fill="#001A4D" fontWeight="bold">peso = softmax( Q·Kᵀ / √d<tspan baselineShift="sub" fontSize="9">k</tspan> )</text>
+                    </svg>
+                    <p className="text-xs text-gray-500 italic text-center mt-1">
+                        Autoatención: cada token (fila) consulta a todos los tokens (columnas) y obtiene un peso softmax(Q·Kᵀ/√d<sub>k</sub>);
+                        la mezcla ponderada de los <em>Value</em> produce una representación sensible al contexto. Aquí «vaina» reparte su
+                        atención hacia «pásame», ganando el sentido de <em>objeto físico</em>. Fuente: elaboración propia.
+                    </p>
+                </div>
+            );
+        };
+
         const Cap23Section = () => {
             const ref = useRef(null);
             useTypeset(ref, []);
@@ -2738,7 +2809,9 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                         <strong> punto fijo y determinista</strong>, el VAE la mapea a una <strong>distribución de
                         probabilidad</strong> (una Gaussiana definida por la media {String.raw`\(\mu\)`} y la desviación estándar
                         {String.raw` \(\sigma\)`}). El modelo no memoriza una coordenada exacta, sino que aprende una «nube» donde es
-                        probable que el dato resida, dotando al espacio latente de dos propiedades vitales: <strong>continuidad</strong> y <strong>completitud</strong>.
+                        probable que el dato resida, dotando al espacio latente de dos propiedades vitales: la <strong>continuidad</strong>
+                        (puntos cercanos decodifican a salidas parecidas) y la <strong>completitud</strong> (todo punto muestreado del espacio
+                        decodifica a una salida plausible, sin «huecos» vacíos).
                     </p>
 
                     <AEvsVAELatentSVG />
@@ -2936,7 +3009,10 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                         Mientras las RNN procesan la información secuencialmente (palabra por palabra) —dificultando las dependencias
                         a larga distancia—, los Transformers introdujeron la <strong>autoatención</strong> (<em>self-attention</em>),
                         que analiza toda la secuencia simultáneamente (paralelización). La idea central: el significado de un elemento
-                        no es fijo, sino que depende dinámicamente de su relación con todos los demás.
+                        no es fijo, sino que depende dinámicamente de su relación con todos los demás. Esta autoatención
+                        <strong> generaliza el mecanismo de atención de Bahdanau</strong> (<strong>Capítulo 2.2 §7</strong>): en lugar de
+                        alinear dos secuencias distintas —encoder y decoder—, cada elemento se relaciona con todos los de su <em>propia</em>
+                        secuencia y se prescinde por completo de la recurrencia.
                     </p>
 
                     <Box type="tip" label="Analogía local — la palabra «Vaina»">
@@ -2957,6 +3033,7 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                         <li><strong>Softmax:</strong> convierte los puntajes en probabilidades que suman 1 —cuánta atención prestar a cada palabra.</li>
                         <li><strong>Suma ponderada</strong> (× {String.raw`\(V\)`}): el resultado es una mezcla de los valores de las palabras relevantes.</li>
                     </ul>
+                    <SelfAttentionSVG />
 
                     <Accordion items={[
                         {
@@ -2973,7 +3050,8 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                     <p>
                         La autoatención explica cómo un Transformer <em>entiende</em> una secuencia, pero ¿cómo la <em>genera</em>?
                         Un Transformer generativo (como la familia GPT) funciona de forma <strong>autorregresiva</strong>: produce el
-                        texto <strong>un token a la vez</strong>, y cada token nuevo se reinyecta como entrada para predecir el
+                        texto <strong>un token a la vez</strong> (un <em>token</em> es la unidad mínima de texto que procesa el modelo: una
+                        palabra o, más a menudo, una subpalabra), y cada token nuevo se reinyecta como entrada para predecir el
                         siguiente. Formalmente, modela la probabilidad de la secuencia como un producto de condicionales:
                     </p>
                     <Eq>{String.raw`$$ p(x_1, x_2, \ldots, x_T) = \prod_{t=1}^{T} p_\theta\big(x_t \mid x_1, \ldots, x_{t-1}\big) $$`}</Eq>
@@ -3170,6 +3248,16 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                         justificacion: 'En lugar de un único vector de contexto estático, la atención construye un contexto dinámico (suma ponderada de todos los estados), recuperando selectivamente la información relevante.'
                     },
                     {
+                        pregunta: '¿Qué distingue a un VAE de un autoencoder clásico (AE)?',
+                        opciones: [
+                            { texto: 'El VAE elimina el decodificador y solo comprime datos.', correcta: false },
+                            { texto: 'El VAE mapea la entrada a una distribución (μ, σ) en lugar de a un punto fijo, logrando un espacio latente continuo del que se puede muestrear para generar.', correcta: true },
+                            { texto: 'El AE usa atención y el VAE, convolución.', correcta: false },
+                            { texto: 'El VAE no necesita función de pérdida.', correcta: false },
+                        ],
+                        justificacion: 'Mientras el AE codifica a un punto determinista, el VAE aprende una distribución regularizada hacia 𝒩(0, I) por el término KL; esa continuidad y completitud del espacio latente es lo que permite generar e interpolar entre conceptos.'
+                    },
+                    {
                         pregunta: 'En el juego minimax de una GAN, el generador G busca que…',
                         opciones: [
                             { texto: 'el discriminador clasifique correctamente todas las muestras.', correcta: false },
@@ -3254,12 +3342,13 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
             ['Atención', 'Mecanismo que pondera dinámicamente todas las posiciones de la entrada en cada paso, recuperando selectivamente la información relevante.'],
             ['Autoatención', 'Variante en la que cada elemento de una secuencia se relaciona con todos los demás dentro de la misma secuencia; corazón del Transformer.'],
             ['Query, Key, Value', 'Tríada de vectores de la atención: una Query se compara con las Keys para ponderar y recuperar los Values semánticos relevantes.'],
-            ['Transformer', 'Arquitectura basada enteramente en atención que procesa secuencias en paralelo; base de la IA generativa moderna (BERT, GPT).'],
+            ['Transformer', 'Arquitectura basada enteramente en atención que procesa secuencias en paralelo (en entrenamiento; la generación autorregresiva es token a token); base de la IA generativa moderna (BERT, GPT).'],
             ['Positional encoding', 'Señal (senos y cosenos) que se suma a cada embedding para indicar su orden, ya que la atención por sí sola es ciega a la posición.'],
             ['Embedding', 'Representación de un concepto (palabra, parche, usuario) como vector continuo donde la distancia geométrica refleja la similitud semántica.'],
             ['Autoencoder (AE)', 'Red no supervisada que comprime la entrada a un código latente y la reconstruye, forzada por un cuello de botella a quedarse con lo esencial.'],
             ['Cuello de botella', 'Capa central de menor dimensión del AE; impide aprender la identidad y obliga a comprimir, descartando ruido y redundancia.'],
             ['Espacio latente', 'Espacio vectorial comprimido donde se mapean las características esenciales; navegarlo permite manipular conceptos de alto nivel.'],
+            ['Manifold (variedad)', 'Hipótesis de que los datos de alta dimensión (imágenes, audio) se concentran en una superficie de dimensión mucho menor «doblada» dentro de ese espacio; el espacio latente busca capturar esa variedad.'],
             ['VAE', 'Variational Autoencoder: mapea la entrada a una distribución (media μ y desviación σ) en lugar de un punto, logrando un espacio latente continuo y navegable.'],
             ['GAN', 'Generative Adversarial Network: un generador y un discriminador compiten en un juego minimax; el generador acaba modelando la distribución real.'],
             ['Generador / Discriminador', 'Las dos redes de una GAN: el generador crea muestras sintéticas y el discriminador intenta distinguirlas de las reales.'],
