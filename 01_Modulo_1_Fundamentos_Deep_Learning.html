@@ -17,7 +17,7 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
     <!-- Babel para transpilar JSX en el navegador -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
 
     <!-- Tailwind CSS (utilidades) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -4581,8 +4581,10 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                 </p>
                 <h3>El bucle de entrenamiento (training loop)</h3>
                 <p>
-                    Ya se tiene el cuerpo (arquitectura), la brújula (función de costo) y el motor (optimizador). El entrenamiento
-                    en PyTorch no es magia: es un ciclo explícito de cinco pasos que se repite durante muchas épocas.
+                    Ya están los tres ingredientes de los capítulos previos: la <strong>arquitectura</strong> (el cuerpo de la red), la
+                    <strong> función de costo</strong> —el «altímetro» que mide cuán lejos del valle está el modelo— y el <strong>optimizador</strong>,
+                    que desciende esa pendiente. El entrenamiento en PyTorch no es magia: es un ciclo explícito de cinco pasos que se repite
+                    durante muchas épocas.
                 </p>
                 <Pipeline steps={[
                     { num: 1, title: 'Forward', desc: 'La red predice (ej. "Roya 80 %").' },
@@ -4664,22 +4666,48 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                     nombre, <em>decaimiento de pesos</em> (<span className="inline-code">weight_decay</span>)—.
                 </Box>
                 <Tabs tabs={[
-                    { label: 'L2 (Ridge)', content: <span>{String.raw`\(\Omega(\mathbf{w})=\tfrac{1}{2}\sum_j w_j^2\)`}. Como un estudiante que repasa todos los capítulos por igual: empuja los pesos a ser pequeños pero <strong>ninguno se anula</strong>. Distribuye la importancia. En PyTorch se activa con el argumento <span className="inline-code">weight_decay</span> del optimizador (el {String.raw`\(\lambda\)`} de la fórmula).</span> },
-                    { label: 'L1 (Lasso)', content: <span>{String.raw`\(\Omega(\mathbf{w})=\sum_j |w_j|\)`}. Como un estudiante pragmático que resalta solo lo esencial: fuerza a <strong>cero</strong> los pesos irrelevantes (ej. «color del vehículo»). Produce modelos dispersos e interpretables.</span> },
-                    { label: 'Dropout', content: <span>En cada iteración apaga aleatoriamente un porcentaje de neuronas (ej. 50 %). Es como ir rotando, en cada sesión, a quién se le pide ausentarse del grupo de estudio —incluida la «estrella»—: nadie depende de una sola neurona y todos aprenden a resolver. Rompe la co-adaptación.</span> },
+                    {
+                        label: 'L2 (Ridge)', content: <div>
+                            <p>{String.raw`\(\Omega(\mathbf{w})=\tfrac{1}{2}\sum_j w_j^2\)`} — penaliza el <strong>cuadrado</strong> de cada peso. Su efecto es <strong>repartir la importancia</strong> entre muchas variables en lugar de concentrarla en unas pocas.</p>
+                            <p>Como la penalización crece con el cuadrado, el «tirón» hacia cero es <strong>proporcional a la magnitud</strong> del peso: los grandes se reducen mucho y los pequeños casi nada. Por eso L2 <strong>encoge todos los pesos de forma suave, pero ninguno llega a cero exacto</strong> (de ahí el nombre <em>decaimiento de pesos</em>).</p>
+                            <p className="!mb-0"><strong>Cuándo conviene:</strong> es la opción por defecto. Brilla cuando se cree que <em>muchas</em> variables aportan un poco y cuando hay variables <strong>correlacionadas</strong> (las promedia en vez de quedarse con una al azar). En PyTorch se activa con <span className="inline-code">weight_decay</span> en el optimizador (el {String.raw`\(\lambda\)`} de la fórmula).</p>
+                        </div>
+                    },
+                    {
+                        label: 'L1 (Lasso)', content: <div>
+                            <p>{String.raw`\(\Omega(\mathbf{w})=\sum_j |w_j|\)`} — penaliza el <strong>valor absoluto</strong> de cada peso. Su efecto es una <strong>selección tajante</strong>: muchos pesos terminan valiendo <strong>exactamente cero</strong>.</p>
+                            <p>La clave está en que su «tirón» hacia cero es <strong>constante</strong>, no depende de la magnitud del peso: ese empuje fijo puede llevar un peso pequeño hasta cero y <strong>mantenerlo ahí</strong>. Geométricamente, la región que L1 permite es un <strong>rombo con esquinas sobre los ejes</strong>, y el óptimo tiende a caer en una de esas esquinas —donde algún peso vale cero—.</p>
+                            <p className="!mb-0">El resultado es un modelo <strong>disperso</strong> (<em>sparse</em>): equivale a una <strong>selección automática de variables</strong> (descarta, p. ej., «color del vehículo») y por eso resulta más <strong>interpretable</strong>. <strong>Cuándo conviene:</strong> cuando se sospecha que solo <em>unas pocas</em> variables importan o cuando la interpretabilidad es prioritaria. Usar L1 y L2 a la vez se llama <em>Elastic Net</em>.</p>
+                        </div>
+                    },
+                    {
+                        label: 'Dropout', content: <div>
+                            <p>En cada iteración de entrenamiento <strong>apaga al azar</strong> una fracción {String.raw`\(p\)`} de las neuronas (típicamente entre el 20 % y el 50 %). Es como ir rotando, en cada sesión, a quién se le pide <strong>ausentarse del grupo de estudio</strong> —incluida la «estrella»—: nadie puede depender de una sola neurona, así que todos aprenden a resolver. Eso <strong>rompe la co-adaptación</strong>.</p>
+                            <p>Visto de otro modo: como cada paso entrena una <strong>sub-red distinta</strong> (con diferentes neuronas activas), es casi como entrenar y promediar un <strong>enorme conjunto de redes</strong> que comparten pesos. De ahí surgen representaciones <strong>redundantes y distribuidas</strong>, que generalizan mejor.</p>
+                            <p className="!mb-0">En <strong>inferencia</strong> el dropout se <strong>apaga</strong>: participan todas las neuronas (la predicción es <strong>determinista</strong>) y las activaciones se <strong>reescalan</strong> para que su magnitud esperada coincida con la del entrenamiento.</p>
+                        </div>
+                    },
                 ]} />
                 <CodeBlock title="Regularización en PyTorch" code={regulTorch} lang="pytorch" />
                 <p>
                     Conviene notar una diferencia de naturaleza: <strong>L1 y L2 son penalizaciones</strong> que se suman al costo,
                     mientras que <strong>Dropout y Batch Normalization son capas</strong> que se insertan en la arquitectura de la red.
                 </p>
-                <Box type="info" label="Caso aplicado · jaguar vs. puma (cámaras trampa, Orinoquía)">
-                    Con solo 500 imágenes por especie (muchas nocturnas), el modelo podría aprender «manchas = jaguar» y confundir
-                    al ocelote. <strong>Dropout</strong> en las capas de textura lo obliga a usar rasgos robustos (forma de la cabeza,
-                    cola, rosetas); <strong>L2</strong> penaliza fijarse en el fondo (vegetación recurrente).
+                <Box type="info" label="Caso aplicado · jaguar vs. ocelote (cámaras trampa, Orinoquía)">
+                    Con solo 500 imágenes por especie (muchas nocturnas), el modelo podría quedarse con el atajo «si tiene manchas, es
+                    jaguar» y confundirlo con el ocelote, que también es manchado. <strong>Dropout</strong> en las capas de textura lo obliga
+                    a apoyarse en rasgos robustos (forma de la cabeza, proporción del cuerpo, el patrón de las rosetas —no las manchas en
+                    bruto—); <strong>L2</strong> penaliza fijarse en el fondo (vegetación recurrente).
                 </Box>
 
                 <h3>Normalización por lotes (Batch Normalization)</h3>
+                <p>
+                    Las técnicas anteriores —L1, L2 y Dropout— actúan sobre <em>qué</em> aprende la red, para que generalice en vez de
+                    memorizar. La normalización por lotes ataca un problema distinto: no <em>qué</em> aprende, sino <strong>qué tan estable y
+                    rápido</strong> entrena. Incluso una red bien regularizada puede aprender con dificultad si, a medida que avanza el
+                    entrenamiento, los datos que circulan entre sus capas cambian de escala sin control. El remedio adapta un truco que ya se
+                    usa <em>antes</em> de entrenar, sobre los datos de entrada:
+                </p>
                 <p>
                     Imagínese una tabla que mezcla columnas en <strong>escalas muy distintas</strong> —estatura en metros ({String.raw`\(\approx 1{,}7\)`}),
                     peso en kilos ({String.raw`\(\approx 70\)`}) e ingresos en miles—: las columnas de números grandes dominan y la comparación se
@@ -4710,8 +4738,11 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                     entrenamiento? El instrumento para responderla son las <strong>curvas de aprendizaje</strong>.
                 </p>
                 <p>
-                    Consisten en graficar el error de <strong>entrenamiento</strong> y de <strong>validación</strong> a lo largo de las épocas;
-                    su forma diagnostica la salud del modelo. Si el de entrenamiento baja pero el de validación sube (la <strong>«U»</strong>),
+                    Consisten en graficar, a lo largo de las épocas, dos errores. El de <strong>entrenamiento</strong> es el que la red comete
+                    sobre los mismos datos con los que aprende; el de <strong>validación</strong>, el que comete sobre un conjunto de datos
+                    <em>apartado</em> que <em>no</em> usa para entrenar y que anticipa cómo se comportará ante datos nuevos (esa <strong>partición
+                    honesta</strong> de los datos se detalla más adelante). Su forma diagnostica la salud del modelo: si el de entrenamiento baja
+                    pero el de validación sube (la <strong>«U»</strong>),
                     hay <strong>sobreajuste</strong>; si ambos quedan altos, hay <strong>subajuste (underfitting)</strong>. El <Termino def="Detener el entrenamiento en la época donde el error de validación toca su mínimo, conservando esos pesos, antes de que el modelo empiece a memorizar ruido.">Early Stopping</Termino> (parada temprana) aprovecha esa «U»: detiene el entrenamiento en el mínimo del error de validación y conserva esos pesos —un remedio que <em>depende</em> directamente de este diagnóstico—.
                 </p>
                 <CurvaAprendizajeChart />
@@ -4785,8 +4816,8 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
 
                 <h3>Validación cruzada K-Fold e hiperparámetros</h3>
                 <p>
-                    La partición anterior reserva <em>un</em> conjunto de validación, pero con pocos datos —lo habitual en muchos
-                    problemas locales— ese conjunto es pequeño y su puntaje se vuelve una <strong>lotería</strong>: cambia según qué
+                    La partición anterior reserva <em>un</em> conjunto de validación, pero con pocos datos —lo habitual, por ejemplo, en un
+                    conjunto de fotos de hojas de café reunido por una cooperativa— ese conjunto es pequeño y su puntaje se vuelve una <strong>lotería</strong>: cambia según qué
                     ejemplos cayeron, por azar, en la validación. La <strong>validación cruzada K-Fold</strong> reparte ese azar: divide
                     los datos en {String.raw`\(K\)`} pliegues (p. ej. {String.raw`\(K=5\)`}) y los rota —en cada vuelta entrena con {String.raw`\(K-1\)`} y
                     valida con el restante—, de modo que <strong>cada ejemplo valida exactamente una vez</strong>. La métrica final es el
@@ -4808,7 +4839,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                     </table>
                 </div>
                 <Accordion items={[
-                    { titulo: 'Grid Search (búsqueda en cuadrícula)', contenido: <span>Evalúa sistemáticamente todas las combinaciones de una rejilla (ej. tostado a 180°, 190°, 200° × 8, 10, 12 min). Exhaustiva pero costosa.</span> },
+                    { titulo: 'Grid Search (búsqueda en cuadrícula)', contenido: <span>Evalúa sistemáticamente todas las combinaciones de una rejilla —p. ej. tasa de aprendizaje {`{0,01; 0,001; 0,0001}`} cruzada con λ {`{0; 1e-4; 1e-3}`}—. Exhaustiva pero costosa: su costo crece con el <strong>producto</strong> de las opciones.</span> },
                     { titulo: 'Random Search (búsqueda aleatoria)', contenido: <span>Prueba combinaciones al azar dentro de rangos razonables. Suele ser más eficiente: explora mejor las regiones promisorias sin malgastar cómputo.</span> },
                 ]} />
 
@@ -4873,8 +4904,8 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                     Todas las métricas anteriores —exactitud, recall, AUC— se calcularon sobre <strong>toda la población</strong> a la vez.
                     Pero un promedio brillante puede <strong>esconder</strong> que el modelo trata mucho peor a un subgrupo: basta volver a
                     calcular esas mismas métricas <em>por grupo</em> para que la desigualdad salte a la vista. Y el sesgo casi nunca se
-                    programa: se <strong>hereda de los datos</strong> —subgrupos con menos ejemplos, registros de peor calidad o etiquetas
-                    históricamente injustas— y el descenso del gradiente, que solo minimiza la pérdida <em>promedio</em>, lo reproduce y a
+                    programa: se <strong>hereda de los datos</strong> (subgrupos con menos ejemplos, registros de peor calidad o etiquetas
+                    históricamente injustas). El descenso del gradiente solo minimiza la pérdida <em>promedio</em>, así que lo reproduce y a
                     veces lo amplifica. Tres ideas para nombrarlo:
                 </p>
                 <Tabs tabs={[
@@ -5106,7 +5137,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                             <tr><td>2. Función de pérdida</td><td>(B) Memorizar el cuadernillo del ICFES del año pasado y fallar en el examen real.</td></tr>
                             <tr><td>3. Backpropagation</td><td>(C) Sumar muchas "lomas" para recrear el perfil de la Cordillera Central.</td></tr>
                             <tr><td>4. Overfitting</td><td>(D) El "altímetro" que indica qué tan lejos se está del valle.</td></tr>
-                            <tr><td>5. Dropout</td><td>(E) Sacar al azar a jugadores estrella para que el equipo trabaje en conjunto.</td></tr>
+                            <tr><td>5. Dropout</td><td>(E) Pedir al azar que se ausente alguien del grupo de estudio —incluida la «estrella»— para que nadie sea indispensable.</td></tr>
                             <tr><td>6. Learning Rate</td><td>(F) El tamaño del paso al bajar la montaña en la niebla.</td></tr>
                             <tr><td>7. Capa oculta</td><td>(G) Los "analistas técnicos" que procesan documentos antes de la decisión.</td></tr>
                         </tbody>
@@ -5265,7 +5296,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                 <Box type="info" label="Aplica lo aprendido · Proyecto Centinela · Fase 1">
                     Toda la teoría del módulo se pone en práctica en la <strong>actividad evaluable</strong>: construir la
                     <strong> línea base con un MLP</strong> de un sistema de alerta temprana para cultivos (el escenario de la roya del
-                    café del Cap. 5). El trabajo cubre el diseño de la red, el bucle de entrenamiento explícito, la regularización ante
+                    café que recorre el módulo). El trabajo cubre el diseño de la red, el bucle de entrenamiento explícito, la regularización ante
                     el sobreajuste (Dropout) y la evaluación con matriz de confusión y auditoría ética. Se realiza con
                     <strong> datos reales y no provenientes de Kaggle</strong>, bajo un <strong>uso responsable de IA</strong> documentado en
                     bitácora y sustentado en la entrega. Esta Fase 1 es la base que crecerá en los Módulos 2 y 3.

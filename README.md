@@ -6,7 +6,7 @@ Maestría en Ciencia de Datos · Universidad Santo Tomás.
 
 🌐 **Sitio:** https://jotamao1985.github.io/Deep_Learning_Usta/
 
-El portal `index.html` es un punto de entrada multi-módulo (selector Módulo 1 / Módulo 2) que da acceso a los materiales de cada módulo y al Proyecto Centinela (Fases 1–3).
+El portal `index.html` es un punto de entrada multi-módulo (selector Módulo 1 / Módulo 2 / Módulo 3) que da acceso a los materiales de cada módulo y al Proyecto Centinela (Fases 1–3).
 
 ## Módulo 1 — Fundamentos del Aprendizaje Profundo
 
@@ -28,6 +28,16 @@ El portal `index.html` es un punto de entrada multi-módulo (selector Módulo 1 
 | `022_infografia-contenidos-modulo-2.html` | Infografía de contenidos |
 | `023_microlearning-modulo-2.html` | Microlearning |
 
+## Módulo 3 — Implementación y Herramientas Profesionales
+
+| Archivo | Descripción |
+|---|---|
+| `03_Modulo_3_Implementacion_Deep_Learning.html` | Material principal — 3 capítulos (frameworks TF/Keras & PyTorch + Keras 3, HPC/GPU + precisión mixta + Colab/Kaggle, pipelines tf.data/DataLoader + Data Augmentation + ONNX/despliegue) |
+| `030_ruta-aprendizaje-modulo-3.html` | Ruta de aprendizaje (mapa navegable) |
+| `031_material-consulta-modulo-3.html` | Material de consulta |
+| `032_infografia-contenidos-modulo-3.html` | Infografía de contenidos |
+| `033_microlearning-modulo-3.html` | Microlearning |
+
 ## Proyecto Centinela (longitudinal)
 
 | Archivo | Descripción |
@@ -44,5 +54,7 @@ El portal `index.html` es un punto de entrada multi-módulo (selector Módulo 1 
 | `notebooks/02-scaffold-centinela-fase1.ipynb` | Andamiaje del proyecto · Fase 1 |
 | `notebooks/03-lab-arquitecturas-modulo-2.ipynb` | Laboratorio M2 (CNN/FashionMNIST, LSTM, autoencoder) |
 | `notebooks/04-scaffold-centinela-fase2.ipynb` | Andamiaje del proyecto · Fase 2 (ramas A/B/C) |
+| `notebooks/06-lab-implementacion-modulo-3.ipynb` | Laboratorio M3 (frameworks TF/PyTorch, GPU + precisión mixta, pipelines, ONNX) |
+| `notebooks/07-scaffold-centinela-fase3.ipynb` | Andamiaje del proyecto · Fase 3 (pipeline + GPU + despliegue offline) |
 
 Sitio estático (React + Tailwind vía CDN); no requiere compilación. Servido con GitHub Pages.

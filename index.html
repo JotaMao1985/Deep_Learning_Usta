@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="Portal del curso Profundización I: Redes Neuronales — Deep Learning. Acceso a los materiales de aprendizaje autónomo de los Módulos 1 (Fundamentos) y 2 (Arquitecturas Especializadas), y al Proyecto Centinela (Fases 1–3). Maestría en Ciencia de Datos, Universidad Santo Tomás.">
-    <title>Portal del curso · Profundización I: Redes Neuronales — Deep Learning · Módulos 1 y 2 · Proyecto Centinela · USTA</title>
+        content="Portal del curso Profundización I: Redes Neuronales — Deep Learning. Acceso a los materiales de aprendizaje autónomo de los Módulos 1 (Fundamentos), 2 (Arquitecturas Especializadas) y 3 (Implementación y Herramientas Profesionales), y al Proyecto Centinela (Fases 1–3). Maestría en Ciencia de Datos, Universidad Santo Tomás.">
+    <title>Portal del curso · Profundización I: Redes Neuronales — Deep Learning · Módulos 1, 2 y 3 · Proyecto Centinela · USTA</title>
 
     <!-- Preconnect para rendimiento de fuentes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,7 +17,7 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
     <!-- Babel para transpilar JSX en el navegador -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
 
     <!-- Tailwind CSS (utilidades) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -135,6 +135,14 @@
                     <li><a href="021_material-consulta-modulo-2.html">Material de Consulta (M2)</a></li>
                     <li><a href="022_infografia-contenidos-modulo-2.html">Infografía de Contenidos (M2)</a></li>
                     <li><a href="023_microlearning-modulo-2.html">Microlearning (M2)</a></li>
+                </ul>
+                <h2 style="color: #001A4D; font-size: 1.05rem; margin-bottom: 0.3rem;">Módulo 3 — Implementación y Herramientas Profesionales</h2>
+                <ul style="line-height: 2; padding-left: 1.2rem; margin-bottom: 1rem;">
+                    <li><a href="03_Modulo_3_Implementacion_Deep_Learning.html">Material principal · Implementación y Herramientas Profesionales</a></li>
+                    <li><a href="030_ruta-aprendizaje-modulo-3.html">Ruta de Aprendizaje (M3)</a></li>
+                    <li><a href="031_material-consulta-modulo-3.html">Material de Consulta (M3)</a></li>
+                    <li><a href="032_infografia-contenidos-modulo-3.html">Infografía de Contenidos (M3)</a></li>
+                    <li><a href="033_microlearning-modulo-3.html">Microlearning (M3)</a></li>
                 </ul>
                 <h2 style="color: #001A4D; font-size: 1.05rem; margin-bottom: 0.3rem;">Proyecto Centinela</h2>
                 <ul style="line-height: 2; padding-left: 1.2rem;">
@@ -280,6 +288,69 @@
                         externo: true,
                         titulo: 'Scaffold Centinela · Fase 2 (Notebook)',
                         desc: 'Andamiaje de partida para la Fase 2: ramas A (clasificación con CNN), B (series con RNN/LSTM/GRU) y C (fusión multimodal), con helpers de datos listos y los pasos clave como TODO. Se abre en Google Colab.',
+                        cta: 'Abrir en Colab',
+                        icon: 'fa-screwdriver-wrench',
+                    },
+                ],
+            },
+            3: {
+                id: 3,
+                etiqueta: 'Módulo 3',
+                titulo: 'Implementación y Herramientas Profesionales',
+                subtitulo: 'Frameworks (TensorFlow/Keras y PyTorch, con Keras 3 como puente); computación de alto rendimiento (GPU, precisión mixta, Colab y Kaggle); y pipelines de datos, Data Augmentation y despliegue (ONNX, LiteRT, Edge).',
+                temas: ['TensorFlow / Keras', 'PyTorch', 'Keras 3', 'GPU / CUDA', 'Precisión mixta', 'tf.data / DataLoader', 'Data Augmentation', 'ONNX / Despliegue'],
+                nucleo: {
+                    archivo: '03_Modulo_3_Implementacion_Deep_Learning.html',
+                    eyebrow: 'Material principal · Aprendizaje autónomo',
+                    titulo: 'Implementación y Herramientas Profesionales',
+                    desc: 'Recorrido completo y autónomo de los 3 capítulos del módulo: los frameworks dominantes (TensorFlow/Keras y PyTorch) y su convergencia con Keras 3; el hardware acelerado (GPU, núcleos CUDA y Tensor Cores, precisión mixta, multi-GPU) y la nube gratuita (Colab y Kaggle); y los pipelines de datos eficientes, el Data Augmentation y el guardado/exportación/despliegue (ONNX, LiteRT, Edge). Con teoría, analogías colombianas, diagramas SVG, código TF/PyTorch y cuestionarios con puntaje.',
+                    cta: 'Abrir material',
+                    icon: 'fa-graduation-cap',
+                },
+                recursos: [
+                    {
+                        archivo: '030_ruta-aprendizaje-modulo-3.html',
+                        titulo: 'Ruta de Aprendizaje',
+                        desc: 'Mapa navegable del Módulo 3: los 3 capítulos, el video de profundización, la Guía 3 y la actividad del Proyecto Centinela (Fase 3), con cronograma, hitos evaluativos y seguimiento de progreso.',
+                        cta: 'Ver la ruta',
+                        icon: 'fa-route',
+                    },
+                    {
+                        archivo: '031_material-consulta-modulo-3.html',
+                        titulo: 'Material de Consulta',
+                        desc: 'Bibliografía y recursos del módulo: documentación oficial por familia (frameworks, HPC/GPU, pipelines), herramientas interactivas (TensorFlow Playground, Colab), marco ético colombiano (Marco Ético IA, CONPES) y datasets como RoCoLe.',
+                        cta: 'Abrir consulta',
+                        icon: 'fa-book-open',
+                    },
+                    {
+                        archivo: '032_infografia-contenidos-modulo-3.html',
+                        titulo: 'Infografía de Contenidos',
+                        desc: 'Síntesis visual del módulo: el ciclo de MLOps, las tres APIs de Keras, CPU vs. GPU, la distribución de la VRAM, el solapamiento del prefetch y la ruta de exportación/despliegue, con las cifras clave y una hoja de specs y comandos.',
+                        cta: 'Ver infografía',
+                        icon: 'fa-chart-pie',
+                    },
+                    {
+                        archivo: '033_microlearning-modulo-3.html',
+                        titulo: 'Microlearning',
+                        desc: 'Cinco cápsulas interactivas: frameworks (TF/Keras vs. PyTorch), pipelines y prefetch, GPU y precisión mixta, Data Augmentation con criterio, y exportación y despliegue (ONNX, LiteRT), con verificación inmediata.',
+                        cta: 'Empezar microlearning',
+                        icon: 'fa-bolt',
+                    },
+                    {
+                        archivo: 'notebooks/06-lab-implementacion-modulo-3.ipynb',
+                        href: 'https://colab.research.google.com/github/JotaMao1985/Deep_Learning_Usta/blob/main/notebooks/06-lab-implementacion-modulo-3.ipynb',
+                        externo: true,
+                        titulo: 'Laboratorio en Python (Notebook)',
+                        desc: 'Cuaderno ejecutable que acompaña los capítulos: la misma CNN en Keras 3 y PyTorch, entrenamiento en GPU con precisión mixta, pipelines tf.data y DataLoader con Data Augmentation, y exportación a ONNX verificada. Se abre en Google Colab (GPU T4).',
+                        cta: 'Abrir en Colab',
+                        icon: 'fa-flask',
+                    },
+                    {
+                        archivo: 'notebooks/07-scaffold-centinela-fase3.ipynb',
+                        href: 'https://colab.research.google.com/github/JotaMao1985/Deep_Learning_Usta/blob/main/notebooks/07-scaffold-centinela-fase3.ipynb',
+                        externo: true,
+                        titulo: 'Scaffold Centinela · Fase 3 (Notebook)',
+                        desc: 'Andamiaje de partida para la Fase 3: etapas A (pipeline reproducible), B (entrenamiento acelerado con GPU y precisión mixta) y C (exportación y despliegue offline), con celdas de soporte funcionales y los pasos evaluables como TODO. Se abre en Google Colab.',
                         cta: 'Abrir en Colab',
                         icon: 'fa-screwdriver-wrench',
                     },
@@ -471,7 +542,7 @@
                         <div className="usta-header rounded-xl p-6 text-center">
                             <p className="text-white font-medium text-sm">
                                 <strong>Profundización I: Redes Neuronales — Deep Learning</strong>
-                                <span className="text-white/70"> · Módulos 1 y 2 · Proyecto Centinela (Fases 1–3)</span>
+                                <span className="text-white/70"> · Módulos 1, 2 y 3 · Proyecto Centinela (Fases 1–3)</span>
                             </p>
                             <p className="text-xs mt-1 text-white/70">
                                 Maestría en Ciencia de Datos · Universidad Santo Tomás

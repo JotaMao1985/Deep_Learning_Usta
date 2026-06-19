@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Material de consulta del Módulo 3: bibliografía, documentación oficial, recursos audiovisuales e interactivos, marco normativo-ético y datasets para la Implementación y Herramientas Profesionales de Deep Learning (frameworks, HPC/GPU y pipelines de despliegue). Maestría en Ciencia de Datos, Universidad Santo Tomás.">
+    <title>Material de consulta · Módulo 3 — Implementación y Herramientas Profesionales de Deep Learning · USTA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Tailwind CSS (utilidades) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome (iconografía de apoyo) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Google Fonts: Montserrat (texto) y Fira Code (código) -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Montserrat', 'Helvetica Neue', 'Arial', 'sans-serif'] },
+                    colors: {
+                        primary: '#3D008D',
+                        secondary: '#ED1E79',
+                        navy: '#001A4D',
+                        gold: '#FDB913',
+                        teal: '#0E7490',
+                        bg: '#F8FAFC',
+                        surface: '#FFFFFF',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #F8FAFC;
+            color: #1E293B;
+            scroll-behavior: smooth;
+        }
+        code, pre, .mono { font-family: 'Fira Code', monospace; }
+
+        /* Gradientes institucionales USTA */
+        .usta-gradient { background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%); }
+        .usta-gradient-text {
+            background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .usta-header { background: linear-gradient(135deg, #001A4D 0%, #3D008D 60%, #5B1C9E 100%); }
+
+        /* Tarjeta base */
+        .card {
+            background: #fff; border-radius: 16px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+            transition: box-shadow .25s ease, transform .25s ease;
+        }
+        .card:hover { box-shadow: 0 12px 30px rgba(0,0,0,0.11); transform: translateY(-3px); }
+
+        /* Barra de desplazamiento */
+        ::-webkit-scrollbar { width: 9px; height: 9px; }
+        ::-webkit-scrollbar-track { background: #eef2f7; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg,#3D008D,#ED1E79); border-radius: 5px; }
+
+        /* Aparición progresiva: SOLO una entrada sutil que nunca oculta el contenido. */
+        @keyframes riseIn { from { opacity: .35; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        .js .reveal.in { animation: riseIn .5s ease-out both; }
+
+        /* Código en línea */
+        .icode {
+            background: #F1F5F9; color: #0F172A; padding: .08rem .42rem;
+            border-radius: 5px; font-size: .85em; font-family: 'Fira Code', monospace;
+        }
+
+        /* Callout / analogía */
+        .callout { border-left: 4px solid; border-radius: 12px; padding: .9rem 1.1rem; }
+        .callout-info   { background:#F3F0FC; border-color:#3D008D; }
+        .callout-tip    { background:#ECFDF5; border-color:#0E9F6E; }
+        .callout-warn   { background:#FFFBEB; border-color:#FDB913; }
+        .callout-danger { background:#FEF2F2; border-color:#DC2626; }
+        .callout-eth    { background:#F0F9FF; border-color:#0E7490; }
+
+        h2.sec-title { font-weight: 800; letter-spacing: -.02em; }
+
+        /* Navegación sticky */
+        .navbar { backdrop-filter: blur(8px); background: rgba(255,255,255,.86); }
+        .navlink { transition: color .2s ease, background .2s ease; }
+        .navlink:hover { color:#3D008D; }
+
+        /* Tabla genérica */
+        .tbl { width:100%; border-collapse: collapse; font-size:.9rem; }
+        .tbl th, .tbl td { border:1px solid #E2E8F0; padding:.6rem .7rem; vertical-align: top; text-align:left; }
+        .tbl thead th { color:#fff; }
+        .tbl a { color:#ED1E79; }
+
+        /* Píldora de familia temática */
+        .fam { display:inline-block; font-size:.68rem; font-weight:700; letter-spacing:.03em;
+            text-transform:uppercase; padding:.1rem .5rem; border-radius:9999px; white-space:nowrap; }
+        .fam-frame { background:#EDE9FE; color:#5B21B6; }
+        .fam-hpc   { background:#FCE7F3; color:#9D174D; }
+        .fam-pipe  { background:#CFFAFE; color:#0E7490; }
+
+        /* Figuras / diagramas */
+        figure { margin: 0; }
+        figcaption { font-size:.8rem; color:#64748B; margin-top:.5rem; text-align:center; }
+
+        /* Impresión / PDF */
+        @media print {
+            body { background: #fff; }
+            .no-print { display: none !important; }
+            .card { box-shadow: none; border: 1px solid #e5e7eb; break-inside: avoid; }
+            section { break-inside: avoid-page; }
+            .js .reveal { opacity: 1 !important; transform: none !important; }
+            a { color: #1E293B; text-decoration: none; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ====================== ENCABEZADO ====================== -->
+    <header class="usta-header text-white">
+        <div class="max-w-6xl mx-auto px-5 md:px-8 py-10 md:py-14">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="usta-gradient p-2.5 rounded-xl shadow-lg"><i class="fas fa-book-open text-lg"></i></span>
+                <span class="text-[11px] md:text-xs uppercase tracking-[0.25em] text-gold font-bold">Universidad Santo Tomás · Maestría en Ciencia de Datos</span>
+            </div>
+            <p class="text-secondary font-semibold text-sm md:text-base mb-1">Profundización I: Redes Neuronales — Deep Learning · EA-N-F-004</p>
+            <h1 class="text-3xl md:text-5xl font-extrabold leading-tight tracking-tight">
+                Material de <span class="text-gold">consulta</span> · Módulo 3
+            </h1>
+            <p class="text-lg md:text-2xl font-light text-white/90 mt-3">Implementación y Herramientas Profesionales de Deep Learning · Bibliografía, documentación oficial y fuentes recomendadas</p>
+            <div class="flex flex-wrap gap-2 mt-6 text-xs md:text-sm">
+                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-book mr-1.5 text-gold"></i>Bibliografía</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-file-lines mr-1.5 text-gold"></i>Documentación oficial</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-laptop-code mr-1.5 text-gold"></i>Interactivos</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-scale-balanced mr-1.5 text-gold"></i>Marco ético</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-database mr-1.5 text-gold"></i>Datasets</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ====================== NAVEGACIÓN STICKY ====================== -->
+    <nav class="navbar sticky top-0 z-40 border-b border-slate-200 no-print">
+        <div class="max-w-6xl mx-auto px-4 flex gap-1 md:gap-3 overflow-x-auto text-xs md:text-sm font-semibold py-2.5 whitespace-nowrap">
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#bibliografia"><i class="fas fa-book mr-1"></i>Bibliografía</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#papers"><i class="fas fa-file-lines mr-1"></i>Documentación oficial</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#audiovisual"><i class="fas fa-laptop-code mr-1"></i>Interactivos</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#normativo"><i class="fas fa-scale-balanced mr-1"></i>Marco ético</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#datasets"><i class="fas fa-database mr-1"></i>Datasets</a>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-5 md:px-8 py-10 md:py-14 space-y-14">
+
+        <!-- ====================== INTRODUCCIÓN ====================== -->
+        <section class="reveal">
+            <div class="callout callout-info">
+                <p class="font-bold text-primary mb-1"><i class="fas fa-circle-info mr-2"></i>Cómo usar este material</p>
+                <p class="text-sm leading-relaxed">Las fuentes de consulta de base para el desarrollo de la actividad corresponden a las lecturas sugeridas dispuestas en el aula virtual o cualquier otra fuente que se considere pertinente consultar. A continuación se recopilan las fuentes <strong>principales</strong> del Módulo 3, organizadas por tipo: bibliografía, documentación oficial y técnica, recursos audiovisuales e interactivos, marco normativo-ético y conjuntos de datos de práctica. El módulo recorre <strong>tres familias de implementación</strong>, identificadas con una etiqueta de color en cada referencia.</p>
+                <div class="flex flex-wrap gap-2 mt-3">
+                    <span class="fam fam-frame"><i class="fas fa-cubes mr-1"></i>Frameworks — TensorFlow / PyTorch / Keras 3</span>
+                    <span class="fam fam-hpc"><i class="fas fa-microchip mr-1"></i>HPC / GPU — CUDA, cuDNN y cómputo acelerado</span>
+                    <span class="fam fam-pipe"><i class="fas fa-diagram-project mr-1"></i>Pipelines / Despliegue — tf.data, ONNX, exportación</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== SECCIÓN 1 — BIBLIOGRAFÍA PRINCIPAL ====================== -->
+        <section id="bibliografia" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-book text-secondary mr-2"></i>Bibliografía principal</h2>
+            <div class="overflow-x-auto card p-1">
+                <table class="tbl" style="min-width:720px">
+                    <thead>
+                        <tr style="background:#3D008D">
+                            <th scope="col" style="width:14%">Familia</th>
+                            <th scope="col" style="width:30%">Referencia</th>
+                            <th scope="col" style="width:38%">Aporte al módulo</th>
+                            <th scope="col" style="width:18%">Enlace</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="fam fam-frame">Frameworks</span></td>
+                            <td>Goodfellow, I., Bengio, Y., &amp; Courville, A. (2016). <em>Deep Learning</em>. MIT Press.</td>
+                            <td>Texto canónico del curso. Fundamenta el porqué matemático que subyace a cada framework: grafos computacionales, diferenciación automática (<em>autograd</em>) y optimización por gradiente que los motores de TensorFlow y PyTorch implementan.</td>
+                            <td><a href="https://www.deeplearningbook.org" target="_blank" rel="noopener">deeplearningbook.org</a></td>
+                        </tr>
+                        <tr>
+                            <td><span class="fam fam-frame">Frameworks</span></td>
+                            <td>Géron, A. (2022). <em>Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow</em> (3.ª ed.). O'Reilly Media.</td>
+                            <td>Referencia operativa central del módulo. Cubre la API de alto nivel de Keras, el pipeline <span class="icode">tf.data</span> y el guardado/despliegue de modelos en el ecosistema TensorFlow 2.x.</td>
+                            <td>Recurso disponible en la biblioteca USTA</td>
+                        </tr>
+                        <tr>
+                            <td><span class="fam fam-frame">Frameworks</span></td>
+                            <td>Stevens, E., Antiga, L., &amp; Viehmann, T. (2020). <em>Deep Learning with PyTorch</em>. Manning Publications.</td>
+                            <td>Guía de referencia para PyTorch: tensores, grafos computacionales dinámicos, <span class="icode">autograd</span>, módulos (<span class="icode">nn.Module</span>) y el pipeline explícito de datos con <span class="icode">DataLoader</span>.</td>
+                            <td>Recurso disponible en la biblioteca USTA</td>
+                        </tr>
+                        <tr>
+                            <td><span class="fam fam-pipe">Pipelines</span></td>
+                            <td>Chollet, F. (2021). <em>Deep Learning with Python</em> (2.ª ed.). Manning Publications.</td>
+                            <td>Escrito por el creador de Keras. Aporta la intuición práctica del flujo de trabajo completo —de la construcción del modelo a su entrenamiento, evaluación y despliegue— que sustenta el <strong>Proyecto Centinela · Fase 3</strong>.</td>
+                            <td>Recurso disponible en la biblioteca USTA</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ====================== SECCIÓN 2 — DOCUMENTACIÓN OFICIAL Y TÉCNICA ====================== -->
+        <section id="papers" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-file-lines text-secondary mr-2"></i>Documentación oficial y técnica</h2>
+            <p class="text-sm text-slate-600 mb-5 max-w-3xl">En la fase de implementación, la <strong>fuente primaria</strong> deja de ser el paper seminal y pasa a ser la <strong>documentación oficial</strong> de cada herramienta. Estas referencias son la verdad operativa del módulo: APIs, formatos de exportación y guías de rendimiento que cambian con cada versión.</p>
+
+            <!-- 2.1 Frameworks -->
+            <h3 class="text-lg font-bold text-primary mb-3 mt-2"><span class="fam fam-frame mr-2">Frameworks</span>TensorFlow, PyTorch y Keras 3</h3>
+            <div class="overflow-x-auto card p-1 mb-8">
+                <table class="tbl" style="min-width:680px">
+                    <thead>
+                        <tr style="background:#3D008D">
+                            <th scope="col" style="width:32%">Referencia</th>
+                            <th scope="col" style="width:48%">Aporte al módulo</th>
+                            <th scope="col" style="width:20%">Enlace</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Keras Team. (2023). <em>Introducing Keras 3.0</em>. Keras.</td>
+                            <td><strong>Keras 3</strong> como API multi-backend: el mismo código corre sobre TensorFlow, JAX o PyTorch. Documenta "el puente entre mundos" que permite escribir un modelo agnóstico al motor de cómputo, eje del capítulo de frameworks.</td>
+                            <td><a href="https://keras.io/keras_3/" target="_blank" rel="noopener">keras.io/keras_3</a></td>
+                        </tr>
+                        <tr>
+                            <td>PyTorch Foundation. (2025). <em>torch.export documentation</em>. PyTorch.</td>
+                            <td>Documenta <span class="icode">torch.export</span>, el mecanismo moderno para capturar un grafo de PyTorch y exportarlo a un formato portable. Pieza clave para llevar un modelo entrenado del cuaderno a producción.</td>
+                            <td><a href="https://docs.pytorch.org/docs/stable/export.html" target="_blank" rel="noopener">docs.pytorch.org/.../export</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 2.2 HPC / GPU -->
+            <h3 class="text-lg font-bold text-primary mb-3"><span class="fam fam-hpc mr-2">HPC/GPU</span>Cómputo de alto rendimiento: CUDA y cuDNN</h3>
+            <div class="overflow-x-auto card p-1 mb-8">
+                <table class="tbl" style="min-width:680px">
+                    <thead>
+                        <tr style="background:#3D008D">
+                            <th scope="col" style="width:32%">Referencia</th>
+                            <th scope="col" style="width:48%">Aporte al módulo</th>
+                            <th scope="col" style="width:20%">Enlace</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>NVIDIA Developer. (2025). <em>CUDA Deep Neural Network (cuDNN)</em>. NVIDIA.</td>
+                            <td><strong>cuDNN</strong>: la biblioteca de primitivas optimizadas (convolución, <em>pooling</em>, normalización) sobre la que TensorFlow y PyTorch delegan el cálculo en GPU. Explica la base de la aceleración por hardware del módulo.</td>
+                            <td><a href="https://developer.nvidia.com/cudnn" target="_blank" rel="noopener">developer.nvidia.com/cudnn</a></td>
+                        </tr>
+                        <tr>
+                            <td>NVIDIA Developer. (2025). <em>CUDA Toolkit Documentation</em>. NVIDIA.</td>
+                            <td><strong>CUDA</strong>: la plataforma de cómputo paralelo de propósito general sobre GPU. Sustenta el concepto de "la pila de software" y por qué la VRAM es el recurso más escaso al entrenar redes profundas.</td>
+                            <td><a href="https://developer.nvidia.com/cuda-toolkit" target="_blank" rel="noopener">developer.nvidia.com/cuda-toolkit</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 2.3 Pipelines / Despliegue -->
+            <h3 class="text-lg font-bold text-primary mb-3"><span class="fam fam-pipe mr-2">Pipelines</span>Pipelines de datos, aumento y despliegue</h3>
+            <div class="overflow-x-auto card p-1">
+                <table class="tbl" style="min-width:680px">
+                    <thead>
+                        <tr style="background:#3D008D">
+                            <th scope="col" style="width:32%">Referencia</th>
+                            <th scope="col" style="width:48%">Aporte al módulo</th>
+                            <th scope="col" style="width:20%">Enlace</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>TensorFlow Authors. (2023). <em>Better performance with the tf.data API</em>. TensorFlow.</td>
+                            <td>Guía oficial del pipeline declarativo <span class="icode">tf.data</span>: <em>prefetch</em>, <em>cache</em> y paralelización para que la GPU nunca espere por los datos. Núcleo del capítulo de pipelines de entrada.</td>
+                            <td><a href="https://www.tensorflow.org/guide/data_performance" target="_blank" rel="noopener">tensorflow.org/guide/data_performance</a></td>
+                        </tr>
+                        <tr>
+                            <td>Buslaev, A., Iglovikov, V., &amp; Parinov, A. (2020). Albumentations: Fast and flexible image augmentations. <em>Information, 11</em>(2), 125. (AlbumentationsX, v2025).</td>
+                            <td>Biblioteca de <strong>aumento de datos</strong> de alto rendimiento. <span class="icode">AlbumentationsX</span> es el sucesor mantenido; se integra al pipeline para generar variabilidad realista sin salir del entorno de cómputo.</td>
+                            <td><a href="https://albumentations.ai/" target="_blank" rel="noopener">albumentations.ai</a></td>
+                        </tr>
+                        <tr>
+                            <td>ONNX Community. (2024). <em>ONNX: Open Neural Network Exchange</em>. The Linux Foundation.</td>
+                            <td><strong>ONNX</strong>, "el pasaporte universal de los modelos": un formato abierto que permite exportar un modelo de un framework e importarlo en otro o en un motor de inferencia. Cierre del capítulo de despliegue.</td>
+                            <td><a href="https://onnx.ai/" target="_blank" rel="noopener">onnx.ai</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-info mt-5">
+                <p class="text-sm"><i class="fas fa-circle-info text-primary mr-2"></i><strong>La documentación versiona.</strong> A diferencia de los papers, estas fuentes <em>cambian con cada versión</em>. Verifica siempre que la página de documentación corresponda a la versión instalada en tu entorno (p. ej. la API de <span class="icode">torch.export</span> o de Keras 3 puede diferir entre <em>minor releases</em>).</p>
+            </div>
+        </section>
+
+        <!-- ====================== SECCIÓN 3 — RECURSOS AUDIOVISUALES E INTERACTIVOS ====================== -->
+        <section id="audiovisual" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-laptop-code text-secondary mr-2"></i>Recursos audiovisuales e interactivos</h2>
+            <p class="text-sm text-slate-600 mb-5 max-w-3xl">Herramientas para "tocar" la implementación sin fricción: simuladores en el navegador, documentación práctica del entorno de cómputo y explicaciones visuales en español.</p>
+            <div class="overflow-x-auto card p-1">
+                <table class="tbl" style="min-width:720px">
+                    <thead>
+                        <tr style="background:#3D008D">
+                            <th scope="col" style="width:14%">Familia</th>
+                            <th scope="col" style="width:26%">Recurso</th>
+                            <th scope="col" style="width:42%">Descripción y vínculo pedagógico</th>
+                            <th scope="col" style="width:18%">Enlace</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="fam fam-frame">Frameworks</span></td>
+                            <td><strong>TensorFlow Playground</strong> (Smilkov &amp; Carter, Google)</td>
+                            <td>Simulador web para experimentar con redes en tiempo real sin instalar nada: capas, tasa de aprendizaje, funciones de activación y regularización. Primer contacto visual con los hiperparámetros que luego se configuran en código.</td>
+                            <td><a href="https://playground.tensorflow.org" target="_blank" rel="noopener">playground.tensorflow.org</a></td>
+                        </tr>
+                        <tr>
+                            <td><span class="fam fam-hpc">HPC/GPU</span></td>
+                            <td><strong>Google Colab — Preguntas Frecuentes (FAQ)</strong> (Google Research)</td>
+                            <td>Documentación oficial del entorno de cómputo gratuito con GPU: límites de uso, tipos de aceleradores, sesiones efímeras y buenas prácticas. Lectura imprescindible para entender la metodología "Ingeniería de Trinchera".</td>
+                            <td><a href="https://research.google.com/colaboratory/faq.html" target="_blank" rel="noopener">research.google.com/.../faq</a></td>
+                        </tr>
+                        <tr>
+                            <td><span class="fam fam-frame">Frameworks</span></td>
+                            <td><strong>Dot CSV</strong> (Carlos Santana, YouTube · español)</td>
+                            <td>Canal de divulgación en español que explica con claridad visual frameworks, GPU y el flujo de implementación de modelos de Deep Learning. Apoyo en lengua materna para reforzar los conceptos del módulo.</td>
+                            <td><a href="https://www.youtube.com/c/DotCSV" target="_blank" rel="noopener">youtube.com/c/DotCSV</a></td>
+                        </tr>
+                        <tr>
+                            <td><span class="fam fam-pipe">Pipelines</span></td>
+                            <td><strong>CNN Explainer</strong> (Polo Club of Data Science, Georgia Tech, 2020)</td>
+                            <td>Visualización interactiva que permite "abrir" una CNN capa por capa (convolución, ReLU, <em>pooling</em>). Útil para razonar qué operaciones aceleran cuDNN y la GPU al ejecutar la inferencia que se despliega.</td>
+                            <td><a href="https://poloclub.github.io/cnn-explainer/" target="_blank" rel="noopener">poloclub.github.io/cnn-explainer</a></td>
+                        </tr>
+                        <tr>
+                            <td><span class="fam fam-pipe">Pipelines</span></td>
+                            <td><strong>Transformer Explainer</strong> (Polo Club of Data Science, Georgia Tech, 2024)</td>
+                            <td>Ejecuta un modelo tipo GPT-2 directamente en el navegador, visualizando la atención multi-cabeza en tiempo real. Ejemplo de cómo un modelo entrenado se sirve y se ejecuta de cara al usuario final.</td>
+                            <td><a href="https://poloclub.github.io/transformer-explainer/" target="_blank" rel="noopener">poloclub.github.io/transformer-explainer</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-tip mt-5">
+                <p class="text-sm"><i class="fas fa-lightbulb text-emerald-600 mr-2"></i><strong>Estrategia de cómputo (Colab + Kaggle).</strong> Combina los dos entornos gratuitos para maximizar GPU: <strong>Google Colab</strong> para iteración rápida y prototipado, y <strong>Kaggle Notebooks</strong> con su cuota predecible de <strong>~30 h de GPU + ~30 h de TPU por semana (≈60 h)</strong> para entrenamientos largos. Así, si un entorno se queda sin sesión, el otro mantiene el proyecto en marcha sin pagar nada: pura "Ingeniería de Trinchera".</p>
+            </div>
+        </section>
+
+        <!-- ====================== SECCIÓN 4 — MARCO NORMATIVO Y ÉTICO ====================== -->
+        <section id="normativo" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-scale-balanced text-secondary mr-2"></i>Marco normativo, ético y casos de aplicación</h2>
+            <div class="overflow-x-auto card p-1">
+                <table class="tbl" style="min-width:680px">
+                    <thead>
+                        <tr style="background:#3D008D">
+                            <th scope="col" style="width:30%">Documento / caso</th>
+                            <th scope="col" style="width:50%">Aplicación en el módulo</th>
+                            <th scope="col" style="width:20%">Enlace</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Ministerio de Ciencia, Tecnología e Innovación. (2021). <em>Marco Ético para la Inteligencia Artificial en Colombia</em>.</td>
+                            <td>Referencia transversal del curso. En la fase de despliegue aplica a la <strong>trazabilidad y reproducibilidad</strong> del modelo en producción (versionado, registro de datos) y a la política de <strong>Uso Responsable de IA</strong> del <strong>Proyecto Centinela · Fase 3</strong>. Lectura obligatoria.</td>
+                            <td><a href="https://minciencias.gov.co/sites/default/files/marco-etico-ia-colombia-2021.pdf" target="_blank" rel="noopener">minciencias.gov.co</a></td>
+                        </tr>
+                        <tr>
+                            <td>CONPES. (2025). <em>Política Pública para el Desarrollo de la Inteligencia Artificial en Colombia</em>. Departamento Nacional de Planeación.</td>
+                            <td>Documento de política pública que define la hoja de ruta nacional de IA: infraestructura de cómputo, talento, ética y adopción. Marco institucional en el que se inscribe el despliegue responsable de modelos en Colombia.</td>
+                            <td><a href="https://www.dnp.gov.co/" target="_blank" rel="noopener">dnp.gov.co</a></td>
+                        </tr>
+                        <tr>
+                            <td>AGROSAVIA. (2024). <em>IA aplicada al agro colombiano: detección temprana de roya del café</em>.</td>
+                            <td>Caso nacional de despliegue de visión por computador en caficultura. Ilustra el ciclo completo del Módulo 3: del modelo entrenado al servicio en campo, con restricciones de conectividad y cómputo (<em>Edge AI</em>) propias del contexto colombiano.</td>
+                            <td><a href="https://www.agrosavia.co/" target="_blank" rel="noopener">agrosavia.co</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-eth mt-5">
+                <p class="text-sm"><i class="fas fa-scale-balanced text-teal mr-2"></i><strong>Implicación ética del módulo.</strong> La fase de <em>implementación y despliegue</em> es donde un modelo deja de ser un experimento y empieza a afectar a personas reales. La trazabilidad (qué versión del modelo, con qué datos, sobre qué hardware) y la reproducibilidad dejan de ser un lujo de ingeniería y pasan a ser un <strong>requisito ético</strong>. La auditoría del <strong>Proyecto Centinela · Fase 3</strong> exige documentar el entorno de cómputo, las versiones de los frameworks y el formato de exportación, en línea con el Marco Ético para la IA en Colombia.</p>
+            </div>
+        </section>
+
+        <!-- ====================== SECCIÓN 5 — DATASETS Y HERRAMIENTAS ====================== -->
+        <section id="datasets" class="reveal">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-database text-secondary mr-2"></i>Datasets y herramientas de práctica</h2>
+
+            <div class="callout callout-warn mb-5">
+                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i><strong>Política de datos del proyecto.</strong> <strong>Kaggle Notebooks</strong> está permitido como <em>entorno de cómputo</em>, pero los <em>datasets</em> y <em>competencias</em> de Kaggle <strong>NO se permiten</strong> como fuente de datos de la actividad: son retos ya resueltos y con datos demasiado limpios. El proyecto exige fuentes reales y públicas (se admiten fuentes internacionales).</p>
+            </div>
+
+            <div class="overflow-x-auto card p-1">
+                <table class="tbl" style="min-width:680px">
+                    <thead>
+                        <tr style="background:#3D008D">
+                            <th scope="col" style="width:30%">Recurso</th>
+                            <th scope="col" style="width:50%">Uso en el módulo</th>
+                            <th scope="col" style="width:20%">Enlace</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Actividad evaluable · Proyecto Centinela · Fase 3</strong></td>
+                            <td>Enunciado completo de la actividad evaluable del Módulo 3. El sistema de alerta temprana se <strong>industrializa</strong>: pipeline de datos reproducible, entrenamiento acelerado por GPU y <strong>despliegue/exportación</strong> del modelo (guardado, ONNX, inferencia). Mantiene la política de <strong>Uso Responsable de IA</strong> (bitácora, sustentación oral y auditoría a la IA) y la regla de datos: fuentes reales y públicas, <strong>sin datasets de Kaggle</strong>.</td>
+                            <td><a href="31_Modulo_3_Actividad_Fase3_Centinela.html" target="_blank" rel="noopener">Proyecto Centinela · Fase 3</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>RoCoLe</strong> — Parraga-Alava, J. et al. (2019). <em>RoCoLe: A robusta coffee leaf images dataset</em> (v2). Mendeley Data.</td>
+                            <td>Dataset del <strong>escenario de referencia</strong> del Proyecto Centinela. En la Fase 3 las imágenes de hojas de café Robusta (sanas / con roya) alimentan un pipeline reproducible con aumento de datos (AlbumentationsX) y un modelo exportable a producción.</td>
+                            <td><a href="https://data.mendeley.com/datasets/c5yvn32dzg/2" target="_blank" rel="noopener">data.mendeley.com</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>FashionMNIST</strong> — Xiao, H., Rasul, K., &amp; Vollgraf, R. (2017). Zalando Research.</td>
+                            <td>Dataset de referencia ligero (70.000 imágenes de prendas en 28&times;28). Ideal como <strong>banco de pruebas</strong> para validar el pipeline completo (<span class="icode">tf.data</span> / <span class="icode">DataLoader</span>, entrenamiento en GPU, guardado y exportación a ONNX) antes de escalar al dato real del proyecto.</td>
+                            <td><a href="https://github.com/zalandoresearch/fashion-mnist" target="_blank" rel="noopener">github.com/zalandoresearch</a></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Google Colab</strong> + <strong>Kaggle Notebooks</strong></td>
+                            <td>Entornos de cómputo gratuitos con GPU. Toda la implementación práctica del módulo se ejecuta en estos entornos según la metodología "Ingeniería de Trinchera". <strong>Kaggle Notebooks</strong> está permitido como entorno de cómputo, pero sus <em>datasets</em> y <em>competencias</em> no se admiten como fuente de datos de la actividad (véase la alerta superior).</td>
+                            <td>
+                                <a href="https://colab.research.google.com/" target="_blank" rel="noopener">colab.research.google.com</a><br>
+                                <a href="https://www.kaggle.com/code" target="_blank" rel="noopener">kaggle.com/code</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>ONNX Runtime</strong> + <strong>AlbumentationsX</strong></td>
+                            <td><strong>ONNX Runtime</strong>: motor de inferencia multiplataforma para ejecutar el modelo exportado a ONNX con baja latencia. <strong>AlbumentationsX</strong>: biblioteca de aumento de imágenes de alto rendimiento para el pipeline de entrenamiento. Herramientas operativas del cierre de despliegue del módulo.</td>
+                            <td>
+                                <a href="https://onnxruntime.ai/" target="_blank" rel="noopener">onnxruntime.ai</a><br>
+                                <a href="https://albumentations.ai/" target="_blank" rel="noopener">albumentations.ai</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-warn mt-5">
+                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i><strong>Atención a la licencia de AlbumentationsX.</strong> El sucesor mantenido de Albumentations, <strong>AlbumentationsX</strong>, se distribuye bajo licencia <strong>AGPL-3.0</strong> (con opción de licencia comercial). La AGPL es "copyleft fuerte" y puede imponer obligaciones de apertura del código si se usa en un servicio en producción. Para el trabajo académico del curso no hay problema, pero <strong>documéntalo en la bitácora</strong> y, si despliegas un servicio real, revisa la compatibilidad de licencias (la versión clásica de Albumentations conserva su licencia MIT, más permisiva).</p>
+            </div>
+
+            <div class="callout callout-tip mt-5">
+                <p class="text-sm"><i class="fas fa-lightbulb text-emerald-600 mr-2"></i><strong>Biblioteca del aula.</strong> Además de las fuentes listadas, el aula virtual de USTA Multicampus dispone de las lecturas digitalizadas de los libros <strong>Géron (2022)</strong> y <strong>Stevens et al. (2020)</strong> y de material complementario en formato PDF y video, accesibles desde la sección "Biblioteca" del espacio académico.</p>
+            </div>
+        </section>
+
+        <!-- ====================== RELACIONADO ====================== -->
+        <section class="reveal">
+            <div class="usta-gradient rounded-2xl p-7 text-white">
+                <h2 class="text-xl md:text-2xl font-extrabold mb-3"><i class="fas fa-diagram-project mr-2"></i>🔗 Relacionado</h2>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                    <a href="03_Modulo_3_Implementacion_Deep_Learning.html" class="bg-white/10 hover:bg-white/20 transition rounded-xl p-4 block">
+                        <p class="font-bold mb-1"><i class="fas fa-layer-group mr-1.5"></i>Contenido del módulo</p>
+                        <p class="text-white/85">Implementación y Herramientas Profesionales — frameworks, HPC/GPU y pipelines de despliegue.</p>
+                    </a>
+                    <a href="030_ruta-aprendizaje-modulo-3.html" class="bg-white/10 hover:bg-white/20 transition rounded-xl p-4 block">
+                        <p class="font-bold mb-1"><i class="fas fa-route mr-1.5"></i>Ruta de aprendizaje</p>
+                        <p class="text-white/85">Secuencia recomendada de estudio y entregas del Módulo 3.</p>
+                    </a>
+                    <a href="31_Modulo_3_Actividad_Fase3_Centinela.html" class="bg-white/10 hover:bg-white/20 transition rounded-xl p-4 block">
+                        <p class="font-bold mb-1"><i class="fas fa-clipboard-check mr-1.5"></i>Actividad evaluativa</p>
+                        <p class="text-white/85">Proyecto Centinela · Fase 3 — pipeline, GPU y despliegue.</p>
+                    </a>
+                    <a href="032_infografia-contenidos-modulo-3.html" class="bg-white/10 hover:bg-white/20 transition rounded-xl p-4 block">
+                        <p class="font-bold mb-1"><i class="fas fa-chart-simple mr-1.5"></i>Infografía de contenidos</p>
+                        <p class="text-white/85">Síntesis visual del Módulo 3 — frameworks, GPU/HPC y pipelines en una página.</p>
+                    </a>
+                    <a href="033_microlearning-modulo-3.html" class="bg-white/10 hover:bg-white/20 transition rounded-xl p-4 block">
+                        <p class="font-bold mb-1"><i class="fas fa-graduation-cap mr-1.5"></i>Microlearning</p>
+                        <p class="text-white/85">Cápsulas breves de repaso y autoevaluación de los conceptos clave del módulo.</p>
+                    </a>
+                    <a href="index.html" class="bg-white/10 hover:bg-white/20 transition rounded-xl p-4 block">
+                        <p class="font-bold mb-1"><i class="fas fa-house mr-1.5"></i>Portal del curso</p>
+                        <p class="text-white/85">Página principal con todos los módulos y materiales.</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ====================== PIE ====================== -->
+    <footer class="bg-navy text-white/80 text-sm">
+        <div class="max-w-6xl mx-auto px-5 md:px-8 py-8">
+            <p class="font-bold text-white mb-1">Universidad Santo Tomás · Maestría en Ciencia de Datos</p>
+            <p>Profundización I: Redes Neuronales — Deep Learning (EA-N-F-004) · Experto temático: Javier Mauricio Sierra</p>
+            <p class="text-white/55 mt-3 text-xs">Material de consulta · Módulo 3 — Implementación y Herramientas Profesionales de Deep Learning. Material de aprendizaje autónomo. Metodología "Ingeniería de Trinchera": si una arquitectura no corre en Google Colab, no existe.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Activa los realces aditivos (nunca ocultan contenido).
+        document.documentElement.classList.add('js');
+
+        // Aparición progresiva por IntersectionObserver.
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+        }, { threshold: 0.08 });
+        document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+        // Realce del enlace de navegación activo según la sección visible.
+        const secs = document.querySelectorAll('main section[id]');
+        const links = document.querySelectorAll('.navlink');
+        const navIO = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    links.forEach(l => l.classList.remove('text-primary', 'bg-slate-100'));
+                    const active = document.querySelector('.navlink[href="#' + e.target.id + '"]');
+                    if (active) active.classList.add('text-primary', 'bg-slate-100');
+                }
+            });
+        }, { rootMargin: '-45% 0px -50% 0px' });
+        secs.forEach(s => navIO.observe(s));
+    </script>
+
+</body>
+
+</html>

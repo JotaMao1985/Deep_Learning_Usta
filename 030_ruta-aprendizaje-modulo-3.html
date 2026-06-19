@@ -5,16 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="Ruta de Aprendizaje Interactiva del Módulo 1 — Fundamentos del Aprendizaje Profundo. Maestría en Ciencia de Datos, Universidad Santo Tomás. Mapa navegable de los 5 capítulos, 2 actividades, 2 videos, glosario y cronograma.">
-    <title>Ruta de Aprendizaje · Módulo 1 — Fundamentos del Aprendizaje Profundo · USTA</title>
+        content="Ruta de Aprendizaje Interactiva del Módulo 3 — Implementación y Herramientas Profesionales de Deep Learning. Maestría en Ciencia de Datos, Universidad Santo Tomás. Mapa navegable de los 3 capítulos (Frameworks TF/PyTorch/Keras 3, Computación de Alto Rendimiento con GPU, Pipelines de Datos y Despliegue), 1 video de profundización, 2 hitos evaluativos, glosario y cronograma.">
+    <title>Ruta de Aprendizaje · Módulo 3 — Implementación y Herramientas Profesionales · USTA</title>
 
     <!-- Preconnect para rendimiento de fuentes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <!-- React & ReactDOM (UMD) -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
     <!-- Babel para transpilar JSX en el navegador -->
     <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
@@ -210,18 +210,18 @@
         };
 
         /* ============================================================
-           HOOK: useLocalStorage — persistencia del progreso
+           HOOK: useLocalStorage — persistencia del progreso (Módulo 3)
+           Clave propia del M3, distinta de las del M1 y M2.
         ============================================================ */
-        const STORAGE_KEY = 'usta-m1-progress';
+        const STORAGE_KEY = 'm3_ruta_progreso';
 
         const defaultProgress = () => ({
-            capsVistos:    { 1: false, 2: false, 3: false, 4: false, 5: false },
-            mcqAciertos:   { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
-            videosVistos:  { seccion: false, profundizacion: false },
-            guia1Pasos:    { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false },
-            act1Pasos:     { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
-            guia1Entregada:  false,
-            act1Entregada:   false,
+            capsVistos:    { 1: false, 2: false, 3: false },
+            videosVistos:  { profundizacion: false },
+            guia3Pasos:    { 1: false, 2: false, 3: false },
+            act3Pasos:     { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
+            guia3Entregada:  false,
+            act3Entregada:   false,
             resetAt: new Date().toISOString(),
         });
 
@@ -234,10 +234,9 @@
                     // Mezcla profunda para tolerar keys nuevas en versiones futuras
                     return { ...defaultProgress(), ...parsed,
                         capsVistos:   { ...defaultProgress().capsVistos,   ...(parsed.capsVistos   || {}) },
-                        mcqAciertos:  { ...defaultProgress().mcqAciertos,  ...(parsed.mcqAciertos  || {}) },
                         videosVistos: { ...defaultProgress().videosVistos, ...(parsed.videosVistos || {}) },
-                        guia1Pasos:   { ...defaultProgress().guia1Pasos,   ...(parsed.guia1Pasos   || {}) },
-                        act1Pasos:    { ...defaultProgress().act1Pasos,    ...(parsed.act1Pasos    || {}) },
+                        guia3Pasos:   { ...defaultProgress().guia3Pasos,   ...(parsed.guia3Pasos   || {}) },
+                        act3Pasos:    { ...defaultProgress().act3Pasos,    ...(parsed.act3Pasos    || {}) },
                     };
                 } catch (e) { return defaultProgress(); }
             });
@@ -255,18 +254,17 @@
            CÁLCULO DE PROGRESO GLOBAL (0–100)
         ============================================================ */
         const computeProgress = (p) => {
-            // 5 caps (10% c/u) + 2 videos (5% c/u) + pasos Guía (10%)
-            // + pasos Act (10%) + entregas (10%) = 100%
+            // 3 caps (16,67% c/u ≈ 50%) + 1 video (10%) + pasos Guía 3 (10%)
+            // + pasos Fase 3 (15%) + entregas (5% + 10%) = 100%
             let pct = 0;
-            for (let i = 1; i <= 5; i++) if (p.capsVistos[i]) pct += 10;
-            if (p.videosVistos.seccion)       pct += 5;
-            if (p.videosVistos.profundizacion) pct += 5;
-            const g1 = Object.values(p.guia1Pasos).filter(Boolean).length;
-            pct += (g1 / 6) * 10;
-            const a1 = Object.values(p.act1Pasos).filter(Boolean).length;
-            pct += (a1 / 7) * 10;
-            if (p.guia1Entregada) pct += 5;
-            if (p.act1Entregada)  pct += 5;
+            for (let i = 1; i <= 3; i++) if (p.capsVistos[i]) pct += 50 / 3;
+            if (p.videosVistos.profundizacion) pct += 10;
+            const g3 = Object.values(p.guia3Pasos).filter(Boolean).length;
+            pct += (g3 / 3) * 10;
+            const a3 = Object.values(p.act3Pasos).filter(Boolean).length;
+            pct += (a3 / 7) * 15;
+            if (p.guia3Entregada) pct += 5;
+            if (p.act3Entregada)  pct += 10;
             return Math.min(100, Math.round(pct));
         };
 
@@ -579,7 +577,7 @@
         };
 
         /* ============================================================
-           URL del aula virtual Teams (constante, mismo enlace los 4 encuentros)
+           URL del aula virtual Teams (constante, mismo enlace los encuentros)
         ============================================================ */
         const TEAMS_URL = 'https://teams.microsoft.com/l/meetup-join/19%3ameeting_MjkwMTczNTMtYmIwNS00NzQ5LThlMjItNWQ0NjI1NjM5NjE0%40thread.v2/0?context=%7b%22Tid%22%3a%22c1406a49-4b6f-4747-9571-871250615680%22%2c%22Oid%22%3a%22f0e54d22-6d4a-4b96-a5fb-9c84c73c3d29%22%7d';
 
@@ -587,60 +585,75 @@
            DATOS PEDAGÓGICOS (literales, extraídos de los .md del vault)
         ============================================================ */
 
-        /* 5 capítulos del Módulo 1 */
+        /* 3 capítulos del Módulo 3 */
         const chapters = [
             {
                 id: 1,
                 num: '01',
-                title: 'Introducción y Contexto Histórico',
-                icon: 'fa-clock-rotate-left',
-                tag: 'tema/historia',
+                title: 'Frameworks de Deep Learning (TensorFlow / Keras 3 y PyTorch)',
+                icon: 'fa-layer-group',
+                tag: 'tema/frameworks',
                 badgeColor: 'primary',
-                duracion: '~ 30 min lectura',
+                duracion: '≈45 min lectura',
                 ra: [
-                    'Comprender los tres ciclos del Deep Learning (1943–1969, 1986–2006, 2006–presente).',
-                    'Diferenciar entre Machine Learning clásico y Deep Learning.',
-                    'Aplicar el árbol de decisión ML clásico vs. DL según tipo y volumen de datos.',
-                    'Reconocer aplicaciones del Deep Learning en Colombia y América Latina.',
+                    'Justificar por qué un framework es indispensable: diferenciación automática (autograd), aceleración en GPU y abstracción de la complejidad, frente a programar el descenso del gradiente "a mano".',
+                    'Contrastar TensorFlow/Keras (ecosistema de despliegue maduro, ejecución eager) con PyTorch (grafos dinámicos, dominio en investigación) y comprender el rol de Keras 3 como API multi-backend.',
+                    'Seleccionar y justificar con criterios técnicos el framework adecuado según el caso de uso (producción y borde vs. investigación y prototipado rápido).',
+                    'Reconocer la convergencia actual de los ecosistemas y el papel de ONNX como formato pasaporte interoperable entre frameworks.',
+                    'Distinguir API de alto nivel (Keras) de API de bajo nivel y mapear las equivalencias mínimas entre TensorFlow y PyTorch.',
                 ],
                 analogia: {
-                    titulo: 'Analogía local: el beneficio del café',
+                    titulo: 'Analogía local: el ajiaco y la cocina (el framework como infraestructura)',
                     contenido: (
                         <div>
                             <p>
-                                Imagine que quiere clasificar automáticamente si un lote de café será
-                                <em> "Grado Exportación"</em> o <em>"Consumo Nacional"</em>. La red neuronal se parece a la cadena
-                                de beneficio del café: una secuencia de etapas (<em>despulpado → fermentación → secado → trilla →
-                                catación</em>) que transforma materia prima "sucia" en un resultado refinado. La capa de entrada
-                                son los datos crudos (altitud, humedad, horas de sol, % broca); las capas ocultas separan,
-                                combinan y refinan características; la capa de salida emite la decisión final del "maestro catador".
+                                Tener los datos, la matemática y la receta no basta: hace falta una <strong>cocina</strong>. Los
+                                <strong> datos</strong> son los ingredientes, la <strong>matemática</strong> es la receta, pero sin un
+                                <strong> framework</strong> no se prepara ningún ajiaco. El framework es esa cocina —ollas, fogón, un espacio
+                                organizado— que calcula los gradientes, mueve los tensores a la GPU y abstrae la complejidad para que el
+                                ingeniero se concentre en el diseño del modelo.
                             </p>
-                            <Box type="tip" label="Idea clave">
-                                <strong>Entrenar la red = encontrar los pesos y sesgos correctos</strong> en cada etapa, igual que
-                                un caficultor aprende con los años las proporciones y los tiempos.
+                            <Box type="tip" label="TensorFlow vs. PyTorch">
+                                <p>
+                                    <strong>TensorFlow</strong> es como la <strong>notaría digital moderna</strong>: ecosistema completo de
+                                    despliegue (TF Serving, LiteRT, TF.js) listo para producción. <strong>PyTorch</strong> es el
+                                    <strong> río Magdalena</strong> que adapta su cauce al terreno: grafos dinámicos, flexibilidad y dominio en
+                                    investigación. <strong>Keras 3</strong> permite escribir el código una vez y ejecutarlo sobre cualquiera de
+                                    los dos motores (o JAX).
+                                </p>
                             </Box>
                         </div>
                     ),
                 },
                 mcq: [
                     {
-                        pregunta: 'Sobre el perceptrón simple de Rosenblatt (1958), ¿cuál fue su limitación fatal demostrada por Minsky y Papert?',
+                        pregunta: '¿Cuál es la justificación técnica central para usar un framework de Deep Learning en lugar de programar el entrenamiento "a mano"?',
                         opciones: [
-                            { texto: 'No podía aprender a sumar números.', correcta: false },
-                            { texto: 'No podía resolver problemas no linealmente separables como el XOR.', correcta: true,
-                              justificacion: 'Un perceptrón de una sola capa traza una frontera lineal; el XOR requiere una frontera curva, lo que demuestra la necesidad de capas ocultas.' },
-                            { texto: 'Requería demasiada memoria RAM.', correcta: false },
-                            { texto: 'Solo funcionaba con números positivos.', correcta: false },
+                            { texto: 'Porque los frameworks dibujan automáticamente las gráficas de pérdida.', correcta: false },
+                            { texto: 'Porque proveen diferenciación automática (autograd), ejecución acelerada en GPU y abstracción de la complejidad de bajo nivel.', correcta: true,
+                              justificacion: 'El autograd calcula los gradientes de retropropagación sin derivar a mano; la integración con CUDA mueve el cómputo a la GPU; y las APIs de alto nivel (Keras) abstraen el detalle, dejando al ingeniero el diseño del modelo.' },
+                            { texto: 'Porque eliminan la necesidad de tener datos de entrenamiento.', correcta: false },
+                            { texto: 'Porque garantizan que cualquier modelo converja sin sobreajuste.', correcta: false },
                         ],
                     },
                     {
-                        pregunta: '¿Cuál de los siguientes NO es un criterio para decidir entre ML clásico y Deep Learning?',
+                        pregunta: 'Una entidad necesita desplegar un modelo en producción con un ecosistema maduro de servicio y borde (TF Serving, LiteRT, TF.js). ¿Qué elección y por qué?',
                         opciones: [
-                            { texto: 'El tipo de datos (tabular vs. imagen/texto).', correcta: false },
-                            { texto: 'La cantidad de datos etiquetados disponibles.', correcta: false },
-                            { texto: 'La marca del fabricante de la GPU.', correcta: true,
-                              justificacion: 'La marca de la GPU no es un criterio técnico de decisión; los criterios reales son tipo de datos, volumen, interpretabilidad, recursos y tiempo.' },
-                            { texto: 'La necesidad o no de interpretabilidad.', correcta: false },
+                            { texto: 'PyTorch, porque domina la investigación académica.', correcta: false },
+                            { texto: 'TensorFlow/Keras, por su ecosistema de despliegue maduro y su orientación a producción.', correcta: true,
+                              justificacion: 'TensorFlow ofrece un stack de despliegue consolidado (TF Serving, LiteRT, TF.js, SavedModel); para producción y borde es la vía más directa, mientras PyTorch destaca en flexibilidad de investigación.' },
+                            { texto: 'NumPy puro, para evitar dependencias externas.', correcta: false },
+                            { texto: 'Cualquier framework, porque la elección no tiene consecuencias de ingeniería.', correcta: false },
+                        ],
+                    },
+                    {
+                        pregunta: 'Un equipo entrena en PyTorch pero debe entregar el modelo a un cliente que ejecuta con TensorFlow. ¿Qué herramienta resuelve la portabilidad?',
+                        opciones: [
+                            { texto: 'Reescribir el modelo completo en TensorFlow desde cero, sin alternativa.', correcta: false },
+                            { texto: 'ONNX, el formato abierto que actúa como "pasaporte universal" entre frameworks.', correcta: true,
+                              justificacion: 'ONNX (Open Neural Network Exchange) es un formato estándar mantenido por la Linux Foundation que exporta el modelo a una representación portable, evitando reescribirlo y permitiendo intercambiarlo entre motores.' },
+                            { texto: 'Guardar el modelo como imagen PNG de su arquitectura.', correcta: false },
+                            { texto: 'Usar pickle de Python, que es interoperable entre todos los frameworks.', correcta: false },
                         ],
                     },
                 ],
@@ -648,58 +661,77 @@
             {
                 id: 2,
                 num: '02',
-                title: 'El Perceptrón Multicapa (MLP) y la Arquitectura',
-                icon: 'fa-network-wired',
-                tag: 'tema/mlp',
+                title: 'Computación de Alto Rendimiento (GPU, precisión mixta y la nube)',
+                icon: 'fa-microchip',
+                tag: 'tema/gpu',
                 badgeColor: 'secondary',
-                duracion: '~ 25 min lectura',
+                duracion: '≈45 min lectura',
                 ra: [
-                    'Describir la anatomía de un MLP: capas de entrada, ocultas y de salida.',
-                    'Explicar el Teorema de Aproximación Universal con la analogía de las "piezas de Lego".',
-                    'Seleccionar la función de activación adecuada para cada capa.',
-                    'Justificar el rol de las capas ocultas en la extracción jerárquica de características.',
+                    'Explicar por qué la GPU acelera el entrenamiento (miles de núcleos paralelos, Tensor Cores) frente a la CPU, con aceleraciones de \\(10\\text{–}1000\\times\\) en operaciones matriciales.',
+                    'Comprender la VRAM como el recurso más limitante (pesos, gradientes, estados del optimizador y activaciones) y diagnosticar el error CUDA out of memory (OOM).',
+                    'Aplicar precisión mixta (AMP): combinar FP16/BF16 para el cómputo y FP32 para los pesos maestros, logrando ≈2–3× de aceleración y ≈50 % de ahorro de memoria.',
+                    'Implementar checkpointing para reanudar entrenamientos interrumpidos, esencial frente a los límites de cuota de Google Colab y Kaggle.',
+                    'Operar plataformas gratuitas en la nube (Colab T4, Kaggle P100/2×T4) gestionando la cuota de cómputo, y reconocer estrategias multi-GPU (DDP, FSDP).',
                 ],
                 analogia: {
-                    titulo: 'Analogía local: la oficina de subsidios del Ministerio',
+                    titulo: 'Analogías locales: la despulpadora, la bodega y la minga',
                     contenido: (
                         <div>
-                            <p>
-                                Imagine la aprobación de un subsidio agrícola en una oficina gubernamental:
-                            </p>
-                            <ul>
-                                <li><strong>Capa de entrada (ventanilla):</strong> recibe documentos crudos (cédula, escrituras, facturas).</li>
-                                <li><strong>Capas ocultas (analistas técnicos):</strong> procesan los datos y los transforman en conceptos: ¿el predio es legal?, ¿el cultivo es prioritario?, ¿hay riesgo financiero?</li>
-                                <li><strong>Capa de salida (director):</strong> toma la decisión final: otorga o no el subsidio.</li>
-                            </ul>
-                            <p>
-                                Ningún analista por sí solo aprueba el subsidio, pero la cadena de evidencia
-                                que construyen sustenta la decisión del director. <strong>Las capas ocultas no deciden,
-                                pero transforman "papeles" en "conceptos interpretables"</strong>.
-                            </p>
+                            <Box type="tip" label="La despulpadora industrial (GPU vs. CPU)">
+                                <p>
+                                    Despulpar el café grano a grano con la mano toma semanas; una <strong>despulpadora industrial</strong>
+                                    procesa cientos de granos simultáneamente en minutos. La CPU es la mano (versátil, pocas tareas a la vez);
+                                    la GPU es la despulpadora (menos versátil, pero miles de operaciones en paralelo). No es una diferencia
+                                    marginal: es entrenar en horas en vez de semanas.
+                                </p>
+                            </Box>
+                            <Box type="danger" label="La bodega y el error CUDA OOM (VRAM)">
+                                <p>
+                                    La <strong>VRAM</strong> es la <strong>bodega de la plaza de mercado</strong>: si se intenta almacenar más
+                                    de lo que cabe (lotes grandes, modelo pesado, activaciones), la bodega se desborda y aparece el error
+                                    <strong> CUDA out of memory</strong>. Se mitiga reduciendo el tamaño de lote, con precisión mixta o con
+                                    gradient checkpointing.
+                                </p>
+                            </Box>
+                            <Box type="info" label="La minga (entrenamiento multi-GPU)">
+                                <p>
+                                    En la <strong>minga</strong> indígena cada participante trabaja una porción de la tarea y al final todos
+                                    comparten el resultado. En el entrenamiento distribuido (DDP/FSDP), cada GPU procesa una porción de los datos
+                                    y al final todas sincronizan sus gradientes.
+                                </p>
+                            </Box>
                         </div>
                     ),
                 },
                 mcq: [
                     {
-                        pregunta: 'El Teorema de Aproximación Universal afirma que:',
+                        pregunta: '¿Qué hace exactamente la precisión mixta automática (AMP) y por qué el ahorro de memoria total es menor que la mitad?',
                         opciones: [
-                            { texto: 'Una red con al menos una capa oculta y suficientes neuronas puede aproximar cualquier función continua.', correcta: true,
-                              justificacion: 'Cada neurona aporta un pequeño "bloque" no lineal; sumando suficientes se reconstruye la topografía de cualquier función continua.' },
-                            { texto: 'Toda red neuronal aprende sin errores en un solo paso.', correcta: false },
-                            { texto: 'Solo las redes recurrentes pueden aproximar funciones.', correcta: false },
-                            { texto: 'Las redes necesitan más de 10 capas para ser "profundas".', correcta: false },
+                            { texto: 'Convierte todo el modelo a FP16, incluidos los pesos maestros, eliminando la mitad de la memoria.', correcta: false },
+                            { texto: 'Usa FP16/BF16 para el cómputo (activaciones) pero mantiene una copia de los pesos maestros en FP32 para la actualización del optimizador.', correcta: true,
+                              justificacion: 'El ahorro se da sobre todo en las activaciones; como AMP conserva pesos maestros en FP32 para la estabilidad numérica del optimizador, el ahorro total es menor que el 50 %. A cambio activa los Tensor Cores y acelera ≈2–3×.' },
+                            { texto: 'Reduce la resolución de las imágenes de entrada a la mitad.', correcta: false },
+                            { texto: 'Apaga la GPU durante la mitad de las épocas para ahorrar energía.', correcta: false },
                         ],
                     },
                     {
-                        pregunta: '¿Por qué ReLU se convirtió en la activación estándar de las capas ocultas? (seleccione 2)',
-                        multiple: true,
+                        pregunta: 'Durante un entrenamiento largo en Google Colab aparece un error CUDA out of memory (OOM). ¿Cuál NO es una solución válida?',
                         opciones: [
-                            { texto: 'Porque evita el desvanecimiento del gradiente en regiones positivas (derivada = 1).', correcta: true,
-                              justificacion: 'Su derivada constante (= 1 para z>0) evita que el gradiente se encoja en redes profundas.' },
-                            { texto: 'Porque es computacionalmente eficiente: solo compara con cero.', correcta: true,
-                              justificacion: 'max(0, z) es básicamente gratuito frente a sigmoid/tanh que requieren exponenciales.' },
-                            { texto: 'Porque normaliza la salida entre 0 y 1.', correcta: false },
-                            { texto: 'Porque es lineal y simplifica todas las matemáticas.', correcta: false },
+                            { texto: 'Reducir el tamaño de lote (batch size).', correcta: false },
+                            { texto: 'Activar precisión mixta (FP16) para reducir la huella de las activaciones.', correcta: false },
+                            { texto: 'Aplicar gradient checkpointing para recomputar activaciones en vez de almacenarlas.', correcta: false },
+                            { texto: 'Aumentar el tamaño de lote para "llenar mejor" la VRAM disponible.', correcta: true,
+                              justificacion: 'El OOM ocurre porque se excede la VRAM; aumentar el lote agrava el desbordamiento. Las vías correctas son reducir el lote, usar precisión mixta o gradient checkpointing.' },
+                        ],
+                    },
+                    {
+                        pregunta: '¿Por qué el checkpointing es especialmente crítico al entrenar en Google Colab o Kaggle?',
+                        opciones: [
+                            { texto: 'Porque mejora la exactitud final del modelo de forma automática.', correcta: false },
+                            { texto: 'Porque estas plataformas tienen cuotas y desconexiones; el checkpoint guarda el estado (pesos, optimizador, época) para reanudar sin perder el trabajo.', correcta: true,
+                              justificacion: 'Colab/Kaggle imponen límites de tiempo y cuota de GPU; si la sesión se cae, sin checkpoint se pierde todo. Guardar periódicamente el estado permite reanudar exactamente donde quedó.' },
+                            { texto: 'Porque convierte automáticamente el modelo a ONNX.', correcta: false },
+                            { texto: 'Porque elimina la necesidad de usar una GPU.', correcta: false },
                         ],
                     },
                 ],
@@ -707,97 +739,45 @@
             {
                 id: 3,
                 num: '03',
-                title: 'La Matemática del Error y la Optimización',
-                icon: 'fa-arrow-trend-down',
-                tag: 'tema/optimizacion',
-                badgeColor: 'gold',
-                duracion: '~ 35 min lectura',
-                ra: [
-                    'Cuantificar el error con funciones de costo: MSE para regresión y BCE para clasificación.',
-                    'Aplicar el descenso del gradiente y sus variantes (batch, mini-batch, SGD).',
-                    'Seleccionar la tasa de aprendizaje y entender su impacto en la convergencia.',
-                    'Identificar el rol del momentum y de optimizadores adaptativos (Adam, RMSProp).',
-                ],
-                analogia: {
-                    titulo: 'Analogía andina: el excursionista en el Páramo de Letras',
-                    contenido: (
-                        <div>
-                            <p>
-                                Se encuentra a 3.677 m de altitud, de noche, con niebla tan densa que no ve a un metro de distancia.
-                                El objetivo es descender al valle donde está el pueblo. Como no puede ver el valle,
-                                <strong> tantea el suelo con los pies</strong> y avanza iterativamente en la dirección de mayor
-                                pendiente descendente.
-                            </p>
-                            <Box type="warn" label="Tasa de aprendizaje (η): cuestión de vida o muerte">
-                                <ul className="list-disc pl-5">
-                                    <li><strong>η muy alta (saltos de 50 m):</strong> se pasa del valle, sube la ladera opuesta, diverge.</li>
-                                    <li><strong>η muy baja (pasos de hormiga):</strong> muere de hipotermia antes de converger.</li>
-                                    <li><strong>η ideal:</strong> pasos seguros pero firmes, que se reducen cuando el terreno se aplana.</li>
-                                </ul>
-                            </Box>
-                        </div>
-                    ),
-                },
-                mcq: [
-                    {
-                        pregunta: '¿Qué función de costo es apropiada para predecir MILÍMETROS de lluvia mensual (regresión)?',
-                        opciones: [
-                            { texto: 'MSE (Error Cuadrático Medio): penaliza el cuadrado de la diferencia.', correcta: true,
-                              justificacion: 'MSE es el estándar para regresión: penaliza desproporcionadamente los errores grandes (útil para alertas tempranas de inundación).' },
-                            { texto: 'Binary Cross-Entropy (BCE).', correcta: false,
-                              justificacion: 'BCE se usa para clasificación binaria (probabilidades entre 0 y 1), no para valores continuos.' },
-                            { texto: 'Softmax.', correcta: false,
-                              justificacion: 'Softmax es una función de activación para clasificación multiclase, no una función de costo.' },
-                        ],
-                    },
-                    {
-                        pregunta: 'Si la tasa de aprendizaje es demasiado alta, el descenso del gradiente…',
-                        opciones: [
-                            { texto: 'Desciende muy lento (convergencia lenta).', correcta: false },
-                            { texto: 'Da saltos tan grandes que pasa por encima del valle y sube la ladera opuesta (divergencia).', correcta: true,
-                              justificacion: 'El algoritmo "rebota" entre las paredes de la función de costo, aumentando el error en lugar de reducirlo.' },
-                            { texto: 'Encuentra el óptimo global de inmediato.', correcta: false },
-                            { texto: 'Se queda atrapado en un mínimo local sin moverse.', correcta: false },
-                        ],
-                    },
-                ],
-            },
-            {
-                id: 4,
-                num: '04',
-                title: 'Retropropagación (Backpropagation)',
+                title: 'Pipelines de Datos y Despliegue (tf.data / DataLoader, Augmentation, ONNX y Edge)',
                 icon: 'fa-diagram-project',
-                tag: 'tema/backpropagation',
-                badgeColor: 'primary',
-                duracion: '~ 30 min lectura',
+                tag: 'tema/pipelines',
+                badgeColor: 'gold',
+                duracion: '≈50 min lectura',
                 ra: [
-                    'Comprender el "problema de asignación de crédito" en redes profundas.',
-                    'Modelar la red como un grafo computacional de operaciones elementales.',
-                    'Aplicar la regla de la cadena del cálculo para propagar gradientes hacia atrás.',
-                    'Usar autograd de PyTorch para calcular gradientes automáticamente.',
+                    'Diagnosticar la «GPU starvation» (hambruna de GPU): la GPU queda ociosa porque el pipeline de datos no la alimenta a tiempo.',
+                    'Construir pipelines eficientes con tf.data (map, cache, shuffle, batch, prefetch) y DataLoader (num_workers, pin_memory, prefetch_factor).',
+                    'Aplicar Data Augmentation (incluido Mixup/CutMix y AlbumentationsX) como regularización para maximizar el rendimiento con datos limitados.',
+                    'Exportar el modelo a formatos estándar (SavedModel/.keras, .pth, ONNX vía torch.export) y verificar consistencia de predicciones.',
+                    'Diseñar una ruta de despliegue offline en campo: cuantización a INT8, LiteRT/ExecuTorch para borde y API REST en la nube, con criterios de despliegue responsable.',
                 ],
                 analogia: {
-                    titulo: 'Analogía local: el retraso del envío de flores a Miami',
+                    titulo: 'Analogías locales: el restaurante de la Candelaria y el puente portable',
                     contenido: (
                         <div>
-                            <p>
-                                Un envío de flores a Miami para San Valentín se retrasó y generó pérdidas. ¿De quién es la culpa?
-                            </p>
-                            <ul>
-                                <li>¿Del <strong>conductor de la última milla</strong> (capa de salida)?</li>
-                                <li>¿Del <strong>despachador en El Dorado</strong> (capa oculta 2)?</li>
-                                <li>¿Del <strong>agrónomo que demoró la cosecha en la sabana</strong> (capa oculta 1)?</li>
-                                <li>¿O de una <strong>política mal diseñada</strong> (pesos iniciales)?</li>
-                            </ul>
-                            <p>
-                                En deep learning esto se llama el <strong>problema de asignación de crédito</strong>: la red falló,
-                                pero hay miles de neuronas involucradas. <em>¿Cuáles deben ajustar sus pesos y en qué medida?</em>
-                            </p>
-                            <Box type="tip" label={'La regla de la cadena: el «efecto dominó»'}>
+                            <Box type="warn" label="El restaurante de la Candelaria (GPU starvation)">
                                 <p>
-                                    Imagine un rumor en una oficina: si un colega distorsiona la información al pasarla al jefe,
-                                    el impacto final = (cuánto distorsiona el colega) × (intensidad del mensaje original).
-                                    Multiplicando derivadas locales en cadena, la capa final reparte la responsabilidad hacia atrás.
+                                    El <strong>chef</strong> (la GPU) es rapidísimo, pero la cocina depende de un solo <strong>mesero</strong>
+                                    (el pipeline): si el mesero no trae los ingredientes a tiempo, el chef queda esperando ocioso. Esa es la
+                                    <strong> «hambruna de GPU»</strong>. Se resuelve con varios meseros en paralelo
+                                    (<span className="inline-code">num_workers</span>) y preparando el siguiente plato mientras se cocina el actual
+                                    (<span className="inline-code">prefetch</span>).
+                                </p>
+                            </Box>
+                            <Box type="info" label="El pasaporte universal (ONNX)">
+                                <p>
+                                    Un modelo entrenado en un framework es como un ciudadano sin pasaporte: no puede cruzar fronteras.
+                                    <strong> ONNX</strong> es el <strong>pasaporte universal</strong> que permite llevar el modelo de un motor a
+                                    otro y desplegarlo en runtimes portables (ONNX Runtime), verificando que las predicciones siguen siendo
+                                    consistentes (<span className="inline-code">np.allclose</span>).
+                                </p>
+                            </Box>
+                            <Box type="eth" label="Despliegue responsable en campo">
+                                <p>
+                                    Llevar la rama visual a una tablet del programa Computadores para Educar exige
+                                    <strong> cuantización a INT8, LiteRT offline</strong> y explicitar principios de <strong>Transparencia</strong> y
+                                    <strong> Beneficio Social</strong>: un falso positivo o negativo en campo afecta decisiones reales del agricultor
+                                    o del orientador rural.
                                 </p>
                             </Box>
                         </div>
@@ -805,182 +785,123 @@
                 },
                 mcq: [
                     {
-                        pregunta: 'Si el gradiente de un peso es exactamente cero, entonces…',
+                        pregunta: 'El entrenamiento es lento aunque la GPU es potente, y al monitorearla está casi siempre ociosa. ¿Cuál es la causa más probable y su remedio?',
                         opciones: [
-                            { texto: 'Cambiar ese peso no afecta (localmente) el error: estamos en un punto estacionario.', correcta: true,
-                              justificacion: 'Gradiente cero = pendiente plana; mover el peso no sube ni baja el error, no hay dirección local de mejora.' },
-                            { texto: 'El peso es el más importante de la red.', correcta: false },
-                            { texto: 'La red ya alcanzó el óptimo global con certeza.', correcta: false },
-                            { texto: 'Hay un error de hardware.', correcta: false },
+                            { texto: 'La GPU está dañada y debe reemplazarse.', correcta: false },
+                            { texto: 'GPU starvation: el pipeline de datos no alimenta a la GPU a tiempo; se mitiga con prefetch, num_workers/cache y pin_memory.', correcta: true,
+                              justificacion: 'Si la CPU prepara los lotes más lento de lo que la GPU los consume, la GPU espera ociosa («hambruna de GPU»). Superponer carga y cómputo (prefetch), paralelizar la carga (num_workers) y cachear resuelve el cuello de botella.' },
+                            { texto: 'El learning rate es demasiado alto y por eso la GPU se apaga.', correcta: false },
+                            { texto: 'Falta convertir el modelo a ONNX antes de entrenar.', correcta: false },
                         ],
                     },
                     {
-                        pregunta: '¿Por qué es necesario llamar <code className="inline-code">optimizer.zero_grad()</code> antes de cada backward?',
+                        pregunta: 'Tras exportar un modelo a ONNX, ¿qué verificación garantiza que el modelo portado se comporta igual que el original?',
                         opciones: [
-                            { texto: 'Para reiniciar los pesos a valores aleatorios.', correcta: false },
-                            { texto: 'Para liberar RAM de la GPU.', correcta: false },
-                            { texto: 'Para evitar que los gradientes del lote actual se sumen a los acumulados de lotes anteriores.', correcta: true,
-                              justificacion: 'PyTorch acumula gradientes por defecto; sin limpiarlos, se corrompería la dirección de descenso (se sumarían derivadas de iteraciones pasadas).' },
-                            { texto: 'Para ejecutar el forward pass.', correcta: false },
-                        ],
-                    },
-                ],
-            },
-            {
-                id: 5,
-                num: '05',
-                title: 'Ajuste, Evaluación y Ética de Modelos',
-                icon: 'fa-scale-balanced',
-                tag: 'tema/regularizacion',
-                badgeColor: 'secondary',
-                duracion: '~ 40 min lectura',
-                ra: [
-                    'Identificar el sobreajuste (overfitting) y distinguirlo del subajuste.',
-                    'Aplicar técnicas de regularización: L1, L2, Dropout, Early Stopping.',
-                    'Comprender y aplicar Batch Normalization entre capas.',
-                    'Evaluar modelos con matriz de confusión y elegir métricas éticamente alineadas.',
-                    'Reconocer las implicaciones éticas del despliegue de modelos en contextos colombianos.',
-                ],
-                analogia: {
-                    titulo: 'Analogías locales: el ICFES, la Selección Colombia y el ajiaco santafereño',
-                    contenido: (
-                        <div>
-                            <Box type="warn" label="El estudiante y el ICFES">
-                                <p>
-                                    Un estudiante que memoriza el cuadernillo del año pasado saca puntaje perfecto en el simulacro
-                                    pero fracasa en el examen real: <strong>memorizó en lugar de aprender</strong>. En Deep Learning
-                                    queremos emular al Estudiante B (generalización), no al A (memorización).
-                                </p>
-                            </Box>
-                            <Box type="tip" label="La Selección Colombia y el dropout">
-                                <p>
-                                    Imagine la Selección Colombia con una "estrella" que resuelve todo. Si la estrella falta el día
-                                    del partido, el equipo colapsa. <strong>El dropout apaga neuronas al azar en cada iteración</strong>
-                                    para que ninguna neurona se convierta en "estrella" y todas aprendan a contribuir.
-                                </p>
-                            </Box>
-                            <Box type="info" label="El ajiaco santafereño y la Batch Normalization">
-                                <p>
-                                    La Batch Normalization actúa como el protocolo de homogeneización del ajiaco: la papa sabanera,
-                                    la pastusa y la criolla llegan con tamaños distintos cada lote. Si no se estandarizan (cortar en
-                                    cubos uniformes), el proceso de cocción es inestable. <strong>Normalizar las entradas a cada capa
-                                    estabiliza el entrenamiento</strong> y permite tasas de aprendizaje más altas.
-                                </p>
-                            </Box>
-                        </div>
-                    ),
-                },
-                mcq: [
-                    {
-                        pregunta: 'Un modelo obtiene 98 % de accuracy en Medellín pero solo 55 % en Cúcuta. ¿Qué está ocurriendo?',
-                        opciones: [
-                            { texto: 'Underfitting (subajuste).', correcta: false },
-                            { texto: 'Overfitting: el modelo memorizó el "ruido" de Medellín en vez de conceptos generales.', correcta: true,
-                              justificacion: 'La brecha grande entre entrenamiento (alto) y prueba (bajo) es la firma del sobreajuste.' },
-                            { texto: 'Generalización correcta: el modelo funciona diferente en cada ciudad.', correcta: false },
-                            { texto: 'Error de hardware en Cúcuta.', correcta: false },
+                            { texto: 'Comprobar que el archivo .onnx pesa lo mismo que el .pth.', correcta: false },
+                            { texto: 'Comparar las salidas del modelo original y el exportado con np.allclose (p. ej. atol=1e-4) sobre las mismas entradas.', correcta: true,
+                              justificacion: 'La consistencia se verifica numéricamente: se pasan las mismas entradas por ambos modelos y se confirma que las predicciones coinciden dentro de una tolerancia (np.allclose, atol=1e-4). El tamaño del archivo no garantiza equivalencia.' },
+                            { texto: 'Abrir el archivo en un editor de texto y revisar que no esté corrupto.', correcta: false },
+                            { texto: 'Volver a entrenar el modelo desde cero con los mismos datos.', correcta: false },
                         ],
                     },
                     {
-                        pregunta: '¿Por qué Dropout ayuda contra el overfitting? (seleccione 2)',
-                        multiple: true,
+                        pregunta: 'Para desplegar la rama visual offline en una tablet de campo con recursos limitados, ¿qué combinación es la más adecuada?',
                         opciones: [
-                            { texto: 'Al apagar neuronas al azar evita depender de una "neurona estrella".', correcta: true,
-                              justificacion: 'Rompe la co-adaptación frágil entre neuronas, obligando a la red a aprender patrones distribuidos.' },
-                            { texto: 'Obliga a aprender representaciones redundantes y distribuidas.', correcta: true,
-                              justificacion: 'Si una neurona falla, otras pueden compensar: la red se vuelve robusta.' },
-                            { texto: 'Duplica las imágenes existentes en el dataset.', correcta: false },
-                            { texto: 'Elimina permanentemente neuronas con pesos negativos.', correcta: false },
-                        ],
-                    },
-                    {
-                        pregunta: 'Si la curva de validación sube desde la época 50 mientras la de entrenamiento sigue bajando, lo correcto es…',
-                        opciones: [
-                            { texto: 'Entrenar 1.000 épocas más, ya que el modelo seguirá mejorando.', correcta: false },
-                            { texto: 'Implementar Early Stopping, guardando los pesos de la época 50.', correcta: true,
-                              justificacion: 'La "U" invertida en validación es la firma del overfitting; Early Stopping detiene justo antes de que el modelo empiece a memorizar ruido.' },
-                            { texto: 'Eliminar el conjunto de validación para simplificar.', correcta: false },
-                            { texto: 'Aumentar la tasa de aprendizaje.', correcta: false },
+                            { texto: 'Servir el modelo FP32 completo por API REST y exigir conexión permanente a internet.', correcta: false },
+                            { texto: 'Cuantizar a INT8 y ejecutar con LiteRT offline en la tablet, dejando la rama temporal por API REST en la nube.', correcta: true,
+                              justificacion: 'En zonas con conectividad escasa, la cuantización (≈4× más pequeño y rápido) y LiteRT permiten inferencia local sin internet; la rama temporal, menos urgente, puede servirse por API REST cuando hay red. Es la ruta de despliegue dual del escenario AGROSAVIA.' },
+                            { texto: 'Cargar TensorFlow y PyTorch a la vez en el dispositivo para tener ambos disponibles.', correcta: false },
+                            { texto: 'Aumentar la precisión a FP64 para mejorar la exactitud en campo.', correcta: false },
                         ],
                     },
                 ],
             },
         ];
 
-        /* 2 actividades evaluativas */
+        /* 2 hitos evaluativos (Guía 3 + Actividad 3 / Proyecto Centinela Fase 3) */
         const activities = {
-            guia1: {
+            guia3: {
                 tipo: 'guia',
-                titulo: 'Guía de Profundización 1: Del Error al Aprendizaje',
+                titulo: 'Guía de Profundización 3: Alertas Tempranas contra la Deserción — Arquitecturas Multimodales para la Deserción Escolar Rural en Colombia',
                 peso: 5,
                 horas: 8,
-                desglose: '1 h directo · 1 h indirecto · 6 h autónomo',
-                entregable: 'Foro + escrito reflexivo (500–700 palabras + 2 réplicas)',
-                caso: 'Hospital público colombiano: IA entrenada con datos de Bogotá/Medellín/Cali desplegada en costa Caribe y Amazonas. Predice "bajo riesgo" a pacientes graves.',
+                desglose: 'Inmersión en el material base · Profundización conceptual y caso rural · Reflexión escrita en el foro (6–8 h de trabajo académico)',
+                entregable: 'Foro — Escrito reflexivo argumentado sobre arquitecturas multimodales para predecir la deserción escolar en colegios públicos rurales, con postura propia, referencias en APA 7 y consideraciones éticas de equidad algorítmica.',
+                caso: 'La deserción escolar en zonas rurales de Colombia: tensión estructural entre la promesa de la IA para identificar estudiantes en riesgo y las limitaciones operativas, éticas y sociales de desplegar sistemas predictivos en contextos de alta vulnerabilidad. Según DANE y el MEN, la deserción intra-anual en la ruralidad dispersa supera el 5 % y la no culminación de media supera el 40 % en Vaupés y Guainía. El estudiante analiza un sistema multimodal (LSTM para trayectorias, Transformers tipo BETO para texto pedagógico, Autoencoders para anomalías y CNN-OCR para boletines escaneados) y su despliegue Edge con vigilancia ética.',
                 pasos: [
-                    'Visualización inicial: vea el video de StatQuest sobre gradient descent y anote conceptos clave.',
-                    'Lectura crítica: lea el Capítulo 8 del Deep Learning Book (Goodfellow) y el artículo de Rajkomar et al. sobre equidad en IA médica.',
-                    'Análisis del caso: lea el caso del hospital y responda 5 preguntas orientadoras (diagnóstico, validación, ética).',
-                    'Experimentación con TensorFlow Playground: pruebe learning rates extremos y overfitting vs. generalización.',
-                    'Construya su respuesta reflexiva con tesis, evidencia, dimensión ética y conclusión (APA 7.ª).',
-                    'Revisión final: verifique citación APA, ortografía y pensamiento propio (no solo paráfrasis).',
+                    'Inmersión en el material base: visualice de forma activa el Video de Profundización de la Sección 3, tomando notas sobre las diferencias arquitectónicas entre CNN, RNN, LSTM, GRU, Autoencoders y Transformers y su rol en un sistema multimodal de alerta temprana.',
+                    'Profundización conceptual y caso rural: estudie el material interactivo de la Sección 3 y la lógica de fusión tardía (cada rama produce un vector de representación que una capa densa combina), el despliegue Edge (cuantización, pruning, knowledge distillation a DistilBETO) y el aprendizaje federado con infraestructura colombiana (RENATA, Guane-1, Apolo, BIOS).',
+                    'Reflexión escrita en el foro: redacte un escrito argumentado con postura propia sobre la viabilidad y los riesgos del sistema, incorporando criterios de equidad algorítmica (fairness through unawareness, equalized odds, paridad demográfica), el riesgo de profecía autocumplida y al menos dos referencias en APA 7.',
                 ],
                 rubrica: [
-                    { criterio: 'Dominio conceptual técnico', peso: 25 },
-                    { criterio: 'Diagnóstico y resolución de problemas', peso: 25 },
-                    { criterio: 'Ética y contexto social colombiano', peso: 20 },
-                    { criterio: 'Calidad argumentativa y formal (APA)', peso: 15 },
-                    { criterio: 'Pensamiento crítico y originalidad', peso: 15 },
+                    { criterio: 'Comprensión técnica de las arquitecturas multimodales', peso: 40 },
+                    { criterio: 'Contextualización rural colombiana y reflexión ética', peso: 40 },
+                    { criterio: 'Claridad, argumentación y fundamentación (APA 7)', peso: 20 },
                 ],
-                linkMd: 'modulos/modulo-1-fundamentos/actividades/guia-1.md',
+                linkMd: 'modulos/modulo-3-implementacion/actividades/guia-3.md',
             },
-            act1: {
+            act3: {
                 tipo: 'actividad',
-                titulo: 'Proyecto Centinela · Fase 1 — Línea Base: MLP sobre Datos Tabulares para Alerta Temprana',
-                peso: 20,
+                titulo: 'Proyecto Centinela · Fase 3 — De Colab al Cafetal: Pipeline, GPU y Despliegue',
+                peso: 25,
                 horas: 40,
-                desglose: '4 h directo · 4 h indirecto · 32 h autónomo',
-                entregable: 'Notebook (.ipynb) + Informe técnico-ético en PDF (máx. 4 págs.) + Bitácora de IA + Propuesta de Datos, todo en un .zip (Apellido_Nombre_Centinela_Fase1.zip) o repositorio GitHub.',
-                /* Checklist de entrega cristalino (solo Fase 1) — sin ambigüedad para el estudiante */
+                desglose: 'Pipeline + Augmentation · Entrenamiento GPU con precisión mixta y checkpointing · Optimización Edge y exportación · Ruta de despliegue offline',
+                entregable: 'Notebook ejecutado en Colab (.ipynb con salidas visibles) + archivos del modelo exportado (.pth, .keras, .onnx) + informe técnico de despliegue (PDF, máx. 4 páginas) + Bitácora de IA, en un .zip. Calificación por rúbrica oficial (6 criterios que suman 100 %).',
+                /* Checklist de entrega cristalino (solo Fase 3) — sin ambigüedad para el estudiante */
                 entregables: [
-                    { titulo: 'Notebook (.ipynb)', detalle: 'Clase MLP + bucle de entrenamiento explícito + curvas de pérdida (train vs. val) + matriz de confusión. Debe correr de principio a fin sin editar.' },
-                    { titulo: 'Informe técnico-ético (PDF)', detalle: 'Máximo 4 páginas, con citas APA y la auditoría ética ligada a falsos positivos/negativos.' },
+                    { titulo: 'Notebook ejecutado en Colab (.ipynb)', detalle: 'Con todas las salidas visibles: pipeline, entrenamiento en GPU, optimización Edge y exportación, reproducible de principio a fin.' },
+                    { titulo: 'Archivos del modelo exportado', detalle: 'En al menos dos formatos estándar verificados: .pth (PyTorch), .keras (Keras) y .onnx (pasaporte portable).' },
+                    { titulo: 'Informe técnico de despliegue (PDF, máx. 4 páginas)', detalle: 'Comparativa de pipelines, rendimiento GPU, tabla de optimización Edge (tamaño/latencia/precisión antes y después) y ruta de despliegue con su justificación de ingeniería.' },
                     { titulo: 'Bitácora de IA', detalle: 'Registro de qué se pidió a la IA y qué se Aceptó / Modificó / Rechazó, con el motivo.' },
-                    { titulo: 'Propuesta de Datos aprobada', detalle: 'Problema, cliente, dos modalidades, fuentes reales no-Kaggle con licencia y la modalidad que se aplana a tabla.' },
-                    { titulo: 'Empaque final', detalle: 'Apellido_Nombre_Centinela_Fase1.zip o un repositorio GitHub con todo lo anterior.' },
+                    { titulo: 'Empaque final', detalle: 'Todo en Apellido_Nombre_Centinela_Fase3.zip (o repositorio en GitHub).' },
                 ],
-                /* Nota de entrega (solo Fase 1) */
-                entregaNota: 'La sustentación oral se evalúa aparte. Nivel Nulo = sin entrega del producto.',
-                caso: 'Usted es ingeniero de IA y construye la línea base de un sistema de alerta temprana "Centinela": un MLP sobre datos tabulares. Escenario guía: clasificar hoja de café (Sana vs. Enferma por roya) con la versión tabular del dataset RoCoLe (promedios RGB/IR), o un problema multimodal propio aprobado.',
+                /* Nota de entrega (solo Fase 3) */
+                entregaNota: 'La sustentación oral se agenda aparte (no va dentro del .zip ni del repositorio). Nivel Nulo (0,0) = sin entrega del producto.',
+                caso: 'Cierre del ciclo de vida del Proyecto Centinela: en el rol de ingeniero de MLOps contratado por una entidad como AGROSAVIA, el estudiante industrializa el sistema de las fases anteriores. Construye un pipeline eficiente que aprovecha la GPU gratuita en la nube, entrena con precisión mixta y checkpointing, y prepara un despliegue que funcione offline en una tablet en campo. El escenario de referencia clasifica hojas de café (Sana vs. Roya), pero la lógica aplica al sistema propio del estudiante.',
                 pasos: [
-                    'Propuesta de Datos (compuerta): declare el problema y el cliente, las dos modalidades del sistema, las fuentes reales no provenientes de Kaggle y cuál modalidad se aplana a tabla en esta fase.',
-                    'Prepare el entorno y realice el EDA del conjunto tabular: revise clases, escalas, faltantes y la partición en train/val/test.',
-                    'Diseñe el MLP con ≥ 2 capas ocultas; la salida es un logit (nn.Linear(..., 1) sin sigmoide dentro del modelo) y justifique las funciones de activación.',
-                    'Configure el entrenamiento con BCEWithLogitsLoss (estable; evita la doble sigmoide), optimizador y learning rate; escriba el bucle de entrenamiento (training loop) explícito (zero_grad → forward → loss → backward → step).',
-                    'Entrene 50 épocas, grafique la pérdida de entrenamiento vs. validación, induzca overfitting a propósito y corríjalo con Dropout o ajuste de LR.',
-                    'Evalúe con matriz de confusión y métricas; analice falsos positivos/negativos (en alerta temprana los falsos negativos suelen ser los más costosos) y realice la auditoría ética con el Marco Ético de IA Colombia.',
-                    'Documente la Bitácora de IA (qué pidió, aceptó y rechazó) y la Auditoría a la IA (un fallo de la IA que detectó y corrigió); prepárese para la sustentación oral.',
+                    'Selección y configuración del framework: elija TF/Keras 3 o PyTorch con criterios técnicos (producción/borde vs. investigación) y justifique la decisión para un cliente offline en campo.',
+                    'Pipeline de datos eficiente: construya el pipeline con tf.data o DataLoader (prefetch/cache, num_workers, pin_memory) y aplique Data Augmentation; documente la comparativa de rendimiento y evite la GPU starvation.',
+                    'Entrenamiento acelerado en GPU: entrene un modelo preentrenado (transfer learning) con precisión mixta (FP16/BF16) y checkpointing; reporte el ahorro de VRAM, el tiempo por época y resuelva cualquier CUDA OOM con evidencia.',
+                    'Optimización Edge: aplique al menos una técnica de compresión (cuantización a INT8, poda o destilación) y mida el efecto con una tabla antes/después de tamaño, latencia y precisión, discutiendo el trade-off.',
+                    'Exportación y verificación: exporte el modelo en formatos estándar (.pth, .keras, ONNX vía la ruta estable) y verifique la consistencia de predicciones con np.allclose (atol=1e-4).',
+                    'Ruta de despliegue offline: documente la ruta dual (rama visual offline con LiteRT en la tablet + rama temporal por API REST en la nube), justifique las decisiones de ingeniería y explicite los principios de Transparencia y Beneficio Social con mitigaciones de falsos positivos/negativos.',
+                    'Uso responsable de IA y comunicación: complete la Bitácora de IA (Aceptada / Modificada / Rechazada con motivo) y la Auditoría a la IA (un fallo real detectado y corregido), y redacte el informe técnico de despliegue.',
                 ],
                 rubrica: [
-                    { criterio: 'Propuesta de datos y EDA', peso: 15, espera: 'Propuesta aprobada con fuentes no-Kaggle y modalidad aplanada declarada; EDA con clases, escalas, faltantes y partición train/val/test justificada.' },
-                    { criterio: 'Diseño e implementación del MLP', peso: 30, espera: 'MLP con ≥ 2 capas ocultas, salida en logit con BCEWithLogitsLoss, semilla fija y bucle de entrenamiento explícito que corre de principio a fin.' },
-                    { criterio: 'Regularización y experimentación', peso: 15, espera: 'Dos curvas (sin y con regularización) que evidencian el sobreajuste y su corrección con Dropout/LR, con la época del punto óptimo.' },
-                    { criterio: 'Evaluación, errores y ética', peso: 15, espera: 'Matriz de confusión y precisión/recall/F1 por clase; argumenta qué error (FN o FP) priorizar citando el Marco Ético.' },
-                    { criterio: 'Uso responsable de IA', peso: 15, espera: 'Bitácora con casos Aceptada/Modificada/Rechazada y su motivo; explica sus decisiones en la sustentación; auditoría de un fallo real de la IA.' },
-                    { criterio: 'Comunicación y storytelling', peso: 10, espera: 'Informe (≤ 4 págs.) para audiencia no técnica con hilo problema→modelo→error→decisión, gráficas rotuladas y citas APA.' },
+                    { criterio: 'Pipeline + Augmentation', peso: 20 },
+                    { criterio: 'Entrenamiento GPU + gestión de recursos', peso: 20 },
+                    { criterio: 'Optimización Edge + exportación', peso: 20 },
+                    { criterio: 'Ruta de despliegue + justificación de ingeniería', peso: 20 },
+                    { criterio: 'Uso responsable de IA', peso: 10 },
+                    { criterio: 'Comunicación (informe técnico)', peso: 10 },
                 ],
-                linkMd: 'modulos/modulo-1-fundamentos/actividades/actividad-1.md',
-                linkHtml: '11_Modulo_1_Actividad_Fase1_Centinela.html',
+                linkMd: 'modulos/modulo-3-implementacion/actividades/actividad-3.md',
+                linkHtml: '31_Modulo_3_Actividad_Fase3_Centinela.html',
             },
         };
 
         /* ============================================================
-           RÚBRICA OFICIAL · CENTINELA FASE 1 (datos para el calificador)
-           - Bandas en escala colombiana 0,0–5,0 (coma decimal). Aprueba ≥ 3,0.
-           - 6 criterios con peso; 5 niveles con rango y "nota" = punto medio.
-           - Descriptores VERBATIM del documento hermano 11_.
+           ENRIQUECIMIENTO DE LA RÚBRICA · CENTINELA FASE 3 (Actividad 3, peso 25)
+           - "Qué se espera" por criterio (descriptor del nivel Autónomo, base de aprobación holgada).
+           - Datos VERBATIM del documento hermano 31_.
         ============================================================ */
-        const FASE1_BANDAS = [
+        /* "Qué se espera" (nivel Autónomo) inyectado en la rúbrica resumida de la Fase 3 */
+        const FASE2_ESPERA = {
+            'Pipeline + Augmentation': 'Pipeline funcional en al menos un framework con prefetch/cache y aumento básico; compara tiempos; código organizado.',
+            'Entrenamiento GPU + gestión de recursos': 'Entrena en GPU con al menos una optimización (precisión mixta o checkpointing); curvas de pérdida e interpretación del comportamiento.',
+            'Optimización Edge + exportación': 'Aplica una técnica de compresión con al menos dos métricas comparadas; exporta en ≥2 formatos verificados (incluida la verificación ONNX).',
+            'Ruta de despliegue + justificación de ingeniería': 'Ruta coherente con las herramientas correctas (LiteRT, ONNX Runtime, API REST) y justificación de las decisiones principales, sin profundizar en todos los trade-offs.',
+            'Uso responsable de IA': 'Bitácora completa y verificada; sustenta la mayoría de sus decisiones; la auditoría documenta y corrige un fallo real.',
+            'Comunicación (informe técnico)': 'Informe bien estructurado y comprensible, con las secciones completas y visualizaciones adecuadas.',
+        };
+
+        /* ============================================================
+           RÚBRICA OFICIAL · CENTINELA FASE 3 (datos para el calificador)
+           - Bandas en escala colombiana 0,0–5,0 (coma decimal). Aprueba ≥ 3,0.
+           - 6 criterios con peso; 5 niveles con rango y "nota" = punto representativo.
+           - Descriptores VERBATIM del documento hermano 31_.
+        ============================================================ */
+        const FASE2_BANDAS = [
             { id: 'estrategico', etiqueta: 'Estratégico', rango: '4,6–5,0', nota: 4.8,  color: '#15803D', bg: '#F0FDF4' },
             { id: 'autonomo',    etiqueta: 'Autónomo',    rango: '4,0–4,5', nota: 4.25, color: '#3D008D', bg: '#F5F0FA' },
             { id: 'basico',      etiqueta: 'Básico',      rango: '3,0–3,9', nota: 3.45, color: '#B45309', bg: '#FFFBEB' },
@@ -988,71 +909,71 @@
             { id: 'nulo',        etiqueta: 'Nulo (sin entrega)', rango: '0,0', nota: 0, color: '#64748B', bg: '#F1F5F9' },
         ];
 
-        const FASE1_CRITERIOS = [
+        const FASE2_CRITERIOS = [
             {
-                id: 'c1', nombre: 'Propuesta de datos y EDA', peso: 15,
+                id: 'c1', nombre: 'Pipeline + Augmentation', peso: 20,
                 desc: {
-                    estrategico: 'Declara problema, cliente y las dos modalidades, e indica cuál se aplana a tabla; fuentes no-Kaggle con enlace y licencia; el EDA reporta clases, escalas y faltantes, y cada hallazgo decide la partición o el preprocesamiento.',
-                    autonomo:    'Propuesta aprobada con fuentes válidas y modalidad aplanada declarada; el EDA incluye gráficas de distribución y una partición train/val/test justificada.',
-                    basico:      'La propuesta omite la modalidad que se aplana o la licencia; el EDA muestra solo una gráfica de clases y la partición no se justifica.',
-                    inicial:     'Usa una fuente de Kaggle o un reto ya resuelto, o no hay EDA, o mezcla datos de prueba en el ajuste (fuga).',
+                    estrategico: 'Pipelines optimizados en ambos frameworks (tf.data y DataLoader) con prefetch/cache y ≥4 aumentos justificados; comparativa de rendimiento documentada; código modular.',
+                    autonomo:    'Pipeline funcional en al menos un framework con prefetch/cache y aumento básico; compara tiempos; código organizado.',
+                    basico:      'Pipeline sin optimizaciones (sin prefetch/cache) o código desordenado/redundante.',
+                    inicial:     'Errores que impiden la ejecución completa o pipeline no funcional.',
                     nulo:        'Sin entrega del producto.',
                 },
             },
             {
-                id: 'c2', nombre: 'Diseño e implementación del MLP', peso: 30,
+                id: 'c2', nombre: 'Entrenamiento GPU + gestión de recursos', peso: 20,
                 desc: {
-                    estrategico: 'MLP con ≥2 capas ocultas y activaciones justificadas; la salida es un logit (nn.Linear(8,1), sin sigmoide en el forward) con BCEWithLogitsLoss; etiqueta y.float().view(-1,1); semilla fija y el notebook corre de principio a fin sin editar.',
-                    autonomo:    'El bucle de entrenamiento explícito ejecuta y converge; la combinación pérdida-activación es coherente (logit + BCEWithLogitsLoss o sigmoide + BCELoss); el código está comentado por secciones.',
-                    basico:      'La red entrena pero con un defecto menor: sin semilla fija, código sin comentar o forma de la etiqueta corregida a mano al ejecutar.',
-                    inicial:     'El notebook no ejecuta, falta zero_grad, hay doble sigmoide o las dimensiones no concuerdan.',
+                    estrategico: 'Precisión mixta (FP16/bfloat16) con ahorro de VRAM y aceleración documentados; checkpointing robusto; resuelve CUDA OOM con evidencia; comparativa de tiempos y curvas claras.',
+                    autonomo:    'Entrena en GPU con al menos una optimización (precisión mixta o checkpointing); curvas de pérdida e interpretación del comportamiento.',
+                    basico:      'Entrena en GPU sin optimizaciones de memoria; curvas con interpretación superficial.',
+                    inicial:     'Sin gráficas de desempeño ni análisis del entrenamiento (caja negra total).',
                     nulo:        'Sin entrega del producto.',
                 },
             },
             {
-                id: 'c3', nombre: 'Regularización y experimentación', peso: 15,
+                id: 'c3', nombre: 'Optimización Edge + exportación', peso: 20,
                 desc: {
-                    estrategico: 'Muestra dos curvas (sin y con regularización) donde la validación cruza al alza y luego se estabiliza con Dropout/LR, y nombra la época del punto óptimo.',
-                    autonomo:    'Las curvas train vs. val. evidencian el sobreajuste y su corrección, con una interpretación correcta del cruce.',
-                    basico:      'Presenta las curvas pero describe el sobreajuste sin señalar dónde la validación deja de bajar.',
-                    inicial:     'Una sola curva, o curvas sin sobreajuste visible, o gráficas sin texto que las interprete.',
+                    estrategico: 'Técnica de compresión (cuantización/poda/destilación) con tabla antes/después de tamaño, latencia y precisión y discusión del trade-off; exporta en 3 formatos con verificación ONNX (np.allclose, atol=1e-4) por la ruta estable.',
+                    autonomo:    'Aplica una técnica de compresión con al menos dos métricas comparadas; exporta en ≥2 formatos verificados (incluida la verificación ONNX).',
+                    basico:      'Intenta la optimización Edge sin métricas claras; exporta en un solo formato o sin verificar consistencia.',
+                    inicial:     'No optimiza para el borde y no exporta en ningún formato estándar, o la exportación falla.',
                     nulo:        'Sin entrega del producto.',
                 },
             },
             {
-                id: 'c4', nombre: 'Evaluación, errores y ética', peso: 15,
+                id: 'c4', nombre: 'Ruta de despliegue + justificación de ingeniería', peso: 20,
                 desc: {
-                    estrategico: 'Reporta matriz de confusión y precisión/recall/F1 por clase, convirtiendo el logit con torch.sigmoid en evaluación; argumenta qué error (FN o FP) priorizar por su costo para el cliente, citando el Marco Ético.',
-                    autonomo:    'Incluye matriz de confusión y las métricas principales interpretadas, con una reflexión ética pertinente al cliente.',
-                    basico:      'Reporta solo la exactitud global y menciona la ética sin ligarla a FN/FP ni a una decisión.',
-                    inicial:     'Evalúa en el training set, o no hay matriz de confusión, o la ética está ausente.',
+                    estrategico: 'Ruta completa (rama visual offline con LiteRT + rama temporal por API REST); justifica los trade-offs VRAM/batch/velocidad y la elección de framework/formato para este cliente offline; principios de Transparencia y Beneficio Social y mitigaciones de falsos positivos/negativos.',
+                    autonomo:    'Ruta coherente con las herramientas correctas (LiteRT, ONNX Runtime, API REST) y justificación de las decisiones principales, sin profundizar en todos los trade-offs.',
+                    basico:      'Despliegue genérico sin ruta concreta ni justificación de ingeniería, o sin considerar las restricciones del contexto.',
+                    inicial:     'No propone ruta de despliegue ni justifica decisión alguna.',
                     nulo:        'Sin entrega del producto.',
                 },
             },
             {
-                id: 'c5', nombre: 'Uso responsable de IA', peso: 15,
+                id: 'c5', nombre: 'Uso responsable de IA', peso: 10,
                 desc: {
-                    estrategico: 'La bitácora registra casos Aceptada/Modificada/Rechazada con su motivo; en la sustentación responde sin notas por qué tomó cada decisión; la auditoría reproduce un fallo concreto de la IA y muestra la corrección.',
-                    autonomo:    'Bitácora completa y verificable; explica la mayoría de sus decisiones en la sustentación; la auditoría documenta y corrige un fallo real.',
-                    basico:      'La bitácora solo lista prompts sin el motivo de aceptar o rechazar; titubea al explicar una decisión; la auditoría describe un fallo genérico.',
-                    inicial:     'No hay bitácora o se redactó después; no puede explicar una parte sustancial de su propio código (delegación ciega).',
+                    estrategico: 'Bitácora con decisiones deliberadas (casos Modificada/Rechazada bien fundamentados); defiende cada decisión como propia; auditoría con un fallo no trivial corregido (p. ej. dynamo=True como única vía).',
+                    autonomo:    'Bitácora completa y verificada; sustenta la mayoría de sus decisiones; la auditoría documenta y corrige un fallo real.',
+                    basico:      'Registro superficial de la IA; titubea al sustentar la autoría de algunas decisiones.',
+                    inicial:     'Bitácora ausente o con señales de delegación ciega.',
                     nulo:        'Sin entrega del producto.',
                 },
             },
             {
-                id: 'c6', nombre: 'Comunicación y storytelling', peso: 10,
+                id: 'c6', nombre: 'Comunicación (informe técnico)', peso: 10,
                 desc: {
-                    estrategico: 'El informe (≤4 págs.) explica el resultado a una audiencia no técnica con un hilo problema→modelo→error→decisión, gráficas rotuladas y citas APA completas.',
-                    autonomo:    'Informe estructurado y comprensible, con visualizaciones legibles y referencias citadas.',
-                    basico:      'Informe con secciones faltantes o gráficas sin rótulos ni leyenda.',
-                    inicial:     'Informe sin estructura, sin referencias o con afirmaciones sin respaldo en los resultados.',
+                    estrategico: 'Informe riguroso con comparativa de pipelines, rendimiento GPU, tabla de optimización Edge y ruta de despliegue; narrativa clara y citación APA correcta.',
+                    autonomo:    'Informe bien estructurado y comprensible, con las secciones completas y visualizaciones adecuadas.',
+                    basico:      'Estructura incompleta o poco clara; faltan secciones o visualizaciones.',
+                    inicial:     'Informe desorganizado, sin referencias.',
                     nulo:        'Sin entrega del producto.',
                 },
             },
         ];
 
         /* Niveles ordenados de mayor a menor (para el <select> y la lógica de "subir") */
-        const FASE1_NIVELES = [
+        const FASE2_NIVELES = [
             { id: 'estrategico', etiqueta: 'Estratégico', rango: '4,6–5,0', nota: 4.8 },
             { id: 'autonomo',    etiqueta: 'Autónomo',    rango: '4,0–4,5', nota: 4.25 },
             { id: 'basico',      etiqueta: 'Básico',      rango: '3,0–3,9', nota: 3.45 },
@@ -1065,22 +986,22 @@
 
         /* Banda del total según la nota estimada (escala 0,0–5,0) */
         const bandaDeTotal = (nota) => {
-            if (nota >= 4.6) return FASE1_BANDAS[0];           // Estratégico
-            if (nota >= 4.0) return FASE1_BANDAS[1];           // Autónomo
-            if (nota >= 3.0) return FASE1_BANDAS[2];           // Básico
-            if (nota >= 1.0) return FASE1_BANDAS[3];           // Inicial
-            return FASE1_BANDAS[4];                            // Nulo
+            if (nota >= 4.6) return FASE2_BANDAS[0];           // Estratégico
+            if (nota >= 4.0) return FASE2_BANDAS[1];           // Autónomo
+            if (nota >= 3.0) return FASE2_BANDAS[2];           // Básico
+            if (nota >= 1.0) return FASE2_BANDAS[3];           // Inicial
+            return FASE2_BANDAS[4];                            // Nulo
         };
 
         /* ============================================================
-           CALCULADORA DE AUTOEVALUACIÓN · CENTINELA FASE 1
+           CALCULADORA DE AUTOEVALUACIÓN · CENTINELA FASE 3
            Herramienta orientativa basada en la rúbrica oficial.
         ============================================================ */
         const CalculadoraAutoevaluacion = () => {
             // Estado: nivel elegido por criterio (por defecto, Autónomo) + checklist de entregables
             const nivelInicial = () => {
                 const o = {};
-                FASE1_CRITERIOS.forEach(c => { o[c.id] = 'autonomo'; });
+                FASE2_CRITERIOS.forEach(c => { o[c.id] = 'autonomo'; });
                 return o;
             };
             const [niveles, setNiveles] = useState(nivelInicial);
@@ -1095,8 +1016,8 @@
             // Cálculo: Σ(nota_nivel × peso)/100
             const notaEstimada = useMemo(() => {
                 let acc = 0;
-                FASE1_CRITERIOS.forEach(c => {
-                    const niv = FASE1_NIVELES.find(n => n.id === niveles[c.id]) || FASE1_NIVELES[1];
+                FASE2_CRITERIOS.forEach(c => {
+                    const niv = FASE2_NIVELES.find(n => n.id === niveles[c.id]) || FASE2_NIVELES[1];
                     acc += niv.nota * c.peso;
                 });
                 return acc / 100;
@@ -1106,18 +1027,18 @@
             const aprobado = notaEstimada >= 3.0;
 
             const ENTREGABLES = [
-                'Notebook (.ipynb): clase MLP + bucle explícito + curvas + matriz de confusión.',
-                'Informe técnico-ético en PDF (≤ 4 págs.).',
+                'Notebook ejecutado en Colab (.ipynb) con todas las salidas visibles.',
+                'Archivos del modelo exportado (.pth, .keras, .onnx) verificados.',
+                'Informe técnico de despliegue en PDF (máx. 4 páginas): pipelines, rendimiento GPU, tabla de optimización Edge y ruta de despliegue.',
                 'Bitácora de IA (Aceptada / Modificada / Rechazada + motivo).',
-                'Propuesta de Datos aprobada (fuentes no-Kaggle, modalidad aplanada).',
-                'Empaque Apellido_Nombre_Centinela_Fase1.zip o repositorio GitHub.',
+                'Empaque Apellido_Nombre_Centinela_Fase3.zip (o repositorio en GitHub).',
             ];
             const entregasListas = entregas.filter(Boolean).length;
 
             // Etiqueta del nivel inmediatamente superior (para la retroalimentación "▲ Para subir a…")
             const nivelSuperior = (nid) => {
-                const idx = FASE1_NIVELES.findIndex(n => n.id === nid);
-                return idx > 0 ? FASE1_NIVELES[idx - 1] : null;
+                const idx = FASE2_NIVELES.findIndex(n => n.id === nid);
+                return idx > 0 ? FASE2_NIVELES[idx - 1] : null;
             };
 
             return (
@@ -1134,7 +1055,7 @@
 
                     {/* Criterios */}
                     <div className="space-y-3">
-                        {FASE1_CRITERIOS.map(c => {
+                        {FASE2_CRITERIOS.map(c => {
                             const nid = niveles[c.id];
                             const sup = nivelSuperior(nid);
                             return (
@@ -1149,7 +1070,7 @@
                                             value={nid}
                                             onChange={(e) => setNivel(c.id, e.target.value)}
                                             className="w-full text-sm rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-secondary focus:ring-1 focus:ring-secondary outline-none">
-                                            {FASE1_NIVELES.map(n => (
+                                            {FASE2_NIVELES.map(n => (
                                                 <option key={n.id} value={n.id}>{n.etiqueta} · {n.rango}</option>
                                             ))}
                                         </select>
@@ -1234,120 +1155,102 @@
             );
         };
 
-        /* 2 videos — serie Deep Learning de 3Blue1Brown */
+        /* 1 video de profundización del Módulo 3 */
         const videos = [
-            {
-                id: 'seccion',
-                tipo: 'Video de Sección',
-                icono: 'fa-circle-play',
-                titulo: '¿Qué es una red neuronal? — 3Blue1Brown (Chapter 1)',
-                duracion: '~ 20 min',
-                numEscenas: null,
-                conceptos: ['Neuronas y capas', 'Representación de funciones', 'Descenso del gradiente', 'Entrenamiento de redes', 'MNIST como caso de estudio'],
-                textoDestacado: [
-                    '"Una red neuronal es un conjunto de capas de neuronas, donde cada neurona toma un número y lo transforma"',
-                    '"El aprendizaje es ajustar pesos y sesgos para que la salida coincida con lo esperado"',
-                    '"Las capas ocultas aprenden representaciones intermedias de los datos"',
-                ],
-                url: 'https://www.youtube.com/watch?v=aircAruvnKk',
-                linkMd: 'modulos/modulo-1-fundamentos/videos/video-seccion-m1.md',
-            },
             {
                 id: 'profundizacion',
                 tipo: 'Video de Profundización',
                 icono: 'fa-film',
-                titulo: 'Descenso del gradiente y retropropagación — 3Blue1Brown (Chapters 2–4)',
-                duracion: '~ 50 min (3 videos)',
-                numEscenas: null,
-                conceptos: ['Función de pérdida', 'Descenso del gradiente', 'Regla de la cadena', 'Tasa de aprendizaje', 'Backpropagation y autograd', 'Optimizadores (Adam, RMSProp)', 'Batches, épocas, curvas'],
+                titulo: 'Alertas Tempranas contra la Deserción: Arquitecturas Multimodales de Deep Learning (LSTM, Transformers y Autoencoders) para la predicción de deserción escolar en colegios públicos rurales de Colombia',
+                duracion: '≈5 min 42 s (12 escenas)',
+                numEscenas: 12,
+                conceptos: ['LSTM y GRU para trayectorias temporales (notas, asistencia, intensidad horaria)', 'Transformers en español (BETO, RoBERTa-BNE, mBERT) sobre observaciones del docente', 'Autoencoders y VAE para detección de anomalías con eventos escasos', 'CNN-OCR para digitalizar boletines de papel escaneados', 'Fusión tardía: concatenación de vectores en una red densa de decisión', 'Edge AI: cuantización (INT8), pruning estructurado y knowledge distillation a DistilBETO', 'Equidad algorítmica y profecía autocumplida (fairness, equalized odds, paridad demográfica)', 'Aprendizaje federado con infraestructura colombiana (RENATA, Guane-1, Apolo, BIOS)'],
                 textoDestacado: [
-                    '"El excursionista tantea el suelo con los pies"',
-                    '"LR alto: rebota; LR bajo: se congela; LR óptimo: converge"',
-                    '"Adelante van los datos; atrás va la responsabilidad del error"',
+                    'La deserción escolar no tiene una sola señal: por eso necesitamos un enfoque multimodal que combine cuatro arquitecturas especializadas',
+                    'La IA educativa más sofisticada no es la más precisa, sino la que llega a la mano del orientador rural sin estigmatizar',
+                    'Un pipeline que cabe en trescientos megabytes y corre offline en el equipo del rector, preservando soberanía educativa',
                 ],
-                url: 'https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi',
-                linkMd: 'modulos/modulo-1-fundamentos/videos/video-profundizacion-m1.md',
+                url: null,
+                linkMd: 'modulos/modulo-3-implementacion/videos/video-profundizacion-m3.md',
             },
         ];
 
-        /* 26 términos del glosario (literales del cap 1-5) */
+        /* Glosario (literales del cap 3-1, 3-2 y 3-3 del Módulo 3) */
         const glossary = [
-            { t: 'Backpropagation',     d: 'Algoritmo que calcula el gradiente del error respecto a cada peso, distribuyendo la "responsabilidad" desde la salida hacia atrás. Analogía: la cadena de mando que lee la bitácora al revés.' },
-            { t: 'Batch (Lote)',        d: 'Subconjunto pequeño de datos (ej. 32 o 64) que la red procesa simultáneamente.' },
-            { t: 'Batch Normalization', d: 'Estandariza las entradas de cada capa durante el entrenamiento. Analogía: protocolo de homogeneización del ajiaco santafereño.' },
-            { t: 'Capa Oculta',         d: 'Capas entre la entrada y la salida que extraen características y aprenden representaciones abstractas. Analogía: los "analistas técnicos" del ministerio.' },
-            { t: 'Curva de Aprendizaje', d: 'Gráfico del error a lo largo del tiempo; vital para diagnosticar la salud del entrenamiento.' },
-            { t: 'Descenso del Gradiente', d: 'Algoritmo de optimización iterativo que minimiza la pérdida ajustando pesos en dirección opuesta a la pendiente. Analogía: el ciclista bajando el Páramo de Letras en la niebla.' },
-            { t: 'Dropout',             d: 'Regularización que "apaga" neuronas al azar durante el entrenamiento para evitar el sobreajuste. Analogía: rotar a las estrellas de la Selección Colombia.' },
-            { t: 'Early Stopping',      d: 'Detener el entrenamiento en la época donde la pérdida de validación alcanza su mínimo, para evitar memorización.' },
-            { t: 'Época (Epoch)',       d: 'Un ciclo completo en el que la red ha visto todos los datos una vez.' },
-            { t: 'Forward Pass',        d: 'Propagación hacia adelante: los datos atraviesan la red desde la entrada hasta la salida, generando una predicción.' },
-            { t: 'Función de Activación', d: 'Función (ReLU, Sigmoide) que introduce no-linealidad, permitiendo aprender patrones complejos. Es el "interruptor" que decide si la neurona dispara.' },
-            { t: 'Función de Pérdida (Loss)', d: 'Cuantifica la diferencia entre predicción y valor real. Analogía: el altímetro del excursionista. Ejemplos: Cross-Entropy, MSE.' },
-            { t: 'Gamma (γ) y Beta (β)', d: 'Parámetros aprendibles de la Batch Normalization que permiten ajustar o "deshacer" la normalización.' },
-            { t: 'Gradiente',           d: 'Vector de derivadas parciales que indica la dirección de máximo aumento de la función de pérdida. El descenso va en la dirección opuesta.' },
-            { t: 'Grid / Random Search', d: 'Métodos para probar combinaciones de hiperparámetros y hallar la mejor.' },
-            { t: 'Hiperparámetro',      d: 'Configuración externa (learning rate, dropout) que no se aprende, se define antes de entrenar.' },
-            { t: 'K-Fold',              d: 'Validación cruzada que divide los datos en K partes; cada parte actúa una vez como validación.' },
-            { t: 'L1 (Lasso)',          d: 'Regularización que elimina características irrelevantes forzando pesos a cero.' },
-            { t: 'L2 (Ridge)',          d: 'Regularización que reduce la influencia excesiva de cualquier característica (pesos bajos pero no cero).' },
-            { t: 'Learning Rate (η)',   d: 'Hiperparámetro que determina el tamaño del paso en cada iteración. Muy alto diverge; muy bajo converge lento.' },
-            { t: 'Matriz de Confusión', d: 'Tabla 2×2 (VP, FP, FN, VN) que desglosa los errores de un clasificador binario. Es la base del Recall, Precision y F1.' },
-            { t: 'Media y Varianza',    d: 'El promedio (centro) y la dispersión (ancho) de los datos. La Batch Norm los usa para estandarizar.' },
-            { t: 'Momentum',            d: 'Técnica de optimización que acumula inercia de gradientes previos para suavizar el zigzagueo del SGD.' },
-            { t: 'Overfitting (Sobreajuste)', d: 'El modelo memoriza el ruido del entrenamiento y pierde capacidad de generalizar. Analogía: memorizar el cuadernillo viejo del ICFES.' },
-            { t: 'Parámetro',           d: 'Valor interno (peso w, sesgo b) que el modelo aprende por sí solo durante el entrenamiento.' },
-            { t: 'ReLU',                d: 'Activación f(x) = max(0, x); eficiente y mitiga el desvanecimiento del gradiente. Deja pasar lo positivo, anula lo negativo.' },
-            { t: 'Regularización',      d: 'Técnicas que previenen el sobreajuste penalizando la complejidad (L1, L2, Dropout, Early Stopping).' },
-            { t: 'SGD (Stochastic Gradient Descent)', d: 'Variante estocástica que actualiza pesos con mini-lotes; trayectorias en zigzag que ayudan a escapar de mínimos locales.' },
-            { t: 'Teorema de Aproximación Universal', d: 'Una red con al menos una capa oculta y suficientes neuronas aproxima cualquier función continua. Analogía: recrear los Andes sumando funciones simples.' },
-            { t: 'Validación Cruzada',  d: 'Evaluar el modelo con múltiples divisiones de los datos (K-Fold, GroupKFold) para evitar sesgos por una sola partición afortunada.' },
-            { t: 'Vanishing Gradient',  d: 'Fenómeno en el que los gradientes se vuelven extremadamente pequeños en capas tempranas, frenando el aprendizaje.' },
+            { t: 'TensorFlow',           d: 'Framework de código abierto de Google para Deep Learning. Incluye Keras como API de alto nivel y un ecosistema de despliegue (TF Serving, LiteRT, TF.js). Analogía: la notaría digital moderna con ejecución eager.' },
+            { t: 'PyTorch',              d: 'Framework de Meta AI / Linux Foundation con grafos computacionales dinámicos. Domina la investigación (≈80% de papers en NeurIPS). Analogía: el río Magdalena que adapta su cauce al terreno.' },
+            { t: 'Keras 3',              d: 'API multi-backend (TensorFlow, PyTorch, JAX) lanzada a finales de 2023. Permite escribir el código una vez y ejecutarlo en cualquier motor.' },
+            { t: 'GPU',                  d: 'Unidad de Procesamiento Gráfico: hardware con miles de núcleos paralelos optimizado para operaciones matriciales. Aceleraciones de 10–1000× respecto a la CPU. Analogía: la despulpadora industrial de café.' },
+            { t: 'CUDA',                 d: 'Plataforma de computación paralela de NVIDIA (2006) que permite ejecutar código en GPU. Base de todo el ecosistema de DL acelerado.' },
+            { t: 'Tensor Core',          d: 'Unidad de hardware especializada en multiplicación-acumulación de matrices (MMA). Hasta 16× más rendimiento que los núcleos CUDA para DL.' },
+            { t: 'VRAM',                 d: 'Memoria de video de la GPU; el recurso más limitante. Almacena pesos, gradientes, estados del optimizador y activaciones. Analogía: la bodega de la plaza de mercado.' },
+            { t: 'Precisión mixta (AMP)', d: 'Técnica que combina FP16/BF16 para el cómputo y FP32 para los pesos maestros, logrando ≈2–3× de aceleración y ≈50% de reducción de memoria.' },
+            { t: 'CUDA OOM',             d: 'Error «out of memory» que aparece cuando el modelo, los lotes y las activaciones exceden la VRAM disponible. Se mitiga reduciendo el batch, con precisión mixta o gradient checkpointing.' },
+            { t: 'DataLoader (PyTorch)', d: 'Clase que gestiona la carga paralela de datos con num_workers, pin_memory y prefetch_factor para maximizar la utilización de la GPU.' },
+            { t: 'tf.data (TensorFlow)', d: 'API declarativa para construir pipelines de datos eficientes con operaciones encadenadas (map, cache, shuffle, batch, prefetch).' },
+            { t: 'Prefetch',             d: 'Técnica que superpone la preparación del siguiente lote (CPU) con el entrenamiento del lote actual (GPU). Analogía: preparar el siguiente plato mientras el actual se cocina.' },
+            { t: 'pin_memory',           d: 'Parámetro del DataLoader que asigna tensores en memoria page-locked del CPU, permitiendo transferencias DMA asíncronas más rápidas a la GPU.' },
+            { t: 'num_workers',          d: 'Número de subprocesos del DataLoader que cargan datos en paralelo en segundo plano. Analogía: meseros trabajando en paralelo.' },
+            { t: 'Data Augmentation',    d: 'Técnica de regularización que aplica transformaciones aleatorias (volteo, rotación, color) a los datos de entrenamiento. Analogía: entrenar a la Selección en condiciones variadas.' },
+            { t: 'Mixup / CutMix',       d: 'Técnicas de aumento que mezclan dos muestras: Mixup interpola imágenes y etiquetas; CutMix recorta una región y la pega en otra, ajustando las etiquetas por área.' },
+            { t: 'AlbumentationsX',      d: 'Biblioteca de augmentation de imágenes optimizada con OpenCV. Sucesora de Albumentations (MIT). Licencia dual AGPL-3.0 / Comercial desde 2025.' },
+            { t: 'GPU starvation',       d: '«Hambruna de GPU»: la GPU permanece ociosa esperando datos porque el pipeline no la alimenta a tiempo. Se mitiga con prefetch, num_workers y cache. Analogía: el restaurante de la Candelaria.' },
+            { t: 'ONNX',                 d: 'Open Neural Network Exchange: formato abierto universal para modelos, mantenido por la Linux Foundation AI. Analogía: el pasaporte universal del modelo.' },
+            { t: 'torch.export',         d: 'Sucesor de TorchScript (deprecado en PyTorch 2.9). Captura modelos como grafos AOT (ATen) para despliegue sin Python. Recomendado desde PyTorch 2.5+.' },
+            { t: 'Transfer Learning',    d: 'Reutilizar un modelo preentrenado (ResNet-18, MobileNetV3) para una tarea nueva con menos datos y cómputo; clave en entornos con recursos limitados.' },
+            { t: 'Cuantización',         d: 'Reducir la precisión de los pesos (ej. de FP32 a INT8) para obtener un modelo ≈4× más pequeño y rápido, con cierta pérdida de exactitud; clave para borde.' },
+            { t: 'LiteRT',               d: 'Sucesor de TensorFlow Lite. Proyecto independiente para inferencia optimizada en móviles y edge, con APIs nativas en Kotlin y C++.' },
+            { t: 'ExecuTorch',           d: 'Runtime oficial de PyTorch para móviles y borde (sucesor de PyTorch Mobile). Consume modelos de torch.export. Soporta Arm, Apple y Qualcomm.' },
+            { t: 'SavedModel',           d: 'Formato nativo de TensorFlow para despliegue. Almacena el grafo, los pesos y la lógica de servicio. Estándar para TF Serving, LiteRT y TF.js.' },
+            { t: 'Checkpoint',           d: 'Guardado periódico del estado del modelo, el optimizador, la época y la pérdida; permite reanudar un entrenamiento interrumpido (esencial en Colab).' },
+            { t: 'FSDP',                 d: 'Fully Sharded Data Parallel: estrategia multi-GPU que fragmenta pesos, gradientes y estados del optimizador, para entrenar modelos que exceden la VRAM de una GPU.' },
+            { t: 'DDP',                  d: 'Distributed Data Parallel: estrategia multi-GPU que replica el modelo en cada dispositivo, procesa porciones distintas de datos y sincroniza los gradientes. Analogía: la minga.' },
+            { t: 'Google Colab',         d: 'Entorno de cuadernos Jupyter en la nube de Google con acceso gratuito a GPUs T4. Planes Pro (≈$10/mes) y Pro+ (≈$50/mes) con GPUs más potentes.' },
+            { t: 'Kaggle Notebooks',     d: 'Plataforma de ciencia de datos con GPUs gratuitas (P100 o 2×T4), ≈30 h/semana y 32 GB de RAM. Integra datasets y competiciones.' },
         ];
 
-        /* Recursos (literales del cap 1-5 y bibliografía oficial) */
+        /* Recursos (literales de los capítulos y de la bibliografía oficial del Módulo 3) */
         const resources = {
             bibliografia: [
                 { ref: 'Goodfellow, I., Bengio, Y., & Courville, A. (2016). Deep Learning. MIT Press.', url: 'https://www.deeplearningbook.org' },
-                { ref: 'Géron, A. (2023). Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow (3rd Ed.). O\'Reilly Media.' },
-                { ref: 'Chollet, F. (2021). Deep Learning with Python (2nd Ed.). Manning Publications.' },
-                { ref: 'Zhang, A., Lipton, Z. C., Li, M., & Smola, A. J. (2023). Dive into Deep Learning. Cambridge University Press.', url: 'https://d2l.ai' },
-                { ref: 'Nielsen, M. (2015). Neural Networks and Deep Learning. Determination Press.', url: 'http://neuralnetworksanddeeplearning.com/' },
-                { ref: 'Deisenroth, M. P., Faisal, A. A., & Ong, C. S. (2020). Mathematics for Machine Learning. Cambridge University Press.', url: 'https://mml-book.github.io/' },
+                { ref: 'Géron, A. (2022). Hands-On Machine Learning with Scikit-Learn, Keras & TensorFlow (3.ª ed.). O’Reilly Media.', url: 'https://www.oreilly.com/library/view/hands-on-machine-learning/9781098125967/' },
+                { ref: 'Stevens, E., Antiga, L., & Viehmann, T. (2020). Deep Learning with PyTorch. Manning Publications.', url: 'https://www.manning.com/books/deep-learning-with-pytorch' },
+                { ref: 'Chollet, F. (2021). Deep Learning with Python (2.ª ed.). Manning Publications.', url: 'https://www.manning.com/books/deep-learning-with-python-second-edition' },
+                { ref: 'Micikevicius, P., et al. (2018). Mixed precision training. ICLR.', url: 'https://arxiv.org/abs/1710.03740' },
             ],
             webgrafia: [
-                { ref: 'Smilkov, D., & Carter, S. TensorFlow Playground: simulación web de redes neuronales.', url: 'https://playground.tensorflow.org' },
-                { ref: '3Blue1Brown. Deep Learning (serie completa). YouTube.', url: 'https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi' },
-                { ref: 'Starmer, J. (2020). The Essential Main Ideas of Neural Networks (StatQuest).', url: 'https://www.youtube.com/watch?v=CqOfi41LfDw' },
-                { ref: 'Santana Vega, C. (2018). ¿Qué es el Descenso del Gradiente? (Dot CSV).', url: 'https://www.youtube.com/watch?v=A6FiCDoz8_4' },
-                { ref: 'Ministerio de Ciencia (2021). Marco Ético para la IA en Colombia.', url: 'https://minciencias.gov.co/sites/default/files/marco-etico-ia-colombia-2021.pdf' },
-                { ref: 'Khan Academy. Cálculo multivariable: descenso del gradiente y regla de la cadena.', url: 'https://es.khanacademy.org/math/multivariable-calculus/applications-of-multivariable-derivatives/optimizing-multivariable-functions/a/what-is-gradient-descent' },
+                { ref: 'TensorFlow. Mejor rendimiento con la API tf.data (pipelines: cache, prefetch, num_parallel_calls).', url: 'https://www.tensorflow.org/guide/data_performance' },
+                { ref: 'PyTorch Foundation (2025). torch.export documentation: exportación a representaciones portables (ONNX/IR).', url: 'https://docs.pytorch.org/docs/stable/export.html' },
+                { ref: 'Keras 3 — documentación oficial de la API multi-backend (TensorFlow, PyTorch, JAX).', url: 'https://keras.io/' },
+                { ref: 'NVIDIA. cuDNN: biblioteca de primitivas aceleradas en GPU para Deep Learning.', url: 'https://developer.nvidia.com/cudnn' },
+                { ref: 'TensorFlow Playground: laboratorio interactivo de redes neuronales en el navegador.', url: 'https://playground.tensorflow.org/' },
+                { ref: 'Google Colab — Preguntas frecuentes (cuotas de GPU, tipos T4/L4 y límites de cómputo).', url: 'https://research.google.com/colaboratory/faq.html' },
+                { ref: 'ONNX Runtime — motor de inferencia portable para modelos exportados a ONNX.', url: 'https://onnxruntime.ai/' },
             ],
             datasets: [
-                { ref: 'Parraga-Alava, J. et al. (2019). RoCoLe: A robusta coffee leaf images dataset (v2). Mendeley Data.', url: 'https://data.mendeley.com/datasets/c5yvn32dzg/2' },
-                { ref: 'Instituto Nacional de Salud. Protocolo de vigilancia en salud pública: Dengue.', url: 'https://www.minsalud.gov.co/' },
-                { ref: 'TensorFlow Playground. Simulador interactivo de redes neuronales (sin instalar nada).', url: 'https://playground.tensorflow.org' },
+                { ref: 'Parraga-Alava, J. et al. (2019). RoCoLe: dataset de hojas de café robusta (escenario AGROSAVIA de la Fase 3).', url: 'https://data.mendeley.com/datasets/c5yvn32dzg/2' },
+                { ref: 'Fashion-MNIST: dataset ligero de 70.000 imágenes 28×28 ideal para prototipar pipelines y entrenamiento en GPU.', url: 'https://github.com/zalandoresearch/fashion-mnist' },
+                { ref: 'Documentación oficial de PyTorch — Automatic Mixed Precision (AMP) examples.', url: 'https://docs.pytorch.org/docs/stable/notes/amp_examples.html' },
+                { ref: 'LiteRT (sucesor de TensorFlow Lite) — guía de inferencia optimizada para móviles y borde.', url: 'https://ai.google.dev/edge/litert' },
             ],
         };
 
-        /* Cronograma (literales del .tex) */
+        /* Cronograma (síntesis de los hitos y encuentros del Módulo 3) */
         const cronograma = {
             semana1: {
-                titulo: 'Semana 1 — Del perceptrón al MLP',
+                titulo: 'Semana 1 — Frameworks y cómputo de alto rendimiento',
                 eventos: [
-                    { fecha: '03/06', hora: '19:30 – 21:00', tipo: 'Encuentro 1', tipoColor: '#3D008D', titulo: 'Introducción y Contexto Histórico del Deep Learning', desc: 'McCulloch-Pitts, Perceptrón de Rosenblatt, Inviernos de la IA y Renacimiento moderno.', link: TEAMS_URL, linkLabel: 'Teams Sincrónico' },
-                    { fecha: '04/06', hora: '19:30 – 21:00', tipo: 'Encuentro 2', tipoColor: '#3D008D', titulo: 'El Perceptrón Multicapa (MLP)', desc: 'Teorema de Aproximación Universal, Funciones de Activación (ReLU, Sigmoide, Softmax) y Arquitectura Feedforward.', link: TEAMS_URL, linkLabel: 'Teams Sincrónico' },
-                    { fecha: 'Toda la semana', tipo: 'Asincrónico', tipoColor: '#FDB913', titulo: 'Videoconferencia asincrónica 1 — Descenso del Gradiente', desc: 'Grabación disponible toda la semana. Cubre la intuición del gradiente, regla de la cadena, tasa de aprendizaje y momentum.' },
-                    { fecha: '08/06', tipo: 'Foro', tipoColor: '#15803D', titulo: 'Momento 1: Foro de reflexión', desc: 'Publicación en el foro del campus virtual sobre los fundamentos del Deep Learning.', link: 'https://campus.usta.edu.co', linkLabel: 'Campus Virtual' },
+                    { fecha: 'Encuentro 1', hora: '19:30 – 21:00', tipo: 'Sincrónico', tipoColor: '#3D008D', titulo: 'Frameworks de Deep Learning', desc: 'Por qué un framework (autograd, GPU, abstracción); TensorFlow/Keras 3 vs. PyTorch; criterios de selección y ONNX como pasaporte interoperable entre ecosistemas.', link: TEAMS_URL, linkLabel: 'Teams Sincrónico' },
+                    { fecha: 'Encuentro 2', hora: '19:30 – 21:00', tipo: 'Sincrónico', tipoColor: '#3D008D', titulo: 'Computación de Alto Rendimiento (GPU)', desc: 'GPU vs. CPU y Tensor Cores; VRAM y CUDA OOM; precisión mixta (AMP) y checkpointing; Google Colab y Kaggle; estrategias multi-GPU (DDP/FSDP).', link: TEAMS_URL, linkLabel: 'Teams Sincrónico' },
+                    { fecha: 'Toda la semana', tipo: 'Asincrónico', tipoColor: '#FDB913', titulo: 'Video de Profundización — Alertas Tempranas contra la Deserción', desc: 'Recurso audiovisual de 12 escenas (≈ 5 min 42 s): arquitecturas multimodales (LSTM, BETO, Autoencoders, CNN-OCR), despliegue Edge y vigilancia ética para la deserción escolar rural.' },
                 ],
             },
             semana2: {
-                titulo: 'Semana 2 — Optimización, backprop y entrega',
+                titulo: 'Semana 2 — Pipelines, despliegue y entrega',
                 eventos: [
-                    { fecha: '10/06', hora: '19:30 – 21:00', tipo: 'Encuentro 3', tipoColor: '#3D008D', titulo: 'Matemática del Error y Optimización', desc: 'Funciones de Costo (MSE, BCE), Descenso del Gradiente y Tasa de Aprendizaje.', link: TEAMS_URL, linkLabel: 'Teams Sincrónico' },
-                    { fecha: '11/06', hora: '19:30 – 21:00', tipo: 'Encuentro 4', tipoColor: '#3D008D', titulo: 'Retropropagación (Backpropagation)', desc: 'Regla de la Cadena, Grafos Computacionales y Autograd en PyTorch.', link: TEAMS_URL, linkLabel: 'Teams Sincrónico' },
-                    { fecha: 'Toda la semana', tipo: 'Asincrónico', tipoColor: '#FDB913', titulo: 'Videoconferencia asincrónica 2 — El Proceso de Entrenamiento', desc: 'Grabación sobre regularización, dropout, batch norm, evaluación y ética en salud.' },
-                    { fecha: '15/06', hora: '23:59', tipo: 'Entrega', tipoColor: '#BE185D', titulo: 'Momento 2: 1ra entrega', desc: 'Notebook + Informe técnico-ético de la Fase 1 del Proyecto Centinela.', link: 'https://campus.usta.edu.co', linkLabel: 'Campus Virtual' },
+                    { fecha: 'Encuentro 3', hora: '19:30 – 21:00', tipo: 'Sincrónico', tipoColor: '#3D008D', titulo: 'Pipelines de Datos y Despliegue', desc: 'GPU starvation; tf.data y DataLoader (prefetch/cache, num_workers); Data Augmentation; exportación a ONNX/LiteRT y ruta de despliegue offline en campo.', link: TEAMS_URL, linkLabel: 'Teams Sincrónico' },
+                    { fecha: 'Foro', tipo: 'Guía 3', tipoColor: '#15803D', titulo: 'Momento 1: Guía de Profundización 3 (5 %)', desc: 'Escrito reflexivo en el foro sobre arquitecturas multimodales para la deserción escolar rural, con criterios de equidad algorítmica y APA 7 (6–8 h).', link: 'https://campus.usta.edu.co', linkLabel: 'Campus Virtual' },
+                    { fecha: 'Entrega', hora: '23:59', tipo: 'Fase 3', tipoColor: '#BE185D', titulo: 'Momento 2: Proyecto Centinela · Fase 3 (25 %)', desc: '"De Colab al Cafetal": pipeline + GPU con precisión mixta + optimización Edge + exportación ONNX + despliegue offline, con Bitácora y Auditoría de IA.', link: 'https://campus.usta.edu.co', linkLabel: 'Campus Virtual' },
                 ],
             },
         };
@@ -1360,7 +1263,7 @@
             { id: 'cronograma',     label: 'Cronograma',     icon: 'fa-calendar-days' },
             { id: 'hitos',          label: 'Hitos',          icon: 'fa-flag-checkered' },
             { id: 'capitulos',      label: 'Capítulos',      icon: 'fa-book' },
-            { id: 'videos',         label: 'Videos',         icon: 'fa-video' },
+            { id: 'videos',         label: 'Video',          icon: 'fa-video' },
             { id: 'glosario',       label: 'Glosario',       icon: 'fa-language' },
             { id: 'recursos',       label: 'Recursos',       icon: 'fa-folder-open' },
         ];
@@ -1412,45 +1315,43 @@
                 { label: 'Cap 1', done: progress.capsVistos[1] },
                 { label: 'Cap 2', done: progress.capsVistos[2] },
                 { label: 'Cap 3', done: progress.capsVistos[3] },
-                { label: 'Cap 4', done: progress.capsVistos[4] },
-                { label: 'Cap 5', done: progress.capsVistos[5] },
-                { label: 'Video Sec.', done: progress.videosVistos.seccion },
                 { label: 'Video Prof.', done: progress.videosVistos.profundizacion },
-                { label: 'Guía 1', done: progress.guia1Entregada },
-                { label: 'Fase 1', done: progress.act1Entregada },
+                { label: 'Guía 3', done: progress.guia3Entregada },
+                { label: 'Fase 3', done: progress.act3Entregada },
             ];
             return (
                 <section id="inicio" className="grid lg:grid-cols-3 gap-5">
                     <div className="lg:col-span-2 usta-card p-6 md:p-8">
                         <div className="flex flex-wrap items-center gap-2 mb-3">
                             <Tag color="primary" icon="fa-route">Ruta de Aprendizaje</Tag>
-                            <Tag color="secondary" icon="fa-graduation-cap">Módulo 1 · 48 h</Tag>
-                            <Tag color="gold" icon="fa-percent">25 % de la nota final</Tag>
+                            <Tag color="secondary" icon="fa-graduation-cap">Módulo 3 · 48 h</Tag>
+                            <Tag color="gold" icon="fa-percent">30 % de la nota final</Tag>
                         </div>
                         <h1 className="text-3xl md:text-4xl font-extrabold text-navy leading-tight mb-2">
-                            Fundamentos del Aprendizaje Profundo
+                            Implementación y Herramientas Profesionales
                         </h1>
                         <p className="text-gray-700 leading-relaxed text-[0.98rem]">
-                            Mapa navegable de los <strong>5 capítulos</strong>, las <strong>2 actividades evaluativas</strong> y los
-                            <strong> 2 videos</strong> que componen el Módulo 1. Aquí podrá consultar la ruta, marcar su progreso
-                            (se guarda en su navegador) y autoevaluarse antes de cada entrega.
+                            Mapa navegable de los <strong>3 capítulos</strong> (Frameworks TF/PyTorch/Keras 3, Computación de Alto
+                            Rendimiento con GPU y Pipelines de Datos y Despliegue), el <strong>video de profundización</strong> y los
+                            <strong> 2 hitos evaluativos</strong> del Módulo 3. Aquí se puede consultar la ruta, marcar el progreso
+                            (se guarda en el navegador) y autoevaluarse antes de cada entrega.
                         </p>
                         <div className="mt-5">
-                            <ProgressBar value={pct} label="Su progreso en el módulo" segments={segments} />
+                            <ProgressBar value={pct} label="Progreso en el módulo" segments={segments} />
                         </div>
                         <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-gray-500">
                             <span><i className="far fa-clock mr-1"></i>Última limpieza: {new Date(progress.resetAt).toLocaleString('es-CO')}</span>
                             <button onClick={() => {
-                                if (window.confirm('¿Reiniciar todo el progreso del Módulo 1? Esta acción no se puede deshacer.')) onReset();
+                                if (window.confirm('¿Reiniciar todo el progreso del Módulo 3? Esta acción no se puede deshacer.')) onReset();
                             }} className="ml-auto text-xs font-semibold text-secondary hover:text-primary transition-colors">
                                 <i className="fas fa-rotate-left mr-1"></i>Reiniciar progreso
                             </button>
                         </div>
                     </div>
                     <div className="grid grid-cols-3 lg:grid-cols-1 gap-3">
-                        <Stat value="48 h" label="Carga total" sub="5 directo · 5 indirecto · 38 autónomo" icon="fa-clock" color="primary" />
-                        <Stat value="25 %" label="Peso evaluativo" sub="Guía 1 (5%) + Fase 1 (20%)" icon="fa-percent" color="secondary" />
-                        <Stat value="5" label="Capítulos" sub="4 sincronías + 2 asincronías" icon="fa-book" color="gold" />
+                        <Stat value="48 h" label="Carga total" sub="Guía 3 (8 h) + Fase 3 (40 h)" icon="fa-clock" color="primary" />
+                        <Stat value="30 %" label="Peso evaluativo" sub="Guía 3 (5%) + Fase 3 (25%)" icon="fa-percent" color="secondary" />
+                        <Stat value="3" label="Capítulos" sub="Frameworks · GPU/HPC · Pipelines y Despliegue" icon="fa-book" color="gold" />
                     </div>
                 </section>
             );
@@ -1466,8 +1367,8 @@
                         <i className="fas fa-calendar-days text-xl"></i>
                     </div>
                     <div>
-                        <h2 className="text-2xl font-extrabold text-navy">Cronograma de las 2 semanas</h2>
-                        <p className="text-sm text-gray-600">Encuentros sincrónicos por Teams (19:30–21:00) + actividades asincrónicas en el campus virtual.</p>
+                        <h2 className="text-2xl font-extrabold text-navy">Cronograma del módulo</h2>
+                        <p className="text-sm text-gray-600">Encuentros sincrónicos por Teams (19:30–21:00) + recursos y entregas asincrónicas en el campus virtual.</p>
                     </div>
                 </div>
                 <Tabs accent="primary" tabs={[
@@ -1494,7 +1395,7 @@
         );
 
         /* ============================================================
-           SECCIÓN 3 — HITOS EVALUATIVOS (Guía 1 + Fase 1 · Proyecto Centinela)
+           SECCIÓN 3 — HITOS EVALUATIVOS (Guía 3 + Fase 3 · Proyecto Centinela)
         ============================================================ */
         const HitoCard = ({ act, progress, onTogglePaso, onToggleEntregada, checklistKey }) => {
             const totalPasos = act.pasos.length;
@@ -1515,7 +1416,7 @@
                         <p className="text-[0.88rem]">{act.caso}</p>
                     </Box>
                     {act.entregables ? (
-                        /* Requisitos de entrega cristalinos — solo Fase 1 */
+                        /* Requisitos de entrega cristalinos — solo Fase 3 */
                         <div className="text-sm text-gray-700 mb-2 rounded-xl border border-gray-200 bg-gray-50/60 p-3.5">
                             <div className="flex items-center gap-2 mb-2 text-navy font-bold">
                                 <i className="fas fa-box-open text-secondary"></i>Requisitos de entrega
@@ -1553,10 +1454,10 @@
                     <div className="mt-3 flex flex-wrap items-center gap-2">
                         <label className="flex items-center gap-2 text-sm font-semibold text-navy cursor-pointer">
                             <input type="checkbox"
-                                checked={!!progress[act.tipo === 'guia' ? 'guia1Entregada' : 'act1Entregada']}
+                                checked={!!progress[act.tipo === 'guia' ? 'guia3Entregada' : 'act3Entregada']}
                                 onChange={(e) => onToggleEntregada(e.target.checked)}
                                 className="w-4 h-4 accent-secondary cursor-pointer" />
-                            {act.tipo === 'guia' ? 'Marcar Guía 1 como entregada' : 'Marcar la Fase 1 como entregada'}
+                            {act.tipo === 'guia' ? 'Marcar Guía 3 como entregada' : 'Marcar la Fase 3 como entregada'}
                         </label>
                         {act.linkHtml && (
                             <a href={act.linkHtml}
@@ -1572,12 +1473,12 @@
                     <Accordion items={[
                         { titulo: `Rúbrica resumida (${act.rubrica.length} criterios)`, icono: 'fa-table-list',
                           contenido: act.tipo === 'actividad' ? (
-                            /* Rúbrica enriquecida — solo Fase 1: leyenda de bandas + "Qué se espera" */
+                            /* Rúbrica enriquecida — solo Fase 3: leyenda de bandas + "Qué se espera" */
                             <div className="space-y-3">
                                 <div>
                                     <p className="text-xs font-bold text-navy uppercase tracking-wide mb-1.5">Bandas de calificación (aprueba con ≥ 3,0)</p>
                                     <div className="flex flex-wrap gap-1.5">
-                                        {FASE1_BANDAS.map(b => (
+                                        {FASE2_BANDAS.map(b => (
                                             <span key={b.id} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.7rem] font-semibold"
                                                 style={{ background: b.bg, color: b.color }}>
                                                 <span className="w-2 h-2 rounded-full" style={{ background: b.color }}></span>
@@ -1593,9 +1494,9 @@
                                                 <span className="font-semibold text-navy">{r.criterio}</span>
                                                 <span className="font-bold text-secondary flex-shrink-0">{r.peso} %</span>
                                             </div>
-                                            {r.espera && (
+                                            {FASE2_ESPERA[r.criterio] && (
                                                 <p className="text-[0.82rem] text-gray-600 mt-0.5 leading-snug">
-                                                    <span className="font-semibold text-gray-500">Qué se espera: </span>{r.espera}
+                                                    <span className="font-semibold text-gray-500">Qué se espera: </span>{FASE2_ESPERA[r.criterio]}
                                                 </p>
                                             )}
                                         </li>
@@ -1614,7 +1515,7 @@
                           ),
                         },
                     ]} />
-                    {/* Calculadora de autoevaluación — solo Fase 1 */}
+                    {/* Calculadora de autoevaluación — solo Fase 3 */}
                     {act.tipo === 'actividad' && (
                         <div className="mt-4">
                             <CalculadoraAutoevaluacion />
@@ -1632,30 +1533,30 @@
                     </div>
                     <div>
                         <h2 className="text-2xl font-extrabold text-navy">Hitos evaluativos del módulo</h2>
-                        <p className="text-sm text-gray-600">Los 2 hitos del Módulo 1 suman <strong>25 % de la nota final</strong> (5% + 20%).</p>
+                        <p className="text-sm text-gray-600">Los 2 hitos del Módulo 3 suman <strong>30 % de la nota final</strong> (5% + 25%).</p>
                     </div>
                 </div>
                 <div className="grid md:grid-cols-2 gap-5">
                     <HitoCard
-                        act={activities.guia1}
+                        act={activities.guia3}
                         progress={progress}
-                        checklistKey="guia1Pasos"
-                        onTogglePaso={(k, v) => update(prev => ({ ...prev, guia1Pasos: { ...prev.guia1Pasos, [k]: v } }))}
-                        onToggleEntregada={(v) => update(prev => ({ ...prev, guia1Entregada: v }))}
+                        checklistKey="guia3Pasos"
+                        onTogglePaso={(k, v) => update(prev => ({ ...prev, guia3Pasos: { ...prev.guia3Pasos, [k]: v } }))}
+                        onToggleEntregada={(v) => update(prev => ({ ...prev, guia3Entregada: v }))}
                     />
                     <HitoCard
-                        act={activities.act1}
+                        act={activities.act3}
                         progress={progress}
-                        checklistKey="act1Pasos"
-                        onTogglePaso={(k, v) => update(prev => ({ ...prev, act1Pasos: { ...prev.act1Pasos, [k]: v } }))}
-                        onToggleEntregada={(v) => update(prev => ({ ...prev, act1Entregada: v }))}
+                        checklistKey="act3Pasos"
+                        onTogglePaso={(k, v) => update(prev => ({ ...prev, act3Pasos: { ...prev.act3Pasos, [k]: v } }))}
+                        onToggleEntregada={(v) => update(prev => ({ ...prev, act3Entregada: v }))}
                     />
                 </div>
             </section>
         );
 
         /* ============================================================
-           SECCIÓN 4 — CAPÍTULOS (5 cards con acordeones y MCQ)
+           SECCIÓN 4 — CAPÍTULOS (3 cards con acordeones y MCQ)
         ============================================================ */
         const ChapterCard = ({ ch, isVisto, onToggleVisto }) => (
             <article className="usta-card overflow-hidden">
@@ -1718,9 +1619,15 @@
                         <i className="fas fa-book text-xl"></i>
                     </div>
                     <div>
-                        <h2 className="text-2xl font-extrabold text-navy">Catálogo de los 5 capítulos</h2>
-                        <p className="text-sm text-gray-600">Cada capítulo cierra con preguntas de autoevaluación. Marque como visto al completar la lectura.</p>
+                        <h2 className="text-2xl font-extrabold text-navy">Catálogo de los 3 capítulos</h2>
+                        <p className="text-sm text-gray-600">Cada capítulo cierra con preguntas de autoevaluación. Marque como visto al completar la lectura del material principal.</p>
                     </div>
+                </div>
+                <div className="mt-4 mb-2">
+                    <a href="03_Modulo_3_Implementacion_Deep_Learning.html"
+                        className="inline-flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-full text-white usta-gradient hover:opacity-90 transition-opacity shadow-md">
+                        <i className="fas fa-book-open"></i>Abrir el material interactivo del Módulo 3
+                    </a>
                 </div>
                 <div className="space-y-5 mt-4">
                     {chapters.map(ch => (
@@ -1736,7 +1643,7 @@
         );
 
         /* ============================================================
-           SECCIÓN 5 — VIDEOS (2 cards)
+           SECCIÓN 5 — VIDEO (1 card)
         ============================================================ */
         const VideoCard = ({ v, visto, onToggleVisto }) => (
             <div className="usta-card p-5 md:p-6">
@@ -1804,11 +1711,17 @@
                         <i className="fas fa-video text-xl"></i>
                     </div>
                     <div>
-                        <h2 className="text-2xl font-extrabold text-navy">Videos del módulo</h2>
-                        <p className="text-sm text-gray-600">2 piezas audiovisuales de 3Blue1Brown: una introductoria (¿qué es una red neuronal?) y una de profundización (descenso del gradiente y retropropagación).</p>
+                        <h2 className="text-2xl font-extrabold text-navy">Video del módulo</h2>
+                        <p className="text-sm text-gray-600">Pieza audiovisual de profundización (12 escenas) que recorre un sistema multimodal (LSTM, BETO, Autoencoders y CNN-OCR), su despliegue Edge y la vigilancia ética para la deserción escolar rural en Colombia.</p>
                     </div>
                 </div>
-                <div className="grid md:grid-cols-2 gap-5 mt-4">
+                <Box type="info" label="Nota puente: del aula rural al cafetal">
+                    Este video y la <strong>Guía 3</strong> aplican las arquitecturas del Módulo 2 (LSTM, Transformers como BETO,
+                    Autoencoders) a un caso multimodal de predicción de <strong>deserción escolar rural</strong>, distinto al contenido
+                    de implementación con café de los capítulos. Sirven de <strong>puente conceptual</strong> hacia la industrialización
+                    (pipelines, GPU y despliegue) que practicarás con el caso del café en la <strong>Fase 3</strong>.
+                </Box>
+                <div className="grid md:grid-cols-1 gap-5 mt-4">
                     {videos.map(v => (
                         <VideoCard
                             key={v.id}
@@ -1822,7 +1735,7 @@
         );
 
         /* ============================================================
-           SECCIÓN 6 — GLOSARIO (31 términos)
+           SECCIÓN 6 — GLOSARIO
         ============================================================ */
         const GlosarioSection = () => {
             // Agrupar por letra inicial
@@ -1894,7 +1807,7 @@
                         </div>
                         <div>
                             <h2 className="text-2xl font-extrabold text-navy">Recursos complementarios</h2>
-                            <p className="text-sm text-gray-600">Bibliografía oficial, webgrafía y datasets para profundizar después del módulo.</p>
+                            <p className="text-sm text-gray-600">Bibliografía oficial, webgrafía interactiva y datasets para profundizar durante y después del módulo.</p>
                         </div>
                     </div>
                     <div className="grid md:grid-cols-3 gap-4 mt-4">
@@ -1922,7 +1835,7 @@
         };
 
         /* ============================================================
-           SECCIÓN 8 — FOOTER + CTA MÓDULO 2
+           SECCIÓN 8 — FOOTER + CTA CIERRE DEL CURSO (Cuestionario Final)
         ============================================================ */
         const FooterSection = ({ progress }) => {
             const pct = computeProgress(progress);
@@ -1931,46 +1844,53 @@
                     <div className="usta-card p-6 md:p-8" style={{ background: 'linear-gradient(135deg, #FAF8FF 0%, #FCE7F1 100%)' }}>
                         <div className="flex flex-wrap items-start gap-3 mb-3">
                             <i className="fas fa-trophy text-gold text-2xl"></i>
-                            <h2 className="text-2xl font-extrabold text-navy">¡Felicitaciones por completar el Módulo 1!</h2>
+                            <h2 className="text-2xl font-extrabold text-navy">¡Felicitaciones por cerrar el Módulo 3 y el curso!</h2>
                         </div>
                         {pct === 100 ? (
-                            <Box type="tip" label="Módulo 1 completado al 100%">
-                                <p>Ha marcado los 5 capítulos, los 2 videos, las 2 entregas y todos los pasos de los 2 hitos.
-                                Ahora puede continuar con el Módulo 2: Arquitecturas de Redes Neuronales Especializadas.</p>
+                            <Box type="tip" label="Módulo 3 completado al 100%">
+                                <p>Ha marcado los 3 capítulos, el video de profundización, las 2 entregas y todos los pasos de los 2 hitos.
+                                Con esto cierra el ciclo de vida del Proyecto Centinela: ya está listo para el <strong>Cuestionario Final del curso</strong>.</p>
                             </Box>
                         ) : (
                             <p className="text-gray-700 leading-relaxed">
-                                Si su progreso actual es <strong>{pct}%</strong>, aún le quedan actividades por marcar.
-                                Use los acordeones de cada capítulo para repasar o visite la sección de <a href="#recursos" className="text-primary font-semibold hover:text-secondary">recursos</a> para profundizar.
+                                Si el progreso actual es <strong>{pct}%</strong>, aún quedan actividades por marcar.
+                                Los acordeones de cada capítulo permiten repasar; la sección de <a href="#recursos" className="text-primary font-semibold hover:text-secondary">recursos</a> y el <a href="#glosario" className="text-primary font-semibold hover:text-secondary">glosario</a> son el mejor repaso antes del Cuestionario Final.
                             </p>
                         )}
                     </div>
 
                     <div className="mt-6 usta-card p-6 md:p-8 border-2 border-primary/20">
                         <div className="flex flex-wrap items-center gap-3 mb-3">
-                            <Tag color="primary" icon="fa-forward">Próximo módulo</Tag>
+                            <Tag color="primary" icon="fa-flag-checkered">Cierre del curso</Tag>
                         </div>
                         <h3 className="text-xl md:text-2xl font-extrabold text-navy leading-tight flex items-center gap-2">
-                            <i className="fas fa-brain text-secondary"></i>Módulo 2: Arquitecturas de Redes Neuronales Especializadas
+                            <i className="fas fa-clipboard-question text-secondary"></i>Lo que sigue: el Cuestionario Final del curso
                         </h3>
                         <p className="text-gray-700 mt-2 leading-relaxed">
-                            Aprenderá <strong>Redes Convolucionales (CNN)</strong> para visión artificial, <strong>RNN/LSTM/GRU</strong>
-                            para series de tiempo y lenguaje, y <strong>modelos generativos (GAN, VAE, Autoencoders)</strong>.
-                            Mantiene la misma carga (48 h, 25% de la nota) con dos actividades prácticas: clasificación con
-                            Transfer Learning y modelado predictivo de series temporales.
+                            Con el Módulo 3 se completa la formación: <strong>Frameworks (TensorFlow / PyTorch / Keras 3)</strong>,
+                            <strong> cómputo de alto rendimiento con GPUs</strong> y <strong>pipelines de datos y despliegue</strong>.
+                            La <strong>Fase 3 del Proyecto Centinela</strong> industrializó el sistema (pipeline, precisión mixta, exportación
+                            ONNX y despliegue offline en campo). El último paso evaluativo es el <strong>Cuestionario Final</strong>: repase el
+                            glosario y los recursos de los tres módulos antes de presentarlo.
                         </p>
                         <div className="mt-4 flex flex-wrap items-center gap-2">
-                            <a href="obsidian://open?vault=Deep%20learning%20course&file=Welcome"
+                            <a href="index.html"
                                 className="inline-flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-full text-white usta-gradient hover:opacity-90 transition-opacity shadow-md">
+                                <i className="fas fa-house"></i>Volver al portal del curso
+                            </a>
+                            <a href="obsidian://open?vault=Deep%20learning%20course&file=Welcome"
+                                className="inline-flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-full border border-primary text-primary hover:bg-primary/5 transition-colors">
                                 <i className="fas fa-map-location-dot"></i>Ir al mapa del Segundo Cerebro
                             </a>
-                            <span className="text-xs text-gray-500">Disponible al iniciar el Módulo 2</span>
                         </div>
                     </div>
 
                     <div className="mt-8 rounded-2xl bg-navy text-white px-6 py-8 text-center space-y-3">
                         <p className="text-sm md:text-base font-semibold text-gold italic leading-relaxed max-w-2xl mx-auto">
                             <i className="fas fa-quote-left mr-2 text-xs"></i>
+                            La IA más sofisticada no es la más precisa, sino la que llega a la mano del agricultor o del orientador rural sin estigmatizar.
+                        </p>
+                        <p className="text-[0.82rem] md:text-sm font-semibold text-white/85 italic leading-relaxed max-w-2xl mx-auto">
                             Metodología "Ingeniería de Trinchera": si una arquitectura no corre en Google Colab, no existe.
                         </p>
                         <div className="pt-3 border-t border-white/15 text-xs text-white/70 space-y-1">
@@ -1984,7 +1904,7 @@
                                 Profundización I: Redes Neuronales — Deep Learning (EA-N-F-004) · Experto temático: Javier Mauricio Sierra
                             </p>
                             <p className="text-white/50">Documento HTML autocontenido · React 18 + Tailwind CDN + MathJax 3 ·
-                                Progreso persistido en <code className="inline-code">localStorage</code> (clave <code className="inline-code">usta-m1-progress</code>)</p>
+                                Progreso persistido en <code className="inline-code">localStorage</code> (clave <code className="inline-code">m3_ruta_progreso</code>)</p>
                         </div>
                     </div>
                 </footer>
@@ -2007,8 +1927,8 @@
                                 </div>
                                 <span className="text-xs uppercase tracking-widest text-gold font-bold">Universidad Santo Tomás</span>
                             </div>
-                            <h1 className="text-2xl md:text-3xl font-extrabold">Ruta de Aprendizaje · Módulo 1</h1>
-                            <p className="text-sm md:text-base text-white/80 mt-1">Fundamentos del Aprendizaje Profundo · Maestría en Ciencia de Datos</p>
+                            <h1 className="text-2xl md:text-3xl font-extrabold">Ruta de Aprendizaje · Módulo 3</h1>
+                            <p className="text-sm md:text-base text-white/80 mt-1">Implementación y Herramientas Profesionales · Maestría en Ciencia de Datos</p>
                         </div>
                     </header>
 

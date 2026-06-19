@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Infografía detallada de los contenidos del Módulo 3 — Implementación y Herramientas Profesionales de Deep Learning. Maestría en Ciencia de Datos, Universidad Santo Tomás. Síntesis visual de los 3 capítulos: frameworks (TensorFlow/Keras 3 y PyTorch), computación de alto rendimiento con GPU (Colab y Kaggle) y pipelines de datos y despliegue (tf.data, ONNX, LiteRT).">
+    <title>Infografía · Contenidos del Módulo 3 — Implementación del Aprendizaje Profundo · USTA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Tailwind CSS (utilidades) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome (iconografía de apoyo) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- MathJax 3 — el contenido es matemáticamente denso; aquí es estático (no se revela
+         dinámicamente), por lo que MathJax tipografía una sola vez al cargar, sin re-typeset. -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <!-- Google Fonts: Montserrat (texto) y Fira Code (código) -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Montserrat', 'Helvetica Neue', 'Arial', 'sans-serif'] },
+                    colors: {
+                        primary: '#3D008D',
+                        secondary: '#ED1E79',
+                        navy: '#001A4D',
+                        gold: '#FDB913',
+                        teal: '#0E7490',
+                        bg: '#F8FAFC',
+                        surface: '#FFFFFF',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #F8FAFC;
+            color: #1E293B;
+            scroll-behavior: smooth;
+        }
+        code, pre, .mono { font-family: 'Fira Code', monospace; }
+
+        /* Gradientes institucionales USTA */
+        .usta-gradient { background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%); }
+        .usta-gradient-text {
+            background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .usta-header { background: linear-gradient(135deg, #001A4D 0%, #3D008D 60%, #5B1C9E 100%); }
+
+        /* Tarjeta base */
+        .card {
+            background: #fff; border-radius: 16px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+            transition: box-shadow .25s ease, transform .25s ease;
+        }
+        .card:hover { box-shadow: 0 12px 30px rgba(0,0,0,0.11); transform: translateY(-3px); }
+
+        /* Barra de desplazamiento */
+        ::-webkit-scrollbar { width: 9px; height: 9px; }
+        ::-webkit-scrollbar-track { background: #eef2f7; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg,#3D008D,#ED1E79); border-radius: 5px; }
+
+        /* Aparición progresiva: SOLO una entrada sutil que nunca oculta el contenido.
+           (El contenido es 100% visible siempre; la animación es un realce opcional.) */
+        @keyframes riseIn { from { opacity: .35; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        .js .reveal.in { animation: riseIn .5s ease-out both; }
+
+        /* Código en línea */
+        .icode {
+            background: #F1F5F9; color: #0F172A; padding: .08rem .42rem;
+            border-radius: 5px; font-size: .85em; font-family: 'Fira Code', monospace;
+        }
+        .codeblock {
+            background: #0F172A; color: #E2E8F0; border-radius: 12px;
+            padding: 1rem 1.1rem; font-family: 'Fira Code', monospace;
+            font-size: .82rem; line-height: 1.7; overflow-x: auto;
+            white-space: pre; tab-size: 4;
+        }
+        .codeblock .cm { color: #64748B; }
+        .codeblock .kw { color: #F472B6; }
+        .codeblock .fn { color: #7DD3FC; }
+        .codeblock .st { color: #FDE68A; }
+
+        /* ====== Ventana de código (cromo tipo terminal · marca USTA) ====== */
+        .code-window { position: relative; background: #0F172A; border: 1px solid #1E293B; border-radius: 14px; overflow: hidden; box-shadow: 0 12px 32px rgba(2,6,23,.30); }
+        .code-window::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; z-index: 2; background: linear-gradient(90deg, #3D008D 0%, #ED1E79 60%, #FDB913 100%); }
+        .code-window-bar { display: flex; align-items: center; gap: .55rem; padding: .62rem .95rem; padding-top: calc(.62rem + 3px); background: #0B1326; border-bottom: 1px solid #1E293B; }
+        .code-window-dots { display: flex; gap: .42rem; }
+        .code-window-dots span { width: 11px; height: 11px; border-radius: 50%; display: block; }
+        .code-window-dots .d-r { background: #FF5F56; } .code-window-dots .d-y { background: #FFBD2E; } .code-window-dots .d-g { background: #27C93F; }
+        .code-window-title { font-family: 'Fira Code', monospace; font-size: .72rem; color: #94A3B8; letter-spacing: .01em; }
+        .code-window-lang { margin-left: auto; font-family: 'Fira Code', monospace; font-size: .67rem; color: #FDE68A; background: rgba(253,185,19,.13); padding: .14rem .55rem; border-radius: 999px; white-space: nowrap; }
+        .code-copy { margin-left: .55rem; background: transparent; border: none; color: #94A3B8; cursor: pointer; font-size: .82rem; line-height: 1; padding: .2rem .35rem; border-radius: 7px; transition: color .15s ease, background .15s ease; }
+        .code-copy:hover { color: #E2E8F0; background: rgba(148,163,184,.16); }
+        .code-window .codeblock { border-radius: 0; box-shadow: none; }
+
+        /* Píldoras de fórmula */
+        .eq {
+            background: #FAF8FF; border: 1px solid rgba(61,0,141,.14);
+            border-radius: 12px; padding: .55rem 1rem; overflow-x: auto;
+        }
+
+        /* Callout / analogía */
+        .callout { border-left: 4px solid; border-radius: 12px; padding: .9rem 1.1rem; }
+
+        /* Cinta de capítulo */
+        .ribbon { writing-mode: vertical-rl; text-orientation: mixed; letter-spacing: .15em; }
+
+        /* Navegación sticky */
+        .navlink.active { color: #fff; }
+        .navlink.active .dot { transform: scale(1.6); }
+
+        h2.sec-title { font-weight: 800; letter-spacing: -.02em; }
+
+        /* Impresión / PDF */
+        @media print {
+            body { background: #fff; }
+            .no-print { display: none !important; }
+            .card { box-shadow: none; border: 1px solid #e5e7eb; break-inside: avoid; }
+            section { break-inside: avoid-page; }
+            .js .reveal { opacity: 1 !important; transform: none !important; }
+            a { color: #1E293B; text-decoration: none; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ====================== ENCABEZADO ====================== -->
+    <header class="usta-header text-white">
+        <div class="max-w-6xl mx-auto px-5 md:px-8 py-10 md:py-14">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="usta-gradient p-2.5 rounded-xl shadow-lg"><i class="fas fa-diagram-project text-lg"></i></span>
+                <span class="text-[11px] md:text-xs uppercase tracking-[0.25em] text-gold font-bold">Universidad Santo Tomás · Maestría en Ciencia de Datos</span>
+            </div>
+            <p class="text-secondary font-semibold text-sm md:text-base mb-1">Profundización I: Redes Neuronales — Deep Learning · EA-N-F-004</p>
+            <h1 class="text-3xl md:text-5xl font-extrabold leading-tight tracking-tight">
+                Infografía de Contenidos<br class="hidden md:block"> · Módulo 3
+            </h1>
+            <p class="text-xl md:text-2xl font-light text-white/90 mt-2">Implementación y Herramientas Profesionales</p>
+            <p class="text-white/70 mt-4 max-w-3xl leading-relaxed text-sm md:text-base">
+                Síntesis visual de los <strong class="text-white">3 capítulos</strong> del módulo, pensada para
+                <strong class="text-white"> analizar y repasar de un vistazo</strong>: los <em>frameworks</em> que
+                <em>traducen</em> las ideas a código, la GPU que las <em>acelera</em>, y los <em>pipelines</em> y el
+                despliegue que las <em>llevan a producción</em>. Todas las analogías están contextualizadas a Colombia,
+                con la <strong class="text-white">cadena del café</strong> como hilo conductor.
+            </p>
+
+            <!-- estadísticas rápidas -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8">
+                <div class="bg-white/10 border border-white/15 rounded-xl px-4 py-3">
+                    <div class="text-2xl md:text-3xl font-extrabold text-gold">3</div>
+                    <div class="text-xs text-white/75 mt-0.5">capítulos de contenido</div>
+                </div>
+                <div class="bg-white/10 border border-white/15 rounded-xl px-4 py-3">
+                    <div class="text-2xl md:text-3xl font-extrabold text-gold">48 h</div>
+                    <div class="text-xs text-white/75 mt-0.5">carga total del módulo</div>
+                </div>
+                <div class="bg-white/10 border border-white/15 rounded-xl px-4 py-3">
+                    <div class="text-2xl md:text-3xl font-extrabold text-gold">30 %</div>
+                    <div class="text-xs text-white/75 mt-0.5">de la nota final (Guía 5 % + Fase 3 25 %)</div>
+                </div>
+                <div class="bg-white/10 border border-white/15 rounded-xl px-4 py-3">
+                    <div class="text-2xl md:text-3xl font-extrabold text-gold">≈25</div>
+                    <div class="text-xs text-white/75 mt-0.5">términos clave del módulo</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ====================== NAV STICKY ====================== -->
+    <nav class="no-print sticky top-0 z-40 bg-navy/95 backdrop-blur border-b border-white/10 shadow-lg">
+        <div class="max-w-6xl mx-auto px-2 md:px-6 overflow-x-auto">
+            <ul class="flex items-center gap-1 py-2 text-[11px] md:text-sm font-semibold whitespace-nowrap text-white/70">
+                <li><a href="#mapa" class="navlink flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition"><span class="dot w-2 h-2 rounded-full bg-gold inline-block transition-transform"></span>Mapa</a></li>
+                <li><a href="#cap1" class="navlink flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition"><span class="dot w-2 h-2 rounded-full bg-primary inline-block transition-transform"></span>1 · Frameworks</a></li>
+                <li><a href="#cap2" class="navlink flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition"><span class="dot w-2 h-2 rounded-full bg-secondary inline-block transition-transform"></span>2 · HPC / GPU</a></li>
+                <li><a href="#cap3" class="navlink flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition"><span class="dot w-2 h-2 rounded-full bg-gold inline-block transition-transform"></span>3 · Pipelines</a></li>
+                <li><a href="#cheatsheet" class="navlink flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition"><span class="dot w-2 h-2 rounded-full bg-white inline-block transition-transform"></span>Especificaciones</a></li>
+                <li class="ml-auto"><button onclick="window.print()" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gold text-navy font-bold hover:opacity-90 transition"><i class="fas fa-print"></i><span class="hidden md:inline">Imprimir / PDF</span></button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 md:px-8 py-10">
+
+        <!-- ====================== MAPA CONCEPTUAL ====================== -->
+        <section id="mapa" class="scroll-mt-20">
+            <div class="flex items-center gap-3 mb-5">
+                <span class="usta-gradient text-white p-2.5 rounded-xl shadow"><i class="fas fa-sitemap"></i></span>
+                <h2 class="sec-title text-2xl md:text-3xl text-navy">Mapa del módulo en una mirada</h2>
+            </div>
+            <p class="text-gray-600 max-w-3xl mb-6 text-[0.95rem]">Los <strong>fundamentos</strong> (Módulo 1) y las <strong>arquitecturas</strong> (Módulo 2) ya están: la red sabe ver, recordar y crear. Falta lo más difícil — <strong>llevarla a producción</strong>. El Módulo 3 industrializa el modelo: el <em>framework</em> traduce la idea a código, la <em>GPU</em> la entrena en horas y no en semanas, y el <em>pipeline</em> + <em>despliegue</em> la pone a correr <em>offline</em> en una tablet en el cafetal. Esto cierra el <strong>ciclo de MLOps</strong> de extremo a extremo.</p>
+
+            <!-- SVG: ciclo MLOps (reutilizado de la Actividad Fase 3) -->
+            <figure class="card p-5 overflow-x-auto mb-6">
+                <svg viewBox="0 0 940 150" width="100%" role="img" aria-labelledby="mlopsTitle mlopsDesc" style="min-width:720px">
+                    <title id="mlopsTitle">Ciclo de MLOps del Módulo 3</title>
+                    <desc id="mlopsDesc">Los datos pasan por un pipeline con cache y prefetch, alimentan un entrenamiento en GPU con precisión mixta, el modelo se exporta a formatos estándar y finalmente se despliega offline en campo.</desc>
+                    <defs>
+                        <linearGradient id="mlopsGrad" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0" stop-color="#3D008D"/><stop offset="1" stop-color="#5B1C9E"/>
+                        </linearGradient>
+                        <marker id="arrowFlow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                            <path d="M0,0 L8,3 L0,6 Z" fill="#94A3B8"/>
+                        </marker>
+                    </defs>
+                    <rect x="12"  y="42" width="110" height="66" rx="11" fill="#EEF2FF" stroke="#C7D2FE"/>
+                    <text x="67"  y="70" text-anchor="middle" font-size="12" font-weight="700" fill="#1E293B" font-family="Montserrat">Datos</text>
+                    <text x="67"  y="88" text-anchor="middle" font-size="10" fill="#64748B" font-family="Montserrat">train · val · test</text>
+                    <line x1="122" y1="75" x2="160" y2="75" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowFlow)"/>
+                    <rect x="165" y="42" width="160" height="66" rx="11" fill="url(#mlopsGrad)"/>
+                    <text x="245" y="70" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="Montserrat">Pipeline</text>
+                    <text x="245" y="88" text-anchor="middle" font-size="9.5" fill="#E9D5FF" font-family="Montserrat">cache · prefetch · aumento</text>
+                    <line x1="325" y1="75" x2="363" y2="75" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowFlow)"/>
+                    <rect x="368" y="42" width="130" height="66" rx="11" fill="#0E7490"/>
+                    <text x="433" y="70" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="Montserrat">GPU</text>
+                    <text x="433" y="88" text-anchor="middle" font-size="9.5" fill="#CFFAFE" font-family="Montserrat">precisión mixta (FP16)</text>
+                    <line x1="498" y1="75" x2="536" y2="75" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowFlow)"/>
+                    <rect x="541" y="42" width="160" height="66" rx="11" fill="#0F172A"/>
+                    <text x="621" y="70" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="Montserrat">Exportación</text>
+                    <text x="621" y="88" text-anchor="middle" font-size="9.5" fill="#94A3B8" font-family="Montserrat">.pth · .keras · ONNX</text>
+                    <line x1="701" y1="75" x2="739" y2="75" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowFlow)"/>
+                    <rect x="744" y="42" width="184" height="66" rx="11" fill="#ED1E79"/>
+                    <text x="836" y="70" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" font-family="Montserrat">Despliegue</text>
+                    <text x="836" y="88" text-anchor="middle" font-size="9.5" fill="#fff" font-family="Montserrat">offline · en campo</text>
+                </svg>
+                <figcaption class="text-center text-[0.78rem] text-gray-500 mt-2">Del dato organizado al modelo desplegado <em>offline</em>: la imagen-guía que articula todo el módulo.</figcaption>
+            </figure>
+
+            <div class="grid md:grid-cols-3 gap-3">
+                <!-- flujo -->
+                <a href="#cap1" class="card p-4 border-t-4 border-primary block">
+                    <div class="flex items-center justify-between"><span class="text-3xl font-extrabold text-primary/25">3.1</span><i class="fas fa-layer-group text-primary"></i></div>
+                    <h3 class="font-bold text-navy mt-1 leading-tight">Frameworks</h3>
+                    <p class="text-xs text-gray-500 mt-1">TensorFlow/Keras 3, PyTorch, grafo dinámico, multi-backend</p>
+                </a>
+                <a href="#cap2" class="card p-4 border-t-4 border-secondary block">
+                    <div class="flex items-center justify-between"><span class="text-3xl font-extrabold text-secondary/25">3.2</span><i class="fas fa-microchip text-secondary"></i></div>
+                    <h3 class="font-bold text-navy mt-1 leading-tight">HPC / GPU</h3>
+                    <p class="text-xs text-gray-500 mt-1">CPU vs GPU, Tensor Cores, VRAM, precisión mixta, Colab/Kaggle</p>
+                </a>
+                <a href="#cap3" class="card p-4 border-t-4 border-gold block">
+                    <div class="flex items-center justify-between"><span class="text-3xl font-extrabold text-gold/40">3.3</span><i class="fas fa-share-nodes" style="color:#B45309"></i></div>
+                    <h3 class="font-bold text-navy mt-1 leading-tight">Pipelines y despliegue</h3>
+                    <p class="text-xs text-gray-500 mt-1">tf.data, prefetch, augmentation, ONNX, LiteRT</p>
+                </a>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-3 mt-3">
+                <div class="card p-4 text-center"><div class="text-secondary font-bold text-sm"><i class="fas fa-pen-ruler mr-1"></i>VER (traducir)</div><p class="text-[0.78rem] text-gray-600 mt-1">Escribir el mismo modelo de roya del café en Keras y en PyTorch, y entender por qué convergen.</p></div>
+                <div class="card p-4 text-center"><div class="text-secondary font-bold text-sm"><i class="fas fa-bolt mr-1"></i>RECORDAR (acelerar)</div><p class="text-[0.78rem] text-gray-600 mt-1">Cargar el cafetal en la GPU T4 de Colab con precisión mixta y vigilar la VRAM como una bodega.</p></div>
+                <div class="card p-4 text-center"><div class="text-secondary font-bold text-sm"><i class="fas fa-truck-fast mr-1"></i>CREAR (desplegar)</div><p class="text-[0.78rem] text-gray-600 mt-1">Exportar a ONNX y correr el clasificador <em>offline</em> en una tablet en la finca, sin internet.</p></div>
+            </div>
+
+            <div class="card p-5 mt-5 bg-gradient-to-br from-[#FAF8FF] to-[#FCE7F1]">
+                <p class="text-sm text-gray-700"><i class="fas fa-quote-left text-secondary mr-2"></i><strong>Idea-fuerza del módulo — la cadena del café:</strong> el grano más fino no vale nada si no llega a la taza. Igual el modelo: <strong>«si no corre en Google Colab, no existe; y si no se puede desplegar, no sirve.»</strong> La progresión es deliberada — de nada sirve dominar PyTorch sin una GPU para entrenar, ni entrenar un modelo que nadie puede usar. <em>Ingeniería de Trinchera</em>: del notebook al campo.</p>
+            </div>
+        </section>
+
+        <!-- ====================== CAPÍTULO 1 ====================== -->
+        <section id="cap1" class="scroll-mt-20 mt-14 reveal">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-14 h-14 rounded-2xl usta-gradient text-white flex items-center justify-center text-xl font-extrabold shadow-lg flex-shrink-0">3.1</div>
+                <div>
+                    <p class="text-xs uppercase tracking-widest text-primary font-bold">Capítulo 3.1 · #tema/frameworks</p>
+                    <h2 class="sec-title text-2xl md:text-3xl text-navy">Frameworks de Deep Learning</h2>
+                </div>
+            </div>
+
+            <div class="callout mb-5" style="border-color:#3D008D; background:#F5F0FA">
+                <p class="text-[0.9rem] text-gray-700"><i class="fas fa-screwdriver-wrench text-primary mr-1"></i><strong>¿Por qué no programar la red a mano?</strong> Implementar la retropropagación y la diferenciación automática en NumPy es inviable. Un <strong>framework</strong> aporta <strong>autograd</strong>, capas listas, optimizadores, soporte de GPU y un ecosistema de despliegue. El módulo recorre los dos dominantes —<strong>TensorFlow/Keras</strong> y <strong>PyTorch</strong>— y la convergencia reciente que habilita <strong>Keras 3</strong> como puente multi-backend.</p>
+            </div>
+
+            <!-- TensorFlow / Keras: 3 APIs -->
+            <div class="card p-6 mb-5">
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-door-open text-primary"></i>TensorFlow + Keras: las tres puertas para construir un modelo</h3>
+                <p class="text-[0.86rem] text-gray-600 mb-4"><strong>Keras</strong> es la interfaz de alto nivel de TensorFlow («para seres humanos, no para máquinas»). Ofrece <strong>tres APIs</strong> con creciente flexibilidad y creciente complejidad: se elige según la forma del modelo.</p>
+                <!-- SVG NUEVO: 3 APIs de Keras -->
+                <svg viewBox="0 0 660 200" class="w-full" role="img" aria-labelledby="kerasTitle kerasDesc">
+                    <title id="kerasTitle">Las tres APIs de Keras: Sequential, Funcional y Subclassing</title>
+                    <desc id="kerasDesc">De izquierda a derecha, la API Sequential apila capas en una sola línea recta; la API Funcional permite ramas que se bifurcan y se unen como un grafo dirigido; la API Subclassing es una caja de código con control total. La flexibilidad y la complejidad aumentan hacia la derecha.</desc>
+                    <defs><marker id="arrKeras" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#94A3B8"/></marker></defs>
+                    <!-- Sequential -->
+                    <g font-family="Montserrat" text-anchor="middle">
+                        <text x="100" y="22" font-size="12" font-weight="700" fill="#3D008D">1 · Sequential</text>
+                        <text x="100" y="36" font-size="8.5" fill="#64748B">línea de ensamblaje</text>
+                        <rect x="72" y="48" width="56" height="22" rx="5" fill="#F5F0FA" stroke="#3D008D"/><text x="100" y="63" font-size="9" fill="#3D008D">Dense</text>
+                        <rect x="72" y="80" width="56" height="22" rx="5" fill="#F5F0FA" stroke="#3D008D"/><text x="100" y="95" font-size="9" fill="#3D008D">Dropout</text>
+                        <rect x="72" y="112" width="56" height="22" rx="5" fill="#F5F0FA" stroke="#3D008D"/><text x="100" y="127" font-size="9" fill="#3D008D">Dense</text>
+                        <rect x="72" y="144" width="56" height="22" rx="5" fill="#F5F0FA" stroke="#3D008D"/><text x="100" y="159" font-size="9" fill="#3D008D">salida</text>
+                    </g>
+                    <g stroke="#94A3B8" stroke-width="1.4" marker-end="url(#arrKeras)">
+                        <line x1="100" y1="70" x2="100" y2="78"/><line x1="100" y1="102" x2="100" y2="110"/><line x1="100" y1="134" x2="100" y2="142"/>
+                    </g>
+                    <text x="100" y="185" text-anchor="middle" font-size="8.5" fill="#16A34A" font-family="Montserrat">1 entrada → 1 salida</text>
+                    <!-- separador -->
+                    <line x1="210" y1="44" x2="210" y2="180" stroke="#E2E8F0" stroke-dasharray="4 4"/>
+                    <!-- Funcional -->
+                    <g font-family="Montserrat" text-anchor="middle">
+                        <text x="330" y="22" font-size="12" font-weight="700" fill="#ED1E79">2 · Funcional</text>
+                        <text x="330" y="36" font-size="8.5" fill="#64748B">grafo (acueducto de Bogotá)</text>
+                        <rect x="252" y="48" width="58" height="22" rx="5" fill="#FCE7F1" stroke="#ED1E79"/><text x="281" y="63" font-size="8.5" fill="#ED1E79">imagen</text>
+                        <rect x="350" y="48" width="58" height="22" rx="5" fill="#FCE7F1" stroke="#ED1E79"/><text x="379" y="63" font-size="8.5" fill="#ED1E79">metadata</text>
+                        <rect x="252" y="92" width="58" height="22" rx="5" fill="#FCE7F1" stroke="#ED1E79"/><text x="281" y="107" font-size="8.5" fill="#ED1E79">Conv2D</text>
+                        <rect x="301" y="134" width="58" height="22" rx="5" fill="#FFF1F7" stroke="#ED1E79" stroke-width="2"/><text x="330" y="149" font-size="8" fill="#ED1E79">concatenate</text>
+                    </g>
+                    <g stroke="#94A3B8" stroke-width="1.4" fill="none" marker-end="url(#arrKeras)">
+                        <line x1="281" y1="70" x2="281" y2="90"/>
+                        <line x1="281" y1="114" x2="315" y2="132"/>
+                        <line x1="379" y1="70" x2="345" y2="132"/>
+                    </g>
+                    <text x="330" y="185" text-anchor="middle" font-size="8.5" fill="#16A34A" font-family="Montserrat">múltiples entradas/salidas (DAG)</text>
+                    <!-- separador -->
+                    <line x1="430" y1="44" x2="430" y2="180" stroke="#E2E8F0" stroke-dasharray="4 4"/>
+                    <!-- Subclassing -->
+                    <g font-family="Montserrat" text-anchor="middle">
+                        <text x="550" y="22" font-size="12" font-weight="700" fill="#B45309">3 · Subclassing</text>
+                        <text x="550" y="36" font-size="8.5" fill="#64748B">taller artesanal</text>
+                        <rect x="478" y="50" width="144" height="100" rx="9" fill="#FFFBEB" stroke="#B45309" stroke-width="1.5"/>
+                        <text x="550" y="74" font-size="9" fill="#92400E" font-family="Fira Code">class MiModelo</text>
+                        <text x="550" y="92" font-size="8.5" fill="#92400E" font-family="Fira Code">__init__()</text>
+                        <text x="550" y="110" font-size="8.5" fill="#92400E" font-family="Fira Code">call(self, x):</text>
+                        <text x="550" y="128" font-size="8" fill="#A16207" font-family="Fira Code">if / for / lógica…</text>
+                    </g>
+                    <text x="550" y="185" text-anchor="middle" font-size="8.5" fill="#16A34A" font-family="Montserrat">control total · más flexible</text>
+                </svg>
+                <div class="grid md:grid-cols-2 gap-4 mt-4">
+                    <div class="code-window">
+                        <div class="code-window-bar">
+                            <span class="code-window-dots"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></span>
+                            <span class="code-window-title">sequential.py</span>
+                            <span class="code-window-lang">Python · Keras</span>
+                            <button class="code-copy" type="button" aria-label="Copiar código" title="Copiar"><i class="fas fa-copy"></i></button>
+                        </div>
+                        <div class="codeblock"><span class="cm"># API Sequential — la línea de ensamblaje</span>
+modelo = keras.<span class="fn">Sequential</span>([
+    keras.layers.<span class="fn">Dense</span>(<span class="st">128</span>, activation=<span class="st">'relu'</span>),
+    keras.layers.<span class="fn">Dropout</span>(<span class="st">0.3</span>),
+    keras.layers.<span class="fn">Dense</span>(<span class="st">1</span>, activation=<span class="st">'sigmoid'</span>),
+])
+modelo.<span class="fn">compile</span>(optimizer=<span class="st">'adam'</span>,
+              loss=<span class="st">'binary_crossentropy'</span>,
+              metrics=[<span class="st">'accuracy'</span>])</div>
+                    </div>
+                    <div class="callout self-center" style="border-color:#0E7490; background:#ECFEFF">
+                        <p class="text-[0.84rem] text-gray-700"><i class="fas fa-mug-hot mr-1 text-teal"></i><strong>La línea de producción de café:</strong> en <strong>Sequential</strong> el grano pasa de una etapa a la siguiente sin desviarse (una entrada, una salida). El <strong>Funcional</strong> es el acueducto de Bogotá: el agua se bifurca y se une por caminos paralelos. El <strong>Subclassing</strong> es el artesano que fabrica cada pieza a mano: máxima libertad, máximo cuidado.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PyTorch grafo dinámico -->
+            <div class="card p-6 mb-5">
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-fire text-primary"></i>PyTorch: tensores, grafo dinámico y <span class="icode">nn.Module</span></h3>
+                <p class="text-[0.86rem] text-gray-600 mb-3">PyTorch construye el grafo de cómputo <strong>en tiempo real, operación por operación</strong>, a medida que el código se ejecuta (<em>define-by-run</em>). Esto permite usar <span class="icode">if</span>, <span class="icode">for</span> y depurar con <span class="icode">print</span> como en Python normal. <span class="icode">requires_grad=True</span> activa el seguimiento de gradientes.</p>
+                <div class="grid md:grid-cols-2 gap-4 items-start">
+                    <div class="code-window">
+                        <div class="code-window-bar">
+                            <span class="code-window-dots"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></span>
+                            <span class="code-window-title">model.py</span>
+                            <span class="code-window-lang">Python · PyTorch</span>
+                            <button class="code-copy" type="button" aria-label="Copiar código" title="Copiar"><i class="fas fa-copy"></i></button>
+                        </div>
+                        <div class="codeblock"><span class="cm"># Todo modelo hereda de torch.nn.Module</span>
+<span class="kw">class</span> <span class="fn">MiRed</span>(nn.Module):
+    <span class="kw">def</span> <span class="fn">__init__</span>(self):
+        super().<span class="fn">__init__</span>()
+        self.fc1 = nn.<span class="fn">Linear</span>(<span class="st">4</span>, <span class="st">64</span>)
+        self.fc2 = nn.<span class="fn">Linear</span>(<span class="st">64</span>, <span class="st">1</span>)
+
+    <span class="kw">def</span> <span class="fn">forward</span>(self, x):       <span class="cm"># grafo dinámico</span>
+        x = torch.<span class="fn">relu</span>(self.<span class="fn">fc1</span>(x))
+        <span class="kw">return</span> torch.<span class="fn">sigmoid</span>(self.<span class="fn">fc2</span>(x))</div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="callout" style="border-color:#0E7490; background:#ECFEFF">
+                            <p class="text-[0.84rem] text-gray-700"><i class="fas fa-water mr-1 text-teal"></i><strong>El río Magdalena:</strong> un grafo estático (TF 1.x) era un canal de concreto fijo; el grafo dinámico de PyTorch es el río Magdalena — su cauce se adapta al terreno, se bifurca y crea meandros según el código que corre.</p>
+                        </div>
+                        <div class="callout" style="border-color:#B45309; background:#FFFBEB">
+                            <p class="text-[0.82rem] text-gray-700"><i class="fas fa-code-branch mr-1" style="color:#B45309"></i><strong>Control explícito vs. abstracción:</strong> en Keras, <span class="icode">model.fit()</span> encapsula todo el ciclo. En PyTorch el <strong>bucle de entrenamiento se escribe a mano</strong>, lo que da control fino sobre cada paso (clave para precisión mixta y acumulación de gradientes).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla comparativa TF vs PyTorch -->
+            <div class="card p-6 mb-5">
+                <h3 class="font-bold text-navy mb-3 flex items-center gap-2"><i class="fas fa-code-compare text-primary"></i>TensorFlow / Keras vs. PyTorch — ¿cuál elegir?</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-[0.78rem] border-collapse">
+                        <thead>
+                            <tr class="bg-[#F5F0FA] text-primary">
+                                <th class="text-left p-2 border border-gray-200">Criterio</th>
+                                <th class="text-left p-2 border border-gray-200">TensorFlow / Keras</th>
+                                <th class="text-left p-2 border border-gray-200">PyTorch</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-700">
+                            <tr><td class="p-2 border border-gray-200 font-semibold">Filosofía</td><td class="p-2 border border-gray-200">Abstracción y producción</td><td class="p-2 border border-gray-200">Flexibilidad e investigación</td></tr>
+                            <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Bucle de entrenamiento</td><td class="p-2 border border-gray-200"><span class="icode">model.fit()</span></td><td class="p-2 border border-gray-200">Manual (control total)</td></tr>
+                            <tr><td class="p-2 border border-gray-200 font-semibold">Producción empresarial</td><td class="p-2 border border-gray-200">TF Serving, LiteRT, TFX</td><td class="p-2 border border-gray-200">TorchServe, ONNX, torch.compile</td></tr>
+                            <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Despliegue móvil</td><td class="p-2 border border-gray-200">LiteRT (maduro)</td><td class="p-2 border border-gray-200">ExecuTorch (estable desde 2024)</td></tr>
+                            <tr><td class="p-2 border border-gray-200 font-semibold">Soporte TPU</td><td class="p-2 border border-gray-200">Nativo y maduro</td><td class="p-2 border border-gray-200">Vía PyTorch/XLA</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="callout mt-3" style="border-color:#5B1C9E; background:#FAF8FF">
+                    <p class="text-[0.86rem] text-gray-700"><i class="fas fa-bicycle mr-1" style="color:#5B1C9E"></i><strong>TransMilenio vs. bicicleta:</strong> TF/Keras es el sistema integrado y eficiente para llegar rápido por una ruta fija; PyTorch es la bicicleta — libertad total de ruta, pero exige más esfuerzo del conductor. Ninguno es «mejor»: depende del trayecto.</p>
+                </div>
+            </div>
+
+            <!-- Keras 3 puente -->
+            <div class="card p-6">
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-bridge text-primary"></i>Keras 3: un código, tres motores (multi-backend)</h3>
+                <p class="text-[0.86rem] text-gray-600 mb-3">Lanzado a finales de 2023, <strong>Keras 3</strong> es una reescritura que convierte a Keras en un framework <strong>multi-backend</strong>: el <strong>mismo código</strong> de alto nivel corre sobre <strong>TensorFlow, PyTorch o JAX</strong> (y OpenVINO para inferencia) cambiando <strong>una sola variable de entorno</strong>.</p>
+                <!-- SVG: puente Keras 3 (nuevo) -->
+                <svg viewBox="0 0 600 150" class="w-full" role="img" aria-labelledby="keras3Title keras3Desc">
+                    <title id="keras3Title">Keras 3 como puente multi-backend</title>
+                    <desc id="keras3Desc">Una caja superior etiquetada como código único de Keras 3 se conecta hacia abajo con tres motores: TensorFlow, PyTorch y JAX, indicando que el mismo código se ejecuta sobre cualquiera de ellos.</desc>
+                    <defs><marker id="arrK3" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker></defs>
+                    <rect x="200" y="18" width="200" height="40" rx="10" fill="url(#mlopsGrad)"/>
+                    <text x="300" y="38" text-anchor="middle" font-size="13" font-weight="700" fill="#fff" font-family="Montserrat">Keras 3 — código único</text>
+                    <text x="300" y="52" text-anchor="middle" font-size="8.5" fill="#E9D5FF" font-family="Fira Code">os.environ['KERAS_BACKEND']</text>
+                    <g stroke="#94A3B8" stroke-width="1.6" fill="none" marker-end="url(#arrK3)">
+                        <line x1="260" y1="58" x2="130" y2="92"/><line x1="300" y1="58" x2="300" y2="92"/><line x1="340" y1="58" x2="470" y2="92"/>
+                    </g>
+                    <g font-family="Montserrat" text-anchor="middle">
+                        <rect x="60" y="96" width="140" height="38" rx="9" fill="#FFF7ED" stroke="#FF6F00"/><text x="130" y="120" font-size="12" font-weight="700" fill="#C2410C">TensorFlow</text>
+                        <rect x="230" y="96" width="140" height="38" rx="9" fill="#FEF2F2" stroke="#EE4C2C"/><text x="300" y="120" font-size="12" font-weight="700" fill="#B91C1C">PyTorch</text>
+                        <rect x="400" y="96" width="140" height="38" rx="9" fill="#F0FDFA" stroke="#0E7490"/><text x="470" y="120" font-size="12" font-weight="700" fill="#0E7490">JAX</text>
+                    </g>
+                </svg>
+                <div class="code-window mt-4">
+                    <div class="code-window-bar">
+                        <span class="code-window-dots"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></span>
+                        <span class="code-window-title">backend.py</span>
+                        <span class="code-window-lang">Python · Keras 3</span>
+                        <button class="code-copy" type="button" aria-label="Copiar código" title="Copiar"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div class="codeblock"><span class="cm"># Elegir el motor ANTES de importar keras</span>
+<span class="kw">import</span> os
+os.environ[<span class="st">'KERAS_BACKEND'</span>] = <span class="st">'jax'</span>   <span class="cm"># o 'tensorflow' / 'torch'</span>
+
+<span class="kw">import</span> keras                       <span class="cm"># el mismo código corre en los 3 motores</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== CAPÍTULO 2 ====================== -->
+        <section id="cap2" class="scroll-mt-20 mt-14 reveal">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-14 h-14 rounded-2xl bg-secondary text-white flex items-center justify-center text-xl font-extrabold shadow-lg flex-shrink-0">3.2</div>
+                <div>
+                    <p class="text-xs uppercase tracking-widest text-secondary font-bold">Capítulo 3.2 · #tema/gpu · #tema/hpc</p>
+                    <h2 class="sec-title text-2xl md:text-3xl text-navy">Computación de Alto Rendimiento (GPU)</h2>
+                </div>
+            </div>
+
+            <div class="callout mb-5" style="border-color:#ED1E79; background:#FFF1F7">
+                <p class="text-[0.9rem] text-gray-700"><i class="fas fa-bolt text-secondary mr-1"></i>Una red profunda son <strong>miles de millones de multiplicaciones de matrices</strong>. La <strong>CPU</strong> las hace de forma casi secuencial; la <strong>GPU</strong> las hace en paralelo masivo. Esa es la diferencia entre entrenar en <strong>semanas</strong> y entrenar en <strong>horas</strong>. Este capítulo democratiza el HPC: con Colab y Kaggle, cualquier estudiante con una cuenta de Google accede a una GPU.</p>
+            </div>
+
+            <!-- CPU vs GPU -->
+            <div class="card p-6 mb-5">
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-microchip text-secondary"></i>CPU vs. GPU: pocos núcleos potentes vs. malla de núcleos simples</h3>
+                <p class="text-[0.86rem] text-gray-600 mb-3">La CPU tiene <strong>pocos núcleos</strong> muy rápidos y versátiles; la GPU tiene <strong>miles de núcleos</strong> simples que ejecutan la misma operación sobre muchos datos a la vez (SIMD). Para álgebra de tensores, gana la malla.</p>
+                <!-- SVG NUEVO: CPU vs GPU -->
+                <svg viewBox="0 0 600 180" class="w-full" role="img" aria-labelledby="cpugpuTitle cpugpuDesc">
+                    <title id="cpugpuTitle">Comparación de CPU y GPU por número de núcleos</title>
+                    <desc id="cpugpuDesc">A la izquierda, una CPU con cuatro núcleos grandes y versátiles. A la derecha, una GPU con una malla densa de muchos núcleos pequeños que operan en paralelo sobre muchos datos a la vez.</desc>
+                    <!-- CPU -->
+                    <text x="150" y="24" text-anchor="middle" font-size="13" font-weight="700" fill="#3D008D" font-family="Montserrat">CPU · pocos núcleos potentes</text>
+                    <rect x="60" y="36" width="180" height="120" rx="10" fill="#F5F0FA" stroke="#3D008D"/>
+                    <g fill="#3D008D" opacity="0.85">
+                        <rect x="78" y="54" width="64" height="42" rx="6"/><rect x="158" y="54" width="64" height="42" rx="6"/>
+                        <rect x="78" y="104" width="64" height="42" rx="6"/><rect x="158" y="104" width="64" height="42" rx="6"/>
+                    </g>
+                    <text x="150" y="172" text-anchor="middle" font-size="9.5" fill="#64748B" font-family="Montserrat">la panadería de un solo maestro</text>
+                    <!-- GPU -->
+                    <text x="450" y="24" text-anchor="middle" font-size="13" font-weight="700" fill="#ED1E79" font-family="Montserrat">GPU · malla de núcleos simples</text>
+                    <rect x="360" y="36" width="180" height="120" rx="10" fill="#FCE7F1" stroke="#ED1E79"/>
+                    <g fill="#ED1E79" opacity="0.8">
+                        <rect x="372" y="48" width="14" height="14" rx="2"/><rect x="392" y="48" width="14" height="14" rx="2"/><rect x="412" y="48" width="14" height="14" rx="2"/><rect x="432" y="48" width="14" height="14" rx="2"/><rect x="452" y="48" width="14" height="14" rx="2"/><rect x="472" y="48" width="14" height="14" rx="2"/><rect x="492" y="48" width="14" height="14" rx="2"/><rect x="512" y="48" width="14" height="14" rx="2"/>
+                        <rect x="372" y="68" width="14" height="14" rx="2"/><rect x="392" y="68" width="14" height="14" rx="2"/><rect x="412" y="68" width="14" height="14" rx="2"/><rect x="432" y="68" width="14" height="14" rx="2"/><rect x="452" y="68" width="14" height="14" rx="2"/><rect x="472" y="68" width="14" height="14" rx="2"/><rect x="492" y="68" width="14" height="14" rx="2"/><rect x="512" y="68" width="14" height="14" rx="2"/>
+                        <rect x="372" y="88" width="14" height="14" rx="2"/><rect x="392" y="88" width="14" height="14" rx="2"/><rect x="412" y="88" width="14" height="14" rx="2"/><rect x="432" y="88" width="14" height="14" rx="2"/><rect x="452" y="88" width="14" height="14" rx="2"/><rect x="472" y="88" width="14" height="14" rx="2"/><rect x="492" y="88" width="14" height="14" rx="2"/><rect x="512" y="88" width="14" height="14" rx="2"/>
+                        <rect x="372" y="108" width="14" height="14" rx="2"/><rect x="392" y="108" width="14" height="14" rx="2"/><rect x="412" y="108" width="14" height="14" rx="2"/><rect x="432" y="108" width="14" height="14" rx="2"/><rect x="452" y="108" width="14" height="14" rx="2"/><rect x="472" y="108" width="14" height="14" rx="2"/><rect x="492" y="108" width="14" height="14" rx="2"/><rect x="512" y="108" width="14" height="14" rx="2"/>
+                        <rect x="372" y="128" width="14" height="14" rx="2"/><rect x="392" y="128" width="14" height="14" rx="2"/><rect x="412" y="128" width="14" height="14" rx="2"/><rect x="432" y="128" width="14" height="14" rx="2"/><rect x="452" y="128" width="14" height="14" rx="2"/><rect x="472" y="128" width="14" height="14" rx="2"/><rect x="492" y="128" width="14" height="14" rx="2"/><rect x="512" y="128" width="14" height="14" rx="2"/>
+                    </g>
+                    <text x="450" y="172" text-anchor="middle" font-size="9.5" fill="#64748B" font-family="Montserrat">la despulpadora industrial</text>
+                </svg>
+                <div class="callout mt-3" style="border-color:#0E7490; background:#ECFEFF">
+                    <p class="text-[0.84rem] text-gray-700"><i class="fas fa-mortar-pestle mr-1 text-teal"></i><strong>La despulpadora y la panadería:</strong> despulpar a mano (CPU) es preciso pero lento; la despulpadora industrial (GPU) procesa cientos de granos a la vez. La CPU es como un maestro panadero versátil; la GPU, como miles de operarios haciendo la misma tarea simple en paralelo.</p>
+                </div>
+            </div>
+
+            <!-- Tensor Cores + VRAM -->
+            <div class="grid lg:grid-cols-2 gap-5 mb-5">
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-bolt-lightning text-secondary"></i>Núcleos CUDA vs. Tensor Cores</h3>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">Los <strong>Tensor Cores</strong> (desde Volta, 2017) son unidades especializadas en multiplicación-acumulación de matrices: un solo Tensor Core ejecuta una multiplicación \(4\times 4\) en una instrucción. En una A100, los CUDA dan 19,5 TFLOPS en FP32 y los Tensor Cores <strong>312 TFLOPS en FP16</strong> (≈16× más).</p>
+                    <div class="eq text-center my-2 text-[0.86rem]">$$\text{Tensor Core: } C \mathrel{+}= A_{4\times4}\cdot B_{4\times4}\ \text{(1 instrucción)}$$</div>
+                    <div class="callout mt-2" style="border-color:#15803D; background:#F0FDF4">
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-wand-magic-sparkles mr-1" style="color:#15803D"></i><strong>Magia transparente:</strong> al ejecutar <span class="icode">model.fit()</span> en una T4 de Colab, detrás se activan CUDA, cuDNN y los Tensor Cores sin escribir una línea de bajo nivel.</p>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-warehouse text-secondary"></i>VRAM: el recurso más escaso</h3>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">La VRAM almacena <strong>a la vez</strong> los pesos, los estados del optimizador, los gradientes, las activaciones y el lote. Los estados del optimizador (Adam) suelen ser el mayor consumidor.</p>
+                    <div class="eq text-center my-2 text-[0.86rem]">$$\text{VRAM}_{\text{pesos}} \approx 2N\ \text{GB}\quad(N \text{ mil millones, FP16})$$</div>
+                    <!-- SVG NUEVO: distribución de VRAM -->
+                    <svg viewBox="0 0 340 60" class="w-full mt-1" role="img" aria-labelledby="vramTitle vramDesc">
+                        <title id="vramTitle">Distribución típica de la VRAM durante el entrenamiento</title>
+                        <desc id="vramDesc">Una barra apilada muestra que los estados del optimizador ocupan la mayor parte de la VRAM, seguidos por las activaciones, los gradientes, los pesos y el lote de entrada.</desc>
+                        <rect x="10" y="14" width="130" height="26" fill="#3D008D"/><text x="75" y="31" text-anchor="middle" font-size="9" fill="#fff" font-family="Montserrat">optimizador</text>
+                        <rect x="140" y="14" width="84" height="26" fill="#ED1E79"/><text x="182" y="31" text-anchor="middle" font-size="9" fill="#fff" font-family="Montserrat">activaciones</text>
+                        <rect x="224" y="14" width="50" height="26" fill="#0E7490"/><text x="249" y="31" text-anchor="middle" font-size="8" fill="#fff" font-family="Montserrat">grad.</text>
+                        <rect x="274" y="14" width="40" height="26" fill="#FDB913"/><text x="294" y="31" text-anchor="middle" font-size="8" fill="#92400E" font-family="Montserrat">pesos</text>
+                        <rect x="314" y="14" width="16" height="26" fill="#94A3B8"/>
+                        <text x="170" y="55" text-anchor="middle" font-size="8" fill="#64748B" font-family="Montserrat">VRAM total durante el entrenamiento →</text>
+                    </svg>
+                    <div class="callout mt-2" style="border-color:#DC2626; background:#FEF2F2">
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-box-open mr-1 text-red-600"></i><strong>La bodega de la plaza:</strong> no importa cuántos camiones (datos) lleguen ni cuántos vendedores (núcleos) haya — si la bodega (VRAM) se llena, no entra más mercancía. Ese es el temido <strong>CUDA OOM</strong>.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Precisión mixta -->
+            <div class="card p-6 mb-5">
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-gauge-high text-secondary"></i>Precisión mixta (AMP): hacer más con menos</h3>
+                <p class="text-[0.86rem] text-gray-600 mb-4">Representar las <strong>activaciones</strong> en 16 bits en vez de 32 reduce la memoria de esos tensores a la mitad y acelera el cómputo al activar los Tensor Cores. Para estabilidad, AMP mantiene una copia de los <strong>pesos maestros en FP32</strong>.</p>
+                <div class="grid md:grid-cols-2 gap-6 items-start">
+                    <!-- SVG: VRAM FP32 vs FP16 (reutilizado de la Actividad) -->
+                    <figure class="card p-4">
+                        <svg viewBox="0 0 360 220" width="100%" role="img" aria-labelledby="fp16Title fp16Desc">
+                            <title id="fp16Title">VRAM y tiempo: FP32 vs FP16</title>
+                            <desc id="fp16Desc">Comparación de VRAM y tiempo por época entre precisión simple FP32 y precisión mixta FP16: la precisión mixta reduce la VRAM cerca de la mitad y el tiempo a cerca de dos tercios.</desc>
+                            <line x1="48" y1="30" x2="48" y2="178" stroke="#94A3B8" stroke-width="1.2"/>
+                            <line x1="48" y1="178" x2="340" y2="178" stroke="#94A3B8" stroke-width="1.2"/>
+                            <rect x="80"  y="48"  width="40" height="130" fill="#001A4D"/><text x="100" y="42" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B" font-family="Montserrat">100%</text>
+                            <rect x="128" y="113" width="40" height="65"  fill="#ED1E79"/><text x="148" y="107" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B" font-family="Montserrat">≈50%</text>
+                            <text x="124" y="196" text-anchor="middle" font-size="10" font-weight="600" fill="#475569" font-family="Montserrat">VRAM</text>
+                            <rect x="220" y="48"  width="40" height="130" fill="#001A4D"/><text x="240" y="42" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B" font-family="Montserrat">100%</text>
+                            <rect x="268" y="92"  width="40" height="86"  fill="#ED1E79"/><text x="288" y="86" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B" font-family="Montserrat">≈65%</text>
+                            <text x="264" y="196" text-anchor="middle" font-size="10" font-weight="600" fill="#475569" font-family="Montserrat">Tiempo / época</text>
+                            <rect x="250" y="26" width="11" height="11" fill="#001A4D"/><text x="266" y="35" font-size="9" fill="#475569" font-family="Montserrat">FP32</text>
+                            <rect x="302" y="26" width="11" height="11" fill="#ED1E79"/><text x="318" y="35" font-size="9" fill="#475569" font-family="Montserrat">FP16</text>
+                        </svg>
+                        <figcaption class="text-center text-[0.76rem] text-gray-500 mt-1">Aceleración típica <strong>2–3×</strong> y hasta <strong>−50 % de memoria</strong> en activaciones (valores ilustrativos).</figcaption>
+                    </figure>
+                    <div class="space-y-3">
+                        <div class="callout" style="border-color:#3D008D; background:#FAF8FF">
+                            <p class="text-[0.84rem] text-gray-700"><i class="fas fa-circle-info text-primary mr-1"></i><strong>Matiz:</strong> el ahorro se da sobre todo en activaciones; el ahorro <em>total</em> es menor que la mitad porque AMP guarda los <strong>pesos maestros en FP32</strong> para el optimizador.</p>
+                        </div>
+                        <div class="callout" style="border-color:#B45309; background:#FFFBEB">
+                            <p class="text-[0.82rem] text-gray-700"><i class="fas fa-microchip mr-1" style="color:#B45309"></i><strong>FP16 vs bfloat16:</strong> en GPUs Ampere+ (L4/A100) suele preferirse <strong>bfloat16</strong> (sin <span class="icode">GradScaler</span>); en la <strong>T4</strong> se usa <strong>float16</strong> con escalado de pérdida.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-window mt-4">
+                    <div class="code-window-bar">
+                        <span class="code-window-dots"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></span>
+                        <span class="code-window-title">amp_train.py</span>
+                        <span class="code-window-lang">Python · PyTorch AMP</span>
+                        <button class="code-copy" type="button" aria-label="Copiar código" title="Copiar"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div class="codeblock"><span class="cm"># Entrenamiento con precisión mixta (PyTorch AMP)</span>
+scaler = torch.amp.<span class="fn">GradScaler</span>()
+<span class="kw">for</span> X, y <span class="kw">in</span> loader:
+    optim.<span class="fn">zero_grad</span>()
+    <span class="kw">with</span> torch.<span class="fn">autocast</span>(<span class="st">"cuda"</span>, dtype=torch.float16):   <span class="cm"># cómputo en FP16</span>
+        perdida = <span class="fn">criterio</span>(<span class="fn">modelo</span>(X), y)
+    scaler.<span class="fn">scale</span>(perdida).<span class="fn">backward</span>()        <span class="cm"># escala para evitar underflow</span>
+    scaler.<span class="fn">step</span>(optim); scaler.<span class="fn">update</span>()</div>
+                </div>
+            </div>
+
+            <!-- Multi-GPU + Colab vs Kaggle -->
+            <div class="grid lg:grid-cols-2 gap-5">
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-server text-secondary"></i>Multi-GPU: DP, DDP y FSDP</h3>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">Cuando una GPU no basta, se reparte el trabajo entre varias.</p>
+                    <ul class="space-y-2 text-[0.84rem] text-gray-700">
+                        <li class="flex gap-2"><span class="font-bold text-secondary">·</span><span><strong>DataParallel (DP):</strong> simple pero ineficiente — cuello de botella en la GPU-0.</span></li>
+                        <li class="flex gap-2"><span class="font-bold text-secondary">·</span><span><strong>DistributedDataParallel (DDP):</strong> un proceso por GPU, sincroniza con NCCL (≈3× más utilización). La opción recomendada.</span></li>
+                        <li class="flex gap-2"><span class="font-bold text-secondary">·</span><span><strong>FSDP (Fully Sharded):</strong> fragmenta pesos, gradientes y estados del optimizador entre GPUs — permite entrenar modelos que <em>no caben</em> en una sola.</span></li>
+                    </ul>
+                    <div class="callout mt-3" style="border-color:#0E7490; background:#ECFEFF">
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-people-group mr-1 text-teal"></i>En TensorFlow, el equivalente es <span class="icode">tf.distribute.MirroredStrategy</span> (un dispositivo, varias réplicas).</p>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-3 flex items-center gap-2"><i class="fas fa-cloud text-secondary"></i>Colab vs. Kaggle — GPU gratis en la nube</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-[0.78rem] border-collapse">
+                            <thead>
+                                <tr class="bg-[#FFF1F7] text-secondary">
+                                    <th class="text-left p-2 border border-gray-200">Criterio</th>
+                                    <th class="text-left p-2 border border-gray-200">Google Colab</th>
+                                    <th class="text-left p-2 border border-gray-200">Kaggle</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-700">
+                                <tr><td class="p-2 border border-gray-200 font-semibold">GPU gratuita</td><td class="p-2 border border-gray-200">T4 (≈15 GB)</td><td class="p-2 border border-gray-200">T4 / P100</td></tr>
+                                <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Cuota</td><td class="p-2 border border-gray-200">Sin garantía; sesión ≈12 h</td><td class="p-2 border border-gray-200">≈30 h/semana garantizadas</td></tr>
+                                <tr><td class="p-2 border border-gray-200 font-semibold">Desconexión</td><td class="p-2 border border-gray-200">Inactividad ≈90 min</td><td class="p-2 border border-gray-200">Persistente por sesión</td></tr>
+                                <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Fuerte en</td><td class="p-2 border border-gray-200">Prototipado, Drive</td><td class="p-2 border border-gray-200">Datasets, competencias</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="callout mt-3" style="border-color:#15803D; background:#F0FDF4">
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-clock mr-1" style="color:#15803D"></i><strong>≈60 h/semana gratis:</strong> combinando Colab y Kaggle, un estudiante reúne cómputo más que suficiente para la Fase 3 — siempre con <em>checkpointing</em> para no perder progreso por desconexiones.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== CAPÍTULO 3 ====================== -->
+        <section id="cap3" class="scroll-mt-20 mt-14 reveal">
+            <div class="flex items-center gap-4 mb-6">
+                <div class="w-14 h-14 rounded-2xl text-white flex items-center justify-center text-xl font-extrabold shadow-lg flex-shrink-0" style="background:#B45309">3.3</div>
+                <div>
+                    <p class="text-xs uppercase tracking-widest font-bold" style="color:#B45309">Capítulo 3.3 · #tema/pipelines · #tema/despliegue</p>
+                    <h2 class="sec-title text-2xl md:text-3xl text-navy">Pipelines de Datos y Despliegue</h2>
+                </div>
+            </div>
+
+            <div class="callout mb-5" style="border-color:#B45309; background:#FFFBEB">
+                <p class="text-[0.9rem] text-gray-700"><i class="fas fa-utensils mr-1" style="color:#B45309"></i><strong>El restaurante eficiente:</strong> tener la mejor GPU (cocina) no sirve si los platos llegan despacio. El <strong>pipeline de datos</strong> es la logística — preparar, refrigerar, mezclar y servir los lotes al ritmo de la cocina, sin que esta espere. Y un modelo entrenado que nadie puede usar tampoco sirve: el <strong>despliegue</strong> lo lleva a la tablet en el cafetal.</p>
+            </div>
+
+            <!-- Pipeline tf.data orden -->
+            <div class="card p-6 mb-5">
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-list-ol" style="color:#B45309"></i>El orden del pipeline <span class="icode">tf.data</span> importa</h3>
+                <p class="text-[0.86rem] text-gray-600 mb-3">El orden de las operaciones cambia la eficiencia. La regla práctica: <strong>map → cache → shuffle → batch → prefetch</strong>, con <span class="icode">prefetch(AUTOTUNE)</span> <strong>siempre al final</strong>.</p>
+                <!-- SVG NUEVO: orden tf.data -->
+                <svg viewBox="0 0 660 90" class="w-full" role="img" aria-labelledby="tfdataTitle tfdataDesc">
+                    <title id="tfdataTitle">Orden recomendado del pipeline tf.data</title>
+                    <desc id="tfdataDesc">Una cadena de cinco etapas en orden: map, cache, shuffle, batch y prefetch al final, conectadas por flechas, que representan el flujo de preparación de los lotes de datos.</desc>
+                    <defs><marker id="arrTf" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker></defs>
+                    <g font-family="Fira Code" text-anchor="middle">
+                        <rect x="14"  y="30" width="104" height="34" rx="8" fill="#FFF7ED" stroke="#B45309"/><text x="66"  y="52" font-size="11" fill="#92400E">.map()</text>
+                        <rect x="142" y="30" width="104" height="34" rx="8" fill="#F5F0FA" stroke="#3D008D"/><text x="194" y="52" font-size="11" fill="#3D008D">.cache()</text>
+                        <rect x="270" y="30" width="104" height="34" rx="8" fill="#FCE7F1" stroke="#ED1E79"/><text x="322" y="52" font-size="11" fill="#ED1E79">.shuffle()</text>
+                        <rect x="398" y="30" width="104" height="34" rx="8" fill="#F0FDFA" stroke="#0E7490"/><text x="450" y="52" font-size="11" fill="#0E7490">.batch()</text>
+                        <rect x="526" y="30" width="120" height="34" rx="8" fill="#F0FDF4" stroke="#15803D" stroke-width="2"/><text x="586" y="52" font-size="10.5" fill="#15803D">.prefetch()</text>
+                    </g>
+                    <g stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrTf)">
+                        <line x1="118" y1="47" x2="140" y2="47"/><line x1="246" y1="47" x2="268" y2="47"/><line x1="374" y1="47" x2="396" y2="47"/><line x1="502" y1="47" x2="524" y2="47"/>
+                    </g>
+                    <text x="586" y="80" text-anchor="middle" font-size="8.5" fill="#15803D" font-family="Montserrat">AUTOTUNE · siempre al final</text>
+                    <text x="66" y="20" text-anchor="middle" font-size="8.5" fill="#64748B" font-family="Montserrat">cargar/decodificar</text>
+                </svg>
+                <div class="callout mt-3" style="border-color:#0E7490; background:#ECFEFF">
+                    <p class="text-[0.84rem] text-gray-700"><i class="fas fa-kitchen-set mr-1 text-teal"></i><strong>La cocina del restaurante:</strong> primero se prepara el ingrediente (<span class="icode">map</span>), se refrigera lo costoso (<span class="icode">cache</span>), se baraja el menú (<span class="icode">shuffle</span>), se arman bandejas (<span class="icode">batch</span>) y un mesero adelanta la siguiente bandeja (<span class="icode">prefetch</span>) para que la cocina nunca pare.</p>
+                </div>
+            </div>
+
+            <!-- Prefetch solapamiento -->
+            <div class="card p-6 mb-5">
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-arrows-left-right" style="color:#B45309"></i>Prefetch: solapar CPU y GPU</h3>
+                <p class="text-[0.86rem] text-gray-600 mb-4">Sin <em>prefetch</em>, la GPU queda ociosa mientras la CPU prepara el siguiente lote. Con <em>prefetch</em>, ambos trabajan en paralelo y el tiempo por época se acerca al <strong>mayor</strong> de los dos, no a su suma.</p>
+                <div class="grid md:grid-cols-2 gap-6 items-start">
+                    <!-- SVG: prefetch (reutilizado de la Actividad) -->
+                    <figure class="card p-4">
+                        <svg viewBox="0 0 360 210" width="100%" role="img" aria-labelledby="prefetchTitle prefetchDesc">
+                            <title id="prefetchTitle">Prefetch: solapamiento CPU/GPU</title>
+                            <desc id="prefetchDesc">Comparación de la línea de tiempo sin prefetch y con prefetch, mostrando el solapamiento de la CPU y la GPU que reduce el tiempo total por época.</desc>
+                            <text x="14" y="32" font-size="11" font-weight="700" fill="#475569" font-family="Montserrat">Sin prefetch · la GPU espera</text>
+                            <rect x="14"  y="42" width="42" height="22" fill="#FDE68A" stroke="#FACC15"/><text x="35"  y="57" text-anchor="middle" font-size="9" fill="#92400E" font-family="Montserrat">CPU</text>
+                            <rect x="56"  y="42" width="42" height="22" fill="#C4B5FD" stroke="#8B5CF6"/><text x="77"  y="57" text-anchor="middle" font-size="9" fill="#4C1D95" font-family="Montserrat">GPU</text>
+                            <rect x="98"  y="42" width="42" height="22" fill="#FDE68A" stroke="#FACC15"/><text x="119" y="57" text-anchor="middle" font-size="9" fill="#92400E" font-family="Montserrat">CPU</text>
+                            <rect x="140" y="42" width="42" height="22" fill="#C4B5FD" stroke="#8B5CF6"/><text x="161" y="57" text-anchor="middle" font-size="9" fill="#4C1D95" font-family="Montserrat">GPU</text>
+                            <rect x="182" y="42" width="42" height="22" fill="#FDE68A" stroke="#FACC15"/><text x="203" y="57" text-anchor="middle" font-size="9" fill="#92400E" font-family="Montserrat">CPU</text>
+                            <rect x="224" y="42" width="42" height="22" fill="#C4B5FD" stroke="#8B5CF6"/><text x="245" y="57" text-anchor="middle" font-size="9" fill="#4C1D95" font-family="Montserrat">GPU</text>
+                            <line x1="14" y1="74" x2="266" y2="74" stroke="#DC2626" stroke-width="1.5"/>
+                            <text x="140" y="88" text-anchor="middle" font-size="9.5" fill="#DC2626" font-family="Montserrat">tiempo total largo →</text>
+                            <text x="14" y="124" font-size="11" font-weight="700" fill="#475569" font-family="Montserrat">Con prefetch · CPU y GPU se solapan</text>
+                            <rect x="14"  y="134" width="42" height="20" fill="#FDE68A" stroke="#FACC15"/><text x="35"  y="148" text-anchor="middle" font-size="8.5" fill="#92400E" font-family="Montserrat">CPU</text>
+                            <rect x="56"  y="134" width="42" height="20" fill="#FDE68A" stroke="#FACC15"/><text x="77"  y="148" text-anchor="middle" font-size="8.5" fill="#92400E" font-family="Montserrat">CPU</text>
+                            <rect x="98"  y="134" width="42" height="20" fill="#FDE68A" stroke="#FACC15"/><text x="119" y="148" text-anchor="middle" font-size="8.5" fill="#92400E" font-family="Montserrat">CPU</text>
+                            <rect x="140" y="134" width="42" height="20" fill="#FDE68A" stroke="#FACC15"/><text x="161" y="148" text-anchor="middle" font-size="8.5" fill="#92400E" font-family="Montserrat">CPU</text>
+                            <rect x="56"  y="156" width="42" height="20" fill="#C4B5FD" stroke="#8B5CF6"/><text x="77"  y="170" text-anchor="middle" font-size="8.5" fill="#4C1D95" font-family="Montserrat">GPU</text>
+                            <rect x="98"  y="156" width="42" height="20" fill="#C4B5FD" stroke="#8B5CF6"/><text x="119" y="170" text-anchor="middle" font-size="8.5" fill="#4C1D95" font-family="Montserrat">GPU</text>
+                            <rect x="140" y="156" width="42" height="20" fill="#C4B5FD" stroke="#8B5CF6"/><text x="161" y="170" text-anchor="middle" font-size="8.5" fill="#4C1D95" font-family="Montserrat">GPU</text>
+                            <rect x="182" y="156" width="42" height="20" fill="#C4B5FD" stroke="#8B5CF6"/><text x="203" y="170" text-anchor="middle" font-size="8.5" fill="#4C1D95" font-family="Montserrat">GPU</text>
+                            <line x1="14" y1="186" x2="224" y2="186" stroke="#15803D" stroke-width="1.5"/>
+                            <text x="119" y="200" text-anchor="middle" font-size="9.5" fill="#15803D" font-family="Montserrat">tiempo total corto →</text>
+                        </svg>
+                        <figcaption class="text-center text-[0.76rem] text-gray-500 mt-1">La GPU deja de quedarse ociosa: el tiempo por época se reduce.</figcaption>
+                    </figure>
+                    <div>
+                        <div class="eq text-center mb-3">$$t_{\text{época}} \approx \max\!\left(t_{\text{CPU}},\; t_{\text{GPU}}\right)$$</div>
+                        <p class="text-[0.84rem] text-gray-700">En <span class="icode">tf.data</span>: <span class="icode">.prefetch(AUTOTUNE)</span>. En PyTorch: <span class="icode">num_workers</span>, <span class="icode">pin_memory</span> y <span class="icode">prefetch_factor</span> en el <span class="icode">DataLoader</span>.</p>
+                        <div class="callout mt-3" style="border-color:#B45309; background:#FFFBEB">
+                            <p class="text-[0.82rem] text-gray-700"><i class="fas fa-people-carry-box mr-1" style="color:#B45309"></i><strong><span class="icode">num_workers</span> = meseros en paralelo:</strong> varios procesos preparan lotes a la vez. Demasiados, sin embargo, saturan la CPU y la RAM.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-window mt-4">
+                    <div class="code-window-bar">
+                        <span class="code-window-dots"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></span>
+                        <span class="code-window-title">pipeline.py</span>
+                        <span class="code-window-lang">Python · tf.data + PyTorch</span>
+                        <button class="code-copy" type="button" aria-label="Copiar código" title="Copiar"><i class="fas fa-copy"></i></button>
+                    </div>
+                    <div class="codeblock"><span class="cm"># El mismo pipeline en ambos frameworks</span>
+ds = (ds.<span class="fn">map</span>(carga, num_parallel_calls=AUTOTUNE)   <span class="cm"># tf.data</span>
+        .<span class="fn">cache</span>().<span class="fn">shuffle</span>(<span class="st">1_000</span>)
+        .<span class="fn">batch</span>(<span class="st">32</span>).<span class="fn">prefetch</span>(AUTOTUNE))
+
+loader = <span class="fn">DataLoader</span>(dataset, batch_size=<span class="st">32</span>,        <span class="cm"># PyTorch</span>
+                    num_workers=<span class="st">4</span>, pin_memory=<span class="kw">True</span>,
+                    prefetch_factor=<span class="st">2</span>)</div>
+                </div>
+            </div>
+
+            <!-- Data Augmentation taxonomía -->
+            <div class="card p-6 mb-5">
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-shuffle" style="color:#B45309"></i>Data Augmentation: entrenar en condiciones variadas</h3>
+                <p class="text-[0.86rem] text-gray-600 mb-3">Multiplicar artificialmente el dataset con transformaciones reduce el sobreajuste — <strong>solo si respetan la semántica</strong>. Una transformación que cambia la etiqueta real hace más daño que bien.</p>
+                <!-- SVG NUEVO: taxonomía de augmentation -->
+                <svg viewBox="0 0 660 160" class="w-full" role="img" aria-labelledby="augTitle augDesc">
+                    <title id="augTitle">Taxonomía de la aumentación de datos</title>
+                    <desc id="augDesc">Tres familias de transformaciones parten de una imagen original: geométricas como volteo y rotación, fotométricas como cambios de color y brillo, y de mezcla como Mixup y CutMix. Un aviso advierte que deben respetar la semántica del problema.</desc>
+                    <defs><marker id="arrAug" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker></defs>
+                    <rect x="14" y="62" width="100" height="40" rx="9" fill="url(#mlopsGrad)"/>
+                    <text x="64" y="80" text-anchor="middle" font-size="11" font-weight="700" fill="#fff" font-family="Montserrat">imagen</text>
+                    <text x="64" y="94" text-anchor="middle" font-size="9" fill="#E9D5FF" font-family="Montserrat">original</text>
+                    <g stroke="#94A3B8" stroke-width="1.6" fill="none" marker-end="url(#arrAug)">
+                        <line x1="114" y1="74" x2="170" y2="34"/><line x1="114" y1="82" x2="170" y2="82"/><line x1="114" y1="90" x2="170" y2="130"/>
+                    </g>
+                    <!-- geométricas -->
+                    <rect x="174" y="14" width="170" height="40" rx="8" fill="#F5F0FA" stroke="#3D008D"/>
+                    <text x="259" y="32" text-anchor="middle" font-size="11" font-weight="700" fill="#3D008D" font-family="Montserrat">Geométricas</text>
+                    <text x="259" y="46" text-anchor="middle" font-size="8.5" fill="#64748B" font-family="Fira Code">Flip · Rotation · ResizedCrop</text>
+                    <!-- fotométricas -->
+                    <rect x="174" y="62" width="170" height="40" rx="8" fill="#FCE7F1" stroke="#ED1E79"/>
+                    <text x="259" y="80" text-anchor="middle" font-size="11" font-weight="700" fill="#ED1E79" font-family="Montserrat">Fotométricas</text>
+                    <text x="259" y="94" text-anchor="middle" font-size="8.5" fill="#64748B" font-family="Fira Code">ColorJitter · brillo · contraste</text>
+                    <!-- mezcla -->
+                    <rect x="174" y="110" width="170" height="40" rx="8" fill="#FFFBEB" stroke="#B45309"/>
+                    <text x="259" y="128" text-anchor="middle" font-size="11" font-weight="700" fill="#B45309" font-family="Montserrat">De mezcla</text>
+                    <text x="259" y="142" text-anchor="middle" font-size="8.5" fill="#64748B" font-family="Fira Code">Mixup · CutMix</text>
+                    <!-- aviso -->
+                    <rect x="380" y="50" width="266" height="60" rx="9" fill="#FEF2F2" stroke="#DC2626" stroke-dasharray="4 3"/>
+                    <text x="513" y="72" text-anchor="middle" font-size="10" font-weight="700" fill="#B91C1C" font-family="Montserrat">⚠ Respetar la semántica</text>
+                    <text x="513" y="90" text-anchor="middle" font-size="8.5" fill="#7F1D1D" font-family="Montserrat">un ColorJitter excesivo borra el tono</text>
+                    <text x="513" y="102" text-anchor="middle" font-size="8.5" fill="#7F1D1D" font-family="Montserrat">amarillo-naranja de la roya → señal perdida</text>
+                </svg>
+                <div class="callout mt-3" style="border-color:#15803D; background:#F0FDF4">
+                    <p class="text-[0.84rem] text-gray-700"><i class="fas fa-clipboard-list mr-1" style="color:#15803D"></i><strong>El director técnico:</strong> entrena al equipo bajo lluvia, sol y cancha mojada (variar condiciones) para que rinda en cualquier partido — pero <em>no</em> le cambia las reglas del juego. Aplicar ≥4 transformaciones y comparar el <em>accuracy</em> de validación con y sin aumento.</p>
+                </div>
+            </div>
+
+            <!-- Guardado / exportación -->
+            <div class="card p-6 mb-5">
+                <h3 class="font-bold text-navy mb-3 flex items-center gap-2"><i class="fas fa-floppy-disk" style="color:#B45309"></i>Guardado y exportación: cada framework, su formato</h3>
+                <p class="text-[0.86rem] text-gray-600 mb-3"><span class="icode">.pth</span> sale de PyTorch y <span class="icode">.keras</span> de Keras: son <strong>dos implementaciones equivalentes</strong>, no el mismo objeto en dos archivos. <strong>ONNX</strong> es el formato abierto que las hace portables entre runtimes.</p>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-[0.78rem] border-collapse">
+                        <thead>
+                            <tr class="bg-[#FFFBEB]" style="color:#B45309">
+                                <th class="text-left p-2 border border-gray-200">Formato</th>
+                                <th class="text-left p-2 border border-gray-200">Origen</th>
+                                <th class="text-left p-2 border border-gray-200">Uso típico</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-700">
+                            <tr><td class="p-2 border border-gray-200 font-semibold mono">.pth</td><td class="p-2 border border-gray-200">PyTorch</td><td class="p-2 border border-gray-200">Checkpoint nativo (state_dict)</td></tr>
+                            <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold mono">.keras</td><td class="p-2 border border-gray-200">Keras 3</td><td class="p-2 border border-gray-200">Modelo completo Keras</td></tr>
+                            <tr><td class="p-2 border border-gray-200 font-semibold mono">SavedModel</td><td class="p-2 border border-gray-200">TensorFlow</td><td class="p-2 border border-gray-200">TF Serving, producción</td></tr>
+                            <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold mono">.onnx</td><td class="p-2 border border-gray-200">Abierto / puente</td><td class="p-2 border border-gray-200">Interoperabilidad entre runtimes</td></tr>
+                            <tr><td class="p-2 border border-gray-200 font-semibold mono">.pt2</td><td class="p-2 border border-gray-200">PyTorch (torch.export)</td><td class="p-2 border border-gray-200">Grafo AOT sin dependencia de Python</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="callout mt-3" style="border-color:#3D008D; background:#FAF8FF">
+                    <p class="text-[0.84rem] text-gray-700"><i class="fas fa-passport mr-1 text-primary"></i><strong>ONNX, el pasaporte universal:</strong> con él un modelo cruza fronteras de framework y de hardware. Pero siempre hay que <strong>verificar la consistencia de predicciones</strong> tras exportar: un modelo que predice distinto no es desplegable.</p>
+                </div>
+            </div>
+
+            <!-- Flujo de despliegue dual -->
+            <div class="card p-6 bg-gradient-to-br from-[#FFFBEB] to-white border-l-4" style="border-color:#B45309">
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-truck-fast" style="color:#B45309"></i>Flujo de despliegue: del notebook al campo</h3>
+                <p class="text-[0.86rem] text-gray-600 mb-4">La <strong>rama visual</strong> se cuantiza y corre con <strong>LiteRT offline</strong> en la tablet; la <strong>rama temporal</strong> se sirve por <strong>API REST en la nube</strong>. ONNX actúa como pasaporte interoperable.</p>
+                <div class="grid md:grid-cols-2 gap-6 items-start">
+                    <!-- SVG: exportación + despliegue dual (reutilizado de la Actividad) -->
+                    <figure class="card p-4 bg-white">
+                        <svg viewBox="0 0 380 250" width="100%" role="img" aria-labelledby="deployTitle deployDesc">
+                            <title id="deployTitle">Exportación y despliegue dual</title>
+                            <desc id="deployDesc">Dos implementaciones equivalentes (PyTorch y Keras) producen cada una su propio formato; ONNX actúa como pasaporte interoperable hacia el despliegue en la nube por API REST y en una tablet offline con LiteRT.</desc>
+                            <defs>
+                                <marker id="arrowDep" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+                                    <path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/>
+                                </marker>
+                            </defs>
+                            <rect x="8" y="46" width="96" height="40" rx="10" fill="url(#mlopsGrad)"/>
+                            <text x="56" y="63" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="Montserrat">Modelo PyTorch</text>
+                            <text x="56" y="78" text-anchor="middle" font-size="8.5" fill="#E9D5FF" font-family="Montserrat">implementación A</text>
+                            <rect x="8" y="150" width="96" height="40" rx="10" fill="#0E7490"/>
+                            <text x="56" y="167" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="Montserrat">Modelo Keras</text>
+                            <text x="56" y="182" text-anchor="middle" font-size="8.5" fill="#CFFAFE" font-family="Montserrat">implementación B</text>
+                            <text x="56" y="118" text-anchor="middle" font-size="9" font-weight="700" fill="#475569" font-family="Montserrat">≈ equivalentes</text>
+                            <rect x="140" y="48"  width="104" height="34" rx="8" fill="#0F172A"/><text x="192" y="69" text-anchor="middle" font-size="10" fill="#fff" font-family="Fira Code">.pth</text>
+                            <rect x="140" y="154" width="104" height="34" rx="8" fill="#0F172A"/><text x="192" y="175" text-anchor="middle" font-size="10" fill="#fff" font-family="Fira Code">.keras</text>
+                            <rect x="140" y="101" width="104" height="34" rx="8" fill="#3D008D"/><text x="192" y="122" text-anchor="middle" font-size="10" fill="#fff" font-family="Montserrat">ONNX (pasaporte)</text>
+                            <line x1="104" y1="66"  x2="136" y2="66"  stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
+                            <line x1="104" y1="170" x2="136" y2="170" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
+                            <line x1="104" y1="74"  x2="136" y2="112" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
+                            <line x1="104" y1="162" x2="136" y2="124" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
+                            <rect x="288" y="54"  width="84" height="48" rx="9" fill="#0E7490"/>
+                            <text x="330" y="74" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="Montserrat">Nube</text>
+                            <text x="330" y="88" text-anchor="middle" font-size="8.5" fill="#CFFAFE" font-family="Montserrat">API REST · temporal</text>
+                            <rect x="288" y="148" width="84" height="48" rx="9" fill="#ED1E79"/>
+                            <text x="330" y="168" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="Montserrat">Tablet</text>
+                            <text x="330" y="182" text-anchor="middle" font-size="8.5" fill="#fff" font-family="Montserrat">LiteRT · visual</text>
+                            <line x1="244" y1="115" x2="284" y2="80"  stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
+                            <line x1="244" y1="120" x2="284" y2="170" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
+                        </svg>
+                        <figcaption class="text-center text-[0.76rem] text-gray-500 mt-1">La rama visual va offline con LiteRT; la temporal por API REST en la nube.</figcaption>
+                    </figure>
+                    <div class="space-y-3">
+                        <div class="code-window">
+                            <div class="code-window-bar">
+                                <span class="code-window-dots"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></span>
+                                <span class="code-window-title">exportar.py</span>
+                                <span class="code-window-lang">Python · ONNX</span>
+                                <button class="code-copy" type="button" aria-label="Copiar código" title="Copiar"><i class="fas fa-copy"></i></button>
+                            </div>
+                            <div class="codeblock"><span class="cm"># Exportar PyTorch → ONNX (pasaporte portable)</span>
+torch.onnx.<span class="fn">export</span>(
+    modelo, ejemplo_entrada,
+    <span class="st">"modelo.onnx"</span>,
+    input_names=[<span class="st">"img"</span>],
+    output_names=[<span class="st">"logits"</span>],
+    dynamic_axes={<span class="st">"img"</span>: {<span class="st">0</span>: <span class="st">"batch"</span>}})</div>
+                        </div>
+                        <div class="callout" style="border-color:#0E7490; background:#ECFEFF">
+                            <p class="text-[0.82rem] text-gray-700"><i class="fas fa-scale-balanced mr-1 text-teal"></i><strong>Despliegue responsable:</strong> en campo, un falso positivo/negativo afecta decisiones reales del agricultor. La ruta explicita transparencia y mitigaciones concretas.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== CHEAT SHEET / SPECS ====================== -->
+        <section id="cheatsheet" class="scroll-mt-20 mt-14 reveal">
+            <div class="flex items-center gap-3 mb-5">
+                <span class="usta-gradient text-white p-2.5 rounded-xl shadow"><i class="fas fa-terminal"></i></span>
+                <h2 class="sec-title text-2xl md:text-3xl text-navy">Ficha de especificaciones y comandos clave</h2>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-5">
+                <!-- specs / cifras -->
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-3 text-sm uppercase tracking-wider">Especificaciones y cifras clave del módulo</h3>
+                    <div class="space-y-2 text-[0.86rem]">
+                        <div class="eq">Regla de VRAM \(\;\text{VRAM}_{\text{pesos}}\approx 2N\ \text{GB}\) (N mil millones, FP16)</div>
+                        <div class="eq">Aceleración con precisión mixta (AMP) \(\;\approx 2\text{–}3\times\)</div>
+                        <div class="eq">Memoria de activaciones FP16 \(\;\approx \tfrac{1}{2}\,\text{FP32}\)</div>
+                        <div class="eq">Tiempo por época \(\;t \approx \max(t_{\text{CPU}},\,t_{\text{GPU}})\) con prefetch</div>
+                        <div class="eq">Tensor Cores A100 \(\;312\ \text{TFLOPS (FP16)}\) ≈ 16× FP32</div>
+                        <div class="eq">GPU gratuita de referencia: <strong>T4 · 16 GB</strong> (Colab/Kaggle)</div>
+                        <div class="eq">Cómputo gratis combinado \(\;\approx 60\ \text{h/semana}\) (Colab + Kaggle)</div>
+                        <div class="eq">Transfer learning ResNet-18 \(\;\approx 15\text{–}30\ \text{min}\) en T4</div>
+                        <div class="eq"><span class="icode">prefetch(AUTOTUNE)</span> → <strong>siempre al final</strong> del pipeline</div>
+                        <div class="eq">DDP \(\;\approx 3\times\) más utilización que DataParallel</div>
+                    </div>
+                </div>
+                <!-- glosario -->
+                <div class="card p-6">
+                    <h3 class="font-bold text-navy mb-3 text-sm uppercase tracking-wider">Glosario relámpago (analogías)</h3>
+                    <dl class="text-[0.83rem] space-y-2">
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">Grafo dinámico</dt><dd class="text-gray-600">el río Magdalena: su cauce se adapta al terreno.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">Prefetch</dt><dd class="text-gray-600">el mesero que adelanta el siguiente plato.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">VRAM</dt><dd class="text-gray-600">la bodega de la plaza de mercado: si se llena, OOM.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">GPU</dt><dd class="text-gray-600">la despulpadora industrial: miles en paralelo.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">ONNX</dt><dd class="text-gray-600">el pasaporte universal entre frameworks y hardware.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">num_workers</dt><dd class="text-gray-600">los meseros en paralelo que preparan los lotes.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">Precisión mixta</dt><dd class="text-gray-600">hacer más con menos: 16 bits donde se puede.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">Data Augmentation</dt><dd class="text-gray-600">entrenar al equipo en condiciones variadas.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">Cuantización</dt><dd class="text-gray-600">el equipaje de mano: lo esencial, más liviano.</dd></div>
+                    </dl>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== FOOTER ====================== -->
+        <footer class="mt-14 reveal">
+            <div class="card p-6 md:p-8 usta-gradient text-white">
+                <div class="flex flex-wrap items-center gap-3 mb-2">
+                    <i class="fas fa-book-open-reader text-gold text-2xl"></i>
+                    <h2 class="text-xl md:text-2xl font-extrabold">Esta infografía resume el Módulo 3 completo</h2>
+                </div>
+                <p class="text-white/85 text-sm leading-relaxed max-w-3xl">El <strong>material principal de aprendizaje autónomo</strong> permite profundizar en cada tema y preparar los dos hitos evaluativos del módulo, que conforman la <strong>Fase 3 del Proyecto Centinela</strong>: la <strong>Guía de profundización 3</strong> (5 %) y la <strong>Actividad evaluativa · Fase 3</strong> (25 %) — la industrialización <em>MLOps</em> del sistema multimodal, del notebook al despliegue <em>offline</em> en campo.</p>
+                <div class="flex flex-wrap gap-2 mt-5 no-print">
+                    <a href="03_Modulo_3_Implementacion_Deep_Learning.html" class="inline-flex items-center gap-2 bg-white text-primary text-sm font-bold px-4 py-2 rounded-full hover:opacity-90 transition"><i class="fas fa-graduation-cap"></i>Material principal</a>
+                    <a href="31_Modulo_3_Actividad_Fase3_Centinela.html" class="inline-flex items-center gap-2 bg-white/15 border border-white/30 text-white text-sm font-bold px-4 py-2 rounded-full hover:bg-white/25 transition"><i class="fas fa-flask-vial"></i>Actividad · Centinela Fase 3</a>
+                    <a href="index.html" class="inline-flex items-center gap-2 bg-white/15 border border-white/30 text-white text-sm font-bold px-4 py-2 rounded-full hover:bg-white/25 transition"><i class="fas fa-house"></i>Portal del curso</a>
+                </div>
+            </div>
+            <div class="text-navy bg-navy/[0.04] border border-navy/10 rounded-xl px-4 py-3 mt-6">
+                <p class="text-center text-[0.82rem] italic text-navy/80"><i class="fas fa-helmet-safety text-gold mr-1"></i>Metodología «Ingeniería de Trinchera»: si no corre en Google Colab, no existe; y si no se puede desplegar, no sirve.</p>
+            </div>
+            <div class="text-center text-xs text-gray-500 mt-4 space-y-1">
+                <p><strong class="text-navy">Experto temático:</strong> Javier Mauricio Sierra · <i class="fas fa-envelope mr-1"></i>javiersierra@usta.edu.co</p>
+                <p>Universidad Santo Tomás · Maestría en Ciencia de Datos · Espacio académico EA-N-F-004 · Documento HTML autocontenido (Tailwind + MathJax 3).</p>
+            </div>
+        </footer>
+    </main>
+
+    <!-- Botón volver arriba -->
+    <button id="topBtn" class="no-print fixed right-5 bottom-5 z-50 usta-gradient text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center opacity-0 pointer-events-none transition-opacity" aria-label="Volver arriba">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script>
+        document.documentElement.classList.add('js');
+
+        /* ---------- Scroll-spy nav + botón arriba + reveal ---------- */
+        const sections = ['mapa', 'cap1', 'cap2', 'cap3', 'cheatsheet'].map(id => document.getElementById(id)).filter(Boolean);
+        const links = {};
+        document.querySelectorAll('.navlink').forEach(a => { links[a.getAttribute('href').slice(1)] = a; });
+        function onScroll() {
+            let cur = sections[0] ? sections[0].id : null;
+            sections.forEach(s => { if (s.getBoundingClientRect().top <= 130) cur = s.id; });
+            Object.values(links).forEach(a => a.classList.remove('active', 'bg-white/10'));
+            if (links[cur]) { links[cur].classList.add('active', 'bg-white/10'); }
+            const btn = document.getElementById('topBtn');
+            if (window.scrollY > 500) { btn.classList.remove('opacity-0', 'pointer-events-none'); }
+            else { btn.classList.add('opacity-0', 'pointer-events-none'); }
+        }
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+        document.getElementById('topBtn').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+        // reveal on scroll
+        if ('IntersectionObserver' in window) {
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+            }, { threshold: 0.08 });
+            document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+        } else {
+            document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+        }
+
+        /* ---------- Botón "copiar" de las ventanas de código ---------- */
+        document.querySelectorAll('.code-copy').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var win = btn.closest('.code-window'); var body = win && win.querySelector('.codeblock'); if (!body) return;
+                navigator.clipboard.writeText(body.innerText).then(function () {
+                    var icon = btn.querySelector('i'); var prev = icon.className; icon.className = 'fas fa-check'; btn.style.color = '#27C93F';
+                    setTimeout(function () { icon.className = prev; btn.style.color = ''; }, 1400);
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

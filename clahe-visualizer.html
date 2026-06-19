@@ -1,0 +1,2126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CLAHE — Visualizador Interactivo</title>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0e1320;
+    --bg-2: #131a2b;
+    --surface: #18213a;
+    --surface-2: #1f2a47;
+    --surface-3: #26345a;
+    --border: #2a3a5c;
+    --border-strong: #3a4d75;
+    --text: #e6e9f2;
+    --text-muted: #a0a8bf;
+    --text-dim: #6a7290;
+    --accent: #ff5577;
+    --accent-2: #00d4ff;
+    --neon-blue: #00d4ff;
+    --neon-green: #3ddc97;
+    --neon-yellow: #ffd166;
+    --neon-pink: #ff6b9d;
+    --neon-purple: #b08bff;
+    --neon-orange: #ff8c42;
+    --warn: #ff5577;
+    --ok: #3ddc97;
+    --radius: 8px;
+    --radius-sm: 4px;
+    --shadow: 0 4px 16px rgba(0,0,0,0.35);
+  }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  #root { min-height: 100vh; }
+
+  .app {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .header h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+  .header .subtitle {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 2px;
+  }
+  .header .badge {
+    display: inline-block;
+    padding: 3px 8px;
+    background: rgba(0, 212, 255, 0.12);
+    color: var(--neon-blue);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    margin-right: 6px;
+  }
+  .header-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+  }
+  .header-meta .meta-row { display: flex; gap: 14px; }
+  .header-meta b { color: var(--text); font-weight: 600; }
+
+  /* STEP PROGRESS */
+  .stepper {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .step-btn {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--text-muted);
+    padding: 7px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.15s ease;
+    font-family: inherit;
+  }
+  .step-btn:hover { background: var(--surface-2); color: var(--text); border-color: var(--neon-blue); }
+  .step-btn.primary { background: var(--neon-blue); color: #001520; border-color: var(--neon-blue); }
+  .step-btn.primary:hover { background: #33dfff; }
+  .step-btn .num {
+    background: rgba(255,255,255,0.12);
+    color: inherit;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.68rem; font-weight: 700;
+  }
+  .step-btn.primary .num { background: rgba(0,0,0,0.18); }
+  .step-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .step-pipeline {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 4px 0;
+  }
+  .step-pill {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .step-pill .idx {
+    background: var(--surface-3);
+    color: var(--text-dim);
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; font-weight: 700;
+  }
+  .step-pill.done { background: rgba(61, 220, 151, 0.08); color: var(--neon-green); border-color: rgba(61, 220, 151, 0.3); }
+  .step-pill.done .idx { background: rgba(61, 220, 151, 0.2); color: var(--neon-green); }
+  .step-pill.active { background: rgba(0, 212, 255, 0.15); color: var(--neon-blue); border-color: var(--neon-blue); }
+  .step-pill.active .idx { background: var(--neon-blue); color: #001520; }
+  .step-arrow { color: var(--text-dim); font-size: 0.8rem; }
+
+  /* MAIN GRID */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 1000px) {
+    .main-grid { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 12px 16px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .panel-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .panel-title .dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  .panel-body { padding: 16px; }
+  .panel-body.tight { padding: 8px; }
+
+  /* IMAGE CANVAS */
+  .canvas-wrap {
+    position: relative;
+    background: #050811;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+  }
+  .canvas-wrap canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+  }
+  .canvas-wrap .grid-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .canvas-wrap.interactive .grid-overlay {
+    pointer-events: auto;
+    cursor: crosshair;
+  }
+  .canvas-wrap .tile-hit {
+    position: absolute;
+    border: 2px solid transparent;
+    pointer-events: auto;
+    cursor: pointer;
+    transition: background 0.1s ease;
+  }
+  .canvas-wrap .tile-hit:hover { background: rgba(0, 212, 255, 0.2); }
+  .canvas-wrap .tile-hit.selected {
+    border-color: var(--neon-blue);
+    box-shadow: 0 0 0 1px var(--neon-blue) inset, 0 0 12px rgba(0, 212, 255, 0.5);
+    z-index: 2;
+  }
+  .canvas-label {
+    position: absolute;
+    top: 8px; left: 8px;
+    background: rgba(0,0,0,0.6);
+    color: var(--text);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    backdrop-filter: blur(4px);
+  }
+  .canvas-stats {
+    position: absolute;
+    bottom: 8px; right: 8px;
+    background: rgba(0,0,0,0.65);
+    color: var(--text-muted);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+    backdrop-filter: blur(4px);
+  }
+  .canvas-stats b { color: var(--neon-blue); }
+
+  /* HEATMAP OVERLAY */
+  .heatmap-container {
+    position: relative;
+    background: #050811;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+  }
+  .heatmap-container canvas { display: block; width: 100%; height: 100%; }
+
+  /* HISTOGRAM CANVAS */
+  .hist-canvas {
+    background: #050811;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    width: 100%;
+    display: block;
+  }
+
+  /* STATS ROW */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .stat-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+  }
+  .stat-label {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+  }
+  .stat-value {
+    font-size: 1.05rem;
+    color: var(--text);
+    font-weight: 700;
+    font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+    margin-top: 2px;
+  }
+  .stat-value .unit { color: var(--text-dim); font-size: 0.7rem; font-weight: 500; margin-left: 3px; }
+
+  /* CONTROLS */
+  .controls {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1.2fr;
+    gap: 18px;
+  }
+  @media (max-width: 900px) {
+    .controls { grid-template-columns: 1fr; }
+  }
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .control-group h4 {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .slider-row { display: flex; flex-direction: column; gap: 6px; }
+  .slider-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 0.78rem;
+  }
+  .slider-head .lbl { color: var(--text-muted); }
+  .slider-head .val {
+    color: var(--neon-blue); font-weight: 700;
+    font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    background: var(--surface-3);
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    background: var(--neon-blue);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.2);
+    transition: transform 0.1s ease;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+  input[type="range"]::-moz-range-thumb {
+    width: 16px; height: 16px;
+    background: var(--neon-blue);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+  }
+
+  .seg {
+    display: flex;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .seg button {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 6px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: inherit;
+    transition: all 0.15s ease;
+  }
+  .seg button:hover { color: var(--text); background: var(--surface-3); }
+  .seg button.active { background: var(--neon-blue); color: #001520; }
+
+  .preset-row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .preset-btn {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.72rem;
+    font-weight: 500;
+    font-family: inherit;
+    transition: all 0.15s ease;
+  }
+  .preset-btn:hover { background: var(--surface-3); color: var(--text); border-color: var(--neon-blue); }
+  .preset-btn.active { background: rgba(0, 212, 255, 0.15); color: var(--neon-blue); border-color: var(--neon-blue); }
+
+  .checkbox-row { display: flex; gap: 14px; flex-wrap: wrap; }
+  .check {
+    display: flex; align-items: center; gap: 6px;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+  .check input { display: none; }
+  .check .box {
+    width: 16px; height: 16px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 3px;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: all 0.15s ease;
+  }
+  .check input:checked + .box {
+    background: var(--neon-blue);
+    border-color: var(--neon-blue);
+  }
+  .check input:checked + .box::after {
+    content: '✓'; color: #001520; font-size: 0.7rem; font-weight: 900;
+  }
+  .check:hover { color: var(--text); }
+
+  .file-btn {
+    background: var(--surface-2);
+    border: 1px dashed var(--border-strong);
+    color: var(--text-muted);
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-family: inherit;
+    text-align: center;
+    transition: all 0.15s ease;
+  }
+  .file-btn:hover { background: var(--surface-3); color: var(--text); border-color: var(--neon-blue); }
+
+  .img-picker { display: flex; gap: 6px; flex-wrap: wrap; }
+  .img-btn {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.72rem;
+    font-weight: 500;
+    font-family: inherit;
+    transition: all 0.15s ease;
+  }
+  .img-btn:hover { background: var(--surface-3); color: var(--text); }
+  .img-btn.active { background: rgba(255, 85, 119, 0.15); color: var(--accent); border-color: var(--accent); }
+
+  /* STEP EXPLANATION */
+  .step-explain {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  @media (max-width: 800px) {
+    .step-explain { grid-template-columns: 1fr; }
+  }
+  .step-badge {
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+    color: #001520;
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    text-align: center;
+    min-width: 110px;
+  }
+  .step-badge .step-num {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.8;
+  }
+  .step-badge .step-name {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-top: 4px;
+    letter-spacing: -0.01em;
+  }
+  .step-explain-body h3 {
+    font-size: 1.05rem;
+    color: var(--text);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .step-explain-body p {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+  .step-explain-body .formula {
+    display: inline-block;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    color: var(--neon-yellow);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+    font-size: 0.82rem;
+    margin-top: 4px;
+  }
+  .step-explain-body .insight {
+    background: rgba(0, 212, 255, 0.08);
+    border-left: 3px solid var(--neon-blue);
+    padding: 8px 12px;
+    border-radius: 0 4px 4px 0;
+    color: var(--text);
+    font-size: 0.85rem;
+    margin-top: 10px;
+  }
+  .step-explain-body .insight b { color: var(--neon-blue); }
+
+  /* LEGEND */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    margin-top: 8px; font-size: 0.72rem; color: var(--text-muted);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-swatch { width: 10px; height: 10px; border-radius: 2px; }
+
+  /* COMPARE ROW */
+  .compare-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .compare-cell {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px;
+    text-align: center;
+  }
+  .compare-cell h5 {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .compare-cell .canvas-wrap { aspect-ratio: 1 / 1; }
+  .compare-cell canvas { image-rendering: pixelated; }
+
+  /* TILE PREVIEW */
+  .tile-preview {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .tile-preview-canvas {
+    background: #050811;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    width: 100%;
+    image-rendering: pixelated;
+    display: block;
+  }
+  .tile-preview-label {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    text-align: center;
+    font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+  }
+
+  /* FULL WIDTH PANEL */
+  .full-panel { grid-column: 1 / -1; }
+
+  /* INTERPOLATION VIS */
+  .interp-vis {
+    background: #050811;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    width: 100%;
+    aspect-ratio: 4 / 1;
+    display: block;
+  }
+
+  /* TOOLTIPS */
+  .hint {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: var(--bg-2); }
+  ::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-strong); }
+
+  /* ANIMATIONS */
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(0, 212, 255, 0); }
+  }
+  .pulse { animation: pulse-glow 1.5s ease-out infinite; }
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in { animation: fade-in 0.3s ease-out; }
+
+  /* RESPONSIVE */
+  @media (max-width: 700px) {
+    .app { padding: 12px; gap: 12px; }
+    .header { padding: 16px; }
+    .header h1 { font-size: 1.15rem; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="env,react">
+const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+// ============================================================
+// CONSTANTS
+// ============================================================
+const IMG_SIZE = 256;
+const NUM_BINS = 256;
+const STEPS = [
+  { id: 'input', name: 'Entrada', num: 1 },
+  { id: 'tiles', name: 'Mosaicos', num: 2 },
+  { id: 'histogram', name: 'Histograma', num: 3 },
+  { id: 'clip', name: 'Recorte', num: 4 },
+  { id: 'redistribute', name: 'Redistribución', num: 5 },
+  { id: 'cdf', name: 'Función de Mapeo', num: 6 },
+  { id: 'apply', name: 'Aplicar + Interpolar', num: 7 },
+  { id: 'output', name: 'Resultado', num: 8 },
+];
+
+// ============================================================
+// SYNTHETIC IMAGE GENERATORS
+// ============================================================
+function makeImageData(w, h, fillFn) {
+  const data = new Uint8ClampedArray(w * h * 4);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const v = Math.max(0, Math.min(255, Math.round(fillFn(x, y, w, h))));
+      const i = (y * w + x) * 4;
+      data[i] = v; data[i+1] = v; data[i+2] = v; data[i+3] = 255;
+    }
+  }
+  return { data, width: w, height: h };
+}
+
+const SYNTH = {
+  landscape: (x, y, w, h) => {
+    // Mid-range low-contrast landscape (visible but narrow)
+    let val;
+    if (y < h * 0.55) {
+      // Sky: gradient 90 → 130
+      val = 90 + (y / (h * 0.55)) * 40;
+    } else {
+      // Ground: 130 → 95
+      val = 130 - ((y - h * 0.55) / (h * 0.45)) * 35;
+    }
+    // Sun: bright spot in upper-right
+    const dx = x - w * 0.72, dy = y - h * 0.28;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist < 50) val += (1 - dist/50) * 45;
+    // Mountains
+    const m1 = Math.exp(-Math.pow((x - w*0.25)/40, 2)) * Math.exp(-Math.pow((y - h*0.50)/30, 2)) * 40;
+    const m2 = Math.exp(-Math.pow((x - w*0.55)/50, 2)) * Math.exp(-Math.pow((y - h*0.50)/30, 2)) * 35;
+    val += m1 + m2;
+    // Tree silhouette
+    const tx = w * 0.18, ty = h * 0.78;
+    const tdx = x - tx, tdy = y - ty;
+    if (tdy > 0) {
+      const trunk = Math.exp(-Math.pow(tdx/4, 2)) * Math.exp(-Math.pow(tdy/60, 2)) * 30;
+      const crown = Math.exp(-(tdx*tdx + tdy*tdy) / 800) * 40;
+      val -= trunk + crown;
+    }
+    val += (Math.random() - 0.5) * 5;
+    return val;
+  },
+  ramp: (x, y, w, h) => {
+    // Linear ramp with low contrast (60-180)
+    const t = x / w;
+    return 60 + t * 120 + (Math.random() - 0.5) * 3;
+  },
+  dualzone: (x, y, w, h) => {
+    // Two distinct zones, each with internal low contrast
+    const base = x < w * 0.5 ? 70 : 130;
+    return base + (Math.random() - 0.5) * 8 + Math.sin(y * 0.05) * 5;
+  },
+  wave: (x, y, w, h) => {
+    // Sinusoidal pattern with low contrast
+    const cx = x - w/2, cy = y - h/2;
+    const r = Math.sqrt(cx*cx + cy*cy) / Math.min(w, h);
+    const v = 120 + Math.sin(r * 12) * 30 + Math.cos(x * 0.08) * 15 + Math.cos(y * 0.06) * 10;
+    return v + (Math.random() - 0.5) * 4;
+  },
+  medical: (x, y, w, h) => {
+    // Simulated X-ray / medical-like image (low contrast)
+    const cx = w/2, cy = h/2;
+    const dx = x - cx, dy = y - cy;
+    const r = Math.sqrt(dx*dx + dy*dy) / Math.min(w, h);
+    const blob = Math.exp(-(r*r) * 4) * 70;
+    const body = Math.exp(-Math.pow((r - 0.3) * 4, 2)) * 50;
+    const noise = (Math.sin(x * 0.3) * Math.cos(y * 0.27) + Math.sin(x * 0.11 + y * 0.13)) * 5;
+    return 90 + blob + body + noise;
+  },
+};
+
+const SAMPLE_LIST = [
+  { id: 'landscape', label: 'Paisaje', synth: SYNTH.landscape },
+  { id: 'medical', label: 'Médico', synth: SYNTH.medical },
+  { id: 'ramp', label: 'Rampa', synth: SYNTH.ramp },
+  { id: 'wave', label: 'Ondas', synth: SYNTH.wave },
+  { id: 'dualzone', label: 'Doble Zona', synth: SYNTH.dualzone },
+];
+
+// ============================================================
+// CLAHE ALGORITHM
+// ============================================================
+function runCLAHE(imageData, tileSize, clipLimit) {
+  const { width, height, data } = imageData;
+  const numTilesX = Math.ceil(width / tileSize);
+  const numTilesY = Math.ceil(height / tileSize);
+  const N = tileSize * tileSize;
+
+  // Step 1-2: per-tile histogram + clipping + redistribution + CDF + LUT
+  const tiles = [];
+  for (let ty = 0; ty < numTilesY; ty++) {
+    for (let tx = 0; tx < numTilesX; tx++) {
+      const x0 = tx * tileSize;
+      const y0 = ty * tileSize;
+      const x1 = Math.min(x0 + tileSize, width);
+      const y1 = Math.min(y0 + tileSize, height);
+      const tileW = x1 - x0;
+      const tileH = y1 - y0;
+      const tileN = tileW * tileH;
+
+      // Histogram
+      const hist = new Array(NUM_BINS).fill(0);
+      for (let yy = y0; yy < y1; yy++) {
+        for (let xx = x0; xx < x1; xx++) {
+          hist[data[(yy * width + xx) * 4]]++;
+        }
+      }
+
+      // Clip
+      const clipThreshold = Math.max(1, clipLimit * tileN / NUM_BINS);
+      const histClipped = hist.slice();
+      let excess = 0;
+      for (let i = 0; i < NUM_BINS; i++) {
+        if (histClipped[i] > clipThreshold) {
+          excess += histClipped[i] - clipThreshold;
+          histClipped[i] = clipThreshold;
+        }
+      }
+
+      // Redistribute
+      const redistPerBin = Math.floor(excess / NUM_BINS);
+      let remainder = excess - redistPerBin * NUM_BINS;
+      const histRedist = histClipped.map(v => v + redistPerBin);
+      for (let i = 0; i < remainder; i++) histRedist[i]++;
+
+      // CDF
+      const cdf = new Array(NUM_BINS);
+      cdf[0] = histRedist[0];
+      for (let i = 1; i < NUM_BINS; i++) cdf[i] = cdf[i-1] + histRedist[i];
+      const cdfMin = cdf.find(v => v > 0) || 0;
+
+      // LUT
+      const lut = new Array(NUM_BINS);
+      const scale = (NUM_BINS - 1) / Math.max(1, tileN - cdfMin);
+      for (let i = 0; i < NUM_BINS; i++) {
+        lut[i] = Math.max(0, Math.min(255, Math.round((cdf[i] - cdfMin) * scale)));
+      }
+
+      tiles.push({ tx, ty, x0, y0, x1, y1, tileN, hist, histClipped, histRedist, cdf, lut, cdfMin, clipThreshold });
+    }
+  }
+
+  // Step 3: Per-tile equalized image (no interpolation) for visualization
+  const perTileOutput = new Uint8ClampedArray(data.length);
+  for (const tile of tiles) {
+    for (let yy = tile.y0; yy < tile.y1; yy++) {
+      for (let xx = tile.x0; xx < tile.x1; xx++) {
+        const i = (yy * width + xx) * 4;
+        const v = data[i];
+        const out = tile.lut[v];
+        perTileOutput[i] = out;
+        perTileOutput[i+1] = out;
+        perTileOutput[i+2] = out;
+        perTileOutput[i+3] = 255;
+      }
+    }
+  }
+
+  // Step 4: Bilinear interpolated CLAHE result
+  const output = new Uint8ClampedArray(data.length);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4;
+      const v = data[i];
+
+      const fx = (x + 0.5) / tileSize - 0.5;
+      const fy = (y + 0.5) / tileSize - 0.5;
+      const x1i = Math.floor(fx);
+      const y1i = Math.floor(fy);
+      const x2i = x1i + 1;
+      const y2i = y1i + 1;
+
+      const wx2 = fx - x1i;
+      const wy2 = fy - y1i;
+      const wx1 = 1 - wx2;
+      const wy1 = 1 - wy2;
+
+      const tx1 = Math.max(0, Math.min(numTilesX - 1, x1i));
+      const ty1 = Math.max(0, Math.min(numTilesY - 1, y1i));
+      const tx2 = Math.max(0, Math.min(numTilesX - 1, x2i));
+      const ty2 = Math.max(0, Math.min(numTilesY - 1, y2i));
+
+      const t11 = tiles[ty1 * numTilesX + tx1];
+      const t12 = tiles[ty2 * numTilesX + tx1];
+      const t21 = tiles[ty1 * numTilesX + tx2];
+      const t22 = tiles[ty2 * numTilesX + tx2];
+
+      const v11 = t11.lut[v];
+      const v12 = t12.lut[v];
+      const v21 = t21.lut[v];
+      const v22 = t22.lut[v];
+
+      const top = v11 * wx1 + v21 * wx2;
+      const bot = v12 * wx1 + v22 * wx2;
+      const result = Math.round(top * wy1 + bot * wy2);
+
+      output[i] = result;
+      output[i+1] = result;
+      output[i+2] = result;
+      output[i+3] = 255;
+    }
+  }
+
+  return { output, perTileOutput, tiles, numTilesX, numTilesY, tileSize };
+}
+
+// Global HE (for comparison)
+function runHE(imageData) {
+  const { width, height, data } = imageData;
+  const N = width * height;
+  const hist = new Array(NUM_BINS).fill(0);
+  for (let i = 0; i < data.length; i += 4) hist[data[i]]++;
+  const cdf = new Array(NUM_BINS);
+  cdf[0] = hist[0];
+  for (let i = 1; i < NUM_BINS; i++) cdf[i] = cdf[i-1] + hist[i];
+  const cdfMin = cdf.find(v => v > 0) || 0;
+  const lut = new Array(NUM_BINS);
+  for (let i = 0; i < NUM_BINS; i++) {
+    lut[i] = Math.round((cdf[i] - cdfMin) / (N - cdfMin) * 255);
+  }
+  const output = new Uint8ClampedArray(data.length);
+  for (let i = 0; i < data.length; i += 4) {
+    const v = lut[data[i]];
+    output[i] = v; output[i+1] = v; output[i+2] = v; output[i+3] = 255;
+  }
+  return { output, lut, cdfMin };
+}
+
+// Global histogram of an image
+function globalHistogram(imageData) {
+  const hist = new Array(NUM_BINS).fill(0);
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    hist[imageData.data[i]]++;
+  }
+  return hist;
+}
+
+// ============================================================
+// DRAWING HELPERS
+// ============================================================
+function drawImage(ctx, imageData, w, h) {
+  const canvas = ctx.canvas;
+  canvas.width = w;
+  canvas.height = h;
+  const tmpCtx = canvas.getContext('2d');
+  // imageData may be either an { data, width, height } object or a raw Uint8ClampedArray
+  let arr;
+  if (imageData && imageData.data) {
+    arr = imageData.data;
+  } else {
+    arr = imageData;
+  }
+  const tmpData = new ImageData(new Uint8ClampedArray(arr), w, h);
+  tmpCtx.putImageData(tmpData, 0, 0);
+}
+
+function drawGridOverlay(ctx, numTilesX, numTilesY, tileSize, width, height, selectedTile, hoverTile) {
+  ctx.save();
+  ctx.strokeStyle = 'rgba(0, 212, 255, 0.5)';
+  ctx.lineWidth = Math.max(0.5, width / 256);
+  for (let i = 1; i < numTilesX; i++) {
+    const x = i * tileSize;
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
+    ctx.stroke();
+  }
+  for (let j = 1; j < numTilesY; j++) {
+    const y = j * tileSize;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
+  }
+  if (selectedTile) {
+    const t = selectedTile;
+    ctx.strokeStyle = '#00d4ff';
+    ctx.lineWidth = Math.max(1.5, width / 200);
+    ctx.shadowColor = '#00d4ff';
+    ctx.shadowBlur = 4;
+    ctx.strokeRect(t.x0 + 0.5, t.y0 + 0.5, t.x1 - t.x0 - 1, t.y1 - t.y0 - 1);
+    ctx.shadowBlur = 0;
+  }
+  ctx.restore();
+}
+
+function drawPerTileHistHeatmap(ctx, tiles, numTilesX, numTilesY, tileSize, w, h, maxVal) {
+  const canvas = ctx.canvas;
+  // Render at 4x for visibility
+  const scale = 4;
+  canvas.width = w * scale;
+  canvas.height = h * scale;
+  const tileW = (w * scale) / numTilesX;
+  const tileH = (h * scale) / numTilesY;
+  // Background
+  ctx.fillStyle = '#050811';
+  ctx.fillRect(0, 0, w * scale, h * scale);
+  // Tile border
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let i = 1; i < numTilesX; i++) {
+    ctx.beginPath(); ctx.moveTo(i * tileW, 0); ctx.lineTo(i * tileW, h * scale); ctx.stroke();
+  }
+  for (let j = 1; j < numTilesY; j++) {
+    ctx.beginPath(); ctx.moveTo(0, j * tileH); ctx.lineTo(w * scale, j * tileH); ctx.stroke();
+  }
+  for (const tile of tiles) {
+    const tx = (tile.tx + 0.5) * tileW;
+    const ty = (tile.ty + 0.5) * tileH;
+    const barAreaW = tileW * 0.9;
+    const barAreaH = tileH * 0.6;
+    const barW = barAreaW / NUM_BINS;
+    for (let i = 0; i < NUM_BINS; i++) {
+      const bh = (tile.hist[i] / maxVal) * barAreaH;
+      const hue = (i / NUM_BINS) * 220;
+      ctx.fillStyle = `hsl(${200 - hue * 0.5}, 75%, 55%)`;
+      ctx.fillRect(
+        tx - barAreaW/2 + i * barW,
+        ty + barAreaH/2 - bh,
+        Math.max(0.6, barW - 0.2),
+        bh
+      );
+    }
+  }
+}
+
+function drawHistogramPanel(canvas, tile, step, clipLimit, globalHist) {
+  const W = canvas.width = canvas.clientWidth * (window.devicePixelRatio || 1);
+  const H = canvas.height = canvas.clientHeight * (window.devicePixelRatio || 1);
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+  ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+  const w = W / (window.devicePixelRatio || 1);
+  const h = H / (window.devicePixelRatio || 1);
+
+  // Layout
+  const topH = 90; // CDF / LUT panel
+  const midH = 14;
+  const botH = h - topH - midH - 30;
+  const baseY = topH + midH;
+  const leftPad = 36;
+  const rightPad = 8;
+  const innerW = w - leftPad - rightPad;
+
+  // Backgrounds
+  ctx.fillStyle = '#050811';
+  ctx.fillRect(0, 0, w, h);
+
+  // Determine which histogram to plot
+  let hist, histClipped, histRedist, cdf, lut, clipThresh, label;
+  if (tile) {
+    hist = tile.hist;
+    histClipped = tile.histClipped;
+    histRedist = tile.histRedist;
+    cdf = tile.cdf;
+    lut = tile.lut;
+    clipThresh = tile.clipThreshold;
+    label = `Mosaico (${tile.tx}, ${tile.ty}) — ${tile.tileN} px`;
+  } else {
+    hist = globalHist;
+    label = 'Imagen completa';
+  }
+
+  // CDF area background
+  ctx.fillStyle = 'rgba(0, 212, 255, 0.03)';
+  ctx.fillRect(leftPad, 6, innerW, topH);
+  ctx.strokeStyle = '#1f2a47';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(leftPad + 0.5, 6.5, innerW, topH);
+
+  // Histogram area background
+  ctx.fillStyle = '#0a1020';
+  ctx.fillRect(leftPad, baseY, innerW, botH);
+  ctx.strokeRect(leftPad + 0.5, baseY + 0.5, innerW, botH);
+
+  if (!hist) {
+    ctx.fillStyle = '#6a7290';
+    ctx.font = '12px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Selecciona un mosaico para ver su histograma', w/2, h/2);
+    return;
+  }
+
+  const maxH = Math.max(...hist) * 1.1;
+  const maxCDF = cdf ? cdf[NUM_BINS - 1] : 0;
+  const maxLUT = 255;
+
+  // Axes
+  ctx.strokeStyle = '#3a4d75';
+  ctx.lineWidth = 1;
+  ctx.font = '10px JetBrains Mono, monospace';
+  ctx.fillStyle = '#6a7290';
+  ctx.textBaseline = 'top';
+
+  // Y-axis (histogram count)
+  ctx.beginPath();
+  ctx.moveTo(leftPad, baseY);
+  ctx.lineTo(leftPad, baseY + botH);
+  ctx.stroke();
+  // Y-axis (CDF)
+  ctx.beginPath();
+  ctx.moveTo(leftPad, 6);
+  ctx.lineTo(leftPad, 6 + topH);
+  ctx.stroke();
+  // X-axis
+  ctx.beginPath();
+  ctx.moveTo(leftPad, baseY + botH);
+  ctx.lineTo(leftPad + innerW, baseY + botH);
+  ctx.stroke();
+
+  // X-axis labels
+  ctx.textAlign = 'center';
+  for (let v = 0; v <= 255; v += 32) {
+    const x = leftPad + (v / 255) * innerW;
+    ctx.fillText(String(v), x, baseY + botH + 4);
+    ctx.strokeStyle = '#1f2a47';
+    ctx.beginPath();
+    ctx.moveTo(x, baseY + botH);
+    ctx.lineTo(x, baseY + botH + 3);
+    ctx.stroke();
+  }
+
+  // Y-axis labels (histogram)
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= 4; i++) {
+    const val = Math.round((maxH * i) / 4);
+    const y = baseY + botH - (i / 4) * botH;
+    ctx.fillText(String(val), leftPad - 4, y - 5);
+  }
+
+  // Y-axis labels (CDF / LUT)
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= 4; i++) {
+    const y = 6 + topH - (i / 4) * topH;
+    if (cdf) {
+      ctx.fillText(String(Math.round((maxCDF * i) / 4)), leftPad - 4, y - 5);
+    }
+  }
+
+  // === HISTOGRAM BARS ===
+  const binW = innerW / NUM_BINS;
+  for (let i = 0; i < NUM_BINS; i++) {
+    const x = leftPad + i * binW;
+    const v = hist[i];
+    const vClipped = histClipped ? Math.min(histClipped[i], v) : v;
+    const vRedist = histRedist ? Math.min(histRedist[i], vClipped) : vClipped;
+    const barH = (v / maxH) * botH;
+    const barHClipped = (vClipped / maxH) * botH;
+    const barHRedist = (vRedist / maxH) * botH;
+    const y = baseY + botH;
+
+    if (step === 'redistribute' && histRedist) {
+      // Clipped part (gray) + Redistributed part (green) + extra (light green)
+      const extraRedist = Math.max(0, histRedist[i] - histClipped[i]);
+      const totalRedistH = (histRedist[i] / maxH) * botH;
+      // Gray base
+      ctx.fillStyle = '#3a4d75';
+      ctx.fillRect(x, y - barHClipped, Math.max(0.5, binW - 0.3), barHClipped);
+      // Green redistribution on top
+      ctx.fillStyle = '#3ddc97';
+      ctx.fillRect(x, y - totalRedistH, Math.max(0.5, binW - 0.3), totalRedistH - barHClipped);
+    } else if (step === 'clip' && histClipped) {
+      // Clipped bars (gray up to threshold, red above)
+      ctx.fillStyle = '#3a4d75';
+      ctx.fillRect(x, y - barHClipped, Math.max(0.5, binW - 0.3), barHClipped);
+      const overThresh = v - histClipped[i];
+      if (overThresh > 0) {
+        const redH = (overThresh / maxH) * botH;
+        ctx.fillStyle = '#ff5577';
+        ctx.fillRect(x, y - barH - redH, Math.max(0.5, binW - 0.3), redH);
+      }
+    } else {
+      // Default: simple gray bars
+      ctx.fillStyle = step === 'histogram' ? '#00d4ff' : '#5a6a8c';
+      ctx.fillRect(x, y - barH, Math.max(0.5, binW - 0.3), barH);
+    }
+  }
+
+  // === CLIP LINE ===
+  if ((step === 'clip' || step === 'redistribute') && clipThresh != null) {
+    const y = baseY + botH - (clipThresh / maxH) * botH;
+    ctx.strokeStyle = '#ff5577';
+    ctx.setLineDash([4, 3]);
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(leftPad, y);
+    ctx.lineTo(leftPad + innerW, y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#ff5577';
+    ctx.font = '10px JetBrains Mono, monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(`clip = ${clipThresh.toFixed(1)}`, leftPad + 4, y - 12);
+  }
+
+  // === CDF / LUT (top panel) ===
+  if (cdf && (step === 'cdf' || step === 'apply' || step === 'output')) {
+    // CDF line
+    ctx.strokeStyle = '#00d4ff';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let i = 0; i < NUM_BINS; i++) {
+      const x = leftPad + (i / 255) * innerW;
+      const y = 6 + topH - (cdf[i] / maxCDF) * topH;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    // Fill area
+    ctx.fillStyle = 'rgba(0, 212, 255, 0.12)';
+    ctx.lineTo(leftPad + innerW, 6 + topH);
+    ctx.lineTo(leftPad, 6 + topH);
+    ctx.closePath();
+    ctx.fill();
+
+    // LUT line (yellow, normalized to 0-255)
+    if (lut) {
+      ctx.strokeStyle = '#ffd166';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      for (let i = 0; i < NUM_BINS; i++) {
+        const x = leftPad + (i / 255) * innerW;
+        const y = 6 + topH - (lut[i] / maxLUT) * topH;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    // Labels
+    ctx.font = '10px JetBrains Mono, monospace';
+    ctx.fillStyle = '#00d4ff';
+    ctx.textAlign = 'right';
+    ctx.fillText('CDF', leftPad + innerW - 6, 18);
+    ctx.fillStyle = '#ffd166';
+    ctx.fillText('LUT', leftPad + innerW - 6, 32);
+  } else if (step === 'redistribute') {
+    // Show what redistribution added
+    if (histRedist && histClipped) {
+      ctx.strokeStyle = '#3ddc97';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (let i = 0; i < NUM_BINS; i++) {
+        const x = leftPad + (i / 255) * innerW;
+        const added = histRedist[i] - histClipped[i];
+        const y = 6 + topH - (added / 30) * topH;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      ctx.fillStyle = '#3ddc97';
+      ctx.font = '10px JetBrains Mono, monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText('Δ añadido', leftPad + innerW - 6, 18);
+    }
+  }
+
+  // Title
+  ctx.fillStyle = '#a0a8bf';
+  ctx.font = '11px Inter, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.fillText(label, leftPad + 4, h - 18);
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+
+function drawTilePreview(canvas, imageData, tile, afterLUT) {
+  const W = canvas.clientWidth, H = canvas.clientWidth;
+  const c = canvas.getContext('2d');
+  c.canvas.width = W;
+  c.canvas.height = H;
+  c.fillStyle = '#050811';
+  c.fillRect(0, 0, W, H);
+  if (!tile) {
+    c.fillStyle = '#6a7290';
+    c.font = '11px Inter, sans-serif';
+    c.textAlign = 'center';
+    c.fillText('Selecciona un mosaico', W/2, H/2);
+    return;
+  }
+  // Draw the tile scaled up
+  const tw = tile.x1 - tile.x0, th = tile.y1 - tile.y0;
+  const scale = Math.min(W / tw, H / th);
+  const dx = (W - tw * scale) / 2, dy = (H - th * scale) / 2;
+  for (let y = tile.y0; y < tile.y1; y++) {
+    for (let x = tile.x0; x < tile.x1; x++) {
+      const i = (y * imageData.width + x) * 4;
+      const v = afterLUT ? tile.lut[imageData.data[i]] : imageData.data[i];
+      c.fillStyle = `rgb(${v},${v},${v})`;
+      c.fillRect(dx + (x - tile.x0) * scale, dy + (y - tile.y0) * scale, scale + 0.5, scale + 0.5);
+    }
+  }
+  // Border
+  c.strokeStyle = '#00d4ff';
+  c.lineWidth = 1.5;
+  c.strokeRect(dx - 0.5, dy - 0.5, tw * scale + 1, th * scale + 1);
+}
+
+function drawInterpolationVis(canvas, tiles, numTilesX, numTilesY, tileSize, imageData, w) {
+  const W = canvas.clientWidth;
+  const H = W * 0.32;
+  const c = canvas.getContext('2d');
+  c.canvas.width = W;
+  c.canvas.height = H;
+  c.fillStyle = '#050811';
+  c.fillRect(0, 0, W, H);
+  // Draw a sample of the LUT for a few tile positions
+  const samples = 8;
+  const padL = 50, padR = 12, padT = 12, padB = 24;
+  const innerW = W - padL - padR;
+  const innerH = H - padT - padB;
+  c.strokeStyle = '#3a4d75';
+  c.lineWidth = 1;
+  c.strokeRect(padL + 0.5, padT + 0.5, innerW, innerH);
+  // Axes labels
+  c.fillStyle = '#6a7290';
+  c.font = '9px JetBrains Mono, monospace';
+  c.textAlign = 'center';
+  c.fillText('Input 0 ─────── 255', padL + innerW/2, H - 4);
+  c.save();
+  c.translate(12, padT + innerH/2);
+  c.rotate(-Math.PI/2);
+  c.textAlign = 'center';
+  c.fillText('Output 0 ──── 255', 0, 0);
+  c.restore();
+  // Pick a few tile LUTs
+  const tileSamples = [];
+  for (let i = 0; i < samples; i++) {
+    const tx = Math.floor((i / (samples - 1)) * (numTilesX - 1));
+    tileSamples.push(tiles[Math.floor(numTilesY/2) * numTilesX + tx]);
+  }
+  const colors = ['#00d4ff', '#3ddc97', '#ffd166', '#ff5577', '#b08bff', '#ff8c42', '#ff6b9d', '#5ad2ff'];
+  tileSamples.forEach((tile, idx) => {
+    if (!tile) return;
+    c.strokeStyle = colors[idx % colors.length];
+    c.lineWidth = 1.3;
+    c.beginPath();
+    for (let i = 0; i < 256; i += 2) {
+      const x = padL + (i / 255) * innerW;
+      const y = padT + innerH - (tile.lut[i] / 255) * innerH;
+      if (i === 0) c.moveTo(x, y); else c.lineTo(x, y);
+    }
+    c.stroke();
+  });
+  // Title
+  c.fillStyle = '#a0a8bf';
+  c.font = '10px Inter, sans-serif';
+  c.textAlign = 'left';
+  c.fillText('LUTs de mosaicos (fila central) — interpolación bilineal entre ellas', padL, padT - 4);
+}
+
+// ============================================================
+// MAIN APP
+// ============================================================
+function App() {
+  const [sampleId, setSampleId] = useState('landscape');
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [clipLimit, setClipLimit] = useState(2.0);
+  const [tileSize, setTileSize] = useState(8);
+  const [stepIdx, setStepIdx] = useState(0);
+  const [selectedTileKey, setSelectedTileKey] = useState(null);
+  const [showGrid, setShowGrid] = useState(true);
+  const [showHeatmap, setShowHeatmap] = useState(false);
+  const [showHECompare, setShowHECompare] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [animProgress, setAnimProgress] = useState(0); // 0..1 for animation between steps
+
+  const imageData = useMemo(() => {
+    if (uploadedImage) return uploadedImage;
+    const synth = SAMPLE_LIST.find(s => s.id === sampleId).synth;
+    return makeImageData(IMG_SIZE, IMG_SIZE, synth);
+  }, [sampleId, uploadedImage]);
+
+  const claheResult = useMemo(() => {
+    if (!imageData) return null;
+    return runCLAHE(imageData, tileSize, clipLimit);
+  }, [imageData, tileSize, clipLimit]);
+
+  const heResult = useMemo(() => {
+    if (!imageData) return null;
+    return runHE(imageData);
+  }, [imageData]);
+
+  const globalHist = useMemo(() => {
+    if (!imageData) return new Array(NUM_BINS).fill(0);
+    return globalHistogram(imageData);
+  }, [imageData]);
+
+  const claheGlobalHist = useMemo(() => {
+    if (!claheResult) return new Array(NUM_BINS).fill(0);
+    return globalHistogram({ data: claheResult.output, width: imageData.width, height: imageData.height });
+  }, [claheResult, imageData]);
+
+  const selectedTile = useMemo(() => {
+    if (!claheResult || !selectedTileKey) return null;
+    return claheResult.tiles.find(t => `${t.tx},${t.ty}` === selectedTileKey) || claheResult.tiles[0];
+  }, [claheResult, selectedTileKey]);
+
+  // Default selection
+  useEffect(() => {
+    if (claheResult && !selectedTileKey) {
+      const t = claheResult.tiles[Math.floor(claheResult.tiles.length / 2)];
+      setSelectedTileKey(`${t.tx},${t.ty}`);
+    }
+  }, [claheResult, selectedTileKey]);
+
+  // Auto-play animation
+  useEffect(() => {
+    if (!isPlaying) return;
+    const t = setTimeout(() => {
+      if (stepIdx < STEPS.length - 1) {
+        setStepIdx(stepIdx + 1);
+      } else {
+        setIsPlaying(false);
+      }
+    }, 1800);
+    return () => clearTimeout(t);
+  }, [isPlaying, stepIdx]);
+
+  // Tile click handler
+  const handleTileClick = useCallback((tile) => {
+    setSelectedTileKey(`${tile.tx},${tile.ty}`);
+    if (stepIdx < 2) setStepIdx(2);
+  }, [stepIdx]);
+
+  const handleFileUpload = useCallback((e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        // Resize to IMG_SIZE x IMG_SIZE and convert to grayscale
+        const c = document.createElement('canvas');
+        c.width = IMG_SIZE; c.height = IMG_SIZE;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(img, 0, 0, IMG_SIZE, IMG_SIZE);
+        const d = ctx.getImageData(0, 0, IMG_SIZE, IMG_SIZE);
+        // Convert to grayscale
+        for (let i = 0; i < d.data.length; i += 4) {
+          const g = 0.299 * d.data[i] + 0.587 * d.data[i+1] + 0.114 * d.data[i+2];
+          d.data[i] = g; d.data[i+1] = g; d.data[i+2] = g;
+        }
+        setUploadedImage({ data: d.data, width: IMG_SIZE, height: IMG_SIZE });
+        setSelectedTileKey(null);
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }, []);
+
+  // Refs for canvases
+  const origCanvasRef = useRef(null);
+  const resultCanvasRef = useRef(null);
+  const perTileCanvasRef = useRef(null);
+  const heCanvasRef = useRef(null);
+  const heatmapCanvasRef = useRef(null);
+  const histCanvasRef = useRef(null);
+  const tileBeforeRef = useRef(null);
+  const tileAfterRef = useRef(null);
+  const interpCanvasRef = useRef(null);
+  const globalHistCanvasRef = useRef(null);
+
+  // Redraw canvases when data changes
+  useEffect(() => {
+    if (!claheResult || !imageData) return;
+    const step = STEPS[stepIdx].id;
+
+    // Original canvas (always shows original)
+    if (origCanvasRef.current) {
+      const ctx = origCanvasRef.current.getContext('2d');
+      drawImage(ctx, imageData, IMG_SIZE, IMG_SIZE);
+      if ((showGrid || step === 'tiles' || step === 'histogram' || step === 'clip' || step === 'redistribute' || step === 'cdf' || step === 'apply') && claheResult) {
+        drawGridOverlay(
+          ctx, claheResult.numTilesX, claheResult.numTilesY, tileSize, IMG_SIZE, IMG_SIZE,
+          selectedTile, null
+        );
+      }
+    }
+
+    // Result canvas
+    if (resultCanvasRef.current) {
+      const ctx = resultCanvasRef.current.getContext('2d');
+      const out = step === 'input' || step === 'tiles' || step === 'histogram' || step === 'clip' || step === 'redistribute' || step === 'cdf'
+        ? imageData.data
+        : (step === 'apply' ? claheResult.perTileOutput : claheResult.output);
+      drawImage(ctx, { data: out, width: IMG_SIZE, height: IMG_SIZE }, IMG_SIZE, IMG_SIZE);
+      if (showGrid && claheResult && step !== 'output') {
+        drawGridOverlay(ctx, claheResult.numTilesX, claheResult.numTilesY, tileSize, IMG_SIZE, IMG_SIZE, selectedTile, null);
+      }
+    }
+
+    // Per-tile canvas (no interp) — only show in apply step
+    if (perTileCanvasRef.current) {
+      const ctx = perTileCanvasRef.current.getContext('2d');
+      drawImage(ctx, { data: claheResult.perTileOutput, width: IMG_SIZE, height: IMG_SIZE }, IMG_SIZE, IMG_SIZE);
+      if (showGrid) drawGridOverlay(ctx, claheResult.numTilesX, claheResult.numTilesY, tileSize, IMG_SIZE, IMG_SIZE, selectedTile, null);
+    }
+
+    // HE canvas
+    if (heCanvasRef.current && heResult) {
+      const ctx = heCanvasRef.current.getContext('2d');
+      drawImage(ctx, { data: heResult.output, width: IMG_SIZE, height: IMG_SIZE }, IMG_SIZE, IMG_SIZE);
+    }
+
+    // Heatmap
+    if (heatmapCanvasRef.current) {
+      const ctx = heatmapCanvasRef.current.getContext('2d');
+      let maxVal = 0;
+      for (const t of claheResult.tiles) {
+        for (let i = 0; i < t.hist.length; i++) {
+          if (t.hist[i] > maxVal) maxVal = t.hist[i];
+        }
+      }
+      if (maxVal === 0) maxVal = 1;
+      drawPerTileHistHeatmap(ctx, claheResult.tiles, claheResult.numTilesX, claheResult.numTilesY, tileSize, IMG_SIZE, IMG_SIZE, maxVal);
+    }
+
+    // Histogram panel
+    if (histCanvasRef.current) {
+      const histCanvas = histCanvasRef.current;
+      const step2 = step === 'cdf' || step === 'apply' || step === 'output' ? 'cdf' :
+                   step === 'redistribute' ? 'redistribute' :
+                   step === 'clip' ? 'clip' :
+                   step === 'histogram' ? 'histogram' :
+                   'histogram';
+      drawHistogramPanel(histCanvas, selectedTile, step2, clipLimit, globalHist);
+    }
+
+    // Tile previews
+    if (tileBeforeRef.current) {
+      drawTilePreview(tileBeforeRef.current, imageData, selectedTile, false);
+    }
+    if (tileAfterRef.current) {
+      drawTilePreview(tileAfterRef.current, imageData, selectedTile, true);
+    }
+
+    // Interpolation vis
+    if (interpCanvasRef.current) {
+      drawInterpolationVis(interpCanvasRef.current, claheResult.tiles, claheResult.numTilesX, claheResult.numTilesY, tileSize, imageData, IMG_SIZE);
+    }
+
+    // Global histogram comparison
+    if (globalHistCanvasRef.current) {
+      drawGlobalHistCompare(globalHistCanvasRef.current, globalHist, claheGlobalHist);
+    }
+  }, [claheResult, imageData, heResult, stepIdx, selectedTile, clipLimit, tileSize, showGrid, showHeatmap, globalHist, claheGlobalHist]);
+
+  // Re-render histogram on resize
+  useEffect(() => {
+    const onResize = () => {
+      if (histCanvasRef.current && selectedTile) {
+        const step = STEPS[stepIdx].id;
+        drawHistogramPanel(histCanvasRef.current, selectedTile, step, clipLimit, globalHist);
+      }
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [selectedTile, stepIdx, clipLimit, globalHist]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const onKey = (e) => {
+      const tag = e.target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      if (e.key === 'ArrowLeft') {
+        setStepIdx(s => Math.max(0, s - 1));
+      } else if (e.key === 'ArrowRight') {
+        setStepIdx(s => Math.min(STEPS.length - 1, s + 1));
+      } else if (e.key === ' ') {
+        e.preventDefault();
+        setIsPlaying(p => !p);
+      } else if (e.key === 'r' || e.key === 'R') {
+        setStepIdx(0); setIsPlaying(false);
+      } else if (/^[1-8]$/.test(e.key)) {
+        const idx = parseInt(e.key) - 1;
+        if (idx < STEPS.length) setStepIdx(idx);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  // Compute step stats
+  const stepStats = useMemo(() => {
+    if (!claheResult) return null;
+    const t = selectedTile;
+    if (!t) return null;
+    const hist = t.hist;
+    const sum = hist.reduce((a, b) => a + b, 0);
+    const mean = hist.reduce((a, v, i) => a + v * i, 0) / sum;
+    let variance = 0;
+    for (let i = 0; i < NUM_BINS; i++) variance += hist[i] * (i - mean) ** 2;
+    variance /= sum;
+    const stdDev = Math.sqrt(variance);
+    const cdfMin = t.cdfMin;
+    const lutRange = t.lut[255] - t.lut[0];
+    return { mean: mean.toFixed(1), stdDev: stdDev.toFixed(1), cdfMin, lutRange, clipThresh: t.clipThreshold.toFixed(1) };
+  }, [claheResult, selectedTile]);
+
+  const currentStep = STEPS[stepIdx];
+  const globalStats = useMemo(() => {
+    if (!imageData) return null;
+    const data = imageData.data;
+    let sum = 0, sumSq = 0, n = 0;
+    let min = 255, max = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      const v = data[i];
+      sum += v; sumSq += v*v; n++;
+      if (v < min) min = v;
+      if (v > max) max = v;
+    }
+    const mean = sum/n;
+    const stdDev = Math.sqrt(sumSq/n - mean*mean);
+    return { mean: mean.toFixed(1), stdDev: stdDev.toFixed(1), min, max, range: max - min };
+  }, [imageData]);
+
+  const claheStats = useMemo(() => {
+    if (!claheResult) return null;
+    const data = claheResult.output;
+    let sum = 0, sumSq = 0, n = 0;
+    let min = 255, max = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      const v = data[i];
+      sum += v; sumSq += v*v; n++;
+      if (v < min) min = v;
+      if (v > max) max = v;
+    }
+    const mean = sum/n;
+    const stdDev = Math.sqrt(sumSq/n - mean*mean);
+    return { mean: mean.toFixed(1), stdDev: stdDev.toFixed(1), min, max, range: max - min };
+  }, [claheResult]);
+
+  return (
+    <div className="app">
+      <Header
+        globalStats={globalStats}
+        claheStats={claheStats}
+        stepIdx={stepIdx}
+      />
+
+      <Stepper
+        stepIdx={stepIdx}
+        setStepIdx={setStepIdx}
+        isPlaying={isPlaying}
+        setIsPlaying={setIsPlaying}
+      />
+
+      <div className="main-grid">
+        <div className="panel">
+          <div className="panel-header">
+            <div className="panel-title">
+              <span className="dot" style={{background: 'var(--text-muted)'}}></span>
+              Imagen Original
+            </div>
+            <div style={{fontSize: '0.7rem', color: 'var(--text-dim)'}}>
+              {globalStats && `rango ${globalStats.min}–${globalStats.max} · σ=${globalStats.stdDev}`}
+            </div>
+          </div>
+          <div className="panel-body">
+            <div className="canvas-wrap interactive">
+              <canvas ref={origCanvasRef} width={IMG_SIZE} height={IMG_SIZE}></canvas>
+              <TileHitBoxes
+                tiles={claheResult?.tiles || []}
+                numTilesX={claheResult?.numTilesX || 1}
+                numTilesY={claheResult?.numTilesY || 1}
+                tileSize={tileSize}
+                imageSize={IMG_SIZE}
+                selectedTileKey={selectedTileKey}
+                onTileClick={handleTileClick}
+                visible={showGrid || currentStep.id !== 'input'}
+              />
+              <div className="canvas-label">Original</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="panel">
+          <div className="panel-header">
+            <div className="panel-title">
+              <span className="dot" style={{background: 'var(--neon-blue)'}}></span>
+              Resultado CLAHE
+            </div>
+            <div style={{fontSize: '0.7rem', color: 'var(--text-dim)'}}>
+              {claheStats && `rango ${claheStats.min}–${claheStats.max} · σ=${claheStats.stdDev}`}
+            </div>
+          </div>
+          <div className="panel-body">
+            <div className="canvas-wrap">
+              <canvas ref={resultCanvasRef} width={IMG_SIZE} height={IMG_SIZE}></canvas>
+              <div className="canvas-label">CLAHE</div>
+            </div>
+            {showHECompare && heResult && (
+              <div style={{marginTop: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10}}>
+                <div className="compare-cell" style={{padding: 6}}>
+                  <h5>HE Global (referencia)</h5>
+                  <div className="canvas-wrap" style={{aspectRatio: '1/1'}}>
+                    <canvas ref={heCanvasRef} width={IMG_SIZE} height={IMG_SIZE} style={{imageRendering: 'pixelated'}}></canvas>
+                  </div>
+                </div>
+                <div className="compare-cell" style={{padding: 6}}>
+                  <h5>Aplicación por mosaico (sin interp.)</h5>
+                  <div className="canvas-wrap" style={{aspectRatio: '1/1'}}>
+                    <canvas ref={perTileCanvasRef} width={IMG_SIZE} height={IMG_SIZE} style={{imageRendering: 'pixelated'}}></canvas>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Per-tile heatmap */}
+      {showHeatmap && claheResult && (
+        <div className="panel full-panel">
+          <div className="panel-header">
+            <div className="panel-title">
+              <span className="dot" style={{background: 'var(--neon-green)'}}></span>
+              Mapa de Histogramas por Mosaico
+            </div>
+            <div style={{fontSize: '0.7rem', color: 'var(--text-dim)'}}>
+              Cada mini-histograma es el de su mosaico — note cómo difieren entre zonas
+            </div>
+          </div>
+          <div className="panel-body">
+            <div className="heatmap-container" style={{maxWidth: 720, margin: '0 auto'}}>
+              <canvas ref={heatmapCanvasRef} style={{imageRendering: 'pixelated'}}></canvas>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tile analysis */}
+      <div className="panel full-panel">
+        <div className="panel-header">
+          <div className="panel-title">
+            <span className="dot" style={{background: 'var(--neon-yellow)'}}></span>
+            Análisis del Mosaico Seleccionado
+          </div>
+          {selectedTile && (
+            <div style={{fontSize: '0.72rem', color: 'var(--text-dim)', fontFamily: 'JetBrains Mono, monospace'}}>
+              tile=({selectedTile.tx}, {selectedTile.ty}) · N={selectedTile.tileN}px
+            </div>
+          )}
+        </div>
+        <div className="panel-body">
+          <div className="stats-row">
+            <div className="stat-card">
+              <div className="stat-label">Media (μ)</div>
+              <div className="stat-value">{stepStats?.mean || '—'}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-label">Desv. Est. (σ)</div>
+              <div className="stat-value">{stepStats?.stdDev || '—'}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-label">Umbral de Recorte</div>
+              <div className="stat-value">{stepStats?.clipThresh || '—'}<span className="unit">px</span></div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-label">Rango de Salida (LUT)</div>
+              <div className="stat-value">{stepStats?.lutRange || '—'}<span className="unit">niveles</span></div>
+            </div>
+          </div>
+          <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: 12, marginBottom: 12}}>
+            <div className="tile-preview">
+              <canvas ref={tileBeforeRef} className="tile-preview-canvas" style={{aspectRatio: '1/1', height: 'auto'}}></canvas>
+              <div className="tile-preview-label">Antes</div>
+            </div>
+            <div className="tile-preview">
+              <canvas ref={tileAfterRef} className="tile-preview-canvas" style={{aspectRatio: '1/1', height: 'auto'}}></canvas>
+              <div className="tile-preview-label">Después (LUT)</div>
+            </div>
+            <div className="hist-panel" style={{display: 'flex', flexDirection: 'column', gap: 6}}>
+              <div style={{fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600}}>
+                Histograma · CDF · LUT
+              </div>
+              <canvas ref={histCanvasRef} className="hist-canvas" style={{height: 180}}></canvas>
+              <div className="legend">
+                <div className="legend-item"><span className="legend-swatch" style={{background: '#5a6a8c'}}></span> Histograma</div>
+                <div className="legend-item"><span className="legend-swatch" style={{background: '#ff5577'}}></span> Recorte</div>
+                <div className="legend-item"><span className="legend-swatch" style={{background: '#3ddc97'}}></span> Redistribución</div>
+                <div className="legend-item"><span className="legend-swatch" style={{background: '#00d4ff'}}></span> CDF</div>
+                <div className="legend-item"><span className="legend-swatch" style={{background: '#ffd166'}}></span> LUT</div>
+              </div>
+            </div>
+          </div>
+          {claheResult && (
+            <div>
+              <div style={{fontSize: '0.7rem', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600, marginBottom: 6}}>
+                Curvas de mapeo de mosaicos (interpolación bilineal)
+              </div>
+              <canvas ref={interpCanvasRef} className="interp-vis"></canvas>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Controls */}
+      <div className="controls">
+        <div className="control-group">
+          <h4>Parámetros CLAHE</h4>
+          <div className="slider-row">
+            <div className="slider-head">
+              <span className="lbl">Límite de recorte (clipLimit)</span>
+              <span className="val">{clipLimit.toFixed(1)}</span>
+            </div>
+            <input
+              type="range"
+              min="0" max="20" step="0.1"
+              value={clipLimit}
+              onChange={e => setClipLimit(parseFloat(e.target.value))}
+              aria-label="Límite de recorte"
+            />
+            <div className="hint">Más bajo = más recorte = más suave. Por defecto OpenCV: 2.0</div>
+          </div>
+          <div className="slider-row">
+            <div className="slider-head">
+              <span className="lbl">Tamaño de mosaico (tileGridSize)</span>
+              <span className="val">{tileSize}×{tileSize}</span>
+            </div>
+            <div className="seg">
+              {[4, 8, 16, 32].map(s => (
+                <button
+                  key={s}
+                  className={tileSize === s ? 'active' : ''}
+                  onClick={() => setTileSize(s)}
+                >{s}</button>
+              ))}
+            </div>
+            <div className="hint">Más pequeño = más local. Por defecto OpenCV: 8×8</div>
+          </div>
+          <div>
+            <h4 style={{marginTop: 6}}>Preajustes</h4>
+            <div className="preset-row">
+              <button className={`preset-btn ${clipLimit===1 && tileSize===8 ? 'active' : ''}`} onClick={() => { setClipLimit(1); setTileSize(8); }}>Suave</button>
+              <button className={`preset-btn ${clipLimit===2 && tileSize===8 ? 'active' : ''}`} onClick={() => { setClipLimit(2); setTileSize(8); }}>OpenCV</button>
+              <button className={`preset-btn ${clipLimit===4 && tileSize===4 ? 'active' : ''}`} onClick={() => { setClipLimit(4); setTileSize(4); }}>Agresivo</button>
+              <button className={`preset-btn ${clipLimit===8 && tileSize===32 ? 'active' : ''}`} onClick={() => { setClipLimit(8); setTileSize(32); }}>HE-like</button>
+            </div>
+          </div>
+        </div>
+
+        <div className="control-group">
+          <h4>Imagen de Entrada</h4>
+          <div className="img-picker">
+            {SAMPLE_LIST.map(s => (
+              <button
+                key={s.id}
+                className={`img-btn ${!uploadedImage && sampleId === s.id ? 'active' : ''}`}
+                onClick={() => { setSampleId(s.id); setUploadedImage(null); setSelectedTileKey(null); }}
+              >{s.label}</button>
+            ))}
+          </div>
+          <label className="file-btn">
+            📁 Cargar imagen propia
+            <input type="file" accept="image/*" onChange={handleFileUpload} style={{display: 'none'}} />
+          </label>
+          <div className="hint">Las imágenes se redimensionan a 256×256 y se convierten a gris.</div>
+        </div>
+
+        <div className="control-group">
+          <h4>Visualización</h4>
+          <div className="checkbox-row">
+            <label className="check">
+              <input type="checkbox" checked={showGrid} onChange={e => setShowGrid(e.target.checked)} />
+              <span className="box"></span>
+              Cuadrícula
+            </label>
+            <label className="check">
+              <input type="checkbox" checked={showHeatmap} onChange={e => setShowHeatmap(e.target.checked)} />
+              <span className="box"></span>
+              Mapa de histogramas
+            </label>
+            <label className="check">
+              <input type="checkbox" checked={showHECompare} onChange={e => setShowHECompare(e.target.checked)} />
+              <span className="box"></span>
+              Comparar con HE
+            </label>
+          </div>
+          <div>
+            <h4 style={{marginTop: 8}}>Atajos de Teclado</h4>
+            <div className="hint" style={{fontFamily: 'JetBrains Mono, monospace', fontSize: '0.68rem'}}>
+              ← / → pasos · Espacio play/pausa · R reiniciar · 1-8 ir al paso
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Step explanation */}
+      <StepExplanation step={currentStep} clipLimit={clipLimit} tileSize={tileSize} />
+    </div>
+  );
+}
+
+function drawGlobalHistCompare(canvas, hist1, hist2) {
+  const W = canvas.clientWidth, H = 120;
+  const c = canvas.getContext('2d');
+  c.canvas.width = W; c.canvas.height = H;
+  c.fillStyle = '#050811';
+  c.fillRect(0, 0, W, H);
+  const padL = 36, padR = 8, padT = 6, padB = 18;
+  const innerW = W - padL - padR;
+  const innerH = H - padT - padB;
+  c.strokeStyle = '#1f2a47';
+  c.strokeRect(padL + 0.5, padT + 0.5, innerW, innerH);
+
+  const max1 = Math.max(...hist1), max2 = Math.max(...hist2);
+  const max = Math.max(max1, max2) * 1.1;
+  const binW = innerW / NUM_BINS;
+
+  // Hist 1 (gray) - original
+  c.fillStyle = 'rgba(90, 106, 140, 0.5)';
+  for (let i = 0; i < NUM_BINS; i++) {
+    const x = padL + i * binW;
+    const bh = (hist1[i] / max) * innerH;
+    c.fillRect(x, padT + innerH - bh, Math.max(0.5, binW - 0.3), bh);
+  }
+  // Hist 2 (cyan) - CLAHE
+  c.fillStyle = 'rgba(0, 212, 255, 0.6)';
+  for (let i = 0; i < NUM_BINS; i++) {
+    const x = padL + i * binW;
+    const bh = (hist2[i] / max) * innerH;
+    c.fillRect(x, padT + innerH - bh, Math.max(0.5, binW - 0.3), bh);
+  }
+
+  // Axes
+  c.fillStyle = '#6a7290';
+  c.font = '9px JetBrains Mono, monospace';
+  c.textAlign = 'center';
+  c.textBaseline = 'top';
+  for (let v = 0; v <= 255; v += 32) {
+    const x = padL + (v / 255) * innerW;
+    c.fillText(String(v), x, padT + innerH + 4);
+  }
+  // Y labels
+  c.textAlign = 'right';
+  c.textBaseline = 'middle';
+  for (let i = 0; i <= 3; i++) {
+    const val = Math.round((max * i) / 3);
+    const y = padT + innerH - (i / 3) * innerH;
+    c.fillText(String(val), padL - 4, y);
+  }
+  // Legend
+  c.font = '9px Inter, sans-serif';
+  c.textAlign = 'left';
+  c.textBaseline = 'middle';
+  c.fillStyle = '#5a6a8c';
+  c.fillRect(padL + 4, padT + 6, 8, 8);
+  c.fillStyle = '#a0a8bf';
+  c.fillText('Original', padL + 16, padT + 10);
+  c.fillStyle = '#00d4ff';
+  c.fillRect(padL + 70, padT + 6, 8, 8);
+  c.fillStyle = '#a0a8bf';
+  c.fillText('CLAHE', padL + 82, padT + 10);
+}
+
+function Header({ globalStats, claheStats, stepIdx }) {
+  return (
+    <div className="header">
+      <div>
+        <h1>
+          <span className="badge">Deep Learning</span>
+          CLAHE — Visualizador Interactivo
+        </h1>
+        <div className="subtitle">
+          Contrast Limited Adaptive Histogram Equalization · 8 pasos animados
+        </div>
+      </div>
+      <div className="header-meta">
+        <div className="meta-row">
+          <span>Paso: <b>{stepIdx + 1}/{STEPS.length}</b></span>
+          {globalStats && <span>σ origen: <b>{globalStats.stdDev}</b></span>}
+          {claheStats && <span>σ CLAHE: <b style={{color: 'var(--neon-blue)'}}>{claheStats.stdDev}</b></span>}
+        </div>
+        <div className="meta-row">
+          <span style={{fontSize: '0.7rem'}}>Profundización I · MSc. Ciencia de Datos</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Stepper({ stepIdx, setStepIdx, isPlaying, setIsPlaying }) {
+  return (
+    <div className="stepper">
+      <button
+        className="step-btn"
+        onClick={() => setStepIdx(Math.max(0, stepIdx - 1))}
+        disabled={stepIdx === 0}
+        aria-label="Paso anterior"
+      >
+        ◀ Ant
+      </button>
+      <button
+        className="step-btn primary"
+        onClick={() => {
+          if (stepIdx === STEPS.length - 1) {
+            setStepIdx(0);
+            setIsPlaying(false);
+          } else {
+            setIsPlaying(!isPlaying);
+          }
+        }}
+        aria-label={isPlaying ? "Pausar" : "Reproducir"}
+      >
+        {isPlaying ? '❚❚ Pausa' : '▶ Reproducir'}
+      </button>
+      <button
+        className="step-btn"
+        onClick={() => setStepIdx(Math.min(STEPS.length - 1, stepIdx + 1))}
+        disabled={stepIdx === STEPS.length - 1}
+        aria-label="Siguiente paso"
+      >
+        Sig ▶
+      </button>
+      <button
+        className="step-btn"
+        onClick={() => { setStepIdx(0); setIsPlaying(false); }}
+        aria-label="Reiniciar"
+      >
+        ↻
+      </button>
+      <div className="step-pipeline">
+        {STEPS.map((s, i) => (
+          <React.Fragment key={s.id}>
+            <button
+              className={`step-pill ${i < stepIdx ? 'done' : ''} ${i === stepIdx ? 'active' : ''}`}
+              onClick={() => setStepIdx(i)}
+            >
+              <span className="idx">{s.num}</span>
+              {s.name}
+            </button>
+            {i < STEPS.length - 1 && <span className="step-arrow">→</span>}
+          </React.Fragment>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TileHitBoxes({ tiles, numTilesX, numTilesY, tileSize, imageSize, selectedTileKey, onTileClick, visible }) {
+  if (!visible) return null;
+  const tilePct = 100 / Math.max(numTilesX, numTilesY);
+  return (
+    <>
+      {tiles.map(t => {
+        const key = `${t.tx},${t.ty}`;
+        const isSelected = key === selectedTileKey;
+        return (
+          <div
+            key={key}
+            className={`tile-hit ${isSelected ? 'selected' : ''}`}
+            style={{
+              left: `${(t.tx / numTilesX) * 100}%`,
+              top: `${(t.ty / numTilesY) * 100}%`,
+              width: `${tilePct}%`,
+              height: `${tilePct}%`,
+            }}
+            onClick={() => onTileClick(t)}
+            title={`Tile (${t.tx}, ${t.ty})`}
+          />
+        );
+      })}
+    </>
+  );
+}
+
+function StepExplanation({ step, clipLimit, tileSize }) {
+  const explanations = {
+    input: {
+      title: 'Imagen Original con Bajo Contraste',
+      text: 'La imagen de entrada suele tener un rango dinámico estrecho (los valores de gris están concentrados en una pequeña porción del espectro 0–255). Esto hace que los detalles se pierdan y la imagen se vea "lavada" u oscura.',
+      insight: 'El objetivo de CLAHE es expandir este rango localmente, sin amplificar el ruido ni generar artefactos.',
+    },
+    tiles: {
+      title: 'División en Mosaicos (Contextual Regions)',
+      text: 'La imagen se divide en pequeños mosaicos rectangulares (por defecto 8×8 píxeles en OpenCV). Cada mosaico se procesa de forma independiente para adaptar el contraste al contexto local.',
+      insight: 'A diferencia de la ecualización global de histograma (HE), CLAHE respeta las variaciones regionales: una zona oscura y una clara pueden tratarse de forma distinta.',
+    },
+    histogram: {
+      title: 'Histograma Local por Mosaico',
+      text: 'Para cada mosaico se calcula su histograma de 256 niveles. Mosaicos con iluminación diferente tendrán histogramas concentrados en zonas distintas del espectro, lo que justifica un tratamiento individual.',
+      insight: 'Haz clic en cualquier mosaico de la imagen para ver su histograma aquí.',
+    },
+    clip: {
+      title: 'Recorte del Histograma (Contrast Limiting)',
+      text: `Se define un umbral de recorte igual a clipLimit × N/256 (donde N = píxeles del mosaico). Cualquier bin que supere este umbral se trunca y el exceso se contabiliza.`,
+      formula: `clipThresh = ${clipLimit.toFixed(1)} × N / 256`,
+      insight: '¿Por qué recortar? Sin recorte, un pico alto en el histograma se "estiraría" demasiado y amplificaría el ruido en regiones planas. El recorte evita la sobre-amplificación.',
+    },
+    redistribute: {
+      title: 'Redistribución Uniforme del Exceso',
+      text: 'El exceso de píxeles recortados se redistribuye uniformemente sobre todos los bins del histograma. Esto preserva el total de píxeles y mantiene la forma general del histograma.',
+      formula: 'Δ = ⌊exceso / 256⌋ por bin + resto distribuido',
+      insight: 'El resultado es un histograma "más plano" pero respetando los picos relativos. Esto es lo que limita el contraste de forma controlada.',
+    },
+    cdf: {
+      title: 'Función de Mapeo (CDF Normalizada)',
+      text: 'Con el histograma recortado y redistribuido, se calcula la CDF (función de distribución acumulada) y se normaliza al rango [0, 255]. Esta función es la LUT (lookup table) que mapea cada valor de entrada a su valor de salida.',
+      formula: 'LUT(v) = round((CDF(v) − CDF_min) / (N − CDF_min) × 255)',
+      insight: 'La CDF monótona creciente garantiza que la transformación preserva el orden (no se invierten intensidades).',
+    },
+    apply: {
+      title: 'Aplicación e Interpolación Bilineal',
+      text: 'Cada mosaico aplica su propia LUT a sus píxeles. Sin embargo, aplicar LUTs independientes crea bordes visibles entre mosaicos. Para evitarlo, CLAHE interpola bilinealmente entre los centros de los 4 mosaicos vecinos.',
+      insight: 'Esto produce una transición suave y continua, manteniendo la naturaleza local de la mejora sin artefactos de bloques.',
+    },
+    output: {
+      title: 'Resultado Final',
+      text: 'El resultado es una imagen con contraste mejorado localmente, donde los detalles en zonas oscuras y claras son visibles sin saturar ni amplificar el ruido. Compárelo con la ecualización global (HE) para apreciar la diferencia.',
+      insight: 'Mueva el deslizador de "clipLimit" o cambie el tamaño de mosaico para ver el efecto en tiempo real.',
+    },
+  };
+  const e = explanations[step.id];
+  return (
+    <div className="step-explain">
+      <div className="step-badge">
+        <div className="step-num">Paso {step.num}</div>
+        <div className="step-name">{step.name}</div>
+      </div>
+      <div className="step-explain-body">
+        <h3>{e.title}</h3>
+        <p>{e.text}</p>
+        {e.formula && <div className="formula">{e.formula}</div>}
+        {e.insight && <div className="insight"><b>Idea clave: </b>{e.insight}</div>}
+      </div>
+    </div>
+  );
+}
+
+// Render
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+
+</script>
+</body>
+</html>
