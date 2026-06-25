@@ -221,7 +221,7 @@
               <rect x="180" y="30" width="25" height="25" fill="#fb923c" opacity="0.5"/>
               <rect x="210" y="50" width="30" height="20" fill="#fb923c" opacity="0.4"/>
               <rect x="160" y="70" width="20" height="30" fill="#fb923c" opacity="0.6"/>
-              <text x="200" y="130" text-anchor="middle" fill="#9ca3af" font-size="10">Imagen (224×224)</text>
+              <text x="200" y="130" text-anchor="middle" fill="#475569" font-size="10">Imagen (224×224)</text>
             </g>
             
             <!-- Conv Layer 1 -->
@@ -291,12 +291,12 @@
               <rect x="180" y="30" width="25" height="25" fill="#60a5fa" opacity="0.5"/>
               <rect x="210" y="50" width="30" height="20" fill="#60a5fa" opacity="0.4"/>
               <rect x="160" y="70" width="20" height="30" fill="#60a5fa" opacity="0.6"/>
-              <text x="200" y="130" text-anchor="middle" fill="#9ca3af" font-size="10">Imagen (224×224)</text>
+              <text x="200" y="130" text-anchor="middle" fill="#475569" font-size="10">Imagen (224×224)</text>
             </g>
             
             <!-- Patches -->
             <g id="vit-patches" opacity="0.3">
-              <text x="200" y="155" text-anchor="middle" fill="#93c5fd" font-size="9">Patches 16×16</text>
+              <text x="200" y="150" text-anchor="middle" fill="#1d4ed8" font-size="9" font-weight="bold">Imagen → patches 16×16</text>
               <!-- Grid of patches -->
               <g id="patch-grid"></g>
             </g>
@@ -318,7 +318,7 @@
               <rect x="255" y="185" width="15" height="20" fill="#3b82f6" rx="2"/>
               <rect x="275" y="185" width="15" height="20" fill="#3b82f6" rx="2"/>
               <rect x="295" y="185" width="15" height="20" fill="#3b82f6" rx="2"/>
-              <text x="200" y="230" text-anchor="middle" fill="#9ca3af" font-size="9">+ Positional Embeddings</text>
+              <text x="200" y="230" text-anchor="middle" fill="#475569" font-size="9">+ Positional Embeddings</text>
             </g>
             
             <!-- Transformer Encoder -->
@@ -418,7 +418,7 @@
           <p class="text-sm text-gray-700">
             Vector aprendible añadido al inicio de la secuencia. <strong>Recopila información global</strong> de todos los patches a través de las capas de atención.
           </p>
-          <div class="mt-3 p-2 bg-yellow-400/10 rounded text-xs text-yellow-200">
+          <div class="mt-3 p-2 bg-yellow-100 rounded text-xs text-yellow-800">
             💡 Al final, solo este token se usa para la clasificación.
           </div>
         </div>
@@ -432,7 +432,7 @@
           <p class="text-sm text-gray-700">
             La imagen se divide en patches (ej: 16×16). Cada patch se <strong>aplana y proyecta</strong> a un vector de dimensión D (ej: 768).
           </p>
-          <div class="mt-3 p-2 bg-blue-400/10 rounded text-xs text-blue-200">
+          <div class="mt-3 p-2 bg-blue-100 rounded text-xs text-blue-800">
             📐 224×224 / 16×16 = 196 patches
           </div>
         </div>
@@ -446,7 +446,7 @@
           <p class="text-sm text-gray-700">
             Vectores <strong>aprendibles</strong> que se suman a cada patch para preservar la información espacial. Sin ellos, el modelo no conoce la posición.
           </p>
-          <div class="mt-3 p-2 bg-purple-400/10 rounded text-xs text-purple-200">
+          <div class="mt-3 p-2 bg-purple-100 rounded text-xs text-purple-800">
             🎯 Esenciales para entender la estructura 2D
           </div>
         </div>
@@ -460,7 +460,7 @@
           <p class="text-sm text-gray-700">
             Cada patch genera <strong>Query, Key, Value</strong>. Múltiples "cabezas" aprenden diferentes tipos de relaciones en paralelo.
           </p>
-          <div class="mt-3 p-2 bg-pink-400/10 rounded text-xs text-pink-200 mono">
+          <div class="mt-3 p-2 bg-pink-100 rounded text-xs text-pink-800 mono">
             Attention(Q,K,V) = softmax(QK<sup>T</sup>/√d)V
           </div>
         </div>
@@ -472,9 +472,9 @@
           <h3 class="font-bold text-green-600 mb-2">Residual Connections</h3>
           <p class="text-xs text-gray-600 mb-3">Skip Connections</p>
           <p class="text-sm text-gray-700">
-            <code class="text-green-300">output = x + Sublayer(x)</code>. Mitigan el <strong>vanishing gradient</strong> y preservan información entre capas profundas.
+            <code class="text-green-700">output = x + Sublayer(x)</code>. Mitigan el <strong>vanishing gradient</strong> y preservan información entre capas profundas.
           </p>
-          <div class="mt-3 p-2 bg-green-400/10 rounded text-xs text-green-200">
+          <div class="mt-3 p-2 bg-green-100 rounded text-xs text-green-800">
             🚀 Permiten arquitecturas de 12-32 capas
           </div>
         </div>
@@ -488,7 +488,7 @@
           <p class="text-sm text-gray-700">
             Normaliza las activaciones <strong>por muestra</strong>. Estabiliza el entrenamiento y acelera la convergencia.
           </p>
-          <div class="mt-3 p-2 bg-indigo-400/10 rounded text-xs text-indigo-200">
+          <div class="mt-3 p-2 bg-indigo-100 rounded text-xs text-indigo-800">
             ⚡ Se aplica después de cada subcapa
           </div>
         </div>
@@ -516,7 +516,7 @@
                 <div class="absolute inset-0 flex items-center justify-center">
                   <div class="w-8 h-8 bg-orange-500/30 border-2 border-orange-400 rounded kernel-scan"></div>
                 </div>
-                <div class="absolute bottom-1 right-2 text-xs text-gray-600">3×3 píxeles</div>
+                <div class="absolute bottom-1 right-2 text-xs text-gray-300">3×3 píxeles</div>
               </div>
             </div>
             
@@ -526,7 +526,7 @@
                 <div class="absolute inset-0 flex items-center justify-center">
                   <div class="w-16 h-16 bg-orange-500/20 border-2 border-orange-400 rounded"></div>
                 </div>
-                <div class="absolute bottom-1 right-2 text-xs text-gray-600">5×5 píxeles</div>
+                <div class="absolute bottom-1 right-2 text-xs text-gray-300">5×5 píxeles</div>
               </div>
             </div>
             
@@ -536,7 +536,7 @@
                 <div class="absolute inset-0 flex items-center justify-center">
                   <div class="w-28 h-28 bg-orange-500/15 border-2 border-orange-400 rounded"></div>
                 </div>
-                <div class="absolute bottom-1 right-2 text-xs text-gray-600">~11×11</div>
+                <div class="absolute bottom-1 right-2 text-xs text-gray-300">~11×11</div>
               </div>
             </div>
             
@@ -544,13 +544,13 @@
               <div class="text-xs font-bold w-20 text-gray-600">Capa N</div>
               <div class="flex-1 relative h-20 bg-gray-900 rounded border border-orange-500/30 overflow-hidden">
                 <div class="absolute inset-2 bg-orange-500/10 border-2 border-orange-400 rounded"></div>
-                <div class="absolute bottom-1 right-2 text-xs text-gray-600">Imagen completa</div>
+                <div class="absolute bottom-1 right-2 text-xs text-gray-300">Imagen completa</div>
               </div>
             </div>
           </div>
           
           <div class="mt-4 p-3 bg-orange-500/10 rounded-lg border border-orange-500/30">
-            <p class="text-xs text-orange-200">
+            <p class="text-xs text-orange-800">
               <strong>⚠️ Limitación:</strong> Las capas iniciales solo ven regiones muy pequeñas. Se necesitan muchas capas para capturar contexto global.
             </p>
           </div>
@@ -568,7 +568,7 @@
                 <svg class="absolute inset-0 w-full h-full" id="vit-attention-svg">
                   <!-- Attention lines will be drawn here -->
                 </svg>
-                <div class="absolute bottom-1 right-2 text-xs text-gray-600">GLOBAL</div>
+                <div class="absolute bottom-1 right-2 text-xs text-gray-300">GLOBAL</div>
               </div>
             </div>
             
@@ -576,7 +576,7 @@
               <div class="text-xs font-bold w-20 text-gray-600">Capa 2</div>
               <div class="flex-1 relative h-20 bg-gray-900 rounded border border-blue-500/30 overflow-hidden">
                 <div class="absolute inset-2 bg-blue-500/25 border-2 border-blue-400 rounded"></div>
-                <div class="absolute bottom-1 right-2 text-xs text-gray-600">GLOBAL + refinado</div>
+                <div class="absolute bottom-1 right-2 text-xs text-gray-300">GLOBAL + refinado</div>
               </div>
             </div>
             
@@ -584,7 +584,7 @@
               <div class="text-xs font-bold w-20 text-gray-600">Capa 3</div>
               <div class="flex-1 relative h-20 bg-gray-900 rounded border border-blue-500/30 overflow-hidden">
                 <div class="absolute inset-2 bg-blue-500/30 border-2 border-blue-400 rounded"></div>
-                <div class="absolute bottom-1 right-2 text-xs text-gray-600">GLOBAL + refinado</div>
+                <div class="absolute bottom-1 right-2 text-xs text-gray-300">GLOBAL + refinado</div>
               </div>
             </div>
             
@@ -592,13 +592,13 @@
               <div class="text-xs font-bold w-20 text-gray-600">Capa N</div>
               <div class="flex-1 relative h-20 bg-gray-900 rounded border border-blue-500/30 overflow-hidden">
                 <div class="absolute inset-2 bg-gradient-to-br from-blue-500/40 to-purple-500/40 border-2 border-blue-400 rounded"></div>
-                <div class="absolute bottom-1 right-2 text-xs text-gray-600">Representación rica</div>
+                <div class="absolute bottom-1 right-2 text-xs text-gray-300">Representación rica</div>
               </div>
             </div>
           </div>
           
           <div class="mt-4 p-3 bg-blue-500/10 rounded-lg border border-blue-500/30">
-            <p class="text-xs text-blue-200">
+            <p class="text-xs text-blue-800">
               <strong>✨ Ventaja:</strong> Desde la primera capa, cada patch puede "atender" a cualquier otro patch de la imagen.
             </p>
           </div>
@@ -622,7 +622,7 @@
           </div>
         </div>
         
-        <div id="rf-info" class="mt-4 p-3 bg-gray-900 rounded-lg text-sm text-gray-700">
+        <div id="rf-info" class="mt-4 p-3 bg-slate-100 border border-slate-200 rounded-lg text-sm text-gray-700">
           👆 Haz clic en cualquier patch para ver la diferencia.
         </div>
       </div>
@@ -730,7 +730,7 @@
           <div class="card rounded-xl p-5 border-l-4 border-purple-500">
             <h3 class="font-bold text-purple-600 mb-2">1. Multi-Head Self-Attention</h3>
             <p class="text-sm text-gray-700 mb-2">
-              Cada patch genera tres vectores: <strong class="text-purple-300">Query (Q)</strong>, <strong class="text-purple-300">Key (K)</strong> y <strong class="text-purple-300">Value (V)</strong>.
+              Cada patch genera tres vectores: <strong class="text-purple-700">Query (Q)</strong>, <strong class="text-purple-700">Key (K)</strong> y <strong class="text-purple-700">Value (V)</strong>.
             </p>
             <div class="bg-gray-900 rounded p-3 mono text-xs text-purple-200">
               Attention(Q,K,V) = softmax(QK<sup>T</sup> / √d<sub>k</sub>) · V
@@ -743,8 +743,8 @@
           <div class="card rounded-xl p-5 border-l-4 border-green-500">
             <h3 class="font-bold text-green-600 mb-2">2. Add & Norm</h3>
             <p class="text-sm text-gray-700 mb-2">
-              <strong class="text-green-300">Residual:</strong> output = x + Sublayer(x)<br>
-              <strong class="text-green-300">LayerNorm:</strong> Normaliza las activaciones
+              <strong class="text-green-700">Residual:</strong> output = x + Sublayer(x)<br>
+              <strong class="text-green-700">LayerNorm:</strong> Normaliza las activaciones
             </p>
             <p class="text-xs text-gray-600">
               Las conexiones residuales permiten entrenar redes muy profundas sin vanishing gradient.
@@ -754,7 +754,7 @@
           <div class="card rounded-xl p-5 border-l-4 border-blue-500">
             <h3 class="font-bold text-blue-600 mb-2">3. Feed-Forward Network</h3>
             <p class="text-sm text-gray-700 mb-2">
-              Dos capas lineales con activación <strong class="text-blue-300">GELU</strong> en medio:
+              Dos capas lineales con activación <strong class="text-blue-700">GELU</strong> en medio:
             </p>
             <div class="bg-gray-900 rounded p-3 mono text-xs text-blue-200">
               FFN(x) = Linear(GELU(Linear(x)))<br>
@@ -768,7 +768,7 @@
           <div class="card rounded-xl p-5 border-l-4 border-yellow-500">
             <h3 class="font-bold text-yellow-600 mb-2">💡 Concepto Clave</h3>
             <p class="text-sm text-gray-700">
-              Este bloque se repite <strong class="text-yellow-300">N veces</strong> (típicamente 12, 24 o 32). Cada capa refina las representaciones, permitiendo que la información fluya y se combine de maneras cada vez más complejas.
+              Este bloque se repite <strong class="text-yellow-700">N veces</strong> (típicamente 12, 24 o 32). Cada capa refina las representaciones, permitiendo que la información fluya y se combine de maneras cada vez más complejas.
             </p>
           </div>
           
@@ -896,10 +896,10 @@ function createPatchGrid() {
   if (!grid || grid.children.length > 0) return;
   
   const size = 8;
-  const startX = 145;
-  const startY = 160;
-  const patchSize = 12;
-  const gap = 1;
+  const startX = 152;
+  const startY = 12;
+  const patchSize = 11;
+  const gap = 1.28;
   
   for (let row = 0; row < size; row++) {
     for (let col = 0; col < size; col++) {
