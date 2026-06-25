@@ -1206,13 +1206,25 @@
         const Cap21Section = () => {
             const ref = useRef(null);
             useTypeset(ref, []);
+            useEffect(() => {
+                const onMsg = (e) => {
+                    const d = e && e.data;
+                    if (d && d.type === 'embed-tool-height' && d.id && d.height) {
+                        const fr = document.getElementById(d.id);
+                        if (fr) fr.style.height = (d.height + 4) + 'px';
+                    }
+                };
+                window.addEventListener('message', onMsg);
+                return () => window.removeEventListener('message', onMsg);
+            }, []);
             return (
                 <div ref={ref} className="prose-usta">
                     <SectionHeader title="Capítulo 2.1 — Redes Convolucionales (CNN) y Vision Transformers" icon={Icons.Grid} />
 
                     <p>
-                        Las imágenes son el dato más abundante y, a la vez, el más exigente del aprendizaje profundo. Este capítulo
-                        recorre por qué las redes densas fracasan ante ellas, cómo la <strong>convolución</strong> resuelve el
+                        Las imágenes son el dato más abundante y, a la vez, el más exigente del aprendizaje profundo. Enseñar a una
+                        máquina a <em>ver</em> es enseñarle a construir significado de lo simple a lo complejo —de los bordes al objeto—.
+                        Este capítulo recorre por qué las redes densas fracasan ante ellas, cómo la <strong>convolución</strong> resuelve el
                         problema imitando al córtex visual, cómo evolucionaron las arquitecturas hasta <strong>ResNet</strong>,
                         cómo los <strong>Vision Transformers</strong> reformulan el problema con atención, y cómo se lleva un
                         modelo entrenado al borde de la selva colombiana.
@@ -1223,7 +1235,7 @@
                     <p>
                         El diseño de las <Termino def="Convolutional Neural Networks: redes que aplican filtros aprendibles sobre rejillas de píxeles.">CNN</Termino> no
                         es arbitrario; es una abstracción matemática de cómo el cerebro procesa lo visual. La luz incide en la retina,
-                        viaja por el nervio óptico hacia el núcleo geniculado lateral y llega a la corteza visual primaria (V1) del
+                        viaja por el nervio óptico hacia el <Termino def="Estación de relevo del tálamo que reenvía la señal visual de la retina hacia la corteza.">núcleo geniculado lateral</Termino> y llega a la corteza visual primaria (V1) del
                         lóbulo occipital. Las investigaciones de Hubel y Wiesel sobre la corteza visual (1962), cuyos hallazgos
                         les valieron el Premio Nobel de Fisiología o Medicina en 1981, revelaron una jerarquía de
                         procesamiento con dos tipos de células:
@@ -1277,16 +1289,20 @@
                     </p>
                     <Eq>{String.raw`$$ 1{.}000{.}000\,\text{entradas} \times 1{.}000\,\text{neuronas} = 1.000.000.000\ \text{pesos} $$`}</Eq>
                     <p>
-                        Mil millones de parámetros <em>solo en la primera capa</em>. Esto dispara el costo de cómputo y conduce al
+                        Mil millones de parámetros <em>solo en la primera capa</em>: un costo de cómputo que, además, alimenta el
                         <Termino def="Sobreajuste: la red memoriza el ruido del entrenamiento y no generaliza.">sobreajuste</Termino>.
-                        Además, aplanar la imagen en un vector destruye la <strong>estructura espacial</strong> (la red ya no sabe qué
-                        píxeles son vecinos) y el MLP carece de <strong>invarianza a la traslación</strong>: un gato en la esquina
-                        superior izquierda tendría que reaprenderse en cada posición posible.
+                        Pero el daño más grave no es <em>computacional</em>, sino <strong>representacional</strong>: al aplanar la imagen
+                        en un vector, la red destruye la <strong>estructura espacial</strong> —deja de saber qué píxeles son vecinos— y
+                        pierde la <strong>invarianza a la traslación</strong>. Concretamente: si entrena con un jaguar centrado, asocia la
+                        clase a los píxeles exactos del centro; basta con que el mismo jaguar aparezca desplazado unos pocos píxeles para
+                        que su vector aplanado resulte irreconocible respecto al anterior, y la red lo trate como un objeto nuevo que debe
+                        reaprender posición por posición.
                     </p>
-                    <Box type="info" label="Analogía local — TransMilenio">
-                        Conectar cada píxel con cada neurona es como obligar a que <em>toda</em> estación de TransMilenio tenga una ruta
-                        directa a <em>todas</em> las demás: el mapa se vuelve un caos impagable. La convolución, en cambio, conecta solo
-                        estaciones vecinas (conectividad local) y reutiliza la misma ruta-patrón por toda la ciudad (pesos compartidos).
+                    <Box type="info" label="Analogía local — la red de cámaras trampa">
+                        Conectar cada píxel con cada neurona es como exigir un cable directo entre <em>cada</em> cámara trampa de la
+                        reserva y <em>todas</em> las demás: un tendido imposible de mantener. La convolución, en cambio, deja que cada
+                        cámara vigile solo <em>su propio claro</em> (conectividad local) y que todas apliquen <em>el mismo criterio</em> de
+                        detección (pesos compartidos).
                     </Box>
 
                     {/* ============== 2. Anatomía de la convolución ============== */}
@@ -1302,7 +1318,7 @@
                     <ConvolucionSVG />
 
                     <p>
-                        A diferencia de los detectores clásicos (Sobel, Canny) diseñados a mano, los valores del kernel son
+                        A diferencia de los detectores clásicos (<Termino def="Operadores clásicos de detección de bordes en procesamiento de imágenes, con coeficientes fijos definidos a mano (no aprendidos).">Sobel, Canny</Termino>) diseñados a mano, los valores del kernel son
                         <strong> parámetros aprendibles</strong>: la red los ajusta por <Termino def="Algoritmo que propaga el error hacia atrás para calcular gradientes.">retropropagación</Termino> hasta
                         detectar las características útiles para la tarea. Si necesita distinguir un «8» de un «1», aprenderá sola un
                         filtro que se active ante curvas.
@@ -1323,6 +1339,12 @@
                             contenido: <span><strong>Max pooling</strong> toma el máximo de cada región (ej. 2×2): si un rasgo se detectó allí, lo conserva y descarta su ubicación exacta, dando invarianza a pequeñas traslaciones. El <strong>average pooling</strong> promedia; su variante <em>global average pooling</em> reduce todo el mapa a un vector antes de clasificar, eliminando capas densas masivas.</span>
                         },
                     ]} />
+
+                    <p>
+                        Esa es la división del trabajo que explica el éxito en visión: la <strong>convolución</strong> aprende{' '}
+                        <em>qué</em> patrón aparece, y el <strong>pooling</strong>, más tolerante a la posición, difumina <em>dónde</em>{' '}
+                        aparece exactamente —esa tolerancia a la posición es justo lo que le faltaba al MLP—.
+                    </p>
 
                     <p>El tamaño de salida de una capa convolucional se obtiene con la fórmula general:</p>
                     <Eq>{String.raw`$$ O = \left\lfloor \frac{W - K + 2P}{S} \right\rfloor + 1 $$`}</Eq>
@@ -1391,6 +1413,23 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                         </table>
                     </div>
 
+                    {/* ============== Animación interactiva: pipeline CNN ============== */}
+                    <h4>Anatomía en movimiento: el pipeline interactivo</h4>
+                    <p>
+                        El §2 presentó las piezas por separado; la siguiente animación las pone en marcha de principio a fin sobre un
+                        ejemplo mínimo —clasificar una «X» o una «O» en una rejilla de 6×6—: convolución, ReLU, pooling y clasificación
+                        final, paso a paso o en modo automático.
+                    </p>
+                    <div className="bg-white border border-gray-200 rounded-xl p-2 shadow-sm my-4 overflow-hidden">
+                        <iframe id="cnn-anatomia-frame" src="cnn-anatomia-interactiva.html"
+                            title="Animación interactiva: anatomía de una red convolucional, pipeline paso a paso"
+                            className="w-full rounded-lg" style={{ display: 'block', width: '100%', height: 1600, border: 0 }} loading="lazy"></iframe>
+                        <p className="text-xs text-gray-500 italic text-center mt-2 px-2">
+                            Animación interactiva del pipeline CNN (entrada → convolución → ReLU → pooling → clasificación) sobre el
+                            ejemplo «X / O»; las probabilidades finales son ilustrativas. Fuente: elaboración propia.
+                        </p>
+                    </div>
+
                     {/* ============== 3. Evolución histórica ============== */}
                     <h3>3. Evolución de las arquitecturas CNN</h3>
                     <p>
@@ -1420,7 +1459,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <p>
                         De LeNet a ResNet se asume que la convolución, con su campo receptivo local, es el operador idóneo para imágenes.
                         En 2021, Dosovitskiy et al. cuestionaron ese supuesto en <em>«An Image is Worth 16×16 Words»</em>, adaptando el
-                        Transformer del lenguaje al dominio visual. La idea: en vez de deslizar filtros, trocear la imagen en una
+<Termino def="Arquitectura de red basada por completo en atención, surgida en el procesamiento de lenguaje (2017); se detalla en el Capítulo 2.3 §6.">Transformer</Termino> del lenguaje al dominio visual. La idea: en vez de deslizar filtros, trocear la imagen en una
                         cuadrícula de <em>parches</em> cuadrados de lado {String.raw`\(P\)`}. El número de parches es:
                     </p>
                     <Eq>{String.raw`$$ N = \frac{H \cdot W}{P^2} $$`}</Eq>
@@ -1432,11 +1471,12 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                         inicio de la secuencia se antepone un <strong>token de clasificación</strong> ([CLS]): tras pasar por el Transformer,
                         su representación final resume la imagen completa y es la que alimenta la cabeza de clasificación.
                     </p>
-                    <Box type="tip" label="Analogía local — el mural del Metro de Medellín">
-                        En lugar de recorrer un mural con una lupa que solo ve un pequeño círculo a la vez (la convolución local), se lo
-                        fotografía dividido en baldosas numeradas y, de inmediato, se comparan <em>todas</em> las baldosas entre sí
-                        (autoatención) para captar la composición global. Así, el ViT vincula una oreja en una esquina con una cola en la
-                        opuesta para confirmar que se trata del mismo jaguar.
+                    <Box type="tip" label="Analogía local — la foto de fototrampa en baldosas">
+                        En lugar de recorrer una foto de fototrampa con una lupa que solo ve un pequeño círculo a la vez (la convolución
+                        local), se la divide en una cuadrícula de baldosas numeradas —y ese número <em>es</em> su posición (codificación
+                        posicional)— y se comparan de inmediato <em>todas</em> las baldosas entre sí (autoatención) para captar la
+                        composición global. Así, el ViT vincula una oreja en una esquina con la cola en la opuesta para confirmar que
+                        pertenecen a <em>un solo</em> jaguar.
                     </Box>
                     <p className="text-sm text-gray-600">
                         El mecanismo de <strong>atención</strong> que hace posible esta comparación global no es exclusivo de la visión:
@@ -1463,7 +1503,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                                 <tr><td><strong>Campo receptivo</strong></td><td>Local, crece con la profundidad</td><td>Global desde la 1.ª capa (atención)</td></tr>
                                 <tr><td><strong>Costo de entrenamiento</strong></td><td>Menor en datasets pequeños</td><td>Alto; escala con datos y cómputo</td></tr>
                                 <tr><td><strong>Latencia en inferencia</strong></td><td>Baja y predecible</td><td>Sensible al n.º de parches (N)</td></tr>
-                                <tr><td><strong>Interpretabilidad</strong></td><td>Grad-CAM / mapas de activación</td><td>Mapas de atención</td></tr>
+                                <tr><td><strong>Interpretabilidad</strong></td><td><Termino def="Técnica de interpretabilidad que resalta, como mapa de calor, las regiones de la imagen más influyentes en la predicción de una CNN.">Grad-CAM</Termino> / mapas de activación</td><td>Mapas de atención</td></tr>
                             </tbody>
                         </table>
                         <p className="text-xs text-gray-500 italic">Elaboración propia basada en Dosovitskiy et al. (2021).</p>
@@ -1471,8 +1511,38 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <Box type="tip" label="¿CNN o ViT para un proyecto de campo?">
                         Para clasificar fauna con unos pocos miles de imágenes de cámaras trampa, conviene partir de una CNN
                         preentrenada (ResNet, EfficientNet) por su eficiencia muestral. El ViT brilla con preentrenamiento a gran escala
-                        o en arquitecturas híbridas (convolución inicial + atención posterior), capturando lo mejor de ambos mundos.
+                        —monitoreo satelital de deforestación o colecciones de millones de fotos ciudadanas (iNaturalist), donde la escala
+                        juega a su favor— o en arquitecturas híbridas (convolución inicial + atención posterior), capturando lo mejor de
+                        ambos mundos.
                     </Box>
+                    <Box type="info" label="Un tercer camino — el MLP-Mixer (2021)">
+                        Si la convolución aporta localidad y el ViT aporta atención, ¿hace falta alguna de las dos? Tolstikhin et al.
+                        mostraron que <strong>no</strong>: el <strong>MLP-Mixer</strong> prescinde de ambas y solo usa perceptrones
+                        multicapa. La clave es que <em>no</em> es el MLP «aplanado» que fracasó al inicio del capítulo: primero trocea la
+                        imagen en parches (como el ViT) y luego alterna dos MLP con pesos compartidos —uno que <strong>mezcla entre
+                        parches</strong> (<em>token-mixing</em>) y otro que <strong>mezcla entre canales</strong> (<em>channel-mixing</em>)—,
+                        esquivando así la explosión de parámetros. La lección de fondo: lo decisivo no fue el operador (convolución,
+                        atención o MLP), sino el <strong>troceo en parches y el sesgo inductivo</strong>. El precio es coherente con lo ya
+                        visto: con un sesgo inductivo aún más débil que el del ViT, el Mixer solo iguala a CNN y Transformers cuando se
+                        preentrena a escala masiva (JFT-300M), por lo que rara vez es la opción para los datos escasos del trabajo de campo.
+                    </Box>
+
+                    {/* ============== Herramienta interactiva: ViT vs CNN ============== */}
+                    <h4>ViT por dentro: explorador interactivo</h4>
+                    <p>
+                        Para fijar las ideas del Vision Transformer, este explorador contrasta CNN y ViT en cuatro vistas: la animación
+                        comparativa, la anatomía del ViT (CLS, parches, codificación posicional, atención), el campo receptivo local
+                        frente al global, y el bloque encoder. Cambia de pestaña y usa los controles de reproducción.
+                    </p>
+                    <div className="bg-white border border-gray-200 rounded-xl p-2 shadow-sm my-4 overflow-hidden">
+                        <iframe id="vit-anatomia-frame" src="vit-anatomia-interactiva.html"
+                            title="Explorador interactivo: Vision Transformer frente a CNN (anatomía, campo receptivo, encoder)"
+                            className="w-full rounded-lg" style={{ display: 'block', width: '100%', height: 1600, border: 0 }} loading="lazy"></iframe>
+                        <p className="text-xs text-gray-500 italic text-center mt-2 px-2">
+                            Explorador interactivo ViT vs CNN: animación comparativa, anatomía del ViT, campo receptivo (local/global)
+                            y bloque encoder. Fuente: elaboración propia.
+                        </p>
+                    </div>
 
                     {/* ============== 5. Transfer learning ============== */}
                     <h3>5. Transfer learning y fine-tuning</h3>
@@ -1525,7 +1595,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     </CalloutPro>
 
                     {/* ============== 7. Optimización para Edge ============== */}
-                    <h3>7. Optimización para Edge: llevar el modelo a la selva</h3>
+                    <h3>7. Optimización para Edge: llevar el modelo al campo</h3>
                     <p>
                         Una cámara trampa en la Orinoquía o un sensor de hojas de café en el Quindío imponen restricciones severas: sin
                         internet, energía de paneles o baterías y procesadores diminutos. Desplegar el modelo en el propio dispositivo,
@@ -1540,16 +1610,16 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     </p>
                     <Eq>{String.raw`$$ 25.000.000 \times 4\,\text{bytes} \approx 100\,\text{MB (FP32)} \;\longrightarrow\; 25.000.000 \times 1\,\text{byte} \approx 25\,\text{MB (INT8)} $$`}</Eq>
                     <p>
-                        Esa reducción es la diferencia entre que el modelo quepa o no en la memoria de un microcontrolador en plena selva.
+                        Esa reducción es la diferencia entre que el modelo quepa o no en la memoria de un microcontrolador en pleno dosel.
                     </p>
                     <Accordion items={[
                         {
                             titulo: 'Pruning (poda): eliminar conexiones inútiles',
-                            contenido: <span>Elimina pesos o neuronas con contribución cercana a cero, generando una red dispersa (<em>sparse</em>). Comparte el espíritu de la regularización L1 —favorecer modelos dispersos—, aunque difiere en el modo: L1 induce la dispersión <em>durante</em> el entrenamiento penalizando los pesos, mientras la poda retira pesos ya entrenados según su magnitud. Si una conexión apenas aporta, retirarla aligera sin sacrificar precisión. Como podar un cafetal: se cortan las ramas improductivas para que la planta concentre su energía.</span>
+                            contenido: <span>Elimina pesos o neuronas con contribución cercana a cero, generando una red dispersa (<em>sparse</em>). Comparte el espíritu de la regularización L1 —favorecer modelos dispersos—, aunque difiere en el modo: L1 induce la dispersión <em>durante</em> el entrenamiento penalizando los pesos, mientras la poda retira pesos ya entrenados según su magnitud. Si una conexión apenas aporta, retirarla aligera sin sacrificar precisión. <em>Analogía local:</em> como el guardaparques que despeja una trocha —retira la maleza improductiva para que el sendero, la información útil, quede transitable.</span>
                         },
                         {
                             titulo: 'Knowledge distillation (destilación)',
-                            contenido: <span>Entrena un modelo pequeño («estudiante») para imitar las salidas de uno grande y preciso («maestro»). En vez de aprender solo de etiquetas duras, absorbe las probabilidades suaves del maestro, capturando matices. Es el aprendiz del taller que, observando al maestro tostador, logra un resultado cercano sin repasar millones de granos.</span>
+                            contenido: <span>Entrena un modelo pequeño («estudiante») para imitar las salidas de uno grande y preciso («maestro»). En vez de aprender solo de etiquetas duras, absorbe las probabilidades suaves del maestro, capturando matices. <em>Analogía local:</em> es el guardaparques novato («estudiante») que, observando al rastreador veterano («maestro»), aprende a reconocer un jaguar por su huella sin revisar millones de fotos de fototrampa.</span>
                         },
                         {
                             titulo: 'Arquitecturas eficientes por diseño',
@@ -2009,10 +2079,12 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <VanishingGradientSVG />
 
                     <Box type="tip" label="Analogía local — el «Teléfono Roto»">
-                        El gerente (entrada inicial) dicta «aumentar la producción de café suave». La instrucción atraviesa 50 niveles
-                        jerárquicos (pasos temporales) y en cada uno se atenúa un poco (multiplicación por un factor &lt; 1). Al llegar
-                        al operario el mensaje se ha desvanecido. Inversamente, la corrección (gradiente) se diluye al viajar de regreso
-                        hacia el gerente: la red corrige bien lo inmediato, pero es incapaz de ajustar la estrategia de largo plazo.
+                        Como en el juego del <strong>teléfono roto</strong>: una frase —«aumentar la producción de café suave»— se
+                        susurra de oído en oído a lo largo de una fila de 50 personas (los pasos temporales) y en cada relevo se
+                        distorsiona un poco; al final llega irreconocible (la señal hacia adelante se <strong>desvanece</strong>). Y como
+                        nadie puede rastrear en qué oído se torció el mensaje para enmendarlo, la <em>corrección</em> (el gradiente)
+                        tampoco alcanza a las primeras personas de la fila: la red ajusta bien lo reciente, pero no las dependencias de
+                        largo plazo.
                     </Box>
                     <Box type="warn" label="Las dos caras del olvido">
                         <strong>Clima:</strong> una RNN predice la lluvia de mañana a partir de la de hoy, pero no captura el ciclo de
@@ -2065,7 +2137,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <Box type="info" label="Por qué la suma salva el gradiente">
                         Al ser aditiva, la derivada durante la retropropagación incluye un término que deja fluir el gradiente
                         «intacto» a través de muchos pasos (el <em>carrusel de error constante</em>). Por eso la LSTM puede recordar el
-                        inicio de una oración —por ejemplo en wayuunaiki— para conjugar correctamente el verbo al final.
+                        inicio de una oración —por ejemplo en <Termino def="Lengua del pueblo wayúu, hablada en La Guajira (Colombia) y el noroeste de Venezuela.">wayuunaiki</Termino>— para conjugar correctamente el verbo al final.
                     </Box>
 
                     <h4>Compuerta de salida</h4>
@@ -2181,7 +2253,7 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                     {/* ============== 6. Encoder-Decoder y su cuello de botella ============== */}
                     <h3>6. El cuello de botella del Encoder-Decoder</h3>
                     <p>
-                        Resuelta la memoria dentro de una sola secuencia, surge un reto mayor: la <strong>transducción</strong> de una
+                        Resuelta la memoria dentro de una sola secuencia, surge un reto mayor: la <Termino def="Convertir una secuencia de entrada en otra secuencia de salida, posiblemente de longitud distinta (traducir, resumir, responder).">transducción</Termino> de una
                         secuencia de entrada en otra de longitud distinta (traducir del wayuunaiki al español, resumir un documento
                         jurídico, responder en un chatbot). Sutskever et al. (2014) propusieron la arquitectura
                         <strong> secuencia a secuencia</strong> (seq2seq), con dos redes recurrentes acopladas:
@@ -2683,9 +2755,11 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                         En una piqueria del Festival de la Leyenda Vallenata, los verseadores no recitan canciones memorizadas
                         (eso sería <em>sobreajuste</em>): han interiorizado una «distribución de probabilidad» cultural —métrica,
                         rima, ritmo de caja, guacharaca y acordeón—. Ante un <em>pie forzado</em> (el vector de entrada), el
-                        verseador improvisa una estrofa nueva que nunca existió pero que es indiscutiblemente vallenato. El público
-                        y el jurado que abuchean los versos flojos cumplen el papel del <strong>discriminador</strong>. Esa tensión
-                        entre crear y juzgar es el corazón de los modelos generativos.
+                        verseador improvisa una estrofa nueva que nunca existió pero que es indiscutiblemente vallenato. <strong>Generar
+                        algo nuevo y plausible a partir de una distribución aprendida —en vez de copiar lo memorizado— es el corazón
+                        común a las cuatro familias de este capítulo.</strong> El público y el jurado que abuchean los versos flojos
+                        añaden una segunda vuelta —la tensión entre <em>crear</em> y <em>juzgar</em>—, que es precisamente el motor de
+                        las <strong>GAN</strong> (§4); las demás familias (AE, VAE, difusión) generan sin ese juez.
                     </Box>
 
                     {/* ============== 1. Espacios latentes y manifolds ============== */}
@@ -2832,7 +2906,7 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                     <Eq>{String.raw`$$ \mathcal{L}_{\text{ELBO}}(\theta,\phi;\,x) = \underbrace{\mathbb{E}_{q_\phi(z|x)}\big[\log p_\theta(x|z)\big]}_{\text{reconstrucción}} - \underbrace{D_{\text{KL}}\!\big(q_\phi(z|x)\,\|\,p(z)\big)}_{\text{regularización}} $$`}</Eq>
                     <ul>
                         <li><strong>Reconstrucción:</strong> maximiza la log-verosimilitud esperada {String.raw`\(\mathbb{E}_{q_\phi(z|x)}[\log p_\theta(x|z)]\)`} para que el dato generado se parezca al real.</li>
-                        <li><strong>Regularización (divergencia KL):</strong> el término {String.raw`\(D_{\text{KL}}(q_\phi(z|x)\,\|\,p(z))\)`} fuerza a las distribuciones latentes a parecerse a una Normal estándar {String.raw`\(\mathcal{N}(0, I)\)`}, evitando que el modelo «haga trampa» dispersando las nubes de datos para memorizarlas.</li>
+                        <li><strong>Regularización (<Termino def="Divergencia de Kullback-Leibler: mide cuánto difiere una distribución de probabilidad de otra de referencia; vale cero solo si son idénticas.">divergencia KL</Termino>):</strong> el término {String.raw`\(D_{\text{KL}}(q_\phi(z|x)\,\|\,p(z))\)`} fuerza a las distribuciones latentes a parecerse a una Normal estándar {String.raw`\(\mathcal{N}(0, I)\)`}, evitando que el modelo «haga trampa» dispersando las nubes de datos para memorizarlas.</li>
                     </ul>
 
                     <Box type="info" label="El truco de reparametrización">
@@ -3137,11 +3211,11 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                         <tbody>
                             <tr><td>1. Convolución (campo receptivo local)</td><td>(A) Una cinta transportadora que cruza toda la fábrica sumando información sin degradarla.</td></tr>
                             <tr><td>2. Cuello de botella del Autoencoder</td><td>(B) El bus articulado rojo de TransMilenio: comprime a miles de personas conservando solo el destino común.</td></tr>
-                            <tr><td>3. Estado de la celda (LSTM)</td><td>(C) Una lupa que solo ve un pequeño círculo a la vez al recorrer un mural del Metro de Medellín.</td></tr>
+                            <tr><td>3. Estado de la celda (LSTM)</td><td>(C) Una lupa que solo ve un pequeño círculo a la vez al recorrer una foto de fototrampa.</td></tr>
                             <tr><td>4. Mecanismo de atención</td><td>(D) Un examen con apuntes abiertos: se vuelve al texto y se resalta lo pertinente para cada pregunta.</td></tr>
                             <tr><td>5. Juego adversario de la GAN</td><td>(E) La piqueria vallenata: el verseador improvisa frente al jurado y al público que lo juzgan.</td></tr>
                             <tr><td>6. Espacio latente continuo del VAE</td><td>(F) El Ajiaco santafereño como receta conceptual: entre dos ajiacos válidos existen infinitos estados intermedios.</td></tr>
-                            <tr><td>7. Desvanecimiento del gradiente (RNN)</td><td>(G) El teléfono roto: la instrucción del gerente se diluye al pasar por 50 niveles jerárquicos.</td></tr>
+                            <tr><td>7. Desvanecimiento del gradiente (RNN)</td><td>(G) El teléfono roto: una frase susurrada de oído en oído por 50 personas llega irreconocible al final.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -3393,6 +3467,7 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                     <li>Simonyan &amp; Zisserman (2015) — VGG</li>
                     <li>He et al. (2016) — ResNet</li>
                     <li>Dosovitskiy et al. (2021) — Vision Transformer</li>
+                    <li>Tolstikhin et al. (2021) — MLP-Mixer (arXiv:2105.01601)</li>
                     <li>Hochreiter &amp; Schmidhuber (1997) — LSTM</li>
                     <li>Cho et al. (2014) — GRU</li>
                     <li>Sutskever et al. (2014) — seq2seq</li>

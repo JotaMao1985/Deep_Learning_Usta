@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ViT vs CNN - Arquitectura Comparativa Animada</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.0/index.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.0/index.css">
+<style>
+  * { font-family: 'Inter', sans-serif; }
+  code, .mono { font-family: 'JetBrains Mono', monospace; }
+  
+  body {
+    background: #ffffff;
+    color: #334155;
+    overflow-x: hidden;
+  }
+  
+  .gradient-text {
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 50%, #db2777 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .cnn-accent { color: #ea580c; }
+  .vit-accent { color: #2563eb; }
+  
+  .card {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    backdrop-filter: blur(10px);
+  }
+  
+  .card-cnn {
+    background: rgba(251, 146, 60, 0.05);
+    border: 1px solid rgba(251, 146, 60, 0.2);
+  }
+  
+  .card-vit {
+    background: rgba(96, 165, 250, 0.05);
+    border: 1px solid rgba(96, 165, 250, 0.2);
+  }
+  
+  .pulse-ring {
+    animation: pulseRing 2s ease-out infinite;
+  }
+  
+  @keyframes pulseRing {
+    0% { transform: scale(0.8); opacity: 1; }
+    100% { transform: scale(2); opacity: 0; }
+  }
+  
+  .glow-cnn {
+    box-shadow: 0 0 20px rgba(251, 146, 60, 0.4);
+  }
+  
+  .glow-vit {
+    box-shadow: 0 0 20px rgba(96, 165, 250, 0.4);
+  }
+  
+  .step-active {
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.2), rgba(167, 139, 250, 0.2));
+    border-color: rgba(96, 165, 250, 0.5);
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    color: #fff;
+    transition: all 0.3s;
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+  }
+  
+  .btn-secondary {
+    background: #F1F5F9;
+    border: 1px solid #CBD5E1;
+    transition: all 0.3s;
+  }
+  
+  .btn-secondary:hover {
+    background: #E2E8F0;
+  }
+  
+  .tab-active {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+    border-color: rgba(96, 165, 250, 0.5);
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  svg text {
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .attention-line {
+    stroke-dasharray: 5;
+    animation: dash 1s linear infinite;
+  }
+  
+  @keyframes dash {
+    to { stroke-dashoffset: -10; }
+  }
+  
+  .kernel-scan {
+    animation: scan 3s ease-in-out infinite;
+  }
+  
+  @keyframes scan {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(20px, 0); }
+    50% { transform: translate(20px, 20px); }
+    75% { transform: translate(0, 20px); }
+  }
+  
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: #F1F5F9; }
+  ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+</style>
+</head>
+<body>
+
+<div class="p-4 md:p-8">
+  
+  <!-- Header -->
+  <header class="max-w-7xl mx-auto mb-8">
+    <div class="flex items-center gap-3 mb-2">
+      <div class="w-2 h-8 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
+      <span class="text-sm uppercase tracking-widest text-gray-600">Material Didáctico Interactivo</span>
+    </div>
+    <h1 class="text-4xl md:text-6xl font-bold mb-4">
+      <span class="gradient-text">Vision Transformer</span>
+      <span class="text-gray-700"> vs </span>
+      <span class="cnn-accent">CNN</span>
+    </h1>
+    <p class="text-lg text-gray-600 max-w-3xl">
+      Explora paso a paso cómo cada arquitectura procesa una imagen. Compara el flujo jerárquico de las redes convolucionales con el mecanismo de atención global de los Vision Transformers.
+    </p>
+  </header>
+
+  <!-- Tabs -->
+  <div class="max-w-7xl mx-auto mb-6 flex flex-wrap gap-2">
+    <button onclick="switchTab('overview')" id="tab-overview" class="tab-btn px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium tab-active">
+      📊 Vista General Comparativa
+    </button>
+    <button onclick="switchTab('vit')" id="tab-vit" class="tab-btn px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium">
+      🔬 Anatomía del ViT
+    </button>
+    <button onclick="switchTab('receptive')" id="tab-receptive" class="tab-btn px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium">
+      🎯 Campo Receptivo
+    </button>
+    <button onclick="switchTab('encoder')" id="tab-encoder" class="tab-btn px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium">
+      ⚙️ Encoder Block
+    </button>
+  </div>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto">
+    
+    <!-- TAB 1: Overview Comparativa -->
+    <div id="content-overview" class="tab-content">
+      
+      <!-- Controls -->
+      <div class="card rounded-xl p-4 mb-6 flex flex-wrap items-center gap-3">
+        <button onclick="togglePlay()" id="playBtn" class="btn-primary px-5 py-2 rounded-lg font-medium flex items-center gap-2">
+          <span id="playIcon">▶</span> <span id="playText">Reproducir</span>
+        </button>
+        <button onclick="stepForward()" class="btn-secondary px-4 py-2 rounded-lg font-medium">
+          ⏭ Siguiente paso
+        </button>
+        <button onclick="resetAnimation()" class="btn-secondary px-4 py-2 rounded-lg font-medium">
+          🔄 Reiniciar
+        </button>
+        <div class="flex items-center gap-2 ml-auto">
+          <span class="text-xs text-gray-600">Paso:</span>
+          <span id="stepCounter" class="mono text-sm font-bold vit-accent">0 / 8</span>
+        </div>
+      </div>
+
+      <!-- Step Info -->
+      <div id="stepInfo" class="card rounded-xl p-5 mb-6 border-l-4 border-blue-500">
+        <div class="flex items-start gap-3">
+          <div class="text-2xl">💡</div>
+          <div>
+            <h3 id="stepTitle" class="text-lg font-bold mb-1">Listo para comenzar</h3>
+            <p id="stepDescription" class="text-gray-600 text-sm">
+              Presiona "Reproducir" o "Siguiente paso" para iniciar la animación comparativa entre CNN y ViT.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two Column Comparison -->
+      <div class="grid md:grid-cols-2 gap-6">
+        
+        <!-- CNN Column -->
+        <div class="card-cnn rounded-xl p-6">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-3 h-3 rounded-full bg-orange-400"></div>
+            <h2 class="text-xl font-bold cnn-accent">CNN Tradicional</h2>
+          </div>
+          <p class="text-xs text-gray-600 mb-4">Procesamiento jerárquico: local → global</p>
+          
+          <svg id="cnn-svg" viewBox="0 0 400 500" class="w-full">
+            <!-- Input Image -->
+            <g id="cnn-input">
+              <rect x="150" y="10" width="100" height="100" fill="#1f2937" stroke="#4b5563" stroke-width="1"/>
+              <rect x="155" y="15" width="20" height="20" fill="#fb923c" opacity="0.3"/>
+              <rect x="180" y="30" width="25" height="25" fill="#fb923c" opacity="0.5"/>
+              <rect x="210" y="50" width="30" height="20" fill="#fb923c" opacity="0.4"/>
+              <rect x="160" y="70" width="20" height="30" fill="#fb923c" opacity="0.6"/>
+              <text x="200" y="130" text-anchor="middle" fill="#9ca3af" font-size="10">Imagen (224×224)</text>
+            </g>
+            
+            <!-- Conv Layer 1 -->
+            <g id="cnn-conv1" opacity="0.3">
+              <rect x="130" y="150" width="140" height="60" fill="#7c2d12" stroke="#fb923c" stroke-width="1" rx="4"/>
+              <text x="200" y="185" text-anchor="middle" fill="#fed7aa" font-size="11" font-weight="bold">Conv 3×3</text>
+              <!-- Kernel scanning -->
+              <g id="cnn-kernel1">
+                <rect x="140" y="160" width="15" height="15" fill="#fbbf24" opacity="0.8" rx="2"/>
+              </g>
+            </g>
+            
+            <!-- Conv Layer 2 -->
+            <g id="cnn-conv2" opacity="0.3">
+              <rect x="110" y="230" width="180" height="50" fill="#7c2d12" stroke="#fb923c" stroke-width="1" rx="4"/>
+              <text x="200" y="260" text-anchor="middle" fill="#fed7aa" font-size="11" font-weight="bold">Conv 3×3</text>
+            </g>
+            
+            <!-- Conv Layer 3 -->
+            <g id="cnn-conv3" opacity="0.3">
+              <rect x="90" y="300" width="220" height="45" fill="#7c2d12" stroke="#fb923c" stroke-width="1" rx="4"/>
+              <text x="200" y="328" text-anchor="middle" fill="#fed7aa" font-size="11" font-weight="bold">Conv 3×3</text>
+            </g>
+            
+            <!-- Pooling -->
+            <g id="cnn-pool" opacity="0.3">
+              <rect x="130" y="365" width="140" height="35" fill="#451a03" stroke="#fb923c" stroke-width="1" rx="4"/>
+              <text x="200" y="388" text-anchor="middle" fill="#fed7aa" font-size="10">Global Avg Pooling</text>
+            </g>
+            
+            <!-- Output -->
+            <g id="cnn-output" opacity="0.3">
+              <rect x="150" y="420" width="100" height="40" fill="#1f2937" stroke="#fb923c" stroke-width="2" rx="4"/>
+              <text x="200" y="445" text-anchor="middle" fill="#fb923c" font-size="11" font-weight="bold">Clase</text>
+            </g>
+            
+            <!-- Arrows -->
+            <g id="cnn-arrows" opacity="0.3">
+              <line x1="200" y1="115" x2="200" y2="145" stroke="#fb923c" stroke-width="1" marker-end="url(#arrow-cnn)"/>
+              <line x1="200" y1="215" x2="200" y2="225" stroke="#fb923c" stroke-width="1" marker-end="url(#arrow-cnn)"/>
+              <line x1="200" y1="285" x2="200" y2="295" stroke="#fb923c" stroke-width="1" marker-end="url(#arrow-cnn)"/>
+              <line x1="200" y1="350" x2="200" y2="360" stroke="#fb923c" stroke-width="1" marker-end="url(#arrow-cnn)"/>
+              <line x1="200" y1="405" x2="200" y2="415" stroke="#fb923c" stroke-width="1" marker-end="url(#arrow-cnn)"/>
+            </g>
+            
+            <defs>
+              <marker id="arrow-cnn" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="#fb923c"/>
+              </marker>
+            </defs>
+          </svg>
+        </div>
+        
+        <!-- ViT Column -->
+        <div class="card-vit rounded-xl p-6">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-3 h-3 rounded-full bg-blue-400"></div>
+            <h2 class="text-xl font-bold vit-accent">Vision Transformer</h2>
+          </div>
+          <p class="text-xs text-gray-600 mb-4">Atención global desde el inicio</p>
+          
+          <svg id="vit-svg" viewBox="0 0 400 500" class="w-full">
+            <!-- Input Image -->
+            <g id="vit-input">
+              <rect x="150" y="10" width="100" height="100" fill="#1f2937" stroke="#4b5563" stroke-width="1"/>
+              <rect x="155" y="15" width="20" height="20" fill="#60a5fa" opacity="0.3"/>
+              <rect x="180" y="30" width="25" height="25" fill="#60a5fa" opacity="0.5"/>
+              <rect x="210" y="50" width="30" height="20" fill="#60a5fa" opacity="0.4"/>
+              <rect x="160" y="70" width="20" height="30" fill="#60a5fa" opacity="0.6"/>
+              <text x="200" y="130" text-anchor="middle" fill="#9ca3af" font-size="10">Imagen (224×224)</text>
+            </g>
+            
+            <!-- Patches -->
+            <g id="vit-patches" opacity="0.3">
+              <text x="200" y="155" text-anchor="middle" fill="#93c5fd" font-size="9">Patches 16×16</text>
+              <!-- Grid of patches -->
+              <g id="patch-grid"></g>
+            </g>
+            
+            <!-- Embeddings + CLS + Pos -->
+            <g id="vit-embeddings" opacity="0.3">
+              <rect x="70" y="175" width="260" height="40" fill="#1e3a8a" stroke="#60a5fa" stroke-width="1" rx="4"/>
+              <!-- CLS token -->
+              <rect x="80" y="185" width="25" height="20" fill="#fbbf24" stroke="#fbbf24" rx="3"/>
+              <text x="92" y="199" text-anchor="middle" fill="#000" font-size="8" font-weight="bold">CLS</text>
+              <!-- Patch embeddings -->
+              <rect x="115" y="185" width="15" height="20" fill="#3b82f6" rx="2"/>
+              <rect x="135" y="185" width="15" height="20" fill="#3b82f6" rx="2"/>
+              <rect x="155" y="185" width="15" height="20" fill="#3b82f6" rx="2"/>
+              <rect x="175" y="185" width="15" height="20" fill="#3b82f6" rx="2"/>
+              <rect x="195" y="185" width="15" height="20" fill="#3b82f6" rx="2"/>
+              <rect x="215" y="185" width="15" height="20" fill="#3b82f6" rx="2"/>
+              <rect x="235" y="185" width="15" height="20" fill="#3b82f6" rx="2"/>
+              <rect x="255" y="185" width="15" height="20" fill="#3b82f6" rx="2"/>
+              <rect x="275" y="185" width="15" height="20" fill="#3b82f6" rx="2"/>
+              <rect x="295" y="185" width="15" height="20" fill="#3b82f6" rx="2"/>
+              <text x="200" y="230" text-anchor="middle" fill="#9ca3af" font-size="9">+ Positional Embeddings</text>
+            </g>
+            
+            <!-- Transformer Encoder -->
+            <g id="vit-encoder" opacity="0.3">
+              <rect x="60" y="250" width="280" height="130" fill="#1e1b4b" stroke="#8b5cf6" stroke-width="1" rx="6"/>
+              <text x="200" y="270" text-anchor="middle" fill="#c4b5fd" font-size="11" font-weight="bold">Transformer Encoder × N</text>
+              
+              <!-- Multi-Head Attention -->
+              <rect x="80" y="285" width="240" height="35" fill="#312e81" stroke="#a78bfa" stroke-width="1" rx="4"/>
+              <text x="200" y="307" text-anchor="middle" fill="#ddd6fe" font-size="10">Multi-Head Self-Attention</text>
+              
+              <!-- Attention lines -->
+              <g id="attention-lines"></g>
+              
+              <!-- Add & Norm -->
+              <rect x="80" y="325" width="110" height="20" fill="#1e1b4b" stroke="#6366f1" stroke-width="1" rx="3"/>
+              <text x="135" y="339" text-anchor="middle" fill="#a5b4fc" font-size="8">Add & Norm</text>
+              
+              <!-- FFN -->
+              <rect x="200" y="325" width="120" height="20" fill="#1e1b4b" stroke="#6366f1" stroke-width="1" rx="3"/>
+              <text x="260" y="339" text-anchor="middle" fill="#a5b4fc" font-size="8">Feed-Forward</text>
+              
+              <!-- Add & Norm 2 -->
+              <rect x="80" y="350" width="240" height="18" fill="#1e1b4b" stroke="#6366f1" stroke-width="1" rx="3"/>
+              <text x="200" y="363" text-anchor="middle" fill="#a5b4fc" font-size="8">Add & Norm</text>
+            </g>
+            
+            <!-- CLS Output -->
+            <g id="vit-cls-out" opacity="0.3">
+              <rect x="150" y="400" width="100" height="30" fill="#78350f" stroke="#fbbf24" stroke-width="2" rx="4"/>
+              <text x="200" y="420" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="bold">CLS Token</text>
+            </g>
+            
+            <!-- MLP Head -->
+            <g id="vit-mlp" opacity="0.3">
+              <rect x="150" y="445" width="100" height="35" fill="#1f2937" stroke="#60a5fa" stroke-width="2" rx="4"/>
+              <text x="200" y="467" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="bold">MLP Head</text>
+            </g>
+            
+            <!-- Arrows -->
+            <g id="vit-arrows" opacity="0.3">
+              <line x1="200" y1="115" x2="200" y2="145" stroke="#60a5fa" stroke-width="1" marker-end="url(#arrow-vit)"/>
+              <line x1="200" y1="168" x2="200" y2="175" stroke="#60a5fa" stroke-width="1" marker-end="url(#arrow-vit)"/>
+              <line x1="200" y1="238" x2="200" y2="248" stroke="#60a5fa" stroke-width="1" marker-end="url(#arrow-vit)"/>
+              <line x1="200" y1="382" x2="200" y2="398" stroke="#60a5fa" stroke-width="1" marker-end="url(#arrow-vit)"/>
+              <line x1="200" y1="432" x2="200" y2="443" stroke="#60a5fa" stroke-width="1" marker-end="url(#arrow-vit)"/>
+            </g>
+            
+            <defs>
+              <marker id="arrow-vit" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="#60a5fa"/>
+              </marker>
+            </defs>
+          </svg>
+        </div>
+      </div>
+      
+      <!-- Legend -->
+      <div class="card rounded-xl p-4 mt-6">
+        <h3 class="text-sm font-bold mb-3 text-gray-700">Leyenda de colores</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded bg-yellow-400"></div>
+            <span><strong>CLS Token:</strong> Token de clasificación</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded bg-blue-500"></div>
+            <span><strong>Patch Embeddings:</strong> Representación de cada patch</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded bg-purple-500"></div>
+            <span><strong>Encoder Block:</strong> Capa del Transformer</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded bg-orange-500"></div>
+            <span><strong>Kernel CNN:</strong> Filtro convolucional</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: Anatomía del ViT -->
+    <div id="content-vit" class="tab-content hidden">
+      <div class="card rounded-xl p-6 mb-6">
+        <h2 class="text-2xl font-bold mb-2 gradient-text">Anatomía del Vision Transformer</h2>
+        <p class="text-gray-600 text-sm">Cada componente tiene un propósito específico. Pasa el cursor sobre cada elemento para más detalles.</p>
+      </div>
+      
+      <div class="grid md:grid-cols-3 gap-4">
+        
+        <div class="card rounded-xl p-5 hover:border-yellow-400/50 transition-all cursor-pointer group">
+          <div class="w-12 h-12 rounded-lg bg-yellow-400/20 flex items-center justify-center mb-3 text-2xl">
+            🏷️
+          </div>
+          <h3 class="font-bold text-yellow-600 mb-2">CLS Token</h3>
+          <p class="text-xs text-gray-600 mb-3">Classification Token</p>
+          <p class="text-sm text-gray-700">
+            Vector aprendible añadido al inicio de la secuencia. <strong>Recopila información global</strong> de todos los patches a través de las capas de atención.
+          </p>
+          <div class="mt-3 p-2 bg-yellow-400/10 rounded text-xs text-yellow-200">
+            💡 Al final, solo este token se usa para la clasificación.
+          </div>
+        </div>
+        
+        <div class="card rounded-xl p-5 hover:border-blue-400/50 transition-all cursor-pointer group">
+          <div class="w-12 h-12 rounded-lg bg-blue-400/20 flex items-center justify-center mb-3 text-2xl">
+            🧩
+          </div>
+          <h3 class="font-bold text-blue-600 mb-2">Patch Embeddings</h3>
+          <p class="text-xs text-gray-600 mb-3">Image → Sequence</p>
+          <p class="text-sm text-gray-700">
+            La imagen se divide en patches (ej: 16×16). Cada patch se <strong>aplana y proyecta</strong> a un vector de dimensión D (ej: 768).
+          </p>
+          <div class="mt-3 p-2 bg-blue-400/10 rounded text-xs text-blue-200">
+            📐 224×224 / 16×16 = 196 patches
+          </div>
+        </div>
+        
+        <div class="card rounded-xl p-5 hover:border-purple-400/50 transition-all cursor-pointer group">
+          <div class="w-12 h-12 rounded-lg bg-purple-400/20 flex items-center justify-center mb-3 text-2xl">
+            📍
+          </div>
+          <h3 class="font-bold text-purple-600 mb-2">Positional Embeddings</h3>
+          <p class="text-xs text-gray-600 mb-3">Spatial Information</p>
+          <p class="text-sm text-gray-700">
+            Vectores <strong>aprendibles</strong> que se suman a cada patch para preservar la información espacial. Sin ellos, el modelo no conoce la posición.
+          </p>
+          <div class="mt-3 p-2 bg-purple-400/10 rounded text-xs text-purple-200">
+            🎯 Esenciales para entender la estructura 2D
+          </div>
+        </div>
+        
+        <div class="card rounded-xl p-5 hover:border-pink-400/50 transition-all cursor-pointer group">
+          <div class="w-12 h-12 rounded-lg bg-pink-400/20 flex items-center justify-center mb-3 text-2xl">
+            🔗
+          </div>
+          <h3 class="font-bold text-pink-600 mb-2">Multi-Head Attention</h3>
+          <p class="text-xs text-gray-600 mb-3">Global Communication</p>
+          <p class="text-sm text-gray-700">
+            Cada patch genera <strong>Query, Key, Value</strong>. Múltiples "cabezas" aprenden diferentes tipos de relaciones en paralelo.
+          </p>
+          <div class="mt-3 p-2 bg-pink-400/10 rounded text-xs text-pink-200 mono">
+            Attention(Q,K,V) = softmax(QK<sup>T</sup>/√d)V
+          </div>
+        </div>
+        
+        <div class="card rounded-xl p-5 hover:border-green-400/50 transition-all cursor-pointer group">
+          <div class="w-12 h-12 rounded-lg bg-green-400/20 flex items-center justify-center mb-3 text-2xl">
+            🔄
+          </div>
+          <h3 class="font-bold text-green-600 mb-2">Residual Connections</h3>
+          <p class="text-xs text-gray-600 mb-3">Skip Connections</p>
+          <p class="text-sm text-gray-700">
+            <code class="text-green-300">output = x + Sublayer(x)</code>. Mitigan el <strong>vanishing gradient</strong> y preservan información entre capas profundas.
+          </p>
+          <div class="mt-3 p-2 bg-green-400/10 rounded text-xs text-green-200">
+            🚀 Permiten arquitecturas de 12-32 capas
+          </div>
+        </div>
+        
+        <div class="card rounded-xl p-5 hover:border-indigo-400/50 transition-all cursor-pointer group">
+          <div class="w-12 h-12 rounded-lg bg-indigo-400/20 flex items-center justify-center mb-3 text-2xl">
+            📊
+          </div>
+          <h3 class="font-bold text-indigo-600 mb-2">Layer Normalization</h3>
+          <p class="text-xs text-gray-600 mb-3">Training Stability</p>
+          <p class="text-sm text-gray-700">
+            Normaliza las activaciones <strong>por muestra</strong>. Estabiliza el entrenamiento y acelera la convergencia.
+          </p>
+          <div class="mt-3 p-2 bg-indigo-400/10 rounded text-xs text-indigo-200">
+            ⚡ Se aplica después de cada subcapa
+          </div>
+        </div>
+        
+      </div>
+    </div>
+
+    <!-- TAB 3: Campo Receptivo -->
+    <div id="content-receptive" class="tab-content hidden">
+      <div class="card rounded-xl p-6 mb-6">
+        <h2 class="text-2xl font-bold mb-2 gradient-text">Campo Receptivo: Local vs Global</h2>
+        <p class="text-gray-600 text-sm">Observa cómo cada arquitectura "ve" diferentes regiones de la imagen en cada capa.</p>
+      </div>
+      
+      <div class="grid md:grid-cols-2 gap-6">
+        
+        <!-- CNN Receptive Field -->
+        <div class="card-cnn rounded-xl p-6">
+          <h3 class="text-xl font-bold cnn-accent mb-4">CNN - Crecimiento Gradual</h3>
+          
+          <div class="space-y-4">
+            <div class="flex items-center gap-4">
+              <div class="text-xs font-bold w-20 text-gray-600">Capa 1</div>
+              <div class="flex-1 relative h-20 bg-gray-900 rounded border border-orange-500/30 overflow-hidden">
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <div class="w-8 h-8 bg-orange-500/30 border-2 border-orange-400 rounded kernel-scan"></div>
+                </div>
+                <div class="absolute bottom-1 right-2 text-xs text-gray-600">3×3 píxeles</div>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+              <div class="text-xs font-bold w-20 text-gray-600">Capa 2</div>
+              <div class="flex-1 relative h-20 bg-gray-900 rounded border border-orange-500/30 overflow-hidden">
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <div class="w-16 h-16 bg-orange-500/20 border-2 border-orange-400 rounded"></div>
+                </div>
+                <div class="absolute bottom-1 right-2 text-xs text-gray-600">5×5 píxeles</div>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+              <div class="text-xs font-bold w-20 text-gray-600">Capa 3</div>
+              <div class="flex-1 relative h-20 bg-gray-900 rounded border border-orange-500/30 overflow-hidden">
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <div class="w-28 h-28 bg-orange-500/15 border-2 border-orange-400 rounded"></div>
+                </div>
+                <div class="absolute bottom-1 right-2 text-xs text-gray-600">~11×11</div>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+              <div class="text-xs font-bold w-20 text-gray-600">Capa N</div>
+              <div class="flex-1 relative h-20 bg-gray-900 rounded border border-orange-500/30 overflow-hidden">
+                <div class="absolute inset-2 bg-orange-500/10 border-2 border-orange-400 rounded"></div>
+                <div class="absolute bottom-1 right-2 text-xs text-gray-600">Imagen completa</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-4 p-3 bg-orange-500/10 rounded-lg border border-orange-500/30">
+            <p class="text-xs text-orange-200">
+              <strong>⚠️ Limitación:</strong> Las capas iniciales solo ven regiones muy pequeñas. Se necesitan muchas capas para capturar contexto global.
+            </p>
+          </div>
+        </div>
+        
+        <!-- ViT Receptive Field -->
+        <div class="card-vit rounded-xl p-6">
+          <h3 class="text-xl font-bold vit-accent mb-4">ViT - Global Inmediato</h3>
+          
+          <div class="space-y-4">
+            <div class="flex items-center gap-4">
+              <div class="text-xs font-bold w-20 text-gray-600">Capa 1</div>
+              <div class="flex-1 relative h-20 bg-gray-900 rounded border border-blue-500/30 overflow-hidden" id="vit-rf-layer1">
+                <div class="absolute inset-2 bg-blue-500/20 border-2 border-blue-400 rounded"></div>
+                <svg class="absolute inset-0 w-full h-full" id="vit-attention-svg">
+                  <!-- Attention lines will be drawn here -->
+                </svg>
+                <div class="absolute bottom-1 right-2 text-xs text-gray-600">GLOBAL</div>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+              <div class="text-xs font-bold w-20 text-gray-600">Capa 2</div>
+              <div class="flex-1 relative h-20 bg-gray-900 rounded border border-blue-500/30 overflow-hidden">
+                <div class="absolute inset-2 bg-blue-500/25 border-2 border-blue-400 rounded"></div>
+                <div class="absolute bottom-1 right-2 text-xs text-gray-600">GLOBAL + refinado</div>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+              <div class="text-xs font-bold w-20 text-gray-600">Capa 3</div>
+              <div class="flex-1 relative h-20 bg-gray-900 rounded border border-blue-500/30 overflow-hidden">
+                <div class="absolute inset-2 bg-blue-500/30 border-2 border-blue-400 rounded"></div>
+                <div class="absolute bottom-1 right-2 text-xs text-gray-600">GLOBAL + refinado</div>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-4">
+              <div class="text-xs font-bold w-20 text-gray-600">Capa N</div>
+              <div class="flex-1 relative h-20 bg-gray-900 rounded border border-blue-500/30 overflow-hidden">
+                <div class="absolute inset-2 bg-gradient-to-br from-blue-500/40 to-purple-500/40 border-2 border-blue-400 rounded"></div>
+                <div class="absolute bottom-1 right-2 text-xs text-gray-600">Representación rica</div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-4 p-3 bg-blue-500/10 rounded-lg border border-blue-500/30">
+            <p class="text-xs text-blue-200">
+              <strong>✨ Ventaja:</strong> Desde la primera capa, cada patch puede "atender" a cualquier otro patch de la imagen.
+            </p>
+          </div>
+        </div>
+        
+      </div>
+      
+      <!-- Interactive Demo -->
+      <div class="card rounded-xl p-6 mt-6">
+        <h3 class="text-lg font-bold mb-4">🎮 Demo Interactivo: Haz clic en un patch</h3>
+        <p class="text-sm text-gray-600 mb-4">Selecciona un patch para ver cómo cada arquitectura lo procesa.</p>
+        
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <h4 class="text-sm font-bold cnn-accent mb-2">CNN - Solo ve vecinos cercanos</h4>
+            <div id="cnn-grid" class="grid grid-cols-8 gap-1"></div>
+          </div>
+          <div>
+            <h4 class="text-sm font-bold vit-accent mb-2">ViT - Ve TODOS los patches</h4>
+            <div id="vit-grid" class="grid grid-cols-8 gap-1"></div>
+          </div>
+        </div>
+        
+        <div id="rf-info" class="mt-4 p-3 bg-gray-900 rounded-lg text-sm text-gray-700">
+          👆 Haz clic en cualquier patch para ver la diferencia.
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: Encoder Block -->
+    <div id="content-encoder" class="tab-content hidden">
+      <div class="card rounded-xl p-6 mb-6">
+        <h2 class="text-2xl font-bold mb-2 gradient-text">Encoder Block del Transformer</h2>
+        <p class="text-gray-600 text-sm">El bloque fundamental que se repite N veces en el Vision Transformer.</p>
+      </div>
+      
+      <div class="grid lg:grid-cols-2 gap-6">
+        
+        <!-- Diagram -->
+        <div class="card rounded-xl p-6">
+          <svg viewBox="0 0 400 550" class="w-full">
+            <!-- Input -->
+            <rect x="130" y="10" width="140" height="35" fill="#1f2937" stroke="#60a5fa" stroke-width="2" rx="4"/>
+            <text x="200" y="32" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="bold">Input Embeddings</text>
+            
+            <!-- Arrow -->
+            <line x1="200" y1="45" x2="200" y2="65" stroke="#60a5fa" stroke-width="1.5" marker-end="url(#arrow-enc)"/>
+            
+            <!-- Multi-Head Attention Block -->
+            <rect x="70" y="70" width="260" height="80" fill="#312e81" stroke="#a78bfa" stroke-width="2" rx="6"/>
+            <text x="200" y="95" text-anchor="middle" fill="#c4b5fd" font-size="12" font-weight="bold">Multi-Head Self-Attention</text>
+            
+            <!-- Q, K, V -->
+            <rect x="90" y="110" width="50" height="25" fill="#4c1d95" rx="3"/>
+            <text x="115" y="127" text-anchor="middle" fill="#ddd6fe" font-size="10">Query</text>
+            <rect x="150" y="110" width="50" height="25" fill="#4c1d95" rx="3"/>
+            <text x="175" y="127" text-anchor="middle" fill="#ddd6fe" font-size="10">Key</text>
+            <rect x="210" y="110" width="50" height="25" fill="#4c1d95" rx="3"/>
+            <text x="235" y="127" text-anchor="middle" fill="#ddd6fe" font-size="10">Value</text>
+            <rect x="270" y="110" width="50" height="25" fill="#4c1d95" rx="3"/>
+            <text x="295" y="127" text-anchor="middle" fill="#ddd6fe" font-size="10">Heads</text>
+            
+            <!-- Residual 1 -->
+            <path d="M 60 80 L 40 80 L 40 170 L 60 170" stroke="#10b981" stroke-width="2" fill="none" stroke-dasharray="4"/>
+            <text x="30" y="130" text-anchor="middle" fill="#10b981" font-size="9" transform="rotate(-90 30 130)">Residual</text>
+            
+            <!-- Add & Norm 1 -->
+            <circle cx="200" cy="175" r="15" fill="#064e3b" stroke="#10b981" stroke-width="2"/>
+            <text x="200" y="180" text-anchor="middle" fill="#6ee7b7" font-size="14" font-weight="bold">+</text>
+            <rect x="230" y="160" width="90" height="30" fill="#064e3b" stroke="#10b981" stroke-width="2" rx="4"/>
+            <text x="275" y="180" text-anchor="middle" fill="#6ee7b7" font-size="10">LayerNorm</text>
+            
+            <!-- Arrow -->
+            <line x1="200" y1="195" x2="200" y2="220" stroke="#60a5fa" stroke-width="1.5" marker-end="url(#arrow-enc)"/>
+            
+            <!-- Feed Forward Block -->
+            <rect x="70" y="225" width="260" height="100" fill="#1e3a8a" stroke="#60a5fa" stroke-width="2" rx="6"/>
+            <text x="200" y="250" text-anchor="middle" fill="#93c5fd" font-size="12" font-weight="bold">Feed-Forward Network</text>
+            
+            <!-- Linear 1 -->
+            <rect x="90" y="265" width="100" height="25" fill="#1e40af" rx="3"/>
+            <text x="140" y="282" text-anchor="middle" fill="#bfdbfe" font-size="10">Linear (D → 4D)</text>
+            
+            <!-- GELU -->
+            <rect x="200" y="265" width="60" height="25" fill="#1e40af" rx="3"/>
+            <text x="230" y="282" text-anchor="middle" fill="#bfdbfe" font-size="10">GELU</text>
+            
+            <!-- Linear 2 -->
+            <rect x="270" y="265" width="50" height="25" fill="#1e40af" rx="3"/>
+            <text x="295" y="282" text-anchor="middle" fill="#bfdbfe" font-size="10">Linear</text>
+            
+            <!-- Dropout -->
+            <rect x="150" y="300" width="100" height="20" fill="#1e40af" rx="3"/>
+            <text x="200" y="314" text-anchor="middle" fill="#bfdbfe" font-size="9">Dropout</text>
+            
+            <!-- Residual 2 -->
+            <path d="M 60 235 L 40 235 L 40 345 L 60 345" stroke="#10b981" stroke-width="2" fill="none" stroke-dasharray="4"/>
+            <text x="30" y="290" text-anchor="middle" fill="#10b981" font-size="9" transform="rotate(-90 30 290)">Residual</text>
+            
+            <!-- Add & Norm 2 -->
+            <circle cx="200" cy="350" r="15" fill="#064e3b" stroke="#10b981" stroke-width="2"/>
+            <text x="200" y="355" text-anchor="middle" fill="#6ee7b7" font-size="14" font-weight="bold">+</text>
+            <rect x="230" y="335" width="90" height="30" fill="#064e3b" stroke="#10b981" stroke-width="2" rx="4"/>
+            <text x="275" y="355" text-anchor="middle" fill="#6ee7b7" font-size="10">LayerNorm</text>
+            
+            <!-- Arrow -->
+            <line x1="200" y1="370" x2="200" y2="400" stroke="#60a5fa" stroke-width="1.5" marker-end="url(#arrow-enc)"/>
+            
+            <!-- Output -->
+            <rect x="130" y="405" width="140" height="35" fill="#1f2937" stroke="#60a5fa" stroke-width="2" rx="4"/>
+            <text x="200" y="427" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="bold">Output → Next Block</text>
+            
+            <!-- Repeat indicator -->
+            <text x="350" y="250" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="bold">× N</text>
+            <text x="350" y="265" text-anchor="middle" fill="#fbbf24" font-size="9">(12-32)</text>
+            <path d="M 340 200 Q 360 250 340 300" stroke="#fbbf24" stroke-width="1.5" fill="none" marker-end="url(#arrow-enc)"/>
+            
+            <defs>
+              <marker id="arrow-enc" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="#60a5fa"/>
+              </marker>
+            </defs>
+          </svg>
+        </div>
+        
+        <!-- Explanation -->
+        <div class="space-y-4">
+          
+          <div class="card rounded-xl p-5 border-l-4 border-purple-500">
+            <h3 class="font-bold text-purple-600 mb-2">1. Multi-Head Self-Attention</h3>
+            <p class="text-sm text-gray-700 mb-2">
+              Cada patch genera tres vectores: <strong class="text-purple-300">Query (Q)</strong>, <strong class="text-purple-300">Key (K)</strong> y <strong class="text-purple-300">Value (V)</strong>.
+            </p>
+            <div class="bg-gray-900 rounded p-3 mono text-xs text-purple-200">
+              Attention(Q,K,V) = softmax(QK<sup>T</sup> / √d<sub>k</sub>) · V
+            </div>
+            <p class="text-xs text-gray-600 mt-2">
+              Múltiples "cabezas" permiten aprender diferentes tipos de relaciones simultáneamente.
+            </p>
+          </div>
+          
+          <div class="card rounded-xl p-5 border-l-4 border-green-500">
+            <h3 class="font-bold text-green-600 mb-2">2. Add & Norm</h3>
+            <p class="text-sm text-gray-700 mb-2">
+              <strong class="text-green-300">Residual:</strong> output = x + Sublayer(x)<br>
+              <strong class="text-green-300">LayerNorm:</strong> Normaliza las activaciones
+            </p>
+            <p class="text-xs text-gray-600">
+              Las conexiones residuales permiten entrenar redes muy profundas sin vanishing gradient.
+            </p>
+          </div>
+          
+          <div class="card rounded-xl p-5 border-l-4 border-blue-500">
+            <h3 class="font-bold text-blue-600 mb-2">3. Feed-Forward Network</h3>
+            <p class="text-sm text-gray-700 mb-2">
+              Dos capas lineales con activación <strong class="text-blue-300">GELU</strong> en medio:
+            </p>
+            <div class="bg-gray-900 rounded p-3 mono text-xs text-blue-200">
+              FFN(x) = Linear(GELU(Linear(x)))<br>
+              Dimensión: D → 4D → D
+            </div>
+            <p class="text-xs text-gray-600 mt-2">
+              Procesa la información de atención para la siguiente capa.
+            </p>
+          </div>
+          
+          <div class="card rounded-xl p-5 border-l-4 border-yellow-500">
+            <h3 class="font-bold text-yellow-600 mb-2">💡 Concepto Clave</h3>
+            <p class="text-sm text-gray-700">
+              Este bloque se repite <strong class="text-yellow-300">N veces</strong> (típicamente 12, 24 o 32). Cada capa refina las representaciones, permitiendo que la información fluya y se combine de maneras cada vez más complejas.
+            </p>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="max-w-7xl mx-auto mt-12 pt-6 border-t border-gray-300 text-center text-sm text-gray-600">
+    <p>Material didáctico interactivo · Vision Transformers vs CNNs</p>
+  </footer>
+
+</div>
+
+<script>
+// Tab switching
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('tab-active'));
+  document.getElementById('content-' + tabName).classList.remove('hidden');
+  document.getElementById('tab-' + tabName).classList.add('tab-active');
+  
+  if (tabName === 'receptive') {
+    initReceptiveFieldDemo();
+    animateViTAttention();
+  }
+}
+
+// Animation state
+let currentStep = 0;
+let isPlaying = false;
+let playInterval = null;
+
+const steps = [
+  {
+    title: "Paso 1: Imagen de entrada",
+    description: "Ambas arquitecturas reciben la misma imagen de entrada (224×224 píxeles). La diferencia está en cómo la procesan internamente.",
+    action: () => {
+      highlightElement('cnn-input', true);
+      highlightElement('vit-input', true);
+    }
+  },
+  {
+    title: "Paso 2: Procesamiento inicial",
+    description: "CNN: Aplica filtros convolucionales directamente sobre los píxeles. ViT: Divide la imagen en patches de 16×16 píxeles (196 patches en total).",
+    action: () => {
+      highlightElement('cnn-conv1', true);
+      animateCNNKernel();
+      highlightElement('vit-patches', true);
+      createPatchGrid();
+    }
+  },
+  {
+    title: "Paso 3: Extracción de características",
+    description: "CNN: Múltiples capas convolucionales extraen características jerárquicas (bordes → texturas → partes). ViT: Cada patch se proyecta a un vector de embedding (768 dimensiones).",
+    action: () => {
+      highlightElement('cnn-conv2', true);
+      highlightElement('cnn-conv3', true);
+      highlightElement('vit-embeddings', true);
+    }
+  },
+  {
+    title: "Paso 4: CLS Token y Positional Embeddings (solo ViT)",
+    description: "ViT añade un CLS token (amarillo) que recopilará información global, y positional embeddings para preservar la estructura espacial. CNN no necesita esto.",
+    action: () => {
+      pulseElement('vit-embeddings');
+    }
+  },
+  {
+    title: "Paso 5: Mecanismo de atención (solo ViT)",
+    description: "En el Transformer Encoder, cada patch 'atiende' a todos los demás mediante Multi-Head Self-Attention. Esto permite comunicación global inmediata.",
+    action: () => {
+      highlightElement('vit-encoder', true);
+      animateAttentionLines();
+    }
+  },
+  {
+    title: "Paso 6: Pooling vs CLS Token",
+    description: "CNN: Global Average Pooling comprime el feature map. ViT: El CLS token ya contiene la representación global tras pasar por las capas de atención.",
+    action: () => {
+      highlightElement('cnn-pool', true);
+      highlightElement('vit-cls-out', true);
+    }
+  },
+  {
+    title: "Paso 7: Clasificación final",
+    description: "Ambas arquitecturas producen una clasificación final. CNN usa fully connected layers, ViT usa un MLP Head sobre el CLS token.",
+    action: () => {
+      highlightElement('cnn-output', true);
+      highlightElement('vit-mlp', true);
+    }
+  },
+  {
+    title: "✅ Resumen de la comparación",
+    description: "CNN: Flujo jerárquico local→global, sesgo inductivo fuerte, eficiente con pocos datos. ViT: Atención global desde el inicio, flexible, requiere más datos pero escala mejor.",
+    action: () => {
+      // All elements highlighted
+    }
+  }
+];
+
+function highlightElement(id, show) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.style.transition = 'opacity 0.5s';
+    el.style.opacity = show ? '1' : '0.3';
+  }
+}
+
+function pulseElement(id) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.style.opacity = '1';
+    el.style.animation = 'none';
+    setTimeout(() => {
+      el.style.animation = 'pulse 1s ease-in-out 2';
+    }, 10);
+  }
+}
+
+function createPatchGrid() {
+  const grid = document.getElementById('patch-grid');
+  if (!grid || grid.children.length > 0) return;
+  
+  const size = 8;
+  const startX = 145;
+  const startY = 160;
+  const patchSize = 12;
+  const gap = 1;
+  
+  for (let row = 0; row < size; row++) {
+    for (let col = 0; col < size; col++) {
+      const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      rect.setAttribute('x', startX + col * (patchSize + gap));
+      rect.setAttribute('y', startY + row * (patchSize + gap));
+      rect.setAttribute('width', patchSize);
+      rect.setAttribute('height', patchSize);
+      rect.setAttribute('fill', '#3b82f6');
+      rect.setAttribute('opacity', 0.3 + Math.random() * 0.5);
+      rect.setAttribute('stroke', '#60a5fa');
+      rect.setAttribute('stroke-width', 0.5);
+      grid.appendChild(rect);
+    }
+  }
+}
+
+function animateCNNKernel() {
+  const kernel = document.getElementById('cnn-kernel1');
+  if (!kernel) return;
+  
+  let positions = [
+    {x: 140, y: 160}, {x: 160, y: 160}, {x: 180, y: 160}, {x: 200, y: 160},
+    {x: 200, y: 175}, {x: 180, y: 175}, {x: 160, y: 175}, {x: 140, y: 175}
+  ];
+  
+  let idx = 0;
+  const rect = kernel.querySelector('rect');
+  
+  const interval = setInterval(() => {
+    if (currentStep !== 1 || !isPlaying) {
+      clearInterval(interval);
+      return;
+    }
+    rect.setAttribute('x', positions[idx].x);
+    rect.setAttribute('y', positions[idx].y);
+    idx = (idx + 1) % positions.length;
+  }, 300);
+}
+
+function animateAttentionLines() {
+  const container = document.getElementById('attention-lines');
+  if (!container) return;
+  container.innerHTML = '';
+  
+  const patches = [];
+  for (let i = 0; i < 8; i++) {
+    patches.push({x: 95 + i * 30, y: 302});
+  }
+  
+  // Draw attention lines from first patch to all others
+  for (let i = 1; i < patches.length; i++) {
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', patches[0].x);
+    line.setAttribute('y1', patches[0].y);
+    line.setAttribute('x2', patches[i].x);
+    line.setAttribute('y2', patches[i].y);
+    line.setAttribute('stroke', '#fbbf24');
+    line.setAttribute('stroke-width', 0.5 + Math.random());
+    line.setAttribute('opacity', 0.3 + Math.random() * 0.5);
+    line.setAttribute('class', 'attention-line');
+    container.appendChild(line);
+  }
+}
+
+function animateViTAttention() {
+  const svg = document.getElementById('vit-attention-svg');
+  if (!svg) return;
+  svg.innerHTML = '';
+  
+  const width = svg.clientWidth || 300;
+  const height = svg.clientHeight || 80;
+  
+  // Create random attention lines
+  for (let i = 0; i < 15; i++) {
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', Math.random() * width);
+    line.setAttribute('y1', Math.random() * height);
+    line.setAttribute('x2', Math.random() * width);
+    line.setAttribute('y2', Math.random() * height);
+    line.setAttribute('stroke', '#60a5fa');
+    line.setAttribute('stroke-width', 0.5);
+    line.setAttribute('opacity', 0.3 + Math.random() * 0.4);
+    svg.appendChild(line);
+  }
+}
+
+function stepForward() {
+  if (currentStep < steps.length) {
+    const step = steps[currentStep];
+    document.getElementById('stepTitle').textContent = step.title;
+    document.getElementById('stepDescription').textContent = step.description;
+    document.getElementById('stepCounter').textContent = `${currentStep + 1} / ${steps.length}`;
+    step.action();
+    currentStep++;
+  } else {
+    if (isPlaying) togglePlay();
+  }
+}
+
+function togglePlay() {
+  isPlaying = !isPlaying;
+  const btn = document.getElementById('playBtn');
+  const icon = document.getElementById('playIcon');
+  const text = document.getElementById('playText');
+  
+  if (isPlaying) {
+    icon.textContent = '⏸';
+    text.textContent = 'Pausar';
+    if (currentStep === 0) stepForward();
+    playInterval = setInterval(() => {
+      if (currentStep < steps.length) {
+        stepForward();
+      } else {
+        togglePlay();
+      }
+    }, 3500);
+  } else {
+    icon.textContent = '▶';
+    text.textContent = 'Reproducir';
+    if (playInterval) clearInterval(playInterval);
+  }
+}
+
+function resetAnimation() {
+  if (isPlaying) togglePlay();
+  currentStep = 0;
+  
+  // Reset all elements
+  ['cnn-conv1', 'cnn-conv2', 'cnn-conv3', 'cnn-pool', 'cnn-output', 'cnn-arrows',
+   'vit-patches', 'vit-embeddings', 'vit-encoder', 'vit-cls-out', 'vit-mlp', 'vit-arrows'].forEach(id => {
+    highlightElement(id, false);
+  });
+  
+  // Clear dynamic elements
+  const patchGrid = document.getElementById('patch-grid');
+  if (patchGrid) patchGrid.innerHTML = '';
+  const attLines = document.getElementById('attention-lines');
+  if (attLines) attLines.innerHTML = '';
+  
+  document.getElementById('stepTitle').textContent = 'Listo para comenzar';
+  document.getElementById('stepDescription').textContent = 'Presiona "Reproducir" o "Siguiente paso" para iniciar la animación comparativa entre CNN y ViT.';
+  document.getElementById('stepCounter').textContent = `0 / ${steps.length}`;
+}
+
+// Receptive Field Interactive Demo
+function initReceptiveFieldDemo() {
+  const cnnGrid = document.getElementById('cnn-grid');
+  const vitGrid = document.getElementById('vit-grid');
+  
+  if (!cnnGrid || cnnGrid.children.length > 0) return;
+  
+  const size = 8;
+  
+  for (let i = 0; i < size * size; i++) {
+    const cnnCell = document.createElement('div');
+    cnnCell.className = 'aspect-square bg-gray-800 rounded cursor-pointer transition-all hover:bg-gray-700';
+    cnnCell.dataset.index = i;
+    cnnCell.onclick = () => showReceptiveField(i, 'cnn');
+    cnnGrid.appendChild(cnnCell);
+    
+    const vitCell = document.createElement('div');
+    vitCell.className = 'aspect-square bg-gray-800 rounded cursor-pointer transition-all hover:bg-gray-700';
+    vitCell.dataset.index = i;
+    vitCell.onclick = () => showReceptiveField(i, 'vit');
+    vitGrid.appendChild(vitCell);
+  }
+}
+
+function showReceptiveField(index, type) {
+  const row = Math.floor(index / 8);
+  const col = index % 8;
+  
+  const cnnGrid = document.getElementById('cnn-grid');
+  const vitGrid = document.getElementById('vit-grid');
+  const info = document.getElementById('rf-info');
+  
+  // Reset all cells
+  [...cnnGrid.children, ...vitGrid.children].forEach(cell => {
+    cell.className = 'aspect-square bg-gray-800 rounded cursor-pointer transition-all hover:bg-gray-700';
+  });
+  
+  if (type === 'cnn') {
+    // CNN: Only nearby cells (3x3 neighborhood)
+    const neighbors = [];
+    for (let dr = -1; dr <= 1; dr++) {
+      for (let dc = -1; dc <= 1; dc++) {
+        const nr = row + dr;
+        const nc = col + dc;
+        if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+          neighbors.push(nr * 8 + nc);
+        }
+      }
+    }
+    
+    neighbors.forEach(idx => {
+      const cell = cnnGrid.children[idx];
+      if (idx === index) {
+        cell.className = 'aspect-square bg-orange-500 rounded cursor-pointer transition-all glow-cnn';
+      } else {
+        cell.className = 'aspect-square bg-orange-500/40 rounded cursor-pointer transition-all';
+      }
+    });
+    
+    // Highlight same cell in ViT grid for comparison
+    vitGrid.children[index].className = 'aspect-square bg-blue-500/30 rounded cursor-pointer transition-all border-2 border-blue-400';
+    
+    info.innerHTML = `<strong class="cnn-accent">CNN:</strong> El patch seleccionado solo puede ver <strong>${neighbors.length} patches vecinos</strong> (vecindad 3×3). Para ver toda la imagen, necesita múltiples capas apiladas.`;
+  } else {
+    // ViT: ALL cells
+    [...vitGrid.children].forEach((cell, idx) => {
+      if (idx === index) {
+        cell.className = 'aspect-square bg-blue-500 rounded cursor-pointer transition-all glow-vit';
+      } else {
+        cell.className = 'aspect-square bg-blue-500/40 rounded cursor-pointer transition-all';
+      }
+    });
+    
+    // Highlight same cell in CNN grid for comparison
+    cnnGrid.children[index].className = 'aspect-square bg-orange-500/30 rounded cursor-pointer transition-all border-2 border-orange-400';
+    
+    info.innerHTML = `<strong class="vit-accent">ViT:</strong> El patch seleccionado puede atender a <strong>TODOS los 64 patches</strong> simultáneamente desde la primera capa. ¡Atención global inmediata!`;
+  }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+  // Set initial state
+  resetAnimation();
+});
+</script>
+
+
+<script>
+(function(){
+  var t;
+  function ph(){ clearTimeout(t); t=setTimeout(function(){
+    try{ parent.postMessage({type:'embed-tool-height', id:'vit-anatomia-frame',
+      height: Math.ceil(document.documentElement.getBoundingClientRect().height)}, '*'); }catch(e){}
+  }, 90); }
+  window.addEventListener('load', ph); window.addEventListener('resize', ph);
+  new MutationObserver(ph).observe(document.body, {subtree:true, childList:true, attributes:true, attributeFilter:['class','style']});
+  setTimeout(ph, 300);
+})();
+</script>
+</body>
+</html>
+

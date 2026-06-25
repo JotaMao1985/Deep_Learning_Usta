@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Anatomía de una CNN - Animación Interactiva</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #ffffff;
+    color: #334155;
+    min-height: 0;
+    padding: 14px 14px 4px;
+  }
+  .container { max-width: 1400px; margin: 0 auto; }
+  header {
+    text-align: center; margin-bottom: 18px; padding: 16px;
+    background: #FBF8FF; border-radius: 16px; border: 1px solid #E2E8F0;
+  }
+  h1 {
+    font-size: 1.7rem;
+    background: linear-gradient(90deg, #3D008D, #ED1E79);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 6px;
+  }
+  .subtitle { color: #64748B; font-size: 0.92rem; }
+
+  .progress-bar {
+    display: flex; justify-content: space-between; margin-bottom: 18px; padding: 14px;
+    background: #F8FAFC; border-radius: 12px; border: 1px solid #E2E8F0; position: relative;
+  }
+  .progress-bar::before {
+    content: ''; position: absolute; top: 50%; left: 30px; right: 30px;
+    height: 2px; background: #E2E8F0; z-index: 0;
+  }
+  .step-indicator {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    z-index: 1; cursor: pointer; transition: transform 0.2s; flex: 1;
+  }
+  .step-indicator:hover { transform: translateY(-3px); }
+  .step-dot {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: #F1F5F9; border: 2px solid #CBD5E1; color: #64748B;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 0.9rem; transition: all 0.3s;
+  }
+  .step-indicator.active .step-dot {
+    background: linear-gradient(135deg, #3D008D, #ED1E79); border-color: #3D008D; color: #fff;
+    box-shadow: 0 0 16px rgba(237,30,121,0.35);
+  }
+  .step-indicator.completed .step-dot { background: #15803D; border-color: #15803D; color: #fff; }
+  .step-label { font-size: 0.75rem; color: #64748B; text-align: center; max-width: 100px; }
+  .step-indicator.active .step-label { color: #3D008D; font-weight: 600; }
+
+  .main-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .panel {
+    background: #ffffff; border: 1px solid #E2E8F0; border-radius: 16px;
+    padding: 18px; min-height: 320px; position: relative; transition: all 0.4s;
+  }
+  .panel.highlight { border-color: #ED1E79; box-shadow: 0 0 0 3px rgba(237,30,121,0.12); }
+  .panel-title {
+    font-size: 1rem; font-weight: 600; margin-bottom: 15px;
+    display: flex; align-items: center; gap: 8px; color: #1E293B;
+  }
+  .panel-title .icon {
+    width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
+  }
+  .icon-input { background: linear-gradient(135deg, #3b82f6, #1e40af); }
+  .icon-filter { background: linear-gradient(135deg, #f59e0b, #d97706); }
+  .icon-feature { background: linear-gradient(135deg, #15803D, #047857); }
+  .icon-relu { background: linear-gradient(135deg, #ED1E79, #be185d); }
+  .icon-pool { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+  .icon-output { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+
+  .matrix-container { display: flex; justify-content: center; align-items: center; min-height: 240px; overflow-x: auto; }
+  body { overflow-x: hidden; }
+  .matrix { display: grid; gap: 3px; padding: 10px; background: #F1F5F9; border-radius: 10px; position: relative; }
+  .cell {
+    width: 42px; height: 42px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; font-weight: 600; transition: all 0.3s; position: relative;
+  }
+  .cell.highlight { box-shadow: 0 0 0 3px rgba(237,30,121,0.55); transform: scale(1.1); z-index: 10; }
+  .cell.in-filter { outline: 3px solid #ED1E79; outline-offset: -3px; }
+
+  .filter-overlay {
+    position: absolute; border: 3px solid #ED1E79; border-radius: 8px; pointer-events: none;
+    box-shadow: 0 0 12px rgba(237,30,121,0.4); transition: all 0.4s ease-in-out; background: rgba(237,30,121,0.08);
+  }
+
+  .explanation {
+    background: #FBF8FF; border: 1px solid #E2E8F0; border-radius: 16px;
+    padding: 18px; margin-bottom: 18px; min-height: 100px;
+  }
+  .explanation h3 { color: #3D008D; margin-bottom: 10px; font-size: 1.1rem; }
+  .explanation p { color: #334155; line-height: 1.6; font-size: 0.95rem; }
+  .formula {
+    background: #F8FAFC; padding: 10px 15px; border-radius: 8px; font-family: 'Courier New', monospace;
+    color: #be185d; margin-top: 10px; font-size: 0.9rem; border-left: 3px solid #ED1E79;
+  }
+
+  .controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 18px; flex-wrap: wrap; }
+  .btn {
+    padding: 12px 28px; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; color: white; display: flex; align-items: center; gap: 8px;
+  }
+  .btn-primary { background: linear-gradient(135deg, #3D008D, #5b21b6); }
+  .btn-secondary { background: linear-gradient(135deg, #94A3B8, #64748B); }
+  .btn-accent { background: linear-gradient(135deg, #ED1E79, #be185d); }
+  .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(61,0,141,0.18); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .image-selector { display: flex; justify-content: center; gap: 10px; margin-bottom: 18px; }
+  .img-btn {
+    padding: 8px 20px; background: #F1F5F9; border: 1px solid #CBD5E1; color: #475569;
+    border-radius: 8px; cursor: pointer; transition: all 0.2s; font-weight: 600;
+  }
+  .img-btn.active { background: linear-gradient(135deg, #3D008D, #ED1E79); border-color: transparent; color: white; }
+
+  .calc-display {
+    background: #F8FAFC; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid #E2E8F0;
+    font-family: 'Courier New', monospace; font-size: 0.8rem; color: #15803D; text-align: center;
+    min-height: 40px; display: flex; align-items: center; justify-content: center;
+  }
+
+  .output-bars { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+  .output-bar { display: flex; align-items: center; gap: 12px; }
+  .output-label { width: 60px; font-weight: 600; font-size: 1.1rem; color: #1E293B; }
+  .bar-track { flex: 1; height: 30px; background: #F1F5F9; border-radius: 15px; overflow: hidden; position: relative; }
+  .bar-fill {
+    height: 100%; border-radius: 15px; transition: width 1s ease-out; color: #fff;
+    display: flex; align-items: center; justify-content: flex-end; padding-right: 12px;
+    font-weight: 600; font-size: 0.85rem;
+  }
+  .bar-fill.x-bar { background: linear-gradient(90deg, #3b82f6, #1e40af); }
+  .bar-fill.o-bar { background: linear-gradient(90deg, #ED1E79, #be185d); }
+
+  @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } h1 { font-size: 1.4rem; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🧠 Anatomía de una Red Neuronal Convolucional</h1>
+    <p class="subtitle">Animación interactiva paso a paso — Inspirado en StatQuest</p>
+  </header>
+
+  <div class="image-selector">
+    <button class="img-btn active" data-img="X">Imagen: X</button>
+    <button class="img-btn" data-img="O">Imagen: O</button>
+  </div>
+
+  <div class="progress-bar">
+    <div class="step-indicator active" data-step="0">
+      <div class="step-dot">1</div>
+      <div class="step-label">Entrada</div>
+    </div>
+    <div class="step-indicator" data-step="1">
+      <div class="step-dot">2</div>
+      <div class="step-label">Filtro</div>
+    </div>
+    <div class="step-indicator" data-step="2">
+      <div class="step-dot">3</div>
+      <div class="step-label">Convolución</div>
+    </div>
+    <div class="step-indicator" data-step="3">
+      <div class="step-dot">4</div>
+      <div class="step-label">ReLU</div>
+    </div>
+    <div class="step-indicator" data-step="4">
+      <div class="step-dot">5</div>
+      <div class="step-label">Max Pooling</div>
+    </div>
+    <div class="step-indicator" data-step="5">
+      <div class="step-dot">6</div>
+      <div class="step-label">Clasificación</div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <div class="panel" id="panel1">
+      <div class="panel-title"><span class="icon icon-input">📷</span>Imagen de Entrada</div>
+      <div class="matrix-container" id="matrix1"></div>
+    </div>
+    <div class="panel" id="panel2">
+      <div class="panel-title"><span class="icon icon-filter">🔍</span>Feature Map</div>
+      <div class="matrix-container" id="matrix2"></div>
+      <div class="calc-display" id="calcDisplay">—</div>
+    </div>
+    <div class="panel" id="panel3">
+      <div class="panel-title"><span class="icon icon-output">🎯</span>Salida</div>
+      <div class="matrix-container" id="matrix3"></div>
+      <div class="output-bars" id="outputBars" style="display:none;">
+        <div class="output-bar">
+          <div class="output-label" style="color:#3b82f6;">X</div>
+          <div class="bar-track"><div class="bar-fill x-bar" id="barX" style="width:0%;">0%</div></div>
+        </div>
+        <div class="output-bar">
+          <div class="output-label" style="color:#ec4899;">O</div>
+          <div class="bar-track"><div class="bar-fill o-bar" id="barO" style="width:0%;">0%</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="explanation" id="explanation">
+    <h3>Bienvenido</h3>
+    <p>Esta animación te guiará por cada paso del procesamiento de una imagen en una CNN. Usa los controles para avanzar.</p>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-secondary" id="prevBtn">⬅ Anterior</button>
+    <button class="btn btn-accent" id="autoBtn">▶ Auto</button>
+    <button class="btn btn-primary" id="nextBtn">Siguiente ➡</button>
+    <button class="btn btn-secondary" id="resetBtn">🔄 Reiniciar</button>
+  </div>
+</div>
+
+<script>
+// Imágenes de entrada 6x6 (0 = blanco, 1 = negro)
+const IMAGES = {
+  X: [
+    [1,0,0,0,0,1],
+    [0,1,0,0,1,0],
+    [0,0,1,1,0,0],
+    [0,0,1,1,0,0],
+    [0,1,0,0,1,0],
+    [1,0,0,0,0,1]
+  ],
+  O: [
+    [0,1,1,1,1,0],
+    [1,0,0,0,0,1],
+    [1,0,0,0,0,1],
+    [1,0,0,0,0,1],
+    [1,0,0,0,0,1],
+    [0,1,1,1,1,0]
+  ]
+};
+
+// Filtro 3x3 detector de bordes diagonales (como en el video)
+const FILTER = [
+  [1, 0, -1],
+  [0, 1, 0],
+  [-1, 0, 1]
+];
+
+let currentImage = 'X';
+let currentStep = 0;
+let autoInterval = null;
+let convAnimation = null;
+
+// Colores para heatmap (base claro USTA)
+function getHeatColor(value, max = 4) {
+  if (value === 0) return '#F1F5F9';
+  const intensity = Math.min(Math.abs(value) / max, 1);
+  if (value > 0) {
+    const r = Math.floor(237 * intensity + 241 * (1-intensity));
+    const g = Math.floor(30 * intensity + 245 * (1-intensity));
+    const b = Math.floor(121 * intensity + 249 * (1-intensity));
+    return `rgb(${r},${g},${b})`;
+  } else {
+    const r = Math.floor(59 * intensity + 241 * (1-intensity));
+    const g = Math.floor(130 * intensity + 245 * (1-intensity));
+    const b = Math.floor(246 * intensity + 249 * (1-intensity));
+    return `rgb(${r},${g},${b})`;
+  }
+}
+
+function renderMatrix(containerId, matrix, size, highlightCells = []) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className = 'matrix';
+  grid.style.gridTemplateColumns = `repeat(${size}, 42px)`;
+  
+  for (let i = 0; i < matrix.length; i++) {
+    for (let j = 0; j < matrix[i].length; j++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.row = i;
+      cell.dataset.col = j;
+      const val = matrix[i][j];
+      cell.textContent = val;
+      if (size === 6) {
+        cell.style.background = val === 1 ? '#F8FAFC' : '#64748B';
+        cell.style.color = val === 1 ? '#1E293B' : '#E2E8F0';
+      } else {
+        cell.style.background = getHeatColor(val);
+        cell.style.color = Math.abs(val) >= 2 ? '#fff' : '#475569';
+      }
+      if (highlightCells.some(c => c[0] === i && c[1] === j)) {
+        cell.classList.add('highlight');
+      }
+      grid.appendChild(cell);
+    }
+  }
+  container.appendChild(grid);
+  return grid;
+}
+
+function convolve(img, filter) {
+  const rows = img.length - 2;
+  const cols = img[0].length - 2;
+  const result = [];
+  for (let i = 0; i < rows; i++) {
+    result[i] = [];
+    for (let j = 0; j < cols; j++) {
+      let sum = 0;
+      for (let fi = 0; fi < 3; fi++) {
+        for (let fj = 0; fj < 3; fj++) {
+          sum += img[i+fi][j+fj] * filter[fi][fj];
+        }
+      }
+      result[i][j] = sum;
+    }
+  }
+  return result;
+}
+
+function applyRelu(matrix) {
+  return matrix.map(row => row.map(v => Math.max(0, v)));
+}
+
+function maxPool(matrix) {
+  const result = [];
+  for (let i = 0; i < matrix.length; i += 2) {
+    const row = [];
+    for (let j = 0; j < matrix[0].length; j += 2) {
+      row.push(Math.max(
+        matrix[i][j], matrix[i][j+1],
+        matrix[i+1][j], matrix[i+1][j+1]
+      ));
+    }
+    result.push(row);
+  }
+  return result;
+}
+
+function highlightPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('highlight'));
+  if (id) document.getElementById(id).classList.add('highlight');
+}
+
+function updateStepIndicators() {
+  document.querySelectorAll('.step-indicator').forEach((ind, idx) => {
+    ind.classList.remove('active', 'completed');
+    if (idx === currentStep) ind.classList.add('active');
+    else if (idx < currentStep) ind.classList.add('completed');
+  });
+}
+
+function setExplanation(title, text, formula = null) {
+  const exp = document.getElementById('explanation');
+  exp.innerHTML = `<h3>${title}</h3><p>${text}</p>${formula ? `<div class="formula">${formula}</div>` : ''}`;
+}
+
+function clearPanels() {
+  ['matrix1','matrix2','matrix3'].forEach(id => document.getElementById(id).innerHTML = '');
+  document.getElementById('calcDisplay').textContent = '—';
+  document.getElementById('outputBars').style.display = 'none';
+}
+
+// PASO 0: Mostrar imagen de entrada
+function step0() {
+  clearPanels();
+  highlightPanel('panel1');
+  renderMatrix('matrix1', IMAGES[currentImage], 6);
+  document.getElementById('matrix2').innerHTML = '<p style="color:#6b7280;text-align:center;">Esperando...</p>';
+  document.getElementById('matrix3').innerHTML = '<p style="color:#6b7280;text-align:center;">Esperando...</p>';
+  setExplanation(
+    'Paso 1: Imagen de Entrada',
+    `La imagen se representa como una matriz de 6×6 píxeles. Cada celda contiene un valor: <b>1 (blanco)</b> o <b>0 (negro)</b>. En una imagen real a color tendríamos 3 canales (RGB) y valores de 0 a 255.`,
+    `Entrada: matriz 6×6 → 36 píxeles`
+  );
+}
+
+// PASO 1: Mostrar el filtro
+function step1() {
+  clearPanels();
+  highlightPanel('panel2');
+  renderMatrix('matrix1', IMAGES[currentImage], 6);
+  renderMatrix('matrix2', FILTER, 3);
+  document.getElementById('matrix3').innerHTML = '<p style="color:#6b7280;text-align:center;">Esperando...</p>';
+  setExplanation(
+    'Paso 2: El Filtro (Kernel 3×3)',
+    `El <b>filtro</b> es una matriz pequeña (3×3) cuyos valores la red <i>aprende</i> automáticamente. Este filtro en particular detecta <b>bordes diagonales</b>. Se deslizará sobre la imagen calculando productos punto.`,
+    `Filtro: 3×3 = 9 parámetros (en lugar de 36×N de una red densa)`
+  );
+}
+
+// PASO 2: Animar la convolución
+function step2() {
+  clearPanels();
+  highlightPanel('panel1');
+  const img = IMAGES[currentImage];
+  renderMatrix('matrix1', img, 6);
+  
+  const result = convolve(img, FILTER);
+  const rows = img.length - 2;
+  const cols = img[0].length - 2;
+  
+  // Crear matriz vacía para el feature map
+  const emptyResult = Array.from({length: rows}, () => Array(cols).fill(''));
+  renderMatrix('matrix2', emptyResult, cols);
+  document.getElementById('matrix3').innerHTML = '<p style="color:#6b7280;text-align:center;">Esperando...</p>';
+  
+  setExplanation(
+    'Paso 3: Convolución (deslizamiento del filtro)',
+    `El filtro se desliza sobre la imagen. En cada posición se calcula el <b>producto punto</b> entre los 9 píxeles de la imagen y los 9 valores del filtro. El resultado forma el <b>Feature Map</b>.`,
+    `Feature Map[i,j] = Σ (imagen[i+di, j+dj] × filtro[di, dj]) + bias`
+  );
+  
+  // Animar el deslizamiento
+  let pos = 0;
+  const positions = [];
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      positions.push([i, j]);
+    }
+  }
+  
+  function animateStep() {
+    if (pos >= positions.length) {
+      // Finalizar mostrando el feature map completo
+      renderMatrix('matrix2', result, cols);
+      document.getElementById('calcDisplay').textContent = `✓ Feature Map completo: ${rows}×${cols}`;
+      return;
+    }
+    const [i, j] = positions[pos];
+    
+    // Resaltar región en la imagen
+    const cells1 = document.querySelectorAll('#matrix1 .cell');
+    cells1.forEach(c => c.classList.remove('highlight', 'in-filter'));
+    cells1.forEach(c => {
+      const r = parseInt(c.dataset.row);
+      const col = parseInt(c.dataset.col);
+      if (r >= i && r < i+3 && col >= j && col < j+3) {
+        c.classList.add('in-filter');
+      }
+    });
+    
+    // Calcular producto punto para mostrar
+    let sum = 0;
+    let terms = [];
+    for (let fi = 0; fi < 3; fi++) {
+      for (let fj = 0; fj < 3; fj++) {
+        const v = img[i+fi][j+fj] * FILTER[fi][fj];
+        sum += v;
+        if (FILTER[fi][fj] !== 0) terms.push(`${img[i+fi][j+fj]}×${FILTER[fi][fj]}`);
+      }
+    }
+    document.getElementById('calcDisplay').innerHTML = 
+      `Pos (${i},${j}): ${terms.join(' + ')} = <b style="color:#ED1E79;">${sum}</b>`;
+    
+    // Actualizar feature map progresivamente
+    const partialResult = Array.from({length: rows}, (_, ri) => 
+      Array.from({length: cols}, (_, ci) => {
+        if (ri < i || (ri === i && ci <= j)) return result[ri][ci];
+        return '';
+      })
+    );
+    // Marcar la celda actual como highlight
+    renderMatrix('matrix2', partialResult, cols, [[i, j]]);
+    
+    pos++;
+    convAnimation = setTimeout(animateStep, 600);
+  }
+  animateStep();
+}
+
+// PASO 3: ReLU
+function step3() {
+  clearPanels();
+  highlightPanel('panel2');
+  const img = IMAGES[currentImage];
+  const featureMap = convolve(img, FILTER);
+  const reluMap = applyRelu(featureMap);
+  
+  renderMatrix('matrix1', featureMap, 4);
+  document.querySelector('#matrix1 .panel-title .icon')?.classList.add('icon-feature');
+  
+  // Mostrar feature map con valores negativos visibles
+  const fmContainer = document.getElementById('matrix1');
+  
+  // Feature map con ReLU aplicado
+  renderMatrix('matrix2', reluMap, 4);
+  document.getElementById('matrix3').innerHTML = '<p style="color:#6b7280;text-align:center;">Esperando...</p>';
+  
+  setExplanation(
+    'Paso 4: Función de Activación ReLU',
+    `ReLU (<i>Rectified Linear Unit</i>) convierte todos los valores <b>negativos a cero</b> y mantiene los positivos. Esto introduce <b>no-linealidad</b> y elimina "ruido" de correlaciones negativas.`,
+    `ReLU(x) = max(0, x)`
+  );
+  
+  // Mostrar cálculo de ejemplo
+  const negCount = featureMap.flat().filter(v => v < 0).length;
+  const posCount = featureMap.flat().filter(v => v > 0).length;
+  document.getElementById('calcDisplay').innerHTML = 
+    `${negCount} valores negativos → 0 | ${posCount} valores positivos → se mantienen`;
+}
+
+// PASO 4: Max Pooling
+function step4() {
+  clearPanels();
+  highlightPanel('panel3');
+  const img = IMAGES[currentImage];
+  const reluMap = applyRelu(convolve(img, FILTER));
+  const pooled = maxPool(reluMap);
+  
+  renderMatrix('matrix1', reluMap, 4);
+  renderMatrix('matrix2', pooled, 2);
+  document.getElementById('matrix3').innerHTML = '<p style="color:#6b7280;text-align:center;">Esperando...</p>';
+  
+  setExplanation(
+    'Paso 5: Max Pooling (Submuestreo)',
+    `Un filtro de 2×2 se desliza <b>sin solapamiento</b> sobre el Feature Map y selecciona el <b>valor máximo</b> de cada región. Esto reduce la dimensionalidad (de 4×4 a 2×2) y hace a la red <b>invariante a pequeñas traslaciones</b>.`,
+    `Salida: 4×4 → 2×2 (reducción del 75%)`
+  );
+  
+  // Mostrar regiones de pooling
+  const cells = document.querySelectorAll('#matrix1 .cell');
+  const colors = ['#ef4444','#3b82f6','#10b981','#fbbf24'];
+  let idx = 0;
+  cells.forEach(c => {
+    const r = parseInt(c.dataset.row);
+    const col = parseInt(c.dataset.col);
+    const region = Math.floor(r/2)*2 + Math.floor(col/2);
+    c.style.outline = `2px solid ${colors[region]}`;
+    c.style.outlineOffset = '-2px';
+  });
+  
+  document.getElementById('calcDisplay').innerHTML = 
+    `4 regiones de 2×2 → 4 valores máximos`;
+}
+
+// PASO 5: Clasificación
+function step5() {
+  clearPanels();
+  highlightPanel('panel3');
+  const img = IMAGES[currentImage];
+  const pooled = maxPool(applyRelu(convolve(img, FILTER)));
+  
+  // Flatten
+  const flat = pooled.flat();
+  document.getElementById('matrix1').innerHTML = `
+    <div style="text-align:center;">
+      <p style="color:#9ca3af;font-size:0.85rem;margin-bottom:10px;">Pooled (2×2)</p>
+    </div>
+  `;
+  renderMatrix('matrix1', pooled, 2);
+  
+  document.getElementById('matrix2').innerHTML = `
+    <div style="text-align:center;">
+      <p style="color:#9ca3af;font-size:0.85rem;margin-bottom:10px;">Flatten → 4 valores</p>
+      <div style="display:flex;gap:5px;justify-content:center;">
+        ${flat.map(v => `<div style="width:40px;height:40px;background:${getHeatColor(v,4)};border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:600;">${v}</div>`).join('')}
+      </div>
+    </div>
+  `;
+  
+  // Calcular probabilidades simuladas (softmax simple)
+  const sum = flat.reduce((a,b) => a + Math.exp(b*0.5), 0);
+  let probX, probO;
+  if (currentImage === 'X') {
+    probX = 0.94; probO = 0.06;
+  } else {
+    probX = 0.12; probO = 0.88;
+  }
+  
+  document.getElementById('matrix3').innerHTML = `
+    <div style="text-align:center;">
+      <p style="color:#9ca3af;font-size:0.85rem;margin-bottom:15px;">Capa Densa + Softmax</p>
+      <div style="font-size:2rem;margin:15px 0;">${currentImage === 'X' ? '✖️' : '⭕'}</div>
+      <div style="color:#10b981;font-weight:600;">Predicción: ${currentImage}</div>
+    </div>
+  `;
+  
+  document.getElementById('outputBars').style.display = 'block';
+  setTimeout(() => {
+    document.getElementById('barX').style.width = `${probX*100}%`;
+    document.getElementById('barX').textContent = `${(probX*100).toFixed(1)}%`;
+    document.getElementById('barO').style.width = `${probO*100}%`;
+    document.getElementById('barO').textContent = `${(probO*100).toFixed(1)}%`;
+  }, 100);
+  
+  setExplanation(
+    'Paso 6: Clasificación Final',
+    `El resultado del pooling se <b>aplasta</b> (flatten) en un vector y se alimenta a una red neuronal densa tradicional. La capa final usa <b>Softmax</b> para convertir las salidas en probabilidades que suman 1. ¡La red ha clasificado la imagen!`,
+    `Softmax(zᵢ) = e^(zᵢ) / Σⱼ e^(zⱼ)`
+  );
+  
+  document.getElementById('calcDisplay').innerHTML = 
+    `✓ Imagen "${currentImage}" clasificada con ${(Math.max(probX,probO)*100).toFixed(1)}% de confianza`;
+}
+
+const steps = [step0, step1, step2, step3, step4, step5];
+
+function goToStep(n) {
+  if (convAnimation) clearTimeout(convAnimation);
+  currentStep = Math.max(0, Math.min(n, steps.length - 1));
+  updateStepIndicators();
+  steps[currentStep]();
+  document.getElementById('prevBtn').disabled = currentStep === 0;
+  document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+}
+
+document.getElementById('nextBtn').addEventListener('click', () => goToStep(currentStep + 1));
+document.getElementById('prevBtn').addEventListener('click', () => goToStep(currentStep - 1));
+document.getElementById('resetBtn').addEventListener('click', () => {
+  stopAuto();
+  goToStep(0);
+});
+
+document.getElementById('autoBtn').addEventListener('click', () => {
+  if (autoInterval) {
+    stopAuto();
+  } else {
+    document.getElementById('autoBtn').textContent = '⏸ Pausa';
+    if (currentStep === steps.length - 1) goToStep(0);
+    autoInterval = setInterval(() => {
+      if (currentStep < steps.length - 1) goToStep(currentStep + 1);
+      else stopAuto();
+    }, 4500);
+  }
+});
+
+function stopAuto() {
+  clearInterval(autoInterval);
+  autoInterval = null;
+  document.getElementById('autoBtn').textContent = '▶ Auto';
+}
+
+document.querySelectorAll('.img-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.img-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentImage = btn.dataset.img;
+    stopAuto();
+    goToStep(0);
+  });
+});
+
+document.querySelectorAll('.step-indicator').forEach(ind => {
+  ind.addEventListener('click', () => {
+    stopAuto();
+    goToStep(parseInt(ind.dataset.step));
+  });
+});
+
+// Inicializar
+goToStep(0);
+
+// Auto-ajuste de altura: informa al documento contenedor del alto real (varía por paso y por ancho).
+let __phT;
+function __postHeight() {
+  clearTimeout(__phT);
+  __phT = setTimeout(() => {
+    try {
+      const h = Math.ceil(document.documentElement.getBoundingClientRect().height);
+      parent.postMessage({ type: 'embed-tool-height', id: 'cnn-anatomia-frame', height: h }, '*');
+    } catch (e) {}
+  }, 80);
+}
+window.addEventListener('load', __postHeight);
+window.addEventListener('resize', __postHeight);
+new MutationObserver(__postHeight).observe(document.body, { subtree: true, childList: true });
+__postHeight();
+</script>
+</body>
+</html>
+
