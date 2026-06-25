@@ -218,7 +218,7 @@
 </div>
 
 <script>
-// Imágenes de entrada 6x6 (0 = blanco, 1 = negro)
+// Imágenes de entrada 6x6 (1 = trazo de la figura, 0 = fondo)
 const IMAGES = {
   X: [
     [1,0,0,0,0,1],
@@ -283,8 +283,8 @@ function renderMatrix(containerId, matrix, size, highlightCells = []) {
       const val = matrix[i][j];
       cell.textContent = val;
       if (size === 6) {
-        cell.style.background = val === 1 ? '#F8FAFC' : '#64748B';
-        cell.style.color = val === 1 ? '#1E293B' : '#E2E8F0';
+        cell.style.background = val === 1 ? '#334155' : '#E2E8F0';
+        cell.style.color = val === 1 ? '#FFFFFF' : '#94A3B8';
       } else {
         cell.style.background = getHeatColor(val);
         cell.style.color = Math.abs(val) >= 2 ? '#fff' : '#475569';
@@ -370,7 +370,7 @@ function step0() {
   document.getElementById('matrix3').innerHTML = '<p style="color:#6b7280;text-align:center;">Esperando...</p>';
   setExplanation(
     'Paso 1: Imagen de Entrada',
-    `La imagen se representa como una matriz de 6×6 píxeles. Cada celda contiene un valor: <b>1 (blanco)</b> o <b>0 (negro)</b>. En una imagen real a color tendríamos 3 canales (RGB) y valores de 0 a 255.`,
+    `La imagen se representa como una matriz de 6×6 píxeles. Cada celda contiene un valor: <b>1 (trazo de la figura)</b> o <b>0 (fondo)</b>. En una imagen real a color tendríamos 3 canales (RGB) y valores de 0 a 255.`,
     `Entrada: matriz 6×6 → 36 píxeles`
   );
 }
