@@ -1310,10 +1310,11 @@
                     <p>
                         Las CNN superan al MLP mediante tres ideas: <strong>conexiones locales</strong>, <strong>pesos compartidos</strong> y
                         <strong> submuestreo</strong>. El corazón del sistema es la <strong>convolución</strong>: deslizar un filtro
-                        (o <em>kernel</em>) pequeño sobre la entrada para producir un <em>mapa de características</em>. En cada posición se
-                        multiplica el filtro elemento a elemento por la región subyacente y se suman los productos:
+                        (o <em>kernel</em>) pequeño sobre la entrada para producir un <em>mapa de características</em> —también
+                        llamado <em>mapa de activación</em>—. En cada posición se multiplica el filtro elemento a elemento por la
+                        región subyacente, se suman los productos y se añade un <strong>sesgo</strong> aprendido:
                     </p>
-                    <Eq>{String.raw`$$ S(i,j) = (I * K)(i,j) = \sum_{m}\sum_{n} I(i+m,\,j+n)\cdot K(m,n) $$`}</Eq>
+                    <Eq>{String.raw`$$ S(i,j) = (I * K)(i,j) + b = \sum_{m}\sum_{n} I(i+m,\,j+n)\cdot K(m,n) + b $$`}</Eq>
 
                     <ConvolucionSVG />
 
@@ -1336,7 +1337,7 @@
                         },
                         {
                             titulo: 'Pooling (submuestreo): invarianza y reducción',
-                            contenido: <span><strong>Max pooling</strong> toma el máximo de cada región (ej. 2×2): si un rasgo se detectó allí, lo conserva y descarta su ubicación exacta, dando invarianza a pequeñas traslaciones. El <strong>average pooling</strong> promedia; su variante <em>global average pooling</em> reduce todo el mapa a un vector antes de clasificar, eliminando capas densas masivas.</span>
+                            contenido: <span><strong>Max pooling</strong> toma el máximo de cada región (ej. 2×2): si un rasgo se detectó allí, lo conserva y descarta su ubicación exacta, dando invarianza a pequeñas traslaciones. El <strong>average pooling</strong> promedia; su variante <em>global average pooling</em> reduce todo el mapa a un vector antes de clasificar, eliminando capas densas masivas. Resulta contraintuitivo que <em>descartar</em> información mejore el modelo: al recortar la resolución, el pooling reduce parámetros y sobreajuste, y suele favorecer la generalización.</span>
                         },
                     ]} />
 
@@ -1413,6 +1414,15 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                         </table>
                     </div>
 
+                    <p>
+                        Dos <strong>funciones de activación</strong> completan el flujo. Entre capas convolucionales se intercala la
+                        activación <strong>ReLU</strong> ({String.raw`\(\max(0,x)\)`}): anula los valores negativos y conserva los
+                        positivos, introduciendo la <strong>no-linealidad</strong> sin la cual apilar convoluciones colapsaría en una
+                        única transformación lineal, incapaz de modelar patrones complejos. Al final de la red, la capa{' '}
+                        <strong>softmax</strong> convierte las puntuaciones sin escalar (los <em>logits</em>) en probabilidades de clase
+                        que <strong>suman 1</strong>.
+                    </p>
+
                     {/* ============== Animación interactiva: pipeline CNN ============== */}
                     <h4>Anatomía en movimiento: el pipeline interactivo</h4>
                     <p>
@@ -1429,6 +1439,14 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                             ejemplo «X / O»; las probabilidades finales son ilustrativas. Fuente: elaboración propia.
                         </p>
                     </div>
+
+                    <Box type="tip" label="Recurso externo · explora una CNN real">
+                        Para ver estos mismos pasos sobre una red entrenada de verdad, conviene explorar{' '}
+                        <a href="https://poloclub.github.io/cnn-explainer/" target="_blank" rel="noopener noreferrer" style={{ color: '#ED1E79', fontWeight: 600, textDecoration: 'underline' }}>CNN Explainer</a>{' '}
+                        (Wang et al., 2021): una CNN <em>Tiny VGG</em> que clasifica imágenes en 10 clases y deja pasar el cursor sobre las
+                        matrices para mover el kernel y ver el producto punto, además de variar en vivo el <em>padding</em>, el tamaño de
+                        kernel y el <em>stride</em>. Software libre (licencia MIT) del Georgia Tech Visualization Lab.
+                    </Box>
 
                     {/* ============== 3. Evolución histórica ============== */}
                     <h3>3. Evolución de las arquitecturas CNN</h3>
