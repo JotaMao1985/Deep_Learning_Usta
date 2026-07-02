@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RNN vs LSTM vs GRU — Explorador Interactivo</title>
+<!--
+  ============================================================================
+  EXPLORADOR INTERACTIVO  ·  RNN  vs  LSTM  vs  GRU
+  Maestría en Ciencia de Datos — Universidad Santo Tomás
+  Módulo 2: Arquitecturas · Redes secuenciales
+  ----------------------------------------------------------------------------
+  LÓGICA PEDAGÓGICA (resumen):
+    - Las TRES arquitecturas procesan LA MISMA secuencia al mismo tiempo.
+      Así el estudiante no compara tres diagramas aislados, sino la MISMA
+      historia contada tres veces -> observa causa y efecto.
+    - Las compuertas (gates) no se "explican con etiquetas": se ENCIENDEN con
+      su valor real calculado (0..1) en cada paso. Ver la compuerta de olvido
+      cerca de 1 mientras la RNN oscila es el momento "ajá".
+    - El gradiente que se desvanece se vuelve FÍSICO: una barra que retrocede
+      en el tiempo se apaga rápido en la RNN y se conserva en LSTM/GRU.
+  Todo es JavaScript puro + SVG en línea. Funciona sin servidor y sin internet.
+  ============================================================================
+-->
+<style>
+  /* ---- Paleta institucional USTA + acentos por arquitectura ------------- */
+  :root{
+    --usta-morado:#3D008D;   --usta-magenta:#ED1E79;
+    --tinta:#334155;         --tinta-suave:#64748B;   --tinta-fuerte:#1E293B;
+    --borde:#E2E8F0;         --lienzo:#F8FAFC;         --lila:#FBF8FF;
+    --rnn:#2563EB;           --lstm:#8B5CF6;           --gru:#0D9488;
+    --olvido:#EF4444;        --entrada:#22C55E;        --salida:#F59E0B;
+    --candidato:#3B82F6;     --reset:#F43F5E;          --update:#8B5CF6;
+    --celda:#F59E0B;         /* estado de celda c_t (la "cinta transportadora") */
+    --ok:#15803D;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'Segoe UI',system-ui,sans-serif;
+    background:#fff;color:var(--tinta);padding:14px 14px 40px;line-height:1.5;
+  }
+  .container{max-width:1400px;margin:0 auto;}
+
+  /* ---- Cabecera --------------------------------------------------------- */
+  header{
+    text-align:center;margin-bottom:16px;padding:18px;
+    background:var(--lila);border-radius:16px;border:1px solid var(--borde);
+  }
+  h1{
+    font-size:1.75rem;margin-bottom:6px;
+    background:linear-gradient(90deg,var(--usta-morado),var(--usta-magenta));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  }
+  .subtitle{color:var(--tinta-suave);font-size:.93rem;max-width:820px;margin:0 auto;}
+
+  /* ---- Barra de controles ---------------------------------------------- */
+  .controls{
+    display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:center;
+    background:var(--lienzo);border:1px solid var(--borde);border-radius:14px;
+    padding:14px 16px;margin-bottom:14px;
+  }
+  .btn{
+    border:none;border-radius:10px;padding:10px 18px;font-size:.9rem;font-weight:600;
+    cursor:pointer;transition:transform .15s,box-shadow .2s;color:#fff;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+  .btn-next{background:linear-gradient(135deg,var(--usta-morado),var(--usta-magenta));
+            box-shadow:0 4px 14px rgba(237,30,121,.28);}
+  .btn-auto{background:linear-gradient(135deg,#0891B2,#0E7490);}
+  .btn-reset{background:#64748B;}
+  .slider-group{display:flex;flex-direction:column;gap:4px;min-width:190px;}
+  .slider-group label{font-size:.78rem;color:var(--tinta-suave);font-weight:600;
+    display:flex;justify-content:space-between;}
+  .slider-group label b{color:var(--usta-morado);}
+  input[type=range]{width:100%;accent-color:var(--usta-magenta);cursor:pointer;}
+
+  /* ---- Cinta de la secuencia (tokens) ---------------------------------- */
+  .sequence-strip{
+    display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:stretch;
+    background:#fff;border:1px solid var(--borde);border-radius:14px;
+    padding:12px;margin-bottom:16px;
+  }
+  .token{
+    min-width:64px;padding:8px 10px;border-radius:10px;text-align:center;
+    background:var(--lienzo);border:2px solid var(--borde);transition:all .35s;position:relative;
+  }
+  .token .word{font-weight:700;color:var(--tinta-fuerte);font-size:.92rem;}
+  .token .val{font-size:.7rem;color:var(--tinta-suave);margin-top:2px;font-variant-numeric:tabular-nums;}
+  .token.active{border-color:var(--usta-magenta);background:#FFF1F8;
+    box-shadow:0 0 0 3px rgba(237,30,121,.14);transform:translateY(-4px);}
+  .token.done{border-color:var(--ok);background:#F0FDF4;}
+  .token .tstep{position:absolute;top:-9px;left:-9px;width:20px;height:20px;border-radius:50%;
+    background:var(--usta-morado);color:#fff;font-size:.62rem;font-weight:700;
+    display:flex;align-items:center;justify-content:center;}
+  .dep-arc{font-size:.72rem;color:var(--usta-magenta);text-align:center;width:100%;
+    margin-top:2px;font-style:italic;}
+
+  /* ---- Rejilla de 3 paneles -------------------------------------------- */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:18px;}
+  @media(max-width:820px){.grid{grid-template-columns:1fr;}}
+  .panel{
+    background:#fff;border:1px solid var(--borde);border-radius:16px;padding:16px;
+    display:flex;flex-direction:column;transition:box-shadow .3s,border-color .3s;
+  }
+  .panel.rnn{border-top:4px solid var(--rnn);}
+  .panel.lstm{border-top:4px solid var(--lstm);}
+  .panel.gru{border-top:4px solid var(--gru);}
+  .panel.pulse{box-shadow:0 0 0 3px rgba(237,30,121,.10);}
+  .panel-head{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+  .panel-head .badge{
+    width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:800;font-size:.78rem;flex-shrink:0;
+  }
+  .rnn .badge{background:var(--rnn);}.lstm .badge{background:var(--lstm);}.gru .badge{background:var(--gru);}
+  .panel-head h2{font-size:1.05rem;color:var(--tinta-fuerte);}
+  .panel-head .tag{font-size:.72rem;color:var(--tinta-suave);}
+  .panel .pitch{font-size:.78rem;color:var(--tinta-suave);min-height:34px;margin:4px 0 8px;}
+
+  svg.cell{width:100%;height:auto;display:block;background:var(--lienzo);
+    border-radius:12px;border:1px solid var(--borde);}
+  /* nodos SVG interactivos */
+  .node{cursor:help;transition:fill .3s,stroke .3s;}
+  .flow{transition:stroke .3s,opacity .3s,stroke-width .3s;}
+  .flow.live{stroke:var(--usta-magenta);stroke-width:3.4;opacity:1;}
+  .svglabel{font-size:11px;font-weight:700;fill:var(--tinta-fuerte);pointer-events:none;}
+  .svgsub{font-size:9px;fill:var(--tinta-suave);pointer-events:none;}
+  .gateval{font-size:9.5px;font-weight:800;pointer-events:none;}
+
+  /* ---- Lecturas en vivo (gates + estados) ------------------------------ */
+  .readout{margin-top:10px;}
+  .readout h3{font-size:.74rem;text-transform:uppercase;letter-spacing:.04em;
+    color:var(--tinta-suave);margin:8px 0 4px;}
+  .gate-row{display:flex;align-items:center;gap:8px;margin:5px 0;cursor:help;}
+  .gate-row .glabel{font-size:.76rem;width:118px;flex-shrink:0;color:var(--tinta-fuerte);font-weight:600;}
+  .gate-row .glabel small{color:var(--tinta-suave);font-weight:400;}
+  .bar-track{flex:1;height:12px;background:#EEF2F7;border-radius:6px;overflow:hidden;}
+  .bar-fill{height:100%;width:0;border-radius:6px;transition:width .45s ease;}
+  .gate-row .gnum{width:38px;text-align:right;font-size:.76rem;font-weight:700;
+    font-variant-numeric:tabular-nums;color:var(--tinta-fuerte);}
+
+  /* vector de estado como mini-barras verticales centradas en 0 */
+  .statevec{display:flex;gap:5px;align-items:center;margin:4px 0;cursor:help;}
+  .statevec .slabel{font-size:.76rem;width:60px;flex-shrink:0;font-weight:700;}
+  .vbars{display:flex;gap:4px;height:46px;align-items:center;
+    background:#EEF2F7;border-radius:8px;padding:4px 8px;flex:1;}
+  .vcell{flex:1;height:100%;position:relative;}
+  .vcell .vbar{position:absolute;left:0;right:0;border-radius:3px;transition:all .45s ease;}
+  .zero-line{flex:0;}
+  .state-hint{font-size:.68rem;color:var(--tinta-suave);}
+
+  /* ---- Sección gradiente que se desvanece ------------------------------ */
+  .grad-section{
+    background:var(--lila);border:1px solid var(--borde);border-radius:16px;
+    padding:18px;margin-bottom:18px;
+  }
+  .grad-section h2{font-size:1.15rem;color:var(--usta-morado);margin-bottom:4px;
+    display:flex;align-items:center;gap:8px;}
+  .grad-section p.lead{font-size:.85rem;color:var(--tinta-suave);margin-bottom:14px;max-width:900px;}
+  .grad-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  @media(max-width:820px){.grad-grid{grid-template-columns:1fr;}}
+  .grad-card{background:#fff;border:1px solid var(--borde);border-radius:12px;padding:12px;}
+  .grad-card .gc-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;}
+  .grad-card .gc-head b{font-size:.92rem;}
+  .grad-card .surv{font-size:.8rem;font-weight:800;font-variant-numeric:tabular-nums;}
+  .decay-bars{display:flex;gap:3px;height:70px;align-items:flex-end;}
+  .decay-bars .db{flex:1;border-radius:3px 3px 0 0;transition:height .5s ease,opacity .5s;min-height:2px;}
+  .decay-x{display:flex;justify-content:space-between;font-size:.62rem;color:var(--tinta-suave);margin-top:4px;}
+  .verdict{font-size:.76rem;margin-top:8px;padding:7px 9px;border-radius:8px;line-height:1.35;}
+
+  /* ---- Leyenda ---------------------------------------------------------- */
+  .legend{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;
+    background:var(--lienzo);border:1px solid var(--borde);border-radius:12px;
+    padding:12px;font-size:.78rem;color:var(--tinta);}
+  .legend .li{display:flex;align-items:center;gap:6px;}
+  .legend .sw{width:16px;height:16px;border-radius:4px;flex-shrink:0;}
+  .legend .sw.line{height:4px;border-radius:2px;}
+
+  /* ---- Tooltip flotante ------------------------------------------------- */
+  #tooltip{
+    position:fixed;z-index:999;max-width:260px;pointer-events:none;
+    background:var(--tinta-fuerte);color:#fff;font-size:.78rem;line-height:1.4;
+    padding:9px 11px;border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.22);
+    opacity:0;transform:translateY(4px);transition:opacity .15s,transform .15s;
+  }
+  #tooltip.show{opacity:1;transform:translateY(0);}
+  #tooltip b{color:#FBCFE8;}
+
+  .foot{text-align:center;font-size:.74rem;color:var(--tinta-suave);margin-top:20px;}
+  .kbd{background:#EEF2F7;border:1px solid var(--borde);border-radius:5px;padding:1px 6px;
+    font-size:.72rem;font-family:monospace;}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>RNN · LSTM · GRU — Explorador Interactivo</h1>
+    <p class="subtitle">
+      Las tres arquitecturas procesan <b>la misma secuencia</b> paso a paso. Observa cómo se
+      actualiza el estado oculto <b>h<sub>t</sub></b> (y el estado de celda <b>c<sub>t</sub></b> en la LSTM),
+      cómo las <b>compuertas</b> deciden qué recordar y por qué la RNN simple sufre el
+      <b>desvanecimiento del gradiente</b>. Pasa el cursor sobre cualquier elemento para ver su explicación.
+    </p>
+  </header>
+
+  <!-- ============ CONTROLES ============ -->
+  <div class="controls">
+    <button class="btn btn-next" id="btnNext">▶ Siguiente paso</button>
+    <button class="btn btn-auto" id="btnAuto">⏩ Auto</button>
+    <button class="btn btn-reset" id="btnReset">↺ Reiniciar</button>
+
+    <div class="slider-group">
+      <label>Magnitud de la entrada <b><span id="magVal">1.0</span>×</b></label>
+      <input type="range" id="magSlider" min="0.2" max="2" step="0.1" value="1">
+    </div>
+    <div class="slider-group">
+      <label>Longitud de la secuencia <b><span id="lenVal">5</span> pasos</b></label>
+      <input type="range" id="lenSlider" min="3" max="8" step="1" value="5">
+    </div>
+  </div>
+
+  <!-- ============ CINTA DE TOKENS ============ -->
+  <div class="sequence-strip" id="strip"></div>
+
+  <!-- ============ TRES PANELES ============ -->
+  <div class="grid" id="grid"></div>
+
+  <!-- ============ GRADIENTE QUE SE DESVANECE ============ -->
+  <div class="grad-section">
+    <h2>🌫️ ¿Por qué la RNN “olvida”? El gradiente que se desvanece</h2>
+    <p class="lead">
+      Al entrenar, el error debe viajar <b>hacia atrás en el tiempo</b> para corregir pasos lejanos.
+      En cada salto, la RNN simple multiplica por factores &lt; 1 (derivada de <i>tanh</i> × pesos), así que
+      la señal <b>se apaga exponencialmente</b>. LSTM y GRU tienen una “autopista” (la compuerta de olvido /
+      de actualización cerca de 1) que <b>preserva</b> la señal a larga distancia. Mueve el slider de longitud
+      para ver cuánto gradiente sobrevive a esa distancia.
+    </p>
+    <div class="grad-grid" id="gradGrid"></div>
+  </div>
+
+  <!-- ============ LEYENDA ============ -->
+  <div class="legend">
+    <div class="li"><span class="sw line" style="background:var(--usta-magenta)"></span> Flujo activo en el paso actual</div>
+    <div class="li"><span class="sw" style="background:var(--celda)"></span> Estado de celda c<sub>t</sub> (memoria de largo plazo)</div>
+    <div class="li"><span class="sw" style="background:var(--olvido)"></span> Compuerta de olvido</div>
+    <div class="li"><span class="sw" style="background:var(--entrada)"></span> Compuerta de entrada</div>
+    <div class="li"><span class="sw" style="background:var(--salida)"></span> Compuerta de salida</div>
+    <div class="li"><span class="sw" style="background:var(--reset)"></span> Compuerta de reinicio (GRU)</div>
+    <div class="li"><span class="sw" style="background:var(--update)"></span> Compuerta de actualización (GRU)</div>
+  </div>
+
+  <p class="foot">
+    Explorador de aula · Módulo 2 — Arquitecturas · Redes secuenciales &nbsp;|&nbsp;
+    Consejo: usa <span class="kbd">▶ Siguiente paso</span> hasta el final y compara las tres columnas.
+  </p>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+/* =========================================================================
+   1) MOTOR NUMÉRICO
+   -------------------------------------------------------------------------
+   Implementamos las ecuaciones REALES de cada celda (con dimensión oculta
+   pequeña H=4 para poder dibujarlas como barras). Los pesos se generan con
+   un PRNG con semilla fija => comportamiento determinista y reproducible.
+   Sesgamos la compuerta de olvido (LSTM) y de actualización (GRU) hacia
+   "recordar", que es justo lo que hace que funcionen en la práctica.
+   ========================================================================= */
+const H = 4;                       // unidades ocultas (tamaño del vector de estado)
+const sig  = x => 1/(1+Math.exp(-x));
+const tanh = Math.tanh;
+
+// PRNG determinista (mulberry32) -> pesos siempre iguales entre recargas
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);
+  t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function makeMatrix(rows,cols,rnd,scale){       // matriz [rows][cols] en [-scale,scale]
+  const m=[];for(let i=0;i<rows;i++){const r=[];for(let j=0;j<cols;j++)r.push((rnd()*2-1)*scale);m.push(r);}return m;}
+function matVec(M,v){return M.map(row=>row.reduce((s,w,j)=>s+w*v[j],0));}  // M·v
+function addBias(v,b){return v.map((x,i)=>x+b[i]);}
+function hadam(a,b){return a.map((x,i)=>x*b[i]);}                          // producto elemento a elemento
+function mean(v){return v.reduce((s,x)=>s+x,0)/v.length;}
+
+// --- Pesos de cada arquitectura (dimensión de entrada a las compuertas = H+1) ---
+const IN = H + 1;                    // concatenamos [h_prev (H) , x (1)]
+const rW = (()=>{const r=mulberry32(11);return {Wh:makeMatrix(H,IN,r,0.9)};})();
+const lW = (()=>{const r=mulberry32(23);return {
+  Wf:makeMatrix(H,IN,r,0.8), Wi:makeMatrix(H,IN,r,0.8),
+  Wo:makeMatrix(H,IN,r,0.8), Wg:makeMatrix(H,IN,r,0.8),
+  bf:Array(H).fill(1.6),  bi:Array(H).fill(0),          // b_f alto => olvido≈0.83 (memoria por defecto)
+  bo:Array(H).fill(0.4),  bg:Array(H).fill(0)};})();
+const gW = (()=>{const r=mulberry32(37);return {
+  Wz:makeMatrix(H,IN,r,0.8), Wr:makeMatrix(H,IN,r,0.8), Wn:makeMatrix(H,IN,r,0.8),
+  bz:Array(H).fill(1.4),  br:Array(H).fill(0.2), bn:Array(H).fill(0)};})();  // b_z alto => conserva
+
+/* ---- Un paso de cada celda. Devuelven además los valores de compuerta
+        para poder visualizarlos (esa es la parte pedagógica clave). ---- */
+function stepRNN(hPrev,x){
+  const cat=[...hPrev,x];
+  const h=matVec(rW.Wh,cat).map(tanh);
+  // "tanh'" promedio: mide cuánto se atenúa el gradiente al pasar por esta celda
+  const gDeriv=mean(h.map(v=>1-v*v));
+  return {h, gDeriv};
+}
+function stepLSTM(hPrev,cPrev,x){
+  const cat=[...hPrev,x];
+  const f=addBias(matVec(lW.Wf,cat),lW.bf).map(sig);   // olvido
+  const i=addBias(matVec(lW.Wi,cat),lW.bi).map(sig);   // entrada
+  const o=addBias(matVec(lW.Wo,cat),lW.bo).map(sig);   // salida
+  const g=addBias(matVec(lW.Wg,cat),lW.bg).map(tanh);  // candidato
+  const c=hPrev.map((_,k)=>f[k]*cPrev[k]+i[k]*g[k]);   // c_t = f∘c_{t-1} + i∘g
+  const h=c.map((ck,k)=>o[k]*tanh(ck));                // h_t = o∘tanh(c_t)
+  return {h,c,gates:{f,i,o,g}, fMean:mean(f)};
+}
+function stepGRU(hPrev,x){
+  const cat=[...hPrev,x];
+  const z=addBias(matVec(gW.Wz,cat),gW.bz).map(sig);   // actualización
+  const rr=addBias(matVec(gW.Wr,cat),gW.br).map(sig);  // reinicio
+  const catN=[...hadam(rr,hPrev),x];                   // el reset filtra la memoria antes del candidato
+  const n=addBias(matVec(gW.Wn,catN),gW.bn).map(tanh); // candidato
+  const h=hPrev.map((_,k)=>(1-z[k])*n[k]+z[k]*hPrev[k]); // h_t = (1-z)∘n + z∘h_{t-1}
+  return {h,gates:{z,r:rr,n}, zMean:mean(z)};
+}
+
+/* =========================================================================
+   2) DATOS: la secuencia (tokens) y su "embedding" escalar
+   -------------------------------------------------------------------------
+   Usamos una frase en español con una DEPENDENCIA DE LARGO ALCANCE: el sujeto
+   "gato" (singular) determina el verbo final, muchos pasos después. Ese es el
+   caso donde importa la memoria. Cada palabra se mapea a un valor escalar
+   determinista (su "embedding" simplificado a 1D).
+   ========================================================================= */
+const BASE_WORDS = ["El","gato","que","perseguía","ratones","corría","muy","rápido"];
+function wordValue(w){ // hash determinista -> valor en ~[-1,1]
+  let h=0; for(let i=0;i<w.length;i++) h=(h*31+w.charCodeAt(i))>>>0;
+  return ((h%1000)/1000)*2-1;
+}
+
+/* =========================================================================
+   3) ESTADO DE LA APLICACIÓN + PRECÁLCULO DE TRAYECTORIAS
+   -------------------------------------------------------------------------
+   Calculamos la trayectoria COMPLETA de las tres arquitecturas de una vez y
+   luego la "revelamos" paso a paso. Así el botón Siguiente es instantáneo.
+   ========================================================================= */
+const App = {
+  step:0,          // 0 = estado inicial (antes de procesar el primer token)
+  len:5,
+  mag:1,
+  seq:[],          // [{word, x}]
+  traj:{rnn:[], lstm:[], gru:[]},  // traj.arch[t] = estado tras procesar el token t (t=1..len)
+  autoTimer:null
+};
+
+function buildSequence(){
+  App.seq=[];
+  for(let t=0;t<App.len;t++){
+    const w=BASE_WORDS[t % BASE_WORDS.length];
+    App.seq.push({word:w, x: wordValue(w)*App.mag});
+  }
+}
+function computeTrajectories(){
+  const zeros=()=>Array(H).fill(0);
+  // Estado inicial (t=0): todo en cero
+  App.traj.rnn=[{h:zeros(),gDeriv:1}];
+  App.traj.lstm=[{h:zeros(),c:zeros(),gates:{f:zeros(),i:zeros(),o:zeros(),g:zeros()},fMean:0}];
+  App.traj.gru=[{h:zeros(),gates:{z:zeros(),r:zeros(),n:zeros()},zMean:0}];
+  for(let t=1;t<=App.len;t++){
+    const x=App.seq[t-1].x;
+    const pr=App.traj.rnn[t-1], pl=App.traj.lstm[t-1], pg=App.traj.gru[t-1];
+    App.traj.rnn.push(stepRNN(pr.h,x));
+    App.traj.lstm.push(stepLSTM(pl.h,pl.c,x));
+    App.traj.gru.push(stepGRU(pg.h,x));
+  }
+}
+
+/* =========================================================================
+   4) DIAGRAMAS SVG DE CADA CELDA
+   -------------------------------------------------------------------------
+   Diagramas esquemáticos pero fieles: la RNN es un único nodo tanh con un
+   lazo recurrente; la LSTM muestra la "cinta transportadora" c_t arriba con
+   sus tres compuertas; la GRU muestra reinicio, actualización y la mezcla.
+   Cada nodo tiene data-tip (tooltip) y un id para colorearlo según su valor.
+   ========================================================================= */
+function svgRNN(){return `
+<svg class="cell" viewBox="0 0 320 210" xmlns="http://www.w3.org/2000/svg">
+  <defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L6,3 L0,6 Z" fill="#94A3B8"/></marker></defs>
+  <!-- entrada x_t -->
+  <rect class="node" x="130" y="168" width="60" height="30" rx="7" fill="#DBEAFE" stroke="var(--rnn)"
+        data-tip="<b>Entrada x_t</b>: el token actual de la secuencia. Se combina con la memoria previa."/>
+  <text class="svglabel" x="160" y="187" text-anchor="middle">x_t</text>
+  <!-- h_{t-1} entra por la izquierda -->
+  <line class="flow" id="rnn-fin" x1="10" y1="95" x2="120" y2="95" stroke="#94A3B8" stroke-width="2" marker-end="url(#ar)"/>
+  <text class="svgsub" x="12" y="86">h_(t-1)</text>
+  <line class="flow" x1="160" y1="168" x2="160" y2="128" stroke="#94A3B8" stroke-width="2" marker-end="url(#ar)"/>
+  <!-- nodo tanh -->
+  <circle class="node" id="rnn-tanh" cx="160" cy="95" r="34" fill="#EFF6FF" stroke="var(--rnn)" stroke-width="2"
+     data-tip="<b>Activación tanh</b>: única transformación de la RNN. h_t = tanh(W·[h_(t-1),x_t]). Aquí se pierde/atenúa el gradiente al retropropagar."/>
+  <text class="svglabel" x="160" y="92" text-anchor="middle">tanh</text>
+  <text class="svgsub" x="160" y="106" text-anchor="middle">h_t</text>
+  <!-- salida a la derecha -->
+  <line class="flow" id="rnn-fout" x1="194" y1="95" x2="308" y2="95" stroke="#94A3B8" stroke-width="2" marker-end="url(#ar)"/>
+  <text class="svgsub" x="284" y="86">h_t</text>
+  <!-- lazo recurrente -->
+  <path class="flow" d="M255,95 C255,30 65,30 65,95" fill="none" stroke="#CBD5E1" stroke-width="1.6"
+        stroke-dasharray="5 4" marker-end="url(#ar)"/>
+  <text class="svgsub" x="160" y="26" text-anchor="middle">recurrencia (memoria de 1 paso)</text>
+</svg>`;}
+
+function svgLSTM(){return `
+<svg class="cell" viewBox="0 0 340 230" xmlns="http://www.w3.org/2000/svg">
+  <defs><marker id="al" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L6,3 L0,6 Z" fill="#94A3B8"/></marker></defs>
+  <!-- CINTA c_t (memoria de largo plazo) -->
+  <line class="flow" id="lstm-cline" x1="8" y1="38" x2="332" y2="38" stroke="var(--celda)" stroke-width="4" marker-end="url(#al)"/>
+  <text class="svgsub" x="10" y="30">c_(t-1)</text>
+  <text class="svgsub" x="300" y="30" fill="var(--celda)">c_t</text>
+  <!-- operador de olvido (⊗) sobre la cinta -->
+  <circle class="node" id="lstm-fx" cx="110" cy="38" r="13" fill="#fff" stroke="var(--olvido)" stroke-width="2"
+    data-tip="<b>×  (olvido)</b>: multiplica la memoria antigua por la compuerta de olvido f_t. Si f≈1 conserva; si f≈0 borra."/>
+  <text class="svglabel" x="110" y="42" text-anchor="middle" fill="var(--olvido)">×</text>
+  <!-- operador de suma (⊕) nueva info -->
+  <circle class="node" id="lstm-add" cx="210" cy="38" r="13" fill="#fff" stroke="var(--entrada)" stroke-width="2"
+    data-tip="<b>+  (agregar)</b>: suma a la memoria la nueva información seleccionada por la compuerta de entrada (i∘g)."/>
+  <text class="svglabel" x="210" y="42" text-anchor="middle" fill="var(--entrada)">+</text>
+  <!-- compuerta de olvido -->
+  <rect class="node" id="lstm-f" x="86" y="92" width="48" height="26" rx="7" fill="#FEE2E2" stroke="var(--olvido)"
+    data-tip="<b>Compuerta de olvido f_t = σ(W_f·[h,x])</b>: decide qué fracción de la memoria previa se conserva (0=borrar, 1=guardar)."/>
+  <text class="gateval" id="lstm-f-t" x="110" y="109" text-anchor="middle" fill="var(--olvido)">σ f</text>
+  <line class="flow" x1="110" y1="92" x2="110" y2="53" stroke="var(--olvido)" stroke-width="2" marker-end="url(#al)"/>
+  <!-- compuerta de entrada + candidato -->
+  <rect class="node" id="lstm-i" x="150" y="92" width="42" height="26" rx="7" fill="#DCFCE7" stroke="var(--entrada)"
+    data-tip="<b>Compuerta de entrada i_t = σ(W_i·[h,x])</b>: decide cuánto del candidato nuevo se escribe en la memoria."/>
+  <text class="gateval" id="lstm-i-t" x="171" y="109" text-anchor="middle" fill="var(--entrada)">σ i</text>
+  <rect class="node" id="lstm-g" x="196" y="92" width="46" height="26" rx="7" fill="#DBEAFE" stroke="var(--candidato)"
+    data-tip="<b>Candidato g_t = tanh(W_g·[h,x])</b>: la nueva información propuesta para añadir a la memoria."/>
+  <text class="gateval" id="lstm-g-t" x="219" y="109" text-anchor="middle" fill="var(--candidato)">tanh g</text>
+  <line class="flow" x1="205" y1="92" x2="205" y2="53" stroke="var(--entrada)" stroke-width="2" marker-end="url(#al)"/>
+  <!-- compuerta de salida -->
+  <rect class="node" id="lstm-o" x="250" y="140" width="46" height="26" rx="7" fill="#FEF3C7" stroke="var(--salida)"
+    data-tip="<b>Compuerta de salida o_t = σ(W_o·[h,x])</b>: decide qué parte de la memoria se expone como estado oculto h_t."/>
+  <text class="gateval" id="lstm-o-t" x="273" y="157" text-anchor="middle" fill="var(--salida)">σ o</text>
+  <!-- h_t salida -->
+  <circle class="node" id="lstm-h" cx="273" cy="90" r="15" fill="#F5F3FF" stroke="var(--lstm)" stroke-width="2"
+    data-tip="<b>Estado oculto h_t = o_t ∘ tanh(c_t)</b>: la 'vista al exterior' de la memoria; es la salida en cada paso."/>
+  <text class="gateval" x="273" y="94" text-anchor="middle" fill="var(--lstm)">h_t</text>
+  <line class="flow" x1="273" y1="140" x2="273" y2="107" stroke="var(--salida)" stroke-width="2" marker-end="url(#al)"/>
+  <line class="flow" x1="240" y1="45" x2="266" y2="80" stroke="var(--celda)" stroke-width="2" marker-end="url(#al)"/>
+  <!-- entradas h_{t-1}, x_t -->
+  <rect class="node" x="20" y="182" width="120" height="26" rx="7" fill="#F1F5F9" stroke="#CBD5E1"
+    data-tip="<b>Entradas</b>: se concatenan el estado previo h_(t-1) y el token x_t; alimentan a las cuatro compuertas."/>
+  <text class="svgsub" x="80" y="199" text-anchor="middle">[ h_(t-1) , x_t ]</text>
+  <line class="flow" x1="80" y1="182" x2="80" y2="120" stroke="#94A3B8" stroke-width="1.6"/>
+  <line class="flow" x1="80" y1="120" x2="200" y2="120" stroke="#94A3B8" stroke-width="1.6"/>
+  <line class="flow" x1="80" y1="120" x2="273" y2="120" stroke="#94A3B8" stroke-width="1.6" opacity="0.5"/>
+</svg>`;}
+
+function svgGRU(){return `
+<svg class="cell" viewBox="0 0 340 230" xmlns="http://www.w3.org/2000/svg">
+  <defs><marker id="ag" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+    <path d="M0,0 L6,3 L0,6 Z" fill="#94A3B8"/></marker></defs>
+  <!-- línea de estado h (la GRU fusiona memoria y salida en h_t) -->
+  <line class="flow" id="gru-hline" x1="8" y1="40" x2="332" y2="40" stroke="var(--gru)" stroke-width="4" marker-end="url(#ag)"/>
+  <text class="svgsub" x="10" y="32">h_(t-1)</text>
+  <text class="svgsub" x="304" y="32" fill="var(--gru)">h_t</text>
+  <!-- mezcla (1-z)∘n + z∘h -->
+  <circle class="node" id="gru-mix" cx="230" cy="40" r="14" fill="#fff" stroke="var(--update)" stroke-width="2"
+    data-tip="<b>Mezcla:  h_t = (1−z)∘n + z∘h_(t-1)</b>. La compuerta de actualización z decide cuánto se conserva de la memoria vieja frente al candidato nuevo."/>
+  <text class="gateval" x="230" y="44" text-anchor="middle" fill="var(--update)">mix</text>
+  <!-- compuerta de actualización -->
+  <rect class="node" id="gru-z" x="200" y="96" width="60" height="26" rx="7" fill="#EDE9FE" stroke="var(--update)"
+    data-tip="<b>Compuerta de actualización z_t = σ(W_z·[h,x])</b>: análoga a olvido+entrada fusionadas. z≈1 conserva la memoria; z≈0 la reemplaza por lo nuevo."/>
+  <text class="gateval" id="gru-z-t" x="230" y="113" text-anchor="middle" fill="var(--update)">σ z</text>
+  <line class="flow" x1="230" y1="96" x2="230" y2="55" stroke="var(--update)" stroke-width="2" marker-end="url(#ag)"/>
+  <!-- compuerta de reinicio -->
+  <rect class="node" id="gru-r" x="60" y="96" width="56" height="26" rx="7" fill="#FFE4E6" stroke="var(--reset)"
+    data-tip="<b>Compuerta de reinicio r_t = σ(W_r·[h,x])</b>: decide cuánta memoria pasada IGNORAR al calcular el candidato. r≈0 = 'empieza casi de cero'."/>
+  <text class="gateval" id="gru-r-t" x="88" y="113" text-anchor="middle" fill="var(--reset)">σ r</text>
+  <!-- candidato -->
+  <rect class="node" id="gru-n" x="130" y="150" width="70" height="26" rx="7" fill="#DBEAFE" stroke="var(--candidato)"
+    data-tip="<b>Candidato n_t = tanh(W_n·[r∘h, x])</b>: nuevo contenido propuesto, usando solo la parte de memoria que el reset dejó pasar."/>
+  <text class="gateval" id="gru-n-t" x="165" y="167" text-anchor="middle" fill="var(--candidato)">tanh n</text>
+  <line class="flow" x1="165" y1="150" x2="220" y2="53" stroke="var(--candidato)" stroke-width="2" marker-end="url(#ag)"/>
+  <line class="flow" x1="88" y1="122" x2="150" y2="150" stroke="var(--reset)" stroke-width="1.6"/>
+  <!-- entradas -->
+  <rect class="node" x="20" y="188" width="120" height="26" rx="7" fill="#F1F5F9" stroke="#CBD5E1"
+    data-tip="<b>Entradas</b>: se concatenan h_(t-1) y x_t; alimentan reinicio, actualización y candidato."/>
+  <text class="svgsub" x="80" y="205" text-anchor="middle">[ h_(t-1) , x_t ]</text>
+  <line class="flow" x1="80" y1="188" x2="80" y2="122" stroke="#94A3B8" stroke-width="1.6"/>
+  <line class="flow" x1="88" y1="96" x2="88" y2="80" stroke="#94A3B8" stroke-width="1.6"/>
+</svg>`;}
+
+/* =========================================================================
+   5) CONSTRUCCIÓN DEL DOM DE LOS PANELES (una sola vez)
+   ========================================================================= */
+const PANELS=[
+  {key:"rnn",  name:"RNN simple", tag:"Elman · 1 activación",
+   pitch:"Memoria de un solo canal. Simple y rápida, pero el gradiente se desvanece: olvida el pasado lejano.",
+   svg:svgRNN,
+   gates:[], // la RNN no tiene compuertas
+   states:[{id:"h",label:"h_t",tip:"Estado oculto: la única memoria de la RNN. Cambia por completo en cada paso."}]},
+  {key:"lstm", name:"LSTM", tag:"3 compuertas + celda c_t",
+   pitch:"Añade una 'cinta de memoria' c_t protegida por 3 compuertas (olvido, entrada, salida). Preserva dependencias largas.",
+   svg:svgLSTM,
+   gates:[
+     {id:"f",label:"Olvido",sub:"f_t",color:"var(--olvido)",tip:"f_t ≈ 1 conserva la memoria previa; ≈ 0 la borra. Sesgada a recordar."},
+     {id:"i",label:"Entrada",sub:"i_t",color:"var(--entrada)",tip:"Cuánto del candidato nuevo se escribe en la memoria."},
+     {id:"o",label:"Salida",sub:"o_t",color:"var(--salida)",tip:"Qué parte de la memoria se expone como h_t."}],
+   states:[
+     {id:"c",label:"c_t",tip:"Estado de celda: memoria de LARGO plazo. Se edita poco a poco (suma), no se reescribe."},
+     {id:"h",label:"h_t",tip:"Estado oculto: la salida en cada paso, derivada de c_t vía la compuerta de salida."}]},
+  {key:"gru",  name:"GRU", tag:"2 compuertas · sin c_t",
+   pitch:"Versión ligera de la LSTM: fusiona memoria y salida en h_t con solo 2 compuertas (reinicio y actualización).",
+   svg:svgGRU,
+   gates:[
+     {id:"r",label:"Reinicio",sub:"r_t",color:"var(--reset)",tip:"Cuánta memoria pasada se ignora al proponer el candidato."},
+     {id:"z",label:"Actualización",sub:"z_t",color:"var(--update)",tip:"z ≈ 1 conserva la memoria vieja; z ≈ 0 la reemplaza. Sesgada a conservar."}],
+   states:[{id:"h",label:"h_t",tip:"Estado oculto único: en la GRU es a la vez memoria y salida."}]}
+];
+
+function buildPanels(){
+  const grid=document.getElementById("grid");
+  grid.innerHTML=PANELS.map(p=>{
+    const gatesHTML = p.gates.length ? `<h3>Compuertas en este paso</h3>` + p.gates.map(g=>`
+      <div class="gate-row" data-tip="${g.tip}">
+        <span class="glabel">${g.label} <small>${g.sub}</small></span>
+        <span class="bar-track"><span class="bar-fill" id="${p.key}-bar-${g.id}" style="background:${g.color}"></span></span>
+        <span class="gnum" id="${p.key}-num-${g.id}">—</span>
+      </div>`).join("")
+      : `<h3>Compuertas</h3><p class="state-hint">La RNN simple <b>no tiene compuertas</b>: por eso no puede proteger su memoria.</p>`;
+
+    const statesHTML = `<h3>Vector de estado (H=${H})</h3>` + p.states.map(s=>`
+      <div class="statevec" data-tip="${s.tip}">
+        <span class="slabel" style="color:${s.id==='c'?'var(--celda)':'var(--'+p.key+')'}">${s.label}</span>
+        <span class="vbars" id="${p.key}-vec-${s.id}"></span>
+      </div>`).join("");
+
+    return `<div class="panel ${p.key}" id="panel-${p.key}">
+      <div class="panel-head">
+        <span class="badge">${p.key.toUpperCase()}</span>
+        <div><h2>${p.name}</h2><div class="tag">${p.tag}</div></div>
+      </div>
+      <p class="pitch">${p.pitch}</p>
+      ${p.svg()}
+      <div class="readout">${gatesHTML}${statesHTML}</div>
+    </div>`;
+  }).join("");
+
+  // sembrar las mini-barras del vector de estado (H celdas cada una)
+  PANELS.forEach(p=>p.states.forEach(s=>{
+    const cont=document.getElementById(`${p.key}-vec-${s.id}`);
+    cont.innerHTML=Array.from({length:H},(_,k)=>
+      `<span class="vcell"><span class="vbar" id="${p.key}-${s.id}-b${k}"></span></span>`).join("");
+  }));
+}
+
+/* =========================================================================
+   6) RENDER: pintar el estado del paso actual
+   ========================================================================= */
+function renderStrip(){
+  const strip=document.getElementById("strip");
+  strip.innerHTML=App.seq.map((tk,idx)=>{
+    const t=idx+1;
+    const cls = t===App.step ? "active" : (t<App.step?"done":"");
+    return `<div class="token ${cls}">
+      <span class="tstep">${t}</span>
+      <div class="word">${tk.word}</div>
+      <div class="val">x=${tk.x.toFixed(2)}</div>
+    </div>`;
+  }).join("") + `<div class="dep-arc">↖ dependencia de largo alcance: el sujeto influye en pasos lejanos</div>`;
+}
+
+// pinta una barra 0..1 (compuerta)
+function setGate(panelKey,gateId,value){
+  const bar=document.getElementById(`${panelKey}-bar-${gateId}`);
+  const num=document.getElementById(`${panelKey}-num-${gateId}`);
+  if(!bar)return;
+  bar.style.width=(value*100).toFixed(0)+"%";
+  num.textContent=value.toFixed(2);
+}
+// pinta un vector de estado (-1..1) como barras centradas en el medio
+function setStateVec(panelKey,stateId,vec,color){
+  vec.forEach((v,k)=>{
+    const b=document.getElementById(`${panelKey}-${stateId}-b${k}`);
+    if(!b)return;
+    const mag=Math.min(Math.abs(v),1);           // recorte visual
+    const half=mag*50;                            // % de media altura
+    if(v>=0){ b.style.bottom="50%"; b.style.top="auto"; }
+    else    { b.style.top="50%";    b.style.bottom="auto"; }
+    b.style.height=half+"%";
+    b.style.background = v>=0 ? color : "#CBD5E1"; // positivo=color, negativo=gris
+  });
+}
+// resalta el color de un nodo SVG según valor de compuerta (0..1)
+function tintNode(id,value,base){
+  const el=document.getElementById(id); if(!el)return;
+  const op=(0.15+0.85*value).toFixed(2);
+  el.setAttribute("fill-opacity",op);
+}
+
+function render(){
+  renderStrip();
+  const t=App.step;
+
+  // --- RNN ---
+  const r=App.traj.rnn[t];
+  setStateVec("rnn","h",r.h,"var(--rnn)");
+
+  // --- LSTM ---
+  const l=App.traj.lstm[t];
+  setGate("lstm","f",mean(l.gates.f));
+  setGate("lstm","i",mean(l.gates.i));
+  setGate("lstm","o",mean(l.gates.o));
+  setStateVec("lstm","c",l.c,"var(--celda)");
+  setStateVec("lstm","h",l.h,"var(--lstm)");
+  tintNode("lstm-f",mean(l.gates.f)); tintNode("lstm-i",mean(l.gates.i)); tintNode("lstm-o",mean(l.gates.o));
+
+  // --- GRU ---
+  const g=App.traj.gru[t];
+  setGate("gru","r",mean(g.gates.r));
+  setGate("gru","z",mean(g.gates.z));
+  setStateVec("gru","h",g.h,"var(--gru)");
+  tintNode("gru-r",mean(g.gates.r)); tintNode("gru-z",mean(g.gates.z));
+
+  // resalta el "flujo activo" mientras se procesa un token (t>=1)
+  document.querySelectorAll(".flow").forEach(f=>f.classList.remove("live"));
+  if(t>=1){
+    ["panel-rnn","panel-lstm","panel-gru"].forEach(id=>document.getElementById(id).classList.add("pulse"));
+    ["rnn-fin","rnn-fout","lstm-cline","gru-hline"].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.classList.add("live");
+    });
+  } else {
+    ["panel-rnn","panel-lstm","panel-gru"].forEach(id=>document.getElementById(id).classList.remove("pulse"));
+  }
+
+  document.getElementById("btnNext").disabled = (t>=App.len);
+  document.getElementById("btnNext").textContent = t>=App.len ? "✓ Secuencia completa" : "▶ Siguiente paso";
+
+  renderGradient();
+}
+
+/* =========================================================================
+   7) GRADIENTE QUE SE DESVANECE
+   -------------------------------------------------------------------------
+   Modelo cualitativo (fiel a la intuición del BPTT):
+     factor_por_paso(RNN)   = |tanh'| promedio · norma efectiva  -> < 1  (decae)
+     factor_por_paso(LSTM)  = compuerta de olvido promedio       -> ≈ 1  (conserva)
+     factor_por_paso(GRU)   = compuerta de actualización promedio -> ≈ 1  (conserva)
+   La señal que sobrevive tras k pasos = factor^k.
+   Ligamos los factores a los valores REALES del recorrido actual, así el
+   slider de magnitud/longitud también afecta esta gráfica.
+   ========================================================================= */
+function decayFactors(){
+  // promedios sobre los pasos ya definidos por la secuencia
+  const steps=App.len;
+  let rAcc=0,lAcc=0,gAcc=0,n=0;
+  for(let t=1;t<=steps;t++){
+    // RNN: tanh' (≤1) × ganancia recurrente efectiva SIN compuerta que la eleve a 1.
+    // Ese 0.6 es el punto clave: la RNN no tiene forma de acercar el factor a 1,
+    // así que se queda muy por debajo de las "autopistas" de LSTM/GRU y decae rápido.
+    rAcc += App.traj.rnn[t].gDeriv * 0.6;
+    lAcc += App.traj.lstm[t].fMean;                // compuerta de olvido media (puede aprender ≈1)
+    gAcc += App.traj.gru[t].zMean;                 // compuerta de actualización media (puede aprender ≈1)
+    n++;
+  }
+  return {
+    rnn:  Math.min(0.98, rAcc/n),                  // típicamente ~0.5-0.6 -> decae fuerte
+    lstm: Math.min(0.995,lAcc/n),                  // ~0.8-0.9
+    gru:  Math.min(0.995,gAcc/n)                   // ~0.85-0.92
+  };
+}
+function renderGradient(){
+  const f=decayFactors();
+  const maxK=App.len;                              // distancia = longitud de la secuencia
+  const cfg=[
+    {key:"rnn", name:"RNN simple", color:"var(--rnn)",  factor:f.rnn,
+     good:"", bad:"El gradiente casi se anula: la RNN <b>no aprende</b> dependencias lejanas."},
+    {key:"lstm",name:"LSTM",       color:"var(--lstm)", factor:f.lstm,
+     good:"La cinta c_t mantiene el gradiente vivo: <b>aprende</b> dependencias largas.", bad:""},
+    {key:"gru", name:"GRU",        color:"var(--gru)",  factor:f.gru,
+     good:"La compuerta de actualización preserva la señal con menos parámetros que la LSTM.", bad:""}
+  ];
+  document.getElementById("gradGrid").innerHTML=cfg.map(c=>{
+    const surv=Math.pow(c.factor,maxK);            // % que sobrevive a la distancia máxima
+    const bars=Array.from({length:maxK},(_,i)=>{
+      const k=i+1, v=Math.pow(c.factor,k);
+      return `<div class="db" title="a ${k} pasos: ${(v*100).toFixed(1)}%"
+        style="height:${(v*100).toFixed(1)}%;background:${c.color};opacity:${(0.35+0.65*v).toFixed(2)}"></div>`;
+    }).join("");
+    const strong = surv>0.15;
+    const verdict = strong
+      ? `<div class="verdict" style="background:#F0FDF4;color:var(--ok)">✔ ${c.good||c.bad}</div>`
+      : `<div class="verdict" style="background:#FEF2F2;color:var(--olvido)">✘ ${c.bad||c.good}</div>`;
+    return `<div class="grad-card">
+      <div class="gc-head"><b style="color:${c.color}">${c.name}</b>
+        <span class="surv" style="color:${strong?'var(--ok)':'var(--olvido)'}">
+          sobrevive ${(surv*100).toFixed(surv<0.1?2:1)}%</span></div>
+      <div class="decay-bars">${bars}</div>
+      <div class="decay-x"><span>cerca (1 paso)</span><span>lejos (${maxK} pasos)</span></div>
+      ${verdict}
+    </div>`;
+  }).join("");
+}
+
+/* =========================================================================
+   8) INTERACCIÓN: botones, sliders, auto-play y tooltips
+   ========================================================================= */
+function resetAll(){
+  stopAuto();
+  App.step=0;
+  buildSequence();
+  computeTrajectories();
+  render();
+}
+function nextStep(){
+  if(App.step<App.len){ App.step++; render(); }
+  if(App.step>=App.len) stopAuto();
+}
+function stopAuto(){
+  if(App.autoTimer){clearInterval(App.autoTimer);App.autoTimer=null;
+    document.getElementById("btnAuto").textContent="⏩ Auto";}
+}
+function toggleAuto(){
+  if(App.autoTimer){stopAuto();return;}
+  if(App.step>=App.len) App.step=0;              // reinicia si estaba al final
+  document.getElementById("btnAuto").textContent="⏸ Pausar";
+  App.autoTimer=setInterval(nextStep,1100);
+}
+
+document.getElementById("btnNext").addEventListener("click",()=>{stopAuto();nextStep();});
+document.getElementById("btnReset").addEventListener("click",resetAll);
+document.getElementById("btnAuto").addEventListener("click",toggleAuto);
+
+document.getElementById("magSlider").addEventListener("input",e=>{
+  App.mag=parseFloat(e.target.value);
+  document.getElementById("magVal").textContent=App.mag.toFixed(1);
+  resetAll();
+});
+document.getElementById("lenSlider").addEventListener("input",e=>{
+  App.len=parseInt(e.target.value);
+  document.getElementById("lenVal").textContent=App.len;
+  resetAll();
+});
+
+/* ---- Tooltip: un único div flotante alimentado por [data-tip] ---------- */
+const tip=document.getElementById("tooltip");
+function showTip(html,x,y){
+  tip.innerHTML=html;tip.classList.add("show");
+  const pad=14, w=tip.offsetWidth, h=tip.offsetHeight;
+  let px=x+pad, py=y+pad;
+  if(px+w>window.innerWidth)  px=x-w-pad;
+  if(py+h>window.innerHeight) py=y-h-pad;
+  tip.style.left=px+"px";tip.style.top=py+"px";
+}
+document.addEventListener("mouseover",e=>{
+  const el=e.target.closest("[data-tip]");
+  if(el) showTip(el.getAttribute("data-tip"),e.clientX,e.clientY);
+});
+document.addEventListener("mousemove",e=>{
+  if(tip.classList.contains("show")){
+    const el=e.target.closest("[data-tip]");
+    if(el) showTip(el.getAttribute("data-tip"),e.clientX,e.clientY);
+    else   tip.classList.remove("show");
+  }
+});
+
+/* =========================================================================
+   9) ARRANQUE
+   ========================================================================= */
+buildPanels();
+resetAll();
+</script>
+
+<!-- Auto-ajuste de altura para el documento contenedor (patrón CNN/ViT). -->
+<script>
+(function(){
+  var t;
+  function ph(){ clearTimeout(t); t=setTimeout(function(){
+    try{ parent.postMessage({type:'embed-tool-height', id:'rnn-lstm-gru-frame',
+      height: Math.ceil(document.documentElement.getBoundingClientRect().height)}, '*'); }catch(e){}
+  }, 90); }
+  window.addEventListener('load', ph); window.addEventListener('resize', ph);
+  new MutationObserver(ph).observe(document.body, {subtree:true, childList:true, attributes:true, attributeFilter:['class','style']});
+  setTimeout(ph, 300);
+})();
+</script>
+</body>
+</html>
