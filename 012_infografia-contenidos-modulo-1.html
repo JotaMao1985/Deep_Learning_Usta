@@ -145,6 +145,10 @@
             .js .reveal { opacity: 1 !important; transform: none !important; }
             a { color: #1E293B; text-decoration: none; }
         }
+    
+        /* MathJax (tex-svg) + Preflight de Tailwind (svg{display:block}) rompe la
+           matematica inline: cada formula salta de linea. Se restaura el flujo inline. */
+        mjx-container svg { display: inline-block; }
     </style>
 </head>
 
@@ -193,7 +197,8 @@
 
     <!-- ====================== NAV STICKY ====================== -->
     <nav class="no-print sticky top-0 z-40 bg-navy/95 backdrop-blur border-b border-white/10 shadow-lg">
-        <div class="max-w-6xl mx-auto px-2 md:px-6 overflow-x-auto">
+        <div class="max-w-6xl mx-auto px-2 md:px-6 flex items-stretch">
+            <div class="overflow-x-auto flex-1 min-w-0">
             <ul class="flex items-center gap-1 py-2 text-[11px] md:text-sm font-semibold whitespace-nowrap text-white/70">
                 <li><a href="#mapa" class="navlink flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition"><span class="dot w-2 h-2 rounded-full bg-gold inline-block transition-transform"></span>Mapa</a></li>
                 <li><a href="#cap1" class="navlink flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition"><span class="dot w-2 h-2 rounded-full bg-primary inline-block transition-transform"></span>1 · Historia</a></li>
@@ -204,6 +209,8 @@
                 <li><a href="#cheatsheet" class="navlink flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/10 transition"><span class="dot w-2 h-2 rounded-full bg-white inline-block transition-transform"></span>Fórmulas</a></li>
                 <li class="ml-auto"><button onclick="window.print()" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gold text-navy font-bold hover:opacity-90 transition"><i class="fas fa-print"></i><span class="hidden md:inline">Imprimir / PDF</span></button></li>
             </ul>
+            </div>
+            <div class="flex-none w-14 md:w-24" aria-hidden="true"></div>
         </div>
     </nav>
 
