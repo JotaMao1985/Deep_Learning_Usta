@@ -145,6 +145,11 @@
             border-radius: 12px; padding: .55rem 1rem; overflow-x: auto;
         }
 
+        /* MathJax (tex-svg) + Preflight de Tailwind: el Preflight aplica svg{display:block},
+           lo que convierte cada fórmula inline en un bloque que salta de línea. Se restaura
+           el flujo inline sin afectar a las ecuaciones en bloque ($$…$$). */
+        mjx-container svg { display: inline-block; }
+
         /* Callout / analogía */
         .callout { border-left: 4px solid; border-radius: 12px; padding: .9rem 1.1rem; }
         .callout-info   { background:#F3F0FC; border-color:#3D008D; }
@@ -220,7 +225,8 @@
 
     <!-- ====================== NAVEGACIÓN STICKY ====================== -->
     <nav class="navbar sticky top-0 z-40 border-b border-slate-200 no-print">
-        <div class="max-w-6xl mx-auto px-4 flex gap-1 md:gap-3 overflow-x-auto text-xs md:text-sm font-semibold py-2.5 whitespace-nowrap">
+        <div class="max-w-6xl mx-auto px-4 flex items-stretch">
+            <div class="flex gap-1 md:gap-3 overflow-x-auto text-xs md:text-sm font-semibold py-2.5 whitespace-nowrap flex-1 min-w-0">
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#contexto"><i class="fas fa-diagram-project mr-1"></i>Contexto</a>
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#objetivos"><i class="fas fa-bullseye mr-1"></i>Objetivos</a>
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#mapa"><i class="fas fa-sitemap mr-1"></i>Mapa de la fase</a>
@@ -231,6 +237,8 @@
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#rubrica"><i class="fas fa-table-list mr-1"></i>Rúbrica</a>
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#autoevaluacion"><i class="fas fa-calculator mr-1"></i>Autoevaluación</a>
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#recursos"><i class="fas fa-book mr-1"></i>Recursos</a>
+            </div>
+            <div class="flex-none w-14 md:w-24" aria-hidden="true"></div>
         </div>
     </nav>
 
@@ -365,7 +373,7 @@
                 </div>
             </div>
             <div class="callout callout-warn mt-5">
-                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i>El escenario de referencia <strong>"Centinela del Café"</strong> combina imágenes de hoja (RoCoLe, rama A) con la serie climática del municipio —donde la temperatura, la humedad y la lluvia condicionan el brote de roya— (NASA POWER / IDEAM, rama B). Sirve de ejemplo; el problema propio del estudiante se rige por la misma lógica multimodal.</p>
+                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i>El escenario de referencia <strong>"Centinela del Café"</strong> combina imágenes de hoja (RoCoLe, rama A) con la serie climática del municipio (NASA POWER / IDEAM, rama B), donde la temperatura, la humedad y la lluvia condicionan el brote de roya. Sirve de ejemplo; el problema propio del estudiante se rige por la misma lógica multimodal.</p>
                 <p class="text-sm mt-2"><i class="fas fa-circle-exclamation text-amber-600 mr-2"></i><strong>Honestidad sobre la alineación.</strong> En este escenario, imagen y clima <strong>solo se alinean a nivel agregado</strong> (región/periodo): RoCoLe <strong>no trae fecha ni GPS por imagen</strong>, así que <strong>no</strong> existe una clave genuina por muestra. Emparejar artificialmente cada hoja con una ventana climática, o adjuntar una <em>feature</em> climática <strong>constante</strong> a todas las muestras, es <strong>fuga de datos</strong> (leakage). La alineación agregada es <strong>aceptable si se declara con sus limitaciones</strong>; el detalle se trabaja en la rama C.</p>
             </div>
         </section>
@@ -441,7 +449,7 @@
                     <li class="flex gap-4"><span class="step-num">1</span><div><p class="font-semibold text-navy">Análisis exploratorio de imágenes</p><p class="text-sm text-slate-600">Distribución de clases, dimensiones, calidad, balance/desbalance; identificación de ruido visual, oclusiones y variabilidad de iluminación, con muestras representativas por clase.</p></div></li>
                     <li class="flex gap-4"><span class="step-num">2</span><div><p class="font-semibold text-navy">Selección y justificación de arquitectura</p><p class="text-sm text-slate-600">Comparación de al menos <strong>dos</strong> arquitecturas preentrenadas (ResNet50, VGG16 o EfficientNet) por número de parámetros, profundidad, velocidad de inferencia y similitud con ImageNet. Decisión entre <em>Feature Extraction</em> (congelar pesos) y <em>Fine-Tuning</em> (reentrenar capas superiores) según tamaño y similitud del conjunto propio.</p></div></li>
                     <li class="flex gap-4"><span class="step-num">3</span><div><p class="font-semibold text-navy">Implementación</p><p class="text-sm text-slate-600">Adaptación de la capa de clasificación final, <em>data augmentation</em> pertinente (rotación, <em>flip</em>, <em>zoom</em>, brillo), partición 70/15/15 justificada, <em>early stopping</em> y <em>callbacks</em>.</p></div></li>
-                    <li class="flex gap-4"><span class="step-num">4</span><div><p class="font-semibold text-navy">Evaluación e interpretabilidad</p><p class="text-sm text-slate-600">Matriz de confusión, precisión/recall/F1 por clase, análisis de errores con ejemplos visuales y <strong>Grad-CAM</strong> para verificar que la red mira la región correcta (la lesión, no el fondo).</p></div></li>
+                    <li class="flex gap-4"><span class="step-num">4</span><div><p class="font-semibold text-navy">Evaluación e interpretabilidad</p><p class="text-sm text-slate-600">Matriz de confusión, precisión/recall/F1 por clase, análisis de errores con ejemplos visuales y <strong>Grad-CAM</strong> —que eleva la evaluación al nivel Estratégico— para verificar que la red mira la región correcta (la lesión, no el fondo).</p></div></li>
                 </ol>
 
                 <div class="code-window mt-6">
@@ -553,7 +561,7 @@ modelo = <span class="fn">Model</span>(base.input, salida)   <span class="cm"># 
                 <h3 class="font-bold text-primary mb-4 text-lg">Pasos de la rama B</h3>
                 <ol class="space-y-4">
                     <li class="flex gap-4"><span class="step-num">1</span><div><p class="font-semibold text-navy">Análisis exploratorio de la serie</p><p class="text-sm text-slate-600">Tendencia, estacionalidad y ruido; estadísticas móviles y autocorrelación (ACF/PACF); detección de atípicos, faltantes y periodicidades. Justificación del uso de modelos recurrentes frente a alternativas clásicas (ARIMA).</p></div></li>
-                    <li class="flex gap-4"><span class="step-num">2</span><div><p class="font-semibold text-navy">Preprocesamiento y ventaneo</p><p class="text-sm text-slate-600">Normalización; construcción de secuencias con <em>ventana deslizante</em> de un <strong>tamaño por defecto</strong> (p. ej. 14 pasos); explorar otros tamaños (7, 30) es <strong>opcional</strong>. Partición que <strong>respeta el orden temporal</strong>; variables exógenas si aplica (día de semana, festivos, indicadores).</p></div></li>
+                    <li class="flex gap-4"><span class="step-num">2</span><div><p class="font-semibold text-navy">Preprocesamiento y ventaneo</p><p class="text-sm text-slate-600">Normalización; construcción de secuencias con <em>ventana deslizante</em> de un <strong>tamaño de referencia</strong> (p. ej. 14 pasos); explorar otros tamaños (7, 30) es <strong>opcional</strong>. Partición que <strong>respeta el orden temporal</strong>; variables exógenas si aplica (día de semana, festivos, indicadores).</p></div></li>
                     <li class="flex gap-4"><span class="step-num">3</span><div><p class="font-semibold text-navy">Implementación comparativa</p><p class="text-sm text-slate-600">Entrenamiento <strong>obligatorio de LSTM y GRU</strong>, con una <strong>RNN simple solo como contraste</strong> para evidenciar el desvanecimiento (no es un barrido de tres arquitecturas). Hiperparámetros comparables (estado oculto 64–128, <em>learning rate</em> ≈0,001, <em>batch</em> 32) y <em>early stopping</em>.</p></div></li>
                     <li class="flex gap-4"><span class="step-num">4</span><div><p class="font-semibold text-navy">Evaluación y evidencia del desvanecimiento</p><p class="text-sm text-slate-600">Comparación con RMSE, MAE y MAPE; predicciones vs. valores reales. Para evidenciar el desvanecimiento basta <strong>una</strong> vía: una traza de las normas de gradiente <strong>o</strong> la diferencia de desempeño de la RNN frente a LSTM/GRU en dependencias largas (opcionalmente con una secuencia sintética larga). Se justifica cuándo usar cada celda.</p></div></li>
                 </ol>
@@ -683,11 +691,11 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
             <!-- ✅ Antes de entregar — checklist explícito y sin ambigüedad -->
             <div class="card p-6 mt-6 border-l-4" style="border-color:#0E9F6E">
                 <h3 class="font-bold text-primary mb-1 text-lg"><i class="fas fa-clipboard-check text-emerald-600 mr-2"></i>✅ Antes de entregar</h3>
-                <p class="text-sm text-slate-600 mb-4">Revisa que tu envío cumpla <strong>todos</strong> estos puntos. Sin todos los entregables la actividad puede quedar incompleta (Nivel Nulo = sin entrega).</p>
+                <p class="text-sm text-slate-600 mb-4">Conviene revisar que el envío cumpla <strong>todos</strong> estos puntos. Sin todos los entregables la actividad puede quedar incompleta (Nivel Nulo = sin entrega).</p>
                 <ul class="space-y-3 text-sm text-slate-700">
                     <li class="flex gap-3">
                         <i class="fas fa-square-check text-emerald-500 mt-0.5"></i>
-                        <span><strong>Notebook ejecutable (.ipynb)</strong> con las <strong>ramas A (CNN), B (LSTM/GRU) y la fusión C</strong>, documentado y que corre de principio a fin.</span>
+                        <span><strong>Notebook ejecutable (.ipynb)</strong> con las <strong>ramas A (CNN), B (LSTM/GRU) y la fusión C</strong>, documentado y que se ejecuta de principio a fin.</span>
                     </li>
                     <li class="flex gap-3">
                         <i class="fas fa-square-check text-emerald-500 mt-0.5"></i>
@@ -745,7 +753,7 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
                             <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">20 %</span>
                         </div>
                         <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> comparar 2 arquitecturas preentrenadas, justificar <em>Feature Extraction</em> vs <em>Fine-Tuning</em> con evidencia y aportar Grad-CAM.</p>
-                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> una CNN preentrenada que entrena y clasifica, aunque uses una sola arquitectura con justificación superficial.</p>
+                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> una CNN preentrenada que entrena y clasifica, aunque se use una sola arquitectura con justificación superficial.</p>
                     </div>
                     <!-- C2 -->
                     <div class="border border-slate-200 rounded-xl p-4">
@@ -807,7 +815,7 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
                         </tr>
                         <tr>
                             <td><strong>2. Rama temporal — LSTM/GRU (RNN de contraste) (20 %)</strong></td>
-                            <td>Implementa LSTM y GRU con ventana por defecto justificada y RNN simple de contraste; evidencia el desvanecimiento (normas de gradiente o diferencia de desempeño en dependencias largas); decide GRU vs LSTM con criterio.</td>
+                            <td>Implementa LSTM y GRU con ventana de referencia justificada y RNN simple de contraste; evidencia el desvanecimiento (normas de gradiente o diferencia de desempeño en dependencias largas); decide GRU vs LSTM con criterio.</td>
                             <td>Implementa LSTM y GRU correctamente más la RNN de contraste; respeta el orden temporal; compara con 2+ métricas e interpreta.</td>
                             <td>Implementa solo una celda con compuertas, o prescinde de la RNN de contraste, o no aporta evidencia del desvanecimiento.</td>
                             <td>Mezcla datos temporales (sin respetar el orden), confunde las arquitecturas o ninguna celda con compuertas funciona.</td>
@@ -844,7 +852,7 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
         <!-- ====================== AUTOEVALUACIÓN ====================== -->
         <section id="autoevaluacion" class="reveal">
             <h2 class="sec-title text-2xl md:text-3xl text-navy mb-3"><i class="fas fa-calculator text-secondary mr-2"></i>Calculadora de autoevaluación</h2>
-            <p class="text-slate-600 mb-4 max-w-3xl">Selecciona, con honestidad, el nivel que mejor describe tu entregable en cada criterio. La nota estimada se calcula <strong>en vivo</strong> con los pesos de la rúbrica oficial. Úsala para detectar qué mejorar antes de entregar.</p>
+            <p class="text-slate-600 mb-4 max-w-3xl">El estudiante selecciona, con honestidad, el nivel que mejor describe su entregable en cada criterio. La nota estimada se calcula <strong>en vivo</strong> con los pesos de la rúbrica oficial. Conviene usarla para detectar qué mejorar antes de entregar.</p>
 
             <div class="callout callout-warn mb-6">
                 <p class="text-sm"><i class="fas fa-circle-info text-amber-500 mr-2"></i><strong>Herramienta orientativa.</strong> Esta autoevaluación se basa en la rúbrica oficial, pero <strong>la calificación definitiva la asigna el docente</strong>; no reemplaza la sustentación ni la revisión del entregable.</p>
@@ -864,7 +872,7 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
                         </div>
                         <div class="mt-3 flex flex-col items-center gap-2">
                             <span id="ae-banda" class="rounded-full px-4 py-1 text-sm font-bold">—</span>
-                            <span id="ae-estado" class="text-sm font-semibold" role="status" aria-live="polite">Selecciona un nivel en cada criterio</span>
+                            <span id="ae-estado" class="text-sm font-semibold" role="status" aria-live="polite">Falta seleccionar un nivel en cada criterio</span>
                         </div>
                         <button id="ae-reset" type="button" class="mt-5 w-full rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
                             <i class="fas fa-rotate-left mr-1.5"></i>Reiniciar
@@ -1017,7 +1025,7 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
                 {
                     nombre: 'Rama temporal — LSTM/GRU (RNN de contraste)', peso: 20,
                     desc: [
-                        'Implementa LSTM y GRU con ventana por defecto justificada y RNN simple de contraste; evidencia el desvanecimiento (normas de gradiente o diferencia de desempeño en dependencias largas); decide GRU vs LSTM con criterio.',
+                        'Implementa LSTM y GRU con ventana de referencia justificada y RNN simple de contraste; evidencia el desvanecimiento (normas de gradiente o diferencia de desempeño en dependencias largas); decide GRU vs LSTM con criterio.',
                         'Implementa LSTM y GRU correctamente más la RNN de contraste; respeta el orden temporal; compara con 2+ métricas e interpreta.',
                         'Implementa solo una celda con compuertas, o prescinde de la RNN de contraste, o no aporta evidencia del desvanecimiento.',
                         'Mezcla datos temporales (sin respetar el orden), confunde las arquitecturas o ninguna celda con compuertas funciona.',
@@ -1143,7 +1151,7 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
                     bandaEl.textContent = '—';
                     bandaEl.style.background = '#F1F5F9';
                     bandaEl.style.color = '#64748B';
-                    estadoEl.textContent = 'Selecciona un nivel en cada criterio';
+                    estadoEl.textContent = 'Falta seleccionar un nivel en cada criterio';
                     estadoEl.style.color = '#64748B';
                     return;
                 }
