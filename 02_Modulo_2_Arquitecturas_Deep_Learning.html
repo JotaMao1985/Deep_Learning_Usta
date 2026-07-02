@@ -2806,6 +2806,17 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
         const Cap23Section = () => {
             const ref = useRef(null);
             useTypeset(ref, []);
+            useEffect(() => {
+                const onMsg = (e) => {
+                    const d = e && e.data;
+                    if (d && d.type === 'embed-tool-height' && d.id && d.height) {
+                        const fr = document.getElementById(d.id);
+                        if (fr) fr.style.height = (d.height + 4) + 'px';
+                    }
+                };
+                window.addEventListener('message', onMsg);
+                return () => window.removeEventListener('message', onMsg);
+            }, []);
             return (
                 <div ref={ref} className="prose-usta">
                     <SectionHeader title="Capítulo 2.3 — Modelos Generativos y Espacios Latentes" icon={Icons.Sparkles} />
@@ -2816,7 +2827,7 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                         generativos aprenden la estructura intrínseca de los datos: modelan la distribución de probabilidad
                         subyacente {String.raw`\(p_{\text{data}}(x)\)`} para producir instancias nuevas que parezcan auténticas. Este
                         capítulo recorre las <strong>cuatro familias generativas</strong>: los <strong>autoencoders</strong> y su
-                        variante probabilística <strong>VAE</strong>, las <strong>GAN</strong>, los <strong>modelos de difusión</strong>
+                        variante probabilística <strong>VAE</strong>, las <strong>GAN</strong>, los <strong>modelos de difusión</strong>{' '}
                         —que hoy dominan la generación de imágenes— y los <strong>Transformers</strong>, sustento de la IA generativa moderna.
                     </p>
 
@@ -2836,7 +2847,7 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                         algo nuevo y plausible a partir de una distribución aprendida —en vez de copiar lo memorizado— es el corazón
                         común a las cuatro familias de este capítulo.</strong> El público y el jurado que abuchean los versos flojos
                         añaden una segunda vuelta —la tensión entre <em>crear</em> y <em>juzgar</em>—, que es precisamente el motor de
-                        las <strong>GAN</strong> (§4); las demás familias (AE, VAE, difusión) generan sin ese juez.
+                        las <strong>GAN</strong> (§4); las demás familias (AE/VAE, difusión y Transformers) generan sin ese juez.
                     </Box>
 
                     {/* ============== 1. Espacios latentes y manifolds ============== */}
@@ -2936,8 +2947,8 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                     <p>
                         Una variante poderosa corrompe intencionalmente la entrada con ruido (manchar o borrar partes de una imagen)
                         y entrena al AE para reconstruir la versión <strong>limpia</strong>. En la analogía de TransMilenio, sería
-                        como filtrar automáticamente a los vendedores ambulantes o «colados» (ruido) para que solo los pasajeros
-                        legítimos (señal) lleguen al destino. El modelo aprende la estructura <em>robusta</em> de los datos, porque el
+                        como si el sistema aprendiera a descontar el bullicio del portal —motores, altavoces, interferencias
+                        (ruido)— para reconstruir sin distorsión la información de los pasajeros (señal) en el destino. El modelo aprende la estructura <em>robusta</em> de los datos, porque el
                         ruido es aleatorio y no tiene estructura comprimible.
                     </p>
                     <h4>Detección de anomalías</h4>
@@ -2960,7 +2971,7 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                         <strong> punto fijo y determinista</strong>, el VAE la mapea a una <strong>distribución de
                         probabilidad</strong> (una Gaussiana definida por la media {String.raw`\(\mu\)`} y la desviación estándar
                         {String.raw` \(\sigma\)`}). El modelo no memoriza una coordenada exacta, sino que aprende una «nube» donde es
-                        probable que el dato resida, dotando al espacio latente de dos propiedades vitales: la <strong>continuidad</strong>
+                        probable que el dato resida. Esta decisión dota al espacio latente de dos propiedades vitales: la <strong>continuidad</strong>{' '}
                         (puntos cercanos decodifican a salidas parecidas) y la <strong>completitud</strong> (todo punto muestreado del espacio
                         decodifica a una salida plausible, sin «huecos» vacíos).
                     </p>
@@ -2977,14 +2988,22 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                     </Box>
 
                     <p>
-                        El VAE optimiza una función objetivo llamada <strong>ELBO</strong> (<em>Evidence Lower Bound</em>), que
-                        equilibra dos fuerzas opuestas:
+                        El VAE se entrena <strong>maximizando</strong> una función objetivo llamada <strong>ELBO</strong>{' '}
+                        (<em>Evidence Lower Bound</em>); en la práctica, la pérdida que se minimiza es su negativo
+                        {String.raw` \(-\mathcal{L}_{\text{ELBO}}\)`}. El ELBO equilibra dos fuerzas opuestas:
                     </p>
                     <Eq>{String.raw`$$ \mathcal{L}_{\text{ELBO}}(\theta,\phi;\,x) = \underbrace{\mathbb{E}_{q_\phi(z|x)}\big[\log p_\theta(x|z)\big]}_{\text{reconstrucción}} - \underbrace{D_{\text{KL}}\!\big(q_\phi(z|x)\,\|\,p(z)\big)}_{\text{regularización}} $$`}</Eq>
                     <ul>
                         <li><strong>Reconstrucción:</strong> maximiza la log-verosimilitud esperada {String.raw`\(\mathbb{E}_{q_\phi(z|x)}[\log p_\theta(x|z)]\)`} para que el dato generado se parezca al real.</li>
                         <li><strong>Regularización (<Termino def="Divergencia de Kullback-Leibler: mide cuánto difiere una distribución de probabilidad de otra de referencia; vale cero solo si son idénticas.">divergencia KL</Termino>):</strong> el término {String.raw`\(D_{\text{KL}}(q_\phi(z|x)\,\|\,p(z))\)`} fuerza a las distribuciones latentes a parecerse a una Normal estándar {String.raw`\(\mathcal{N}(0, I)\)`}, evitando que el modelo «haga trampa» dispersando las nubes de datos para memorizarlas.</li>
                     </ul>
+                    <p>
+                        <strong>En palabras:</strong> el ELBO exige dos cosas a la vez, en clave de Ajiaco. El término de
+                        reconstrucción pide que cada plato decodificado sepa a ajiaco (lo generado debe parecerse al dato
+                        original); el término KL pide que ninguna receta se aleje demasiado del arquetipo compartido (cada
+                        «nube» latente debe quedar cerca de la Normal estándar). Entrenar un VAE es negociar ese equilibrio:
+                        fidelidad al dato sin memorizar recetas aisladas.
+                    </p>
 
                     <Box type="info" label="El truco de reparametrización">
                         El muestreo (elegir un punto aleatorio de la distribución) no es derivable, lo que rompería la
@@ -3025,6 +3044,12 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                     <p>En la práctica se alternan dos pasos de optimización, cada uno con su pérdida:</p>
                     <Eq>{String.raw`$$ \mathcal{L}_{D} = -\Big( \mathbb{E}_{x \sim p_{\text{data}}}[\log D(x)] + \mathbb{E}_{z \sim p_{z}}[\log(1 - D(G(z)))] \Big) \qquad \mathcal{L}_{G} = \mathbb{E}_{z \sim p_{z}}[\log(1 - D(G(z)))] $$`}</Eq>
                     <p>
+                        <strong>En palabras:</strong> {String.raw`\(\mathcal{L}_D\)`} es la tarea del jurado de la piqueria: un
+                        clasificador binario corriente que aprende a puntuar alto el vallenato auténtico y bajo la imitación.
+                        {String.raw` \(\mathcal{L}_G\)`} es la tarea del verseador: ajustar su improvisación hasta que el jurado
+                        la dé por auténtica. En cada ronda, una red entrena contra la versión más reciente de la otra.
+                    </p>
+                    <p>
                         En el equilibrio teórico (un <Termino def="Equilibrio de Nash: ningún jugador mejora cambiando su estrategia unilateralmente.">equilibrio de Nash</Termino>),
                         el generador modela tan bien la distribución real que el discriminador queda reducido a lanzar una moneda:
                         {String.raw` \(D(x) = 1/2\)`} para cualquier muestra.
@@ -3035,7 +3060,7 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                         La pérdida original del generador esconde un problema. Al inicio, {String.raw`\(G\)`} produce basura evidente y
                         {String.raw` \(D\)`} la rechaza con altísima confianza ({String.raw`\(D(G(z)) \approx 0\)`}). En esa región,
                         {String.raw` \(\log(1 - D(G(z)))\)`} es casi plana: su gradiente se <strong>satura</strong>, justo cuando
-                        {String.raw` \(G\)`} más necesita aprender. La solución estándar (la pérdida <em>non-saturating</em>) hace que
+                        {String.raw` \(G\)`} más necesita aprender. La solución estándar (la pérdida <em>non-saturating</em>, «no saturante») hace que
                         el generador <strong>maximice</strong> {String.raw`\(\log D(G(z))\)`} en lugar de minimizar el término original:
                     </p>
                     <Eq>{String.raw`$$ \mathcal{L}_{G}^{\text{NS}} = -\,\mathbb{E}_{z \sim p_{z}}\big[\log D(G(z))\big] $$`}</Eq>
@@ -3105,7 +3130,7 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                     <ul>
                         <li><strong>Proceso forward (añadir ruido):</strong> es <em>fijo, sin parámetros aprendibles</em>. Parte de una imagen real {String.raw`\(x_0\)`} y le añade ruido gaussiano gradualmente hasta que {String.raw`\(x_T\)`} es indistinguible de ruido puro. Cada paso es una cadena de Markov:
                             <Eq>{String.raw`$$ q(x_t \mid x_{t-1}) = \mathcal{N}\!\Big(x_t;\, \sqrt{1 - \beta_t}\,x_{t-1},\, \beta_t I\Big) $$`}</Eq>
-                            donde {String.raw`\(\beta_t\)`} es el «calendario de ruido» que controla cuánto se inyecta en cada paso.</li>
+                            donde {String.raw`\(\beta_t\)`} es el «calendario de ruido» que controla cuánto se inyecta en cada paso. <em>En palabras:</em> cada paso toma la imagen anterior, la atenúa levemente (el factor {String.raw`\(\sqrt{1-\beta_t}\)`}) y le suma un poco de ruido fresco (la varianza {String.raw`\(\beta_t\)`}): un vertimiento más al río.</li>
                         <li><strong>Proceso reverse (quitar ruido):</strong> aquí reside el aprendizaje. Una red {String.raw`\(p_\theta\)`} aprende a revertir cada paso, estimando cómo limpiar el ruido para recuperar una imagen un poco más nítida:
                             <Eq>{String.raw`$$ p_\theta(x_{t-1} \mid x_t) = \mathcal{N}\!\Big(x_{t-1};\, \mu_\theta(x_t, t),\, \Sigma_\theta(x_t, t)\Big) $$`}</Eq>
                             Una vez entrenada, la generación parte de ruido puro {String.raw`\(x_T \sim \mathcal{N}(0, I)\)`} y aplica el reverse {String.raw`\(T\)`} veces.</li>
@@ -3114,7 +3139,7 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                     <Box type="tip" label="Analogía local — la limpieza del Río Bogotá">
                         Un río cristalino de páramo es la imagen original {String.raw`\(x_0\)`}. A medida que atraviesa la sabana
                         recibe vertimientos paso a paso —sedimento aquí, residuos allá— hasta volverse una mezcla turbia
-                        irreconocible {String.raw`\(x_T\)`}: ese deterioro gradual y predecible es el <strong>proceso forward</strong>
+                        irreconocible {String.raw`\(x_T\)`}: ese deterioro gradual y predecible es el <strong>proceso forward</strong>{' '}
                         (nadie tuvo que «aprender» a ensuciarlo). Una planta de tratamiento aprende a revertir la contaminación por
                         etapas —sólidos gruesos, sedimentos finos, contaminantes disueltos—: ese es el <strong>proceso reverse</strong>.
                         Bien entrenada, la planta puede tomar <em>cualquier</em> agua turbia (ruido aleatorio) y producir un río limpio
@@ -3126,7 +3151,7 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                         <strong> Midjourney</strong>. Sus ventajas frente a las GAN: <strong>estabilidad</strong> (optimizan un
                         objetivo de regresión simple —predecir el ruido— evitando el frágil juego adversario y el mode collapse),
                         <strong> diversidad</strong> (cubren todo el recorrido de ruido a dato) y <strong>controlabilidad</strong> (se
-                        condicionan con naturalidad a texto vía <em>embeddings</em> de Transformers, habilitando «texto-a-imagen»).
+                        condicionan con naturalidad a texto vía <em>embeddings</em> de Transformers, habilitando «texto a imagen»).
                     </p>
                     <Box type="warn" label="El costo del muestreo">
                         La gran desventaja es el <strong>costo de inferencia</strong>: generar una sola imagen exige ejecutar el
@@ -3147,7 +3172,7 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                                 <tr><td><strong>Estabilidad de entrenamiento</strong></td><td>Baja (juego adversario frágil)</td><td>Alta (objetivo bien definido)</td><td>Alta (regresión de ruido)</td></tr>
                                 <tr><td><strong>Costo de muestreo</strong></td><td>Bajo (una pasada)</td><td>Bajo (una pasada)</td><td>Alto (cientos de pasos)</td></tr>
                                 <tr><td><strong>Espacio latente interpretable</strong></td><td>Parcial</td><td>Sí (continuo y navegable)</td><td>No directamente</td></tr>
-                                <tr><td><strong>Caso de uso típico</strong></td><td>Imágenes realistas rápidas</td><td>Interpolación, detección de anomalías</td><td>Texto-a-imagen de alta fidelidad</td></tr>
+                                <tr><td><strong>Caso de uso típico</strong></td><td>Imágenes realistas rápidas</td><td>Interpolación, detección de anomalías</td><td>Texto a imagen de alta fidelidad</td></tr>
                             </tbody>
                         </table>
                         <p className="text-xs text-gray-500 italic">Fuente: elaboración propia.</p>
@@ -3160,9 +3185,12 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                         Mientras las RNN procesan la información secuencialmente (palabra por palabra) —dificultando las dependencias
                         a larga distancia—, los Transformers introdujeron la <strong>autoatención</strong> (<em>self-attention</em>),
                         que analiza toda la secuencia simultáneamente (paralelización). La idea central: el significado de un elemento
-                        no es fijo, sino que depende dinámicamente de su relación con todos los demás. Esta autoatención
-                        <strong> generaliza el mecanismo de atención de Bahdanau</strong> (<strong>Capítulo 2.2 §7</strong>): en lugar de
-                        alinear dos secuencias distintas —encoder y decoder—, cada elemento se relaciona con todos los de su <em>propia</em>
+                        no es fijo, sino que depende dinámicamente de su relación con todos los demás.
+                    </p>
+                    <p>
+                        Esta autoatención <strong>generaliza el mecanismo de atención de Bahdanau</strong> (<strong>Capítulo 2.2 §7</strong>):
+                        en lugar de alinear dos secuencias distintas —encoder y decoder—, cada elemento se relaciona con todos los de
+                        su <em>propia</em>{' '}
                         secuencia y se prescinde por completo de la recurrencia.
                     </p>
 
@@ -3171,7 +3199,7 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                         contexto. En «Pásame esa vaina de la mesa», la atención la liga a «pásame» y «mesa»: es un <em>objeto
                         físico</em>. En «¡Qué vaina tan buena!», la atención se enfoca en «buena»: es una <em>situación</em>. En «Echó
                         una vaina y se rió», se vuelve <em>chiste</em>. El Transformer resuelve esto con tres vectores: la
-                        <strong> Query</strong> ({String.raw`\(Q\)`}) pregunta «¿qué soy en este contexto?»; las <strong>Keys</strong>
+                        <strong> Query</strong> ({String.raw`\(Q\)`}) pregunta «¿qué soy en este contexto?»; las <strong>Keys</strong>{' '}
                         ({String.raw`\(K\)`}) de las demás palabras ofrecen sus claves; y si una clave responde bien a la pregunta, su
                         <strong> Value</strong> ({String.raw`\(V\)`}) se transfiere para llenar el significado.
                     </Box>
@@ -3184,12 +3212,18 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                         <li><strong>Softmax:</strong> convierte los puntajes en probabilidades que suman 1 —cuánta atención prestar a cada palabra.</li>
                         <li><strong>Suma ponderada</strong> (× {String.raw`\(V\)`}): el resultado es una mezcla de los valores de las palabras relevantes.</li>
                     </ul>
+                    <p>
+                        <strong>En palabras:</strong> aplicada a «Pásame esa vaina de la mesa», la fórmula calcula cuánto responden
+                        «pásame» y «mesa» a la pregunta de «vaina» ({String.raw`\(QK^{\top}\)`}), reparte la atención entre las
+                        palabras según esos puntajes (softmax) y rellena el significado de «vaina» con una mezcla de sus valores
+                        (× {String.raw`\(V\)`}): un objeto físico que está sobre la mesa.
+                    </p>
                     <SelfAttentionSVG />
 
                     <Accordion items={[
                         {
                             titulo: 'Positional encoding (codificación posicional)',
-                            contenido: <span>Como el Transformer ve todo a la vez, no sabe el orden de las palabras. Se inyecta una señal matemática (senos y cosenos) a cada palabra para indicar su posición relativa. Es como el número de silla en un bus: sin él, no sabemos quién va primero.</span>
+                            contenido: <span>Como el Transformer ve todo a la vez, no sabe el orden de las palabras. Se inyecta una señal matemática (senos y cosenos) a cada palabra para indicar su posición relativa. Es como el número de silla en un bus: sin él, no se sabe quién va primero.</span>
                         },
                         {
                             titulo: 'Multi-head attention (cabezas múltiples)',
@@ -3206,6 +3240,32 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                         siguiente. Formalmente, modela la probabilidad de la secuencia como un producto de condicionales:
                     </p>
                     <Eq>{String.raw`$$ p(x_1, x_2, \ldots, x_T) = \prod_{t=1}^{T} p_\theta\big(x_t \mid x_1, \ldots, x_{t-1}\big) $$`}</Eq>
+                    <p>
+                        <strong>En palabras:</strong> la probabilidad de la secuencia completa se descompone en una cadena de
+                        decisiones, una por token: cada factor es la probabilidad del token siguiente dado todo lo ya escrito.
+                        Es como el verseador de la piqueria, que construye la estrofa verso a verso: cada verso nuevo se
+                        improvisa condicionado por el pie forzado inicial y por todos los versos ya cantados.
+                    </p>
+
+                    {/* ============== Herramienta interactiva: autoatención ============== */}
+                    <h4>Herramienta interactiva: la autoatención en vivo con la palabra «vaina»</h4>
+                    <p>
+                        La siguiente herramienta —inspirada en el <em>Transformer Explainer</em> del Polo Club de Georgia
+                        Tech— calcula en vivo la atención escalada de producto punto sobre las tres frases de la «vaina».
+                        Al seleccionar un token se muestra a quién atiende (puntajes, softmax y matriz completa) y cómo la
+                        mezcla de <em>values</em> construye su significado; el panel final conecta la atención con la
+                        generación autorregresiva mediante una softmax con temperatura.
+                    </p>
+                    <div className="bg-white border border-gray-200 rounded-xl p-2 shadow-sm my-4 overflow-hidden">
+                        <iframe id="atencion-frame" src="atencion-transformer-interactiva.html"
+                            title="Herramienta interactiva de autoatención: pesos QKV en vivo, matriz de atención y generación autorregresiva con temperatura"
+                            className="w-full rounded-lg" style={{ display: 'block', width: '100%', height: 1200, border: 0 }} loading="lazy"></iframe>
+                        <p className="text-xs text-gray-500 italic text-center mt-2 px-2">
+                            Autoatención interactiva sobre la palabra «vaina»: el mismo token adquiere significados distintos
+                            según la frase. Modelo de juguete con dimensiones interpretables; cálculo softmax(QKᵀ/√dₖ)·V en vivo.
+                            Fuente: elaboración propia.
+                        </p>
+                    </div>
                     <p>
                         En cada paso, la red estima una distribución sobre el vocabulario y se muestrea el siguiente token. Una
                         <strong> máscara causal</strong> impide que la autoatención «mire hacia el futuro» —a tokens aún no
@@ -3251,7 +3311,7 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                             pregunta: 'En el juego minimax de una GAN, ¿qué busca el generador G?',
                             opciones: [
                                 { texto: 'Que D(G(z)) → 1, es decir, que el discriminador crea reales sus muestras falsas, minimizando la función de valor.', correcta: true },
-                                { texto: 'Maximizar el error del discriminador sobre los datos reales p_data.', correcta: false },
+                                { texto: 'Maximizar el error del discriminador sobre la distribución real de los datos.', correcta: false },
                                 { texto: 'Clasificar correctamente las muestras como reales o falsas.', correcta: false },
                             ],
                             justificacion: 'G solo influye en el segundo término de V(D,G); busca engañar a D para que D(G(z)) tienda a 1. Clasificar es tarea de D, no de G.'
