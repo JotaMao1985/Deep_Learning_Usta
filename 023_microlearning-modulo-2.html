@@ -321,6 +321,10 @@
             flex: 1;
         }
         .progress-segment:hover { transform: scaleY(1.5); }
+    
+        /* MathJax (tex-svg) + Preflight de Tailwind (svg{display:block}) rompe la
+           matematica inline: cada formula salta de linea. Se restaura el flujo inline. */
+        mjx-container svg { display: inline-block; }
     </style>
 </head>
 

@@ -178,6 +178,10 @@
             border: 2px solid white;
             box-shadow: 0 2px 6px rgba(0,0,0,0.15);
         }
+    
+        /* MathJax (tex-svg) + Preflight de Tailwind (svg{display:block}) rompe la
+           matematica inline: cada formula salta de linea. Se restaura el flujo inline. */
+        mjx-container svg { display: inline-block; }
     </style>
 </head>
 

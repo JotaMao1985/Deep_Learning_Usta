@@ -351,6 +351,10 @@
         .code-window .cw-kw { color: #C084FC; }
         .code-window .cw-fn { color: #5EEAD4; }
         .code-window .cw-st { color: #FCD34D; }
+    
+        /* MathJax (tex-svg) + Preflight de Tailwind (svg{display:block}) rompe la
+           matematica inline: cada formula salta de linea. Se restaura el flujo inline. */
+        mjx-container svg { display: inline-block; }
     </style>
 </head>
 
