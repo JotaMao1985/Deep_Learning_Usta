@@ -38,6 +38,18 @@ El portal `index.html` es un punto de entrada multi-módulo (selector Módulo 1 
 | `032_infografia-contenidos-modulo-3.html` | Infografía de contenidos |
 | `033_microlearning-modulo-3.html` | Microlearning |
 
+## Herramientas interactivas embebidas
+
+Exploradores autónomos (HTML + JS/SVG, sin CDN salvo el material principal) que se embeben vía `iframe` con auto-ajuste de altura dentro del material principal de cada módulo. También funcionan abriéndolos directamente.
+
+| Archivo | Módulo / Capítulo | Descripción |
+|---|---|---|
+| `cnn-anatomia-interactiva.html` | M2 · Cap 2.1 | Animación paso a paso del pipeline de una CNN (entrada → convolución → ReLU → pooling → clasificación) |
+| `vit-anatomia-interactiva.html` | M2 · Cap 2.1 | Explorador ViT vs. CNN (anatomía del ViT, campo receptivo local vs. global, bloque encoder) |
+| `rnn-lstm-gru-interactivo.html` | M2 · Cap 2.2 | Explorador RNN·LSTM·GRU: misma secuencia en las 3 celdas, compuertas en vivo, desvanecimiento del gradiente y cuadro comparativo |
+| `atencion-transformer-interactiva.html` | M2 · Cap 2.3 §6 | Autoatención en vivo sobre la palabra «vaina»: pesos QKV, matriz de atención y generación autorregresiva con temperatura |
+| `clahe-visualizer.html` | M2 · Cap 2.1 | Visualizador del realce de contraste CLAHE |
+
 ## Proyecto Centinela (longitudinal)
 
 | Archivo | Descripción |
