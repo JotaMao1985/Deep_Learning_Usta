@@ -3368,6 +3368,27 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                         es la cuarta familia generativa del módulo y la que sustenta los grandes modelos de lenguaje actuales.
                     </p>
 
+                    {/* ============== Herramienta interactiva: comparador AE/VAE/GAN/Transformer ============== */}
+                    <h4>Herramienta interactiva: los cuatro modelos generativos, frente a frente</h4>
+                    <p>
+                        Presentadas ya las cuatro familias, la siguiente herramienta las reúne en un mismo lugar para
+                        contrastarlas. Cada pestaña ofrece tres niveles de lectura: el <strong>diagrama de la arquitectura</strong>
+                        (con el flujo de datos, la pérdida y la retropropagación), una <strong>ficha técnica</strong> (idea, pérdida,
+                        dinámica, usos, fortalezas y debilidades) y un <strong>laboratorio en vivo</strong> donde una red pequeña
+                        se entrena dentro del navegador: el AE y el VAE reconstruyen —y el VAE además genera desde el prior—, la GAN
+                        libra su juego adversarial sobre el mapa del discriminador, y una cabeza de autoatención aprende «de qué
+                        posición copiar». Una quinta pestaña sintetiza las diferencias en una tabla comparativa.
+                    </p>
+                    <div className="bg-white border border-gray-200 rounded-xl p-2 shadow-sm my-4 overflow-hidden">
+                        <iframe id="generativos-frame" src="ae-vae-gan-transformer-interactivo.html"
+                            title="Comparador interactivo de modelos generativos: diagramas, fichas técnicas y laboratorios 2-D con entrenamiento real de AE, VAE, GAN y Transformer"
+                            className="w-full rounded-lg" style={{ display: 'block', width: '100%', height: 1500, border: 0 }} loading="lazy"></iframe>
+                        <p className="text-xs text-gray-500 italic text-center mt-2 px-2">
+                            Autoencoder, VAE, GAN y Transformer comparados con entrenamiento real en el navegador (redes pequeñas con
+                            retropropagación y Adam) sobre datos sintéticos 2-D y secuencias de juguete. Fuente: elaboración propia.
+                        </p>
+                    </div>
+
                     {/* ============== 7. Aplicaciones ============== */}
                     <h3>7. Aplicaciones generativas en Colombia</h3>
                     <CalloutPro tema="info" titulo="De la escasez de datos a la preservación cultural" subtitulo="IA generativa al servicio del territorio" icon="fa-seedling">

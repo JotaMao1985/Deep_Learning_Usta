@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AE · VAE · GAN · Transformer — Comparador Interactivo</title>
+<!--
+  ============================================================================
+  COMPARADOR INTERACTIVO · AE vs VAE vs GAN vs TRANSFORMER
+  Maestría en Ciencia de Datos — Universidad Santo Tomás
+  Módulo 2: Arquitecturas · Modelos generativos
+  ----------------------------------------------------------------------------
+  LÓGICA PEDAGÓGICA (resumen):
+    - Cada pestaña presenta UNA arquitectura con tres niveles de lectura:
+        (1) diagrama SVG del flujo de datos + pérdida + retropropagación,
+        (2) ficha técnica (idea, pérdida, dinámica, usos, pros/contras),
+        (3) laboratorio 2-D DONDE EL MODELO SE ENTRENA DE VERDAD en el
+            navegador (redes pequeñas con backprop escrito a mano).
+    - El mismo conjunto sintético (lunas / círculos) atraviesa AE, VAE y GAN:
+      así las diferencias son atribuibles al MODELO, no a los datos.
+    - El Transformer se ilustra con su tarea natural (secuencias): una cabeza
+      de autoatención mínima aprende DE QUÉ POSICIÓN copiar; el mapa de
+      atención convergiendo a la anti-diagonal (tarea «invertir») es el
+      momento "ajá".
+    - Animaciones del proceso generativo: reconstrucción punto a punto (AE),
+      muestreo del prior (VAE), ruido→datos (GAN) y generación token a token
+      (Transformer).
+  Todo es JavaScript puro + SVG + Canvas. Funciona sin servidor y sin internet.
+  ============================================================================
+-->
+<style>
+  /* ---- Paleta institucional USTA + acentos por arquitectura ------------- */
+  :root{
+    --usta-morado:#3D008D;   --usta-magenta:#ED1E79;   --usta-oro:#FDB913;
+    --tinta:#334155;         --tinta-suave:#64748B;    --tinta-fuerte:#1E293B;
+    --borde:#E2E8F0;         --lienzo:#F8FAFC;         --lila:#FBF8FF;
+    --ae:#2563EB;            --vae:#8B5CF6;            --gan:#ED1E79;   --trf:#0D9488;
+    --ok:#15803D;            --warn:#B45309;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'Segoe UI',system-ui,sans-serif;
+    background:#fff;color:var(--tinta);padding:14px 14px 40px;line-height:1.55;
+  }
+  .container{max-width:1180px;margin:0 auto;}
+
+  /* ---- Cabecera --------------------------------------------------------- */
+  header{
+    text-align:center;margin-bottom:16px;padding:18px;
+    background:var(--lila);border-radius:16px;border:1px solid var(--borde);
+  }
+  h1{
+    font-size:1.7rem;margin-bottom:6px;
+    background:linear-gradient(90deg,var(--usta-morado),var(--usta-magenta));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  }
+  .subtitle{color:var(--tinta-suave);font-size:.93rem;max-width:860px;margin:0 auto;}
+
+  /* ---- Pestañas --------------------------------------------------------- */
+  .tabs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px;}
+  .tab{
+    border:1.5px solid var(--borde);background:#fff;border-radius:12px;
+    padding:9px 18px;font-size:.92rem;font-weight:700;color:var(--tinta-suave);
+    cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;
+  }
+  .tab .dot{width:10px;height:10px;border-radius:50%;background:var(--borde);}
+  .tab:hover{border-color:var(--usta-morado);color:var(--usta-morado);}
+  .tab[aria-selected="true"]{color:#fff;border-color:transparent;
+    background:linear-gradient(135deg,var(--usta-morado),var(--usta-magenta));}
+  .tab[aria-selected="true"] .dot{background:#fff;}
+  .tab.ae .dot{background:var(--ae);} .tab.vae .dot{background:var(--vae);}
+  .tab.gan .dot{background:var(--gan);} .tab.trf .dot{background:var(--trf);}
+  .tab[aria-selected="true"].ae .dot,.tab[aria-selected="true"].vae .dot,
+  .tab[aria-selected="true"].gan .dot,.tab[aria-selected="true"].trf .dot{background:#fff;}
+
+  section[role=tabpanel]{display:none;}
+  section[role=tabpanel].active{display:block;animation:fadein .3s ease;}
+  @keyframes fadein{from{opacity:.35;}to{opacity:1;}}
+
+  /* ---- Tarjetas / paneles ----------------------------------------------- */
+  .panel{
+    background:#fff;border:1px solid var(--borde);border-radius:16px;
+    padding:16px;margin-bottom:16px;
+  }
+  .panel.acc-ae{border-top:4px solid var(--ae);}
+  .panel.acc-vae{border-top:4px solid var(--vae);}
+  .panel.acc-gan{border-top:4px solid var(--gan);}
+  .panel.acc-trf{border-top:4px solid var(--trf);}
+  .panel h2{font-size:1.12rem;color:var(--tinta-fuerte);margin-bottom:4px;}
+  .panel .pitch{font-size:.86rem;color:var(--tinta-suave);margin-bottom:10px;max-width:900px;}
+
+  /* Diagramas SVG */
+  svg.diagrama{width:100%;height:auto;display:block;background:var(--lienzo);
+    border-radius:12px;border:1px solid var(--borde);}
+  .dg-node{fill:#fff;stroke:#94A3B8;stroke-width:1.6;cursor:help;}
+  .dg-node.hot{stroke-width:2.2;}
+  .dg-flow{stroke:#94A3B8;stroke-width:2;fill:none;}
+  .dg-grad{stroke:#EF4444;stroke-width:1.6;fill:none;stroke-dasharray:5 4;opacity:.8;}
+  .dg-kl{stroke:#B45309;stroke-width:1.6;fill:none;stroke-dasharray:5 4;opacity:.8;}
+  .dg-label{font-size:12px;font-weight:700;fill:var(--tinta-fuerte);pointer-events:none;}
+  .dg-sub{font-size:10px;fill:var(--tinta-suave);pointer-events:none;}
+  .dg-loss{fill:#FEF2F2;stroke:#FCA5A5;stroke-width:1.4;cursor:help;}
+  /* Al entrenar (auto) el flujo se anima: los datos "circulan" por el diagrama */
+  svg.diagrama.training .dg-flow{
+    stroke:var(--usta-magenta);stroke-dasharray:7 5;animation:flowmove .9s linear infinite;
+  }
+  @keyframes flowmove{to{stroke-dashoffset:-24;}}
+
+  /* Ficha técnica: rejilla de mini-tarjetas */
+  .ficha{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  @media(max-width:900px){.ficha{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:560px){.ficha{grid-template-columns:1fr;}}
+  .ficha .card{
+    background:var(--lienzo);border:1px solid var(--borde);border-radius:12px;padding:10px 12px;
+  }
+  .ficha .card h3{font-size:.78rem;color:var(--usta-morado);margin-bottom:4px;
+    text-transform:uppercase;letter-spacing:.04em;}
+  .ficha .card p{font-size:.82rem;color:var(--tinta);}
+  .ficha .card code,.formula{
+    font-family:'Cascadia Code','Fira Code',Consolas,monospace;font-size:.82rem;
+    color:var(--usta-morado);background:#F1EBFA;border-radius:6px;padding:1px 5px;
+  }
+
+  /* Cuadro de alerta (callout) */
+  .callout{
+    display:flex;gap:10px;border-radius:12px;padding:10px 14px;margin-top:12px;
+    font-size:.84rem;border:1px solid;
+  }
+  .callout.warn{background:#FFFBEB;border-color:#FDE68A;color:#78350F;}
+  .callout.info{background:#EFF6FF;border-color:#BFDBFE;color:#1E3A8A;}
+  .callout .ico{font-size:1.1rem;flex-shrink:0;}
+
+  /* ---- Laboratorio (demo 2-D) ------------------------------------------- */
+  .lab{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;}
+  .lab .lienzo-col{flex:1 1 460px;min-width:320px;}
+  .lab .ctrl-col{flex:1 1 280px;min-width:260px;display:flex;flex-direction:column;gap:12px;}
+  canvas.mundo{width:100%;height:auto;display:block;background:var(--lienzo);
+    border-radius:12px;border:1px solid var(--borde);}
+  canvas.curva{width:100%;height:auto;display:block;background:#fff;
+    border-radius:10px;border:1px solid var(--borde);margin-top:8px;}
+  .leyenda{display:flex;flex-wrap:wrap;gap:12px;font-size:.75rem;color:var(--tinta-suave);
+    margin-top:6px;}
+  .leyenda span{display:flex;align-items:center;gap:5px;}
+  .leyenda i{width:11px;height:11px;border-radius:50%;display:inline-block;}
+
+  .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .btn{
+    border:none;border-radius:10px;padding:9px 15px;font-size:.85rem;font-weight:700;
+    cursor:pointer;transition:transform .15s,box-shadow .2s;color:#fff;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+  .btn-train{background:linear-gradient(135deg,var(--usta-morado),var(--usta-magenta));
+             box-shadow:0 4px 14px rgba(237,30,121,.25);}
+  .btn-auto{background:linear-gradient(135deg,#0891B2,#0E7490);}
+  .btn-anim{background:linear-gradient(135deg,#B45309,#D97706);}
+  .btn-reset{background:#64748B;}
+  select,.sel{
+    border:1.5px solid var(--borde);border-radius:10px;padding:8px 10px;font-size:.85rem;
+    color:var(--tinta-fuerte);background:#fff;cursor:pointer;font-weight:600;
+  }
+  .slider-group{display:flex;flex-direction:column;gap:4px;min-width:180px;}
+  .slider-group label{font-size:.76rem;color:var(--tinta-suave);font-weight:700;
+    display:flex;justify-content:space-between;}
+  .slider-group label b{color:var(--usta-morado);}
+  input[type=range]{width:100%;accent-color:var(--usta-magenta);cursor:pointer;}
+
+  .readout{
+    background:var(--lienzo);border:1px solid var(--borde);border-radius:12px;
+    padding:10px 12px;font-size:.82rem;
+  }
+  .readout .row{display:flex;justify-content:space-between;padding:2px 0;}
+  .readout .row b{font-variant-numeric:tabular-nums;color:var(--usta-morado);}
+  .observar{
+    background:var(--lila);border:1px solid #E9D8FD;border-radius:12px;padding:10px 12px;
+    font-size:.8rem;
+  }
+  .observar h3{font-size:.78rem;color:var(--usta-morado);text-transform:uppercase;
+    letter-spacing:.04em;margin-bottom:4px;}
+  .observar ul{margin-left:16px;}
+  .observar li{margin:3px 0;}
+
+  /* ---- Demo del Transformer -------------------------------------------- */
+  .trf-lab{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;}
+  .trf-lab .izq{flex:1 1 420px;min-width:300px;}
+  .trf-lab .der{flex:1 1 300px;min-width:260px;display:flex;flex-direction:column;gap:12px;}
+  .seq-row{display:flex;gap:6px;align-items:center;margin:4px 0;flex-wrap:wrap;}
+  .seq-row .rot{font-size:.72rem;color:var(--tinta-suave);width:74px;font-weight:700;flex-shrink:0;}
+  .tok{
+    width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:1rem;background:#fff;border:2px solid var(--borde);
+    color:var(--tinta-fuerte);transition:all .3s;position:relative;
+  }
+  .tok.in{background:var(--lienzo);}
+  .tok.out{color:var(--trf);}
+  .tok.hit{border-color:var(--ok);background:#F0FDF4;}
+  .tok.miss{border-color:#EF4444;background:#FEF2F2;}
+  .tok.focus{box-shadow:0 0 0 3px rgba(237,30,121,.25);border-color:var(--usta-magenta);}
+  .tok.pending{color:transparent;background:repeating-linear-gradient(45deg,#F1F5F9,#F1F5F9 6px,#E2E8F0 6px,#E2E8F0 12px);}
+  .tok .idx{position:absolute;top:-9px;left:-7px;width:17px;height:17px;border-radius:50%;
+    background:var(--usta-morado);color:#fff;font-size:.58rem;font-weight:700;
+    display:flex;align-items:center;justify-content:center;}
+  .attn-grid{
+    display:grid;gap:3px;margin-top:8px;background:#fff;border:1px solid var(--borde);
+    border-radius:12px;padding:10px;
+  }
+  .attn-grid .hd{font-size:.66rem;color:var(--tinta-suave);display:flex;
+    align-items:center;justify-content:center;font-weight:700;}
+  .attn-cell{
+    aspect-ratio:1;border-radius:5px;background:#F1F5F9;cursor:help;transition:background .25s;
+    display:flex;align-items:center;justify-content:center;font-size:.6rem;color:#fff;font-weight:700;
+  }
+  .attn-cell.rowfocus{outline:2px solid var(--usta-magenta);outline-offset:1px;}
+  .attn-cap{font-size:.72rem;color:var(--tinta-suave);margin-top:6px;}
+
+  /* ---- Tabla comparativa ------------------------------------------------ */
+  .tabla-wrap{overflow-x:auto;}
+  table.comp{border-collapse:collapse;width:100%;min-width:760px;font-size:.83rem;}
+  table.comp th,table.comp td{border:1px solid var(--borde);padding:8px 10px;text-align:left;vertical-align:top;}
+  table.comp thead th{background:var(--usta-morado);color:#fff;font-size:.85rem;}
+  table.comp thead th:first-child{background:var(--tinta-fuerte);}
+  table.comp tbody th{background:var(--lienzo);color:var(--usta-morado);white-space:nowrap;}
+  table.comp tbody tr:nth-child(even) td{background:#FCFCFE;}
+
+  /* ---- Tooltip flotante -------------------------------------------------- */
+  #tip{
+    position:fixed;z-index:99;max-width:290px;background:var(--tinta-fuerte);color:#F1F5F9;
+    font-size:.76rem;line-height:1.45;padding:9px 11px;border-radius:10px;
+    box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .15s;
+  }
+  #tip.show{opacity:1;}
+
+  footer{margin-top:22px;text-align:center;font-size:.75rem;color:var(--tinta-suave);}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>AE · VAE · GAN · Transformer</h1>
+  <p class="subtitle">
+    Comparador interactivo de modelos generativos. En cada pestaña se presenta el diagrama de la
+    arquitectura, su ficha técnica y un <b>laboratorio en vivo</b>: una red pequeña se entrena
+    dentro del navegador sobre datos sintéticos 2-D (o sobre secuencias, en el caso del
+    Transformer). Al pasar el cursor sobre los nodos de los diagramas se muestran explicaciones.
+  </p>
+</header>
+
+<!-- ======================= BARRA DE PESTAÑAS ============================ -->
+<div class="tabs" role="tablist" aria-label="Modelos">
+  <button class="tab ae"  role="tab" id="tab-ae"   aria-controls="sec-ae"   aria-selected="true" ><span class="dot"></span>Autoencoder (AE)</button>
+  <button class="tab vae" role="tab" id="tab-vae"  aria-controls="sec-vae"  aria-selected="false"><span class="dot"></span>VAE</button>
+  <button class="tab gan" role="tab" id="tab-gan"  aria-controls="sec-gan"  aria-selected="false"><span class="dot"></span>GAN</button>
+  <button class="tab trf" role="tab" id="tab-trf"  aria-controls="sec-trf"  aria-selected="false"><span class="dot"></span>Transformer</button>
+  <button class="tab"     role="tab" id="tab-comp" aria-controls="sec-comp" aria-selected="false"><span class="dot"></span>⚖️ Comparación</button>
+</div>
+
+<!-- ============================================================================
+     PESTAÑA 1 · AUTOENCODER
+     ============================================================================ -->
+<section id="sec-ae" role="tabpanel" aria-labelledby="tab-ae" class="active">
+
+  <div class="panel acc-ae">
+    <h2>Arquitectura y flujo de datos</h2>
+    <p class="pitch">
+      El autoencoder comprime la entrada <span class="formula">x</span> a un código latente
+      <span class="formula">z</span> de menor dimensión (el «cuello de botella») y la reconstruye.
+      Se entrena minimizando el error de reconstrucción; el gradiente (línea roja punteada)
+      fluye de la pérdida hacia atrás por toda la red.
+    </p>
+    <svg class="diagrama" id="dg-ae" viewBox="0 0 680 210" role="img"
+         aria-label="Diagrama del autoencoder: x pasa por el codificador al latente z, el decodificador produce la reconstrucción y la pérdida compara ambas.">
+      <defs>
+        <marker id="arrA" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker>
+        <marker id="arrR" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#EF4444"/></marker>
+      </defs>
+      <!-- entrada x -->
+      <rect class="dg-node" x="14" y="75" width="64" height="60" rx="10"
+            data-tip="Entrada x ∈ ℝ²: un punto del conjunto de datos (aquí, coordenadas 2-D)."/>
+      <text class="dg-label" x="46" y="102" text-anchor="middle">x</text>
+      <text class="dg-sub"   x="46" y="118" text-anchor="middle">entrada</text>
+      <!-- codificador -->
+      <polygon class="dg-node" points="100,60 185,88 185,122 100,150"
+            data-tip="Codificador f(x): red densa que reduce la dimensión (2 → 16 → 1). Aprende QUÉ conservar."/>
+      <text class="dg-label" x="142" y="101" text-anchor="middle">Codificador</text>
+      <text class="dg-sub"   x="142" y="116" text-anchor="middle">2 → 16 → 1</text>
+      <!-- latente -->
+      <circle class="dg-node" cx="222" cy="105" r="17"
+            data-tip="Código latente z ∈ ℝ: cuello de botella determinista. Toda la información debe pasar por este único número."/>
+      <text class="dg-label" x="222" y="109" text-anchor="middle">z</text>
+      <text class="dg-sub"   x="222" y="140" text-anchor="middle">cuello de botella</text>
+      <!-- decodificador -->
+      <polygon class="dg-node" points="258,88 343,60 343,150 258,122"
+            data-tip="Decodificador g(z): reconstruye la entrada a partir del código (1 → 16 → 2)."/>
+      <text class="dg-label" x="300" y="101" text-anchor="middle">Decodificador</text>
+      <text class="dg-sub"   x="300" y="116" text-anchor="middle">1 → 16 → 2</text>
+      <!-- reconstrucción -->
+      <rect class="dg-node" x="365" y="75" width="64" height="60" rx="10"
+            data-tip="Reconstrucción x̂ = g(f(x)): la mejor copia de x que cabe por el cuello de botella."/>
+      <text class="dg-label" x="397" y="102" text-anchor="middle">x̂</text>
+      <text class="dg-sub"   x="397" y="118" text-anchor="middle">reconstrucción</text>
+      <!-- pérdida -->
+      <rect class="dg-loss" x="480" y="70" width="180" height="70" rx="12"
+            data-tip="Error cuadrático medio: penaliza la distancia entre la entrada y su reconstrucción. Es la ÚNICA señal de aprendizaje."/>
+      <text class="dg-label" x="570" y="100" text-anchor="middle">ℒ = ‖x − x̂‖²</text>
+      <text class="dg-sub"   x="570" y="120" text-anchor="middle">pérdida de reconstrucción</text>
+      <!-- flujo hacia adelante -->
+      <path class="dg-flow" d="M78,105 L96,105"  marker-end="url(#arrA)"/>
+      <path class="dg-flow" d="M185,105 L201,105" marker-end="url(#arrA)"/>
+      <path class="dg-flow" d="M239,105 L254,105" marker-end="url(#arrA)"/>
+      <path class="dg-flow" d="M343,105 L361,105" marker-end="url(#arrA)"/>
+      <path class="dg-flow" d="M429,105 L476,105" marker-end="url(#arrA)"/>
+      <!-- x también llega a la pérdida (comparación) -->
+      <path class="dg-flow" d="M46,75 C46,20 560,18 566,66" marker-end="url(#arrA)" style="opacity:.55"/>
+      <!-- gradiente hacia atrás -->
+      <path class="dg-grad" d="M480,132 C400,185 180,185 110,152" marker-end="url(#arrR)"
+            data-tip="Retropropagación: ∂ℒ/∂θ actualiza decodificador y codificador en cada paso de descenso del gradiente."/>
+      <text class="dg-sub" x="300" y="196" text-anchor="middle" fill="#B91C1C">∇ retropropagación</text>
+    </svg>
+  </div>
+
+  <div class="panel acc-ae">
+    <h2>Ficha técnica</h2>
+    <div class="ficha">
+      <div class="card"><h3>💡 Idea central</h3>
+        <p>Aprender una compresión no lineal: obligar a los datos a pasar por un cuello de botella
+        <span class="formula">z = f(x)</span> y reconstruirlos con <span class="formula">x̂ = g(z)</span>.
+        La red descubre la <b>variedad de baja dimensión</b> donde viven los datos.</p></div>
+      <div class="card"><h3>📉 Función de pérdida</h3>
+        <p><span class="formula">ℒ = ‖x − x̂‖²</span> (ECM) para datos continuos, o entropía cruzada
+        por componente para datos binarios. No hay término probabilístico: el latente es
+        <b>determinista</b>.</p></div>
+      <div class="card"><h3>⚙️ Dinámica de entrenamiento</h3>
+        <p>Descenso del gradiente estándar de extremo a extremo. Muy estable: una sola red, una sola
+        pérdida, sin equilibrios que mantener. Converge de forma monótona en la práctica.</p></div>
+      <div class="card"><h3>🛠️ Aplicaciones típicas</h3>
+        <p>Reducción de dimensionalidad no lineal (alternativa a PCA), detección de anomalías
+        (error de reconstrucción alto ⇒ dato atípico), eliminación de ruido (denoising) y
+        preentrenamiento de representaciones.</p></div>
+      <div class="card"><h3>✅ Fortalezas</h3>
+        <p>Simple, estable y fiel: reconstruye con precisión lo que ha visto. El error de
+        reconstrucción es una métrica directa e interpretable.</p></div>
+      <div class="card"><h3>⚠️ Debilidades</h3>
+        <p><b>No es generativo por sí mismo</b>: el espacio latente tiene «huecos» sin estructura;
+        decodificar un <span class="formula">z</span> arbitrario suele producir salidas sin sentido.
+        Por eso nace el VAE.</p></div>
+    </div>
+  </div>
+
+  <div class="panel acc-ae">
+    <h2>Laboratorio · reconstruir la variedad</h2>
+    <p class="pitch">
+      Un autoencoder 2 → 1 → 2 se entrena sobre puntos 2-D. El botón «Entrenar ×20» ejecuta
+      20 pasos de descenso del gradiente (Adam, minilotes de 32); con «Auto» el entrenamiento
+      continúa solo. La curva dorada es la <b>imagen del latente</b>: todo lo que el decodificador
+      puede producir al recorrer <span class="formula">z</span> de menor a mayor.
+    </p>
+    <div class="lab">
+      <div class="lienzo-col">
+        <canvas class="mundo" id="ae-canvas" width="520" height="380"></canvas>
+        <div class="leyenda">
+          <span><i style="background:#1E3A8A"></i> datos x</span>
+          <span><i style="background:#ED1E79"></i> reconstrucción x̂</span>
+          <span><i style="background:#CBD5E1;border-radius:0;height:2px;width:14px"></i> pares x→x̂</span>
+          <span><i style="background:#FDB913;border-radius:0;height:3px;width:14px"></i> variedad decodificada g(z)</span>
+        </div>
+        <canvas class="curva" id="ae-curva" width="520" height="80"></canvas>
+      </div>
+      <div class="ctrl-col">
+        <div class="controls">
+          <button class="btn btn-train" id="ae-step">Entrenar ×20</button>
+          <button class="btn btn-auto"  id="ae-auto">▶ Auto</button>
+          <button class="btn btn-anim"  id="ae-anim">🎬 Reconstruir un punto</button>
+          <button class="btn btn-reset" id="ae-reset">↺ Reiniciar</button>
+          <select class="sel" id="ae-data" data-tip="Conjunto sintético de entrenamiento.">
+            <option value="moons">🌙 Dos lunas</option>
+            <option value="circles">⭕ Dos círculos</option>
+          </select>
+        </div>
+        <div class="readout" id="ae-read">
+          <div class="row"><span>Pasos de entrenamiento</span><b id="ae-steps">0</b></div>
+          <div class="row"><span>ECM (minilote)</span><b id="ae-loss">—</b></div>
+          <div class="row"><span>Latente del punto animado</span><b id="ae-z">—</b></div>
+        </div>
+        <div class="observar">
+          <h3>🔎 Qué observar</h3>
+          <ul>
+            <li>Al inicio las reconstrucciones se agolpan cerca del origen; con el entrenamiento
+                los segmentos grises se acortan: <b>x̂ se acerca a x</b>.</li>
+            <li>La curva dorada se estira hasta «abrazar» los datos: el AE aprende una
+                parametrización 1-D de la variedad.</li>
+            <li>Con «Dos círculos» el cuello de botella 1-D sufre: dos anillos separados no se
+                recorren bien con una sola coordenada continua.</li>
+          </ul>
+        </div>
+        <div class="callout info"><span class="ico">💡</span>
+          <span>La animación «Reconstruir un punto» sigue a un dato individual: viaja hasta su
+          reconstrucción mientras se muestra el valor latente <span class="formula">z</span>
+          que lo codifica.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================================
+     PESTAÑA 2 · VAE
+     ============================================================================ -->
+<section id="sec-vae" role="tabpanel" aria-labelledby="tab-vae">
+
+  <div class="panel acc-vae">
+    <h2>Arquitectura y flujo de datos</h2>
+    <p class="pitch">
+      El VAE convierte el autoencoder en un <b>modelo probabilístico</b>: el codificador ya no
+      produce un punto sino una distribución <span class="formula">q(z|x) = 𝒩(μ, σ²)</span>.
+      El «truco de reparametrización» <span class="formula">z = μ + σ⊙ε</span> permite que el
+      gradiente atraviese el muestreo, y el término KL empuja el latente hacia el prior
+      <span class="formula">𝒩(0, 1)</span> — por eso después se puede <b>generar</b> muestreando el prior.
+    </p>
+    <svg class="diagrama" id="dg-vae" viewBox="0 0 680 250" role="img"
+         aria-label="Diagrama del VAE: el codificador produce mu y sigma, se muestrea z con ruido epsilon, el decodificador reconstruye y la pérdida suma reconstrucción y divergencia KL.">
+      <defs>
+        <marker id="arrB" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker>
+        <marker id="arrR2" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#EF4444"/></marker>
+        <marker id="arrK" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#B45309"/></marker>
+      </defs>
+      <!-- entrada -->
+      <rect class="dg-node" x="14" y="95" width="60" height="58" rx="10"
+            data-tip="Entrada x: un punto 2-D del conjunto de datos."/>
+      <text class="dg-label" x="44" y="121" text-anchor="middle">x</text>
+      <!-- codificador -->
+      <polygon class="dg-node" points="92,80 168,105 168,143 92,168"
+            data-tip="Codificador probabilístico: en lugar de un z fijo produce los parámetros μ y log σ² de una gaussiana q(z|x)."/>
+      <text class="dg-label" x="130" y="120" text-anchor="middle">Codificador</text>
+      <text class="dg-sub"   x="130" y="135" text-anchor="middle">2 → 16 → (μ, log σ²)</text>
+      <!-- mu y sigma -->
+      <rect class="dg-node" x="188" y="85" width="46" height="30" rx="8"
+            data-tip="μ(x): centro de la distribución latente para esta entrada."/>
+      <text class="dg-label" x="211" y="105" text-anchor="middle">μ</text>
+      <rect class="dg-node" x="188" y="133" width="46" height="30" rx="8"
+            data-tip="σ(x): incertidumbre del código. Se predice log σ² por estabilidad numérica."/>
+      <text class="dg-label" x="211" y="153" text-anchor="middle">σ</text>
+      <!-- epsilon -->
+      <circle class="dg-node" cx="211" cy="30" r="16"
+            data-tip="Ruido externo ε ~ 𝒩(0,1): la aleatoriedad se saca fuera de la red para que el gradiente pueda fluir hacia μ y σ (truco de reparametrización)."/>
+      <text class="dg-label" x="211" y="34" text-anchor="middle">ε</text>
+      <text class="dg-sub"   x="248" y="26" text-anchor="middle">𝒩(0,1)</text>
+      <!-- nodo de muestreo -->
+      <rect class="dg-node" x="258" y="102" width="106" height="44" rx="10"
+            data-tip="Muestreo reparametrizado: z = μ + σ⊙ε. Es una operación DIFERENCIABLE respecto de μ y σ."/>
+      <text class="dg-label" x="311" y="122" text-anchor="middle">z = μ + σ·ε</text>
+      <text class="dg-sub"   x="311" y="137" text-anchor="middle">muestreo</text>
+      <!-- decodificador -->
+      <polygon class="dg-node" points="384,105 460,80 460,168 384,143"
+            data-tip="Decodificador g(z): igual que en el AE, mapea el latente a una reconstrucción (1 → 16 → 2). Para GENERAR se le alimenta z ~ 𝒩(0,1)."/>
+      <text class="dg-label" x="422" y="120" text-anchor="middle">Decodificador</text>
+      <text class="dg-sub"   x="422" y="135" text-anchor="middle">1 → 16 → 2</text>
+      <!-- salida -->
+      <rect class="dg-node" x="478" y="95" width="60" height="58" rx="10"
+            data-tip="Reconstrucción x̂ (durante el entrenamiento) o muestra nueva (al decodificar z del prior)."/>
+      <text class="dg-label" x="508" y="121" text-anchor="middle">x̂</text>
+      <!-- pérdida -->
+      <rect class="dg-loss" x="440" y="192" width="228" height="48" rx="12"
+            data-tip="ELBO negativa: reconstrucción + β·KL. El primer término exige fidelidad; el segundo ordena el latente hacia 𝒩(0,1)."/>
+      <text class="dg-label" x="554" y="212" text-anchor="middle">ℒ = ‖x−x̂‖² + β·D_KL(q‖𝒩(0,1))</text>
+      <text class="dg-sub"   x="554" y="230" text-anchor="middle">reconstrucción + regularización</text>
+      <!-- flujos -->
+      <path class="dg-flow" d="M74,124 L88,124" marker-end="url(#arrB)"/>
+      <path class="dg-flow" d="M168,110 L184,101" marker-end="url(#arrB)"/>
+      <path class="dg-flow" d="M168,138 L184,147" marker-end="url(#arrB)"/>
+      <path class="dg-flow" d="M234,100 L254,114" marker-end="url(#arrB)"/>
+      <path class="dg-flow" d="M234,148 L254,134" marker-end="url(#arrB)"/>
+      <path class="dg-flow" d="M211,46 L211,80 L258,110" marker-end="url(#arrB)" style="opacity:.6"/>
+      <path class="dg-flow" d="M364,124 L380,124" marker-end="url(#arrB)"/>
+      <path class="dg-flow" d="M460,124 L474,124" marker-end="url(#arrB)"/>
+      <path class="dg-flow" d="M508,153 L516,188" marker-end="url(#arrB)"/>
+      <!-- KL desde mu/sigma hacia la pérdida -->
+      <path class="dg-kl" d="M234,160 C300,225 380,225 436,216" marker-end="url(#arrK)"
+            data-tip="El término KL solo depende de μ y σ: penaliza que q(z|x) se aleje del prior 𝒩(0,1)."/>
+      <text class="dg-sub" x="322" y="238" text-anchor="middle" fill="#92400E">D_KL(q(z|x) ‖ 𝒩(0,1))</text>
+      <!-- gradiente -->
+      <path class="dg-grad" d="M440,205 C250,205 130,195 108,172" marker-end="url(#arrR2)"
+            data-tip="El gradiente cruza el muestreo gracias a la reparametrización y llega hasta el codificador."/>
+    </svg>
+  </div>
+
+  <div class="panel acc-vae">
+    <h2>Ficha técnica</h2>
+    <div class="ficha">
+      <div class="card"><h3>💡 Idea central</h3>
+        <p>Autoencoder probabilístico: se maximiza una cota inferior de la verosimilitud
+        (<b>ELBO</b>). El codificador infiere <span class="formula">q(z|x)</span>, el decodificador
+        modela <span class="formula">p(x|z)</span> y el prior <span class="formula">p(z)=𝒩(0,I)</span>
+        hace el latente <b>navegable</b>.</p></div>
+      <div class="card"><h3>📉 Función de pérdida</h3>
+        <p><span class="formula">ℒ = 𝔼[‖x−x̂‖²] + β·D_KL(q(z|x)‖𝒩(0,I))</span>. Con β &gt; 1
+        (β-VAE) se fuerza más estructura en el latente a costa de la fidelidad; con β → 0 se
+        recupera un AE clásico.</p></div>
+      <div class="card"><h3>⚙️ Dinámica de entrenamiento</h3>
+        <p>Estable como el AE, con una tensión interna: la reconstrucción quiere latentes
+        informativos y la KL quiere latentes «anónimos». Si la KL domina puede ocurrir el
+        <b>colapso del posterior</b> (el decodificador ignora z).</p></div>
+      <div class="card"><h3>🛠️ Aplicaciones típicas</h3>
+        <p>Generación de datos, interpolación semántica en el latente, imputación de valores
+        faltantes, diseño de moléculas y compresión aprendida.</p></div>
+      <div class="card"><h3>✅ Fortalezas</h3>
+        <p>Latente continuo, regularizado y muestreable; entrenamiento estable; da una
+        (cota de la) verosimilitud, útil para comparar modelos.</p></div>
+      <div class="card"><h3>⚠️ Debilidades</h3>
+        <p>Muestras <b>borrosas</b>: el ECM promedia modos posibles en lugar de elegir uno.
+        Ajustar β es un compromiso delicado entre fidelidad y estructura.</p></div>
+    </div>
+  </div>
+
+  <div class="panel acc-vae">
+    <h2>Laboratorio · comprimir <em>y</em> generar</h2>
+    <p class="pitch">
+      El mismo conjunto 2-D, ahora con latente probabilístico. Los puntos magenta <b>no son
+      reconstrucciones</b>: se obtienen muestreando <span class="formula">z ~ 𝒩(0,1)</span> y
+      decodificando — es decir, son <b>muestras generadas desde el prior</b>. El deslizador β
+      controla el peso del término KL.
+    </p>
+    <div class="lab">
+      <div class="lienzo-col">
+        <canvas class="mundo" id="vae-canvas" width="520" height="380"></canvas>
+        <div class="leyenda">
+          <span><i style="background:#1E3A8A"></i> datos x</span>
+          <span><i style="background:#ED1E79"></i> muestras g(z), z ~ 𝒩(0,1)</span>
+          <span><i style="background:#FDB913;border-radius:0;height:3px;width:14px"></i> barrido del latente g(z), z ∈ [−2.5, 2.5]</span>
+        </div>
+        <canvas class="curva" id="vae-curva" width="520" height="80"></canvas>
+      </div>
+      <div class="ctrl-col">
+        <div class="controls">
+          <button class="btn btn-train" id="vae-step">Entrenar ×20</button>
+          <button class="btn btn-auto"  id="vae-auto">▶ Auto</button>
+          <button class="btn btn-anim"  id="vae-anim">✨ Generar muestras nuevas</button>
+          <button class="btn btn-reset" id="vae-reset">↺ Reiniciar</button>
+          <select class="sel" id="vae-data" data-tip="Conjunto sintético de entrenamiento.">
+            <option value="moons">🌙 Dos lunas</option>
+            <option value="circles">⭕ Dos círculos</option>
+          </select>
+          <div class="slider-group">
+            <label><span>β (peso del término KL)</span><b id="vae-beta-val">0.30</b></label>
+            <input type="range" id="vae-beta" min="0" max="1" step="0.05" value="0.3"
+                   data-tip="β pequeño ⇒ prioriza reconstruir (latente menos ordenado). β grande ⇒ prioriza el prior (muestras más 'seguras' pero menos fieles).">
+          </div>
+        </div>
+        <div class="readout">
+          <div class="row"><span>Pasos de entrenamiento</span><b id="vae-steps">0</b></div>
+          <div class="row"><span>Reconstrucción (ECM)</span><b id="vae-rec">—</b></div>
+          <div class="row"><span>D<sub>KL</sub> promedio</span><b id="vae-kl">—</b></div>
+        </div>
+        <div class="observar">
+          <h3>🔎 Qué observar</h3>
+          <ul>
+            <li>A diferencia del AE, aquí los puntos magenta nacen de <b>ruido puro</b>: si caen
+                sobre los datos, el modelo aprendió a generar.</li>
+            <li>Con β = 0 el latente pierde su anclaje al prior y las muestras de
+                <span class="formula">𝒩(0,1)</span> pueden caer fuera de la variedad: es el
+                «hueco» del AE clásico.</li>
+            <li>Al pulsar «Generar muestras nuevas» se re-muestrea ε: cada tanda es distinta,
+                pero todas caen cerca de la variedad aprendida.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================================
+     PESTAÑA 3 · GAN
+     ============================================================================ -->
+<section id="sec-gan" role="tabpanel" aria-labelledby="tab-gan">
+
+  <div class="panel acc-gan">
+    <h2>Arquitectura y flujo de datos</h2>
+    <p class="pitch">
+      La GAN no reconstruye nada: enfrenta dos redes en un <b>juego minimax</b>. El generador
+      <span class="formula">G</span> transforma ruido en datos falsos; el discriminador
+      <span class="formula">D</span> intenta distinguir lo real de lo falso. Cada red recibe el
+      gradiente de <b>su propia</b> pérdida: D aprende a detectar, G aprende a engañar.
+    </p>
+    <svg class="diagrama" id="dg-gan" viewBox="0 0 680 250" role="img"
+         aria-label="Diagrama de la GAN: el ruido z entra al generador G que produce datos falsos; datos reales y falsos entran al discriminador D que estima la probabilidad de real; las pérdidas adversariales actualizan G y D.">
+      <defs>
+        <marker id="arrC" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker>
+        <marker id="arrR3" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#EF4444"/></marker>
+      </defs>
+      <!-- ruido -->
+      <circle class="dg-node" cx="46" cy="180" r="22"
+            data-tip="Ruido z ~ 𝒩(0,I): la 'semilla' aleatoria. G la transforma en un candidato a dato."/>
+      <text class="dg-label" x="46" y="184" text-anchor="middle">z</text>
+      <text class="dg-sub"   x="46" y="216" text-anchor="middle">ruido 𝒩(0,I)</text>
+      <!-- generador -->
+      <polygon class="dg-node" points="96,155 190,140 190,220 96,205"
+            data-tip="Generador G(z): red 2 → 16 → 16 → 2. NUNCA ve los datos reales; solo recibe el gradiente que atraviesa a D."/>
+      <text class="dg-label" x="143" y="177" text-anchor="middle">Generador G</text>
+      <text class="dg-sub"   x="143" y="192" text-anchor="middle">2 → 16 → 16 → 2</text>
+      <!-- falso -->
+      <rect class="dg-node" x="212" y="152" width="76" height="56" rx="10"
+            data-tip="Muestra falsa x̂ = G(z). El objetivo de G es que D la clasifique como real."/>
+      <text class="dg-label" x="250" y="177" text-anchor="middle">x̂ falso</text>
+      <text class="dg-sub"   x="250" y="193" text-anchor="middle">G(z)</text>
+      <!-- real -->
+      <rect class="dg-node" x="212" y="30" width="76" height="56" rx="10"
+            data-tip="Muestra real x del conjunto de datos: la referencia que D usa para calibrar su detector."/>
+      <text class="dg-label" x="250" y="55" text-anchor="middle">x real</text>
+      <text class="dg-sub"   x="250" y="71" text-anchor="middle">datos</text>
+      <!-- discriminador -->
+      <polygon class="dg-node" points="330,85 424,110 424,150 330,175"
+            data-tip="Discriminador D(x): red 2 → 16 → 16 → 1 con salida sigmoide. Estima P(real). Es un CLASIFICADOR binario entrenado con las etiquetas real=1 / falso=0."/>
+      <text class="dg-label" x="377" y="126" text-anchor="middle">Discriminador D</text>
+      <text class="dg-sub"   x="377" y="141" text-anchor="middle">2 → 16 → 16 → 1</text>
+      <!-- prob -->
+      <rect class="dg-node" x="446" y="102" width="86" height="52" rx="10"
+            data-tip="Salida de D: probabilidad de que la entrada sea real. Cerca de 1 = 'parece real'; cerca de 0 = 'parece falsa'."/>
+      <text class="dg-label" x="489" y="125" text-anchor="middle">D(·) ∈ (0,1)</text>
+      <text class="dg-sub"   x="489" y="141" text-anchor="middle">P(real)</text>
+      <!-- pérdidas -->
+      <rect class="dg-loss" x="552" y="30" width="118" height="66" rx="12"
+            data-tip="Pérdida de D: entropía cruzada binaria. D maximiza log D(x) + log(1 − D(G(z))): acertar en reales Y en falsos."/>
+      <text class="dg-label" x="611" y="55" text-anchor="middle">ℒ_D</text>
+      <text class="dg-sub"   x="611" y="72" text-anchor="middle">detectar lo falso</text>
+      <rect class="dg-loss" x="552" y="160" width="118" height="66" rx="12"
+            data-tip="Pérdida de G (variante no saturante): minimizar −log D(G(z)), es decir, maximizar el 'engaño'. El gradiente atraviesa a D congelado y llega a G."/>
+      <text class="dg-label" x="611" y="185" text-anchor="middle">ℒ_G</text>
+      <text class="dg-sub"   x="611" y="202" text-anchor="middle">engañar a D</text>
+      <!-- flujos -->
+      <path class="dg-flow" d="M68,180 L92,180" marker-end="url(#arrC)"/>
+      <path class="dg-flow" d="M190,180 L208,180" marker-end="url(#arrC)"/>
+      <path class="dg-flow" d="M288,180 C312,180 316,158 326,150" marker-end="url(#arrC)"/>
+      <path class="dg-flow" d="M288,58 C312,58 316,100 326,108" marker-end="url(#arrC)"/>
+      <path class="dg-flow" d="M424,128 L442,128" marker-end="url(#arrC)"/>
+      <path class="dg-flow" d="M532,115 C542,100 542,80 548,68" marker-end="url(#arrC)"/>
+      <path class="dg-flow" d="M532,141 C542,158 542,178 548,188" marker-end="url(#arrC)"/>
+      <!-- gradientes -->
+      <path class="dg-grad" d="M552,88 C480,96 440,96 428,102" marker-end="url(#arrR3)"
+            data-tip="Gradiente de ℒ_D: solo actualiza los pesos de D."/>
+      <path class="dg-grad" d="M552,210 C420,246 200,240 150,222" marker-end="url(#arrR3)"
+            data-tip="Gradiente de ℒ_G: atraviesa a D (sin actualizarlo) y llega hasta G."/>
+      <text class="dg-sub" x="360" y="243" text-anchor="middle" fill="#B91C1C">∇ hacia G (D congelado)</text>
+    </svg>
+  </div>
+
+  <div class="panel acc-gan">
+    <h2>Ficha técnica</h2>
+    <div class="ficha">
+      <div class="card"><h3>💡 Idea central</h3>
+        <p>Modelo generativo <b>implícito</b>: en lugar de escribir p(x), se aprende un muestreador
+        <span class="formula">G(z)</span> tal que sus muestras sean indistinguibles de las reales
+        según un adversario <span class="formula">D</span> que aprende a la par.</p></div>
+      <div class="card"><h3>📉 Función de pérdida</h3>
+        <p><span class="formula">min_G max_D 𝔼[log D(x)] + 𝔼[log(1−D(G(z)))]</span>.
+        En la práctica G usa la variante <b>no saturante</b>
+        <span class="formula">−log D(G(z))</span>, que da gradientes útiles al inicio.</p></div>
+      <div class="card"><h3>⚙️ Dinámica de entrenamiento</h3>
+        <p>Alternada y <b>delicada</b>: se busca un equilibrio (punto de silla), no un mínimo.
+        Si D domina, G no recibe señal; si G domina, D no discrimina. Riesgos: oscilaciones y
+        <b>colapso de modos</b>.</p></div>
+      <div class="card"><h3>🛠️ Aplicaciones típicas</h3>
+        <p>Síntesis de imágenes fotorrealistas (StyleGAN), superresolución, traducción
+        imagen-a-imagen y transferencia de estilo, aumento de datos sintéticos.</p></div>
+      <div class="card"><h3>✅ Fortalezas</h3>
+        <p>Muestras <b>nítidas</b> (no promedia modos como el VAE); no requiere una verosimilitud
+        explícita; una sola pasada de G genera una muestra (rápido en inferencia).</p></div>
+      <div class="card"><h3>⚠️ Debilidades</h3>
+        <p>Inestabilidad, colapso de modos (genera solo una parte de la distribución), difícil de
+        evaluar (no hay verosimilitud) y sensible a hiperparámetros.</p></div>
+    </div>
+    <div class="callout warn"><span class="ico">⚖️</span>
+      <span><b>Implicación ética:</b> la misma capacidad que produce imágenes fotorrealistas
+      alimenta los <em>deepfakes</em>. El despliegue responsable exige trazabilidad del contenido
+      sintético (marcas de agua, procedencia) y contexto de uso legítimo.</span></div>
+  </div>
+
+  <div class="panel acc-gan">
+    <h2>Laboratorio · el juego adversarial</h2>
+    <p class="pitch">
+      El fondo del lienzo muestra la <b>opinión del discriminador</b>: zonas rosadas =
+      «parece real», zonas azules = «parece falso». Los puntos magenta son muestras de G a partir
+      de un banco fijo de ruido: paso a paso migran desde el centro hacia los datos, empujadas por
+      el gradiente que atraviesa a D.
+    </p>
+    <div class="lab">
+      <div class="lienzo-col">
+        <canvas class="mundo" id="gan-canvas" width="520" height="380"></canvas>
+        <div class="leyenda">
+          <span><i style="background:#1E3A8A"></i> datos reales</span>
+          <span><i style="background:#ED1E79"></i> muestras G(z)</span>
+          <span><i style="background:#FBCFE8;border-radius:3px"></i> D dice «real»</span>
+          <span><i style="background:#DBEAFE;border-radius:3px"></i> D dice «falso»</span>
+        </div>
+        <canvas class="curva" id="gan-curva" width="520" height="80"></canvas>
+      </div>
+      <div class="ctrl-col">
+        <div class="controls">
+          <button class="btn btn-train" id="gan-step">Entrenar ×20</button>
+          <button class="btn btn-auto"  id="gan-auto">▶ Auto</button>
+          <button class="btn btn-anim"  id="gan-anim">🎬 Animar ruido → datos</button>
+          <button class="btn btn-reset" id="gan-reset">↺ Reiniciar</button>
+          <select class="sel" id="gan-data" data-tip="Conjunto sintético de entrenamiento.">
+            <option value="moons">🌙 Dos lunas</option>
+            <option value="circles">⭕ Dos círculos</option>
+          </select>
+        </div>
+        <div class="readout">
+          <div class="row"><span>Pasos de entrenamiento</span><b id="gan-steps">0</b></div>
+          <div class="row"><span>Pérdida de D</span><b id="gan-ld">—</b></div>
+          <div class="row"><span>Pérdida de G</span><b id="gan-lg">—</b></div>
+          <div class="row"><span>D(G(z)) promedio</span><b id="gan-fool">—</b></div>
+        </div>
+        <div class="observar">
+          <h3>🔎 Qué observar</h3>
+          <ul>
+            <li>En el equilibrio ideal, <span class="formula">D(G(z)) ≈ 0.5</span>: el
+                discriminador ya no distingue. Vigilar ese número en el lector de la derecha.</li>
+            <li>La frontera rosa/azul se <b>reacomoda</b> en cada paso: D persigue a G y G escapa
+                hacia donde D todavía se deja engañar.</li>
+            <li>Si las muestras magenta cubren solo una de las dos lunas, se está viendo un
+                <b>colapso de modos</b> en vivo — reiniciar y comparar corridas.</li>
+            <li>La animación «ruido → datos» muestra el transporte que G aprendió: cada punto de
+                ruido viaja hasta su posición generada.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================================
+     PESTAÑA 4 · TRANSFORMER
+     ============================================================================ -->
+<section id="sec-trf" role="tabpanel" aria-labelledby="tab-trf">
+
+  <div class="panel acc-trf">
+    <h2>Arquitectura y flujo de datos</h2>
+    <p class="pitch">
+      El Transformer modela secuencias con <b>autoatención</b>: cada posición emite una consulta
+      (Q), se compara con las claves (K) de todas las posiciones y mezcla sus valores (V) según los
+      pesos <span class="formula">α = softmax(QKᵀ/√d)</span>. Como modelo generativo, aprende
+      <span class="formula">p(x_t | x_&lt;t)</span> y genera <b>token a token</b> (autorregresivo),
+      entrenado por máxima verosimilitud con entropía cruzada.
+    </p>
+    <svg class="diagrama" id="dg-trf" viewBox="0 0 680 240" role="img"
+         aria-label="Diagrama del Transformer: los tokens con codificación posicional producen Q, K y V; la atención softmax de Q por K transpuesta pondera los valores; la salida se compara con el objetivo mediante entropía cruzada.">
+      <defs>
+        <marker id="arrD" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker>
+        <marker id="arrR4" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#EF4444"/></marker>
+      </defs>
+      <!-- tokens -->
+      <rect class="dg-node" x="14" y="60" width="92" height="52" rx="10"
+            data-tip="Secuencia de tokens de entrada (aquí: letras A–D). En un LLM serían fragmentos de texto."/>
+      <text class="dg-label" x="60" y="83" text-anchor="middle">tokens</text>
+      <text class="dg-sub"   x="60" y="99" text-anchor="middle">x₁ … x_L</text>
+      <!-- posicional -->
+      <rect class="dg-node" x="14" y="140" width="92" height="52" rx="10"
+            data-tip="Codificación posicional: sin ella la atención no sabría EN QUÉ ORDEN llegan los tokens (la atención es invariante a permutaciones)."/>
+      <text class="dg-label" x="60" y="163" text-anchor="middle">+ posición</text>
+      <text class="dg-sub"   x="60" y="179" text-anchor="middle">p₁ … p_L</text>
+      <!-- QKV -->
+      <rect class="dg-node" x="150" y="36"  width="56" height="40" rx="9"
+            data-tip="Consultas Q = X·W_Q: 'qué busca' cada posición."/>
+      <text class="dg-label" x="178" y="61" text-anchor="middle">Q</text>
+      <rect class="dg-node" x="150" y="104" width="56" height="40" rx="9"
+            data-tip="Claves K = X·W_K: 'qué ofrece' cada posición para ser encontrada."/>
+      <text class="dg-label" x="178" y="129" text-anchor="middle">K</text>
+      <rect class="dg-node" x="150" y="172" width="56" height="40" rx="9"
+            data-tip="Valores V = X·W_V: el contenido que se mezcla una vez decidida la atención."/>
+      <text class="dg-label" x="178" y="197" text-anchor="middle">V</text>
+      <!-- atención -->
+      <rect class="dg-node" x="238" y="72" width="150" height="56" rx="12"
+            data-tip="Puntuaciones s_ij = Q_i·K_j/√d, normalizadas con softmax por fila: α_ij dice cuánto atiende la posición i a la posición j. En el laboratorio esta matriz se ve como mapa de calor."/>
+      <text class="dg-label" x="313" y="96" text-anchor="middle">α = softmax(QKᵀ/√d)</text>
+      <text class="dg-sub"   x="313" y="113" text-anchor="middle">pesos de atención</text>
+      <!-- mezcla -->
+      <rect class="dg-node" x="238" y="156" width="150" height="48" rx="12"
+            data-tip="Cada salida es una combinación convexa de los valores: out_i = Σ_j α_ij·V_j."/>
+      <text class="dg-label" x="313" y="177" text-anchor="middle">out = α · V</text>
+      <text class="dg-sub"   x="313" y="193" text-anchor="middle">mezcla ponderada</text>
+      <!-- salida -->
+      <rect class="dg-node" x="420" y="96" width="92" height="56" rx="10"
+            data-tip="Distribución sobre el vocabulario para cada posición (tras capa de salida + softmax). En generación se muestrea/elige el token y se realimenta."/>
+      <text class="dg-label" x="466" y="120" text-anchor="middle">ŷ₁ … ŷ_L</text>
+      <text class="dg-sub"   x="466" y="137" text-anchor="middle">softmax vocabulario</text>
+      <!-- pérdida -->
+      <rect class="dg-loss" x="544" y="90" width="124" height="68" rx="12"
+            data-tip="Entropía cruzada: −Σ log ŷ_i[objetivo_i]. Máxima verosimilitud del siguiente token: la receta de los LLM."/>
+      <text class="dg-label" x="606" y="118" text-anchor="middle">ℒ = −Σ log ŷ[y]</text>
+      <text class="dg-sub"   x="606" y="136" text-anchor="middle">entropía cruzada</text>
+      <!-- flujos -->
+      <path class="dg-flow" d="M106,86 C126,86 132,64 146,58" marker-end="url(#arrD)"/>
+      <path class="dg-flow" d="M106,166 C126,166 132,132 146,126" marker-end="url(#arrD)"/>
+      <path class="dg-flow" d="M106,178 C130,190 134,192 146,192" marker-end="url(#arrD)"/>
+      <path class="dg-flow" d="M206,56 C222,60 226,74 234,82" marker-end="url(#arrD)"/>
+      <path class="dg-flow" d="M206,124 C222,120 226,110 234,104" marker-end="url(#arrD)"/>
+      <path class="dg-flow" d="M206,192 C218,190 226,186 234,182" marker-end="url(#arrD)"/>
+      <path class="dg-flow" d="M313,128 L313,152" marker-end="url(#arrD)"/>
+      <path class="dg-flow" d="M388,178 C404,174 408,140 416,130" marker-end="url(#arrD)"/>
+      <path class="dg-flow" d="M512,124 L540,124" marker-end="url(#arrD)"/>
+      <!-- gradiente -->
+      <path class="dg-grad" d="M544,152 C420,228 220,232 168,216" marker-end="url(#arrR4)"
+            data-tip="La retropropagación llega a W_Q, W_K, W_V y a los embeddings. El entrenamiento es PARALELO en toda la secuencia (teacher forcing)."/>
+      <text class="dg-sub" x="360" y="234" text-anchor="middle" fill="#B91C1C">∇ retropropagación (paralela en toda la secuencia)</text>
+    </svg>
+  </div>
+
+  <div class="panel acc-trf">
+    <h2>Ficha técnica</h2>
+    <div class="ficha">
+      <div class="card"><h3>💡 Idea central</h3>
+        <p>Sustituir la recurrencia por <b>autoatención</b>: cada token consulta directamente a
+        todos los demás, sin importar la distancia. Como generador, factoriza
+        <span class="formula">p(x) = Π p(x_t | x_&lt;t)</span> con máscara causal.</p></div>
+      <div class="card"><h3>📉 Función de pérdida</h3>
+        <p>Entropía cruzada sobre el siguiente token: <span class="formula">ℒ = −Σ_t log p(x_t | x_&lt;t)</span>.
+        Máxima verosimilitud pura — sin adversarios ni términos KL.</p></div>
+      <div class="card"><h3>⚙️ Dinámica de entrenamiento</h3>
+        <p>Estable y <b>paralelizable</b>: con teacher forcing todas las posiciones se entrenan a la
+        vez. El desempeño escala de forma predecible con datos, parámetros y cómputo
+        (leyes de escala).</p></div>
+      <div class="card"><h3>🛠️ Aplicaciones típicas</h3>
+        <p>Modelos de lenguaje (GPT, Claude), traducción, código, audio y música; también visión
+        (ViT) y generación de imágenes como columna vertebral de modelos autorregresivos y de
+        difusión.</p></div>
+      <div class="card"><h3>✅ Fortalezas</h3>
+        <p>Captura dependencias a larga distancia, se entrena en paralelo, transfiere de maravilla
+        (preentrenar + ajustar) y hoy define el estado del arte generativo.</p></div>
+      <div class="card"><h3>⚠️ Debilidades</h3>
+        <p>La atención cuesta <span class="formula">O(L²)</span> en la longitud; exige datos y
+        cómputo masivos; la generación es secuencial (un token por paso), más lenta que una pasada
+        de G en una GAN.</p></div>
+    </div>
+  </div>
+
+  <div class="panel acc-trf">
+    <h2>Laboratorio · una cabeza de atención que aprende a mirar</h2>
+    <p class="pitch">
+      Versión mínima y honesta: una sola cabeza de atención donde Q y K provienen de la
+      <b>codificación posicional</b> y V es el propio token. La tarea («invertir», «desplazar» o
+      «copiar» la secuencia) se resuelve aprendiendo <b>de qué posición copiar</b>: el mapa de
+      calor muestra α y converge al patrón correcto (anti-diagonal, diagonal desplazada o
+      diagonal). El entrenamiento usa secuencias aleatorias nuevas en cada paso — lo aprendido
+      <b>generaliza</b>, no memoriza.
+    </p>
+    <div class="trf-lab">
+      <div class="izq">
+        <div class="seq-row"><span class="rot">Entrada</span><span id="trf-in"  style="display:flex;gap:6px;flex-wrap:wrap"></span></div>
+        <div class="seq-row"><span class="rot">Objetivo</span><span id="trf-tgt" style="display:flex;gap:6px;flex-wrap:wrap"></span></div>
+        <div class="seq-row"><span class="rot">Salida ŷ</span><span id="trf-out" style="display:flex;gap:6px;flex-wrap:wrap"></span></div>
+        <div class="attn-grid" id="trf-grid"></div>
+        <p class="attn-cap">Mapa de atención α: la fila <em>i</em> indica a qué posiciones de la
+        entrada atiende la salida <em>i</em> (más oscuro = más atención). Al pasar el cursor sobre
+        una celda se muestra su valor.</p>
+        <canvas class="curva" id="trf-curva" width="520" height="80"></canvas>
+      </div>
+      <div class="der">
+        <div class="controls">
+          <button class="btn btn-train" id="trf-step">Entrenar ×20</button>
+          <button class="btn btn-auto"  id="trf-auto">▶ Auto</button>
+          <button class="btn btn-anim"  id="trf-anim">🎬 Generar token a token</button>
+          <button class="btn btn-reset" id="trf-reset">↺ Reiniciar</button>
+          <select class="sel" id="trf-task" data-tip="Tarea de secuencia a secuencia que la cabeza de atención debe aprender.">
+            <option value="rev">↔️ Invertir la secuencia</option>
+            <option value="shift">➡️ Desplazar una posición</option>
+            <option value="copy">📋 Copiar tal cual</option>
+          </select>
+          <button class="btn btn-reset" id="trf-new" style="background:#0891B2">🎲 Nueva secuencia</button>
+        </div>
+        <div class="readout">
+          <div class="row"><span>Pasos de entrenamiento</span><b id="trf-steps">0</b></div>
+          <div class="row"><span>Entropía cruzada</span><b id="trf-loss">—</b></div>
+          <div class="row"><span>Exactitud (esta secuencia)</span><b id="trf-acc">—</b></div>
+        </div>
+        <div class="observar">
+          <h3>🔎 Qué observar</h3>
+          <ul>
+            <li>Al inicio α es casi uniforme: cada salida «mira a todas partes» y acierta al azar
+                (~25 %, con 4 letras).</li>
+            <li>Con la tarea «invertir», el mapa converge a la <b>anti-diagonal</b>: la salida 1
+                aprende a atender a la última posición de la entrada. Al cambiar la tarea, el
+                patrón objetivo cambia — misma arquitectura, distinta atención aprendida.</li>
+            <li>«Generar token a token» reproduce el modo autorregresivo: cada token de salida se
+                revela consultando su fila de atención (resaltada) sobre la entrada.</li>
+          </ul>
+        </div>
+        <div class="callout info"><span class="ico">🧠</span>
+          <span>En un LLM real hay decenas de capas y cabezas, con Q, K y V que dependen del
+          contenido y no solo de la posición — pero el mecanismo elemental es exactamente este:
+          <b>aprender dónde mirar</b>.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================================
+     PESTAÑA 5 · COMPARACIÓN
+     ============================================================================ -->
+<section id="sec-comp" role="tabpanel" aria-labelledby="tab-comp">
+  <div class="panel">
+    <h2>⚖️ Los cuatro modelos, frente a frente</h2>
+    <p class="pitch">
+      Síntesis de lo explorado en los laboratorios. Una forma útil de leer la tabla: AE y VAE
+      <b>reconstruyen</b> (con y sin probabilidad), la GAN <b>compite</b> y el Transformer
+      <b>predice lo que sigue</b>. Los cuatro son piezas del mismo rompecabezas generativo.
+    </p>
+    <div class="tabla-wrap">
+    <table class="comp">
+      <thead><tr>
+        <th>Criterio</th>
+        <th style="background:#2563EB">Autoencoder</th>
+        <th style="background:#8B5CF6">VAE</th>
+        <th style="background:#ED1E79">GAN</th>
+        <th style="background:#0D9488">Transformer</th>
+      </tr></thead>
+      <tbody>
+        <tr><th>Objetivo</th>
+          <td>Reconstruir la entrada a través de un cuello de botella</td>
+          <td>Modelar p(x) con un latente probabilístico (maximizar la ELBO)</td>
+          <td>Generar muestras indistinguibles de las reales (juego minimax)</td>
+          <td>Modelar p(x) autorregresivamente, token a token</td></tr>
+        <tr><th>Espacio latente</th>
+          <td>Determinista y sin estructura garantizada («huecos»)</td>
+          <td>Continuo y regularizado hacia 𝒩(0, I): navegable e interpolable</td>
+          <td>El ruido z de entrada; estructura implícita, no inferible desde x</td>
+          <td>No hay latente explícito: el contexto se representa vía atención</td></tr>
+        <tr><th>Pérdida</th>
+          <td>ECM: ‖x − x̂‖²</td>
+          <td>ECM + β·D<sub>KL</sub>(q(z|x) ‖ 𝒩(0,I))</td>
+          <td>Adversarial (BCE): min<sub>G</sub> max<sub>D</sub></td>
+          <td>Entropía cruzada del siguiente token</td></tr>
+        <tr><th>¿Genera muestras nuevas?</th>
+          <td>No de forma fiable (z arbitrario ⇒ basura)</td>
+          <td>Sí: muestrear z ~ 𝒩(0,I) y decodificar</td>
+          <td>Sí: una pasada de G por cada muestra</td>
+          <td>Sí: muestreo autorregresivo (secuencial)</td></tr>
+        <tr><th>Estabilidad de entrenamiento</th>
+          <td>Alta (una red, una pérdida)</td>
+          <td>Alta; vigilar el colapso del posterior</td>
+          <td>Baja: equilibrio delicado, colapso de modos</td>
+          <td>Alta, pero con costo computacional elevado</td></tr>
+        <tr><th>Calidad / diversidad</th>
+          <td>Fiel a lo visto; no crea</td>
+          <td>Diverso pero tiende a lo borroso (promedia modos)</td>
+          <td>Nítido, puede perder modos (menos diversidad)</td>
+          <td>Estado del arte con escala suficiente</td></tr>
+        <tr><th>Aplicaciones insignia</th>
+          <td>Compresión, anomalías, denoising</td>
+          <td>Interpolación latente, moléculas, imputación</td>
+          <td>Imágenes fotorrealistas, superresolución, estilo</td>
+          <td>Lenguaje, código, multimodal (LLMs)</td></tr>
+        <tr><th>Costo computacional</th>
+          <td>Bajo</td>
+          <td>Bajo–medio</td>
+          <td>Medio (dos redes, equilibrio)</td>
+          <td>Alto: atención O(L²) y escala masiva</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="callout info"><span class="ico">🧭</span>
+      <span><b>Regla práctica para elegir:</b> comprimir o detectar anomalías → AE; latente
+      interpretable y muestreo estable → VAE; máxima nitidez visual con datos abundantes → GAN
+      (o difusión, su sucesora práctica); secuencias y lenguaje, o generación a gran escala →
+      Transformer.</span></div>
+  </div>
+</section>
+
+<footer>
+  Maestría en Ciencia de Datos · Universidad Santo Tomás · Profundización I: Deep Learning ·
+  Módulo 2 — herramienta autocontenida (funciona sin conexión).
+</footer>
+</div>
+
+<div id="tip" role="tooltip"></div>
+
+<script>
+"use strict";
+/* ===========================================================================
+   0) UTILIDADES NUMÉRICAS Y DE DIBUJO
+   ---------------------------------------------------------------------------
+   Todo el aprendizaje ocurre aquí, en JavaScript puro: redes densas pequeñas
+   con retropropagación escrita a mano y optimizador Adam. Los tamaños son
+   diminutos a propósito: el objetivo es VER el proceso, no la eficiencia.
+   =========================================================================== */
+
+/** Muestra gaussiana estándar (Box–Muller). */
+function gauss(){
+  let u=0,v=0;
+  while(u===0)u=Math.random();
+  while(v===0)v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+}
+const sig=x=>1/(1+Math.exp(-x));
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+
+/* ---- Conjuntos sintéticos 2-D (compartidos por AE / VAE / GAN) ---------- */
+/** Dos medialunas entrelazadas (versión de make_moons), centradas en el origen. */
+function genMoons(n){
+  const pts=[];
+  for(let i=0;i<n;i++){
+    const t=Math.random()*Math.PI;
+    let x,y;
+    if(i%2===0){ x=Math.cos(t);   y=Math.sin(t)-0.25; }   // luna superior
+    else       { x=1-Math.cos(t); y=0.25-Math.sin(t); }   // luna inferior
+    pts.push([(x-0.5)*1.5+gauss()*0.07, y*1.4+gauss()*0.07]);
+  }
+  return pts;
+}
+/** Dos anillos concéntricos (versión de make_circles). */
+function genCircles(n){
+  const pts=[];
+  for(let i=0;i<n;i++){
+    const r=(i%2===0)?1.5:0.65, th=Math.random()*2*Math.PI;
+    pts.push([r*Math.cos(th)+gauss()*0.06, r*Math.sin(th)+gauss()*0.06]);
+  }
+  return pts;
+}
+function genData(kind,n){ return kind==="circles" ? genCircles(n) : genMoons(n); }
+
+/* ---- Vista mundo→lienzo --------------------------------------------------
+   Los datos viven en [−2.4, 2.4] × [−1.85, 1.85]; el canvas mide 520×380. */
+function makeView(canvas){
+  const XR=2.4, YR=1.85;
+  return {
+    x:v=>(v+XR)/(2*XR)*canvas.width,
+    y:v=>(1-(v+YR)/(2*YR))*canvas.height,
+    XR, YR
+  };
+}
+function drawDot(ctx,view,p,color,r){
+  ctx.beginPath();
+  ctx.arc(view.x(p[0]),view.y(p[1]),r,0,2*Math.PI);
+  ctx.fillStyle=color; ctx.fill();
+}
+
+/** Curva de pérdida minimalista: una o dos series en un canvas pequeño. */
+function drawLossCurve(canvas,series,colors,labels){
+  const ctx=canvas.getContext("2d");
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle="#fff"; ctx.fillRect(0,0,canvas.width,canvas.height);
+  let lo=Infinity,hi=-Infinity;
+  for(const s of series) for(const v of s){ if(v<lo)lo=v; if(v>hi)hi=v; }
+  if(!isFinite(lo)||series[0].length<2){
+    ctx.fillStyle="#94A3B8"; ctx.font="11px system-ui";
+    ctx.fillText("curva de pérdida (aparece al entrenar)",10,20); return;
+  }
+  if(hi-lo<1e-9) hi=lo+1e-9;
+  series.forEach((s,si)=>{
+    ctx.beginPath();
+    s.forEach((v,i)=>{
+      const px=i/(s.length-1)*(canvas.width-12)+6;
+      const py=canvas.height-8-(v-lo)/(hi-lo)*(canvas.height-20);
+      i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+    });
+    ctx.strokeStyle=colors[si]; ctx.lineWidth=1.6; ctx.stroke();
+  });
+  ctx.fillStyle="#64748B"; ctx.font="10px system-ui";
+  labels.forEach((t,i)=>{ ctx.fillStyle=colors[i]; ctx.fillText("— "+t, 8+i*120, 12); });
+}
+
+/** Guarda un valor en un historial acotado (para las curvas de pérdida). */
+function pushHist(arr,v,cap){ arr.push(v); if(arr.length>cap) arr.splice(0,arr.length-cap); }
+
+/* ===========================================================================
+   1) RED DENSA GENÉRICA (MLP) CON BACKPROP MANUAL Y ADAM
+   ---------------------------------------------------------------------------
+   - Capas ocultas con tanh; capa de salida LINEAL (las no linealidades de
+     salida —sigmoide, softmax— se aplican FUERA, junto con su gradiente,
+     porque cada modelo las combina distinto con su pérdida).
+   - forward() guarda las activaciones; backward(dOut) acumula gradientes y
+     devuelve ∂ℒ/∂entrada (imprescindible para VAE y GAN, donde el gradiente
+     debe seguir viajando hacia otra red).
+   =========================================================================== */
+class MLP{
+  constructor(sizes){
+    this.sizes=sizes; this.L=sizes.length-1; this.t=0; // t = contador de Adam
+    this.W=[];this.b=[];this.gW=[];this.gb=[];
+    this.mW=[];this.vW=[];this.mb=[];this.vb=[];
+    for(let l=0;l<this.L;l++){
+      const nin=sizes[l], nout=sizes[l+1];
+      const s=Math.sqrt(2/(nin+nout));            // inicialización tipo Xavier
+      const W=[],gW=[],mW=[],vW=[];
+      for(let i=0;i<nout;i++){
+        W.push(Float64Array.from({length:nin},()=>gauss()*s));
+        gW.push(new Float64Array(nin)); mW.push(new Float64Array(nin)); vW.push(new Float64Array(nin));
+      }
+      this.W.push(W); this.gW.push(gW); this.mW.push(mW); this.vW.push(vW);
+      this.b.push(new Float64Array(nout)); this.gb.push(new Float64Array(nout));
+      this.mb.push(new Float64Array(nout)); this.vb.push(new Float64Array(nout));
+    }
+  }
+  /** Pasada hacia adelante de UNA muestra; guarda activaciones para backward. */
+  forward(x){
+    this.a=[Float64Array.from(x)];
+    for(let l=0;l<this.L;l++){
+      const prev=this.a[l], W=this.W[l], b=this.b[l];
+      const out=new Float64Array(this.sizes[l+1]);
+      for(let i=0;i<out.length;i++){
+        let z=b[i]; const Wi=W[i];
+        for(let j=0;j<prev.length;j++) z+=Wi[j]*prev[j];
+        out[i]=(l<this.L-1)?Math.tanh(z):z;       // tanh oculta, salida lineal
+      }
+      this.a.push(out);
+    }
+    return this.a[this.L];
+  }
+  /** Retropropaga dOut = ∂ℒ/∂salida; ACUMULA gradientes; devuelve ∂ℒ/∂entrada. */
+  backward(dOut){
+    let delta=Float64Array.from(dOut);
+    for(let l=this.L-1;l>=0;l--){
+      const prev=this.a[l], W=this.W[l], gW=this.gW[l], gb=this.gb[l];
+      const dPrev=new Float64Array(prev.length);
+      for(let i=0;i<delta.length;i++){
+        const d=delta[i]; gb[i]+=d;
+        const Wi=W[i], gWi=gW[i];
+        for(let j=0;j<prev.length;j++){ gWi[j]+=d*prev[j]; dPrev[j]+=Wi[j]*d; }
+      }
+      // derivada de tanh: 1 − h² (solo para capas ocultas, no para la entrada cruda)
+      if(l>0) for(let j=0;j<dPrev.length;j++){ const h=this.a[l][j]; dPrev[j]*=(1-h*h); }
+      delta=dPrev;
+    }
+    return delta;
+  }
+  zeroGrad(){
+    for(let l=0;l<this.L;l++){
+      this.gb[l].fill(0);
+      for(const g of this.gW[l]) g.fill(0);
+    }
+  }
+  /** Paso de Adam. `scale` divide los gradientes acumulados (tamaño del lote). */
+  step(lr,scale,b1=0.9,b2=0.999){
+    this.t++;
+    const c1=1-Math.pow(b1,this.t), c2=1-Math.pow(b2,this.t), eps=1e-8;
+    for(let l=0;l<this.L;l++){
+      for(let i=0;i<this.b[l].length;i++){
+        // sesgos
+        const g=this.gb[l][i]/scale;
+        this.mb[l][i]=b1*this.mb[l][i]+(1-b1)*g;
+        this.vb[l][i]=b2*this.vb[l][i]+(1-b2)*g*g;
+        this.b[l][i]-=lr*(this.mb[l][i]/c1)/(Math.sqrt(this.vb[l][i]/c2)+eps);
+        // pesos
+        const Wi=this.W[l][i], gWi=this.gW[l][i], mWi=this.mW[l][i], vWi=this.vW[l][i];
+        for(let j=0;j<Wi.length;j++){
+          const gw=gWi[j]/scale;
+          mWi[j]=b1*mWi[j]+(1-b1)*gw;
+          vWi[j]=b2*vWi[j]+(1-b2)*gw*gw;
+          Wi[j]-=lr*(mWi[j]/c1)/(Math.sqrt(vWi[j]/c2)+eps);
+        }
+      }
+    }
+  }
+}
+
+/* ===========================================================================
+   2) GESTIÓN DE PESTAÑAS + BUCLE MAESTRO DE ANIMACIÓN
+   ---------------------------------------------------------------------------
+   Solo la pestaña activa consume CPU: su demo recibe tick() en cada frame.
+   Al cambiar de pestaña se pausan todos los modos "Auto".
+   =========================================================================== */
+const demos={};            // id → {tick, redraw, setAuto, ...}
+let activeTab="ae";
+
+document.querySelectorAll(".tab").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected","false"));
+    btn.setAttribute("aria-selected","true");
+    document.querySelectorAll("section[role=tabpanel]").forEach(s=>s.classList.remove("active"));
+    document.getElementById(btn.getAttribute("aria-controls")).classList.add("active");
+    activeTab=btn.id.replace("tab-","");
+    Object.values(demos).forEach(d=>d.setAuto&&d.setAuto(false)); // pausa global
+  });
+});
+
+function masterLoop(){
+  const d=demos[activeTab];
+  if(d&&d.tick) d.tick();
+  requestAnimationFrame(masterLoop);
+}
+
+/** Cablea el botón ▶ Auto / ⏸ Pausa de un demo y anima su diagrama. */
+function wireAuto(btn,demo,svgId){
+  btn.addEventListener("click",()=>demo.setAuto(!demo.auto));
+  demo._autoBtn=btn; demo._svg=document.getElementById(svgId);
+}
+function setAutoState(demo,on){
+  demo.auto=on;
+  if(demo._autoBtn) demo._autoBtn.textContent=on?"⏸ Pausa":"▶ Auto";
+  if(demo._svg) demo._svg.classList.toggle("training",on); // el diagrama "fluye"
+}
+
+/* ===========================================================================
+   3) DEMO AE — autoencoder 2 → 1 → 2 sobre datos 2-D
+   =========================================================================== */
+(function(){
+  const canvas=document.getElementById("ae-canvas"), ctx=canvas.getContext("2d");
+  const view=makeView(canvas), curva=document.getElementById("ae-curva");
+  const N=220, LR=0.01, BATCH=32;
+  let enc,dec,data,steps,hist,anim=null;
+
+  function reset(){
+    enc=new MLP([2,16,1]);          // codificador: 2-D → latente 1-D
+    dec=new MLP([1,16,2]);          // decodificador: latente 1-D → 2-D
+    data=genData(document.getElementById("ae-data").value,N);
+    steps=0; hist=[]; anim=null;
+    document.getElementById("ae-z").textContent="—";
+    updateRead(NaN); redraw();
+  }
+
+  /** Un paso de entrenamiento = un minilote con ECM. */
+  function trainStep(){
+    enc.zeroGrad(); dec.zeroGrad();
+    let loss=0;
+    for(let b=0;b<BATCH;b++){
+      const x=data[(Math.random()*N)|0];
+      const z=enc.forward(x);                    // codificar
+      const xr=dec.forward(z);                   // decodificar
+      const dx=[2*(xr[0]-x[0]),2*(xr[1]-x[1])];  // ∂ECM/∂x̂
+      loss+=(xr[0]-x[0])**2+(xr[1]-x[1])**2;
+      const dz=dec.backward(dx);                 // el gradiente sale del decodificador…
+      enc.backward(dz);                          // …y sigue hacia el codificador
+    }
+    dec.step(LR,BATCH); enc.step(LR,BATCH);
+    steps++;
+    return loss/BATCH;
+  }
+
+  function trainMany(k){
+    let L=0; for(let i=0;i<k;i++) L=trainStep();
+    pushHist(hist,L,300); updateRead(L);
+  }
+  function updateRead(L){
+    document.getElementById("ae-steps").textContent=steps;
+    document.getElementById("ae-loss").textContent=isFinite(L)?L.toFixed(4):"—";
+  }
+
+  /** Curva dorada: imagen del decodificador al barrer z en el rango observado. */
+  function manifold(){
+    let zlo=Infinity,zhi=-Infinity;
+    for(let i=0;i<N;i+=3){ const z=enc.forward(data[i])[0]; if(z<zlo)zlo=z; if(z>zhi)zhi=z; }
+    const pts=[];
+    for(let i=0;i<=80;i++) pts.push(dec.forward([zlo+(zhi-zlo)*i/80]));
+    return pts;
+  }
+
+  function redraw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    // pares x → x̂ (uno de cada tres, para no saturar el lienzo)
+    ctx.strokeStyle="#CBD5E1"; ctx.lineWidth=1;
+    const recs=[];
+    for(let i=0;i<N;i+=3){
+      const x=data[i], xr=dec.forward(enc.forward(x));
+      recs.push([x,xr]);
+      ctx.beginPath(); ctx.moveTo(view.x(x[0]),view.y(x[1]));
+      ctx.lineTo(view.x(xr[0]),view.y(xr[1])); ctx.stroke();
+    }
+    // variedad decodificada
+    const man=manifold();
+    ctx.beginPath();
+    man.forEach((p,i)=>{ const px=view.x(p[0]),py=view.y(p[1]); i===0?ctx.moveTo(px,py):ctx.lineTo(px,py); });
+    ctx.strokeStyle="#FDB913"; ctx.lineWidth=3; ctx.stroke();
+    // datos y reconstrucciones
+    for(const p of data) drawDot(ctx,view,p,"rgba(30,58,138,.75)",3);
+    for(const [,xr] of recs) drawDot(ctx,view,xr,"rgba(237,30,121,.85)",2.6);
+    // animación de reconstrucción de un punto
+    if(anim){
+      const t=anim.t, x=anim.x, xr=anim.xr;
+      const px=x[0]+(xr[0]-x[0])*t, py=x[1]+(xr[1]-x[1])*t;
+      ctx.beginPath(); ctx.setLineDash([4,4]);
+      ctx.moveTo(view.x(x[0]),view.y(x[1])); ctx.lineTo(view.x(xr[0]),view.y(xr[1]));
+      ctx.strokeStyle="#3D008D"; ctx.lineWidth=1.4; ctx.stroke(); ctx.setLineDash([]);
+      drawDot(ctx,view,[px,py],"#3D008D",6);
+      drawDot(ctx,view,x,"#1E3A8A",4.5); drawDot(ctx,view,xr,"#ED1E79",4.5);
+    }
+    drawLossCurve(curva,[hist],["#ED1E79"],["ECM"]);
+  }
+
+  demos.ae={
+    auto:false,
+    setAuto(on){ setAutoState(this,on); },
+    tick(){
+      if(this.auto){ trainMany(5); redraw(); }
+      if(anim){ anim.t+=0.02; if(anim.t>=1){ anim.t=1; if(--anim.hold<=0) anim=null; } if(!this.auto) redraw(); }
+    },
+    trainStep, get loss(){ return hist[hist.length-1]; }, get steps(){ return steps; }
+  };
+
+  document.getElementById("ae-step").addEventListener("click",()=>{ trainMany(20); redraw(); });
+  document.getElementById("ae-reset").addEventListener("click",reset);
+  document.getElementById("ae-data").addEventListener("change",reset);
+  document.getElementById("ae-anim").addEventListener("click",()=>{
+    const x=data[(Math.random()*N)|0];
+    const z=enc.forward(x), xr=dec.forward(z);
+    document.getElementById("ae-z").textContent="z = "+z[0].toFixed(3);
+    anim={x,xr:[xr[0],xr[1]],t:0,hold:40};
+    redraw();
+  });
+  wireAuto(document.getElementById("ae-auto"),demos.ae,"dg-ae");
+  reset();
+})();
+
+/* ===========================================================================
+   4) DEMO VAE — latente probabilístico 1-D + término KL
+   ---------------------------------------------------------------------------
+   Codificador 2 → 16 → 2 (las DOS salidas son μ y log σ²).
+   Muestreo reparametrizado z = μ + σ·ε con ε ~ 𝒩(0,1).
+   Pérdida = ‖x−x̂‖² + β · KL, con KL = ½(σ² + μ² − 1 − log σ²).
+   =========================================================================== */
+(function(){
+  const canvas=document.getElementById("vae-canvas"), ctx=canvas.getContext("2d");
+  const view=makeView(canvas), curva=document.getElementById("vae-curva");
+  const N=220, LR=0.008, BATCH=32, NSAMP=120;
+  let enc,dec,data,steps,histR,histK,zBank;
+
+  function resampleBank(){ zBank=Array.from({length:NSAMP},()=>gauss()); }
+
+  function reset(){
+    enc=new MLP([2,16,2]);          // salidas: [μ, log σ²]
+    dec=new MLP([1,16,2]);
+    data=genData(document.getElementById("vae-data").value,N);
+    steps=0; histR=[]; histK=[];
+    resampleBank(); updateRead(NaN,NaN); redraw();
+  }
+
+  function beta(){ return parseFloat(document.getElementById("vae-beta").value); }
+
+  function trainStep(){
+    enc.zeroGrad(); dec.zeroGrad();
+    let rec=0,kl=0; const B=beta();
+    for(let b=0;b<BATCH;b++){
+      const x=data[(Math.random()*N)|0];
+      const [mu,lv0]=enc.forward(x);
+      const lv=clamp(lv0,-6,3);                    // estabilidad numérica
+      const sd=Math.exp(0.5*lv);
+      const eps=gauss();
+      const z=mu+sd*eps;                           // truco de reparametrización
+      const xr=dec.forward([z]);
+      rec+=(xr[0]-x[0])**2+(xr[1]-x[1])**2;
+      kl+=0.5*(Math.exp(lv)+mu*mu-1-lv);
+      // --- gradientes ---
+      const dx=[2*(xr[0]-x[0]),2*(xr[1]-x[1])];    // ∂rec/∂x̂
+      const dz=dec.backward(dx)[0];                // ∂rec/∂z (cruza el decodificador)
+      // el gradiente atraviesa el muestreo: ∂z/∂μ = 1, ∂z/∂lv = ε·½·σ
+      const dmu=dz + B*mu;                         //   + ∂KL/∂μ = μ
+      const dlv=dz*eps*0.5*sd + B*0.5*(Math.exp(lv)-1); // + ∂KL/∂lv
+      enc.backward([dmu,dlv]);
+    }
+    dec.step(LR,BATCH); enc.step(LR,BATCH);
+    steps++;
+    return [rec/BATCH,kl/BATCH];
+  }
+  function trainMany(k){
+    let r=0,K=0; for(let i=0;i<k;i++)[r,K]=trainStep();
+    pushHist(histR,r,300); pushHist(histK,K,300); updateRead(r,K);
+  }
+  function updateRead(r,K){
+    document.getElementById("vae-steps").textContent=steps;
+    document.getElementById("vae-rec").textContent=isFinite(r)?r.toFixed(4):"—";
+    document.getElementById("vae-kl").textContent=isFinite(K)?K.toFixed(4):"—";
+  }
+
+  function redraw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    // barrido del latente por el prior: g(z) para z ∈ [−2.5, 2.5]
+    ctx.beginPath();
+    for(let i=0;i<=80;i++){
+      const p=dec.forward([-2.5+5*i/80]);
+      const px=view.x(p[0]),py=view.y(p[1]);
+      i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+    }
+    ctx.strokeStyle="#FDB913"; ctx.lineWidth=3; ctx.stroke();
+    // datos reales
+    for(const p of data) drawDot(ctx,view,p,"rgba(30,58,138,.75)",3);
+    // muestras generadas desde el prior (banco fijo → se ve la mejora, sin parpadeo)
+    for(const z of zBank) drawDot(ctx,view,dec.forward([z]),"rgba(237,30,121,.8)",2.8);
+    drawLossCurve(curva,[histR,histK],["#ED1E79","#B45309"],["reconstrucción","KL"]);
+  }
+
+  demos.vae={
+    auto:false,
+    setAuto(on){ setAutoState(this,on); },
+    tick(){ if(this.auto){ trainMany(5); redraw(); } },
+    trainStep, get loss(){ return histR[histR.length-1]; }, get steps(){ return steps; }
+  };
+
+  document.getElementById("vae-step").addEventListener("click",()=>{ trainMany(20); redraw(); });
+  document.getElementById("vae-reset").addEventListener("click",reset);
+  document.getElementById("vae-data").addEventListener("change",reset);
+  document.getElementById("vae-anim").addEventListener("click",()=>{ resampleBank(); redraw(); });
+  document.getElementById("vae-beta").addEventListener("input",()=>{
+    document.getElementById("vae-beta-val").textContent=beta().toFixed(2);
+  });
+  wireAuto(document.getElementById("vae-auto"),demos.vae,"dg-vae");
+  reset();
+})();
+
+/* ===========================================================================
+   5) DEMO GAN — generador vs discriminador sobre datos 2-D
+   ---------------------------------------------------------------------------
+   G: ruido 2-D → punto 2-D.   D: punto 2-D → logit (P(real) = σ(logit)).
+   Entrenamiento alternado con BCE; G usa la pérdida no saturante.
+   Truco clave: el gradiente de G se obtiene retropropagando A TRAVÉS de D,
+   pero después se DESCARTAN los gradientes acumulados en D (D "congelado").
+   =========================================================================== */
+(function(){
+  const canvas=document.getElementById("gan-canvas"), ctx=canvas.getContext("2d");
+  const view=makeView(canvas), curva=document.getElementById("gan-curva");
+  const N=220, LRD=0.002, LRG=0.002, BATCH=24, NSHOW=140;
+  const GRID=56;                                   // resolución del mapa de D
+  let G,D,data,steps,histD,histG,zShow,heat=null,heatAge=99,anim=null;
+
+  function reset(){
+    G=new MLP([2,16,16,2]); D=new MLP([2,16,16,1]);
+    data=genData(document.getElementById("gan-data").value,N);
+    // banco FIJO de ruido para visualizar: así se aprecia el transporte z→G(z)
+    zShow=Array.from({length:NSHOW},()=>[gauss(),gauss()]);
+    steps=0; histD=[]; histG=[]; heatAge=99; anim=null;
+    updateRead(NaN,NaN,NaN); redraw();
+  }
+
+  function trainStep(){
+    // ---------- (a) paso del DISCRIMINADOR ----------
+    D.zeroGrad();
+    let lossD=0;
+    for(let b=0;b<BATCH;b++){                      // reales, etiqueta 1
+      const x=data[(Math.random()*N)|0];
+      const p=sig(D.forward(x)[0]);
+      lossD+=-Math.log(p+1e-9);
+      D.backward([p-1]);                           // ∂BCE/∂logit = σ(logit) − y
+    }
+    for(let b=0;b<BATCH;b++){                      // falsos, etiqueta 0
+      const xf=G.forward([gauss(),gauss()]);       // G solo hace forward aquí
+      const p=sig(D.forward(xf)[0]);
+      lossD+=-Math.log(1-p+1e-9);
+      D.backward([p]);
+    }
+    D.step(LRD,2*BATCH,0.5);                       // β₁ = 0.5: uso estándar en GAN
+    // ---------- (b) paso del GENERADOR ----------
+    G.zeroGrad(); D.zeroGrad();                    // los grads de D se descartarán
+    let lossG=0, fool=0;
+    for(let b=0;b<BATCH;b++){
+      const z=[gauss(),gauss()];
+      const xf=G.forward(z);
+      const p=sig(D.forward(xf)[0]);
+      lossG+=-Math.log(p+1e-9); fool+=p;
+      const dx=D.backward([p-1]);                  // no saturante: como si y=1
+      G.backward(dx);                              // el gradiente sigue hasta G
+    }
+    G.step(LRG,BATCH,0.5);
+    D.zeroGrad();                                  // limpieza: D quedó "congelado"
+    steps++;
+    return [lossD/(2*BATCH), lossG/BATCH, fool/BATCH];
+  }
+
+  function trainMany(k){
+    let a=0,b=0,f=0;
+    for(let i=0;i<k;i++)[a,b,f]=trainStep();
+    if(!isFinite(a)||!isFinite(b)){ reset(); return; }  // red desbordada → reinicio limpio
+    pushHist(histD,a,300); pushHist(histG,b,300);
+    heatAge=99; updateRead(a,b,f);
+  }
+  function updateRead(a,b,f){
+    document.getElementById("gan-steps").textContent=steps;
+    document.getElementById("gan-ld").textContent=isFinite(a)?a.toFixed(3):"—";
+    document.getElementById("gan-lg").textContent=isFinite(b)?b.toFixed(3):"—";
+    document.getElementById("gan-fool").textContent=isFinite(f)?f.toFixed(3):"—";
+  }
+
+  /** Mapa de calor con la opinión de D, calculado en una rejilla gruesa. */
+  function buildHeat(){
+    const img=ctx.createImageData(GRID,GRID);
+    for(let gy=0;gy<GRID;gy++)for(let gx=0;gx<GRID;gx++){
+      const wx=-view.XR+2*view.XR*(gx+0.5)/GRID;
+      const wy= view.YR-2*view.YR*(gy+0.5)/GRID;
+      const p=sig(D.forward([wx,wy])[0]);          // P(real) en ese punto
+      // interpolación azul claro (falso) → blanco → rosa claro (real)
+      const t=p, i=(gy*GRID+gx)*4;
+      img.data[i  ]=Math.round(219+t*(251-219));   // R
+      img.data[i+1]=Math.round(234+t*(207-234));   // G
+      img.data[i+2]=Math.round(254+t*(232-254));   // B
+      img.data[i+3]=255;
+    }
+    // se pinta en un canvas auxiliar y luego se escala (suavizado del navegador)
+    if(!heat){ heat=document.createElement("canvas"); heat.width=GRID; heat.height=GRID; }
+    heat.getContext("2d").putImageData(img,0,0);
+  }
+
+  function redraw(){
+    if(heatAge>8){ buildHeat(); heatAge=0; } else heatAge++;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.imageSmoothingEnabled=true;
+    ctx.drawImage(heat,0,0,canvas.width,canvas.height);
+    // datos reales
+    for(const p of data) drawDot(ctx,view,p,"rgba(30,58,138,.8)",3);
+    // muestras del generador (o su animación ruido → datos)
+    if(anim){
+      const t=anim.t, e=t*t*(3-2*t);               // suavizado (smoothstep)
+      for(let i=0;i<zShow.length;i+=2){
+        const z=zShow[i], g=anim.targets[i];
+        const px=z[0]+(g[0]-z[0])*e, py=z[1]+(g[1]-z[1])*e;
+        drawDot(ctx,view,[px,py],"rgba(237,30,121,.85)",2.8);
+      }
+    }else{
+      for(const z of zShow) drawDot(ctx,view,G.forward(z),"rgba(237,30,121,.85)",2.8);
+    }
+    drawLossCurve(curva,[histD,histG],["#2563EB","#ED1E79"],["pérdida D","pérdida G"]);
+  }
+
+  demos.gan={
+    auto:false,
+    setAuto(on){ setAutoState(this,on); },
+    tick(){
+      if(this.auto&&!anim){ trainMany(3); redraw(); }
+      if(anim){ anim.t+=0.016; if(anim.t>=1){ anim=null; } redraw(); }
+    },
+    trainStep, get loss(){ return histG[histG.length-1]; }, get steps(){ return steps; }
+  };
+
+  document.getElementById("gan-step").addEventListener("click",()=>{ trainMany(20); redraw(); });
+  document.getElementById("gan-reset").addEventListener("click",reset);
+  document.getElementById("gan-data").addEventListener("change",reset);
+  document.getElementById("gan-anim").addEventListener("click",()=>{
+    anim={t:0,targets:zShow.map(z=>{ const g=G.forward(z); return [g[0],g[1]]; })};
+  });
+  wireAuto(document.getElementById("gan-auto"),demos.gan,"dg-gan");
+  reset();
+})();
+
+/* ===========================================================================
+   6) DEMO TRANSFORMER — una cabeza de atención posicional
+   ---------------------------------------------------------------------------
+   Modelo mínimo: Q y K son vectores APRENDIDOS por posición (equivale a
+   Q = P·W_Q con P posicional one-hot); V es el one-hot del token. Entonces
+       α_i = softmax_j(Q_i·K_j/√d)   y   ŷ_i = Σ_j α_ij · onehot(x_j),
+   que ya es una distribución sobre el vocabulario (mezcla convexa).
+   Pérdida: entropía cruzada  −Σ_i log ŷ_i[objetivo_i].
+   La tarea (invertir / desplazar / copiar) solo cambia el objetivo: la
+   atención aprende sola el patrón de "dónde mirar".
+   =========================================================================== */
+(function(){
+  const L=6, V=4, DIM=12, TOKS=["A","B","C","D"];
+  const LR=0.05, BATCH=8;
+  const COLS=["#2563EB","#8B5CF6","#ED1E79","#0D9488"]; // color por letra
+  let Q,K,mQ,vQ,mK,vK,tAdam,steps,hist,seq,alpha,anim=null;
+  const curva=document.getElementById("trf-curva");
+
+  /* --- inicialización de parámetros (Q y K: L×DIM) --- */
+  function reset(){
+    const init=()=>Array.from({length:L},()=>Float64Array.from({length:DIM},()=>gauss()*0.3));
+    Q=init(); K=init();
+    mQ=init().map(r=>r.fill(0)); vQ=init().map(r=>r.fill(0));
+    mK=init().map(r=>r.fill(0)); vK=init().map(r=>r.fill(0));
+    tAdam=0; steps=0; hist=[]; anim=null;
+    newSeq(); updateAll(NaN);
+  }
+  function task(){ return document.getElementById("trf-task").value; }
+  function target(s){
+    const t=task();
+    return s.map((_,i)=> t==="rev" ? s[L-1-i] : t==="shift" ? s[(i+1)%L] : s[i]);
+  }
+  function randSeq(){ return Array.from({length:L},()=>(Math.random()*V)|0); }
+  function newSeq(){ seq=randSeq(); forwardDisplay(); }
+
+  /* --- pasada hacia adelante: devuelve α (L×L) y ŷ (L×V) --- */
+  function forward(s){
+    const A=[],Yh=[];
+    for(let i=0;i<L;i++){
+      const sc=new Float64Array(L);
+      let mx=-Infinity;
+      for(let j=0;j<L;j++){
+        let d=0; for(let k=0;k<DIM;k++) d+=Q[i][k]*K[j][k];
+        sc[j]=d/Math.sqrt(DIM); if(sc[j]>mx)mx=sc[j];
+      }
+      let Z=0; const a=new Float64Array(L);
+      for(let j=0;j<L;j++){ a[j]=Math.exp(sc[j]-mx); Z+=a[j]; }
+      for(let j=0;j<L;j++) a[j]/=Z;
+      const y=new Float64Array(V);
+      for(let j=0;j<L;j++) y[s[j]]+=a[j];          // mezcla de one-hots = distribución
+      A.push(a); Yh.push(y);
+    }
+    return [A,Yh];
+  }
+
+  /* --- un paso de entrenamiento: BATCH secuencias aleatorias nuevas --- */
+  function trainStep(){
+    const gQ=Q.map(r=>new Float64Array(DIM)), gK=K.map(r=>new Float64Array(DIM));
+    let loss=0;
+    for(let b=0;b<BATCH;b++){
+      const s=randSeq(), tgt=target(s);
+      const [A,Yh]=forward(s);
+      for(let i=0;i<L;i++){
+        const p=Yh[i][tgt[i]]+1e-9;
+        loss+=-Math.log(p);
+        // ∂ℒ/∂α_ij = −(1/p) si el token j es el objetivo (V_j aporta a esa clase)
+        const dA=new Float64Array(L);
+        for(let j=0;j<L;j++) if(s[j]===tgt[i]) dA[j]=-1/p;
+        // backward del softmax: ds_j = α_j (dA_j − Σ_k α_k dA_k)
+        let dot=0; for(let j=0;j<L;j++) dot+=A[i][j]*dA[j];
+        for(let j=0;j<L;j++){
+          const ds=A[i][j]*(dA[j]-dot)/Math.sqrt(DIM);
+          for(let k=0;k<DIM;k++){ gQ[i][k]+=ds*K[j][k]; gK[j][k]+=ds*Q[i][k]; }
+        }
+      }
+    }
+    // paso de Adam sobre Q y K
+    tAdam++;
+    const b1=0.9,b2=0.999,eps=1e-8;
+    const c1=1-Math.pow(b1,tAdam), c2=1-Math.pow(b2,tAdam);
+    const scale=BATCH*L;
+    for(let i=0;i<L;i++)for(let k=0;k<DIM;k++){
+      let g=gQ[i][k]/scale;
+      mQ[i][k]=b1*mQ[i][k]+(1-b1)*g; vQ[i][k]=b2*vQ[i][k]+(1-b2)*g*g;
+      Q[i][k]-=LR*(mQ[i][k]/c1)/(Math.sqrt(vQ[i][k]/c2)+eps);
+      g=gK[i][k]/scale;
+      mK[i][k]=b1*mK[i][k]+(1-b1)*g; vK[i][k]=b2*vK[i][k]+(1-b2)*g*g;
+      K[i][k]-=LR*(mK[i][k]/c1)/(Math.sqrt(vK[i][k]/c2)+eps);
+    }
+    steps++;
+    return loss/scale;
+  }
+  function trainMany(k){
+    let Lo=0; for(let i=0;i<k;i++)Lo=trainStep();
+    pushHist(hist,Lo,300); forwardDisplay(); updateAll(Lo);
+  }
+
+  /* --- render: fichas de tokens + mapa de atención --- */
+  const elIn=document.getElementById("trf-in"), elTgt=document.getElementById("trf-tgt"),
+        elOut=document.getElementById("trf-out"), grid=document.getElementById("trf-grid");
+  grid.style.gridTemplateColumns=`28px repeat(${L},1fr)`;
+
+  function tokEl(v,cls,idx){
+    const d=document.createElement("div");
+    d.className="tok "+cls; d.textContent=TOKS[v];
+    d.style.borderColor=cls.includes("hit")?"":""; d.style.color=COLS[v];
+    if(idx!==undefined){ const s=document.createElement("span"); s.className="idx"; s.textContent=idx+1; d.appendChild(s); }
+    return d;
+  }
+
+  function forwardDisplay(){
+    const [A,Yh]=forward(seq);
+    alpha=A;
+    const tgt=target(seq);
+    const pred=Yh.map(y=>{ let bi=0; for(let v=1;v<V;v++) if(y[v]>y[bi])bi=v; return bi; });
+    // filas de tokens
+    elIn.innerHTML=""; elTgt.innerHTML=""; elOut.innerHTML="";
+    seq.forEach((v,i)=>elIn.appendChild(tokEl(v,"in",i)));
+    tgt.forEach(v=>elTgt.appendChild(tokEl(v,"in")));
+    pred.forEach((v,i)=>{
+      const revealed=!anim||i<anim.i;
+      const e=tokEl(v, revealed?("out "+(v===tgt[i]?"hit":"miss")):"out pending");
+      if(anim&&i===anim.i) e.classList.add("focus");
+      elOut.appendChild(e);
+    });
+    // mapa de atención
+    grid.innerHTML="";
+    grid.appendChild(Object.assign(document.createElement("div"),{className:"hd"}));
+    for(let j=0;j<L;j++){ const h=document.createElement("div"); h.className="hd"; h.textContent="e"+(j+1); grid.appendChild(h); }
+    for(let i=0;i<L;i++){
+      const h=document.createElement("div"); h.className="hd"; h.textContent="s"+(i+1); grid.appendChild(h);
+      for(let j=0;j<L;j++){
+        const c=document.createElement("div"); c.className="attn-cell";
+        const a=A[i][j];
+        c.style.background=`rgba(61,0,141,${(0.06+0.94*a).toFixed(3)})`;
+        c.setAttribute("data-tip",`α(${i+1}→${j+1}) = ${a.toFixed(3)} — la salida ${i+1} atiende a la entrada ${j+1} con este peso.`);
+        if(a>0.4) c.textContent=a.toFixed(2).slice(1);
+        if(anim&&i===anim.i) c.classList.add("rowfocus");
+        grid.appendChild(c);
+      }
+    }
+    // exactitud sobre la secuencia mostrada
+    const acc=pred.filter((p,i)=>p===tgt[i]).length/L;
+    document.getElementById("trf-acc").textContent=(acc*100).toFixed(0)+" %";
+    // resaltar en la ENTRADA lo que mira la fila animada
+    if(anim){
+      [...elIn.children].forEach((e,j)=>{
+        e.style.boxShadow=`0 0 0 3px rgba(237,30,121,${(A[anim.i]?A[anim.i][j]*0.9:0).toFixed(2)})`;
+      });
+    }
+  }
+  function updateAll(Lo){
+    document.getElementById("trf-steps").textContent=steps;
+    document.getElementById("trf-loss").textContent=isFinite(Lo)?Lo.toFixed(4):"—";
+    drawLossCurve(curva,[hist],["#0D9488"],["entropía cruzada"]);
+  }
+
+  demos.trf={
+    auto:false,
+    setAuto(on){ setAutoState(this,on); },
+    tick(){
+      if(this.auto&&!anim){ trainMany(5); }
+      if(anim){
+        anim.f++;
+        if(anim.f>32){ anim.f=0; anim.i++; if(anim.i>=L){ anim=null; } }
+        forwardDisplay();
+      }
+    },
+    trainStep, get loss(){ return hist[hist.length-1]; }, get steps(){ return steps; }
+  };
+
+  document.getElementById("trf-step").addEventListener("click",()=>trainMany(20));
+  document.getElementById("trf-reset").addEventListener("click",reset);
+  document.getElementById("trf-task").addEventListener("change",()=>{ steps=steps; forwardDisplay(); });
+  document.getElementById("trf-new").addEventListener("click",newSeq);
+  document.getElementById("trf-anim").addEventListener("click",()=>{ anim={i:0,f:0}; forwardDisplay(); });
+  wireAuto(document.getElementById("trf-auto"),demos.trf,"dg-trf");
+  reset();
+})();
+
+/* ===========================================================================
+   7) TOOLTIP FLOTANTE (elementos con data-tip)
+   =========================================================================== */
+const tip=document.getElementById("tip");
+function showTip(text,x,y){
+  tip.textContent=text; tip.classList.add("show");
+  const pad=14, w=tip.offsetWidth, h=tip.offsetHeight;
+  let px=x+pad, py=y+pad;
+  if(px+w>window.innerWidth)  px=x-w-pad;
+  if(py+h>window.innerHeight) py=y-h-pad;
+  tip.style.left=px+"px"; tip.style.top=py+"px";
+}
+document.addEventListener("mouseover",e=>{
+  const el=e.target.closest("[data-tip]");
+  if(el) showTip(el.getAttribute("data-tip"),e.clientX,e.clientY);
+});
+document.addEventListener("mousemove",e=>{
+  if(tip.classList.contains("show")){
+    const el=e.target.closest("[data-tip]");
+    if(el) showTip(el.getAttribute("data-tip"),e.clientX,e.clientY);
+    else   tip.classList.remove("show");
+  }
+});
+
+/* ===========================================================================
+   8) ARRANQUE + gancho de depuración (verificable desde la consola)
+   =========================================================================== */
+window.__genlab=demos;   // p. ej.: __genlab.ae.trainStep() ; __genlab.gan.loss
+masterLoop();
+</script>
+
+<!-- Auto-ajuste de altura para el documento contenedor (patrón CNN/ViT/RNN). -->
+<script>
+(function(){
+  var t;
+  function ph(){ clearTimeout(t); t=setTimeout(function(){
+    try{ parent.postMessage({type:'embed-tool-height', id:'generativos-frame',
+      height: Math.ceil(document.documentElement.getBoundingClientRect().height)}, '*'); }catch(e){}
+  }, 90); }
+  window.addEventListener('load', ph); window.addEventListener('resize', ph);
+  new MutationObserver(ph).observe(document.body, {subtree:true, childList:true, attributes:true, attributeFilter:['class','style']});
+  setTimeout(ph, 300);
+})();
+</script>
+</body>
+</html>
