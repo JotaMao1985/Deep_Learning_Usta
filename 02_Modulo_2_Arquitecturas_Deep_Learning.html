@@ -3011,6 +3011,45 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                         con {String.raw`\(\epsilon \sim \mathcal{N}(0, I)\)`} un ruido externo. Así los gradientes fluyen a través de
                         {String.raw` \(\mu\)`} y {String.raw`\(\sigma\)`}, y la red aprende los parámetros de la distribución.
                     </Box>
+                    <p>
+                        En código, el modelo entero cabe en pocas líneas; conviene notar cómo el truco de reparametrización y
+                        la divergencia KL en forma cerrada se traducen directamente desde las ecuaciones anteriores:
+                    </p>
+                    <CodeBlock title="VAE: reparametrización y pérdida ELBO" lang="pytorch" code={`import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class VAE(nn.Module):
+    def __init__(self, d_lat=20):
+        super().__init__()
+        self.enc   = nn.Linear(784, 400)
+        self.fc_mu = nn.Linear(400, d_lat)   # media μ del código latente
+        self.fc_lv = nn.Linear(400, d_lat)   # log-varianza log σ^2 (más estable que σ)
+        self.dec = nn.Sequential(
+            nn.Linear(d_lat, 400), nn.ReLU(),
+            nn.Linear(400, 784),   nn.Sigmoid(),   # píxeles reconstruidos en [0, 1]
+        )
+
+    def reparametrizar(self, mu, logvar):
+        std = torch.exp(0.5 * logvar)        # σ = exp(0.5 * log σ^2)
+        eps = torch.randn_like(std)          # ruido externo ε ~ N(0, I)
+        return mu + std * eps                # z = μ + σ * ε  (ya es derivable)
+
+    def forward(self, x):
+        h = F.relu(self.enc(x))
+        mu, logvar = self.fc_mu(h), self.fc_lv(h)
+        z = self.reparametrizar(mu, logvar)
+        return self.dec(z), mu, logvar
+
+def perdida_elbo(x_rec, x, mu, logvar):
+    recon = F.binary_cross_entropy(x_rec, x, reduction='sum')          # término de reconstrucción
+    kl    = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())    # KL contra N(0, I), forma cerrada
+    return recon + kl        # se minimiza  -ELBO = reconstrucción + regularización
+
+model = VAE()
+x = torch.rand(1, 784)              # un dígito aplanado, valores en [0, 1]
+x_rec, mu, logvar = model(x)
+print(x_rec.shape, mu.shape)        # torch.Size([1, 784]) torch.Size([1, 20])`} />
                     <Box type="eth" label="Aplicaciones en Colombia">
                         En caficultura, un VAE modela el «espacio de fermentación» (pH, temperatura, °Brix) para predecir perfiles de
                         taza. En genética de cultivos, interpola entre variedades (Caturra, Castillo, Geisha) para simular cruces. En
@@ -3068,6 +3107,40 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                         Conserva el mismo punto de equilibrio pero ofrece gradientes fuertes precisamente cuando las muestras son
                         rechazadas con confianza, acelerando el aprendizaje en las primeras etapas.
                     </p>
+                    <p>
+                        El juego se implementa alternando dos pasos de optimización, cada uno con su propia pérdida. Un detalle
+                        clave es el <code>.detach()</code>: al actualizar el discriminador, corta el gradiente hacia el generador
+                        para que solo aprenda una red a la vez.
+                    </p>
+                    <CodeBlock title="GAN: un paso del juego adversario" lang="pytorch" code={`import torch
+import torch.nn as nn
+
+# Generador: ruido z (100) -> imagen falsa (784)
+G = nn.Sequential(nn.Linear(100, 256), nn.ReLU(),
+                  nn.Linear(256, 784), nn.Tanh())
+# Discriminador: imagen (784) -> probabilidad de ser real (0..1)
+D = nn.Sequential(nn.Linear(784, 256), nn.LeakyReLU(0.2),
+                  nn.Linear(256, 1),   nn.Sigmoid())
+
+bce   = nn.BCELoss()
+opt_G = torch.optim.Adam(G.parameters(), lr=2e-4)
+opt_D = torch.optim.Adam(D.parameters(), lr=2e-4)
+
+def paso(x_real):
+    b = x_real.size(0)
+    real, fake = torch.ones(b, 1), torch.zeros(b, 1)
+
+    # 1) El discriminador aprende a separar reales de falsas
+    x_fake = G(torch.randn(b, 100))
+    loss_D = bce(D(x_real), real) + bce(D(x_fake.detach()), fake)
+    opt_D.zero_grad(); loss_D.backward(); opt_D.step()
+
+    # 2) El generador busca que D crea reales sus falsificaciones (non-saturating)
+    loss_G = bce(D(G(torch.randn(b, 100))), real)   # maximiza log D(G(z))
+    opt_G.zero_grad(); loss_G.backward(); opt_G.step()
+    return loss_D.item(), loss_G.item()
+
+print(paso(torch.randn(64, 784)))   # (loss_D, loss_G) de un minibatch`} />
 
                     <h4>Mode collapse e inestabilidad</h4>
 
@@ -3219,6 +3292,28 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                         (× {String.raw`\(V\)`}): un objeto físico que está sobre la mesa.
                     </p>
                     <SelfAttentionSVG />
+
+                    <p>
+                        La fórmula se traduce casi literalmente a código: una sola cabeza de atención son apenas media docena de
+                        líneas, donde cada paso —proyectar, puntuar, normalizar con <em>softmax</em> y mezclar— aparece explícito.
+                    </p>
+                    <CodeBlock title="Autoatención: producto punto escalado" lang="pytorch" code={`import torch
+import torch.nn.functional as F
+
+def autoatencion(X, Wq, Wk, Wv):
+    Q, K, V = X @ Wq, X @ Wk, X @ Wv                 # proyecciones (en un modelo real, aprendidas)
+    d_k = Q.size(-1)
+    puntajes = Q @ K.transpose(-2, -1) / d_k**0.5    # QK^T / sqrt(d_k): afinidad token a token
+    A = F.softmax(puntajes, dim=-1)                  # pesos de atención: cada fila suma 1
+    return A @ V, A                                  # salida = mezcla ponderada de los valores V
+
+torch.manual_seed(0)
+X  = torch.randn(4, 8)                # 4 tokens, dimensión del modelo = 8
+Wq = Wk = Wv = torch.randn(8, 8)
+salida, A = autoatencion(X, Wq, Wk, Wv)
+print(salida.shape)   # torch.Size([4, 8])  -> un vector nuevo por token
+print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
+# En la práctica se corren varias cabezas en paralelo: nn.MultiheadAttention`} />
 
                     <Accordion items={[
                         {
