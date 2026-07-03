@@ -69,4 +69,10 @@ Exploradores autónomos (HTML + JS/SVG, sin CDN salvo el material principal) que
 | `notebooks/06-lab-implementacion-modulo-3.ipynb` | Laboratorio M3 (frameworks TF/PyTorch, GPU + precisión mixta, pipelines, ONNX) |
 | `notebooks/07-scaffold-centinela-fase3.ipynb` | Andamiaje del proyecto · Fase 3 (pipeline + GPU + despliegue offline) |
 
+## Laboratorio interactivo (Streamlit)
+
+| Archivo | Descripción |
+|---|---|
+| `notebooks/app-laboratorio-regularizacion.py` | Laboratorio de **Regularización, Estabilización y Diagnóstico** (M1 · Cap 5): L1/L2/Dropout, BatchNorm y curvas de aprendizaje en vivo. Se ejecuta localmente con `streamlit run notebooks/app-laboratorio-regularizacion.py`. |
+
 Sitio estático (React + Tailwind vía CDN); no requiere compilación. Servido con GitHub Pages.
