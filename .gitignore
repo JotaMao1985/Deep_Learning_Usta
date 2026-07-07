@@ -2,6 +2,7 @@
 .claude/
 notebooks/data/*
 !notebooks/data/knmi_273_marknesse.csv
+!notebooks/data/sentinel2_parches_polder.npz
 __pycache__/
 .ipynb_checkpoints/
 
