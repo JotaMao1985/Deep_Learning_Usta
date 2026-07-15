@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="Ruta de Aprendizaje Interactiva del Módulo 3 — Implementación y Herramientas Profesionales de Deep Learning. Maestría en Ciencia de Datos, Universidad Santo Tomás. Mapa navegable de los 3 capítulos (Frameworks TF/PyTorch/Keras 3, Computación de Alto Rendimiento con GPU, Pipelines de Datos y Despliegue), 1 video de profundización, 2 hitos evaluativos, glosario y cronograma.">
+        content="Ruta de Aprendizaje Interactiva del Módulo 3 — Implementación y Herramientas Profesionales de Deep Learning. Maestría en Ciencia de Datos, Universidad Santo Tomás. Mapa navegable de los 3 capítulos (Frameworks TF/PyTorch/Keras 3, Computación de Alto Rendimiento con GPU, Pipelines de Datos y Despliegue), el video de profundización «De Colab al Cafetal» más el video capstone de la Guía 3, 2 hitos evaluativos, glosario y cronograma.">
     <title>Ruta de Aprendizaje · Módulo 3 — Implementación y Herramientas Profesionales · USTA</title>
 
     <!-- Preconnect para rendimiento de fuentes -->
@@ -833,7 +833,7 @@
                 entregable: 'Foro — Escrito reflexivo argumentado sobre arquitecturas multimodales para predecir la deserción escolar en colegios públicos rurales, con postura propia, referencias en APA 7 y consideraciones éticas de equidad algorítmica.',
                 caso: 'La deserción escolar en zonas rurales de Colombia: tensión estructural entre la promesa de la IA para identificar estudiantes en riesgo y las limitaciones operativas, éticas y sociales de desplegar sistemas predictivos en contextos de alta vulnerabilidad. Según DANE y el MEN, la deserción intra-anual en la ruralidad dispersa supera el 5 % y la no culminación de media supera el 40 % en Vaupés y Guainía. El estudiante analiza un sistema multimodal (LSTM para trayectorias, Transformers tipo BETO para texto pedagógico, Autoencoders para anomalías y CNN-OCR para boletines escaneados) y su despliegue Edge con vigilancia ética.',
                 pasos: [
-                    'Inmersión en el material base: visualice de forma activa el Video de Profundización de la Sección 3, tomando notas sobre las diferencias arquitectónicas entre CNN, RNN, LSTM, GRU, Autoencoders y Transformers y su rol en un sistema multimodal de alerta temprana.',
+                    'Inmersión en el material base: visualice de forma activa el video capstone de esta Guía 3 («Alertas Tempranas contra la Deserción»), tomando notas sobre las diferencias arquitectónicas entre CNN, RNN, LSTM, GRU, Autoencoders y Transformers y su rol en un sistema multimodal de alerta temprana.',
                     'Profundización conceptual y caso rural: estudie el material interactivo de la Sección 3 y la lógica de fusión tardía (cada rama produce un vector de representación que una capa densa combina), el despliegue Edge (cuantización, pruning, knowledge distillation a DistilBETO) y el aprendizaje federado con infraestructura colombiana (RENATA, Guane-1, Apolo, BIOS).',
                     'Reflexión escrita en el foro: redacte un escrito argumentado con postura propia sobre la viabilidad y los riesgos del sistema, incorporando criterios de equidad algorítmica (fairness through unawareness, equalized odds, paridad demográfica), el riesgo de profecía autocumplida y al menos dos referencias en APA 7.',
                 ],
@@ -1159,11 +1159,27 @@
             );
         };
 
-        /* 1 video de profundización del Módulo 3 */
+        /* Videos del Módulo 3: (1) video de profundización de la sección «De Colab al Cafetal»; (2) video capstone de la Guía 3 (deserción) */
         const videos = [
             {
                 id: 'profundizacion',
                 tipo: 'Video de Profundización',
+                icono: 'fa-film',
+                titulo: 'De Colab al Cafetal: Implementación Profesional de Deep Learning (Frameworks, GPU, Pipelines y Despliegue Móvil) para el Contexto Cafetero Colombiano',
+                duracion: '≈5 min 33 s (12 escenas)',
+                numEscenas: 12,
+                conceptos: ['TensorFlow 2.x + Keras: APIs Sequential, Funcional y Subclassing; ecosistema de producción (Serving, TFX, LiteRT)', 'PyTorch: tensores (CPU/GPU), define-by-run, Autograd y torch.nn', 'Elección de framework según el destino; Keras 3 (un código, tres backends: TF, PyTorch, JAX)', 'GPU: núcleos CUDA y Tensor Cores, pila CUDA/cuDNN, VRAM y error «out of memory»', 'Cómputo gratuito bien usado: Colab y Kaggle, precisión mixta (FP16/bfloat16), acumulación de gradientes y checkpoints', 'Pipelines eficientes: tf.data (map→cache→shuffle→batch→prefetch) y DataLoader (num_workers, pin_memory)', 'Data Augmentation para robustez en campo (rotación, brillo, recorte, volteo)', 'Del entrenamiento al dispositivo: guardado (.keras/SavedModel/state_dict), export ONNX→LiteRT/ExecuTorch, cuantización INT8', 'Despliegue responsable: umbrales de confianza, humano en el bucle y monitoreo de deriva'],
+                textoDestacado: [
+                    'Del notebook al celular, sin internet: el framework se elige por el destino del modelo',
+                    'La regla de oro de los pipelines: que la GPU nunca espere al disco',
+                    'La IA más valiosa no es la que gana un benchmark, sino la que corre en la mano del técnico, sin señal, y respeta las consecuencias de equivocarse',
+                ],
+                url: null,
+                linkMd: 'modulos/modulo-3-implementacion/videos/video-profundizacion-m3.md',
+            },
+            {
+                id: 'capstone',
+                tipo: 'Video capstone · Guía 3',
                 icono: 'fa-film',
                 titulo: 'Alertas Tempranas contra la Deserción: Arquitecturas Multimodales de Deep Learning (LSTM, Transformers y Autoencoders) para la predicción de deserción escolar en colegios públicos rurales de Colombia',
                 duracion: '≈5 min 42 s (12 escenas)',
@@ -1175,7 +1191,7 @@
                     'Un pipeline que cabe en trescientos megabytes y corre offline en el equipo del rector, preservando soberanía educativa',
                 ],
                 url: null,
-                linkMd: 'modulos/modulo-3-implementacion/videos/video-profundizacion-m3.md',
+                linkMd: 'modulos/modulo-3-implementacion/videos/video-capstone-guia3-desercion.md',
             },
         ];
 
@@ -1246,14 +1262,14 @@
                 eventos: [
                     { fecha: 'Encuentro 1', hora: '19:30 – 21:00', tipo: 'Sincrónico', tipoColor: '#3D008D', titulo: 'Frameworks de Deep Learning', desc: 'Por qué un framework (autograd, GPU, abstracción); TensorFlow/Keras 3 vs. PyTorch; criterios de selección y ONNX como pasaporte interoperable entre ecosistemas.', link: TEAMS_URL, linkLabel: 'Teams Sincrónico' },
                     { fecha: 'Encuentro 2', hora: '19:30 – 21:00', tipo: 'Sincrónico', tipoColor: '#3D008D', titulo: 'Computación de Alto Rendimiento (GPU)', desc: 'GPU vs. CPU y Tensor Cores; VRAM y CUDA OOM; precisión mixta (AMP) y checkpointing; Google Colab y Kaggle; estrategias multi-GPU (DDP/FSDP).', link: TEAMS_URL, linkLabel: 'Teams Sincrónico' },
-                    { fecha: 'Toda la semana', tipo: 'Asincrónico', tipoColor: '#FDB913', titulo: 'Video de Profundización — Alertas Tempranas contra la Deserción', desc: 'Recurso audiovisual de 12 escenas (≈ 5 min 42 s): arquitecturas multimodales (LSTM, BETO, Autoencoders, CNN-OCR), despliegue Edge y vigilancia ética para la deserción escolar rural.' },
+                    { fecha: 'Toda la semana', tipo: 'Asincrónico', tipoColor: '#FDB913', titulo: 'Video de Profundización — De Colab al Cafetal', desc: 'Recurso audiovisual de 12 escenas (≈ 5 min 33 s): frameworks (TensorFlow/PyTorch/Keras 3), GPU y cómputo en la nube (Colab/Kaggle, precisión mixta), pipelines (tf.data/DataLoader) y despliegue offline (ONNX/LiteRT, cuantización INT8).' },
                 ],
             },
             semana2: {
                 titulo: 'Semana 2 — Pipelines, despliegue y entrega',
                 eventos: [
                     { fecha: 'Encuentro 3', hora: '19:30 – 21:00', tipo: 'Sincrónico', tipoColor: '#3D008D', titulo: 'Pipelines de Datos y Despliegue', desc: 'GPU starvation; tf.data y DataLoader (prefetch/cache, num_workers); Data Augmentation; exportación a ONNX/LiteRT y ruta de despliegue offline en campo.', link: TEAMS_URL, linkLabel: 'Teams Sincrónico' },
-                    { fecha: 'Foro', tipo: 'Guía 3', tipoColor: '#15803D', titulo: 'Momento 1: Guía de Profundización 3 (5 %)', desc: 'Escrito reflexivo en el foro sobre arquitecturas multimodales para la deserción escolar rural, con criterios de equidad algorítmica y APA 7 (6–8 h).', link: 'https://campus.usta.edu.co', linkLabel: 'Campus Virtual' },
+                    { fecha: 'Foro', tipo: 'Guía 3', tipoColor: '#15803D', titulo: 'Momento 1: Guía de Profundización 3 (5 %)', desc: 'Escrito reflexivo en el foro sobre arquitecturas multimodales para la deserción escolar rural, con criterios de equidad algorítmica y APA 7 (6–8 h). Apoyo: video capstone «Alertas Tempranas contra la Deserción» (≈ 5 min 42 s).', link: 'https://campus.usta.edu.co', linkLabel: 'Campus Virtual' },
                     { fecha: 'Entrega', hora: '23:59', tipo: 'Fase 3', tipoColor: '#BE185D', titulo: 'Momento 2: Proyecto Centinela · Fase 3 (25 %)', desc: '"De Colab al Cafetal": pipeline + GPU con precisión mixta + optimización Edge + exportación ONNX + despliegue offline, con Bitácora y Auditoría de IA.', link: 'https://campus.usta.edu.co', linkLabel: 'Campus Virtual' },
                 ],
             },
@@ -1267,7 +1283,7 @@
             { id: 'cronograma',     label: 'Cronograma',     icon: 'fa-calendar-days' },
             { id: 'hitos',          label: 'Hitos',          icon: 'fa-flag-checkered' },
             { id: 'capitulos',      label: 'Capítulos',      icon: 'fa-book' },
-            { id: 'videos',         label: 'Video',          icon: 'fa-video' },
+            { id: 'videos',         label: 'Videos',         icon: 'fa-video' },
             { id: 'glosario',       label: 'Glosario',       icon: 'fa-language' },
             { id: 'recursos',       label: 'Recursos',       icon: 'fa-folder-open' },
         ];
@@ -1647,7 +1663,7 @@
         );
 
         /* ============================================================
-           SECCIÓN 5 — VIDEO (1 card)
+           SECCIÓN 5 — VIDEOS (2 cards: profundización + capstone)
         ============================================================ */
         const VideoCard = ({ v, visto, onToggleVisto }) => (
             <div className="usta-card p-5 md:p-6">
@@ -1715,15 +1731,17 @@
                         <i className="fas fa-video text-xl"></i>
                     </div>
                     <div>
-                        <h2 className="text-2xl font-extrabold text-navy">Video del módulo</h2>
-                        <p className="text-sm text-gray-600">Pieza audiovisual de profundización (12 escenas) que recorre un sistema multimodal (LSTM, BETO, Autoencoders y CNN-OCR), su despliegue Edge y la vigilancia ética para la deserción escolar rural en Colombia.</p>
+                        <h2 className="text-2xl font-extrabold text-navy">Videos del módulo</h2>
+                        <p className="text-sm text-gray-600">Dos piezas audiovisuales: el <strong>Video de Profundización</strong> de la sección, «De Colab al Cafetal» (frameworks, GPU, pipelines y despliegue), y el <strong>video capstone</strong> de la Guía 3, «Alertas Tempranas contra la Deserción», que integra las arquitecturas de los Módulos 1 y 2 sobre el caso de deserción escolar rural.</p>
                     </div>
                 </div>
-                <Box type="info" label="Nota puente: del aula rural al cafetal">
-                    Este video y la <strong>Guía 3</strong> aplican las arquitecturas del Módulo 2 (LSTM, Transformers como BETO,
-                    Autoencoders) a un caso multimodal de predicción de <strong>deserción escolar rural</strong>, distinto al contenido
-                    de implementación con café de los capítulos. Sirven de <strong>puente conceptual</strong> hacia la industrialización
-                    (pipelines, GPU y despliegue) que practicarás con el caso del café en la <strong>Fase 3</strong>.
+                <Box type="info" label="Nota de alineación curricular">
+                    El <strong>video de profundización de la Sección 3</strong> es «De Colab al Cafetal»: cubre el contenido evaluable de la sección
+                    (frameworks TF/PyTorch/Keras 3, GPU y Colab/Kaggle, pipelines y despliegue), en línea con los <strong>Capítulos 1–3</strong> y con la
+                    <strong> Fase 3</strong> del Proyecto Centinela. El video «Alertas Tempranas contra la Deserción» es el <strong>capstone de la Guía 3</strong> (foro):
+                    reintegra las arquitecturas de los Módulos 1 y 2 (LSTM, Transformers como BETO, Autoencoders y CNN-OCR) en un caso multimodal de
+                    <strong> deserción escolar rural</strong>, aplicando los conceptos de despliegue de la sección (Edge AI, cuantización, pipelines operativos
+                    y soberanía digital).
                 </Box>
                 <div className="grid md:grid-cols-1 gap-5 mt-4">
                     {videos.map(v => (
