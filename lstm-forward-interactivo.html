@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El Paso Hacia Adelante de una LSTM — Simulador Interactivo</title>
+<!-- Si se abre embebido en un iframe, se marca <html> para adaptar el layout (sin 100vh ni pie pegajoso). -->
+<script>if(window.self!==window.top)document.documentElement.classList.add('embedded');</script>
+<!--
+  ============================================================================
+  SIMULADOR INTERACTIVO · PASO HACIA ADELANTE DE UNA CELDA LSTM
+  Maestria en Ciencia de Datos — Universidad Santo Tomas
+  Modulo 2: Arquitecturas · Redes secuenciales
+  ----------------------------------------------------------------------------
+  QUE ES:
+    Herramienta autonoma (un solo archivo, sin CDN, funciona sin internet) que
+    simula PASO A PASO el forward pass de una LSTM ESCALAR (una sola unidad).
+    Traduce las seis ecuaciones a un fenomeno observable.
+
+  LOGICA PEDAGOGICA:
+    - Las compuertas no se "explican con etiquetas": se ENCIENDEN con su valor
+      real calculado (0..1). Ver la compuerta de olvido caer a ~0 ante una
+      entrada negativa fuerte es el momento "aja".
+    - El estado de celda c_t se dibuja como una CINTA TRANSPORTADORA horizontal
+      cuyo grosor crece con |c_t|; el estado oculto h_t emerge por debajo.
+    - Cada operacion muestra su SUSTITUCION NUMERICA EXACTA al pasar el cursor:
+      en vez de sigma(w*x+b) se ve sigma(0.7x0.5 + 0.1x0 + 0). El estudiante
+      puede verificar con calculadora -> se derriba la "caja negra".
+    - Estetica "a mano" (jitter con semilla fija) para reducir la intimidacion.
+
+  VALIDACION:
+    Abrir con ?selftest=1 corre el auto-test que compara el motor JS contra los
+    valores dorados de lstm-forward-referencia.py (NumPy), epsilon 1e-9.
+
+  ARQUITECTURA:  vanilla HTML + CSS + JS + SVG en linea. Sin dependencias.
+  ============================================================================
+-->
+<style>
+  :root{
+    /* Cromo institucional USTA */
+    --usta-morado:#3D008D;   --usta-magenta:#ED1E79;
+    --tinta:#334155;         --tinta-suave:#64748B;   --tinta-fuerte:#1E293B;
+    --borde:#E2E8F0;         --lienzo:#F8FAFC;         --lila:#FBF8FF;
+    --panel:#FFFFFF;         --ok:#15803D;            --alerta:#B45309;
+    /* Colores de compuerta (esquema del documento fuente, estilo StatQuest) */
+    --olvido:#EAB308;        /* forget gate  -> amarillo */
+    --entrada:#2563EB;       /* input gate   -> azul */
+    --candidato:#0D9488;     /* candidato ~c -> verde azulado (familia entrada) */
+    --salida:#DC2626;        /* output gate  -> rojo */
+    --celda:#334155;         /* estado de celda c_t (cinta) -> carbon */
+    --oculto:#7C3AED;        /* estado oculto h_t -> violeta */
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:var(--lienzo);color:var(--tinta);line-height:1.5;
+    display:flex;flex-direction:column;min-height:100vh;
+  }
+  h1,h2,h3{color:var(--tinta-fuerte);font-weight:700;}
+  code,.mono{font-family:'SFMono-Regular',Consolas,'Liberation Mono',monospace;}
+
+  /* ---- Encabezado --------------------------------------------------------- */
+  header{
+    background:linear-gradient(100deg,var(--usta-morado),#5B21B6);
+    color:#fff;padding:14px 20px;display:flex;align-items:center;
+    gap:16px;flex-wrap:wrap;box-shadow:0 2px 10px rgba(61,0,141,.25);
+  }
+  header .brand{flex:1;min-width:260px;}
+  header h1{color:#fff;font-size:1.25rem;line-height:1.2;}
+  header p{color:#E9D5FF;font-size:.85rem;margin-top:2px;}
+  header .acciones{display:flex;gap:8px;flex-wrap:wrap;}
+  .btn{
+    border:none;border-radius:8px;padding:8px 12px;font-size:.85rem;
+    font-weight:600;cursor:pointer;background:#fff;color:var(--usta-morado);
+    transition:transform .08s ease,box-shadow .15s ease;
+  }
+  .btn:hover{transform:translateY(-1px);box-shadow:0 3px 8px rgba(0,0,0,.18);}
+  .btn.ghost{background:rgba(255,255,255,.15);color:#fff;}
+  .btn.mini{padding:5px 9px;font-size:.78rem;border-radius:6px;}
+
+  /* ---- Rejilla principal -------------------------------------------------- */
+  main{
+    flex:1;display:grid;gap:12px;padding:12px;
+    grid-template-columns:minmax(230px,270px) 1fr minmax(250px,300px);
+    grid-template-areas:"config lienzo contexto";
+    align-items:start;
+  }
+  .panel{
+    background:var(--panel);border:1px solid var(--borde);border-radius:12px;
+    box-shadow:0 1px 3px rgba(15,23,42,.05);
+  }
+  .panel h2{
+    font-size:.82rem;text-transform:uppercase;letter-spacing:.04em;
+    color:var(--usta-morado);padding:11px 14px;border-bottom:1px solid var(--borde);
+  }
+  .panel .cuerpo{padding:12px 14px;}
+
+  #panel-config{grid-area:config;align-self:stretch;}
+  #zona-lienzo{grid-area:lienzo;}
+  #panel-contexto{grid-area:contexto;align-self:stretch;position:sticky;top:12px;}
+
+  /* ---- Panel de configuracion -------------------------------------------- */
+  .campo{margin-bottom:12px;}
+  .campo label{display:block;font-size:.78rem;font-weight:600;color:var(--tinta-fuerte);margin-bottom:4px;}
+  .campo .hint{font-size:.72rem;color:var(--tinta-suave);margin-top:3px;}
+  select,input[type=text]{
+    width:100%;padding:7px 9px;border:1px solid var(--borde);border-radius:8px;
+    font-size:.85rem;color:var(--tinta-fuerte);background:#fff;font-family:inherit;
+  }
+  select:focus,input[type=text]:focus{outline:2px solid var(--usta-magenta);outline-offset:-1px;}
+
+  details.grupo{border:1px solid var(--borde);border-radius:9px;margin-bottom:8px;overflow:hidden;}
+  details.grupo>summary{
+    list-style:none;cursor:pointer;padding:8px 11px;font-size:.8rem;font-weight:700;
+    display:flex;align-items:center;gap:8px;background:var(--lila);
+  }
+  details.grupo>summary::-webkit-details-marker{display:none;}
+  details.grupo>summary .punto{width:11px;height:11px;border-radius:3px;flex:none;}
+  details.grupo .cont{padding:8px 11px 4px;}
+  .desliza{display:grid;grid-template-columns:34px 1fr 48px;align-items:center;gap:7px;margin-bottom:7px;}
+  .desliza label{font-size:.76rem;font-weight:600;color:var(--tinta-suave);}
+  .desliza .val{font-size:.74rem;text-align:right;color:var(--tinta-fuerte);}
+  input[type=range]{width:100%;accent-color:var(--usta-magenta);height:16px;}
+
+  /* ---- Lienzo ------------------------------------------------------------- */
+  #zona-lienzo .cuerpo{padding:6px 8px 10px;}
+  #svg-lstm{width:100%;height:auto;display:block;touch-action:none;}
+  .rotulo-lienzo{
+    display:flex;justify-content:space-between;align-items:baseline;
+    padding:2px 8px 6px;font-size:.78rem;color:var(--tinta-suave);flex-wrap:wrap;gap:6px;
+  }
+  .paso-actual{font-weight:700;color:var(--usta-morado);}
+  .leyenda{display:flex;gap:12px;flex-wrap:wrap;font-size:.72rem;color:var(--tinta-suave);padding:2px 8px;}
+  .leyenda span{display:inline-flex;align-items:center;gap:5px;}
+  .leyenda i{width:13px;height:4px;border-radius:2px;display:inline-block;}
+
+  /* Nodos SVG interactivos */
+  .nodo-hit{cursor:pointer;}
+  .nodo-hit:hover .caja-nodo{stroke-width:3.2;}
+  .caja-nodo{transition:stroke-width .12s ease;}
+  text{font-family:'Segoe UI',system-ui,sans-serif;}
+  .txt-valor{font-weight:700;}
+
+  /* ---- Panel contextual (hover) ------------------------------------------ */
+  #contexto-cuerpo{min-height:230px;font-size:.85rem;}
+  #ctx-titulo{font-size:.95rem;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+  #ctx-titulo .chip{width:13px;height:13px;border-radius:4px;flex:none;}
+  .formula-abs{background:var(--lila);border:1px solid var(--borde);border-radius:8px;padding:9px 11px;font-size:.9rem;margin:8px 0;text-align:center;}
+  .formula-num{background:#0B1020;color:#E2E8F0;border-radius:8px;padding:9px 11px;font-size:.82rem;margin:8px 0;overflow-x:auto;}
+  .formula-num .res{color:#7DD3FC;font-weight:700;}
+  .ctx-def{font-size:.82rem;color:var(--tinta);}
+  .ctx-rango{font-size:.74rem;color:var(--tinta-suave);margin-top:6px;}
+  .ctx-vacio{color:var(--tinta-suave);font-size:.83rem;font-style:italic;}
+
+  /* ---- Control temporal (pie) -------------------------------------------- */
+  footer.temporal{
+    background:var(--panel);border-top:1px solid var(--borde);
+    padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    box-shadow:0 -1px 6px rgba(15,23,42,.05);position:sticky;bottom:0;z-index:5;
+  }
+  .ctrl-botones{display:flex;gap:6px;}
+  .ctrl-botones .btn{background:var(--usta-morado);color:#fff;}
+  .ctrl-botones .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+  .linea-tiempo{flex:1;min-width:200px;display:flex;align-items:center;gap:10px;}
+  .linea-tiempo input[type=range]{flex:1;accent-color:var(--usta-morado);}
+  .badge-t{font-weight:700;color:var(--usta-morado);white-space:nowrap;font-size:.85rem;}
+  .vel{display:flex;align-items:center;gap:6px;font-size:.76rem;color:var(--tinta-suave);}
+
+  /* ---- Alertas de concepto erroneo --------------------------------------- */
+  #alerta-concepto{
+    position:fixed;left:50%;bottom:78px;transform:translateX(-50%) translateY(20px);
+    max-width:520px;width:calc(100% - 32px);background:#FFFBEB;border:1px solid #FCD34D;
+    border-left:5px solid var(--alerta);border-radius:10px;padding:11px 14px;
+    box-shadow:0 8px 24px rgba(180,83,9,.18);opacity:0;pointer-events:none;
+    transition:opacity .25s ease,transform .25s ease;z-index:40;font-size:.83rem;
+  }
+  #alerta-concepto.visible{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;}
+  #alerta-concepto strong{color:var(--alerta);}
+  #alerta-concepto .cerrar{float:right;cursor:pointer;color:var(--tinta-suave);font-weight:700;margin-left:8px;}
+
+  /* ---- Modal de ayuda ----------------------------------------------------- */
+  .modal-fondo{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;z-index:60;padding:20px;}
+  .modal-fondo.abierto{display:flex;}
+  .modal{background:#fff;border-radius:14px;max-width:640px;width:100%;max-height:86vh;overflow-y:auto;padding:24px 26px;box-shadow:0 20px 60px rgba(0,0,0,.35);}
+  .modal h2{color:var(--usta-morado);margin-bottom:10px;}
+  .modal h3{margin:14px 0 4px;font-size:.95rem;}
+  .modal p,.modal li{font-size:.88rem;margin-bottom:6px;}
+  .modal ul{padding-left:20px;}
+  .modal .cerrar-modal{float:right;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--tinta-suave);line-height:1;}
+
+  /* ---- Panel de auto-test ------------------------------------------------- */
+  #selftest{display:none;position:fixed;top:0;right:0;max-width:420px;max-height:100vh;overflow:auto;
+    background:#0B1020;color:#E2E8F0;font-family:monospace;font-size:.75rem;padding:14px 16px;z-index:80;border-bottom-left-radius:12px;}
+  #selftest.visible{display:block;}
+  #selftest h3{color:#fff;margin-bottom:8px;}
+  #selftest .pass{color:#4ADE80;} #selftest .fail{color:#F87171;}
+  #selftest table{border-collapse:collapse;width:100%;margin-top:6px;}
+  #selftest td{padding:1px 6px;border-bottom:1px solid #1E293B;}
+
+  /* ---- Responsive --------------------------------------------------------- */
+  @media (max-width:980px){
+    main{grid-template-columns:1fr;grid-template-areas:"lienzo" "config" "contexto";}
+    #panel-contexto{position:static;}
+  }
+
+  /* ---- Modo embebido (iframe): sin 100vh ni pie pegajoso; el contenedor auto-ajusta la altura ---- */
+  html.embedded, html.embedded body{height:auto;}
+  html.embedded body{min-height:0;}
+  html.embedded footer.temporal{position:static;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>El paso hacia adelante de una LSTM</h1>
+    <p>Simulador interactivo · Modulo 2 · Redes secuenciales — Maestria en Ciencia de Datos, USTA</p>
+  </div>
+  <div class="acciones">
+    <button class="btn ghost" id="btn-ayuda">Como se usa</button>
+    <button class="btn" id="btn-reiniciar">Reiniciar</button>
+  </div>
+</header>
+
+<main>
+  <!-- ============ PANEL DE CONFIGURACION (izquierda) ==================== -->
+  <aside class="panel" id="panel-config">
+    <h2>Configuracion</h2>
+    <div class="cuerpo">
+      <div class="campo">
+        <label for="sel-escenario">Escenario guiado «¿que pasaria si…?»</label>
+        <select id="sel-escenario">
+          <option value="manual">Exploracion libre</option>
+          <option value="context_switch">Cambio de contexto (la compuerta de olvido limpia)</option>
+          <option value="long_bridge">Puente de dependencia larga (la señal viaja intacta)</option>
+        </select>
+        <div class="hint" id="hint-escenario">Se ajustan pesos y secuencia para revelar un comportamiento clave.</div>
+      </div>
+
+      <div class="campo">
+        <label for="in-secuencia">Secuencia de entrada (x, separada por comas)</label>
+        <input type="text" id="in-secuencia" value="0.5, -1, 2" spellcheck="false">
+        <div class="hint">Cada valor es un paso temporal. La red los procesa uno a uno.</div>
+      </div>
+
+      <p style="font-size:.78rem;font-weight:700;color:var(--tinta-fuerte);margin:10px 0 6px;">Pesos y sesgos (escalares)</p>
+      <!-- Los grupos de deslizadores se generan por JS para evitar repeticion -->
+      <div id="grupos-pesos"></div>
+
+      <button class="btn mini" id="btn-pesos-def" style="background:var(--lila);color:var(--usta-morado);width:100%;margin-top:4px;">Restaurar pesos por defecto</button>
+    </div>
+  </aside>
+
+  <!-- ============ LIENZO CENTRAL ======================================= -->
+  <section class="panel" id="zona-lienzo">
+    <h2>La celda por dentro</h2>
+    <div class="cuerpo">
+      <div class="rotulo-lienzo">
+        <span>Al pasar el cursor sobre cada bloque se muestra su cálculo exacto.</span>
+        <span class="paso-actual" id="rotulo-paso">Paso t = 0</span>
+      </div>
+      <div class="leyenda">
+        <span><i style="background:var(--olvido)"></i> Olvido f<sub>t</sub></span>
+        <span><i style="background:var(--entrada)"></i> Entrada i<sub>t</sub></span>
+        <span><i style="background:var(--candidato)"></i> Candidato ~c<sub>t</sub></span>
+        <span><i style="background:var(--salida)"></i> Salida o<sub>t</sub></span>
+        <span><i style="background:var(--celda);height:6px"></i> Estado de celda c<sub>t</sub></span>
+        <span><i style="background:var(--oculto)"></i> Estado oculto h<sub>t</sub></span>
+      </div>
+      <!-- El SVG se construye por JS (geometria "a mano" con semilla fija) -->
+      <svg id="svg-lstm" viewBox="0 0 760 492" role="img" aria-label="Diagrama de una celda LSTM"></svg>
+    </div>
+  </section>
+
+  <!-- ============ PANEL CONTEXTUAL (derecha) =========================== -->
+  <aside class="panel" id="panel-contexto">
+    <h2>Detalle del calculo</h2>
+    <div class="cuerpo" id="contexto-cuerpo">
+      <div id="ctx-vacio-msg" class="ctx-vacio">Al posar el cursor sobre una compuerta, una multiplicación o la cinta se muestran aquí su fórmula, su sustitución numérica exacta y su definición.</div>
+      <div id="ctx-detalle" style="display:none;">
+        <div id="ctx-titulo"><span class="chip"></span><span id="ctx-nombre"></span></div>
+        <div class="formula-abs" id="ctx-formula"></div>
+        <div class="formula-num" id="ctx-numerica"></div>
+        <div class="ctx-def" id="ctx-definicion"></div>
+        <div class="ctx-rango" id="ctx-rango"></div>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<!-- ============ CONTROL TEMPORAL (pie) ================================= -->
+<footer class="temporal">
+  <div class="ctrl-botones">
+    <button class="btn mini" id="btn-inicio" title="Ir al inicio">⏮</button>
+    <button class="btn mini" id="btn-atras" title="Paso atras">◀</button>
+    <button class="btn mini" id="btn-play" title="Reproducir / pausar" style="min-width:70px">▶ Reproducir</button>
+    <button class="btn mini" id="btn-adelante" title="Paso adelante">▶</button>
+  </div>
+  <div class="linea-tiempo">
+    <span class="badge-t" id="badge-t">t = 0</span>
+    <input type="range" id="barra-tiempo" min="0" max="2" step="1" value="0">
+    <span class="badge-t" id="badge-total">/ 2</span>
+  </div>
+  <div class="vel">
+    Velocidad
+    <input type="range" id="vel-tiempo" min="300" max="1600" step="100" value="900" style="width:90px" title="Milisegundos por paso">
+  </div>
+</footer>
+
+<!-- Alerta de concepto erroneo -->
+<div id="alerta-concepto"><span class="cerrar" id="cerrar-alerta">×</span><span id="txt-alerta"></span></div>
+
+<!-- Modal de ayuda -->
+<div class="modal-fondo" id="modal-ayuda">
+  <div class="modal">
+    <button class="cerrar-modal" id="cerrar-ayuda">×</button>
+    <h2>Como leer este simulador</h2>
+    <p>Una <strong>LSTM</strong> (memoria larga a corto plazo) procesa una secuencia <em>un paso a la vez</em>. En cada paso decide <em>que olvidar</em>, <em>que memorizar de nuevo</em> y <em>que exponer</em> al resto de la red. Aqui se usa una celda <strong>escalar</strong> (un solo numero por variable) para que toda la aritmetica sea visible.</p>
+
+    <p style="background:var(--lila);border:1px solid var(--borde);border-left:4px solid var(--usta-magenta);border-radius:8px;padding:10px 12px;font-size:.84rem;margin:10px 0;">
+      <strong>Del escalar al vector.</strong> En una LSTM real, cada variable (x, h, c y las compuertas) es un <strong>vector</strong> de tamaño oculto, y los pesos w y u son <strong>matrices</strong>. Aqui se usa dimensión 1 para poder ver toda la aritmética; las compuertas se aplican <strong>elemento a elemento</strong> (producto de Hadamard, ⊙). La lógica es idéntica: en la práctica solo se repite en paralelo sobre muchas dimensiones.</p>
+
+    <h3>Las dos memorias</h3>
+    <ul>
+      <li><strong>Estado de celda c<sub>t</sub></strong> (la cinta carbon de arriba): la memoria de <em>largo plazo</em>. Es una «cinta transportadora» por la que la informacion fluye casi sin modificarse.</li>
+      <li><strong>Estado oculto h<sub>t</sub></strong> (violeta, abajo): la memoria de <em>corto plazo</em> y la salida del paso. Es lo que la celda «expone» hacia afuera.</li>
+    </ul>
+
+    <h3>Las tres compuertas</h3>
+    <ul>
+      <li><strong style="color:var(--olvido)">Olvido f<sub>t</sub></strong> (amarillo, σ∈[0,1]): que fraccion de la memoria previa se conserva. 0 = borrar todo, 1 = conservar todo.</li>
+      <li><strong style="color:var(--entrada)">Entrada i<sub>t</sub></strong> (azul, σ∈[0,1]) + <strong style="color:var(--candidato)">candidato ~c<sub>t</sub></strong> (tanh∈[-1,1]): cuanta memoria nueva se inyecta y cual.</li>
+      <li><strong style="color:var(--salida)">Salida o<sub>t</sub></strong> (rojo, σ∈[0,1]): que parte del estado de celda se deja ver como estado oculto.</li>
+    </ul>
+
+    <h3>Que observar</h3>
+    <ul>
+      <li>El <strong>grosor y la opacidad</strong> de cada trazo crecen con el valor de su compuerta: una compuerta cerrada (≈0) casi desaparece.</li>
+      <li>Al pasar el cursor por cualquier bloque, el panel derecho muestra la <strong>sustitucion numerica exacta</strong>, lista para verificar con calculadora.</li>
+      <li>La salida <strong>h<sub>t</sub></strong> se <strong>realimenta</strong>: es la entrada h<sub>t-1</sub> del paso siguiente (el lazo punteado violeta del diagrama).</li>
+      <li>Se recomienda emplear los <strong>escenarios guiados</strong> y avanzar paso a paso con los controles inferiores.</li>
+    </ul>
+    <p style="margin-top:10px;font-size:.8rem;color:var(--tinta-suave)">Sugerencia: al abrir esta página con <code>?selftest=1</code> se muestra la validación matemática frente a la referencia en Python.</p>
+  </div>
+</div>
+
+<!-- Panel de auto-test (solo con ?selftest=1) -->
+<div id="selftest"><h3>Auto-test matematico</h3><div id="selftest-cont"></div></div>
+
+<script>
+"use strict";
+/* ==========================================================================
+   0)  UTILIDADES: PRNG con semilla fija  (reemplazo de rough.js sin jitter)
+   ========================================================================== */
+// mulberry32: generador determinista. Misma semilla -> misma secuencia,
+// asi la estetica "a mano" NO tiembla entre re-renderizados (requisito del doc).
+function mulberry32(seed){
+  let a = seed >>> 0;
+  return function(){
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+// Devuelve el atributo "d" de una linea "a mano": dos trazos ligeramente
+// desviados, con puntos intermedios sacudidos por el PRNG sembrado.
+function sketchLine(x1,y1,x2,y2,seed,rough){
+  rough = rough==null ? 1.6 : rough;
+  const rnd = mulberry32(seed);
+  const mk = ()=>{
+    const n = 3, pts=[];
+    for(let k=0;k<=n;k++){
+      const tt=k/n;
+      let x = x1+(x2-x1)*tt, y = y1+(y2-y1)*tt;
+      if(k>0 && k<n){ x += (rnd()*2-1)*rough; y += (rnd()*2-1)*rough; }
+      pts.push([x,y]);
+    }
+    let d=`M ${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+    for(let k=1;k<pts.length;k++) d+=` L ${pts[k][0].toFixed(1)} ${pts[k][1].toFixed(1)}`;
+    return d;
+  };
+  return mk()+" "+mk(); // dos pasadas -> aspecto de boligrafo
+}
+// Rectangulo redondeado "a mano" (para las cajas de compuerta).
+function sketchRect(x,y,w,h,seed,rough){
+  rough = rough==null ? 1.4 : rough;
+  const rnd = mulberry32(seed);
+  const j = ()=> (rnd()*2-1)*rough;
+  const p=[
+    [x+j(),y+j()],[x+w+j(),y+j()],[x+w+j(),y+h+j()],[x+j(),y+h+j()]
+  ];
+  let d=`M ${p[0][0].toFixed(1)} ${p[0][1].toFixed(1)}`;
+  for(let k=1;k<4;k++) d+=` L ${p[k][0].toFixed(1)} ${p[k][1].toFixed(1)}`;
+  return d+" Z";
+}
+const NS="http://www.w3.org/2000/svg";
+function el(tag,attrs){
+  const e=document.createElementNS(NS,tag);
+  if(attrs) for(const k in attrs) e.setAttribute(k,attrs[k]);
+  return e;
+}
+
+/* ==========================================================================
+   1)  NUCLEO MATEMATICO  (aislado de la UI — Fase 1)
+   ========================================================================== */
+const sigmoid = z => 1/(1+Math.exp(-z));
+const tanh    = z => Math.tanh(z);
+
+// Ejecuta el paso hacia adelante completo de la LSTM escalar.
+// inputs: [x0,x1,...]   W: {wf,uf,bf, wi,ui,bi, wc,uc,bc, wo,uo,bo}
+// Devuelve la HISTORIA: un registro por paso con TODOS los intermedios.
+function computeForwardPass(inputs, W){
+  let c=0, h=0;
+  const hist=[];
+  for(let t=0;t<inputs.length;t++){
+    const x=inputs[t], hPrev=h, cPrev=c;
+    const zf=W.wf*x+W.uf*h+W.bf, f=sigmoid(zf);
+    const zi=W.wi*x+W.ui*h+W.bi, i=sigmoid(zi);
+    const zc=W.wc*x+W.uc*h+W.bc, cand=tanh(zc);
+    const zo=W.wo*x+W.uo*h+W.bo, o=sigmoid(zo);
+    const cNew = f*cPrev + i*cand;
+    const tc   = tanh(cNew);
+    const hNew = o*tc;
+    hist.push({t,x,hPrev,cPrev, zf,f, zi,i, zc,cand, zo,o, tcell:tc, c:cNew, h:hNew});
+    c=cNew; h=hNew;
+  }
+  return hist;
+}
+
+/* ==========================================================================
+   2)  ESTADO DE LA APLICACION
+   ========================================================================== */
+const DEF_W = {wf:0.7,uf:0.10,bf:0.0, wi:0.9,ui:0.20,bi:-0.10, wc:0.8,uc:0.15,bc:0.05, wo:0.6,uo:0.25,bo:0.0};
+const ESCENARIOS = {
+  context_switch:{
+    nombre:"Cambio de contexto",
+    hint:"Entradas positivas sostenidas y luego una entrada negativa fuerte: la compuerta de olvido cae a ~0 y limpia la cinta.",
+    inputs:[1,1,1,-4,1],
+    W:{wf:2.0,uf:0.0,bf:1.5, wi:1.5,ui:0.0,bi:0.0, wc:1.0,uc:0.0,bc:0.0, wo:1.0,uo:0.0,bo:0.5}
+  },
+  long_bridge:{
+    nombre:"Puente de dependencia larga",
+    hint:"Informacion importante en t=0 y luego ruido ~0. El olvido queda ≈1: la señal viaja casi intacta por la cinta.",
+    inputs:[2,0,0,0,0],
+    W:{wf:0.0,uf:0.0,bf:4.0, wi:5.0,ui:0.0,bi:-1.0, wc:2.0,uc:0.0,bc:0.0, wo:0.0,uo:0.0,bo:2.0}
+  }
+};
+const state = {
+  inputs:[0.5,-1,2],
+  W:Object.assign({},DEF_W),
+  hist:[],
+  step:0,
+  playing:false,
+  velMs:900,
+  hover:null,      // clave del nodo bajo el cursor
+};
+
+/* ==========================================================================
+   3)  CONSTRUCCION DEL DIAGRAMA (Fase 2 — geometria estatica "a mano")
+   ==========================================================================
+   Layout (viewBox 760x470):
+     - Cinta de celda c_t : linea carbon horizontal en y=70.
+         (x) mult de olvido en x=250 ; (+) suma en x=470.
+     - Compuertas (cajas σ/tanh) en y=300.
+     - Productos puntuales: entrada×candidato -> ⊕ ; salida×tanh(c) -> h_t.
+     - Bus de entradas x_t, h_{t-1} en la parte inferior (y=418).
+   ========================================================================== */
+const G = { // coordenadas clave
+  beltY:70,
+  multF:{x:250,y:70},   // f_t · c_{t-1}
+  add:{x:470,y:70},     // + i_t·~c_t
+  gateY:300, gateW:70, gateH:48,
+  fx:250, ix:390, gx:470, ox:610,       // centros x de compuertas f,i,g,o
+  prodIG:{x:445,y:175}, // i_t · ~c_t  (desplazado de x=470 para separarlo de la columna de la suma)
+  tcell:{x:610,y:130},  // tanh(c_t)
+  prodO:{x:610,y:205},  // o_t · tanh(c_t) -> h_t
+  busY:418,
+  outCX:740,            // salida c_t (derecha)
+};
+const svg = document.getElementById('svg-lstm');
+// Referencias a elementos dinamicos que se actualizan por paso:
+const dyn = {};  // dyn[clave] = {path, label, kind}
+
+function nodo(clave){ // helper para registrar grupos interactivos (raton + teclado)
+  const g=el('g',{class:'nodo-hit',tabindex:'0',role:'button'});
+  g.setAttribute('aria-label',(DEFS[clave]&&DEFS[clave].nom)||clave);
+  const entrar=()=>{ state.hover=clave; renderContexto(); };
+  const salir =()=>{ state.hover=null; renderContexto(); };
+  g.addEventListener('mouseenter',entrar);
+  g.addEventListener('mouseleave',salir);
+  g.addEventListener('focus',entrar);   // inspeccion accesible por teclado (Tab)
+  g.addEventListener('blur',salir);
+  g.addEventListener('click',entrar);
+  return g;
+}
+
+function construirDiagrama(){
+  svg.innerHTML='';
+  const frag=document.createDocumentFragment();
+
+  // --- Envoltura de la celda (recuadro tenue "a mano") -------------------
+  const marco=el('path',{d:sketchRect(150,40,470,400,1001,2.2),fill:'#FEFEFF',stroke:'#CBD5E1','stroke-width':1.4,'stroke-linejoin':'round'});
+  frag.appendChild(marco);
+  const rotMarco=el('text',{x:160,y:58,'font-size':12,fill:'#94A3B8','font-style':'italic'}); rotMarco.textContent='celda LSTM (paso t)'; frag.appendChild(rotMarco);
+
+  // --- CINTA DE CELDA (memoria de largo plazo) ---------------------------
+  // Segmento de entrada c_{t-1} -> multF
+  const beltIn=el('path',{d:sketchLine(30,G.beltY,G.multF.x,G.beltY,201,1.2),fill:'none',stroke:'var(--celda)','stroke-linecap':'round'});
+  dyn.beltIn={path:beltIn,kind:'belt'}; frag.appendChild(beltIn);
+  // Segmento multF -> add
+  const beltMid=el('path',{d:sketchLine(G.multF.x,G.beltY,G.add.x,G.beltY,202,1.2),fill:'none',stroke:'var(--celda)','stroke-linecap':'round'});
+  dyn.beltMid={path:beltMid,kind:'belt'}; frag.appendChild(beltMid);
+  // Segmento add -> salida c_t
+  const beltOut=el('path',{d:sketchLine(G.add.x,G.beltY,G.outCX,G.beltY,203,1.2),fill:'none',stroke:'var(--celda)','stroke-linecap':'round'});
+  dyn.beltOut={path:beltOut,kind:'belt'}; frag.appendChild(beltOut);
+
+  const cIn=el('text',{x:26,y:G.beltY-9,'font-size':12,fill:'var(--celda)','font-weight':700}); cIn.textContent='cₜ₋₁'; frag.appendChild(cIn);
+  const cOut=el('text',{x:G.outCX-2,y:G.beltY-9,'font-size':12,fill:'var(--celda)','font-weight':700,'text-anchor':'end'}); cOut.textContent='cₜ'; frag.appendChild(cOut);
+
+  // --- BUS DE ENTRADAS x_t , h_{t-1} -------------------------------------
+  const bus=el('path',{d:sketchLine(90,G.busY,G.ox,G.busY,210,1.0),fill:'none',stroke:'#94A3B8','stroke-width':1.6}); frag.appendChild(bus);
+  const lblX=el('text',{x:70,y:G.busY-6,'font-size':12,fill:'var(--tinta-fuerte)','font-weight':700,'text-anchor':'end'}); lblX.textContent='xₜ'; frag.appendChild(lblX);
+  const lblH=el('text',{x:70,y:G.busY+14,'font-size':12,fill:'var(--oculto)','font-weight':700,'text-anchor':'end'}); lblH.textContent='hₜ₋₁'; frag.appendChild(lblH);
+  dyn.busXVal=el('text',{x:96,y:G.busY-6,'font-size':11,fill:'var(--tinta-suave)'}); frag.appendChild(dyn.busXVal);
+  dyn.busHVal=el('text',{x:96,y:G.busY+14,'font-size':11,fill:'var(--tinta-suave)'}); frag.appendChild(dyn.busHVal);
+
+  // Conectores del bus hacia el pie de cada compuerta
+  [['f',G.fx,'var(--olvido)',221],['i',G.ix,'var(--entrada)',222],['g',G.gx,'var(--candidato)',223],['o',G.ox,'var(--salida)',224]].forEach(([k,x,col,seed])=>{
+    const c=el('path',{d:sketchLine(x,G.busY,x,G.gateY+G.gateH/2,seed,1.0),fill:'none',stroke:col,'stroke-width':1.4,opacity:.55});
+    frag.appendChild(c);
+  });
+
+  // --- COMPUERTAS (cajas σ / tanh) ---------------------------------------
+  function gateBox(clave,cx,color,etiqueta,seed){
+    const g=nodo(clave);
+    const x=cx-G.gateW/2, y=G.gateY-G.gateH/2;
+    const caja=el('path',{d:sketchRect(x,y,G.gateW,G.gateH,seed,1.5),fill:'#fff',stroke:color,'stroke-width':2.4,class:'caja-nodo','stroke-linejoin':'round'});
+    const et=el('text',{x:cx,y:G.gateY-3,'font-size':15,'text-anchor':'middle',fill:color,'font-weight':700}); et.textContent=etiqueta;
+    const val=el('text',{x:cx,y:G.gateY+16,'font-size':13,'text-anchor':'middle',fill:color,class:'txt-valor'});
+    // area de hover generosa
+    const hit=el('rect',{x:x-6,y:y-6,width:G.gateW+12,height:G.gateH+12,fill:'transparent'});
+    g.appendChild(caja); g.appendChild(et); g.appendChild(val); g.appendChild(hit);
+    frag.appendChild(g);
+    dyn[clave]={path:caja,label:val,kind:'gate',color};
+    return {cx,y};
+  }
+  gateBox('f',G.fx,'var(--olvido)','σ',301);
+  gateBox('i',G.ix,'var(--entrada)','σ',302);
+  gateBox('g',G.gx,'var(--candidato)','tanh',303);
+  gateBox('o',G.ox,'var(--salida)','σ',304);
+
+  // --- Linea compuerta de olvido -> multiplicacion en la cinta -----------
+  const l_f=el('path',{d:sketchLine(G.fx,G.gateY-G.gateH/2,G.multF.x,G.beltY+12,311,1.1),fill:'none',stroke:'var(--olvido)','stroke-linecap':'round'});
+  dyn.l_f={path:l_f,kind:'flow',metric:'f'}; frag.appendChild(l_f);
+
+  // --- Nodo producto olvido (⊗ sobre la cinta) ---------------------------
+  crearOp('multF',G.multF.x,G.multF.y,'×','var(--olvido)',frag,401);
+
+  // --- Lineas i y g -> producto i·g --------------------------------------
+  const l_i=el('path',{d:sketchLine(G.ix,G.gateY-G.gateH/2,G.prodIG.x,G.prodIG.y+8,312,1.1),fill:'none',stroke:'var(--entrada)','stroke-linecap':'round'});
+  dyn.l_i={path:l_i,kind:'flow',metric:'i'}; frag.appendChild(l_i);
+  const l_g=el('path',{d:sketchLine(G.gx,G.gateY-G.gateH/2,G.prodIG.x,G.prodIG.y+8,313,1.1),fill:'none',stroke:'var(--candidato)','stroke-linecap':'round'});
+  dyn.l_g={path:l_g,kind:'flow',metric:'gmag'}; frag.appendChild(l_g);
+  crearOp('prodIG',G.prodIG.x,G.prodIG.y,'×','var(--entrada)',frag,402);
+  // producto -> suma en la cinta
+  const l_igadd=el('path',{d:sketchLine(G.prodIG.x,G.prodIG.y-8,G.add.x,G.beltY+12,314,1.0),fill:'none',stroke:'var(--entrada)','stroke-linecap':'round'});
+  dyn.l_igadd={path:l_igadd,kind:'flow',metric:'ig'}; frag.appendChild(l_igadd);
+
+  // --- Nodo suma (⊕) sobre la cinta --------------------------------------
+  crearOp('add',G.add.x,G.add.y,'+','var(--celda)',frag,403);
+
+  // --- Rama de salida: c_t -> tanh(c_t) -> ⊗ con o_t -> h_t --------------
+  const l_c2tanh=el('path',{d:sketchLine(G.tcell.x,G.beltY+10,G.tcell.x,G.tcell.y-14,315,1.0),fill:'none',stroke:'var(--celda)','stroke-linecap':'round'});
+  frag.appendChild(l_c2tanh);
+  // caja tanh(c_t)
+  const gT=nodo('tcell');
+  const tcx=G.tcell.x-30, tcy=G.tcell.y-14;
+  const cajaT=el('path',{d:sketchRect(tcx,tcy,60,28,305,1.3),fill:'#fff',stroke:'var(--celda)','stroke-width':2.0,class:'caja-nodo','stroke-linejoin':'round'});
+  const etT=el('text',{x:G.tcell.x,y:G.tcell.y+4,'font-size':12,'text-anchor':'middle',fill:'var(--celda)','font-weight':700}); etT.textContent='tanh';
+  const hitT=el('rect',{x:tcx-5,y:tcy-5,width:70,height:38,fill:'transparent'});
+  gT.appendChild(cajaT); gT.appendChild(etT); gT.appendChild(hitT); frag.appendChild(gT);
+  dyn.tcell={path:cajaT,kind:'gate',color:'var(--celda)'};
+  // tanh(c_t) -> producto o
+  const l_t2o=el('path',{d:sketchLine(G.tcell.x,G.tcell.y+16,G.prodO.x,G.prodO.y-8,316,1.0),fill:'none',stroke:'var(--celda)','stroke-linecap':'round'});
+  frag.appendChild(l_t2o);
+  // salida o -> producto o
+  const l_o=el('path',{d:sketchLine(G.ox,G.gateY-G.gateH/2,G.prodO.x,G.prodO.y+8,317,1.1),fill:'none',stroke:'var(--salida)','stroke-linecap':'round'});
+  dyn.l_o={path:l_o,kind:'flow',metric:'o'}; frag.appendChild(l_o);
+  crearOp('prodO',G.prodO.x,G.prodO.y,'×','var(--salida)',frag,404);
+
+  // producto o -> h_t (sale a la derecha y baja)
+  const l_h=el('path',{d:sketchLine(G.prodO.x+14,G.prodO.y,G.outCX,G.prodO.y,318,1.0),fill:'none',stroke:'var(--oculto)','stroke-width':2.6,'stroke-linecap':'round'});
+  dyn.l_h={path:l_h,kind:'flow',metric:'hmag'}; frag.appendChild(l_h);
+  const lblHT=el('text',{x:G.outCX-2,y:G.prodO.y-8,'font-size':12,fill:'var(--oculto)','font-weight':700,'text-anchor':'end'}); lblHT.textContent='hₜ'; frag.appendChild(lblHT);
+  dyn.hVal=el('text',{x:G.outCX-2,y:G.prodO.y+16,'font-size':11,fill:'var(--oculto)','text-anchor':'end'}); frag.appendChild(dyn.hVal);
+
+  // --- Realimentacion h_t -> h_{t-1} del siguiente paso (cable tenue punteado) ---
+  // La caracteristica definitoria de una LSTM desenrollada: la salida h_t de este
+  // paso ES la entrada h_{t-1} del siguiente. Se dibuja como un lazo por debajo.
+  const fb=el('path',{d:'M 741 212 C 780 255, 780 478, 400 478 C 150 478, 96 478, 82 450',
+    fill:'none',stroke:'var(--oculto)','stroke-width':1.6,'stroke-dasharray':'6 5',opacity:.5,'stroke-linecap':'round'});
+  frag.appendChild(fb);
+  const fbArrow=el('path',{d:'M 82 442 L 87 451 L 77 451 Z',fill:'var(--oculto)',opacity:.65}); // punta hacia el bus h_{t-1}
+  frag.appendChild(fbArrow);
+  const fbLbl=el('text',{x:410,y:472,'font-size':11,'text-anchor':'middle',fill:'var(--oculto)','font-style':'italic'});
+  fbLbl.textContent='hₜ se realimenta como hₜ₋₁ en el paso siguiente'; frag.appendChild(fbLbl);
+
+  svg.appendChild(frag);
+}
+
+// Crea un nodo de operacion puntual (circulo "a mano" con simbolo) interactivo.
+function crearOp(clave,x,y,simbolo,color,frag,seed){
+  const g=nodo(clave);
+  const rnd=mulberry32(seed); const r=15;
+  // circulo aproximado por poligono sacudido
+  let d='M '; const N=14;
+  for(let k=0;k<=N;k++){
+    const a=(k/N)*Math.PI*2;
+    const rr=r+(rnd()*2-1)*1.3;
+    const px=x+Math.cos(a)*rr, py=y+Math.sin(a)*rr;
+    d+=(k? 'L ':'')+px.toFixed(1)+' '+py.toFixed(1)+' ';
+  }
+  d+='Z';
+  const circ=el('path',{d,fill:'#fff',stroke:color,'stroke-width':2.2,class:'caja-nodo'});
+  const sim=el('text',{x,y:y+5,'font-size':16,'text-anchor':'middle',fill:color,'font-weight':700}); sim.textContent=simbolo;
+  const hit=el('circle',{cx:x,cy:y,r:r+7,fill:'transparent'});
+  g.appendChild(circ); g.appendChild(sim); g.appendChild(hit); frag.appendChild(g);
+  dyn[clave]={path:circ,kind:'op',color};
+}
+
+/* ==========================================================================
+   4)  ACTUALIZACION POR PASO (Fase 3 — enlace de datos al SVG)
+   ==========================================================================
+   El grosor/opacidad de cada trazo es proporcional a su activacion.
+   ========================================================================== */
+const anchoTrazo = (v,base,max)=> base + Math.min(1,Math.abs(v))*(max-base);
+function actualizarDiagrama(){
+  const s = state.hist[state.step];
+  if(!s) return;
+  // Compuertas: opacidad y etiqueta
+  const setGate=(clave,val,rango01)=>{
+    const D=dyn[clave]; if(!D) return;
+    const mag = rango01 ? val : Math.abs(val);
+    D.path.setAttribute('opacity',(0.28+0.72*Math.min(1,mag)).toFixed(3));
+    D.path.setAttribute('stroke-width',(1.8+2.4*Math.min(1,mag)).toFixed(2));
+    if(D.label) D.label.textContent = val.toFixed(2);
+  };
+  setGate('f',s.f,true);
+  setGate('i',s.i,true);
+  setGate('g',s.cand,false);
+  setGate('o',s.o,true);
+  // tanh(c_t) intensidad por |tanh(c)|
+  dyn.tcell.path.setAttribute('opacity',(0.3+0.7*Math.min(1,Math.abs(s.tcell))).toFixed(3));
+
+  // Flujos (lineas): grosor/opacidad segun su metrica
+  const metricVal={f:s.f,i:s.i,gmag:Math.abs(s.cand),ig:Math.abs(s.i*s.cand),o:s.o,hmag:Math.abs(s.h)};
+  for(const k in dyn){
+    const D=dyn[k];
+    if(D.kind==='flow'){
+      const v=metricVal[D.metric]||0;
+      D.path.setAttribute('stroke-width',anchoTrazo(v,1.0,5.5).toFixed(2));
+      D.path.setAttribute('opacity',(0.2+0.8*Math.min(1,v)).toFixed(3));
+    }
+  }
+  // Trazo del candidato discontinuo si ~c_t < 0 (el grosor codifica MAGNITUD, no signo)
+  if(dyn.l_g) dyn.l_g.path.setAttribute('stroke-dasharray', s.cand<0 ? '6 4' : 'none');
+  // Cinta: grosor por |c|
+  const wIn=anchoTrazo(s.cPrev,2.2,9), wOut=anchoTrazo(s.c,2.2,9);
+  dyn.beltIn.path.setAttribute('stroke-width',wIn.toFixed(2));
+  dyn.beltMid.path.setAttribute('stroke-width',((wIn+wOut)/2).toFixed(2));
+  dyn.beltOut.path.setAttribute('stroke-width',wOut.toFixed(2));
+
+  // Operaciones puntuales: intensidad
+  dyn.multF.path.setAttribute('opacity',(0.35+0.65*Math.min(1,s.f)).toFixed(3));
+  dyn.prodIG.path.setAttribute('opacity',(0.35+0.65*Math.min(1,s.i)).toFixed(3));
+  dyn.prodO.path.setAttribute('opacity',(0.35+0.65*Math.min(1,s.o)).toFixed(3));
+  dyn.add.path.setAttribute('opacity',0.95);
+
+  // Valores del bus y salida
+  dyn.busXVal.textContent='= '+fmt(s.x);
+  dyn.busHVal.textContent='= '+fmt(s.hPrev);
+  dyn.hVal.textContent='= '+fmt(s.h);
+
+  // Rotulos
+  document.getElementById('rotulo-paso').textContent='Paso t = '+s.t;
+  document.getElementById('badge-t').textContent='t = '+s.t;
+
+  // Deteccion de conceptos erroneos y refresco del panel contextual
+  detectarConceptoErroneo(s);
+  renderContexto();
+}
+const fmt=(v)=> (Math.abs(v)<1e-9?0:v).toFixed(3);
+
+/* ==========================================================================
+   5)  PANEL CONTEXTUAL — sustitucion numerica exacta (Fase 4)
+   ========================================================================== */
+const DEFS = {
+  f:{nom:'Compuerta de olvido  fₜ',col:'var(--olvido)',rango:'σ(z) ∈ [0, 1]  ·  0 = borrar todo, 1 = conservar todo',
+     def:'Decide que fraccion del estado de celda previo cₜ₋₁ se conserva. Multiplica a la memoria de largo plazo en la cinta.',
+     abs:'f<sub>t</sub> = σ( w<sub>f</sub>·x<sub>t</sub> + u<sub>f</sub>·h<sub>t-1</sub> + b<sub>f</sub> )',
+     num:s=>`σ( ${gw('wf')}·${par(s.x)} + ${gw('uf')}·${par(s.hPrev)}${suma(state.W.bf)} )  =  σ(${fd(s.zf)})  = <span class="res">${md(s.f)}</span>`},
+  i:{nom:'Compuerta de entrada  iₜ',col:'var(--entrada)',rango:'σ(z) ∈ [0, 1]',
+     def:'Decide que fraccion de la memoria candidata se inyecta a la cinta en este paso.',
+     abs:'i<sub>t</sub> = σ( w<sub>i</sub>·x<sub>t</sub> + u<sub>i</sub>·h<sub>t-1</sub> + b<sub>i</sub> )',
+     num:s=>`σ( ${gw('wi')}·${par(s.x)} + ${gw('ui')}·${par(s.hPrev)}${suma(state.W.bi)} )  =  σ(${fd(s.zi)})  = <span class="res">${md(s.i)}</span>`},
+  g:{nom:'Memoria candidata  ~cₜ',col:'var(--candidato)',rango:'tanh(z) ∈ [-1, 1]',
+     def:'La memoria NUEVA que se propone añadir. tanh permite valores negativos: puede empujar la memoria hacia abajo o hacia arriba. En el diagrama, el grosor del trazo codifica su magnitud y el trazo discontinuo indica un candidato negativo.',
+     abs:'~c<sub>t</sub> = tanh( w<sub>c</sub>·x<sub>t</sub> + u<sub>c</sub>·h<sub>t-1</sub> + b<sub>c</sub> )',
+     num:s=>`tanh( ${gw('wc')}·${par(s.x)} + ${gw('uc')}·${par(s.hPrev)}${suma(state.W.bc)} )  =  tanh(${fd(s.zc)})  = <span class="res">${md(s.cand)}</span>`},
+  o:{nom:'Compuerta de salida  oₜ',col:'var(--salida)',rango:'σ(z) ∈ [0, 1]',
+     def:'Decide que parte del estado de celda (ya filtrado por tanh) se expone como estado oculto hₜ.',
+     abs:'o<sub>t</sub> = σ( w<sub>o</sub>·x<sub>t</sub> + u<sub>o</sub>·h<sub>t-1</sub> + b<sub>o</sub> )',
+     num:s=>`σ( ${gw('wo')}·${par(s.x)} + ${gw('uo')}·${par(s.hPrev)}${suma(state.W.bo)} )  =  σ(${fd(s.zo)})  = <span class="res">${md(s.o)}</span>`},
+  multF:{nom:'Producto de olvido  fₜ · cₜ₋₁',col:'var(--olvido)',rango:'producto punto a punto (⊙)',
+     def:'La compuerta de olvido escala la memoria previa. Si fₜ≈0, la cinta se «limpia»; si fₜ≈1, pasa intacta.',
+     abs:'f<sub>t</sub> · c<sub>t-1</sub>',
+     num:s=>`${md(s.f)} · ${pd(s.cPrev)}  = <span class="res">${md(s.f*s.cPrev)}</span>`},
+  prodIG:{nom:'Memoria nueva  iₜ · ~cₜ',col:'var(--entrada)',rango:'producto punto a punto (⊙)',
+     def:'La compuerta de entrada escala a la memoria candidata. Este es el aporte NUEVO que se suma a la cinta.',
+     abs:'i<sub>t</sub> · ~c<sub>t</sub>',
+     num:s=>`${md(s.i)} · ${pd(s.cand)}  = <span class="res">${md(s.i*s.cand)}</span>`},
+  add:{nom:'Actualizacion de la cinta  cₜ',col:'var(--celda)',rango:'suma lineal → gradiente sin obstruccion',
+     def:'El corazon de la LSTM: se olvida una parte y se suma memoria nueva. La suma (no multiplicacion) es lo que evita que el gradiente se desvanezca.',
+     abs:'c<sub>t</sub> = f<sub>t</sub>·c<sub>t-1</sub> + i<sub>t</sub>·~c<sub>t</sub>',
+     num:s=>`${md(s.f*s.cPrev)}${add4(s.i*s.cand)}  = <span class="res">${md(s.c)}</span>`},
+  tcell:{nom:'tanh( cₜ )',col:'var(--celda)',rango:'tanh(z) ∈ [-1, 1]',
+     def:'Antes de exponer la memoria, se comprime al rango [-1,1]. Esto es lo que la compuerta de salida filtrara.',
+     abs:'tanh( c<sub>t</sub> )',
+     num:s=>`tanh(${md(s.c)})  = <span class="res">${md(s.tcell)}</span>`},
+  prodO:{nom:'Estado oculto  hₜ',col:'var(--oculto)',rango:'oₜ ∈ [0,1] · tanh(cₜ) ∈ [-1,1]  ⇒  hₜ ∈ [-1,1]',
+     def:'La salida del paso y la memoria de corto plazo. Se realimenta como hₜ₋₁ en el siguiente paso.',
+     abs:'h<sub>t</sub> = o<sub>t</sub> · tanh( c<sub>t</sub> )',
+     num:s=>`${md(s.o)} · ${pd(s.tcell)}  = <span class="res">${md(s.h)}</span>`},
+  beltIn:{nom:'Estado de celda previo  cₜ₋₁',col:'var(--celda)',rango:'sin cota — memoria acumulada',
+     def:'La «cinta transportadora»: memoria de largo plazo que llega del paso anterior. Fluye casi sin modificarse.',
+     abs:'c<sub>t-1</sub>  (entra desde el paso anterior)',
+     num:s=>`c<sub>t-1</sub> = <span class="res">${fd(s.cPrev)}</span>`},
+  beltOut:{nom:'Estado de celda  cₜ',col:'var(--celda)',rango:'sin cota — memoria acumulada',
+     def:'La memoria de largo plazo que sale hacia el siguiente paso, ya actualizada.',
+     abs:'c<sub>t</sub> = f<sub>t</sub>·c<sub>t-1</sub> + i<sub>t</sub>·~c<sub>t</sub>',
+     num:s=>`c<sub>t</sub> = <span class="res">${fd(s.c)}</span>`},
+};
+DEFS.beltMid=DEFS.add;
+// --- Formateadores para las sustituciones numericas (signos limpios, sin «+ -») ---
+function g(k){ return (+state.W[k]).toFixed(2); }                                   // peso 2 decimales
+const fd  = v => fmt(v).replace('-','−');                                           // 3 dec, menos tipografico (x, h, z)
+const md  = v => (Math.abs(v)<1e-9?0:v).toFixed(4).replace('-','−');                // 4 dec (activaciones/resultados)
+const par = v => v<0 ? '('+fd(v)+')' : fd(v);                                       // operando 3dec entre parentesis si negativo
+const pd  = v => v<0 ? '('+md(v)+')' : md(v);                                       // operando 4dec entre parentesis si negativo
+const gw  = k => { const w=+state.W[k]; return w<0?'('+w.toFixed(2).replace('-','−')+')':w.toFixed(2); }; // peso con parentesis si negativo
+const suma= v => (v<0?' − ':' + ')+fd(Math.abs(v));                                 // termino aditivo (peso/sesgo)
+const add4= v => (v<0?' − ':' + ')+md(Math.abs(v));                                 // termino aditivo (producto, 4 dec)
+
+function renderContexto(){
+  const s=state.hist[state.step];
+  const vac=document.getElementById('ctx-vacio-msg');
+  const det=document.getElementById('ctx-detalle');
+  const clave=state.hover;
+  if(!clave || !DEFS[clave] || !s){ vac.style.display='block'; det.style.display='none'; return; }
+  const D=DEFS[clave];
+  vac.style.display='none'; det.style.display='block';
+  document.querySelector('#ctx-titulo .chip').style.background=D.col;
+  document.getElementById('ctx-nombre').textContent=D.nom;
+  document.getElementById('ctx-formula').innerHTML=D.abs;
+  document.getElementById('ctx-numerica').innerHTML=D.num(s);
+  document.getElementById('ctx-definicion').textContent=D.def;
+  document.getElementById('ctx-rango').textContent=D.rango;
+}
+
+/* ==========================================================================
+   6)  ALERTAS DE CONCEPTO ERRONEO (Fase 5)
+   ========================================================================== */
+let alertaTimer=null, ultimaAlerta='';
+function mostrarAlerta(html){
+  if(html===ultimaAlerta) return;
+  ultimaAlerta=html;
+  const a=document.getElementById('alerta-concepto');
+  document.getElementById('txt-alerta').innerHTML=html;
+  a.classList.add('visible');
+  clearTimeout(alertaTimer);
+  alertaTimer=setTimeout(()=>a.classList.remove('visible'),7000);
+}
+function detectarConceptoErroneo(s){
+  // Se reunen las alertas aplicables y se ROTAN por paso, para que el estudiante
+  // llegue a ver AMBAS (antes, la de compuertas continuas eclipsaba a la de c≠h).
+  const msgs=[];
+  const frac=[['olvido',s.f],['entrada',s.i],['salida',s.o]].find(([,v])=>v>0.12 && v<0.88);
+  if(frac){
+    const pct=Math.round(frac[1]*100);
+    msgs.push(`<strong>Las compuertas no son interruptores 0/1.</strong> La compuerta de ${frac[0]} vale <b>${frac[1].toFixed(2)}</b>: es un valor <em>continuo</em> (sigmoide). Aqui significa una retencion <em>parcial</em> del ${pct}%, y por eso la red es diferenciable y se puede entrenar.`);
+  }
+  if(Math.abs(s.c - s.h)>0.6){
+    msgs.push(`<strong>cₜ y hₜ no son lo mismo.</strong> La cinta cₜ=<b>${fmt(s.c)}</b> es la memoria de largo plazo; el estado oculto hₜ=<b>${fmt(s.h)}</b> es solo lo que la salida deja ver (hₜ = oₜ·tanh(cₜ)).`);
+  }
+  if(!msgs.length) return;
+  mostrarAlerta(msgs[s.t % msgs.length]);   // rotacion por indice de paso
+}
+
+/* ==========================================================================
+   7)  RECALCULO REACTIVO + CONTROLES
+   ========================================================================== */
+function recomputar(preservarPaso){
+  state.hist = computeForwardPass(state.inputs, state.W);
+  const maxT=Math.max(0,state.inputs.length-1);
+  if(!preservarPaso || state.step>maxT) state.step=Math.min(state.step,maxT);
+  const barra=document.getElementById('barra-tiempo');
+  barra.max=maxT; barra.value=state.step;
+  document.getElementById('badge-total').textContent='/ '+maxT;
+  requestAnimationFrame(actualizarDiagrama);
+}
+function irAPaso(t){
+  const maxT=state.inputs.length-1;
+  state.step=Math.max(0,Math.min(maxT,t));
+  document.getElementById('barra-tiempo').value=state.step;
+  requestAnimationFrame(actualizarDiagrama);
+}
+
+// --- Reproduccion temporal ---
+let playHandle=null;
+function play(){
+  if(state.playing) return;
+  clearTimeout(playHandle);   // blindaje contra dobles arranques por eventos rapidos
+  state.playing=true; setPlayBtn();
+  const tick=()=>{
+    if(!state.playing) return;
+    if(state.step>=state.inputs.length-1){ pausar(); return; }
+    irAPaso(state.step+1);
+    playHandle=setTimeout(tick,state.velMs);
+  };
+  if(state.step>=state.inputs.length-1) irAPaso(0);
+  playHandle=setTimeout(tick,state.velMs);
+}
+function pausar(){ state.playing=false; clearTimeout(playHandle); setPlayBtn(); }
+function setPlayBtn(){ document.getElementById('btn-play').innerHTML=state.playing?'⏸ Pausar':'▶ Reproducir'; }
+
+/* ==========================================================================
+   8)  PANEL DE PESOS (generado) + eventos
+   ========================================================================== */
+const GRUPOS_PESOS=[
+  {clave:'f',nom:'Olvido',col:'var(--olvido)',pesos:[['wf','w'],['uf','u'],['bf','b']]},
+  {clave:'i',nom:'Entrada',col:'var(--entrada)',pesos:[['wi','w'],['ui','u'],['bi','b']]},
+  {clave:'g',nom:'Candidato',col:'var(--candidato)',pesos:[['wc','w'],['uc','u'],['bc','b']]},
+  {clave:'o',nom:'Salida',col:'var(--salida)',pesos:[['wo','w'],['uo','u'],['bo','b']]},
+];
+function construirPesos(){
+  const cont=document.getElementById('grupos-pesos'); cont.innerHTML='';
+  GRUPOS_PESOS.forEach((grp,gi)=>{
+    const det=document.createElement('details'); det.className='grupo'; if(gi===0) det.open=true;
+    det.innerHTML=`<summary><span class="punto" style="background:${grp.col}"></span>${grp.nom}</summary><div class="cont"></div>`;
+    const c=det.querySelector('.cont');
+    grp.pesos.forEach(([k,etq])=>{
+      const row=document.createElement('div'); row.className='desliza';
+      row.innerHTML=`<label>${etq}</label><input type="range" min="-5" max="5" step="0.05" value="${state.W[k]}" data-w="${k}"><span class="val" id="val-${k}">${(+state.W[k]).toFixed(2)}</span>`;
+      c.appendChild(row);
+    });
+    cont.appendChild(det);
+  });
+  cont.querySelectorAll('input[type=range]').forEach(r=>{
+    r.addEventListener('input',()=>{
+      const k=r.dataset.w; state.W[k]=parseFloat(r.value);
+      document.getElementById('val-'+k).textContent=parseFloat(r.value).toFixed(2);
+      document.getElementById('sel-escenario').value='manual';
+      recomputar(true);
+    });
+  });
+}
+function sincronizarPesosUI(){
+  for(const k in state.W){
+    const r=document.querySelector(`input[data-w="${k}"]`); if(r){ r.value=state.W[k]; }
+    const v=document.getElementById('val-'+k); if(v) v.textContent=(+state.W[k]).toFixed(2);
+  }
+}
+
+function parsearSecuencia(txt){
+  const arr=txt.split(',').map(s=>parseFloat(s.trim())).filter(v=>!isNaN(v));
+  return arr.length?arr:[0];
+}
+
+/* ==========================================================================
+   9)  CABLEADO DE LA INTERFAZ
+   ========================================================================== */
+function aplicarEscenario(clave){
+  if(clave==='manual'){ document.getElementById('hint-escenario').textContent='Ajuste libremente pesos y secuencia.'; return; }
+  const E=ESCENARIOS[clave];
+  state.inputs=E.inputs.slice(); state.W=Object.assign({},E.W);
+  document.getElementById('in-secuencia').value=E.inputs.join(', ');
+  document.getElementById('hint-escenario').textContent=E.hint;
+  sincronizarPesosUI(); pausar(); state.step=0; recomputar(false);
+}
+function reiniciar(){
+  state.inputs=[0.5,-1,2]; state.W=Object.assign({},DEF_W); state.step=0;
+  document.getElementById('in-secuencia').value='0.5, -1, 2';
+  document.getElementById('sel-escenario').value='manual';
+  document.getElementById('hint-escenario').textContent='Se ajustan pesos y secuencia para revelar un comportamiento clave.';
+  sincronizarPesosUI(); pausar(); recomputar(false);
+}
+function wire(){
+  document.getElementById('sel-escenario').addEventListener('change',e=>aplicarEscenario(e.target.value));
+  document.getElementById('in-secuencia').addEventListener('input',e=>{
+    state.inputs=parsearSecuencia(e.target.value);
+    document.getElementById('sel-escenario').value='manual'; pausar(); recomputar(true);
+  });
+  document.getElementById('btn-reiniciar').addEventListener('click',reiniciar);
+  document.getElementById('btn-pesos-def').addEventListener('click',()=>{
+    state.W=Object.assign({},DEF_W); sincronizarPesosUI();
+    document.getElementById('sel-escenario').value='manual'; recomputar(true);
+  });
+  document.getElementById('btn-inicio').addEventListener('click',()=>{pausar();irAPaso(0);});
+  document.getElementById('btn-atras').addEventListener('click',()=>{pausar();irAPaso(state.step-1);});
+  document.getElementById('btn-adelante').addEventListener('click',()=>{pausar();irAPaso(state.step+1);});
+  document.getElementById('btn-play').addEventListener('click',()=>{state.playing?pausar():play();});
+  document.getElementById('barra-tiempo').addEventListener('input',e=>{pausar();irAPaso(parseInt(e.target.value,10));});
+  document.getElementById('vel-tiempo').addEventListener('input',e=>{state.velMs=parseInt(e.target.value,10);});
+  document.getElementById('btn-ayuda').addEventListener('click',()=>document.getElementById('modal-ayuda').classList.add('abierto'));
+  document.getElementById('cerrar-ayuda').addEventListener('click',()=>document.getElementById('modal-ayuda').classList.remove('abierto'));
+  document.getElementById('modal-ayuda').addEventListener('click',e=>{if(e.target.id==='modal-ayuda')e.currentTarget.classList.remove('abierto');});
+  document.getElementById('cerrar-alerta').addEventListener('click',()=>document.getElementById('alerta-concepto').classList.remove('visible'));
+  document.addEventListener('keydown',e=>{
+    if(['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)) return; // no interferir con el campo de secuencia
+    if(e.key==='ArrowRight'){pausar();irAPaso(state.step+1);}
+    else if(e.key==='ArrowLeft'){pausar();irAPaso(state.step-1);}
+    else if(e.key===' '){e.preventDefault();state.playing?pausar():play();}
+    else if(e.key==='Escape'){document.getElementById('modal-ayuda').classList.remove('abierto');}
+  });
+}
+
+/* ==========================================================================
+   10)  AUTO-TEST  (?selftest=1)  — paridad con lstm-forward-referencia.py
+   ========================================================================== */
+// Valores DORADOS (NumPy, precision completa) para el caso canonico:
+// W = DEF_W ; X = [0.5,-1,2]
+const GOLDEN = {
+  W:{wf:0.7,uf:0.10,bf:0.0, wi:0.9,ui:0.20,bi:-0.10, wc:0.8,uc:0.15,bc:0.05, wo:0.6,uo:0.25,bo:0.0},
+  X:[0.5,-1.0,2.0],
+  hist:[
+    {f:0.5866175789173301, i:0.5866175789173301, cand:0.42189900525000795, o:0.574442516811659, c:0.2474933730073896, h:0.13933732449622496},
+    {f:0.3349087221738316, i:0.2744556468534132, cand:-0.6225140635013252, o:0.36235306816108587, c:-0.08796481067320665, h:-0.03179236024811944},
+    {f:0.8016789070985031, i:0.8447024561517917, cand:0.9282003159129304, o:0.767107845810217, c:0.7135335533688983, h:0.47015107933959094},
+  ]
+};
+function runSelfTest(){
+  const eps=1e-9;
+  const got=computeForwardPass(GOLDEN.X,GOLDEN.W);
+  const filas=[]; let ok=true;
+  GOLDEN.hist.forEach((exp,t)=>{
+    for(const k of ['f','i','cand','o','c','h']){
+      const d=Math.abs(got[t][k]-exp[k]); const pasa=d<=eps; if(!pasa) ok=false;
+      filas.push(`<tr><td>t=${t} ${k}</td><td>${got[t][k].toFixed(9)}</td><td>${exp[k].toFixed(9)}</td><td class="${pasa?'pass':'fail'}">${pasa?'OK':'DIF '+d.toExponential(1)}</td></tr>`);
+    }
+  });
+  // Prueba de acotamiento: sigmoides en [0,1], tanh en [-1,1] (entradas/pesos extremos)
+  let bounds=true;
+  computeForwardPass([3,-3,10,-10,0.5],GOLDEN.W).forEach(s=>{
+    if(s.f<0||s.f>1||s.i<0||s.i>1||s.o<0||s.o>1||Math.abs(s.cand)>1||Math.abs(s.tcell)>1) bounds=false;
+  });
+
+  // Escenarios pedagogicos: aserciones cualitativas (blindan contra ediciones de ESCENARIOS)
+  const cs=computeForwardPass(ESCENARIOS.context_switch.inputs,ESCENARIOS.context_switch.W);
+  const csOK = cs[2].c>1.0 && cs[3].f<0.05 && Math.abs(cs[3].c)<0.05;      // se acumula, luego el olvido cierra y limpia
+  const lb=computeForwardPass(ESCENARIOS.long_bridge.inputs,ESCENARIOS.long_bridge.W);
+  const lbOK = lb.every(s=>s.f>0.98) && (lb[lb.length-1].c/lb[0].c)>0.85;   // olvido≈1 y la señal sobrevive el ruido
+
+  // Casos borde: nucleo matematico vs. parser de la UI
+  const uno=computeForwardPass([0.5],GOLDEN.W);
+  const edgeUno = uno.length===1 && Math.abs(uno[0].h-0.13933732449622496)<1e-9;   // 1 solo paso, c0=h0=0
+  const vacio   = computeForwardPass([],GOLDEN.W).length===0;                        // secuencia vacia -> []
+  const nanProp = Number.isNaN(computeForwardPass([0.5,NaN,2],GOLDEN.W)[2].h);       // el nucleo propaga NaN (por diseño)
+  const parserOK = JSON.stringify(parsearSecuencia('0.5, abc, 2'))==='[0.5,2]'       // la UI SI filtra no-numericos...
+                && JSON.stringify(parsearSecuencia(''))==='[0]';                     // ...y evita la secuencia vacia
+  const edgeOK = edgeUno && vacio && nanProp && parserOK;
+
+  const todo = ok&&bounds&&csOK&&lbOK&&edgeOK;
+  const panel=document.getElementById('selftest');
+  const linea=(c,t)=>`<div class="${c?'pass':'fail'}">${t}: ${c?'PASA':'FALLA'}</div>`;
+  document.getElementById('selftest-cont').innerHTML=
+    linea(ok,'Paridad NumPy (ε=1e-9)')+
+    linea(bounds,'Acotamiento σ∈[0,1], tanh∈[-1,1]')+
+    linea(csOK,'Escenario «cambio de contexto» (olvido cierra y limpia)')+
+    linea(lbOK,'Escenario «puente largo» (olvido≈1, señal sobrevive)')+
+    linea(edgeOK,'Casos borde (1 paso · vacío · NaN · parser UI)')+
+    `<table>${filas.join('')}</table>`;
+  panel.classList.add('visible');
+  window.__lstm = Object.assign(window.__lstm||{},{selftest:{pass:todo,parity:ok,bounds,scenarios:csOK&&lbOK,edges:edgeOK}});
+  console.log('[LSTM self-test] paridad='+ok+' acotamiento='+bounds+' escenarios='+(csOK&&lbOK)+' borde='+edgeOK);
+  return todo;
+}
+
+/* ==========================================================================
+   11)  ARRANQUE
+   ========================================================================== */
+function init(){
+  construirDiagrama();
+  construirPesos();
+  wire();
+  recomputar(false);
+  // API de inspeccion para verificacion por agentes/preview:
+  window.__lstm=Object.assign(window.__lstm||{},{state, computeForwardPass, irAPaso});
+  // getter EN VIVO (Object.assign no preserva getters -> se define aparte):
+  Object.defineProperty(window.__lstm,'hist',{configurable:true,get(){return state.hist;}});
+  if(new URLSearchParams(location.search).get('selftest')==='1') runSelfTest();
+}
+document.addEventListener('DOMContentLoaded',init);
+</script>
+
+<!-- Auto-ajuste de altura para el documento contenedor cuando se embebe (patron CNN/ViT/RNN). -->
+<script>
+(function(){
+  var t;
+  function ph(){ clearTimeout(t); t=setTimeout(function(){
+    try{ parent.postMessage({type:'embed-tool-height', id:'lstm-forward-frame',
+      height: Math.ceil(document.documentElement.getBoundingClientRect().height)}, '*'); }catch(e){}
+  }, 90); }
+  window.addEventListener('load', ph); window.addEventListener('resize', ph);
+  try{ new MutationObserver(ph).observe(document.body, {subtree:true, childList:true, attributes:true, attributeFilter:['class','style']}); }catch(e){}
+  setTimeout(ph, 300);
+})();
+</script>
+</body>
+</html>

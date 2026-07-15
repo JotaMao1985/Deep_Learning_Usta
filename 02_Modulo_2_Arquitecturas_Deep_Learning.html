@@ -2308,6 +2308,26 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                         </p>
                     </div>
 
+                    {/* ============== Simulador del paso hacia adelante de una LSTM ============== */}
+                    <h4>Simulador: el paso hacia adelante de una celda LSTM, número a número</h4>
+                    <p>
+                        Tras comparar las tres celdas, la siguiente herramienta hace <strong>zoom</strong> en una única celda LSTM y
+                        muestra su <strong>paso hacia adelante</strong> con detalle: las tres compuertas se «encienden» con su valor
+                        real, el estado de celda <em>c<sub>t</sub></em> avanza por la «cinta transportadora» y, al posar el cursor sobre
+                        cualquier bloque, se observa la <strong>sustitución numérica exacta</strong> (lista para verificar con calculadora).
+                        Incluye dos escenarios guiados —cómo la compuerta de olvido «limpia» la memoria ante un <em>cambio de contexto</em>
+                        y cómo una señal importante «viaja» intacta a través del ruido (la solución al desvanecimiento del gradiente)— y
+                        alertas que corrigen los dos errores más comunes: creer que las compuertas son binarias y confundir <em>c<sub>t</sub></em> con <em>h<sub>t</sub></em>.
+                    </p>
+                    <div className="bg-white border border-gray-200 rounded-xl p-2 shadow-sm my-4 overflow-hidden">
+                        <iframe id="lstm-forward-frame" src="lstm-forward-interactivo.html"
+                            title="Simulador interactivo del paso hacia adelante de una celda LSTM: compuertas en vivo, cinta del estado de celda y sustitución numérica exacta"
+                            className="w-full rounded-lg" style={{ display: 'block', width: '100%', height: 1400, border: 0 }} loading="lazy"></iframe>
+                        <p className="text-xs text-gray-500 italic text-center mt-2 px-2">
+                            Simulador del paso hacia adelante de una LSTM escalar, paso a paso, con sustitución numérica exacta. Fuente: elaboración propia.
+                        </p>
+                    </div>
+
                     {/* ============== 5. Caso Rappi ============== */}
                     <h3>5. Caso de estudio: «Turbo» de Rappi y la logística de última milla</h3>
                     <p>
