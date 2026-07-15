@@ -1034,7 +1034,7 @@
 
                 <h3>Objetivo general del módulo</h3>
                 <p>
-                    Pasar del <em>qué</em> y el <em>por qué</em> del aprendizaje profundo al <strong>cómo, dónde y con qué</strong>:
+                    Pasar del <em>qué</em> y el <em>porqué</em> del aprendizaje profundo al <strong>cómo, dónde y con qué</strong>:
                     dominar las herramientas de software (frameworks), el hardware acelerado (GPU y nube) y los flujos de trabajo
                     (pipelines y despliegue) que transforman ecuaciones matemáticas en sistemas de inteligencia artificial
                     funcionales y desplegables, con criterio técnico, económico y ético para el contexto colombiano.
@@ -1053,7 +1053,7 @@
                 <Pipeline steps={[
                     { num: 1, title: 'Frameworks', desc: 'Beneficiaderos: TF/Keras 3 y PyTorch' },
                     { num: 2, title: 'Cómputo (HPC)', desc: 'Infraestructura energética: GPU, Colab y Kaggle' },
-                    { num: 3, title: 'Pipelines y despliegue', desc: 'Logística: datos, augmentation, ONNX, LiteRT' },
+                    { num: 3, title: 'Pipelines y despliegue', desc: 'Logística: datos, Data Augmentation, ONNX, LiteRT' },
                 ]} />
 
                 <div className="grid md:grid-cols-3 gap-3 my-4">
@@ -1105,7 +1105,7 @@
                 <h3>Problematización: la app de café de María, Samuel y Daniela</h3>
                 <p>
                     María, Samuel y Daniela, estudiantes de Ingeniería de Sistemas en Colombia, desarrollan una app de visión por
-                    computador para detectar enfermedades en hojas de café (<strong>roya, broca, cercospora y ojo de gallo</strong>)
+                    computador para detectar enfermedades y plagas del café (<strong>roya, cercospora, ojo de gallo y broca</strong>)
                     usando fotos de celulares. La iniciativa nace en Planadas (Tolima), donde la detección tardía causa pérdidas del
                     30 %. Cuentan con <strong>4.200 imágenes etiquetadas</strong>, acceso gratuito a <strong>Colab y Kaggle</strong>,
                     y fundamentos de Deep Learning. En cuatro meses deben tomar decisiones técnicas interdependientes que definirán si
@@ -1126,8 +1126,8 @@
                     {[
                         { n: '1', t: 'Framework', d: '¿Qué framework o combinación equilibra investigación, despliegue móvil y un plazo de 4 meses?' },
                         { n: '2', t: 'Cómputo', d: 'Estrategia para maximizar Colab y Kaggle: ¿precisión mixta, acumulación de gradientes, checkpointing, Transfer Learning?' },
-                        { n: '3', t: 'Datos', d: '¿Qué Data Augmentation mitiga iluminación, ángulo, dispositivo y clima? ¿Cuáles transformaciones son contraproducentes?' },
-                        { n: '4', t: 'Despliegue', d: 'Traza la ruta notebook → Android: ONNX, LiteRT, ExecuTorch, cuantización, poda y puntos de falla.' },
+                        { n: '3', t: 'Datos', d: '¿Qué Data Augmentation mitiga las variaciones de iluminación, ángulo, dispositivo y clima? ¿Cuáles transformaciones son contraproducentes?' },
+                        { n: '4', t: 'Despliegue', d: 'La ruta notebook → Android: ONNX, LiteRT, ExecuTorch, cuantización, poda y puntos de falla.' },
                         { n: '5', t: 'Ética', d: 'Responsabilidad ante fallos, umbrales de confianza y despliegue de IA en comunidades rurales.' },
                     ].map((q, i) => (
                         <div key={i} className="usta-card p-4">
@@ -1140,9 +1140,9 @@
                     ))}
                 </div>
                 <Box type="info" label="Contexto local — Colombia en expansión de IA">
-                    La política <strong>CONPES de IA</strong> (aprobada en febrero de 2025), el programa <strong>ColombIA Inteligente</strong>
+                    La política <strong>CONPES de IA</strong> (aprobada en febrero de 2025), el programa <strong>ColombIA Inteligente</strong>{' '}
                     de MinCiencias y el creciente ecosistema de <em>startups</em> demandan profesionales que sepan llevar un modelo desde
-                    la idea hasta un producto funcional. Las herramientas de estos capítulos son exactamente esas competencias — y, gracias
+                    la idea hasta un producto funcional. Las herramientas de estos capítulos desarrollan exactamente esas competencias; y, gracias
                     a Colab y Kaggle, están al alcance de cualquier estudiante con una cuenta de Google y conexión a internet.
                 </Box>
             </div>
@@ -1167,7 +1167,7 @@
                         </marker>
                     </defs>
                     <line x1="40" y1="240" x2="700" y2="240" stroke="#001A4D" strokeWidth="2" markerEnd="url(#arrK)" />
-                    <text x="370" y="262" textAnchor="middle" fontSize="12" fill="#001A4D" fontWeight="bold">Complejidad y flexibilidad creciente  →</text>
+                    <text x="370" y="262" textAnchor="middle" fontSize="12" fill="#001A4D" fontWeight="bold">Complejidad y flexibilidad crecientes →</text>
 
                     {/* 1. Sequential */}
                     <text x="130" y="34" textAnchor="middle" fontSize="13" fill="#3D008D" fontWeight="bold">1 · Sequential</text>
@@ -1238,7 +1238,8 @@
                     ))}
 
                     {/* Ecosistema TF */}
-                    <text x={170} y={180} textAnchor="middle" fontSize="12" fill="#FF6F00" fontWeight="bold">Producción TF</text>
+                    <line x1={170} y1={146} x2={170} y2={168} stroke="#FF6F00" strokeWidth="1.4" strokeDasharray="4 3" />
+                    <text x={170} y={180} textAnchor="middle" fontSize="12" fill="#FF6F00" fontWeight="bold">Ecosistema TF</text>
                     {['TF Serving', 'LiteRT', 'TF.js', 'TFX', 'TensorBoard'].map((t, i) => (
                         <g key={`tf-${i}`}>
                             <rect x={60} y={196 + i * 20} width={220} height={16} rx="4" fill="#FFF7ED" stroke="#FDBA74" strokeWidth="1" />
@@ -1247,7 +1248,8 @@
                     ))}
 
                     {/* Ecosistema PyTorch */}
-                    <text x={555} y={180} textAnchor="middle" fontSize="12" fill="#EE4C2C" fontWeight="bold">Producción PyTorch</text>
+                    <line x1={385} y1={146} x2={548} y2={168} stroke="#EE4C2C" strokeWidth="1.4" strokeDasharray="4 3" />
+                    <text x={555} y={180} textAnchor="middle" fontSize="12" fill="#EE4C2C" fontWeight="bold">Ecosistema PyTorch</text>
                     {['TorchServe', 'torch.export + ONNX', 'torch.compile', 'ExecuTorch', 'HuggingFace'].map((t, i) => (
                         <g key={`pt-${i}`}>
                             <rect x={445} y={196 + i * 20} width={220} height={16} rx="4" fill="#FEF2F2" stroke="#FCA5A5" strokeWidth="1" />
@@ -1269,7 +1271,7 @@
                     <SectionHeader title="Capítulo 3.1 — Frameworks de Deep Learning" icon={Icons.Layers} />
 
                     <p>
-                        Tener los datos, la matemática y la receta no basta: hace falta una <strong>cocina</strong>. En el aprendizaje
+                        Tener los ingredientes (datos) y la receta (matemática) no basta: hace falta una <strong>cocina</strong>. En el aprendizaje
                         profundo, los <strong>frameworks</strong> son esa cocina —la herramienta de software que organiza, calcula y
                         ejecuta todo—. Este capítulo recorre los dos frameworks dominantes (<strong>TensorFlow/Keras</strong> y
                         <strong> PyTorch</strong>), sus filosofías, sus APIs de construcción de modelos, sus ecosistemas de producción y
@@ -1296,7 +1298,7 @@
                     <h4>La evolución: de TensorFlow 1.x a 2.x</h4>
                     <Box type="info" label="Analogía local — la notaría de los años 90 vs. la notaría digital">
                         Trabajar con TensorFlow 1.x era como un trámite en una <strong>notaría colombiana de los años 90</strong>:
-                        primero llenar todos los formularios (definir el grafo estático completo), luego hacer la fila (crear una
+                        primero llenar todos los formularios (definir el grafo estático completo), luego hacer la fila (crear una{' '}
                         <span className="inline-code">tf.Session</span>) y solo al final, cuando el notario lo llamaba, ejecutar. Si había
                         un error, tocaba volver al principio. <strong>TensorFlow 2.x</strong> es la <strong>notaría digital moderna</strong>:
                         se ejecuta cada paso de inmediato (<em>ejecución eager</em>), se verifica el resultado en el acto y, si algo sale mal,
@@ -1331,7 +1333,8 @@
 from tensorflow import keras
 
 modelo = keras.Sequential([
-    keras.layers.Dense(128, activation='relu', input_shape=(4,)),
+    keras.Input(shape=(4,)),
+    keras.layers.Dense(128, activation='relu'),
     keras.layers.Dropout(0.3),
     keras.layers.Dense(64, activation='relu'),
     keras.layers.Dense(1, activation='sigmoid')
@@ -1403,7 +1406,7 @@ modelo = keras.Model(
                     <h3>2. PyTorch: tensores, grafos dinámicos y módulos</h3>
                     <p>
                         <strong>PyTorch</strong>, desarrollado por Meta AI (FAIR) y publicado en 2016, opera desde 2022 bajo la Linux
-                        Foundation. A 2025 domina la investigación académica: ~<strong>80 % de los artículos de Deep Learning en NeurIPS</strong>
+                        Foundation. A 2025 domina la investigación académica: ≈<strong>80 % de los artículos de Deep Learning en NeurIPS</strong>{' '}
                         usan este framework, y arquitecturas como GPT, LLaMA, Stable Diffusion y los modelos de Hugging Face están construidas
                         sobre él.
                     </p>
@@ -1449,15 +1452,15 @@ resultado = datos_sensor @ pesos.T   # Multiplicación matricial`} />
                     </Box>
                     <p>
                         En PyTorch el grafo se construye <strong>en tiempo real</strong>, operación por operación, a medida que el código se
-                        ejecuta. Esto permite usar las herramientas estándar de depuración de Python (<span className="inline-code">print()</span>,
-                        <span className="inline-code">pdb</span>, breakpoints) para inspeccionar cualquier tensor intermedio. Esa inmediatez es la
+                        ejecuta. Esto permite usar las herramientas estándar de depuración de Python (<span className="inline-code">print()</span>,{' '}
+                        <span className="inline-code">pdb</span>, puntos de interrupción) para inspeccionar cualquier tensor intermedio. Esa inmediatez es la
                         razón principal de su adopción masiva en investigación.
                     </p>
 
                     <h4>El sistema Autograd: la bitácora automática</h4>
                     <p>
                         Al operar sobre tensores con <span className="inline-code">requires_grad=True</span>, PyTorch registra cada operación en un
-                        grafo acíclico dirigido (DAG). Al invocar <span className="inline-code">.backward()</span> sobre la pérdida, el motor recorre
+                        grafo dirigido acíclico (DAG). Al invocar <span className="inline-code">.backward()</span> sobre la pérdida, el motor recorre
                         el grafo en orden inverso aplicando la regla de la cadena. Es la implementación práctica de la retropropagación: el
                         «secretario invisible que anota en la bitácora».
                     </p>
@@ -1470,7 +1473,7 @@ print(x.grad)               # tensor(11.)  ->  4(2) + 3 = 11`} />
                     <p>
                         PyTorch organiza las redes alrededor de <span className="inline-code">torch.nn.Module</span>. Todo modelo se define como una
                         clase que hereda de <span className="inline-code">nn.Module</span> e implementa dos elementos: el constructor
-                        <span className="inline-code">__init__()</span> (donde se declaran las capas) y <span className="inline-code">forward()</span>
+                        <span className="inline-code">__init__()</span> (donde se declaran las capas) y <span className="inline-code">forward()</span>{' '}
                         (cómo fluyen los datos).
                     </p>
                     <CodeBlock lang="pytorch" title="Definir un modelo con nn.Module" code={`import torch.nn as nn
@@ -1494,13 +1497,13 @@ class DetectorRoya(nn.Module):
 modelo = DetectorRoya()`} />
                     <CalloutPro tema="info" titulo="Control explícito vs. abstracción" subtitulo="Keras model.fit() ↔ bucle de PyTorch" icon="fa-code-branch">
                         En Keras, <span className="inline-code">model.fit()</span> encapsula todo el ciclo de entrenamiento. En PyTorch el
-                        programador escribe explícitamente el <em>training loop</em>. Más laborioso al inicio, pero otorga control total sobre
+                        programador escribe explícitamente el <em>bucle de entrenamiento</em>. Más laborioso al inicio, pero otorga control total sobre
                         cada paso, facilitando técnicas avanzadas como la precisión mixta o la acumulación de gradientes.
                     </CalloutPro>
 
                     <h4>El ecosistema de PyTorch</h4>
                     <ul>
-                        <li><strong>TorchVision, TorchAudio, TorchText:</strong> visión, audio y NLP, con datasets, transformaciones y modelos preentrenados.</li>
+                        <li><strong>TorchVision, TorchAudio, TorchText:</strong> visión, audio y NLP, con datasets, transformaciones y modelos preentrenados (TorchText fue archivado en 2024).</li>
                         <li><strong>Hugging Face Transformers:</strong> la biblioteca de modelos de lenguaje (BERT, GPT, LLaMA) más popular del mundo, construida primordialmente sobre PyTorch.</li>
                         <li><strong>torch.export y ONNX:</strong> <span className="inline-code">torch.export</span> (recomendado desde 2.5) es el sucesor de TorchScript (deprecado) y serializa modelos como grafos AOT sin dependencia de Python; ONNX es el formato abierto de interoperabilidad.</li>
                         <li><strong>TorchServe:</strong> desarrollado por AWS y Meta, el equivalente de TF Serving para PyTorch (REST, lotes, versiones).</li>
@@ -1525,11 +1528,11 @@ modelo = DetectorRoya()`} />
                                 <tr><td>Creador</td><td>Google Brain (2015)</td><td>Meta AI / FAIR (2016)</td></tr>
                                 <tr><td>Paradigma</td><td>Eager + grafos estáticos opcionales (tf.function)</td><td>Grafos dinámicos (define-by-run) por defecto</td></tr>
                                 <tr><td>API de alto nivel</td><td>Keras (integrada; multi-backend desde v3)</td><td>torch.nn.Module + bucle explícito</td></tr>
-                                <tr><td>Curva de aprendizaje</td><td>Baja con Keras; media-alta con TF nativo</td><td>Media; exige escribir el training loop</td></tr>
+                                <tr><td>Curva de aprendizaje</td><td>Baja con Keras; media-alta con TF nativo</td><td>Media; exige escribir el bucle de entrenamiento</td></tr>
                                 <tr><td>Depuración</td><td>Mejorada en 2.x; limitada en modo grafo</td><td>Natural con herramientas de Python</td></tr>
-                                <tr><td>Investigación</td><td>≈15 % de papers en NeurIPS</td><td>≈80 % de papers en NeurIPS</td></tr>
+                                <tr><td>Investigación</td><td>≈5 % de los artículos en NeurIPS</td><td>≈80 % de los artículos en NeurIPS</td></tr>
                                 <tr><td>Producción empresarial</td><td>Fuerte: TF Serving, LiteRT, TFX</td><td>Creciente: TorchServe, ONNX, torch.compile</td></tr>
-                                <tr><td>Despliegue móvil</td><td>LiteRT (maduro)</td><td>ExecuTorch (estable desde 2024)</td></tr>
+                                <tr><td>Despliegue móvil</td><td>LiteRT (maduro)</td><td>ExecuTorch (estable desde 2025)</td></tr>
                                 <tr><td>Soporte TPU</td><td>Nativo y maduro</td><td>Vía PyTorch/XLA</td></tr>
                                 <tr><td>IA generativa</td><td>Moderada</td><td>Dominante (GPT, LLaMA, HuggingFace)</td></tr>
                                 <tr><td>Compilación</td><td>XLA (≈15–20 % aceleración)</td><td>torch.compile (≈20–25 % aceleración)</td></tr>
@@ -1548,7 +1551,8 @@ modelo = DetectorRoya()`} />
                     <div className="grid lg:grid-cols-2 gap-3">
                         <CodeBlock lang="python" title="Flujo en Keras (TensorFlow)" code={`# 1. Definir el modelo
 modelo = keras.Sequential([
-    keras.layers.Dense(64, activation='relu', input_shape=(4,)),
+    keras.Input(shape=(4,)),
+    keras.layers.Dense(64, activation='relu'),
     keras.layers.Dropout(0.3),
     keras.layers.Dense(32, activation='relu'),
     keras.layers.Dense(1, activation='sigmoid')
@@ -1593,10 +1597,10 @@ for epoca in range(50):
         optimizador.step()                # Actualizar pesos`} />
                     </div>
                     <Box type="tip" label="Nota técnica — BCEWithLogitsLoss">
-                        En PyTorch se usa <span className="inline-code">nn.BCEWithLogitsLoss()</span> en lugar de
+                        En PyTorch se usa <span className="inline-code">nn.BCEWithLogitsLoss()</span> en lugar de{' '}
                         <span className="inline-code">nn.BCELoss()</span> + <span className="inline-code">nn.Sigmoid()</span>: fusiona internamente
                         la sigmoide con la entropía cruzada binaria en una operación numéricamente más estable, evitando desbordamientos con
-                        valores extremos. La salida produce <em>logits crudos</em>; para obtener probabilidades en inferencia se aplica
+                        valores extremos. El modelo produce <em>logits</em> crudos; para obtener probabilidades en inferencia se aplica{' '}
                         <span className="inline-code">torch.sigmoid()</span>.
                     </Box>
 
@@ -1633,7 +1637,7 @@ import keras
                                 { texto: 'Elimina la posibilidad de usar GPUs.', correcta: false },
                                 { texto: 'Obliga a definir el grafo en C++.', correcta: false },
                             ],
-                            justificacion: 'La ejecución eager evalúa las operaciones al instante (como la "notaría digital"), frente al grafo estático que se define y compila antes de ejecutarse.'
+                            justificacion: 'La ejecución eager evalúa las operaciones al instante (como la «notaría digital»), frente al grafo estático que se define y compila antes de ejecutarse.'
                         },
                         {
                             pregunta: '¿Qué afirmación describe correctamente a Keras 3?',
@@ -1656,10 +1660,10 @@ import keras
                             justificacion: 'requires_grad=True activa el rastreo del grafo dinámico; al llamar .backward() Autograd recorre el DAG aplicando la regla de la cadena.'
                         },
                         {
-                            pregunta: '¿Cuál de estas dos asociaciones marco↔fortaleza es la más exacta?',
+                            pregunta: '¿Cuál de estas asociaciones framework↔fortaleza es la más exacta?',
                             opciones: [
                                 { texto: 'PyTorch domina el despliegue móvil maduro; TensorFlow domina la investigación.', correcta: false },
-                                { texto: 'TensorFlow/Keras destaca en producción y móvil (LiteRT); PyTorch domina la investigación (≈80% de papers en NeurIPS) e IA generativa.', correcta: true },
+                                { texto: 'TensorFlow/Keras destaca en producción y móvil (LiteRT); PyTorch domina la investigación (≈80 % de los artículos en NeurIPS) e IA generativa.', correcta: true },
                                 { texto: 'Ambos son idénticos en todos los aspectos.', correcta: false },
                                 { texto: 'Ninguno corre en Google Colab.', correcta: false },
                             ],
@@ -1708,13 +1712,48 @@ import keras
             </div>
         );
 
+        /* DIAGRAMA SVG: la pila de software CUDA (de modelo.fit() al silicio) */
+        const CudaStackSVG = () => {
+            const capas = [
+                { t: 'modelo.fit()  ·  bucle de entrenamiento', d: 'Código del estudiante', color: '#FDB913', bg: '#FFFBEB', txt: '#92400E' },
+                { t: 'TensorFlow / Keras 3  ·  PyTorch', d: 'Frameworks', color: '#3D008D', bg: '#F5F0FA', txt: '#3D008D' },
+                { t: 'cuDNN  ·  NCCL  ·  TensorRT', d: 'Bibliotecas aceleradas', color: '#ED1E79', bg: '#FFF1F7', txt: '#9D174D' },
+                { t: 'CUDA (2006)', d: 'Plataforma paralela', color: '#0E7490', bg: '#ECFEFF', txt: '#0E7490' },
+                { t: 'GPU: núcleos CUDA + Tensor Cores', d: 'Hardware', color: '#15803D', bg: '#F0FDF4', txt: '#15803D' },
+            ];
+            return (
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                    <svg viewBox="0 0 740 262" className="w-full" style={{ minWidth: 620 }} role="img"
+                        aria-label="La pila de software CUDA en cinco capas: el código del estudiante llama a un framework, este despacha a las bibliotecas aceleradas cuDNN, NCCL y TensorRT, que corren sobre la plataforma CUDA, la cual gobierna los núcleos CUDA y Tensor Cores de la GPU.">
+                        <title>Cada llamada de alto nivel desciende por la pila: modelo.fit() invoca al framework, el framework a cuDNN, cuDNN a CUDA y CUDA al hardware de la GPU.</title>
+                        <defs><marker id="arrC" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#94A3B8" /></marker></defs>
+                        <text x="330" y="20" textAnchor="middle" fontSize="13" fill="#001A4D" fontWeight="bold">Una línea de alto nivel desciende hasta el silicio</text>
+                        {capas.map((c, i) => (
+                            <g key={i}>
+                                <rect x={110} y={30 + i * 46} width={440} height={34} rx="8" fill={c.bg} stroke={c.color} strokeWidth="2" />
+                                <text x={330} y={51 + i * 46} textAnchor="middle" fontSize="12" fill={c.txt} fontWeight="bold">{c.t}</text>
+                                <text x={585} y={51 + i * 46} fontSize="10" fill="#64748B" fontStyle="italic">{c.d}</text>
+                            </g>
+                        ))}
+                        {[0, 1, 2, 3].map((i) => (
+                            <line key={`fl-${i}`} x1={330} y1={64 + i * 46} x2={330} y2={74 + i * 46} stroke="#94A3B8" strokeWidth="1.6" markerEnd="url(#arrC)" />
+                        ))}
+                        <text x={60} y={140} textAnchor="middle" fontSize="10" fill="#94A3B8" fontStyle="italic" transform="rotate(-90 60 140)">abstracción ↓</text>
+                    </svg>
+                    <p className="text-xs text-gray-500 italic text-center mt-1">
+                        Figura 2. La pila de software CUDA: de modelo.fit() al hardware de la GPU. Fuente: elaboración propia.
+                    </p>
+                </div>
+            );
+        };
+
         /* DIAGRAMA SVG: distribución típica de la VRAM durante el entrenamiento */
         const VRAMSVG = () => {
             const segs = [
-                { lbl: 'Estados del optimizador (Adam)', pct: 37, color: '#3D008D' },
-                { lbl: 'Activaciones intermedias', pct: 28, color: '#0E7490' },
-                { lbl: 'Gradientes', pct: 18, color: '#ED1E79' },
-                { lbl: 'Pesos del modelo', pct: 12, color: '#15803D' },
+                { lbl: 'Estados del optimizador (Adam, ≈2× los pesos)', pct: 32, color: '#3D008D' },
+                { lbl: 'Activaciones intermedias', pct: 31, color: '#0E7490' },
+                { lbl: 'Gradientes (≈1× los pesos)', pct: 16, color: '#ED1E79' },
+                { lbl: 'Pesos del modelo', pct: 16, color: '#15803D' },
                 { lbl: 'Lote de entrada', pct: 5, color: '#B45309' },
             ];
             let acc = 0;
@@ -1746,6 +1785,50 @@ import keras
             );
         };
 
+        /* DIAGRAMA SVG: anatomía de los formatos numéricos (FP32/BF16/FP16/FP8) */
+        const FormatosNumericosSVG = () => {
+            const B = 15.5, X0 = 130;
+            const filas = [
+                { n: 'FP32', bits: '32 bits', e: 8, m: 23, nota: 'pesos maestros' },
+                { n: 'BF16', bits: '16 bits', e: 8, m: 7, nota: 'mismo exponente que FP32: sin escalado' },
+                { n: 'FP16', bits: '16 bits', e: 5, m: 10, nota: 'rango corto: requiere escalado de pérdida' },
+                { n: 'FP8 (E4M3)', bits: '8 bits', e: 4, m: 3, nota: 'Hopper y Blackwell' },
+            ];
+            return (
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                    <svg viewBox="0 0 740 250" className="w-full" style={{ minWidth: 660 }} role="img"
+                        aria-label="Anatomía de los formatos numéricos FP32, BF16, FP16 y FP8: cada fila muestra el bit de signo, los bits de exponente (que definen el rango) y los bits de mantisa (que definen la precisión). BF16 conserva los 8 bits de exponente de FP32, por eso no necesita escalado de pérdida; FP16 solo tiene 5 y sí lo requiere.">
+                        <title>Comparación a escala de los campos de bits: signo, exponente y mantisa de FP32, BF16, FP16 y FP8. El exponente define el rango representable y la mantisa la precisión.</title>
+                        <text x="370" y="20" textAnchor="middle" fontSize="13" fill="#001A4D" fontWeight="bold">signo · exponente (rango) · mantisa (precisión)</text>
+                        {/* leyenda */}
+                        <rect x={215} y={30} width={11} height={11} fill="#001A4D" /><text x={230} y={40} fontSize="10" fill="#475569">signo</text>
+                        <rect x={285} y={30} width={11} height={11} fill="#0E7490" /><text x={300} y={40} fontSize="10" fill="#475569">exponente</text>
+                        <rect x={385} y={30} width={11} height={11} fill="#ED1E79" /><text x={400} y={40} fontSize="10" fill="#475569">mantisa</text>
+                        {filas.map((f, i) => {
+                            const y = 56 + i * 46;
+                            const wE = f.e * B, wM = f.m * B;
+                            return (
+                                <g key={i}>
+                                    <text x={X0 - 10} y={y + 14} textAnchor="end" fontSize="11" fill="#001A4D" fontWeight="bold">{f.n}</text>
+                                    <text x={X0 - 10} y={y + 26} textAnchor="end" fontSize="9" fill="#94A3B8">{f.bits}</text>
+                                    <rect x={X0} y={y} width={B} height={22} fill="#001A4D" stroke="#fff" strokeWidth="1" />
+                                    <rect x={X0 + B} y={y} width={wE} height={22} fill="#0E7490" stroke="#fff" strokeWidth="1" />
+                                    <text x={X0 + B + wE / 2} y={y + 15} textAnchor="middle" fontSize="10" fill="#fff" fontWeight="bold">{f.e}</text>
+                                    <rect x={X0 + B + wE} y={y} width={wM} height={22} fill="#ED1E79" stroke="#fff" strokeWidth="1" />
+                                    <text x={X0 + B + wE + wM / 2} y={y + 15} textAnchor="middle" fontSize="10" fill="#fff" fontWeight="bold">{f.m}</text>
+                                    <text x={X0 + B + wE + wM + 10} y={y + 15} fontSize="9.5" fill="#64748B" fontStyle="italic">{f.nota}</text>
+                                </g>
+                            );
+                        })}
+                        <text x="370" y="242" textAnchor="middle" fontSize="10" fill="#94A3B8" fontStyle="italic">BF16 recorta la mantisa pero conserva el rango de FP32; FP16 gana precisión pero pierde rango.</text>
+                    </svg>
+                    <p className="text-xs text-gray-500 italic text-center mt-1">
+                        Figura 4. Anatomía de los formatos numéricos: el exponente define el rango y la mantisa la precisión. Fuente: elaboración propia.
+                    </p>
+                </div>
+            );
+        };
+
         /* DIAGRAMA SVG: flujo del entrenamiento con precisión mixta (AMP) */
         const AMPSVG = () => (
             <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
@@ -1760,7 +1843,7 @@ import keras
                     <text x={100} y={116} textAnchor="middle" fontSize="12" fill="#3D008D" fontWeight="bold">Pesos maestros</text>
                     <text x={100} y="132" textAnchor="middle" fontSize="11" fill="#3D008D">FP32 (estable)</text>
                     {/* Forward FP16 */}
-                    <line x1={160} y1={120} x2={200} y2={120} stroke="#001A4D" strokeWidth="1.6" markerEnd="url(#arrA)" />
+                    <line x1={160} y1={112} x2={202} y2={88} stroke="#001A4D" strokeWidth="1.6" markerEnd="url(#arrA)" />
                     <rect x={205} y={50} width={130} height={44} rx="8" fill="#ECFEFF" stroke="#0E7490" strokeWidth="1.8" />
                     <text x={270} y={70} textAnchor="middle" fontSize="11" fill="#0E7490" fontWeight="bold">Forward (FP16/BF16)</text>
                     <text x={270} y={86} textAnchor="middle" fontSize="10" fill="#0E7490">Tensor Cores</text>
@@ -1782,10 +1865,10 @@ import keras
                     {/* vuelta a pesos maestros */}
                     <line x1={520} y1={174} x2={160} y2={145} stroke="#15803D" strokeWidth="1.6" strokeDasharray="5 3" markerEnd="url(#arrA)" />
                     <text x={300} y={210} textAnchor="middle" fontSize="11" fill="#15803D" fontStyle="italic">El optimizador actualiza los pesos maestros FP32 — el ciclo se repite</text>
-                    <text x={100} y={180} textAnchor="middle" fontSize="10" fill="#475569" fontStyle="italic">≈ 2–3× más rápido · −50% memoria</text>
+                    <text x={100} y={180} textAnchor="middle" fontSize="10" fill="#475569" fontStyle="italic">≈2–3× más rápido · −50 % de memoria</text>
                 </svg>
                 <p className="text-xs text-gray-500 italic text-center mt-1">
-                    Figura 4. Flujo del entrenamiento con precisión mixta (AMP). El escalado de pérdida solo es necesario con FP16. Fuente: elaboración propia.
+                    Figura 5. Flujo del entrenamiento con precisión mixta (AMP). El escalado de pérdida solo es necesario con FP16. Fuente: elaboración propia.
                 </p>
             </div>
         );
@@ -1802,10 +1885,10 @@ import keras
                         <g key={`dp-${i}`}>
                             <rect x={50 + i * 50} y={50} width={40} height={34} rx="5" fill={i === 0 ? '#FECACA' : '#F1F5F9'} stroke={i === 0 ? '#B91C1C' : '#94A3B8'} strokeWidth="1.5" />
                             <text x={70 + i * 50} y={71} textAnchor="middle" fontSize="9" fill="#475569">G{i}</text>
-                            {i > 0 && <line x1={70 + i * 50} y1={50} x2={75} y2={36} stroke="#B91C1C" strokeWidth="1.4" />}
+                            {i > 0 && <line x1={70 + i * 50} y1={50} x2={75} y2={46} stroke="#B91C1C" strokeWidth="1.4" />}
                         </g>
                     ))}
-                    <text x={70} y={32} textAnchor="middle" fontSize="9" fill="#B91C1C">★</text>
+                    <text x={58} y={68} textAnchor="middle" fontSize="9" fill="#B91C1C">★</text>
                     <text x="123" y="108" textAnchor="middle" fontSize="10" fill="#B91C1C" fontStyle="italic">Cuello de botella en G0</text>
 
                     {/* DDP */}
@@ -1820,7 +1903,7 @@ import keras
                     <text x="370" y="108" textAnchor="middle" fontSize="10" fill="#15803D" fontStyle="italic">all-reduce equilibrado (NCCL)</text>
 
                     {/* FSDP */}
-                    <text x="617" y="28" textAnchor="middle" fontSize="12" fill="#3D008D" fontWeight="bold">FSDP (shard total)</text>
+                    <text x="617" y="28" textAnchor="middle" fontSize="12" fill="#3D008D" fontWeight="bold">FSDP (fragmentación total)</text>
                     {[0, 1, 2].map((i) => (
                         <g key={`fsdp-${i}`}>
                             <rect x={547 + i * 50} y={50} width={40} height={34} rx="5" fill="#EDE9FE" stroke="#3D008D" strokeWidth="1.5" />
@@ -1837,10 +1920,58 @@ import keras
                     <text x={370} y={206} textAnchor="middle" fontSize="10" fill="#64748B">En TensorFlow, tf.distribute.MirroredStrategy() ofrece multi-GPU de un nodo de forma transparente.</text>
                 </svg>
                 <p className="text-xs text-gray-500 italic text-center mt-1">
-                    Figura 5. Estrategias de entrenamiento multi-GPU en PyTorch (DP, DDP, FSDP). Fuente: elaboración propia.
+                    Figura 6. Estrategias de entrenamiento multi-GPU en PyTorch (DP, DDP, FSDP). Fuente: elaboración propia.
                 </p>
             </div>
         );
+
+        /* DIAGRAMA SVG: decisión Colab vs. Kaggle */
+        const DecisionPlataformaSVG = () => {
+            const pasos = [
+                { q: '¿Entrenamiento largo (más de 9–12 h) o cuota previsible?', si: 'kaggle' },
+                { q: '¿Colaboración en tiempo real (estilo Google Docs)?', si: 'colab' },
+                { q: '¿Dataset público de Kaggle o RAM mayor a 13 GB?', si: 'kaggle' },
+            ];
+            const destino = (tipo, x, y) => tipo === 'kaggle'
+                ? (<g><rect x={x} y={y} width={170} height={40} rx="8" fill="#ECFEFF" stroke="#0E7490" strokeWidth="2" />
+                    <text x={x + 85} y={y + 17} textAnchor="middle" fontSize="11.5" fill="#0E7490" fontWeight="bold">Kaggle</text>
+                    <text x={x + 85} y={y + 31} textAnchor="middle" fontSize="8.5" fill="#0E7490">P100 / 2×T4 · ≈30 h/semana</text></g>)
+                : (<g><rect x={x} y={y} width={170} height={40} rx="8" fill="#F5F0FA" stroke="#3D008D" strokeWidth="2" />
+                    <text x={x + 85} y={y + 17} textAnchor="middle" fontSize="11.5" fill="#3D008D" fontWeight="bold">Colab</text>
+                    <text x={x + 85} y={y + 31} textAnchor="middle" fontSize="8.5" fill="#3D008D">T4 · Drive · tiempo real</text></g>);
+            return (
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                    <svg viewBox="0 0 740 330" className="w-full" style={{ minWidth: 660 }} role="img"
+                        aria-label="Diagrama de decisión entre Colab y Kaggle: los entrenamientos largos o con cuota previsible y los datasets públicos con mucha RAM apuntan a Kaggle; la colaboración en tiempo real y el prototipado apuntan a Colab; la estrategia combinada usa ambos.">
+                        <title>Tres preguntas guían la elección de plataforma: duración y cuota, colaboración en tiempo real, y datos o memoria; cada respuesta afirmativa dirige a Kaggle o a Colab, y responder no a todo lleva al prototipado en Colab.</title>
+                        <defs><marker id="arrQ" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#001A4D" /></marker></defs>
+                        <text x="230" y="24" textAnchor="middle" fontSize="13" fill="#001A4D" fontWeight="bold">¿Dónde entrenar hoy?</text>
+                        {pasos.map((p, i) => {
+                            const y = 40 + i * 72;
+                            return (
+                                <g key={i}>
+                                    <rect x={40} y={y} width={380} height={40} rx="8" fill="#FFFBEB" stroke="#B45309" strokeWidth="1.6" />
+                                    <text x={230} y={y + 24} textAnchor="middle" fontSize="10.5" fill="#92400E">{p.q}</text>
+                                    <line x1={420} y1={y + 20} x2={490} y2={y + 20} stroke="#15803D" strokeWidth="1.6" markerEnd="url(#arrQ)" />
+                                    <text x={452} y={y + 13} textAnchor="middle" fontSize="10" fill="#15803D" fontWeight="bold">Sí</text>
+                                    {destino(p.si, 495, y)}
+                                    <line x1={230} y1={y + 40} x2={230} y2={y + 68} stroke="#B91C1C" strokeWidth="1.6" markerEnd="url(#arrQ)" />
+                                    <text x={243} y={y + 58} fontSize="10" fill="#B91C1C" fontWeight="bold">No</text>
+                                </g>
+                            );
+                        })}
+                        {destino('colab', 145, 260)}
+                        <text x={230} y={318} textAnchor="middle" fontSize="8.5" fill="#64748B" fontStyle="italic">prototipado y desarrollo del día a día</text>
+                        <rect x={495} y={256} width={215} height={48} rx="8" fill="#F0FDF4" stroke="#15803D" strokeWidth="1.6" strokeDasharray="5 3" />
+                        <text x={602} y={275} textAnchor="middle" fontSize="10" fill="#15803D" fontWeight="bold">Estrategia combinada</text>
+                        <text x={602} y={291} textAnchor="middle" fontSize="8.5" fill="#15803D">Colab desarrolla + Kaggle entrena: ≈60 h/sem</text>
+                    </svg>
+                    <p className="text-xs text-gray-500 italic text-center mt-1">
+                        Figura 7. Diagrama de decisión Colab vs. Kaggle según las necesidades del proyecto. Fuente: elaboración propia.
+                    </p>
+                </div>
+            );
+        };
 
         const Cap32Section = () => {
             const ref = useRef(null);
@@ -1880,7 +2011,7 @@ import keras
                     <CPUvsGPUSVG />
                     <p>
                         Las cifras son contundentes: una CNN de 58 millones de parámetros tarda ≈4.787 s en CPU y ≈745 s en una RTX 2080
-                        (aceleración de 6,4×). Para modelos como BERT, las aceleraciones llegan a 50×–1.000×.
+                        (aceleración de 6,4×). Para modelos como BERT, las aceleraciones típicas van de 10× a 100×, según el modelo y el hardware.
                     </p>
 
                     <h4>Núcleos CUDA vs. Tensor Cores</h4>
@@ -1888,7 +2019,7 @@ import keras
                         Los <strong>núcleos CUDA</strong> son procesadores de propósito general (una operación de punto flotante por ciclo).
                         Los <strong>Tensor Cores</strong> (desde la arquitectura Volta, 2017) son unidades especializadas en
                         multiplicación-acumulación de matrices (MMA): un solo Tensor Core ejecuta una multiplicación 4×4 en una instrucción.
-                        En una A100, los CUDA dan 19,5 TFLOPS en FP32 y los Tensor Cores <strong>312 TFLOPS en FP16</strong> (16× más para la
+                        En una A100, los núcleos CUDA dan 19,5 TFLOPS en FP32 y los Tensor Cores <strong>312 TFLOPS en FP16</strong> (16× más para la
                         matemática matricial que domina el DL).
                     </p>
 
@@ -1905,6 +2036,7 @@ import keras
                         esa línea se activan automáticamente CUDA, cuDNN y los Tensor Cores, sin escribir una sola línea de bajo nivel. Esa pila
                         de software es la verdadera ventaja competitiva de NVIDIA.
                     </Box>
+                    <CudaStackSVG />
 
                     <h4>VRAM: el recurso más escaso</h4>
                     <p>
@@ -1917,7 +2049,7 @@ import keras
                     </p>
                     <Box type="danger" label="Analogía local — la bodega y el error CUDA OOM">
                         La VRAM es la <strong>bodega de una plaza de mercado</strong>. No importa cuántos camiones (datos) lleguen ni cuántos
-                        vendedores (núcleos) haya: si la bodega se llena, no entra más mercancía. El temido error
+                        vendedores (núcleos) haya: si la bodega se llena, no entra más mercancía. El temido error{' '}
                         <span className="inline-code">CUDA out of memory</span> (OOM) es el administrador diciendo «no hay más espacio,
                         devuelvan el camión». La primera solución siempre es <strong>reducir el tamaño del lote (batch size)</strong>.
                     </Box>
@@ -1932,8 +2064,9 @@ import keras
                         <li><strong>FP32</strong> (32 bits): precisión completa, para pesos maestros y la pérdida final.</li>
                         <li><strong>BF16</strong> (16 bits, exponente de 8): preferido en Ampere+ (A100, H100); su rango iguala al de FP32, sin necesidad de escalado.</li>
                         <li><strong>FP16</strong> (16 bits, exponente de 5): requiere <em>escalado de pérdida</em> para evitar desbordamientos. En toda GPU con Tensor Cores.</li>
-                        <li><strong>FP8</strong> (8 bits): en Hopper (H100) y Blackwell (B200); la H100 alcanza 3.958 TFLOPS en FP8.</li>
+                        <li><strong>FP8</strong> (8 bits): en Hopper (H100) y Blackwell (B200); la H100 alcanza ≈1.979 TFLOPS en FP8 (3.958 con dispersión estructurada).</li>
                     </ul>
+                    <FormatosNumericosSVG />
                     <p>Resultado: <strong>2–3× de aceleración y ≈50 % menos memoria</strong>, permitiendo duplicar el lote sin cambiar de hardware.</p>
                     <AMPSVG />
 
@@ -2003,7 +2136,7 @@ for i, (entradas, etiquetas) in enumerate(dataloader):
                         <strong>DataParallel (DP)</strong> es simple pero ineficiente (cuello de botella en GPU-0).
                         <strong> DistributedDataParallel (DDP)</strong> lanza un proceso por GPU y sincroniza con NCCL (≈3× más utilización
                         que DP); es la opción recomendada. <strong>FSDP</strong> fragmenta parámetros, gradientes y estados del optimizador,
-                        permitiendo entrenar modelos que exceden la VRAM de una sola GPU. En TensorFlow,
+                        permitiendo entrenar modelos que exceden la VRAM de una sola GPU. En TensorFlow,{' '}
                         <span className="inline-code">tf.distribute.MirroredStrategy()</span> ofrece multi-GPU de un nodo de forma transparente.
                     </p>
                     <MultiGPUSVG />
@@ -2015,13 +2148,13 @@ for i, (entradas, etiquetas) in enumerate(dataloader):
                                 <tr><td>RTX 3060</td><td>Ampere</td><td>≈51</td><td>12 GB</td><td>Estudiantes</td></tr>
                                 <tr><td>RTX 4090</td><td>Ada Lovelace</td><td>165</td><td>24 GB</td><td>Investigación</td></tr>
                                 <tr><td>T4</td><td>Turing</td><td>65</td><td>16 GB</td><td>Colab/Kaggle</td></tr>
-                                <tr><td>A100 SXM</td><td>Ampere</td><td>312</td><td>80 GB</td><td>Data centers</td></tr>
-                                <tr><td>H100 SXM</td><td>Hopper</td><td>1.979</td><td>80 GB</td><td>LLMs</td></tr>
+                                <tr><td>A100 SXM</td><td>Ampere</td><td>312</td><td>80 GB</td><td>Centros de datos</td></tr>
+                                <tr><td>H100 SXM</td><td>Hopper</td><td>989</td><td>80 GB</td><td>LLMs</td></tr>
                                 <tr><td>B200</td><td>Blackwell</td><td>2.250</td><td>192 GB</td><td>Frontera IA</td></tr>
                             </tbody>
                         </table>
                     </div>
-                    <p className="text-xs text-gray-500 italic text-center">Tabla 1. GPUs para Deep Learning (2025). Fuente: elaboración propia.</p>
+                    <p className="text-xs text-gray-500 italic text-center">Tabla 1. GPUs para Deep Learning (2025); TFLOPS FP16 densos, sin dispersión estructurada. Fuente: elaboración propia.</p>
 
                     {/* ============== 2.2 Colab y Kaggle ============== */}
                     <h3>2. Entornos en la nube: Google Colab y Kaggle</h3>
@@ -2041,14 +2174,14 @@ for i, (entradas, etiquetas) in enumerate(dataloader):
                             <thead><tr><th>Plan</th><th>Precio/mes</th><th>GPUs</th><th>RAM</th><th>Características</th></tr></thead>
                             <tbody>
                                 <tr><td>Gratuito</td><td>$0</td><td>T4 (15 GB)</td><td>≈12 GB</td><td>Sin garantía; sesión ≈12 h; desconexión por inactividad ≈90 min</td></tr>
-                                <tr><td>Pro</td><td>~$10 USD</td><td>T4, L4, A100 (40/80 GB)</td><td>≈25+ GB</td><td>100 CU/mes; acceso prioritario; terminal; Gemini</td></tr>
-                                <tr><td>Pro+</td><td>~$50 USD</td><td>T4 a H100, G4 (≈96 GB)</td><td>≈50+ GB</td><td>500 CU/mes; ejecución en segundo plano 24 h; GPUs premium</td></tr>
+                                <tr><td>Pro</td><td>≈10 USD</td><td>T4, L4, A100 (40/80 GB)</td><td>≈25+ GB</td><td>100 CU/mes; acceso prioritario; terminal; Gemini</td></tr>
+                                <tr><td>Pro+</td><td>≈50 USD</td><td>T4 a H100, G4 (≈96 GB)</td><td>≈50+ GB</td><td>500 CU/mes; ejecución en segundo plano 24 h; GPUs premium</td></tr>
                             </tbody>
                         </table>
                     </div>
-                    <p className="text-xs text-gray-500 italic text-center">Tabla 2. Planes de Google Colab (2025-2026). Fuente: elaboración propia.</p>
-                    <Box type="warn" label="Cambios recientes (2025-2026)">
-                        Llegada de GPUs H100 y G4 (Blackwell, ≈96 GB) para pago; apertura del terminal para todos (julio 2025); transición de
+                    <p className="text-xs text-gray-500 italic text-center">Tabla 2. Planes de Google Colab (2025–2026). Fuente: elaboración propia.</p>
+                    <Box type="warn" label="Cambios recientes (2025–2026)">
+                        Llegada de GPUs H100 y G4 (Blackwell, ≈96 GB) para pago; apertura del terminal para todos (julio de 2025); transición de
                         TPU v2-8 a v5e-1 en el nivel gratuito; codificación asistida por Gemini 2.5 Flash. <strong>Importante:</strong> BF16 y
                         Flash Attention 2 funcionan en A100, L4, H100 y G4, pero <strong>no en la T4</strong> (arquitectura Turing).
                     </Box>
@@ -2057,7 +2190,7 @@ for i, (entradas, etiquetas) in enumerate(dataloader):
                     <p>
                         <strong>Kaggle</strong> (propiedad de Google) ofrece GPU y TPU gratuitas con cuotas más predecibles que Colab:
                         1× P100 (16 GB) o 2× T4 (32 GB en total), TPU v3-8 (128 GB), ≈30 h/semana de GPU y <strong>32 GB de RAM</strong> del
-                        sistema. Sus fortalezas: Datasets públicos sin descarga manual, competiciones, modelos preentrenados (integración con
+                        sistema. Sus fortalezas: datasets públicos sin descarga manual, competiciones, modelos preentrenados (integración con
                         Hugging Face desde 2025) y RAM generosa.
                     </p>
                     <div className="overflow-x-auto">
@@ -2070,7 +2203,7 @@ for i, (entradas, etiquetas) in enumerate(dataloader):
                                 <tr><td>RAM del sistema</td><td>≈12–13 GB</td><td>32 GB</td></tr>
                                 <tr><td>Colaboración</td><td>Tiempo real (Google Docs)</td><td>Fork + versionamiento</td></tr>
                                 <tr><td>Almacenamiento</td><td>Google Drive (15 GB gratis)</td><td>Datasets + 100 GB privados</td></tr>
-                                <tr><td>Ideal para</td><td>Prototipado, trabajo en equipo</td><td>Entrenamientos largos, competencias</td></tr>
+                                <tr><td>Ideal para</td><td>Prototipado, trabajo en equipo</td><td>Entrenamientos largos, competiciones</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -2078,11 +2211,15 @@ for i, (entradas, etiquetas) in enumerate(dataloader):
                     <CalloutPro tema="info" titulo="Estrategia combinada: ≈60 horas de GPU semanales gratis" subtitulo="Colab para desarrollo · Kaggle para entrenamientos largos" icon="fa-layer-group">
                         Lo óptimo para presupuesto limitado: usar ambas plataformas de forma complementaria. <strong>Colab</strong> para
                         desarrollo interactivo y trabajo en equipo; <strong>Kaggle</strong> para entrenamientos largos y competiciones.
-                        Combinados, los niveles gratuitos dan ~<strong>60 horas de GPU por semana a costo cero</strong>.
+                        Combinados, los niveles gratuitos dan ≈<strong>60 horas de GPU por semana a costo cero</strong>.
                     </CalloutPro>
+                    <DecisionPlataformaSVG />
 
                     <h4>Buenas prácticas en la nube</h4>
-                    <CodeBlock lang="python" title="Checkpoints persistentes en Drive" code={`from google.colab import drive
+                    <CodeBlock lang="python" title="Checkpoints persistentes en Drive" code={`import os
+import torch
+from google.colab import drive
+
 drive.mount('/content/drive')
 
 # Guardar checkpoints cada N épocas
@@ -2099,14 +2236,14 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                         <li><strong>Guardar cada 1–2 épocas:</strong> las sesiones se desconectan sin aviso; sin checkpoints se pierde todo el progreso.</li>
                         <li><strong>Dividir entrenamientos largos:</strong> fraccionar 24 h en segmentos de 10–11 h que quepan en el límite de sesión.</li>
                         <li><strong>Desarrollar en CPU primero:</strong> depurar antes de activar la GPU para no gastar cuota.</li>
-                        <li><strong>Cerrar la sesión GPU:</strong> desconectar el runtime cuando no se entrena, para preservar la cuota.</li>
+                        <li><strong>Cerrar la sesión GPU:</strong> desconectar el entorno de ejecución cuando no se entrena, para preservar la cuota.</li>
                     </ul>
 
                     <h4>Más allá de Colab y Kaggle</h4>
                     <p>
-                        <strong>AWS SageMaker Studio Lab</strong> (T4 gratis, 4 h/día, sin tarjeta), <strong>Lightning AI Studios</strong>
-                        (créditos mensuales, interfaz tipo VS Code) y, para alquiler de alto rendimiento, <strong>Vast.ai, RunPod y Lambda</strong>
-                        (A100 desde ~$1 USD/hora, mucho más barato que AWS/GCP/Azure).
+                        <strong>AWS SageMaker Studio Lab</strong> (T4 gratis, 4 h/día, sin tarjeta), <strong>Lightning AI Studios</strong>{' '}
+                        (créditos mensuales, interfaz tipo VS Code) y, para alquiler de alto rendimiento, <strong>Vast.ai, RunPod y Lambda</strong>{' '}
+                        (A100 desde ≈1 USD/hora, mucho más barato que AWS/GCP/Azure).
                     </p>
 
                     <h4>Estrategias para el contexto colombiano</h4>
@@ -2115,9 +2252,9 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                         de 2025): una inversión razonable <strong>solo</strong> tras agotar lo gratuito.
                     </CalloutPro>
                     <ul>
-                        <li><strong>GitHub Student Developer Pack:</strong> $200 en DigitalOcean, $100 en Azure, Copilot gratis y +80 herramientas (verificando correo .edu).</li>
+                        <li><strong>GitHub Student Developer Pack:</strong> $200 en DigitalOcean, $100 en Azure, Copilot gratis y más de 80 herramientas (previa verificación del correo .edu).</li>
                         <li><strong>Azure para Estudiantes:</strong> $100 USD sin tarjeta de crédito; <strong>Google Cloud:</strong> $300 USD para nuevos usuarios.</li>
-                        <li><strong>Supercomputadores universitarios:</strong> Guane-1 (UIS, 320 TFLOPS), Apolo (EAFIT, 17,8 TFLOPS), BIOS (Manizales, 130 TFLOPS); la red <strong>RENATA</strong> conecta a +18.700 organizaciones en 137 países.</li>
+                        <li><strong>Supercomputadores universitarios:</strong> Guane-1 (UIS, 320 TFLOPS), Apolo (EAFIT, 17,8 TFLOPS), BIOS (Manizales, 130 TFLOPS); la red <strong>RENATA</strong> conecta las instituciones colombianas con más de 18.700 organizaciones en 137 países.</li>
                         <li><strong>Transfer Learning:</strong> la técnica de mayor impacto con recursos limitados. Ajustar un ResNet-18 sobre 1.000 imágenes tarda 15–30 min en la T4 gratuita; MobileNetV3 (5,4 M parámetros) y DistilBERT (66 M) dan el 80–95 % de la precisión a una fracción del costo.</li>
                     </ul>
 
@@ -2134,7 +2271,7 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                             justificacion: 'Entrenar una red es multiplicar matrices enormes: miles de operaciones idénticas sobre datos distintos, justo el trabajo paralelo (SIMT) de la GPU.'
                         },
                         {
-                            pregunta: 'Ante un error "CUDA out of memory" en una T4, ¿cuál es la primera acción recomendada?',
+                            pregunta: 'Ante un error «CUDA out of memory» en una T4, ¿cuál es la primera acción recomendada?',
                             opciones: [
                                 { texto: 'Comprar Colab Pro para una GPU más grande.', correcta: false },
                                 { texto: 'Reducir el tamaño del lote (batch size).', correcta: true },
@@ -2147,7 +2284,7 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                             pregunta: 'El entrenamiento con precisión mixta logra, principalmente…',
                             opciones: [
                                 { texto: 'Mayor precisión numérica en todos los cálculos.', correcta: false },
-                                { texto: '≈2–3× de aceleración y ≈50% menos memoria, usando FP16/BF16 para el cómputo y FP32 para los pesos maestros.', correcta: true },
+                                { texto: '≈2–3× de aceleración y ≈50 % menos memoria, usando FP16/BF16 para el cómputo y FP32 para los pesos maestros.', correcta: true },
                                 { texto: 'Eliminar la necesidad de GPU.', correcta: false },
                                 { texto: 'Duplicar el número de parámetros del modelo.', correcta: false },
                             ],
@@ -2189,7 +2326,7 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                 { n: '3', t: 'cache', d: 'evita releer disco', color: '#0E7490' },
                 { n: '4', t: 'shuffle', d: 'mezclar', color: '#B45309' },
                 { n: '5', t: 'batch', d: 'agrupar en lotes', color: '#ED1E79' },
-                { n: '6', t: 'prefetch(AUTOTUNE)', d: 'SIEMPRE al final', color: '#15803D' },
+                { n: '6', t: 'prefetch', d: 'AUTOTUNE, siempre al final', color: '#15803D' },
             ];
             return (
                 <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
@@ -2232,10 +2369,10 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                     <text x="40" y="76" fontSize="10" fill="#475569">GPU</text>
                     {[0, 1, 2].map((i) => (
                         <g key={`np-${i}`}>
-                            <rect x={90 + i * 180} y={42} width={70} height={16} fill="#FECACA" stroke="#B91C1C" strokeWidth="1" />
-                            <text x={125 + i * 180} y={54} textAnchor="middle" fontSize="8" fill="#7F1D1D">prep N{i}</text>
-                            <rect x={160 + i * 180} y={66} width={70} height={16} fill="#FCA5A5" stroke="#B91C1C" strokeWidth="1" />
-                            <text x={195 + i * 180} y={78} textAnchor="middle" fontSize="8" fill="#7F1D1D">train N{i}</text>
+                            <rect x={90 + i * 140} y={42} width={70} height={16} fill="#FECACA" stroke="#B91C1C" strokeWidth="1" />
+                            <text x={125 + i * 140} y={54} textAnchor="middle" fontSize="8" fill="#7F1D1D">prep N{i}</text>
+                            <rect x={160 + i * 140} y={66} width={70} height={16} fill="#FCA5A5" stroke="#B91C1C" strokeWidth="1" />
+                            <text x={195 + i * 140} y={78} textAnchor="middle" fontSize="8" fill="#7F1D1D">train N{i}</text>
                         </g>
                     ))}
                     <text x="370" y="104" textAnchor="middle" fontSize="9" fill="#B91C1C" fontStyle="italic">la GPU queda ociosa mientras la CPU prepara cada lote (huecos)</text>
@@ -2245,13 +2382,17 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                     <text x="40" y="162" fontSize="10" fill="#475569">CPU</text>
                     <text x="40" y="186" fontSize="10" fill="#475569">GPU</text>
                     {[0, 1, 2, 3].map((i) => (
-                        <rect key={`pc-${i}`} x={90 + i * 110} y={152} width={106} height={16} fill="#BBF7D0" stroke="#15803D" strokeWidth="1" />
+                        <g key={`pc-${i}`}>
+                            <rect x={90 + i * 110} y={152} width={106} height={16} fill="#BBF7D0" stroke="#15803D" strokeWidth="1" />
+                            <text x={143 + i * 110} y={163} textAnchor="middle" fontSize="8" fill="#14532D">prep N{i + 1}</text>
+                        </g>
                     ))}
                     {[0, 1, 2, 3].map((i) => (
-                        <rect key={`pg-${i}`} x={90 + i * 110} y={176} width={106} height={16} fill="#86EFAC" stroke="#15803D" strokeWidth="1" />
+                        <g key={`pg-${i}`}>
+                            <rect x={90 + i * 110} y={176} width={106} height={16} fill="#86EFAC" stroke="#15803D" strokeWidth="1" />
+                            <text x={143 + i * 110} y={187} textAnchor="middle" fontSize="8" fill="#14532D">train N{i}</text>
+                        </g>
                     ))}
-                    <text x={143} y={163} textAnchor="middle" fontSize="8" fill="#14532D">prep</text>
-                    <text x={143} y={187} textAnchor="middle" fontSize="8" fill="#14532D">train</text>
                     <text x="370" y="214" textAnchor="middle" fontSize="9" fill="#15803D" fontStyle="italic">la CPU prepara el lote N+1 mientras la GPU entrena con el lote N: sin tiempos muertos</text>
                 </svg>
                 <p className="text-xs text-gray-500 italic text-center mt-1">
@@ -2270,7 +2411,7 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                     <text x={370} y={43} textAnchor="middle" fontSize="13" fill="#fff" fontWeight="bold">Data Augmentation</text>
                     {[
                         { x: 60, title: 'Geométricas', sub: 'cambian la geometría', color: '#0E7490', bg: '#ECFEFF', items: ['RandomHorizontalFlip', 'RandomRotation', 'RandomResizedCrop', 'RandomAffine'] },
-                        { x: 290, title: 'Fotométricas', sub: 'cambian los píxeles', color: '#B45309', bg: '#FFFBEB', items: ['ColorJitter', 'GaussianBlur', 'Normalize'] },
+                        { x: 290, title: 'Fotométricas', sub: 'cambian los píxeles', color: '#B45309', bg: '#FFFBEB', items: ['ColorJitter', 'GaussianBlur', 'Normalize (no es aumento)'] },
                         { x: 520, title: 'Mezcla de muestras', sub: 'combinan 2 imágenes', color: '#ED1E79', bg: '#FFF1F7', items: ['Mixup', 'CutMix'] },
                     ].map((col, ci) => (
                         <g key={ci}>
@@ -2296,7 +2437,7 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
         /* DIAGRAMA SVG: flujo de despliegue */
         const DespliegueSVG = () => (
             <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
-                <svg viewBox="0 0 740 250" className="w-full" style={{ minWidth: 680 }} role="img"
+                <svg viewBox="0 0 740 258" className="w-full" style={{ minWidth: 680 }} role="img"
                     aria-label="Flujo de despliegue: del modelo entrenado se exporta a un formato (state_dict, .keras, ONNX, torch.export) y se dirige a cuatro destinos: API REST, dispositivos de borde, navegador y nube.">
                     <title>Un modelo entrenado se exporta a un formato portable (state_dict, .keras, SavedModel, ONNX o torch.export) y desde ahí se despliega como API REST, en dispositivos de borde, en el navegador o en la nube.</title>
                     <defs><marker id="arrD" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#001A4D" /></marker></defs>
@@ -2358,7 +2499,7 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                         es el <strong>pipeline de datos</strong>: cargar archivos, transformarlos y entregar lotes. Si es más lento que la GPU,
                         esta queda ociosa esperando: la <Termino def="GPU starvation: la GPU permanece inactiva porque el pipeline de datos no la alimenta a tiempo.">«hambruna de GPU»</Termino>.
                     </p>
-                    <Box type="info" label="Analogía local — el restaurante de la Candelaria">
+                    <Box type="info" label="Analogía local — el restaurante de La Candelaria">
                         El <strong>chef</strong> (la GPU) es rapidísimo, pero la cocina depende de un solo <strong>mesero</strong> (el pipeline)
                         que toma pedidos, va a la bodega, busca, lava y lleva los ingredientes. Si el mesero es lento, el chef se queda de brazos
                         cruzados. La solución no es un chef más rápido, sino mejor logística: varios meseros en paralelo
@@ -2400,8 +2541,8 @@ dataset = dataset.prefetch(tf.data.AUTOTUNE)`} />
 
                     <h4>DataLoader: el pipeline explícito de PyTorch</h4>
                     <p>
-                        PyTorch usa dos abstracciones: <span className="inline-code">Dataset</span> (qué datos cargar y cómo) y
-                        <span className="inline-code"> DataLoader</span> (cómo entregarlos: en lotes, mezclados, con varios procesos). A
+                        PyTorch usa dos abstracciones: <span className="inline-code">Dataset</span> (qué datos cargar y cómo) y{' '}
+                        <span className="inline-code">DataLoader</span> (cómo entregarlos: en lotes, mezclados, con varios procesos). A
                         diferencia de tf.data (declarativo), el DataLoader ofrece <strong>control explícito</strong> de cada parámetro.
                     </p>
                     <CodeBlock lang="pytorch" title="DataLoader optimizado" code={`from torch.utils.data import Dataset, DataLoader
@@ -2431,7 +2572,7 @@ dataloader = DataLoader(
 )`} />
                     <ul>
                         <li><strong>num_workers:</strong> subprocesos paralelos de carga. Heurística: <span className="inline-code">os.cpu_count() // 2</span> o <span className="inline-code">4 × nº de GPUs</span>, ajustando experimentalmente. Demasiados consumen RAM y generan contención.</li>
-                        <li><strong>pin_memory=True:</strong> asigna tensores en memoria <em>page-locked</em> del CPU para transferencias asíncronas más rápidas a la GPU. Combinar con <span className="inline-code">.to(device, non_blocking=True)</span>. Solo útil con GPU.</li>
+                        <li><strong>pin_memory=True:</strong> asigna tensores en memoria <em>page-locked</em> de la CPU para transferencias asíncronas más rápidas a la GPU. Combinar con <span className="inline-code">.to(device, non_blocking=True)</span>. Solo útil con GPU.</li>
                         <li><strong>prefetch_factor:</strong> lotes precargados por worker (2 por defecto funciona bien).</li>
                         <li><strong>persistent_workers=True:</strong> mantiene los procesos vivos entre épocas, evitando el costo de reiniciarlos. Útil con épocas cortas.</li>
                     </ul>
@@ -2443,7 +2584,7 @@ dataloader = DataLoader(
                                 <tr><td>Paralelismo</td><td>num_parallel_calls en .map()</td><td>num_workers (multiproceso)</td></tr>
                                 <tr><td>Precarga</td><td>.prefetch(AUTOTUNE) automático</td><td>prefetch_factor (manual)</td></tr>
                                 <tr><td>Caché</td><td>.cache() integrado</td><td>Manual (precargar en RAM)</td></tr>
-                                <tr><td>Transferencia CPU→GPU</td><td>Pre-asigna VRAM por defecto</td><td>pin_memory=True (explícito)</td></tr>
+                                <tr><td>Transferencia CPU→GPU</td><td>Automática: el motor de TF gestiona la VRAM</td><td>pin_memory=True (explícito)</td></tr>
                                 <tr><td>Depuración</td><td>Compleja (ejecución diferida)</td><td>Sencilla (Python estándar)</td></tr>
                             </tbody>
                         </table>
@@ -2468,7 +2609,7 @@ dataloader = DataLoader(
                     <p>Las transformaciones se clasifican en:</p>
                     <ul>
                         <li><strong>Geométricas:</strong> <span className="inline-code">RandomHorizontalFlip</span> (útil en escenas naturales; contraindicado en texto o dígitos), <span className="inline-code">RandomRotation</span>, <span className="inline-code">RandomResizedCrop</span>, <span className="inline-code">RandomAffine</span>.</li>
-                        <li><strong>Fotométricas:</strong> <span className="inline-code">ColorJitter</span> (brillo, contraste, saturación, tono — simula sol vs. nublado), <span className="inline-code">GaussianBlur</span>, <span className="inline-code">Normalize</span> (con media/desviación de ImageNet).</li>
+                        <li><strong>Fotométricas:</strong> <span className="inline-code">ColorJitter</span> (brillo, contraste, saturación, tono — simula sol vs. nublado), <span className="inline-code">GaussianBlur</span>, <span className="inline-code">Normalize</span> (con media/desviación de ImageNet; es preprocesamiento esencial, no un aumento en sí).</li>
                         <li><strong>Mezcla entre muestras:</strong> <strong>Mixup</strong> interpola linealmente dos imágenes y sus etiquetas; <strong>CutMix</strong> recorta una región de una imagen y la pega en otra, ajustando las etiquetas por área. Mejoran calibración y robustez.</li>
                     </ul>
                     <Tabs tabs={[
@@ -2517,9 +2658,9 @@ modelo = tf.keras.Sequential([
                         },
                     ]} />
                     <Box type="tip" label="Nota técnica — el parámetro training">
-                        Las capas de preprocesamiento de Keras verifican el flag <span className="inline-code">training</span>: durante
+                        Las capas de preprocesamiento de Keras verifican el argumento <span className="inline-code">training</span>: durante{' '}
                         <span className="inline-code">.fit()</span> es <span className="inline-code">True</span> y aplican las transformaciones;
-                        durante <span className="inline-code">.predict()</span>/<span className="inline-code">.evaluate()</span> es
+                        durante <span className="inline-code">.predict()</span>/<span className="inline-code">.evaluate()</span> es{' '}
                         <span className="inline-code">False</span> y las omiten. Así no se transforma por error la validación o prueba.
                     </Box>
                     <Box type="warn" label="Aviso de licencia — AlbumentationsX (2025)">
@@ -2543,8 +2684,8 @@ modelo = tf.keras.Sequential([
 
                     {/* ============== 3.3 Guardado y despliegue ============== */}
                     <h3>3. Guardado de modelos y despliegue</h3>
-                    <Box type="info" label="Analogía local — el puente">
-                        Un modelo entrenado en Colab es como un <strong>prototipo de puente en una maqueta</strong> dentro de una universidad:
+                    <Box type="info" label="Analogía local — la maqueta y la obra real">
+                        Un modelo entrenado en Colab es como la <strong>maqueta de un puente</strong> en el laboratorio de una universidad:
                         funciona en el laboratorio, pero no sirve para cruzar un río. Para que la gente lo cruce hay que <strong>desplegarlo</strong>:
                         construirlo con materiales reales, en el sitio real, con las condiciones reales de carga y clima.
                     </Box>
@@ -2564,7 +2705,7 @@ modelo.load_state_dict(
 )
 modelo.eval()             # Cambiar a modo evaluación`} />
                     <Box type="danger" label="Nota de seguridad — weights_only=True">
-                        <span className="inline-code">weights_only=True</span> es <strong>obligatorio en PyTorch 2.6+</strong> y recomendado desde
+                        <span className="inline-code">weights_only=True</span> es <strong>el comportamiento por defecto desde PyTorch 2.6</strong> y recomendado desde
                         2.4. Sin él, <span className="inline-code">torch.load()</span> usa Pickle, que permite ejecución de código arbitrario al
                         cargar archivos de fuentes no confiables. Con <span className="inline-code">weights_only=True</span> solo se deserializan
                         tensores y tipos primitivos. Guardar el <em>modelo completo</em> es más cómodo pero menos portable y hereda los riesgos de
@@ -2585,8 +2726,12 @@ modelo.save('clasificador_cafe.keras')
 modelo_cargado = keras.models.load_model('clasificador_cafe.keras')
 
 # Formato SavedModel (para despliegue TF: Serving, LiteRT, TF.js)
-modelo.save('clasificador_cafe_savedmodel')
-modelo_cargado = tf.keras.models.load_model('clasificador_cafe_savedmodel')`} />
+# En Keras 3 se genera con export() — save() exige extensión .keras/.h5
+modelo.export('clasificador_cafe_savedmodel')
+
+# Para inferencia, el SavedModel se recarga como capa:
+capa_inferencia = keras.layers.TFSMLayer(
+    'clasificador_cafe_savedmodel', call_endpoint='serving_default')`} />
                     <p>
                         El formato <strong>.keras</strong> (recomendado desde Keras 3) guarda arquitectura, pesos y configuración en un archivo
                         agnóstico de backend; <strong>SavedModel</strong> almacena el grafo completo y la lógica de servicio, estándar para TF
@@ -2597,7 +2742,7 @@ modelo_cargado = tf.keras.models.load_model('clasificador_cafe_savedmodel')`} />
                     <p>
                         <strong>ONNX</strong> (Open Neural Network Exchange) es un formato abierto que funciona como un <strong>pasaporte</strong>:
                         permite entrenar en PyTorch y ejecutar en TensorFlow, un servidor C++, un móvil o un acelerador especializado, sin reescribir
-                        código. Lo mantiene la Linux Foundation AI &amp; Data y lo soportan Microsoft, Google, Meta y NVIDIA.
+                        código. Lo mantiene la Linux Foundation AI &amp; Data y lo soportan Microsoft, Meta, AWS y NVIDIA.
                     </p>
                     <CodeBlock lang="pytorch" title="Exportar a ONNX (exportador recomendado desde PyTorch 2.5)" code={`import torch
 
@@ -2610,15 +2755,15 @@ torch.onnx.export(
     'detector_roya.onnx',
     input_names=['imagen'],
     output_names=['prediccion'],
-    dynamic_axes={'imagen': {0: 'batch_size'}},
+    dynamic_axes={'imagen': {0: 'batch_size'}},  # dynamo lo traduce a dynamic_shapes
     dynamo=True   # Usa torch.export internamente (NO TorchScript)
 )`} />
                     <p>Una vez exportado, el modelo corre con <strong>ONNX Runtime</strong>, que optimiza la ejecución para el hardware disponible (CPU, GPU, aceleradores).</p>
 
                     <h4>torch.export: el sucesor de TorchScript</h4>
                     <p>
-                        <strong>TorchScript</strong> fue oficialmente <strong>deprecado a partir de PyTorch 2.9 (2025)</strong>. Su sucesor,
-                        <span className="inline-code"> torch.export</span>, captura el modelo como un grafo <strong>AOT</strong> (Ahead-of-Time)
+                        <strong>TorchScript</strong> fue oficialmente <strong>deprecado a partir de PyTorch 2.9 (2025)</strong>. Su sucesor,{' '}
+                        <span className="inline-code">torch.export</span>, captura el modelo como un grafo <strong>AOT</strong> (Ahead-of-Time)
                         de operadores ATen, consumible por ExecuTorch y ONNX Runtime; se integra con el compilador Dynamo y evita los problemas de
                         compatibilidad de TorchScript.
                     </p>
@@ -2636,7 +2781,7 @@ resultado = programa_cargado.module()(entrada[0])`} />
                     <h4>Conceptos básicos de despliegue</h4>
                     <DespliegueSVG />
                     <ul>
-                        <li><strong>API REST:</strong> el modelo se encapsula en un servicio web (Flask, FastAPI, TorchServe, TF Serving) que expone un endpoint HTTP; la app envía una imagen y recibe la predicción en JSON.</li>
+                        <li><strong>API REST:</strong> el modelo se encapsula en un servicio web (Flask, FastAPI, TorchServe, TF Serving) que expone un endpoint HTTP; la aplicación envía una imagen y recibe la predicción en JSON.</li>
                         <li><strong>Borde / móvil:</strong> el modelo se optimiza (cuantización, poda) y se convierte a LiteRT o ExecuTorch para correr en teléfonos o IoT <strong>sin internet</strong>.</li>
                         <li><strong>Navegador:</strong> TensorFlow.js ejecuta el modelo en el navegador, sin servidor de inferencia.</li>
                         <li><strong>Nube:</strong> Vertex AI, SageMaker o Azure ML sirven a escala con autoescalado, monitoreo y versionamiento.</li>
@@ -2678,11 +2823,11 @@ resultado = programa_cargado.module()(entrada[0])`} />
                             pregunta: 'En el DataLoader de PyTorch, ¿cuál es el efecto técnico de pin_memory=True?',
                             opciones: [
                                 { texto: 'Aumenta la VRAM comprimiendo los datos.', correcta: false },
-                                { texto: 'Asigna los tensores en memoria page-locked del CPU, acelerando la transferencia asíncrona a la GPU.', correcta: true },
+                                { texto: 'Asigna los tensores en memoria page-locked de la CPU, acelerando la transferencia asíncrona a la GPU.', correcta: true },
                                 { texto: 'Fija los pesos del modelo para que no cambien.', correcta: false },
                                 { texto: 'Almacena los datos en la caché de la GPU permanentemente.', correcta: false },
                             ],
-                            justificacion: 'La memoria "fijada" no puede paginarse al disco, lo que permite transferencias DMA directas CPU↔GPU sin copia intermedia. Conviene combinarlo con .to(device, non_blocking=True).'
+                            justificacion: 'La memoria «fijada» (pinned) no puede paginarse al disco, lo que permite transferencias DMA directas CPU↔GPU sin copia intermedia. Conviene combinarlo con .to(device, non_blocking=True).'
                         },
                         {
                             pregunta: 'Un equipo entrena un detector de roya. ¿Cuál de estas augmentaciones sería CONTRAPRODUCENTE?',
@@ -2712,7 +2857,7 @@ resultado = programa_cargado.module()(entrada[0])`} />
                                 { texto: 'Convierte el modelo a ONNX automáticamente.', correcta: false },
                                 { texto: 'Permite cargar sin definir la arquitectura.', correcta: false },
                             ],
-                            justificacion: 'Sin weights_only=True, torch.load usa Pickle, que puede ejecutar código arbitrario al cargar archivos no confiables. Es obligatorio en PyTorch 2.6+.'
+                            justificacion: 'Sin weights_only=True, torch.load usa Pickle, que puede ejecutar código arbitrario al cargar archivos no confiables. Es el comportamiento por defecto desde PyTorch 2.6.'
                         },
                     ]} />
                 </div>
@@ -2728,7 +2873,7 @@ resultado = programa_cargado.module()(entrada[0])`} />
 
                 <Box type="info" label="Cómo aprovechar esta evaluación">
                     Esta lección integra los tres capítulos del Módulo 3 (frameworks, cómputo de alto rendimiento y
-                    pipelines/despliegue). Conviene responder <em>antes</em> de revelar las soluciones. El cuestionario final
+                    pipelines/despliegue). Conviene responder <em>antes</em> de revelar las soluciones. El cuestionario integrador (Parte 3)
                     tiene puntuación automática; los emparejamientos incluyen una clave revelable.
                 </Box>
 
@@ -2741,7 +2886,7 @@ resultado = programa_cargado.module()(entrada[0])`} />
                             <tr><td>1. Grafo computacional dinámico (PyTorch)</td><td>(A) Múltiples meseros en paralelo para que el chef (GPU) nunca espere ingredientes.</td></tr>
                             <tr><td>2. Prefetch en tf.data</td><td>(B) La notaría digital moderna donde cada paso se ejecuta y verifica de inmediato.</td></tr>
                             <tr><td>3. pin_memory en DataLoader</td><td>(C) El río Magdalena que adapta su cauce al terreno en tiempo real.</td></tr>
-                            <tr><td>4. Data Augmentation</td><td>(D) Tener los ingredientes más usados en la barra del chef, listos para transferir sin demora.</td></tr>
+                            <tr><td>4. Data Augmentation</td><td>(D) Una bandeja fija junto a la estufa desde la que el mesero pasa los ingredientes al chef sin demora.</td></tr>
                             <tr><td>5. Ejecución eager (TensorFlow 2.x)</td><td>(E) Entrenar a la Selección Colombia en condiciones variadas (altura, lluvia, calor).</td></tr>
                             <tr><td>6. num_workers en DataLoader</td><td>(F) Preparar el siguiente plato mientras el actual se cocina, sin tiempo muerto del chef.</td></tr>
                             <tr><td>7. ONNX</td><td>(G) Un pasaporte universal que permite al modelo viajar entre frameworks sin restricciones.</td></tr>
@@ -2758,11 +2903,11 @@ resultado = programa_cargado.module()(entrada[0])`} />
                     <table>
                         <thead><tr><th>Código</th><th>Acción</th></tr></thead>
                         <tbody>
-                            <tr><td>1. <span className="inline-code">modelo.to(device)</span></td><td>(I) Traslada el modelo y sus pesos a la GPU para entrenamiento acelerado.</td></tr>
-                            <tr><td>2. <span className="inline-code">dataset.prefetch(tf.data.AUTOTUNE)</span></td><td>(J) Habilita la precarga automática del siguiente lote mientras la GPU entrena.</td></tr>
-                            <tr><td>3. <span className="inline-code">torch.save(modelo.state_dict(), 'm.pth')</span></td><td>(K) Almacena únicamente los parámetros aprendidos del modelo en disco.</td></tr>
-                            <tr><td>4. <span className="inline-code">torch.onnx.export(..., dynamo=True)</span></td><td>(H) Exporta el modelo a un formato interoperable entre frameworks.</td></tr>
-                            <tr><td>5. <span className="inline-code">mixed_precision.set_global_policy('mixed_float16')</span></td><td>(L) Activa la precisión mixta para acelerar el entrenamiento y reducir memoria.</td></tr>
+                            <tr><td>1. <span className="inline-code">modelo.to(device)</span></td><td>(H) Exporta el modelo a un formato interoperable entre frameworks.</td></tr>
+                            <tr><td>2. <span className="inline-code">dataset.prefetch(tf.data.AUTOTUNE)</span></td><td>(K) Almacena únicamente los parámetros aprendidos del modelo en disco.</td></tr>
+                            <tr><td>3. <span className="inline-code">torch.save(modelo.state_dict(), 'm.pth')</span></td><td>(I) Traslada el modelo y sus pesos a la GPU para entrenamiento acelerado.</td></tr>
+                            <tr><td>4. <span className="inline-code">torch.onnx.export(..., dynamo=True)</span></td><td>(L) Activa la precisión mixta para acelerar el entrenamiento y reducir memoria.</td></tr>
+                            <tr><td>5. <span className="inline-code">mixed_precision.set_global_policy('mixed_float16')</span></td><td>(J) Habilita la precarga automática del siguiente lote mientras la GPU entrena.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -2777,11 +2922,11 @@ resultado = programa_cargado.module()(entrada[0])`} />
                         pregunta: 'Al configurar un DataLoader con pin_memory=True, ¿cuál es su efecto técnico?',
                         opciones: [
                             { texto: 'Aumenta la VRAM disponible comprimiendo los datos.', correcta: false },
-                            { texto: 'Asigna los tensores en memoria page-locked del CPU, acelerando la transferencia asíncrona a la GPU.', correcta: true },
+                            { texto: 'Asigna los tensores en memoria page-locked de la CPU, acelerando la transferencia asíncrona a la GPU.', correcta: true },
                             { texto: 'Fija los pesos del modelo para que no cambien durante el entrenamiento.', correcta: false },
                             { texto: 'Almacena los datos en la caché de la GPU permanentemente.', correcta: false },
                         ],
-                        justificacion: 'La memoria "fijada" (pinned) no puede paginarse al disco, lo que permite transferencias DMA directas entre CPU y GPU sin copia intermedia.'
+                        justificacion: 'La memoria «fijada» (pinned) no puede paginarse al disco, lo que permite transferencias DMA directas entre CPU y GPU sin copia intermedia.'
                     },
                     {
                         pregunta: 'En un pipeline de tf.data, ¿por qué .prefetch(AUTOTUNE) debe ser la última operación?',
@@ -2794,7 +2939,7 @@ resultado = programa_cargado.module()(entrada[0])`} />
                         justificacion: 'Prefetch crea un solapamiento entre la preparación de datos (CPU) y el entrenamiento (GPU), eliminando tiempos muertos entre lotes.'
                     },
                     {
-                        pregunta: 'Keras 3 se describe como un framework "agnóstico de backend": el mismo código corre sobre TensorFlow, PyTorch o JAX cambiando una variable de entorno. (Verdadero/Falso)',
+                        pregunta: 'Keras 3 se describe como un framework «agnóstico de backend»: el mismo código corre sobre TensorFlow, PyTorch o JAX cambiando una variable de entorno. (Verdadero/Falso)',
                         opciones: [
                             { texto: 'Verdadero', correcta: true },
                             { texto: 'Falso', correcta: false },
@@ -2819,7 +2964,7 @@ resultado = programa_cargado.module()(entrada[0])`} />
                             { texto: 'BCELoss no funciona en GPU.', correcta: false },
                             { texto: 'Elimina la necesidad de calcular gradientes.', correcta: false },
                         ],
-                        justificacion: 'La fusión matemática evita calcular log(sigmoid(x)) con valores extremos donde la sigmoide satura a 0 o 1, causando log(0) = −infinito. Es estabilidad numérica, no compatibilidad.'
+                        justificacion: 'La fusión matemática evita calcular log(sigmoid(x)) con valores extremos donde la sigmoide satura a 0 o 1, causando log(0) = −∞. Es estabilidad numérica, no compatibilidad.'
                     },
                     {
                         pregunta: 'TorchScript fue deprecado. ¿Cuál es su sucesor para serialización de modelos sin Python?',
@@ -2832,7 +2977,7 @@ resultado = programa_cargado.module()(entrada[0])`} />
                         justificacion: 'torch.export genera un grafo AOT de operadores ATen, consumible por ExecuTorch y ONNX Runtime sin Python. torch.compile optimiza en Python; torch.jit es TorchScript (deprecado); pickle tiene riesgos de seguridad.'
                     },
                     {
-                        pregunta: 'Con una T4 (16 GB) y un error "CUDA out of memory", ¿cuál es la primera acción recomendada?',
+                        pregunta: 'Con una T4 (16 GB) y un error «CUDA out of memory», ¿cuál es la primera acción recomendada?',
                         opciones: [
                             { texto: 'Comprar Colab Pro para una GPU más grande.', correcta: false },
                             { texto: 'Reducir el tamaño del lote (batch size).', correcta: true },
@@ -2865,7 +3010,7 @@ resultado = programa_cargado.module()(entrada[0])`} />
                         pregunta: 'El entrenamiento con precisión mixta logra, principalmente…',
                         opciones: [
                             { texto: 'Mayor precisión numérica en todos los cálculos.', correcta: false },
-                            { texto: '≈2–3× de aceleración y ≈50% menos memoria, usando FP16/BF16 para el cómputo y FP32 para los pesos maestros.', correcta: true },
+                            { texto: '≈2–3× de aceleración y ≈50 % menos memoria, usando FP16/BF16 para el cómputo y FP32 para los pesos maestros.', correcta: true },
                             { texto: 'Eliminar la necesidad de GPU.', correcta: false },
                             { texto: 'Duplicar el número de parámetros.', correcta: false },
                         ],
@@ -2887,32 +3032,32 @@ resultado = programa_cargado.module()(entrada[0])`} />
         ============================================================ */
         const GLOSARIO_M3 = [
             ['TensorFlow', 'Framework de código abierto de Google para Deep Learning. Incluye Keras como API de alto nivel y un ecosistema de despliegue (TF Serving, LiteRT, TF.js). Analogía: la notaría digital moderna con ejecución eager.'],
-            ['PyTorch', 'Framework de Meta AI / Linux Foundation con grafos computacionales dinámicos. Domina la investigación (≈80% de papers en NeurIPS). Analogía: el río Magdalena que adapta su cauce al terreno.'],
+            ['PyTorch', 'Framework de Meta AI / Linux Foundation con grafos computacionales dinámicos. Domina la investigación (≈80 % de los artículos en NeurIPS). Analogía: el río Magdalena que adapta su cauce al terreno.'],
             ['Keras 3', 'API multi-backend (TensorFlow, PyTorch, JAX) lanzada a finales de 2023. Permite escribir el código una vez y ejecutarlo en cualquier motor.'],
-            ['GPU', 'Unidad de Procesamiento Gráfico: hardware con miles de núcleos paralelos optimizado para operaciones matriciales. Aceleraciones de 10–1000× respecto a la CPU. Analogía: la despulpadora industrial de café.'],
+            ['GPU', 'Unidad de Procesamiento Gráfico: hardware con miles de núcleos paralelos optimizado para operaciones matriciales. Aceleraciones de 10–100× respecto a la CPU. Analogía: la despulpadora industrial de café.'],
             ['CUDA', 'Plataforma de computación paralela de NVIDIA (2006) que permite ejecutar código en GPU. Base de todo el ecosistema de DL acelerado.'],
             ['Tensor Core', 'Unidad de hardware especializada en multiplicación-acumulación de matrices (MMA). Hasta 16× más rendimiento que los núcleos CUDA para DL.'],
             ['VRAM', 'Memoria de video de la GPU; el recurso más limitante. Almacena pesos, gradientes, estados del optimizador y activaciones. Analogía: la bodega de la plaza de mercado.'],
-            ['Precisión mixta (AMP)', 'Técnica que combina FP16/BF16 para el cómputo y FP32 para los pesos maestros, logrando ≈2–3× de aceleración y ≈50% de reducción de memoria.'],
+            ['Precisión mixta (AMP)', 'Técnica que combina FP16/BF16 para el cómputo y FP32 para los pesos maestros, logrando ≈2–3× de aceleración y ≈50 % de reducción de memoria.'],
             ['DataLoader (PyTorch)', 'Clase que gestiona la carga paralela de datos con num_workers, pin_memory y prefetch_factor para maximizar la utilización de la GPU.'],
             ['tf.data (TensorFlow)', 'API declarativa para construir pipelines de datos eficientes con operaciones encadenadas (map, cache, shuffle, batch, prefetch).'],
             ['Prefetch', 'Técnica que superpone la preparación del siguiente lote (CPU) con el entrenamiento del lote actual (GPU). Analogía: preparar el siguiente plato mientras el actual se cocina.'],
-            ['pin_memory', 'Parámetro del DataLoader que asigna tensores en memoria page-locked del CPU, permitiendo transferencias DMA asíncronas más rápidas a la GPU.'],
+            ['pin_memory', 'Parámetro del DataLoader que asigna tensores en memoria page-locked de la CPU, permitiendo transferencias DMA asíncronas más rápidas a la GPU.'],
             ['num_workers', 'Número de subprocesos del DataLoader que cargan datos en paralelo en segundo plano. Analogía: meseros trabajando en paralelo.'],
             ['Data Augmentation', 'Técnica de regularización que aplica transformaciones aleatorias (volteo, rotación, color) a los datos de entrenamiento. Analogía: entrenar a la Selección en condiciones variadas.'],
             ['Mixup / CutMix', 'Técnicas de aumento que mezclan dos muestras: Mixup interpola imágenes y etiquetas; CutMix recorta una región y la pega en otra, ajustando las etiquetas por área.'],
             ['AlbumentationsX', 'Biblioteca de augmentation de imágenes optimizada con OpenCV. Sucesora de Albumentations (MIT). Licencia dual AGPL-3.0 / Comercial desde 2025.'],
             ['GPU starvation', '«Hambruna de GPU»: la GPU permanece ociosa esperando datos porque el pipeline no la alimenta a tiempo. Se mitiga con prefetch, num_workers y cache.'],
             ['ONNX', 'Open Neural Network Exchange: formato abierto universal para modelos, mantenido por la Linux Foundation AI. Analogía: el pasaporte universal del modelo.'],
-            ['torch.export', 'Sucesor de TorchScript (deprecado en PyTorch 2.9). Captura modelos como grafos AOT (ATen) para despliegue sin Python. Recomendado desde PyTorch 2.5+.'],
+            ['torch.export', 'Sucesor de TorchScript (deprecado en PyTorch 2.9). Captura modelos como grafos AOT (ATen) para despliegue sin Python. Recomendado desde PyTorch 2.5.'],
             ['Transfer Learning', 'Reutilizar un modelo preentrenado (ResNet-18, MobileNetV3) para una tarea nueva con menos datos y cómputo; clave en entornos con recursos limitados.'],
             ['Cuantización', 'Reducir la precisión de los pesos (ej. de FP32 a INT8) para obtener un modelo ≈4× más pequeño y rápido, con cierta pérdida de exactitud; clave para borde.'],
-            ['LiteRT', 'Sucesor de TensorFlow Lite. Proyecto independiente para inferencia optimizada en móviles y edge, con APIs nativas en Kotlin y C++.'],
+            ['LiteRT', 'Sucesor de TensorFlow Lite. Proyecto independiente para inferencia optimizada en móviles y borde, con APIs nativas en Kotlin y C++.'],
             ['ExecuTorch', 'Runtime oficial de PyTorch para móviles y borde (sucesor de PyTorch Mobile). Consume modelos de torch.export. Soporta Arm, Apple y Qualcomm.'],
             ['SavedModel', 'Formato nativo de TensorFlow para despliegue. Almacena el grafo, los pesos y la lógica de servicio. Estándar para TF Serving, LiteRT y TF.js.'],
             ['Checkpoint', 'Guardado periódico del estado del modelo, el optimizador, la época y la pérdida; permite reanudar un entrenamiento interrumpido (esencial en Colab).'],
             ['FSDP', 'Fully Sharded Data Parallel: estrategia multi-GPU que fragmenta pesos, gradientes y estados del optimizador, para entrenar modelos que exceden la VRAM de una GPU.'],
-            ['Google Colab', 'Entorno de cuadernos Jupyter en la nube de Google con acceso gratuito a GPUs T4. Planes Pro (~$10/mes) y Pro+ (~$50/mes) con GPUs más potentes.'],
+            ['Google Colab', 'Entorno de cuadernos Jupyter en la nube de Google con acceso gratuito a GPUs T4. Planes Pro (≈10 USD/mes) y Pro+ (≈50 USD/mes) con GPUs más potentes.'],
             ['Kaggle Notebooks', 'Plataforma de ciencia de datos con GPUs gratuitas (P100 o 2×T4), ≈30 h/semana y 32 GB de RAM. Integra datasets y competiciones.'],
         ];
 
@@ -2964,7 +3109,7 @@ resultado = programa_cargado.module()(entrada[0])`} />
                 <h4>Recursos educativos y herramientas</h4>
                 <ul>
                     <li>Smilkov, D., y Carter, S. (s.f.). <em>TensorFlow Playground</em>. Google. https://playground.tensorflow.org</li>
-                    <li>Buslaev, A., Iglovikov, V., y Parinov, A. (2020). Albumentations: Fast and Flexible Image Augmentations. <em>Information, 11</em>(2), 125.</li>
+                    <li>Buslaev, A., Iglovikov, V. I., Khvedchenya, E., Parinov, A., Druzhinin, M., y Kalinin, A. A. (2020). Albumentations: Fast and flexible image augmentations. <em>Information, 11</em>(2), 125.</li>
                     <li>Parraga-Alava, J., Cusme, K., Loor, A., y Santander, E. (2019). <em>RoCoLe: A robusta coffee leaf images dataset</em> (v2). Mendeley Data.</li>
                 </ul>
                 <Box type="info" label="Material de consulta">
@@ -3083,7 +3228,7 @@ resultado = programa_cargado.module()(entrada[0])`} />
                                         <div className="mb-8 text-center bg-white p-7 rounded-2xl shadow-sm border border-gray-100">
                                             <p className="text-xs uppercase tracking-widest text-secondary font-bold mb-2">Profundización I · Redes Neuronales</p>
                                             <h1 className="text-2xl font-bold text-primary mb-2">Implementación y Herramientas Profesionales de Deep Learning</h1>
-                                            <p className="text-gray-600 font-light">Del qué y el por qué al cómo, dónde y con qué: frameworks (TensorFlow/Keras 3 y PyTorch), computación de alto rendimiento con GPU (Colab y Kaggle), y pipelines de datos y despliegue (tf.data, DataLoader, Data Augmentation, ONNX, LiteRT) para llevar un modelo del notebook al campo.</p>
+                                            <p className="text-gray-600 font-light">Del qué y el porqué al cómo, dónde y con qué: frameworks (TensorFlow/Keras 3 y PyTorch), computación de alto rendimiento con GPU (Colab y Kaggle), y pipelines de datos y despliegue (tf.data, DataLoader, Data Augmentation, ONNX, LiteRT) para llevar un modelo del notebook al campo.</p>
                                             <div className="flex justify-center flex-wrap gap-2 mt-4 text-xs">
                                                 {['Frameworks', 'Keras 3', 'GPU / CUDA', 'Colab / Kaggle', 'Pipelines', 'ONNX / Despliegue'].map(t => (
                                                     <span key={t} className="px-3 py-1 rounded-full bg-primary/10 text-primary">{t}</span>
@@ -3116,7 +3261,7 @@ resultado = programa_cargado.module()(entrada[0])`} />
                                 <footer className="mt-16 pt-8 border-t border-gray-200">
                                     <div className="usta-header rounded-xl p-6 text-center">
                                         <p className="text-white font-medium text-sm"><strong>Módulo 3 · Implementación y Herramientas Profesionales de Deep Learning</strong></p>
-                                        <p className="text-xs mt-1 text-white/80 italic">Metodología «Ingeniería de Trinchera»: si una arquitectura no corre en Google Colab, no existe.</p>
+                                        <p className="text-xs mt-1 text-white/80 italic">Metodología «Ingeniería de Trinchera»: si una arquitectura no corre en Google Colab, no existe; y si no se puede desplegar, no sirve.</p>
                                         <p className="text-xs mt-2 text-white/70">Universidad Santo Tomás · Maestría en Ciencia de Datos</p>
                                         <p className="text-xs text-white/70">Profundización I: Redes Neuronales — Deep Learning (EA-N-F-004) · Experto temático: Javier Mauricio Sierra</p>
                                         <p className="text-[10px] mt-2 text-white/50">Material de aprendizaje autónomo. Analogías contextualizadas al entorno colombiano.</p>
