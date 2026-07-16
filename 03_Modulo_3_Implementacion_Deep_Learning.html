@@ -1844,6 +1844,7 @@ import keras
                     <text x={100} y="132" textAnchor="middle" fontSize="11" fill="#3D008D">FP32 (estable)</text>
                     {/* Forward FP16 */}
                     <line x1={160} y1={112} x2={202} y2={88} stroke="#001A4D" strokeWidth="1.6" markerEnd="url(#arrA)" />
+                    <text x={176} y={79} textAnchor="middle" fontSize="8.5" fill="#64748B" fontStyle="italic">copia a FP16</text>
                     <rect x={205} y={50} width={130} height={44} rx="8" fill="#ECFEFF" stroke="#0E7490" strokeWidth="1.8" />
                     <text x={270} y={70} textAnchor="middle" fontSize="11" fill="#0E7490" fontWeight="bold">Forward (FP16/BF16)</text>
                     <text x={270} y={86} textAnchor="middle" fontSize="10" fill="#0E7490">Tensor Cores</text>
@@ -1852,6 +1853,8 @@ import keras
                     <rect x={385} y={50} width={130} height={44} rx="8" fill="#FFF1F7" stroke="#ED1E79" strokeWidth="1.8" />
                     <text x={450} y={70} textAnchor="middle" fontSize="11" fill="#ED1E79" fontWeight="bold">Escalado de pérdida</text>
                     <text x={450} y={86} textAnchor="middle" fontSize="10" fill="#ED1E79">solo FP16</text>
+                    <text x={450} y={112} textAnchor="middle" fontSize="8.5" fill="#9D174D">Sin escalar, los gradientes</text>
+                    <text x={450} y={124} textAnchor="middle" fontSize="8.5" fill="#9D174D">diminutos de FP16 se anulan (→ 0)</text>
                     {/* Backward */}
                     <line x1={515} y1={72} x2={560} y2={72} stroke="#001A4D" strokeWidth="1.6" markerEnd="url(#arrA)" />
                     <rect x={565} y={50} width={130} height={44} rx="8" fill="#ECFEFF" stroke="#0E7490" strokeWidth="1.8" />
@@ -1865,7 +1868,6 @@ import keras
                     {/* vuelta a pesos maestros */}
                     <line x1={520} y1={174} x2={160} y2={145} stroke="#15803D" strokeWidth="1.6" strokeDasharray="5 3" markerEnd="url(#arrA)" />
                     <text x={300} y={210} textAnchor="middle" fontSize="11" fill="#15803D" fontStyle="italic">El optimizador actualiza los pesos maestros FP32 — el ciclo se repite</text>
-                    <text x={100} y={180} textAnchor="middle" fontSize="10" fill="#475569" fontStyle="italic">≈2–3× más rápido · −50 % de memoria</text>
                 </svg>
                 <p className="text-xs text-gray-500 italic text-center mt-1">
                     Figura 5. Flujo del entrenamiento con precisión mixta (AMP). El escalado de pérdida solo es necesario con FP16. Fuente: elaboración propia.
