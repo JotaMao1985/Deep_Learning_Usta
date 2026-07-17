@@ -565,6 +565,7 @@
                 warn: { border: '#B45309', bg: '#FFFBEB', label: '#B45309', icon: 'fa-triangle-exclamation' },
                 danger: { border: '#B91C1C', bg: '#FEF2F2', label: '#B91C1C', icon: 'fa-circle-exclamation' },
                 eth: { border: '#0E7490', bg: '#ECFEFF', label: '#0E7490', icon: 'fa-scale-balanced' },
+                code: { border: '#334155', bg: '#F1F5F9', label: '#334155', icon: 'fa-magnifying-glass' },
             }[type] || { border: '#3D008D', bg: '#F5F0FA', label: '#3D008D', icon: 'fa-circle-info' };
             return (
                 <div className="rounded-xl px-5 py-4 my-4 border-l-4" style={{ borderColor: styles.border, background: styles.bg }}>
@@ -1391,6 +1392,14 @@ modelo = keras.Model(
                             )
                         },
                     ]} />
+                    <Box type="code" label="Lectura del código">
+                        Las tres versiones construyen la <strong>misma red</strong>; lo único que cambia es la forma de declararla.{' '}
+                        <span className="inline-code">Sequential</span> apila capas en línea recta (lo más rápido para un prototipo); la API{' '}
+                        <span className="inline-code">Funcional</span> conecta entradas y salidas como un grafo, necesaria para modelos con
+                        varias ramas —por ejemplo, uno que combine la <strong>foto de la hoja</strong> y los <strong>metadatos de la finca</strong>—;
+                        y <span className="inline-code">Subclassing</span> entrega el control total del método <span className="inline-code">forward</span>{' '}
+                        para lógica dinámica. Regla práctica: se empieza por Sequential y solo se sube de nivel cuando la arquitectura lo exige.
+                    </Box>
 
                     <h4>El ecosistema de producción de TensorFlow</h4>
                     <p>Una de las mayores fortalezas de TensorFlow es su ecosistema completo de despliegue:</p>
@@ -1468,11 +1477,18 @@ resultado = datos_sensor @ pesos.T   # Multiplicación matricial`} />
 y = 2 * x**2 + 3 * x + 5    # y = 2(4) + 6 + 5 = 19
 y.backward()                # Calcula dy/dx = 4x + 3
 print(x.grad)               # tensor(11.)  ->  4(2) + 3 = 11`} />
+                    <Box type="code" label="Lectura del código">
+                        El gradiente <span className="inline-code">x.grad</span> devuelve <strong>11.0</strong>, exactamente el valor de la
+                        derivada <span className="inline-code">dy/dx = 4x + 3</span> evaluada en <span className="inline-code">x = 2</span>.
+                        Autograd no derivó la fórmula a mano: reconstruyó la regla de la cadena recorriendo hacia atrás el grafo de operaciones
+                        que registró durante el forward. Ese mismo mecanismo, aplicado a millones de parámetros, es lo que permite entrenar una
+                        red sin calcular una sola derivada de forma manual.
+                    </Box>
 
                     <h4>El módulo torch.nn: construcción de redes</h4>
                     <p>
                         PyTorch organiza las redes alrededor de <span className="inline-code">torch.nn.Module</span>. Todo modelo se define como una
-                        clase que hereda de <span className="inline-code">nn.Module</span> e implementa dos elementos: el constructor
+                        clase que hereda de <span className="inline-code">nn.Module</span> e implementa dos elementos: el constructor{' '}
                         <span className="inline-code">__init__()</span> (donde se declaran las capas) y <span className="inline-code">forward()</span>{' '}
                         (cómo fluyen los datos).
                     </p>
@@ -1614,6 +1630,11 @@ for epoca in range(50):
 os.environ['KERAS_BACKEND'] = 'torch'   # o 'tensorflow', 'jax'
 import keras
 # ... el resto del código Keras es idéntico para cualquier backend`} />
+                    <Box type="code" label="Lectura del código">
+                        La única línea que cambia entre un backend y otro es <span className="inline-code">os.environ['KERAS_BACKEND']</span>, y
+                        debe fijarse <strong>antes</strong> de importar Keras (de lo contrario el backend ya quedó elegido). El resto del modelo
+                        —capas, entrenamiento, guardado— permanece idéntico: esa es la promesa multi-backend de Keras 3 convertida en código.
+                    </Box>
 
                     <h4>¿Cuál elegir? Guía para el contexto colombiano</h4>
                     <Accordion items={[
@@ -2111,6 +2132,15 @@ tf.keras.mixed_precision.set_global_policy('mixed_float16')`} />
                             )
                         },
                     ]} />
+                    <Box type="code" label="Lectura del código">
+                        Ambos fragmentos activan la <strong>precisión mixta</strong>, pero con distinto nivel de control. En PyTorch,{' '}
+                        <span className="inline-code">autocast</span> ejecuta cada operación en FP16 donde es seguro y{' '}
+                        <span className="inline-code">GradScaler</span> escala la pérdida para que los gradientes diminutos no se anulen (es el
+                        ciclo de la <strong>Figura 5</strong>: escalar → backward → des-escalar → paso). En Keras el escalado queda oculto: basta
+                        una línea, <span className="inline-code">set_global_policy('mixed_float16')</span>. La instrucción{' '}
+                        <span className="inline-code">set_memory_growth</span> es un asunto aparte: evita que TensorFlow reserve toda la VRAM al
+                        arrancar, dejándola disponible para el lote.
+                    </Box>
 
                     <h4>Gestión de memoria: cuando la GPU dice «no más»</h4>
                     <p>La <strong>acumulación de gradientes</strong> simula lotes grandes sin memoria adicional:</p>
@@ -2721,6 +2751,12 @@ modelo.eval()             # Cambiar a modo evaluación`} />
     'perdida': perdida_actual,
 }
 torch.save(checkpoint, f'checkpoint_epoca_{epoca}.pth')`} />
+                    <Box type="code" label="Lectura del código">
+                        A diferencia del <span className="inline-code">state_dict</span> (que guarda solo los pesos), el checkpoint es un diccionario
+                        que almacena también el <span className="inline-code">optimizador_state_dict</span>, la época y la pérdida. Con esos cuatro
+                        elementos, un entrenamiento que Colab interrumpe por desconexión se reanuda <strong>exactamente</strong> donde quedó —incluido
+                        el estado interno de Adam (sus medias móviles)—, en lugar de recomenzar desde cero.
+                    </Box>
 
                     <h4>Guardado en TensorFlow/Keras: .keras vs. SavedModel</h4>
                     <CodeBlock lang="python" title="Formatos de Keras" code={`# Formato .keras (Keras 3, multi-backend)
@@ -2779,6 +2815,13 @@ torch.export.save(programa, 'detector_roya.pt2')
 # Cargar en otro entorno (sin el código fuente del modelo)
 programa_cargado = torch.export.load('detector_roya.pt2')
 resultado = programa_cargado.module()(entrada[0])`} />
+                    <Box type="code" label="Lectura del código">
+                        <span className="inline-code">torch.export.export</span> traza el modelo con una entrada de ejemplo y lo congela como un
+                        grafo autocontenido; el archivo <span className="inline-code">.pt2</span> que produce se vuelve a cargar en otra máquina{' '}
+                        <strong>sin el código fuente de la clase del modelo</strong> —a diferencia del <span className="inline-code">state_dict</span>,
+                        que exige volver a declarar la arquitectura antes de cargar—. Por eso es el formato pensado para desplegar en C++ o en el
+                        borde, donde no hay un intérprete de Python que reconstruya la red.
+                    </Box>
 
                     <h4>Conceptos básicos de despliegue</h4>
                     <DespliegueSVG />
