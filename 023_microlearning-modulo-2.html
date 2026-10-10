@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="Microlearning del Módulo 2 — Arquitecturas del Aprendizaje Profundo. 5 cápsulas de 4-5 minutos sobre los conceptos esenciales: convolución vs. capa densa, compuertas LSTM, mecanismo de atención, modelos generativos (VAE/GAN/Difusión) y transfer learning. Universidad Santo Tomás.">
+        content="Microlearning del Módulo 2 — Arquitecturas del Aprendizaje Profundo. 5 cápsulas de 4–5 minutos sobre los conceptos esenciales: convolución vs. capa densa, compuertas LSTM, mecanismo de atención, modelos generativos (VAE/GAN/difusión) y aprendizaje por transferencia. Universidad Santo Tomás.">
     <title>Microlearning · Módulo 2 — Arquitecturas del Deep Learning · USTA</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -538,13 +538,16 @@
                         {checked && (
                             <span className={`text-sm font-bold ${ok ? 'text-green-600' : 'text-red-500'}`}>
                                 <i className={`fas ${ok ? 'fa-circle-check' : 'fa-circle-xmark'} mr-1`}></i>
-                                {ok ? '¡Correcto!' : 'Revisa la explicación abajo'}
+                                {ok ? '¡Correcto!' : 'Conviene revisar la explicación'}
                             </span>
                         )}
                     </div>
                     {checked && (
                         <div className="mt-3 text-[0.9rem] text-gray-700 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-4 border-l-4 border-gold animate-fade-in shadow-sm">
-                            <strong>Explicación: </strong>{opciones[correctIdx].justificacion}
+                            {!ok && sel !== null && opciones[sel] && (
+                                <p className="mb-2"><strong>Sobre la opción elegida:</strong>{' '}{opciones[sel].justificacion}</p>
+                            )}
+                            <strong>{ok ? 'Explicación:' : 'Respuesta correcta:'}</strong>{' '}{opciones[correctIdx].justificacion}
                         </div>
                     )}
                 </div>
@@ -686,11 +689,12 @@
             const beltY = 55;
             const beltX1 = 30, beltX2 = 350;
 
+            const coma = (v) => v.toFixed(2).replace('.', ',');
             const Gate = ({ x, label, val, color, sub }) => (
                 <g>
                     <circle cx={x} cy={150} r="22" fill="white" stroke={color} strokeWidth="2.5" />
                     <text x={x} y={146} textAnchor="middle" fontSize="13" fontWeight="bold" fill={color}>{label}</text>
-                    <text x={x} y={160} textAnchor="middle" fontSize="9" fill={color}>{val.toFixed(2)}</text>
+                    <text x={x} y={160} textAnchor="middle" fontSize="9" fill={color}>{coma(val)}</text>
                     <text x={x} y={188} textAnchor="middle" fontSize="8.5" fill="#64748B" fontWeight="600">{sub}</text>
                 </g>
             );
@@ -701,7 +705,7 @@
                         <i className="fas fa-conveyor-belt-empty text-secondary mr-2"></i>La celda LSTM: tres compuertas y el estado de celda
                     </h4>
                     <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
-                        aria-label="Esquema de una celda LSTM. En la parte superior, una cinta transportadora representa el estado de celda, la memoria a largo plazo que fluye con sumas en lugar de multiplicaciones. Debajo, tres compuertas sigmoide: olvido, entrada y salida, controlan qué se descarta, qué se almacena y qué se expone como salida.">
+                        aria-label="Esquema de una celda LSTM. En la parte superior, una cinta transportadora representa el estado de celda, la memoria a largo plazo que se actualiza con una suma y solo se multiplica por la compuerta de olvido. Debajo, tres compuertas sigmoides (olvido, entrada y salida) controlan qué se descarta, qué se almacena y qué se expone como salida.">
                         <defs>
                             <linearGradient id="beltGrad" x1="0" y1="0" x2="1" y2="0">
                                 <stop offset="0%" stopColor="#15803D" />
@@ -715,8 +719,8 @@
                         <line x1={beltX1} y1={beltY} x2={beltX2} y2={beltY}
                             stroke="url(#beltGrad)" strokeWidth={2 + Cnew * 6} strokeLinecap="round"
                             markerEnd="url(#lstmArr)" style={{ transition: 'stroke-width 0.3s' }} />
-                        <text x={beltX1} y={beltY - 14} fontSize="9" fill="#15803D" fontWeight="700">C(t-1)</text>
-                        <text x={beltX2 - 28} y={beltY - 14} fontSize="9" fill="#15803D" fontWeight="700">C(t)</text>
+                        <text x={beltX1} y={beltY - 14} fontSize="9" fill="#15803D" fontWeight="700">Cₜ₋₁</text>
+                        <text x={beltX2 - 28} y={beltY - 14} fontSize="9" fill="#15803D" fontWeight="700">Cₜ</text>
                         <text x={W / 2} y={beltY - 14} textAnchor="middle" fontSize="9.5" fill="#15803D" fontWeight="700">Estado de celda (memoria larga · sumas)</text>
                         {/* Operación de olvido (multiplicación) sobre la cinta */}
                         <circle cx="110" cy={beltY} r="9" fill="white" stroke="#B45309" strokeWidth="2" />
@@ -733,7 +737,7 @@
                         <Gate x={330} label="o" val={output} color="#0E7490" sub="salida" />
                         {/* Salida h(t) */}
                         <line x1="330" y1="172" x2="330" y2="210" stroke="#0E7490" strokeWidth="1.5" strokeDasharray="3,3" />
-                        <text x="330" y="222" textAnchor="middle" fontSize="9" fill="#0E7490" fontWeight="700">h(t)={hOut.toFixed(2)}</text>
+                        <text x="330" y="222" textAnchor="middle" fontSize="9" fill="#0E7490" fontWeight="700">hₜ = {coma(hOut)}</text>
                     </svg>
                     <div className="grid grid-cols-3 gap-2 mt-3">
                         <div>
@@ -756,8 +760,8 @@
                         </div>
                     </div>
                     <p className="text-center text-xs text-gray-500 mt-3 italic leading-relaxed">
-                        Mueva las compuertas (valores de 0 a 1). Con olvido cercano a 1 la memoria pasada se conserva;
-                        cerca de 0 se descarta. La actualización del estado usa <strong>sumas</strong>, lo que deja fluir el gradiente sin desvanecerse.
+                        Al mover las compuertas (valores de 0 a 1) se observa que, con el olvido cercano a 1, la memoria pasada se conserva y,
+                        cerca de 0, se descarta. Como la actualización del estado es una <strong>suma</strong>, el gradiente solo se multiplica por la compuerta de olvido: cruza casi intacto mientras esta se mantenga cerca de 1.
                     </p>
                 </div>
             );
@@ -811,7 +815,7 @@
                                         fill="#ED1E79" opacity={0.35 + peso * 0.6}
                                         style={{ transition: 'all 0.4s' }} />
                                     <text x={cx} y={baseY - 24 - barH} textAnchor="middle" fontSize="8" fill="#BE185D" fontWeight="700">
-                                        {peso.toFixed(2)}
+                                        {peso.toFixed(2).replace('.', ',')}
                                     </text>
                                     {/* Caja del token */}
                                     <rect x={cx - colW / 2 + 4} y={baseY - 18} width={colW - 8} height="26" rx="7"
@@ -828,12 +832,12 @@
                         {escenarios.map((e, i) => (
                             <button key={i} onClick={() => setIdx(i)}
                                 className={`text-xs font-bold px-4 py-1.5 rounded-full border-2 transition-all ${idx === i ? 'border-secondary text-secondary bg-pink-50' : 'border-gray-300 text-gray-600 hover:border-secondary hover:text-secondary'}`}>
-                                Generar “{e.objetivo}”
+                                Generar «{e.objetivo}»
                             </button>
                         ))}
                     </div>
                     <p className="text-center text-xs text-gray-500 mt-3 italic leading-relaxed">
-                        Al traducir cada palabra, el modelo “alinea” su atención hacia la palabra de entrada correspondiente,
+                        Al traducir cada palabra, el modelo «alinea» su atención hacia la palabra de entrada correspondiente,
                         en vez de comprimir toda la frase en un único vector fijo.
                     </p>
                 </div>
@@ -846,10 +850,10 @@
             const [familia, setFamilia] = useState('vae');
             const W = 380, H = 200;
 
-            const Box = ({ x, y, w, h, label, fill, stroke }) => (
+            const Box = ({ x, y, w, h, label, fill, stroke, fs = 10.5 }) => (
                 <g>
                     <rect x={x} y={y} width={w} height={h} rx="10" fill={fill} stroke={stroke} strokeWidth="1.8" />
-                    <text x={x + w / 2} y={y + h / 2 + 4} textAnchor="middle" fontSize="10.5" fontWeight="bold" fill={stroke}>{label}</text>
+                    <text x={x + w / 2} y={y + h / 2 + 4} textAnchor="middle" fontSize={fs} fontWeight="bold" fill={stroke}>{label}</text>
                 </g>
             );
             const Arrow = ({ x1, y1, x2, y2, color }) => (
@@ -872,11 +876,11 @@
                             <>
                                 <Box x={20} y={75} w={60} h={48} label="x" fill="#F5F0FA" stroke="#3D008D" />
                                 <Arrow x1={80} y1={99} x2={120} y2={99} color="#3D008D" />
-                                <Box x={120} y={70} w={70} h={58} label="Encoder" fill="#EDE5F7" stroke="#3D008D" />
+                                <Box x={120} y={70} w={70} h={58} label="Codificador" fs={9} fill="#EDE5F7" stroke="#3D008D" />
                                 <Box x={210} y={78} w={60} h={42} label="μ, σ → z" fill="#FCE7F1" stroke="#BE185D" />
                                 <Arrow x1={190} y1={99} x2={210} y2={99} color="#3D008D" />
                                 <Arrow x1={270} y1={99} x2={300} y2={99} color="#3D008D" />
-                                <Box x={300} y={70} w={60} h={58} label="Decoder" fill="#EDE5F7" stroke="#3D008D" />
+                                <Box x={300} y={70} w={74} h={58} label="Decodificador" fs={9} fill="#EDE5F7" stroke="#3D008D" />
                                 <text x={W / 2} y="22" textAnchor="middle" fontSize="10" fill="#64748B" fontWeight="700">Comprime a una distribución latente y reconstruye</text>
                                 <text x={240} y="150" textAnchor="middle" fontSize="8.5" fill="#BE185D">espacio latente continuo</text>
                             </>
@@ -896,7 +900,7 @@
                         )}
                         {familia === 'diff' && (
                             <>
-                                <text x={W / 2} y="22" textAnchor="middle" fontSize="10" fill="#64748B" fontWeight="700">Añade ruido (forward) y aprende a quitarlo (reverse)</text>
+                                <text x={W / 2} y="22" textAnchor="middle" fontSize="10" fill="#64748B" fontWeight="700">Añade ruido (proceso directo) y aprende a quitarlo (inverso)</text>
                                 {[0, 1, 2, 3].map(i => {
                                     const x = 30 + i * 90;
                                     const op = 1 - i * 0.28; // de imagen nítida a ruido
@@ -911,7 +915,7 @@
                                         </g>
                                     );
                                 })}
-                                <text x={W / 2} y="160" textAnchor="middle" fontSize="9" fill="#15803D" fontWeight="700">◀ El reverse (denoising) reconstruye paso a paso</text>
+                                <text x={W / 2} y="160" textAnchor="middle" fontSize="9" fill="#15803D" fontWeight="700">◀ El proceso inverso (quitar ruido) reconstruye paso a paso</text>
                             </>
                         )}
                     </svg>
@@ -931,7 +935,7 @@
             );
         };
 
-        /* ——— Cápsula 5: Transfer learning vs fine-tuning (capas congeladas) ——— */
+        /* ——— Cápsula 5: aprendizaje por transferencia vs. ajuste fino (capas congeladas) ——— */
         const TransferVisual = () => {
             const revRef = useReveal();
             const [modo, setModo] = useState('extract'); // extract | finetune
@@ -949,7 +953,7 @@
             const congelada = (c, i) => {
                 if (c.tipo === 'nuevo') return false; // siempre se entrena
                 if (modo === 'extract') return true;  // toda la base congelada
-                return c.tipo === 'base' && i < 3;     // fine-tuning: solo las profundas siguen congeladas
+                return c.tipo === 'base' && i < 3;     // ajuste fino: las capas iniciales siguen congeladas
             };
 
             const lh = 38, lx = 60, lw = 240;
@@ -957,10 +961,10 @@
             return (
                 <div ref={revRef} className="visual-container reveal">
                     <h4 className="visual-title">
-                        <i className="fas fa-snowflake text-secondary mr-2"></i>Transfer learning: ¿qué capas congelar?
+                        <i className="fas fa-snowflake text-secondary mr-2"></i>Aprendizaje por transferencia: ¿qué capas congelar?
                     </h4>
                     <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
-                        aria-label="Pila de capas de una red pre-entrenada. En extracción de características, todas las capas base están congeladas y solo se entrena un clasificador nuevo. En fine-tuning, las últimas capas se descongelan y se reentrenan con una tasa de aprendizaje baja, junto con el clasificador nuevo.">
+                        aria-label="Pila de capas de una red preentrenada. En extracción de características, todas las capas base están congeladas y solo se entrena un clasificador nuevo. En ajuste fino, las últimas capas se descongelan y se reentrenan con una tasa de aprendizaje baja, junto con el clasificador nuevo.">
                         {capas.map((c, i) => {
                             const y = 18 + i * (lh + 8);
                             const fr = congelada(c, i);
@@ -988,7 +992,7 @@
                         </button>
                         <button onClick={() => setModo('finetune')}
                             className={`text-xs font-bold px-4 py-1.5 rounded-full border-2 transition-all ${modo === 'finetune' ? 'border-green-500 text-green-700 bg-green-50' : 'border-gray-300 text-gray-600 hover:border-green-500'}`}>
-                            <i className="fas fa-fire mr-1"></i>Fine-tuning (más datos)
+                            <i className="fas fa-fire mr-1"></i>Ajuste fino (más datos)
                         </button>
                     </div>
                     <p className="text-center text-xs text-gray-500 mt-3 italic leading-relaxed">
@@ -1041,19 +1045,19 @@
                     titulo: 'But what is a convolution?',
                     canal: '3Blue1Brown · Convoluciones',
                     url: 'https://www.youtube.com/watch?v=KuXjwB4LzSA',
-                    descripcion: 'Explica visualmente la operación de convolución: cómo un filtro pequeño se desliza sobre la señal, la base matemática que distingue a una CNN de una red densa.',
+                    descripcion: 'Explica la convolución como operación de deslizar y sumar (incluidos los kernels de imagen). Esta cápsula la conecta con la CNN y su ventaja frente a la capa densa.',
                 },
                 objetivo: 'Comprender por qué un perceptrón multicapa (MLP) fracasa con imágenes y cómo la convolución resuelve la explosión de parámetros mediante conectividad local y pesos compartidos.',
                 analogia: {
-                    tipo: 'warn',
-                    titulo: 'Analogía: el inspector que no recuerda dónde estaban las cosas',
+                    tipo: 'tip',
+                    titulo: 'Analogía: la red de cámaras trampa',
                     contenido: (
                         <p>
-                            Un MLP, para procesar una imagen, debe <strong>aplanarla</strong> en una larga fila de píxeles.
-                            Es como darle a un inspector una lista desordenada de 1.000.000 de números sin decirle cuáles
-                            estaban juntos: pierde por completo la noción de “arriba”, “abajo”, “cerca” o “lejos”. La CNN,
-                            en cambio, mira <strong>pequeños parches vecinos</strong> y reutiliza el mismo detector en toda
-                            la imagen, conservando la estructura espacial.
+                            Aplanar la foto para un MLP es como entregar a un guardaparques 1.000.000 de valores sueltos sin
+                            decirle cuáles estaban juntos: pierde la noción de «arriba», «abajo», «cerca» o «lejos». La CNN,
+                            como una red de cámaras trampa, deja que cada cámara vigile solo <strong>su propio claro</strong>{' '}
+                            (conectividad local) y que todas apliquen <strong>el mismo criterio</strong> de detección en toda
+                            la reserva (pesos compartidos).
                         </p>
                     ),
                 },
@@ -1072,7 +1076,7 @@
                             solo observa un pequeño parche (por ejemplo, 3×3). Los <strong>pesos compartidos</strong>:
                             el mismo filtro se aplica en toda la imagen, porque si un detector de bordes es útil en una
                             zona, lo es en cualquier otra. Y el <strong>submuestreo</strong> (pooling), que aporta
-                            invarianza a pequeñas traslaciones. Así, un gato sigue siendo un gato en cualquier esquina.
+                            invarianza a pequeñas traslaciones. Así, un jaguar sigue siendo un jaguar en cualquier esquina de la foto.
                         </p>
                         <p>
                             La operación de convolución desliza un filtro aprendible sobre la imagen y produce un mapa
@@ -1083,12 +1087,12 @@
                 ),
                 formula: String.raw`$$S(i, j) = (I * K)(i, j) = \sum_{m} \sum_{n} I(i + m, j + n) \cdot K(m, n)$$`,
                 mcq: {
-                    pregunta: '¿Por qué una CNN supera a un MLP al procesar imágenes?',
+                    pregunta: 'Una capa densa que conecta una imagen de 1.000 × 1.000 píxeles con 1.000 neuronas necesita mil millones de pesos; una capa convolucional con 1.000 filtros de 3 × 3, solo 9.000. ¿Qué explica la diferencia?',
                     opciones: [
-                        { texto: 'Porque usa más neuronas y, por tanto, más memoria.', correcta: false, justificacion: 'Al contrario: la CNN usa muchos menos parámetros que un MLP gracias a la compartición de pesos. La ventaja no es tener más capacidad bruta.' },
-                        { texto: 'Porque aplica conectividad local y pesos compartidos, preservando la estructura espacial y reduciendo drásticamente los parámetros.', correcta: true, justificacion: 'El MLP debe aplanar la imagen (pierde la topología) y conectar todo con todo (mil millones de pesos). La CNN reutiliza un filtro pequeño en toda la imagen, conserva la vecindad de los píxeles y logra invarianza a la traslación.' },
-                        { texto: 'Porque no necesita función de activación no lineal.', correcta: false, justificacion: 'Las CNN sí usan no linealidades (típicamente ReLU). Eso no las diferencia del MLP.' },
-                        { texto: 'Porque entrena sin retropropagación.', correcta: false, justificacion: 'Las CNN se entrenan con retropropagación, igual que los MLP. Los filtros son parámetros aprendibles.' },
+                        { texto: 'La convolución reduce primero la imagen a baja resolución y luego la procesa.', correcta: false, justificacion: 'La convolución no reescala la imagen antes de aplicarse: recorre la imagen completa. El ahorro viene de cómo se reutilizan los pesos.' },
+                        { texto: 'La capa convolucional no lleva sesgos ni activación.', correcta: false, justificacion: 'Las capas convolucionales sí suelen llevar un sesgo por filtro y una activación (típicamente ReLU); quitarlos ahorraría muy poco.' },
+                        { texto: 'Las CNN guardan cada peso en 8 bits en lugar de 32.', correcta: false, justificacion: 'Eso es la cuantización, que reduce los bytes por peso, no el número de pesos. Además, no es propia de las CNN.' },
+                        { texto: 'Cada filtro de 3 × 3 se reutiliza en toda la imagen.', correcta: true, justificacion: 'Conectividad local y pesos compartidos: cada filtro tiene 9 pesos que no dependen del tamaño de la imagen, porque se deslizan por todas las posiciones. Además conservan la vecindad entre píxeles que el MLP pierde al aplanar.' },
                     ],
                 },
             },
@@ -1102,17 +1106,18 @@
                     url: 'https://www.youtube.com/watch?v=YCzL96nL7j0',
                     descripcion: 'Recorre paso a paso las tres compuertas de una LSTM y el estado de celda, mostrando cómo la red decide qué recordar y qué olvidar.',
                 },
-                objetivo: 'Entender cómo las tres compuertas de una LSTM (olvido, entrada y salida) y el estado de celda resuelven el desvanecimiento del gradiente de las RNN simples.',
+                objetivo: 'Entender cómo las tres compuertas de una LSTM (olvido, entrada y salida) y el estado de celda mitigan el desvanecimiento del gradiente de las RNN simples.',
                 analogia: {
                     tipo: 'tip',
                     titulo: 'Analogía: la cinta transportadora de la memoria',
                     contenido: (
                         <>
                             <p>
-                                El estado de celda {String.raw`\(C_t\)`} es como una <strong>cinta transportadora</strong>
+                                El estado de celda {String.raw`\(C_t\)`} es como una <strong>cinta transportadora</strong>{' '}
                                 que recorre toda la secuencia con pocas interacciones lineales: un ajuste multiplicativo de la
-                                compuerta de olvido y una <strong>suma</strong> de información nueva. Gracias a esa suma, la
-                                información puede viajar “intacta” a lo largo de muchos pasos:
+                                compuerta de olvido y una <strong>suma</strong> de información nueva (la metáfora es de Olah, 2015).
+                                Gracias a esa suma, la información puede viajar «casi intacta» a lo largo de muchos pasos, mientras
+                                la compuerta de olvido se mantenga cerca de 1:
                             </p>
                             <ul>
                                 <li><strong>Compuerta de olvido (f):</strong> decide qué se descarta de la memoria previa.</li>
@@ -1131,7 +1136,7 @@
                         <p>
                             Una RNN simple sufre el <strong>desvanecimiento del gradiente</strong>: al propagar el error
                             hacia atrás a través de muchos pasos temporales, se multiplican muchas derivadas menores que 1
-                            y la señal se diluye (el “teléfono roto”). La red aprende dependencias cortas, pero olvida el
+                            y la señal se diluye (el «teléfono roto» de 50 personas). La red aprende dependencias cortas, pero olvida el
                             inicio de una oración larga o un ciclo climático de hace meses.
                         </p>
                         <p>
@@ -1142,24 +1147,24 @@
                 ),
                 formula: String.raw`$$C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$$`,
                 mcq: {
-                    pregunta: '¿Cuál es la función de la compuerta de olvido (forget gate) en una LSTM?',
+                    pregunta: '¿Cuál es la función de la compuerta de olvido en una LSTM?',
                     opciones: [
-                        { texto: 'Generar los valores candidatos que se sumarán al estado.', correcta: false, justificacion: 'Eso lo hace el generador de candidatos (la rama tanh) junto con la compuerta de entrada, no la de olvido.' },
-                        { texto: 'Decidir qué parte de la información del estado de celda anterior se descarta.', correcta: true, justificacion: 'La compuerta de olvido emite valores entre 0 y 1 que multiplican al estado anterior C(t-1): un 0 borra esa información, un 1 la conserva. Por ejemplo, “olvidar” la ubicación geográfica previa de un usuario que se mudó de ciudad.' },
-                        { texto: 'Exponer la memoria interna como salida del paso actual.', correcta: false, justificacion: 'Esa es la compuerta de salida (output gate), que filtra el estado de celda para producir el estado oculto h(t).' },
-                        { texto: 'Reemplazar la retropropagación por una regla de suma.', correcta: false, justificacion: 'La LSTM sigue entrenándose con retropropagación (BPTT). Lo que ayuda al gradiente es la actualización aditiva del estado de celda, no la compuerta de olvido por sí sola.' },
+                        { texto: 'Decidir qué fracción del estado de celda anterior se conserva.', correcta: true, justificacion: 'La compuerta de olvido emite valores entre 0 y 1 que multiplican al estado anterior Cₜ₋₁: un 0 borra esa información y un 1 la conserva. Por ejemplo, «olvidar» la ciudad previa de un usuario que se mudó.' },
+                        { texto: 'Decidir cuánto del candidato C̃ₜ se escribe en el estado.', correcta: false, justificacion: 'Esa es la compuerta de entrada iₜ, que multiplica al candidato antes de sumarlo a la cinta.' },
+                        { texto: 'Filtrar el estado de celda para producir el estado oculto hₜ.', correcta: false, justificacion: 'Esa es la compuerta de salida oₜ, que lee tanh(Cₜ) y decide qué parte se expone como hₜ.' },
+                        { texto: 'Generar los valores candidatos con una tanh a partir de xₜ y hₜ₋₁.', correcta: false, justificacion: 'Eso lo hace la rama del candidato C̃ₜ (con tanh), no una compuerta sigmoide.' },
                     ],
                 },
             },
             {
                 id: 3, num: '03', icon: 'fa-highlighter', badgeColor: 'gold',
-                title: 'El mecanismo de atención: a qué “mirar” en cada paso',
+                title: 'El mecanismo de atención: a qué «mirar» en cada paso',
                 duracion: '~ 5 min',
                 video: {
                     titulo: 'Attention in transformers, step-by-step | Deep Learning cap. 6',
                     canal: '3Blue1Brown · Deep Learning',
                     url: 'https://www.youtube.com/watch?v=eMlx5fFNoYc',
-                    descripcion: 'Desarrolla intuitivamente el mecanismo de atención y los vectores Query, Key y Value que sostienen los Transformers.',
+                    descripcion: 'Desarrolla la autoatención con Query, Key y Value (Transformer); la cápsula parte de su antecesora, la atención de Bahdanau.',
                 },
                 objetivo: 'Comprender cómo la atención permite al modelo consultar dinámicamente toda la secuencia de entrada, superando el cuello de botella del vector de contexto fijo.',
                 analogia: {
@@ -1185,15 +1190,15 @@
                 contenidoExtra: (
                     <div>
                         <p>
-                            En la arquitectura encoder-decoder original, todo el mensaje de entrada debía comprimirse en
+                            En la arquitectura codificador-decodificador original, todo el mensaje de entrada debía comprimirse en
                             un único <strong>vector de contexto</strong> de tamaño fijo. En secuencias largas ese vector
                             se satura: los primeros elementos quedan diluidos. La atención (Bahdanau et al., 2015) rompe
-                            ese cuello de botella permitiendo al decodificador <strong>mirar de regreso a toda la entrada</strong>
+                            ese cuello de botella permitiendo al decodificador <strong>mirar de regreso a toda la entrada</strong>{' '}
                             en cada paso.
                         </p>
                         <p>
-                            En lugar de un solo vector, se construye un <strong>contexto dinámico</strong> {String.raw`\(c_t\)`}
-                            como una suma ponderada de todos los estados del encoder. Los pesos {String.raw`\(\alpha_{t,i}\)`}
+                            En lugar de un solo vector, se construye un <strong>contexto dinámico</strong> {String.raw`\(c_t\)`}{' '}
+                            como una suma ponderada de todos los estados del codificador. Los pesos {String.raw`\(\alpha_{t,i}\)`}
                             —obtenidos con softmax sobre una puntuación de afinidad— indican cuánta atención presta el
                             modelo a cada palabra de entrada y <strong>suman 1</strong>:
                         </p>
@@ -1201,12 +1206,12 @@
                 ),
                 formula: String.raw`$$c_t = \sum_{i=1}^{T} \alpha_{t,i}\, h_i \qquad \text{con} \qquad \alpha_{t,i} = \frac{\exp(\mathrm{score}(s_{t-1}, h_i))}{\sum_{j=1}^{T} \exp(\mathrm{score}(s_{t-1}, h_j))}$$`,
                 mcq: {
-                    pregunta: '¿Qué hace exactamente el mecanismo de atención al generar cada palabra de salida?',
+                    pregunta: 'En la atención de Bahdanau, ¿cómo son los pesos α de un paso del decodificador sobre las palabras de entrada?',
                     opciones: [
-                        { texto: 'Comprime toda la oración en un único vector fijo al inicio del proceso.', correcta: false, justificacion: 'Eso es precisamente el cuello de botella del seq2seq clásico que la atención resuelve. La atención NO usa un vector único y estático.' },
-                        { texto: 'Calcula una puntuación de relevancia entre el paso actual y todas las palabras de la entrada, y pondera cuánto contexto importar de cada una.', correcta: true, justificacion: 'La atención asigna pesos α (que suman 1, vía softmax) a cada elemento de la entrada, construyendo un contexto dinámico distinto en cada paso. Así “alinea” la palabra que genera con la región relevante de la entrada.' },
-                        { texto: 'Procesa la oración palabra por palabra, en estricto orden, sin mirar hacia adelante.', correcta: false, justificacion: 'Eso describe el procesamiento recurrente secuencial. La atención permite relacionar cada elemento con todos los demás simultáneamente, sin importar la distancia.' },
-                        { texto: 'Genera significados aleatorios y deja que un discriminador elija el mejor.', correcta: false, justificacion: 'Eso describe el esquema adversario de una GAN, que no tiene relación con el mecanismo de atención.' },
+                        { texto: 'Fijos: se aprenden una vez por posición y valen en todos los pasos.', correcta: false, justificacion: 'Si fueran fijos, el contexto sería el mismo en cada paso: otro resumen estático. La atención los recalcula en cada paso según el estado del decodificador.' },
+                        { texto: 'Solo 0 o 1: el decodificador elige una única palabra de entrada.', correcta: false, justificacion: 'Eso sería una atención «dura». La de Bahdanau es suave: reparte el peso entre varias palabras y por eso es derivable.' },
+                        { texto: 'No negativos, suman 1 y cambian en cada paso.', correcta: true, justificacion: 'Salen de una softmax sobre las puntuaciones de afinidad entre el estado del decodificador y cada estado del codificador. Por eso forman un promedio ponderado distinto en cada paso, como un resaltador que se mueve.' },
+                        { texto: 'Suman 1 por columna: cada palabra reparte su atención entre los pasos.', correcta: false, justificacion: 'La normalización va por el otro eje: en cada paso del decodificador, la softmax reparte el peso entre las palabras de entrada.' },
                     ],
                 },
             },
@@ -1220,21 +1225,21 @@
                     url: 'https://www.youtube.com/watch?v=1CIpzeNxIhU',
                     descripcion: 'Explica el proceso de difusión: cómo se añade ruido a una imagen y cómo la red aprende a revertirlo paso a paso para generar imágenes nuevas.',
                 },
-                objetivo: 'Distinguir las tres grandes familias generativas por su mecanismo: reconstrucción regularizada (VAE), juego adversario (GAN) y reversión del ruido (Difusión).',
+                objetivo: 'Distinguir las tres grandes familias generativas por su mecanismo: reconstrucción regularizada (VAE), juego adversario (GAN) y reversión del ruido (difusión).',
                 analogia: {
-                    tipo: 'ethics',
-                    titulo: 'Analogía: el escultor de Miguel Ángel (difusión)',
+                    tipo: 'tip',
+                    titulo: 'Analogía: la limpieza del río Bogotá (difusión)',
                     contenido: (
                         <>
                             <p>
-                                Miguel Ángel decía que la escultura ya estaba dentro del bloque de mármol y que su tarea
-                                era solo retirar lo que sobraba. Un modelo de difusión hace eso al revés en el tiempo:
+                                Un río cristalino de páramo es la imagen original {String.raw`\(x_0\)`}. A medida que atraviesa la
+                                sabana recibe vertimientos paso a paso hasta volverse una mezcla turbia {String.raw`\(x_T\)`}:
                             </p>
                             <ul>
-                                <li>El proceso <strong>forward</strong> convierte una figura nítida en un “mármol ruidoso” añadiendo polvo estático grano a grano (proceso fijo, sin aprendizaje).</li>
-                                <li>El proceso <strong>reverse</strong> es el escultor que aprendió a retirar ese ruido cincelada a cincelada, hasta que de la nube informe emerge una figura.</li>
+                                <li>El proceso <strong>directo</strong> (<em>forward</em>) es ese deterioro gradual y predecible: es fijo y nadie tuvo que «aprender» a ensuciar el río.</li>
+                                <li>El proceso <strong>inverso</strong> (<em>reverse</em>) es una planta de tratamiento que aprende a revertir la contaminación por etapas.</li>
                             </ul>
-                            <p>La red nunca memoriza esculturas: aprende el oficio de quitar polvo, y por eso talla figuras que nunca existieron.</p>
+                            <p>Bien entrenada, la planta toma <em>cualquier</em> agua turbia (ruido aleatorio) y produce un río limpio plausible que nunca existió exactamente así.</p>
                         </>
                     ),
                 },
@@ -1242,14 +1247,14 @@
                 contenidoExtra: (
                     <div>
                         <p>
-                            Un <strong>VAE</strong> codifica la entrada no en un punto fijo, sino en una <em>distribución</em>
+                            Un <strong>VAE</strong> codifica la entrada no en un punto fijo, sino en una <em>distribución</em>{' '}
                             de probabilidad (media {String.raw`\(\mu\)`} y desviación {String.raw`\(\sigma\)`}), y la
                             decodifica. Esto le da un espacio latente <strong>continuo</strong>, ideal para interpolar
                             (perfiles de fermentación de café, mapas de fertilidad). Optimiza la cota ELBO, que equilibra
                             reconstrucción y una regularización por divergencia KL.
                         </p>
                         <p>
-                            Una <strong>GAN</strong> enfrenta dos redes en un juego de suma cero: el generador {String.raw`\(G\)`}
+                            Una <strong>GAN</strong> enfrenta dos redes en un juego de suma cero: el generador {String.raw`\(G\)`}{' '}
                             crea muestras falsas y el discriminador {String.raw`\(D\)`} intenta distinguirlas de las reales.
                             Produce imágenes muy nítidas, pero su entrenamiento es <strong>inestable</strong> (<em>colapso de modos</em>,
                             es decir, el generador produce siempre la misma muestra; y oscilaciones) y su pérdida no es monótona.
@@ -1258,7 +1263,8 @@
                             Un <strong>modelo de difusión</strong> añade ruido a la imagen paso a paso (proceso fijo) y
                             entrena una red para <strong>predecir y quitar ese ruido</strong>. Al optimizar un objetivo de
                             regresión simple, su entrenamiento es estable y cubre bien la diversidad de los datos: por eso
-                            sustenta hoy a DALL·E, Stable Diffusion y Midjourney.
+                            sustenta DALL·E 2, Stable Diffusion y buena parte de los generadores actuales de imagen (el DALL·E
+                            original de 2021, en cambio, era un Transformer autorregresivo).
                         </p>
                     </div>
                 ),
@@ -1266,24 +1272,24 @@
                 mcq: {
                     pregunta: 'Una GAN genera imágenes mediante…',
                     opciones: [
-                        { texto: 'Un proceso fijo que añade ruido y una red que aprende a quitarlo paso a paso.', correcta: false, justificacion: 'Eso describe un modelo de difusión, no una GAN. La difusión revierte un proceso conocido de adición de ruido.' },
-                        { texto: 'La codificación de la entrada en una distribución gaussiana latente y su posterior decodificación.', correcta: false, justificacion: 'Eso describe un VAE, que optimiza la cota ELBO con una regularización KL. No hay juego adversario.' },
-                        { texto: 'Un juego adversario de suma cero entre un generador que crea muestras falsas y un discriminador que intenta detectarlas.', correcta: true, justificacion: 'El generador G busca engañar al discriminador D, y D busca no dejarse engañar. En el equilibrio teórico, D queda reducido a “lanzar una moneda” (D(x)=1/2). Este juego produce nitidez pero es inestable (colapso de modos, o mode collapse).' },
-                        { texto: 'La aplicación de la regla de la cadena hacia atrás en el tiempo (BPTT).', correcta: false, justificacion: 'BPTT es el algoritmo de entrenamiento de las RNN/LSTM sobre secuencias, no el mecanismo generativo de una GAN.' },
+                        { texto: 'un proceso fijo que añade ruido y una red que aprende a quitarlo paso a paso.', correcta: false, justificacion: 'Eso describe un modelo de difusión, no una GAN. La difusión revierte un proceso conocido de adición de ruido.' },
+                        { texto: 'un juego entre un generador que crea y un discriminador que juzga.', correcta: true, justificacion: 'El generador G busca engañar al discriminador D, y D busca no dejarse engañar. En el equilibrio teórico, D queda reducido a «lanzar una moneda» (D(x) = 1/2). Este juego produce nitidez, pero es inestable (colapso de modos).' },
+                        { texto: 'la codificación de la entrada en una distribución latente y su decodificación.', correcta: false, justificacion: 'Eso describe un VAE, que optimiza la cota ELBO con una regularización KL. No hay juego adversario.' },
+                        { texto: 'una red que predice cada píxel a partir de los anteriores, uno a la vez.', correcta: false, justificacion: 'Eso describe un modelo autorregresivo (como el DALL·E original, que generaba la imagen como una secuencia de tokens). La GAN genera la imagen completa en una sola pasada del generador.' },
                     ],
                 },
             },
             {
                 id: 5, num: '05', icon: 'fa-snowflake', badgeColor: 'secondary',
-                title: 'Transfer learning y fine-tuning: reutilizar el conocimiento',
+                title: 'Aprendizaje por transferencia y ajuste fino: reutilizar el conocimiento',
                 duracion: '~ 4 min',
                 video: {
-                    titulo: 'Transfer Learning - explained',
+                    titulo: 'Fine-tuning a Neural Network explained',
                     canal: 'deeplizard',
                     url: 'https://www.youtube.com/watch?v=5T-iXNNiwIs',
-                    descripcion: 'Explica qué es el transfer learning, por qué reutilizar redes pre-entrenadas ahorra datos y cómo se diferencia de un fine-tuning completo.',
+                    descripcion: 'Explica cómo se reutiliza una red ya entrenada y se ajustan sus capas (ajuste fino) para una tarea nueva, en lugar de entrenar desde cero.',
                 },
-                objetivo: 'Saber cuándo congelar la red base (extracción de características) y cuándo descongelar capas para reentrenarlas (fine-tuning), según el tamaño y la similitud de los datos.',
+                objetivo: 'Saber cuándo congelar la red base (extracción de características) y cuándo descongelar capas para reentrenarlas (ajuste fino, en inglés fine-tuning), según el tamaño y la similitud de los datos.',
                 analogia: {
                     tipo: 'tip',
                     titulo: 'Analogía: el experto que ya sabe lo básico',
@@ -1291,14 +1297,14 @@
                         <>
                             <p>
                                 Entrenar una red desde cero es como formar a un profesional desde la primaria. El
-                                <strong> transfer learning</strong> aprovecha que las capas iniciales de una red entrenada
+                                <strong> aprendizaje por transferencia</strong> (<em>transfer learning</em>) aprovecha que las capas iniciales de una red entrenada
                                 en millones de imágenes (ImageNet) ya aprendieron a detectar <strong>bordes, colores y
                                 texturas universales</strong>: un borde en una foto de un perro es igual a un borde en una
                                 radiografía.
                             </p>
                             <ul>
                                 <li><strong>Extracción de características:</strong> con pocos datos, se congela toda la base y solo se entrena un clasificador nuevo al final.</li>
-                                <li><strong>Fine-tuning:</strong> con más datos o un dominio muy distinto, se descongelan las capas superiores y se reentrenan con una tasa de aprendizaje muy baja.</li>
+                                <li><strong>Ajuste fino:</strong> con más datos o un dominio muy distinto, se descongelan las capas superiores y se reentrenan con una tasa de aprendizaje muy baja.</li>
                             </ul>
                         </>
                     ),
@@ -1310,26 +1316,26 @@
                             En contextos con cómputo y datos limitados —clasificar fauna con unos pocos miles de imágenes
                             de cámaras trampa, o detectar roya en hojas de café— entrenar una red profunda desde cero es
                             inviable y provoca sobreajuste inmediato. La solución pragmática y estándar es reutilizar una
-                            red pre-entrenada (ResNet, EfficientNet, MobileNet).
+                            red preentrenada (ResNet, EfficientNet, MobileNet).
                         </p>
                         <p>
-                            La decisión entre <strong>extracción de características</strong> y <strong>fine-tuning</strong>
-                            depende de dos variables: el tamaño del conjunto de datos y su similitud con el dataset original.
-                            Con un dataset pequeño y similar, se congelan los pesos base y se entrena solo el clasificador.
-                            Con un dataset grande o muy diferente (imágenes médicas, satelitales), se descongelan las últimas
-                            capas convolucionales. La precaución clave: usar una tasa de aprendizaje <strong>baja</strong>
+                            La decisión entre <strong>extracción de características</strong> y <strong>ajuste fino</strong>{' '}
+                            depende de dos variables: el tamaño del conjunto de datos y su similitud con el conjunto original.
+                            Con un conjunto pequeño y similar, se congelan los pesos base y se entrena solo el clasificador.
+                            Con un conjunto grande o muy diferente (imágenes médicas, satelitales), se descongelan las últimas
+                            capas convolucionales. La precaución clave: usar una tasa de aprendizaje <strong>baja</strong>{' '}
                             en las capas descongeladas, para no destruir con gradientes grandes el conocimiento ya adquirido.
                         </p>
                     </div>
                 ),
                 formula: null,
                 mcq: {
-                    pregunta: 'Se dispone de solo 100 fotos etiquetadas de flores locales y una ResNet pre-entrenada en ImageNet. ¿Qué estrategia es la más adecuada?',
+                    pregunta: 'Se dispone de solo 100 fotos etiquetadas de flores locales y de una ResNet preentrenada en ImageNet. ¿Qué estrategia es la más adecuada?',
                     opciones: [
-                        { texto: 'Entrenar la ResNet completa desde cero con las 100 fotos.', correcta: false, justificacion: 'Con tan pocos datos, entrenar millones de parámetros desde cero produce sobreajuste inmediato. El conocimiento pre-entrenado se desperdicia.' },
-                        { texto: 'Extracción de características: congelar la base pre-entrenada y entrenar solo un clasificador nuevo al final.', correcta: true, justificacion: 'Con un dataset pequeño y similar al original, la red actúa como extractor de características fijo. Se congelan todos los pesos base (que ya detectan bordes y texturas universales) y solo se entrena la nueva capa de clasificación, minimizando el riesgo de sobreajuste.' },
-                        { texto: 'Descongelar y reentrenar todas las capas con una tasa de aprendizaje alta.', correcta: false, justificacion: 'Una tasa alta sobre toda la red destruiría con gradientes grandes los pesos pre-entrenados útiles. El fine-tuning agresivo solo se justifica con muchos datos y siempre con tasa de aprendizaje baja.' },
-                        { texto: 'Aplicar un modelo de difusión para generar más flores.', correcta: false, justificacion: 'Generar datos sintéticos es otra técnica; la pregunta es sobre cómo reutilizar la red pre-entrenada. La respuesta directa es la extracción de características.' },
+                        { texto: 'Entrenar desde cero una CNN pequeña de 3 capas, más acorde con 100 fotos.', correcta: false, justificacion: 'Una red pequeña sobreajusta menos que una grande entrenada desde cero, pero desaprovecha los filtros ya aprendidos en ImageNet, que con tan pocos datos son la mayor ventaja disponible.' },
+                        { texto: 'Descongelar todas las capas desde el inicio con una tasa de aprendizaje alta.', correcta: false, justificacion: 'Una tasa alta sobre toda la red destruiría con gradientes grandes los pesos preentrenados útiles. El ajuste fino agresivo solo se justifica con muchos datos, y siempre con una tasa de aprendizaje baja.' },
+                        { texto: 'Congelar la base preentrenada y entrenar solo un clasificador nuevo.', correcta: true, justificacion: 'Con un conjunto de datos pequeño y similar al original, la red actúa como extractor de características fijo: los pesos base (que ya detectan bordes y texturas universales) se congelan y solo se entrena la nueva capa de clasificación, lo que reduce el riesgo de sobreajuste.' },
+                        { texto: 'Entrenar la ResNet completa desde cero, con aumento de datos agresivo.', correcta: false, justificacion: 'Con 100 fotos, millones de parámetros entrenados desde cero sobreajustan aun con aumento de datos; además se desperdicia el conocimiento preentrenado.' },
                     ],
                 },
             },
@@ -1480,7 +1486,7 @@
                     <div className="mt-4">
                         <div className="flex justify-between text-[0.7rem] font-semibold mb-1.5">
                             <span>{completedCount} / {total} cápsulas completadas</span>
-                            <span className="text-gold">{pct}%</span>
+                            <span className="text-gold">{pct} %</span>
                         </div>
                         <div className="flex gap-1.5">
                             {Array.from({ length: total }).map((_, i) => (
@@ -1595,7 +1601,7 @@
                                     <h2 className="text-2xl md:text-3xl font-extrabold text-navy mt-4">¡Felicitaciones!</h2>
                                     <p className="text-gray-700 mt-2 leading-relaxed max-w-md mx-auto">
                                         Microlearning del Módulo 2 completado: las 5 cápsulas (convolución, LSTM,
-                                        atención, modelos generativos y <strong>transfer learning</strong>) quedan repasadas,
+                                        atención, modelos generativos y <strong>aprendizaje por transferencia</strong>) quedan repasadas,
                                         cubriendo las cuatro grandes familias de arquitecturas. Queda una base sólida
                                         para enfrentar el <strong>Proyecto Centinela · Fase 2</strong>.
                                     </p>
@@ -1603,13 +1609,12 @@
                             ) : (
                                 <div className="mb-6">
                                     <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 text-primary text-4xl flex items-center justify-center mx-auto">
-                                        <span className="font-extrabold">{pct}%</span>
+                                        <span className="font-extrabold">{pct} %</span>
                                     </div>
-                                    <h2 className="text-2xl md:text-3xl font-extrabold text-navy mt-4">Progreso: {pct}%</h2>
+                                    <h2 className="text-2xl md:text-3xl font-extrabold text-navy mt-4">Progreso: {pct} %</h2>
                                     <p className="text-gray-700 mt-2 leading-relaxed max-w-md mx-auto">
-                                        Ha llegado al final del recorrido. Le recomendamos volver a las cápsulas
-                                        pendientes para reforzar los conceptos antes de la <strong>Fase 2</strong> del
-                                        <strong>Proyecto Centinela</strong>.
+                                        El recorrido terminó con cápsulas pendientes; conviene volver a ellas para reforzar
+                                        los conceptos antes de la <strong>Fase 2 del Proyecto Centinela</strong>.
                                     </p>
                                 </div>
                             )}
@@ -1654,7 +1659,7 @@
                         <div className="text-center mt-8 rounded-2xl px-6 py-6 text-white shadow-lg"
                             style={{ background: 'linear-gradient(180deg, #001A4D 0%, #002868 100%)' }}>
                             <p className="text-sm italic font-semibold text-gold leading-relaxed max-w-xl mx-auto">
-                                Metodología "Ingeniería de Trinchera": si una arquitectura no corre en Google Colab, no existe.
+                                Metodología «Ingeniería de Trinchera»: si una arquitectura no corre en Google Colab, no existe.
                             </p>
                             <div className="mt-4 pt-4 border-t border-white/15 text-xs text-white/70 leading-relaxed">
                                 <p>Universidad Santo Tomás · Maestría en Ciencia de Datos</p>

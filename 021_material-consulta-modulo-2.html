@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="Material de consulta del Módulo 2: bibliografía, papers seminales, recursos audiovisuales e interactivos, marco normativo-ético y datasets para Arquitecturas Especializadas de Deep Learning (CNN/ViT, secuencias y modelos generativos). Maestría en Ciencia de Datos, Universidad Santo Tomás.">
+        content="Material de consulta del Módulo 2: bibliografía, artículos seminales, recursos audiovisuales e interactivos, marco normativo-ético y conjuntos de datos para Arquitecturas Especializadas de Deep Learning (CNN/ViT, secuencias y modelos generativos). Maestría en Ciencia de Datos, Universidad Santo Tomás.">
     <title>Material de consulta · Módulo 2 — Arquitecturas Especializadas de Deep Learning · USTA</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -108,6 +108,11 @@
         .fam-cnn { background:#EDE9FE; color:#5B21B6; }
         .fam-seq { background:#FCE7F3; color:#9D174D; }
         .fam-gen { background:#CFFAFE; color:#0E7490; }
+        .fam-rep { background:#F1F5F9; color:#475569; }
+        /* La leyenda de familias puede partirse en líneas en pantallas estrechas */
+        .fam-leyenda .fam { white-space: normal; }
+        /* Móvil: los hijos de las rejillas pueden encogerse por debajo de su contenido */
+        .grid > * { min-width: 0; }
 
         /* Figuras / diagramas */
         figure { margin: 0; }
@@ -138,13 +143,13 @@
             <h1 class="text-3xl md:text-5xl font-extrabold leading-tight tracking-tight">
                 Material de <span class="text-gold">consulta</span> · Módulo 2
             </h1>
-            <p class="text-lg md:text-2xl font-light text-white/90 mt-3">Arquitecturas Especializadas de Deep Learning · Bibliografía, papers seminales y fuentes recomendadas</p>
+            <p class="text-lg md:text-2xl font-light text-white/90 mt-3">Arquitecturas Especializadas de Deep Learning · Bibliografía, artículos seminales y fuentes recomendadas</p>
             <div class="flex flex-wrap gap-2 mt-6 text-xs md:text-sm">
                 <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-book mr-1.5 text-gold"></i>Bibliografía</span>
-                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-file-lines mr-1.5 text-gold"></i>Papers seminales</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-file-lines mr-1.5 text-gold"></i>Artículos seminales</span>
                 <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-laptop-code mr-1.5 text-gold"></i>Interactivos</span>
                 <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-scale-balanced mr-1.5 text-gold"></i>Marco ético</span>
-                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-database mr-1.5 text-gold"></i>Datasets</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-database mr-1.5 text-gold"></i>Conjuntos de datos</span>
             </div>
         </div>
     </header>
@@ -154,10 +159,10 @@
         <div class="max-w-6xl mx-auto px-4 flex items-stretch">
             <div class="flex gap-1 md:gap-3 overflow-x-auto text-xs md:text-sm font-semibold py-2.5 whitespace-nowrap flex-1 min-w-0">
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#bibliografia"><i class="fas fa-book mr-1"></i>Bibliografía</a>
-            <a class="navlink rounded-lg px-2.5 py-1.5" href="#papers"><i class="fas fa-file-lines mr-1"></i>Papers seminales</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#papers"><i class="fas fa-file-lines mr-1"></i>Artículos seminales</a>
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#audiovisual"><i class="fas fa-laptop-code mr-1"></i>Interactivos</a>
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#normativo"><i class="fas fa-scale-balanced mr-1"></i>Marco ético</a>
-            <a class="navlink rounded-lg px-2.5 py-1.5" href="#datasets"><i class="fas fa-database mr-1"></i>Datasets</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#datasets"><i class="fas fa-database mr-1"></i>Conjuntos de datos</a>
             </div>
             <div class="flex-none w-14 md:w-24" aria-hidden="true"></div>
         </div>
@@ -170,10 +175,10 @@
             <div class="callout callout-info">
                 <p class="font-bold text-primary mb-1"><i class="fas fa-circle-info mr-2"></i>Cómo usar este material</p>
                 <p class="text-sm leading-relaxed">Las fuentes de consulta de base para el desarrollo de la actividad corresponden a las lecturas sugeridas dispuestas en el aula virtual o cualquier otra fuente que se considere pertinente consultar. A continuación se recopilan las fuentes <strong>principales</strong> del Módulo 2, organizadas por tipo: bibliografía, artículos seminales, recursos audiovisuales e interactivos, marco normativo-ético y conjuntos de datos de práctica. El módulo recorre <strong>tres familias arquitectónicas</strong>, identificadas con una etiqueta de color en cada referencia.</p>
-                <div class="flex flex-wrap gap-2 mt-3">
-                    <span class="fam fam-cnn"><i class="fas fa-image mr-1"></i>CNN / ViT — Visión por Computador</span>
+                <div class="flex flex-wrap gap-2 mt-3 fam-leyenda">
+                    <span class="fam fam-cnn"><i class="fas fa-image mr-1"></i>CNN / ViT — Visión por computador</span>
                     <span class="fam fam-seq"><i class="fas fa-wave-square mr-1"></i>Secuencias — RNN / LSTM / GRU / Atención</span>
-                    <span class="fam fam-gen"><i class="fas fa-shapes mr-1"></i>Generativos — AE / VAE / GAN / Difusión / Transformers</span>
+                    <span class="fam fam-gen"><i class="fas fa-shapes mr-1"></i>Generativos — AE / VAE / GAN / difusión / Transformers</span>
                 </div>
             </div>
         </section>
@@ -186,87 +191,102 @@
                     <thead>
                         <tr style="background:#3D008D">
                             <th scope="col" style="width:14%">Familia</th>
-                            <th scope="col" style="width:30%">Referencia</th>
-                            <th scope="col" style="width:38%">Aporte al módulo</th>
-                            <th scope="col" style="width:18%">Enlace</th>
+                            <th scope="col" style="width:34%">Referencia</th>
+                            <th scope="col" style="width:36%">Aporte al módulo</th>
+                            <th scope="col" style="width:16%">Enlace</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td><span class="fam fam-cnn">CNN/ViT</span></td>
-                            <td>Goodfellow, I., Bengio, Y., &amp; Courville, A. (2016). <em>Deep Learning</em>. MIT Press.</td>
-                            <td>Texto canónico del curso. El <strong>Cap. 9 (Convolutional Networks)</strong> sustenta toda la base teórica de las CNN: convolución, <em>pooling</em> e invarianza a la traslación.</td>
+                            <td>Goodfellow, I., Bengio, Y. y Courville, A. (2016). <em>Deep learning</em>. MIT Press. https://www.deeplearningbook.org</td>
+                            <td>Texto canónico del curso. El <strong>Cap. 9 (redes convolucionales)</strong> sustenta la base teórica de las CNN: convolución, <em>pooling</em>, equivarianza e invarianza a la traslación; el <strong>Cap. 10</strong> (modelado de secuencias), la de las RNN, LSTM y GRU.</td>
                             <td><a href="https://www.deeplearningbook.org" target="_blank" rel="noopener">deeplearningbook.org</a></td>
                         </tr>
                         <tr>
                             <td><span class="fam fam-cnn">CNN/ViT</span></td>
-                            <td>Chollet, F. (2021). <em>Deep Learning with Python</em> (2nd Ed.). Manning Publications.</td>
-                            <td>Excelente para la intuición práctica y el <strong>aprendizaje por transferencia</strong> (<em>transfer learning</em>). Acompaña el reentrenamiento de redes pre-entrenadas usado en el <strong>Proyecto Centinela · Fase 2</strong>.</td>
-                            <td>Recurso disponible en la biblioteca USTA</td>
+                            <td>Chollet, F. y Watson, M. (2025). <em>Deep learning with Python</em> (3.ª ed.). Manning. https://deeplearningwithpython.io/</td>
+                            <td>Edición de 2025, basada en Keras 3. Excelente para la intuición práctica y el <strong>aprendizaje por transferencia</strong> (<em>transfer learning</em>) usado en el <strong>Proyecto Centinela · Fase 2</strong>.</td>
+                            <td><a href="https://deeplearningwithpython.io/" target="_blank" rel="noopener">deeplearningwithpython.io</a></td>
                         </tr>
                         <tr>
                             <td><span class="fam fam-seq">Secuencias</span></td>
-                            <td>Géron, A. (2023). <em>Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow</em> (3rd Ed.). O'Reilly Media.</td>
-                            <td>Implementación práctica de RNN, LSTM y GRU en Keras/TensorFlow. Referencia operativa para el procesamiento de secuencias y series temporales del módulo.</td>
-                            <td>Recurso disponible en la biblioteca USTA</td>
+                            <td>Géron, A. (2025). <em>Hands-on machine learning with Scikit-Learn and PyTorch: Concepts, tools, and techniques to build intelligent systems</em>. O'Reilly Media.</td>
+                            <td>Edición de 2025, alineada con PyTorch, el marco del curso. Implementación práctica de CNN, RNN, LSTM y GRU y del procesamiento de secuencias y series temporales. (La 3.ª edición de 2022 usa Keras y TensorFlow).</td>
+                            <td>Disponible en la biblioteca USTA</td>
                         </tr>
                         <tr>
                             <td><span class="fam fam-gen">Generativos</span></td>
-                            <td>Zhang, A., Lipton, Z. C., Li, M., &amp; Smola, A. J. (2023). <em>Dive into Deep Learning</em>. Cambridge University Press.</td>
-                            <td>Libro abierto con notebooks ejecutables en PyTorch/TensorFlow. Cubre CNN, mecanismos de atención y Transformers combinando matemática, código y aplicaciones.</td>
-                            <td><a href="https://d2l.ai" target="_blank" rel="noopener">d2l.ai</a></td>
+                            <td>Zhang, A., Lipton, Z. C., Li, M. y Smola, A. J. (2023). <em>Dive into deep learning</em>. Cambridge University Press. https://d2l.ai/</td>
+                            <td>Libro abierto con cuadernos ejecutables en PyTorch y TensorFlow. Cubre CNN, mecanismos de atención y Transformers combinando matemática, código y aplicaciones.</td>
+                            <td><a href="https://d2l.ai/" target="_blank" rel="noopener">d2l.ai</a></td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </section>
 
-        <!-- ====================== SECCIÓN 2 — PAPERS SEMINALES ====================== -->
+        <!-- ====================== SECCIÓN 2 — ARTÍCULOS SEMINALES ====================== -->
         <section id="papers" class="reveal">
-            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-file-lines text-secondary mr-2"></i>Artículos y papers seminales</h2>
-            <p class="text-sm text-slate-600 mb-5 max-w-3xl">Estos artículos definieron cada familia arquitectónica del módulo. Constituyen las <strong>fuentes primarias</strong> del recorrido histórico: de LeNet a ViT en visión, de la RNN al Transformer en secuencias, y de la GAN a la difusión en generación.</p>
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-file-lines text-secondary mr-2"></i>Artículos seminales</h2>
+            <p class="text-sm text-slate-600 mb-5 max-w-3xl">Estos artículos definieron cada familia arquitectónica del módulo. Constituyen las <strong>fuentes primarias</strong> del recorrido histórico: de LeNet a ViT en visión, de la RNN al Transformer en secuencias, y de la GAN a la difusión en generación. Al final de cada tabla se incluyen referencias recientes que muestran la vigencia de cada familia.</p>
 
             <!-- 2.1 CNN / ViT -->
-            <h3 class="text-lg font-bold text-primary mb-3 mt-2"><span class="fam fam-cnn mr-2">CNN/ViT</span>Visión por Computador: de LeNet a Vision Transformer</h3>
+            <h3 class="text-lg font-bold text-primary mb-3 mt-2"><span class="fam fam-cnn mr-2">CNN/ViT</span>Visión por computador: de LeNet a Vision Transformer</h3>
             <div class="overflow-x-auto card p-1 mb-8">
                 <table class="tbl" style="min-width:680px">
                     <thead>
                         <tr style="background:#3D008D">
-                            <th scope="col" style="width:32%">Referencia</th>
-                            <th scope="col" style="width:48%">Aporte al módulo</th>
-                            <th scope="col" style="width:20%">Enlace</th>
+                            <th scope="col" style="width:40%">Referencia</th>
+                            <th scope="col" style="width:42%">Aporte al módulo</th>
+                            <th scope="col" style="width:18%">Enlace</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>LeCun, Y., Bottou, L., Bengio, Y., &amp; Haffner, P. (1998). Gradient-based learning applied to document recognition. <em>Proceedings of the IEEE, 86</em>(11), 2278-2324.</td>
+                            <td>LeCun, Y., Bottou, L., Bengio, Y. y Haffner, P. (1998). Gradient-based learning applied to document recognition. <em>Proceedings of the IEEE</em>, <em>86</em>(11), 2278–2324. https://doi.org/10.1109/5.726791</td>
                             <td>Origen de <strong>LeNet-5</strong> y de los fundamentos de la convolución aplicada al reconocimiento de documentos. Punto de partida del recorrido histórico de las CNN.</td>
                             <td><a href="https://doi.org/10.1109/5.726791" target="_blank" rel="noopener">doi.org/10.1109/5.726791</a></td>
                         </tr>
                         <tr>
-                            <td>Krizhevsky, A., Sutskever, I., &amp; Hinton, G. E. (2012). ImageNet classification with deep convolutional neural networks. <em>NeurIPS, 25</em>.</td>
-                            <td><strong>AlexNet</strong>: el punto de inflexión que detonó el auge del Deep Learning moderno al ganar el reto ImageNet con un amplio margen.</td>
+                            <td>Krizhevsky, A., Sutskever, I. y Hinton, G. E. (2012). ImageNet classification with deep convolutional neural networks. En <em>Advances in Neural Information Processing Systems</em> (Vol. 25, pp. 1097–1105). Curran Associates. https://proceedings.neurips.cc/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf</td>
+                            <td><strong>AlexNet</strong>: el punto de inflexión que detonó el auge del aprendizaje profundo moderno al ganar el reto ImageNet con un amplio margen.</td>
                             <td><a href="https://proceedings.neurips.cc/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf" target="_blank" rel="noopener">NeurIPS Proceedings</a></td>
                         </tr>
                         <tr>
-                            <td>Simonyan, K., &amp; Zisserman, A. (2015). Very deep convolutional networks for large-scale image recognition. <em>ICLR</em>.</td>
-                            <td>Arquitectura <strong>VGG</strong>: profundidad uniforme con filtros pequeños de 3&times;3. Referencia de simplicidad estructural y de transferencia de características.</td>
+                            <td>Simonyan, K. y Zisserman, A. (2015). Very deep convolutional networks for large-scale image recognition. En <em>3rd International Conference on Learning Representations (ICLR 2015)</em>. https://arxiv.org/abs/1409.1556</td>
+                            <td>Arquitectura <strong>VGG</strong> (presentada en 2014): profundidad uniforme con filtros pequeños de 3&times;3. Referencia de simplicidad estructural y de transferencia de características.</td>
                             <td><a href="https://arxiv.org/abs/1409.1556" target="_blank" rel="noopener">arxiv.org/abs/1409.1556</a></td>
                         </tr>
                         <tr>
-                            <td>He, K., Zhang, X., Ren, S., &amp; Sun, J. (2016). Deep residual learning for image recognition. <em>CVPR</em> (pp. 770-778).</td>
-                            <td><strong>ResNet</strong> y las conexiones residuales (<em>skip connections</em>) que permitieron entrenar redes de cientos de capas sin desvanecimiento del gradiente.</td>
+                            <td>He, K., Zhang, X., Ren, S. y Sun, J. (2016). Deep residual learning for image recognition. En <em>Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)</em> (pp. 770–778). IEEE. https://doi.org/10.1109/CVPR.2016.90</td>
+                            <td><strong>ResNet</strong> y las conexiones residuales (<em>skip connections</em>), que permitieron entrenar redes de cientos de capas superando el <strong>problema de degradación</strong> (más capas, mayor error de entrenamiento).</td>
                             <td><a href="https://doi.org/10.1109/CVPR.2016.90" target="_blank" rel="noopener">doi.org/10.1109/CVPR.2016.90</a></td>
                         </tr>
                         <tr>
-                            <td>Dosovitskiy, A., Beyer, L., Kolesnikov, A., et al. (2021). An image is worth 16x16 words: Transformers for image recognition at scale. <em>ICLR</em>.</td>
-                            <td><strong>Vision Transformer (ViT)</strong>: cuestiona el supuesto de que la convolución es el operador idóneo para imágenes, llevando la atención del lenguaje al dominio visual. Cierre del capítulo de CNN.</td>
+                            <td>Dosovitskiy, A., Beyer, L., Kolesnikov, A., Weissenborn, D., Zhai, X., Unterthiner, T., Dehghani, M., Minderer, M., Heigold, G., Gelly, S., Uszkoreit, J. y Houlsby, N. (2021). An image is worth 16x16 words: Transformers for image recognition at scale. En <em>9th International Conference on Learning Representations (ICLR 2021)</em>. https://arxiv.org/abs/2010.11929</td>
+                            <td><strong>Vision Transformer (ViT)</strong>, presentado en 2020: cuestiona el supuesto de que la convolución es el operador idóneo para imágenes y lleva la atención del lenguaje al dominio visual.</td>
                             <td><a href="https://arxiv.org/abs/2010.11929" target="_blank" rel="noopener">arxiv.org/abs/2010.11929</a></td>
                         </tr>
                         <tr>
-                            <td>Yosinski, J., Clune, J., Bengio, Y., &amp; Lipson, H. (2014). How transferable are features in deep neural networks? <em>NeurIPS, 27</em>.</td>
-                            <td>Estudio empírico de la <strong>transferibilidad</strong> de características entre tareas. Base teórica de la estrategia de <em>transfer learning</em> del proyecto.</td>
+                            <td>Tolstikhin, I., Houlsby, N., Kolesnikov, A., Beyer, L., Zhai, X., Unterthiner, T., Yung, J., Steiner, A., Keysers, D., Uszkoreit, J., Lucic, M. y Dosovitskiy, A. (2021). MLP-Mixer: An all-MLP architecture for vision. En <em>Advances in Neural Information Processing Systems</em> (Vol. 34, pp. 24261–24272). Curran Associates. https://arxiv.org/abs/2105.01601</td>
+                            <td><strong>MLP-Mixer</strong>: muestra que, con datos y preentrenamiento a gran escala, incluso una arquitectura solo de MLP compite en visión. Complementa el debate CNN frente a ViT del Cap. 2.1.</td>
+                            <td><a href="https://arxiv.org/abs/2105.01601" target="_blank" rel="noopener">arxiv.org/abs/2105.01601</a></td>
+                        </tr>
+                        <tr>
+                            <td>Liu, Z., Mao, H., Wu, C.-Y., Feichtenhofer, C., Darrell, T. y Xie, S. (2022). A ConvNet for the 2020s. En <em>2022 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)</em> (pp. 11966–11976). IEEE. https://doi.org/10.1109/CVPR52688.2022.01167</td>
+                            <td><strong>ConvNeXt</strong>: una CNN moderna que, con decisiones de diseño tomadas del ViT, compite con él. Cierra el debate CNN frente a ViT del Cap. 2.1.</td>
+                            <td><a href="https://doi.org/10.1109/CVPR52688.2022.01167" target="_blank" rel="noopener">doi.org/10.1109/CVPR52688.2022.01167</a></td>
+                        </tr>
+                        <tr>
+                            <td>Yosinski, J., Clune, J., Bengio, Y. y Lipson, H. (2014). How transferable are features in deep neural networks? En <em>Advances in Neural Information Processing Systems</em> (Vol. 27, pp. 3320–3328). Curran Associates. https://arxiv.org/abs/1411.1792</td>
+                            <td>Estudio empírico de la <strong>transferibilidad</strong> de características entre tareas. Base teórica de la estrategia de aprendizaje por transferencia del proyecto.</td>
                             <td><a href="https://arxiv.org/abs/1411.1792" target="_blank" rel="noopener">arxiv.org/abs/1411.1792</a></td>
+                        </tr>
+                        <tr>
+                            <td>Ahumada, J. A., Fegraus, E., Birch, T., Flores, N., Kays, R., O’Brien, T. G., Palmer, J., Schuttler, S., Zhao, J. Y., Jetz, W., Kinnaird, M., Kulkarni, S., Lyet, A., Thau, D., Duong, M., Oliver, R. y Dancer, A. (2020). Wildlife Insights: A platform to maximize the potential of camera trap and other passive sensor wildlife data for the planet. <em>Environmental Conservation</em>, <em>47</em>(1), 1–6. https://doi.org/10.1017/S0376892919000298</td>
+                            <td><strong>Wildlife Insights</strong>: plataforma que usa CNN para clasificar y filtrar fotos de cámaras trampa. Caso de aplicación del hilo de fauna (jaguar y ocelote) del Cap. 2.1.</td>
+                            <td><a href="https://doi.org/10.1017/S0376892919000298" target="_blank" rel="noopener">doi.org/10.1017/S0376892919000298</a></td>
                         </tr>
                     </tbody>
                 </table>
@@ -278,46 +298,56 @@
                 <table class="tbl" style="min-width:680px">
                     <thead>
                         <tr style="background:#3D008D">
-                            <th scope="col" style="width:32%">Referencia</th>
-                            <th scope="col" style="width:48%">Aporte al módulo</th>
-                            <th scope="col" style="width:20%">Enlace</th>
+                            <th scope="col" style="width:40%">Referencia</th>
+                            <th scope="col" style="width:42%">Aporte al módulo</th>
+                            <th scope="col" style="width:18%">Enlace</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Elman, J. L. (1990). Finding structure in time. <em>Cognitive Science, 14</em>(2), 179-211.</td>
+                            <td>Elman, J. L. (1990). Finding structure in time. <em>Cognitive Science</em>, <em>14</em>(2), 179–211. https://doi.org/10.1207/s15516709cog1402_1</td>
                             <td>Fundamentos de las <strong>RNN</strong>: cómo una red puede capturar estructura temporal mediante un estado oculto recurrente.</td>
-                            <td><a href="https://doi.org/10.1207/s15516709cog1402_1" target="_blank" rel="noopener">doi.org/10.1207/...cog1402_1</a></td>
+                            <td><a href="https://doi.org/10.1207/s15516709cog1402_1" target="_blank" rel="noopener">doi.org/10.1207/s15516709cog1402_1</a></td>
                         </tr>
                         <tr>
-                            <td>Bengio, Y., Simard, P., &amp; Frasconi, P. (1994). Learning long-term dependencies with gradient descent is difficult. <em>IEEE TNN, 5</em>(2), 157-166.</td>
+                            <td>Bengio, Y., Simard, P. y Frasconi, P. (1994). Learning long-term dependencies with gradient descent is difficult. <em>IEEE Transactions on Neural Networks</em>, <em>5</em>(2), 157–166. https://doi.org/10.1109/72.279181</td>
                             <td>Diagnóstico formal del <strong>desvanecimiento del gradiente</strong>, el problema que motiva la aparición de la LSTM.</td>
                             <td><a href="https://doi.org/10.1109/72.279181" target="_blank" rel="noopener">doi.org/10.1109/72.279181</a></td>
                         </tr>
                         <tr>
-                            <td>Hochreiter, S., &amp; Schmidhuber, J. (1997). Long short-term memory. <em>Neural Computation, 9</em>(8), 1735-1780.</td>
-                            <td>Paper fundacional de la <strong>LSTM</strong>: el estado de la celda y las compuertas (olvido, entrada, salida) que resuelven la memoria a largo plazo.</td>
-                            <td><a href="https://doi.org/10.1162/neco.1997.9.8.1735" target="_blank" rel="noopener">doi.org/10.1162/neco...</a></td>
+                            <td>Hochreiter, S. y Schmidhuber, J. (1997). Long short-term memory. <em>Neural Computation</em>, <em>9</em>(8), 1735–1780. https://doi.org/10.1162/neco.1997.9.8.1735</td>
+                            <td>Artículo fundacional de la <strong>LSTM</strong>: el estado de la celda y las compuertas que <strong>mitigan</strong> el desvanecimiento y permiten aprender dependencias largas (la compuerta de olvido se añadió en 2000).</td>
+                            <td><a href="https://doi.org/10.1162/neco.1997.9.8.1735" target="_blank" rel="noopener">doi.org/10.1162/neco.1997.9.8.1735</a></td>
                         </tr>
                         <tr>
-                            <td>Cho, K., van Merriënboer, B., Gulcehre, C., Bahdanau, D., et al. (2014). Learning phrase representations using RNN encoder-decoder for statistical machine translation. <em>EMNLP</em>.</td>
-                            <td>Introduce la <strong>GRU</strong> y el esquema <em>encoder-decoder</em>, base de la traducción automática secuencia a secuencia.</td>
+                            <td>Cho, K., van Merriënboer, B., Gulcehre, C., Bahdanau, D., Bougares, F., Schwenk, H. y Bengio, Y. (2014). Learning phrase representations using RNN encoder–decoder for statistical machine translation. En <em>Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing (EMNLP)</em> (pp. 1724–1734). Association for Computational Linguistics. https://doi.org/10.3115/v1/D14-1179</td>
+                            <td>Introduce la <strong>GRU</strong> y el esquema codificador-decodificador (<em>encoder-decoder</em>), base de la traducción automática secuencia a secuencia. Su convención de la GRU es la que sigue el curso.</td>
                             <td><a href="https://doi.org/10.3115/v1/D14-1179" target="_blank" rel="noopener">doi.org/10.3115/v1/D14-1179</a></td>
                         </tr>
                         <tr>
-                            <td>Sutskever, I., Vinyals, O., &amp; Le, Q. V. (2014). Sequence to sequence learning with neural networks. <em>NeurIPS, 27</em>.</td>
-                            <td>Arquitectura <strong>seq2seq</strong>: transduce una secuencia de entrada en otra de longitud distinta (traducción, resumen, chatbots).</td>
+                            <td>Sutskever, I., Vinyals, O. y Le, Q. V. (2014). Sequence to sequence learning with neural networks. En <em>Advances in Neural Information Processing Systems</em> (Vol. 27, pp. 3104–3112). Curran Associates. https://arxiv.org/abs/1409.3215</td>
+                            <td>Arquitectura <strong>seq2seq</strong>: transduce una secuencia de entrada en otra de longitud distinta (traducción, resumen, asistentes conversacionales).</td>
                             <td><a href="https://arxiv.org/abs/1409.3215" target="_blank" rel="noopener">arxiv.org/abs/1409.3215</a></td>
                         </tr>
                         <tr>
-                            <td>Bahdanau, D., Cho, K., &amp; Bengio, Y. (2015). Neural machine translation by jointly learning to align and translate. <em>ICLR</em>.</td>
+                            <td>Bahdanau, D., Cho, K. y Bengio, Y. (2015). Neural machine translation by jointly learning to align and translate. En <em>3rd International Conference on Learning Representations (ICLR 2015)</em>. https://arxiv.org/abs/1409.0473</td>
                             <td>Introduce el <strong>mecanismo de atención</strong> en las RNN, superando el cuello de botella del vector de contexto único. Antesala del Transformer.</td>
                             <td><a href="https://arxiv.org/abs/1409.0473" target="_blank" rel="noopener">arxiv.org/abs/1409.0473</a></td>
                         </tr>
                         <tr>
-                            <td>Graves, A., Mohamed, A.-R., &amp; Hinton, G. (2013). Speech recognition with deep recurrent neural networks. <em>ICASSP</em> (pp. 6645-6649).</td>
-                            <td>Aplicación de las RNN profundas al <strong>reconocimiento de voz</strong>. Ejemplo del módulo sobre el tratamiento de señales de audio.</td>
-                            <td><a href="https://doi.org/10.1109/ICASSP.2013.6638947" target="_blank" rel="noopener">doi.org/10.1109/ICASSP.2013...</a></td>
+                            <td>Graves, A., Mohamed, A.-r. y Hinton, G. (2013). Speech recognition with deep recurrent neural networks. En <em>2013 IEEE International Conference on Acoustics, Speech and Signal Processing</em> (pp. 6645–6649). IEEE. https://doi.org/10.1109/ICASSP.2013.6638947</td>
+                            <td>Aplicación de las RNN profundas (LSTM bidireccionales) al <strong>reconocimiento de voz</strong>, un ejemplo de secuencias de audio complementario al módulo.</td>
+                            <td><a href="https://doi.org/10.1109/ICASSP.2013.6638947" target="_blank" rel="noopener">doi.org/10.1109/ICASSP.2013.6638947</a></td>
+                        </tr>
+                        <tr>
+                            <td>Gu, A. y Dao, T. (2023). <em>Mamba: Linear-time sequence modeling with selective state spaces</em> [Preprint]. arXiv. https://doi.org/10.48550/arXiv.2312.00752</td>
+                            <td><strong>Mamba</strong>: alternativa recurrente de costo lineal a la atención para secuencias muy largas. Muestra hacia dónde evolucionan los modelos de secuencias después de la LSTM.</td>
+                            <td><a href="https://doi.org/10.48550/arXiv.2312.00752" target="_blank" rel="noopener">doi.org/10.48550/arXiv.2312.00752</a></td>
+                        </tr>
+                        <tr>
+                            <td>Ansari, A. F., Stella, L., Turkmen, C., Zhang, X., Mercado, P., Shen, H., Shchur, O., Rangapuram, S. S., Pineda Arango, S., Kapoor, S., Zschiegner, J., Maddix, D. C., Wang, H., Mahoney, M. W., Torkkola, K., Wilson, A. G., Bohlke-Schneider, M. y Wang, Y. (2024). <em>Chronos: Learning the language of time series</em> [Preprint]. arXiv. https://doi.org/10.48550/arXiv.2403.07815</td>
+                            <td><strong>Chronos</strong>: modelos fundacionales para series de tiempo, preentrenados sobre muchas series. Pertinente para la rama temporal (B) de la Fase 2 como punto de comparación.</td>
+                            <td><a href="https://doi.org/10.48550/arXiv.2403.07815" target="_blank" rel="noopener">doi.org/10.48550/arXiv.2403.07815</a></td>
                         </tr>
                     </tbody>
                 </table>
@@ -329,51 +359,66 @@
                 <table class="tbl" style="min-width:680px">
                     <thead>
                         <tr style="background:#3D008D">
-                            <th scope="col" style="width:32%">Referencia</th>
-                            <th scope="col" style="width:48%">Aporte al módulo</th>
-                            <th scope="col" style="width:20%">Enlace</th>
+                            <th scope="col" style="width:40%">Referencia</th>
+                            <th scope="col" style="width:42%">Aporte al módulo</th>
+                            <th scope="col" style="width:18%">Enlace</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Hinton, G. E., &amp; Salakhutdinov, R. R. (2006). Reducing the dimensionality of data with neural networks. <em>Science, 313</em>(5786), 504-507.</td>
-                            <td><strong>Autoencoders</strong> para reducción de dimensionalidad: el cuello de botella que fuerza una representación latente eficiente.</td>
+                            <td>Hinton, G. E. y Salakhutdinov, R. R. (2006). Reducing the dimensionality of data with neural networks. <em>Science</em>, <em>313</em>(5786), 504–507. https://doi.org/10.1126/science.1127647</td>
+                            <td><strong>Autocodificadores</strong> para reducción de dimensionalidad: el cuello de botella que fuerza una representación latente eficiente.</td>
                             <td><a href="https://doi.org/10.1126/science.1127647" target="_blank" rel="noopener">doi.org/10.1126/science.1127647</a></td>
                         </tr>
                         <tr>
-                            <td>Kingma, D. P., &amp; Welling, M. (2014). Auto-encoding variational bayes. <em>ICLR</em>.</td>
-                            <td>Paper fundacional del <strong>VAE</strong>: espacios latentes probabilísticos continuos, la cota ELBO y el truco de reparametrización.</td>
+                            <td>Kingma, D. P. y Welling, M. (2014). Auto-encoding variational Bayes. En <em>2nd International Conference on Learning Representations (ICLR 2014)</em>. https://arxiv.org/abs/1312.6114</td>
+                            <td>Artículo fundacional del <strong>VAE</strong>: espacios latentes probabilísticos continuos, la cota ELBO y el truco de reparametrización.</td>
                             <td><a href="https://arxiv.org/abs/1312.6114" target="_blank" rel="noopener">arxiv.org/abs/1312.6114</a></td>
                         </tr>
                         <tr>
-                            <td>Goodfellow, I., Pouget-Abadie, J., Mirza, M., Xu, B., et al. (2014). Generative adversarial nets. <em>NeurIPS, 27</em>.</td>
-                            <td>Paper fundacional de las <strong>GAN</strong> y del juego minimax. Eje del capítulo generativo (analogía de la piquería vallenata).</td>
+                            <td>Goodfellow, I. J., Pouget-Abadie, J., Mirza, M., Xu, B., Warde-Farley, D., Ozair, S., Courville, A. y Bengio, Y. (2014). Generative adversarial nets. En <em>Advances in Neural Information Processing Systems</em> (Vol. 27, pp. 2672–2680). Curran Associates. https://arxiv.org/abs/1406.2661</td>
+                            <td>Artículo fundacional de las <strong>GAN</strong> y del juego minimax. Eje del capítulo generativo (analogía de la piquería vallenata).</td>
                             <td><a href="https://arxiv.org/abs/1406.2661" target="_blank" rel="noopener">arxiv.org/abs/1406.2661</a></td>
                         </tr>
                         <tr>
-                            <td>Radford, A., Metz, L., &amp; Chintala, S. (2016). Unsupervised representation learning with deep convolutional generative adversarial networks. <em>ICLR</em>.</td>
-                            <td><strong>DCGAN</strong>: primera arquitectura que produjo imágenes nítidas de forma reproducible y estabilizó el entrenamiento adversario.</td>
+                            <td>Radford, A., Metz, L. y Chintala, S. (2016). Unsupervised representation learning with deep convolutional generative adversarial networks. En <em>4th International Conference on Learning Representations (ICLR 2016)</em>. https://arxiv.org/abs/1511.06434</td>
+                            <td><strong>DCGAN</strong>: una de las primeras arquitecturas en producir imágenes nítidas de forma reproducible y en estabilizar el entrenamiento adversario.</td>
                             <td><a href="https://arxiv.org/abs/1511.06434" target="_blank" rel="noopener">arxiv.org/abs/1511.06434</a></td>
                         </tr>
                         <tr>
-                            <td>Arjovsky, M., Chintala, S., &amp; Bottou, L. (2017). Wasserstein GAN. <em>ICML</em>.</td>
-                            <td><strong>WGAN</strong> y la distancia de Wasserstein como remedio al <em>mode collapse</em> y a la inestabilidad del entrenamiento.</td>
-                            <td><a href="https://arxiv.org/abs/1701.07875" target="_blank" rel="noopener">arxiv.org/abs/1701.07875</a></td>
+                            <td>Arjovsky, M., Chintala, S. y Bottou, L. (2017). Wasserstein generative adversarial networks. En <em>Proceedings of the 34th International Conference on Machine Learning</em> (Vol. 70, pp. 214–223). PMLR. https://proceedings.mlr.press/v70/arjovsky17a.html</td>
+                            <td><strong>WGAN</strong>: la distancia de Wasserstein da una pérdida que se correlaciona con la calidad de las muestras; sus autores no observaron colapso de modos (<em>mode collapse</em>) en sus experimentos.</td>
+                            <td><a href="https://proceedings.mlr.press/v70/arjovsky17a.html" target="_blank" rel="noopener">PMLR</a></td>
                         </tr>
                         <tr>
-                            <td>Ho, J., Jain, A., &amp; Abbeel, P. (2020). Denoising diffusion probabilistic models. <em>NeurIPS, 33</em>.</td>
-                            <td><strong>DDPM</strong>: los modelos de difusión y sus procesos <em>forward</em> y <em>reverse</em>. Familia hoy dominante en generación de imágenes.</td>
+                            <td>Ho, J., Jain, A. y Abbeel, P. (2020). Denoising diffusion probabilistic models. En <em>Advances in Neural Information Processing Systems</em> (Vol. 33, pp. 6840–6851). Curran Associates. https://arxiv.org/abs/2006.11239</td>
+                            <td><strong>DDPM</strong>: los modelos de difusión y sus procesos directo (<em>forward</em>) e inverso (<em>reverse</em>). Familia hoy dominante en generación de imágenes.</td>
                             <td><a href="https://arxiv.org/abs/2006.11239" target="_blank" rel="noopener">arxiv.org/abs/2006.11239</a></td>
                         </tr>
                         <tr>
-                            <td>Rombach, R., Blattmann, A., Lorenz, D., Esser, P., &amp; Ommer, B. (2022). High-resolution image synthesis with latent diffusion models. <em>CVPR</em> (pp. 10684-10695).</td>
-                            <td><strong>Difusión en espacio latente</strong>, base de Stable Diffusion. Aborda el alto costo de muestreo de los modelos de difusión.</td>
-                            <td><a href="https://arxiv.org/abs/2112.10752" target="_blank" rel="noopener">arxiv.org/abs/2112.10752</a></td>
+                            <td>Song, Y., Sohl-Dickstein, J., Kingma, D. P., Kumar, A., Ermon, S. y Poole, B. (2021). Score-based generative modeling through stochastic differential equations. En <em>9th International Conference on Learning Representations (ICLR 2021)</em>. https://arxiv.org/abs/2011.13456</td>
+                            <td>Unifica la difusión y los modelos basados en <em>score</em> mediante ecuaciones diferenciales estocásticas. Marco teórico de la difusión actual.</td>
+                            <td><a href="https://arxiv.org/abs/2011.13456" target="_blank" rel="noopener">arxiv.org/abs/2011.13456</a></td>
                         </tr>
                         <tr>
-                            <td>Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., et al. (2017). Attention is all you need. <em>NeurIPS, 30</em>.</td>
-                            <td>Paper imprescindible: la arquitectura <strong>Transformer</strong> basada por completo en auto-atención. Cimiento de la IA generativa moderna (BERT, GPT).</td>
-                            <td><a href="https://proceedings.neurips.cc/paper/2017/file/3f5ee243547dee91fbd053c1c4a845aa-Paper.pdf" target="_blank" rel="noopener">NeurIPS Proceedings</a></td>
+                            <td>Rombach, R., Blattmann, A., Lorenz, D., Esser, P. y Ommer, B. (2022). High-resolution image synthesis with latent diffusion models. En <em>Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)</em> (pp. 10684–10695). IEEE. https://doi.org/10.1109/CVPR52688.2022.01042</td>
+                            <td><strong>Difusión en espacio latente</strong>, base de Stable Diffusion. Aborda el alto costo de muestreo de los modelos de difusión.</td>
+                            <td><a href="https://doi.org/10.1109/CVPR52688.2022.01042" target="_blank" rel="noopener">doi.org/10.1109/CVPR52688.2022.01042</a></td>
+                        </tr>
+                        <tr>
+                            <td>Ho, J. y Salimans, T. (2022). <em>Classifier-free diffusion guidance</em> [Preprint]. arXiv. https://doi.org/10.48550/arXiv.2207.12598</td>
+                            <td><strong>Guía sin clasificador</strong> (<em>classifier-free guidance</em>): la técnica con la que los generadores de imagen siguen una instrucción de texto.</td>
+                            <td><a href="https://doi.org/10.48550/arXiv.2207.12598" target="_blank" rel="noopener">doi.org/10.48550/arXiv.2207.12598</a></td>
+                        </tr>
+                        <tr>
+                            <td>Lipman, Y., Chen, R. T. Q., Ben-Hamu, H., Nickel, M. y Le, M. (2023). Flow matching for generative modeling. En <em>11th International Conference on Learning Representations (ICLR 2023)</em>. https://arxiv.org/abs/2210.02747</td>
+                            <td><strong>Flow matching</strong>: alternativa a la difusión que aprende un campo de velocidades y genera con menos pasos. Vigencia del capítulo generativo.</td>
+                            <td><a href="https://arxiv.org/abs/2210.02747" target="_blank" rel="noopener">arxiv.org/abs/2210.02747</a></td>
+                        </tr>
+                        <tr>
+                            <td>Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, Ł. y Polosukhin, I. (2017). Attention is all you need. En <em>Advances in Neural Information Processing Systems</em> (Vol. 30, pp. 5998–6008). Curran Associates. https://arxiv.org/abs/1706.03762</td>
+                            <td>Artículo imprescindible: la arquitectura <strong>Transformer</strong>, basada por completo en autoatención. Cimiento de la IA generativa moderna (BERT, GPT).</td>
+                            <td><a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">arxiv.org/abs/1706.03762</a></td>
                         </tr>
                     </tbody>
                 </table>
@@ -383,82 +428,88 @@
         <!-- ====================== SECCIÓN 3 — RECURSOS AUDIOVISUALES E INTERACTIVOS ====================== -->
         <section id="audiovisual" class="reveal">
             <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-laptop-code text-secondary mr-2"></i>Recursos audiovisuales e interactivos</h2>
-            <p class="text-sm text-slate-600 mb-5 max-w-3xl">Herramientas que permiten "abrir la caja negra" de cada arquitectura sin escribir código, junto con explicaciones visuales en español y artículos pedagógicos de referencia.</p>
+            <p class="text-sm text-slate-600 mb-5 max-w-3xl">Herramientas que permiten «abrir la caja negra» de cada arquitectura sin escribir código, junto con explicaciones visuales en español y artículos pedagógicos de referencia.</p>
             <div class="overflow-x-auto card p-1">
                 <table class="tbl" style="min-width:720px">
                     <thead>
                         <tr style="background:#3D008D">
                             <th scope="col" style="width:14%">Familia</th>
-                            <th scope="col" style="width:26%">Recurso</th>
-                            <th scope="col" style="width:42%">Descripción y vínculo pedagógico</th>
-                            <th scope="col" style="width:18%">Enlace</th>
+                            <th scope="col" style="width:34%">Recurso</th>
+                            <th scope="col" style="width:36%">Descripción y vínculo pedagógico</th>
+                            <th scope="col" style="width:16%">Enlace</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td><span class="fam fam-cnn">CNN/ViT</span></td>
-                            <td><strong>CNN Explainer</strong> (Wang et al., Georgia Tech &amp; Oregon State, 2020)</td>
-                            <td>Visualización interactiva premiada que permite "abrir" una CNN y hacer clic en cada capa (convolución, ReLU, <em>pooling</em>) para ver cómo los píxeles se transforman en mapas de características. Fundamental para desmitificar la caja negra de las CNN.</td>
+                            <td>Wang, Z. J., Turko, R., Shaikh, O., Park, H., Das, N., Hohman, F., Kahng, M. y Chau, D. H. (2021). CNN Explainer: Learning convolutional neural networks with interactive visualization. <em>IEEE Transactions on Visualization and Computer Graphics</em>, <em>27</em>(2), 1396–1406. https://doi.org/10.1109/TVCG.2020.3030418</td>
+                            <td>Visualización interactiva premiada (Polo Club of Data Science, Georgia Tech) que permite «abrir» una CNN y hacer clic en cada capa (convolución, ReLU, <em>pooling</em>) para ver cómo los píxeles se transforman en mapas de características.</td>
                             <td><a href="https://poloclub.github.io/cnn-explainer/" target="_blank" rel="noopener">poloclub.github.io/cnn-explainer</a></td>
                         </tr>
                         <tr>
-                            <td><span class="fam fam-cnn">CNN/ViT</span></td>
-                            <td><strong>TensorFlow Playground</strong> (Smilkov &amp; Carter, Google)</td>
-                            <td>Simulador web para experimentar con redes en tiempo real, visualizando fronteras de decisión, <em>overfitting</em> y el efecto de capas, tasas de aprendizaje y funciones de activación. Primer contacto visual con la intuición arquitectónica.</td>
+                            <td><span class="fam fam-rep">Repaso MLP</span></td>
+                            <td>Smilkov, D. y Carter, S. (s. f.). <em>TensorFlow Playground</em> [Software]. Google. https://playground.tensorflow.org</td>
+                            <td>Simulador web de redes densas (MLP), sin convoluciones: fronteras de decisión, sobreajuste y efecto de capas, tasas de aprendizaje y funciones de activación. Sirve de repaso del Módulo 1 antes de pasar a la CNN.</td>
                             <td><a href="https://playground.tensorflow.org" target="_blank" rel="noopener">playground.tensorflow.org</a></td>
                         </tr>
                         <tr>
                             <td><span class="fam fam-cnn">CNN/ViT</span></td>
-                            <td><strong>¿Qué es una Red Neuronal Convolucional?</strong> (Dot CSV, Carlos Santana, 2018)</td>
-                            <td>Explicación visual en español, paso a paso, de la arquitectura de una CNN: cómo los filtros detectan bordes y formas y cómo se jerarquizan. Conecta con la analogía biológica del córtex visual del módulo.</td>
+                            <td>Santana Vega, C. [Dot CSV]. (2020, 12 de noviembre). <em>¡Redes neuronales convolucionales! ¿Cómo funcionan?</em> [Video]. YouTube. https://www.youtube.com/watch?v=V8j1oENVz00</td>
+                            <td>Explicación visual en español, paso a paso, de la arquitectura de una CNN: cómo los filtros detectan bordes y formas y cómo se jerarquizan. Conecta con la analogía biológica de la corteza visual del módulo.</td>
                             <td><a href="https://www.youtube.com/watch?v=V8j1oENVz00" target="_blank" rel="noopener">YouTube</a></td>
                         </tr>
                         <tr>
                             <td><span class="fam fam-cnn">CNN/ViT</span></td>
-                            <td><strong>Feature Visualization</strong> (Olah, Mordvintsev &amp; Schubert, Distill, 2017)</td>
-                            <td>Artículo interactivo que muestra qué "ven" realmente las CNN en cada capa. Aporta intuición visual sobre la jerarquía de características aprendidas.</td>
-                            <td><a href="https://distill.pub/2017/feature-visualization/" target="_blank" rel="noopener">distill.pub</a></td>
+                            <td>Olah, C., Mordvintsev, A. y Schubert, L. (2017). Feature visualization. <em>Distill</em>, <em>2</em>(11), e7. https://doi.org/10.23915/distill.00007</td>
+                            <td>Artículo interactivo que muestra qué «ven» realmente las CNN en cada capa. Aporta intuición visual sobre la jerarquía de características aprendidas.</td>
+                            <td><a href="https://doi.org/10.23915/distill.00007" target="_blank" rel="noopener">distill.pub</a></td>
                         </tr>
                         <tr>
                             <td><span class="fam fam-seq">Secuencias</span></td>
-                            <td><strong>Understanding LSTM Networks</strong> (Christopher Olah, 2015)</td>
-                            <td>Considerada la explicación visual definitiva de la LSTM. Diagramas paso a paso de las compuertas y origen de la analogía de la "cinta transportadora" del estado de la celda.</td>
-                            <td><a href="http://colah.github.io/posts/2015-08-Understanding-LSTMs/" target="_blank" rel="noopener">colah.github.io</a></td>
+                            <td>Olah, C. (2015, 27 de agosto). Understanding LSTM networks. <em>Colah's Blog</em>. https://colah.github.io/posts/2015-08-Understanding-LSTMs/</td>
+                            <td>Considerada la explicación visual de referencia de la LSTM. Diagramas paso a paso de las compuertas y origen de la metáfora de la «cinta transportadora» del estado de la celda.</td>
+                            <td><a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs/" target="_blank" rel="noopener">colah.github.io</a></td>
                         </tr>
                         <tr>
                             <td><span class="fam fam-seq">Secuencias</span></td>
-                            <td><strong>The Unreasonable Effectiveness of Recurrent Neural Networks</strong> (Andrej Karpathy, 2015)</td>
+                            <td>Karpathy, A. (2015, 21 de mayo). The unreasonable effectiveness of recurrent neural networks. <em>Andrej Karpathy blog</em>. http://karpathy.github.io/2015/05/21/rnn-effectiveness/</td>
                             <td>Ensayo clásico que muestra, con ejemplos generativos, la sorprendente capacidad de las RNN para modelar texto carácter a carácter. Motivación intuitiva del modelado secuencial.</td>
                             <td><a href="http://karpathy.github.io/2015/05/21/rnn-effectiveness/" target="_blank" rel="noopener">karpathy.github.io</a></td>
                         </tr>
                         <tr>
                             <td><span class="fam fam-seq">Secuencias</span></td>
-                            <td><strong>¿Qué es una Red Neuronal Recurrente? (RNN y LSTM)</strong> (AMP Tech, 2018)</td>
+                            <td>AMP Tech. (2019, 5 de noviembre). <em>Redes neuronales recurrentes</em> [Video]. YouTube. https://www.youtube.com/watch?v=715RuKtX1Xc</td>
                             <td>Explicación narrativa y visual en español que conecta la necesidad de procesar secuencias con la solución LSTM y el problema del desvanecimiento del gradiente.</td>
                             <td><a href="https://www.youtube.com/watch?v=715RuKtX1Xc" target="_blank" rel="noopener">YouTube</a></td>
                         </tr>
                         <tr>
+                            <td><span class="fam fam-seq">Secuencias</span></td>
+                            <td>Amat Rodrigo, J. (2023). <em>Deep learning para la predicción de series temporales: redes neuronales recurrentes (RNN), gated recurrent unit (GRU) y long short-term memory (LSTM)</em>. Ciencia de Datos. https://cienciadedatos.net/documentos/py54-forecasting-con-deep-learning</td>
+                            <td>Tutorial en español con código para pronosticar series temporales con RNN, GRU y LSTM. Apoyo práctico para la rama temporal (B) de la Fase 2.</td>
+                            <td><a href="https://cienciadedatos.net/documentos/py54-forecasting-con-deep-learning" target="_blank" rel="noopener">cienciadedatos.net</a></td>
+                        </tr>
+                        <tr>
                             <td><span class="fam fam-gen">Generativos</span></td>
-                            <td><strong>Transformer Explainer</strong> (Polo Club of Data Science, Georgia Tech, 2024)</td>
-                            <td>Ejecuta un modelo tipo GPT-2 directamente en el navegador. Permite escribir texto propio (incluso en español) y visualizar en tiempo real cómo la atención multi-cabeza asigna probabilidades a la siguiente palabra. Complemento práctico ideal para "ver" la matemática de la atención.</td>
+                            <td>Cho, A., Kim, G. C., Karpekov, A., Helbling, A., Wang, Z. J., Lee, S., Hoover, B. y Chau, D. H. (2024). <em>Transformer Explainer: Interactive learning of text-generative models</em> [Preprint]. arXiv. https://doi.org/10.48550/arXiv.2408.04619</td>
+                            <td>Herramienta (Polo Club of Data Science, Georgia Tech) que ejecuta un modelo tipo GPT-2 en el navegador. Permite escribir texto propio y visualizar en tiempo real cómo la atención multicabeza asigna probabilidades a la siguiente palabra.</td>
                             <td><a href="https://poloclub.github.io/transformer-explainer/" target="_blank" rel="noopener">poloclub.github.io/transformer-explainer</a></td>
                         </tr>
                         <tr>
                             <td><span class="fam fam-gen">Generativos</span></td>
-                            <td><strong>The Illustrated Transformer</strong> (Jay Alammar, 2018)</td>
-                            <td>El recurso más citado para entender visualmente la arquitectura Transformer: <em>query/key/value</em>, atención escalada, codificación posicional y atención multi-cabeza, explicados con diagramas.</td>
+                            <td>Alammar, J. (2018, 27 de junio). The illustrated transformer. <em>Jay Alammar blog</em>. https://jalammar.github.io/illustrated-transformer/</td>
+                            <td>Uno de los recursos más citados para entender visualmente el Transformer: <em>query/key/value</em>, atención escalada, codificación posicional y atención multicabeza, explicados con diagramas.</td>
                             <td><a href="https://jalammar.github.io/illustrated-transformer/" target="_blank" rel="noopener">jalammar.github.io</a></td>
                         </tr>
                         <tr>
                             <td><span class="fam fam-gen">Generativos</span></td>
-                            <td><strong>Understanding Variational Autoencoders (VAEs)</strong> (Joseph Rocca, 2019)</td>
-                            <td>Desarrollo progresivo desde el AE hasta el VAE, con la intuición de los espacios latentes probabilísticos y la divergencia KL. Apoyo a la analogía del "ajiaco como distribución".</td>
+                            <td>Rocca, J. (2019, 23 de septiembre). Understanding variational autoencoders (VAEs). <em>Towards Data Science</em>. https://towardsdatascience.com/understanding-variational-autoencoders-vaes-f70510919f73</td>
+                            <td>Desarrollo progresivo desde el AE hasta el VAE, con la intuición de los espacios latentes probabilísticos y la divergencia KL. Apoyo a la analogía del «ajiaco como distribución».</td>
                             <td><a href="https://towardsdatascience.com/understanding-variational-autoencoders-vaes-f70510919f73" target="_blank" rel="noopener">Towards Data Science</a></td>
                         </tr>
                         <tr>
                             <td><span class="fam fam-gen">Generativos</span></td>
-                            <td><strong>MIT 6.S191: Deep Generative Modeling</strong> (Alexander Amini, 2023)</td>
-                            <td>Clase magistral del MIT que recorre AE, VAE, GAN y difusión con rigor y claridad visual. Síntesis ideal de toda la familia generativa del módulo.</td>
+                            <td>Amini, A. (2023, 31 de marzo). <em>MIT 6.S191: Deep generative modeling</em> [Video]. YouTube. https://www.youtube.com/watch?v=3G5hWM6jqPk</td>
+                            <td>Clase del curso MIT 6.S191 que recorre AE, VAE, GAN y difusión con rigor y claridad visual. Síntesis de toda la familia generativa del módulo.</td>
                             <td><a href="https://www.youtube.com/watch?v=3G5hWM6jqPk" target="_blank" rel="noopener">YouTube</a></td>
                         </tr>
                     </tbody>
@@ -466,7 +517,7 @@
             </div>
 
             <div class="callout callout-tip mt-5">
-                <p class="text-sm"><i class="fas fa-lightbulb text-emerald-600 mr-2"></i><strong>Material del curso (Stanford).</strong> Para profundizar en las CNN se recomienda <strong>CS231n: Deep Learning for Computer Vision</strong> (Li, Johnson &amp; Yeung, Stanford), cuyas notas sobre redes convolucionales están disponibles de forma abierta en <a href="https://cs231n.github.io/convolutional-networks/" target="_blank" rel="noopener">cs231n.github.io</a>.</p>
+                <p class="text-sm"><i class="fas fa-lightbulb text-emerald-600 mr-2"></i><strong>Material del curso (Stanford).</strong> Para profundizar en las CNN se recomienda <strong>CS231n: Deep Learning for Computer Vision</strong> (Stanford University, s. f.), cuyas notas sobre redes convolucionales están disponibles de forma abierta en <a href="https://cs231n.github.io/convolutional-networks/" target="_blank" rel="noopener">cs231n.github.io</a>.</p>
             </div>
         </section>
 
@@ -477,30 +528,35 @@
                 <table class="tbl" style="min-width:680px">
                     <thead>
                         <tr style="background:#3D008D">
-                            <th scope="col" style="width:30%">Documento / caso</th>
-                            <th scope="col" style="width:50%">Aplicación en el módulo</th>
-                            <th scope="col" style="width:20%">Enlace</th>
+                            <th scope="col" style="width:40%">Documento / caso</th>
+                            <th scope="col" style="width:42%">Aplicación en el módulo</th>
+                            <th scope="col" style="width:18%">Enlace</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Ministerio de Ciencia, Tecnología e Innovación. (2021). <em>Marco Ético para la Inteligencia Artificial en Colombia</em>.</td>
-                            <td>Referencia transversal del curso. Aplicable a la generación de datos sintéticos (riesgo de <em>deepfakes</em> y sesgos amplificados) y a la política de <strong>Uso Responsable de IA</strong> del <strong>Proyecto Centinela · Fase 2</strong>. Lectura obligatoria para todos los estudiantes.</td>
-                            <td><a href="https://minciencias.gov.co/sites/default/files/marco-etico-ia-colombia-2021.pdf" target="_blank" rel="noopener">minciencias.gov.co</a></td>
+                            <td>Guío Español, A., Tamayo Uribe, E. y Gómez Ayerbe, P. (2021). <em>Marco ético para la inteligencia artificial en Colombia</em> (Versión 1). Consejería Presidencial para Asuntos Económicos y Transformación Digital, Presidencia de la República de Colombia. https://minciencias.gov.co/sites/default/files/marco-etico-ia-colombia-2021.pdf</td>
+                            <td>Documento de la Presidencia de la República (MinCiencias solo aloja el archivo). Referencia transversal del curso, aplicable a la generación de datos sintéticos (riesgo de <em>deepfakes</em> y sesgos amplificados) y a la política de <strong>Uso Responsable de IA</strong> del <strong>Proyecto Centinela · Fase 2</strong>. Lectura obligatoria para todos los estudiantes.</td>
+                            <td><a href="https://minciencias.gov.co/sites/default/files/marco-etico-ia-colombia-2021.pdf" target="_blank" rel="noopener">Marco ético (PDF)</a></td>
                         </tr>
                         <tr>
-                            <td>Microsoft News Center Latinoamérica. (2023). <em>Proyecto Guacamaya: IA para preservar la Amazonía</em>.</td>
+                            <td>Consejo Nacional de Política Económica y Social. (2025). <em>Política nacional de inteligencia artificial</em> (Documento CONPES 4144). Departamento Nacional de Planeación. https://colaboracion.dnp.gov.co/CDT/Conpes/Econ%C3%B3micos/4144.pdf</td>
+                            <td>Política nacional de inteligencia artificial (CONPES 4144). Marco vigente para discutir el despliegue responsable de los modelos del módulo en Colombia.</td>
+                            <td><a href="https://colaboracion.dnp.gov.co/CDT/Conpes/Econ%C3%B3micos/4144.pdf" target="_blank" rel="noopener">colaboracion.dnp.gov.co</a></td>
+                        </tr>
+                        <tr>
+                            <td>Microsoft News Center Latinoamérica. (2023). <em>Proyecto Guacamaya usa modelos IA contra la deforestación</em>. Microsoft Source LATAM. https://news.microsoft.com/source/latam/features/ia/proyecto-guacamaya-selva-tropical-deforestacion/</td>
                             <td>Alianza entre el Instituto Humboldt, la Universidad de los Andes y Microsoft que usa IA para procesar bioacústica e imágenes satelitales. Ejemplo nacional de CNN para biodiversidad y de detección de deforestación.</td>
                             <td><a href="https://news.microsoft.com/source/latam/features/ia/proyecto-guacamaya-selva-tropical-deforestacion/" target="_blank" rel="noopener">news.microsoft.com</a></td>
                         </tr>
                         <tr>
-                            <td>BMZ Digital. (2025). <em>AI &amp; Coffee: Intelligent &amp; Awake (Proyecto Croppie)</em>.</td>
-                            <td>Herramienta de visión por computador en móviles que cuenta cerezas de café y estima rendimientos en entornos de baja conectividad (<em>Edge AI</em>). Caso de caficultura que conecta el Módulo 1 con las CNN del Módulo 2.</td>
+                            <td>BMZ Digital.Global. (2025, 28 de enero). <em>AI in coffee: Intelligent and awake</em>. Federal Ministry for Economic Cooperation and Development. https://www.bmz-digital.global/en/ai-coffee-intelligent-awake/ (consultado el 2026-10-10)</td>
+                            <td>Proyecto <strong>Croppie</strong> (GIZ, FAIR Forward): a partir de fotos tomadas con el celular, la visión por computador cuenta las cerezas de café y estima el rendimiento de cada lote; agricultores de Colombia y Perú aportaron datos entre 2020 y 2022. Caso de caficultura que conecta el Módulo 1 con las CNN del Módulo 2.</td>
                             <td><a href="https://www.bmz-digital.global/en/ai-coffee-intelligent-awake/" target="_blank" rel="noopener">bmz-digital.global</a></td>
                         </tr>
                         <tr>
-                            <td>Facultad de Ingeniería, Pontificia Universidad Javeriana. (2025). <em>Movilidad con visión</em> [Podcast].</td>
-                            <td>Entrevista sobre un proyecto real de visión por computador aplicado a TransMilenio. Perspectiva local de las CNN en problemas de <em>Smart Cities</em> y movilidad urbana.</td>
+                            <td>Facultad de Ingeniería, Pontificia Universidad Javeriana. (2025, 9 de septiembre). <em>Movilidad con visión</em> [Video]. Podcast Facultad de Ingeniería. https://open.spotify.com/episode/497Ri8LZ2YLJdHPUO0STUL</td>
+                            <td>Entrevista sobre un proyecto real de visión por computador aplicado a TransMilenio. Perspectiva local de las CNN en problemas de ciudades inteligentes y movilidad urbana.</td>
                             <td><a href="https://open.spotify.com/episode/497Ri8LZ2YLJdHPUO0STUL" target="_blank" rel="noopener">Spotify</a></td>
                         </tr>
                     </tbody>
@@ -508,16 +564,16 @@
             </div>
 
             <div class="callout callout-eth mt-5">
-                <p class="text-sm"><i class="fas fa-scale-balanced text-teal mr-2"></i><strong>Implicación ética del módulo.</strong> Los modelos generativos (GAN, VAE, difusión) habilitan la creación de imágenes, audio y texto sintéticos indistinguibles de los reales. Esto plantea riesgos de <em>deepfakes</em>, desinformación y amplificación de sesgos presentes en los datos de entrenamiento. La auditoría ética del <strong>Proyecto Centinela · Fase 2</strong> exige documentar el origen de los datos sintéticos y su impacto, en línea con el Marco Ético para la IA en Colombia.</p>
+                <p class="text-sm"><i class="fas fa-scale-balanced text-teal mr-2"></i><strong>Implicación ética del módulo.</strong> Los modelos generativos (GAN, VAE, difusión) habilitan la creación de imágenes, audio y texto sintéticos indistinguibles de los reales. Esto plantea riesgos de <em>deepfakes</em>, desinformación y amplificación de sesgos presentes en los datos de entrenamiento. La auditoría ética del <strong>Proyecto Centinela · Fase 2</strong> exige documentar el origen de los datos sintéticos y su impacto, en línea con el <em>Marco ético para la inteligencia artificial en Colombia</em> (Guío Español et al., 2021) y la política nacional de IA (Consejo Nacional de Política Económica y Social, 2025).</p>
             </div>
         </section>
 
-        <!-- ====================== SECCIÓN 5 — DATASETS Y HERRAMIENTAS ====================== -->
+        <!-- ====================== SECCIÓN 5 — CONJUNTOS DE DATOS Y HERRAMIENTAS ====================== -->
         <section id="datasets" class="reveal">
-            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-database text-secondary mr-2"></i>Datasets y herramientas de práctica</h2>
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i class="fas fa-database text-secondary mr-2"></i>Conjuntos de datos y herramientas de práctica</h2>
 
             <div class="callout callout-warn mb-5">
-                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i><strong>Política de datos del proyecto.</strong> <strong>Kaggle Notebooks</strong> está permitido como <em>entorno de cómputo</em>, pero los <em>datasets</em> y <em>competencias</em> de Kaggle <strong>NO se permiten</strong> como fuente de datos de la actividad: son retos ya resueltos y con datos demasiado limpios. El proyecto exige fuentes reales y públicas (se admiten fuentes internacionales).</p>
+                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i><strong>Política de datos del proyecto.</strong> <strong>Kaggle Notebooks</strong> está permitido como <em>entorno de cómputo</em>, pero los conjuntos de datos (<em>datasets</em>) y las <em>competencias</em> de Kaggle <strong>no se permiten</strong> como fuente de datos de la actividad: son retos ya resueltos y con datos demasiado limpios. El proyecto exige fuentes reales y públicas (se admiten fuentes internacionales).</p>
             </div>
 
             <div class="overflow-x-auto card p-1">
@@ -532,22 +588,22 @@
                     <tbody>
                         <tr>
                             <td><strong>Actividad evaluable · Proyecto Centinela · Fase 2</strong></td>
-                            <td>Enunciado completo de la actividad evaluable del Módulo 2. El sistema de alerta temprana evoluciona desde la línea base con un MLP (Fase 1) hacia <strong>arquitecturas especializadas</strong> (CNN para imágenes, modelos de secuencias y/o generativos para aumento de datos). Mantiene la política de <strong>Uso Responsable de IA</strong> (bitácora, sustentación oral y auditoría a la IA) y la regla de datos: fuentes reales y públicas, <strong>sin datasets de Kaggle</strong>.</td>
+                            <td>Enunciado completo de la actividad evaluable del Módulo 2. El sistema de alerta temprana evoluciona desde la línea base con un MLP (Fase 1) hacia un <strong>sistema multimodal especializado</strong>: rama visual (CNN con aprendizaje por transferencia), rama temporal (LSTM y GRU, con una RNN simple de contraste) y fusión con estudio de ablación. Mantiene la política de <strong>Uso Responsable de IA</strong> (bitácora, sustentación oral y auditoría a la IA) y la regla de datos: fuentes reales y públicas, <strong>sin conjuntos de datos de Kaggle</strong>.</td>
                             <td><a href="21_Modulo_2_Actividad_Fase2_Centinela.html" target="_blank" rel="noopener">Proyecto Centinela · Fase 2</a></td>
                         </tr>
                         <tr>
-                            <td><strong>ImageNet</strong> — Deng, J. et al. (2009). <em>ImageNet: A large-scale hierarchical image database</em>. CVPR.</td>
-                            <td>Base de más de 14.000.000 de imágenes anotadas. No se usa directamente como dato del proyecto, sino como <strong>fuente de pesos pre-entrenados</strong> para el <em>transfer learning</em> de las CNN (VGG, ResNet) hacia el dominio colombiano (p. ej., plagas del café u orquídeas del Chocó).</td>
+                            <td><strong>ImageNet</strong> — Deng, J., Dong, W., Socher, R., Li, L.-J., Li, K. y Fei-Fei, L. (2009). ImageNet: A large-scale hierarchical image database. En <em>2009 IEEE Conference on Computer Vision and Pattern Recognition</em> (pp. 248–255). IEEE. https://doi.org/10.1109/CVPR.2009.5206848</td>
+                            <td>Base de más de 14.000.000 de imágenes anotadas. No se usa directamente como dato del proyecto, sino como <strong>fuente de pesos preentrenados</strong> para el aprendizaje por transferencia (<em>transfer learning</em>) de las CNN (VGG, ResNet) hacia el dominio colombiano (p. ej., plagas del café u orquídeas del Chocó).</td>
                             <td><a href="https://www.image-net.org/" target="_blank" rel="noopener">image-net.org</a></td>
                         </tr>
                         <tr>
-                            <td><strong>RoCoLe</strong> — Parraga-Alava, J. et al. (2019). <em>RoCoLe: A robusta coffee leaf images dataset</em> (v2). Mendeley Data.</td>
-                            <td>Dataset del <strong>escenario de referencia</strong> del Proyecto Centinela. En la Fase 2 las imágenes de hojas de café Robusta (sanas / con roya) se procesan con una <strong>CNN</strong> (en vez del MLP sobre vectores espectrales de la Fase 1), habilitando además el aumento de datos con modelos generativos.</td>
-                            <td><a href="https://data.mendeley.com/datasets/c5yvn32dzg/2" target="_blank" rel="noopener">data.mendeley.com</a></td>
+                            <td><strong>RoCoLe</strong> — Parraga-Alava, J., Cusme, K., Loor, A. y Santander, E. (2019). <em>RoCoLe: A robusta coffee leaf images dataset</em> (Versión 2) [Conjunto de datos]. Mendeley Data. https://doi.org/10.17632/c5yvn32dzg.2</td>
+                            <td>Conjunto de datos del <strong>escenario de referencia</strong> del Proyecto Centinela. En la Fase 2, las 1.560 fotografías de hoja de café robusta (sanas, con ácaros y con roya) se procesan con una <strong>CNN</strong>, en lugar del MLP sobre descriptores de color por canal (R, G, B) de la Fase 1.</td>
+                            <td><a href="https://doi.org/10.17632/c5yvn32dzg.2" target="_blank" rel="noopener">doi.org/10.17632/c5yvn32dzg.2</a></td>
                         </tr>
                         <tr>
                             <td><strong>Google Colab</strong> + <strong>Kaggle Notebooks</strong></td>
-                            <td>Entornos de cómputo gratuitos con GPU. Toda la implementación práctica del módulo se ejecuta en estos entornos según la metodología "Ingeniería de Trinchera". <strong>Kaggle Notebooks</strong> está permitido como entorno de cómputo, pero sus <em>datasets</em> y <em>competencias</em> no se admiten como fuente de datos de la actividad (véase la alerta superior).</td>
+                            <td>Entornos de cómputo gratuitos con GPU. Toda la implementación práctica del módulo se ejecuta en estos entornos según la metodología «Ingeniería de Trinchera». <strong>Kaggle Notebooks</strong> está permitido como entorno de cómputo, pero sus conjuntos de datos y <em>competencias</em> no se admiten como fuente de datos de la actividad (véase la alerta superior).</td>
                             <td>
                                 <a href="https://colab.research.google.com/" target="_blank" rel="noopener">colab.research.google.com</a><br>
                                 <a href="https://www.kaggle.com/code" target="_blank" rel="noopener">kaggle.com/code</a>
@@ -555,7 +611,7 @@
                         </tr>
                         <tr>
                             <td><strong>Transformer Explainer</strong> / <strong>CNN Explainer</strong></td>
-                            <td>Laboratorios visuales en el navegador para inspeccionar, sin código, el funcionamiento interno de un Transformer (atención multi-cabeza) y de una CNN (convolución, ReLU, <em>pooling</em>). Recomendados como primer contacto antes de implementar cada arquitectura.</td>
+                            <td>Laboratorios visuales en el navegador para inspeccionar, sin código, el funcionamiento interno de un Transformer (atención multicabeza) y de una CNN (convolución, ReLU, <em>pooling</em>). Recomendados como primer contacto antes de implementar cada arquitectura.</td>
                             <td>
                                 <a href="https://poloclub.github.io/transformer-explainer/" target="_blank" rel="noopener">transformer-explainer</a><br>
                                 <a href="https://poloclub.github.io/cnn-explainer/" target="_blank" rel="noopener">cnn-explainer</a>
@@ -566,7 +622,7 @@
             </div>
 
             <div class="callout callout-tip mt-5">
-                <p class="text-sm"><i class="fas fa-lightbulb text-emerald-600 mr-2"></i><strong>Biblioteca del aula.</strong> Además de las fuentes listadas, el aula virtual de USTA Multicampus dispone de las lecturas digitalizadas del libro <strong>Goodfellow et al. (2016)</strong> y de material complementario en formato PDF y video, accesibles desde la sección "Biblioteca" del espacio académico.</p>
+                <p class="text-sm"><i class="fas fa-lightbulb text-emerald-600 mr-2"></i><strong>Biblioteca del aula.</strong> Además de las fuentes listadas, el aula virtual de USTA Multicampus dispone de las lecturas digitalizadas del libro <strong>Goodfellow et al. (2016)</strong> y de material complementario en formato PDF y video, accesibles desde la sección «Biblioteca» del espacio académico.</p>
             </div>
         </section>
 
@@ -602,7 +658,7 @@
         <div class="max-w-6xl mx-auto px-5 md:px-8 py-8">
             <p class="font-bold text-white mb-1">Universidad Santo Tomás · Maestría en Ciencia de Datos</p>
             <p>Profundización I: Redes Neuronales — Deep Learning (EA-N-F-004) · Experto temático: Javier Mauricio Sierra</p>
-            <p class="text-white/55 mt-3 text-xs">Material de consulta · Módulo 2 — Arquitecturas Especializadas de Deep Learning. Material de aprendizaje autónomo. Metodología "Ingeniería de Trinchera": si una arquitectura no corre en Google Colab, no existe.</p>
+            <p class="text-white/55 mt-3 text-xs">Material de consulta · Módulo 2 — Arquitecturas Especializadas de Deep Learning. Material de aprendizaje autónomo. Metodología «Ingeniería de Trinchera»: si una arquitectura no corre en Google Colab, no existe.</p>
         </div>
     </footer>
 

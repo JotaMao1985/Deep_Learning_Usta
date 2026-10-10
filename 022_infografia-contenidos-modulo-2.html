@@ -149,6 +149,10 @@
         /* MathJax (tex-svg) + Preflight de Tailwind (svg{display:block}) rompe la
            matematica inline: cada formula salta de linea. Se restaura el flujo inline. */
         mjx-container svg { display: inline-block; }
+
+        /* Móvil: los hijos de las rejillas pueden encogerse por debajo de su contenido
+           (las ecuaciones anchas quedan dentro del desplazamiento propio de .eq). */
+        .grid > * { min-width: 0; }
     </style>
 </head>
 
@@ -184,11 +188,11 @@
                     <div class="text-xs text-white/75 mt-0.5">carga total del módulo</div>
                 </div>
                 <div class="bg-white/10 border border-white/15 rounded-xl px-4 py-3">
-                    <div class="text-2xl md:text-3xl font-extrabold text-gold">30 %</div>
-                    <div class="text-xs text-white/75 mt-0.5">del peso de la nota final (2 actividades)</div>
+                    <div class="text-2xl md:text-3xl font-extrabold text-gold">35 %</div>
+                    <div class="text-xs text-white/75 mt-0.5">de la nota final: Guía 2 (5 %) + Fase 2 (15 % + 15 %)</div>
                 </div>
                 <div class="bg-white/10 border border-white/15 rounded-xl px-4 py-3">
-                    <div class="text-2xl md:text-3xl font-extrabold text-gold">40</div>
+                    <div class="text-2xl md:text-3xl font-extrabold text-gold">56</div>
                     <div class="text-xs text-white/75 mt-0.5">términos clave del módulo</div>
                 </div>
             </div>
@@ -232,7 +236,7 @@
                 <a href="#cap2" class="card p-4 border-t-4 border-secondary block">
                     <div class="flex items-center justify-between"><span class="text-3xl font-extrabold text-secondary/25">2.2</span><i class="fas fa-wave-square text-secondary"></i></div>
                     <h3 class="font-bold text-navy mt-1 leading-tight">Secuencias: RNN / LSTM / GRU</h3>
-                    <p class="text-xs text-gray-500 mt-1">Memoria, compuertas, encoder-decoder, atención</p>
+                    <p class="text-xs text-gray-500 mt-1">Memoria, compuertas, codificador-decodificador, atención</p>
                 </a>
                 <a href="#cap3" class="card p-4 border-t-4 border-gold block">
                     <div class="flex items-center justify-between"><span class="text-3xl font-extrabold text-gold/40">2.3</span><i class="fas fa-wand-magic-sparkles" style="color:#B45309"></i></div>
@@ -243,7 +247,7 @@
 
             <div class="grid md:grid-cols-3 gap-3 mt-3">
                 <div class="card p-4 text-center"><div class="text-secondary font-bold text-sm"><i class="fas fa-eye mr-1"></i>VER</div><p class="text-[0.78rem] text-gray-600 mt-1">Identificar roya en hojas de café o jaguares en cámaras trampa.</p></div>
-                <div class="card p-4 text-center"><div class="text-secondary font-bold text-sm"><i class="fas fa-clock-rotate-left mr-1"></i>RECORDAR</div><p class="text-[0.78rem] text-gray-600 mt-1">Predecir lluvia, detectar fraude transaccional o entender "dar papaya".</p></div>
+                <div class="card p-4 text-center"><div class="text-secondary font-bold text-sm"><i class="fas fa-clock-rotate-left mr-1"></i>RECORDAR</div><p class="text-[0.78rem] text-gray-600 mt-1">Predecir lluvia, detectar fraude transaccional o entender «dar papaya».</p></div>
                 <div class="card p-4 text-center"><div class="text-secondary font-bold text-sm"><i class="fas fa-lightbulb mr-1"></i>CREAR</div><p class="text-[0.78rem] text-gray-600 mt-1">Sintetizar imágenes de plagas raras o limpiar audios de la selva.</p></div>
             </div>
 
@@ -264,14 +268,14 @@
 
             <!-- Por qué fracasa el MLP -->
             <div class="callout mb-5" style="border-color:#3D008D; background:#F5F0FA">
-                <p class="text-[0.9rem] text-gray-700"><i class="fas fa-triangle-exclamation text-primary mr-1"></i><strong>¿Por qué un MLP fracasa con imágenes?</strong> Una imagen de \(1000\times 1000\) píxeles conectada a una capa oculta de 1.000 neuronas exige <strong>mil millones de pesos</strong> solo en la primera capa. Además, aplanar la imagen <strong>destruye la estructura espacial</strong> (pierde "arriba", "cerca", "lejos") y no ofrece <strong>invarianza a la traslación</strong>. La CNN resuelve los tres problemas con <strong>conexiones locales</strong>, <strong>pesos compartidos</strong> y <strong>submuestreo</strong>.</p>
+                <p class="text-[0.9rem] text-gray-700"><i class="fas fa-triangle-exclamation text-primary mr-1"></i><strong>¿Por qué un MLP fracasa con imágenes?</strong> Una imagen de \(1000\times 1000\) píxeles conectada a una capa oculta de 1.000 neuronas exige <strong>mil millones de pesos</strong> solo en la primera capa. Además, aplanar la imagen <strong>destruye la estructura espacial</strong> (pierde «arriba», «cerca», «lejos») y no ofrece <strong>invarianza a la traslación</strong>. La CNN resuelve los tres problemas con <strong>conexiones locales</strong>, <strong>pesos compartidos</strong> y <strong>submuestreo</strong>.</p>
             </div>
 
             <!-- Convolución + Pooling -->
             <div class="grid lg:grid-cols-2 gap-5 mb-5">
                 <div class="card p-6">
                     <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-border-all text-primary"></i>La operación de convolución</h3>
-                    <p class="text-[0.86rem] text-gray-600 mb-3">Un <strong>filtro</strong> (kernel) se desliza sobre la imagen; en cada posición se multiplica elemento a elemento y se suma, produciendo un <strong>mapa de características</strong>. Los valores del filtro <strong>se aprenden</strong> por retropropagación: la red descubre sola qué bordes o curvas detectar.</p>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">Un <strong>filtro</strong> (<em>kernel</em>) se desliza sobre la imagen; en cada posición se multiplica elemento a elemento y se suma, produciendo un <strong>mapa de características</strong>. Los valores del filtro <strong>se aprenden</strong> por retropropagación: la red descubre sola qué bordes o curvas detectar.</p>
                     <div class="eq text-center my-3">$$S(i,j) = (I * K)(i,j) = \sum_{m}\sum_{n} I(i+m,\,j+n)\,K(m,n)$$</div>
                     <!-- SVG convolución -->
                     <svg viewBox="0 0 420 180" class="w-full" role="img" aria-labelledby="convTitle convDesc">
@@ -320,13 +324,13 @@
                     </svg>
                     <p class="text-center text-[0.78rem] text-gray-500 mt-1">Tamaño de salida: \(O=\left\lfloor\frac{W-K+2P}{S}\right\rfloor+1\)</p>
                     <div class="callout mt-2" style="border-color:#B45309; background:#FFFBEB">
-                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-magnifying-glass mr-1" style="color:#B45309"></i><strong>Hiperparámetros:</strong> el <strong>stride</strong> (\(S\)) es cuánto salta el filtro; el <strong>padding</strong> (\(P\)) rellena los bordes con ceros para no encoger la imagen (<em>same padding</em>: \(P=\frac{K-1}{2}\)).</p>
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-magnifying-glass mr-1" style="color:#B45309"></i><strong>Hiperparámetros:</strong> el <strong>paso</strong> (<em>stride</em>, \(S\)) es cuánto salta el filtro; el <strong>relleno</strong> (<em>padding</em>, \(P\)) rellena los bordes con ceros para no encoger la imagen (<em>same padding</em>: \(P=\frac{K-1}{2}\)).</p>
                     </div>
                 </div>
 
                 <div class="card p-6">
-                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-compress text-primary"></i>Max Pooling: invarianza y reducción</h3>
-                    <p class="text-[0.86rem] text-gray-600 mb-3">El pooling divide el mapa en regiones (p. ej. \(2\times 2\)) y conserva el <strong>máximo</strong> de cada una. Reduce el cómputo y aporta <strong>invarianza a pequeñas traslaciones</strong>: si el ojo del jaguar se movió un píxel, el valor máximo de la ventana sigue siendo el mismo.</p>
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-compress text-primary"></i>Max pooling: invarianza y reducción</h3>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">El <em>pooling</em> divide el mapa en regiones (p. ej. \(2\times 2\)) y conserva el <strong>máximo</strong> de cada una. Reduce el cómputo y aporta <strong>invarianza a pequeñas traslaciones</strong>: si el ojo del jaguar se movió un píxel, el valor máximo de la ventana sigue siendo el mismo.</p>
                     <!-- SVG max pooling -->
                     <svg viewBox="0 0 420 160" class="w-full" role="img" aria-labelledby="poolTitle poolDesc">
                         <title id="poolTitle">Operación de Max Pooling 2 por 2</title>
@@ -363,7 +367,7 @@
                         <text x="312" y="155" text-anchor="middle" font-size="10" fill="#64748B" font-family="Montserrat">Salida 2×2</text>
                     </svg>
                     <div class="callout mt-2" style="border-color:#0E7490; background:#ECFEFF">
-                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-industry mr-1 text-teal"></i><strong>La fábrica visual:</strong> la imagen avanza por una línea de ensamblaje — inspectores-robot (convolución) detectan patrones, ReLU filtra lo útil, el pooling resume, y la sala de decisiones (capas densas) emite el veredicto «Gato: 95%».</p>
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-magnifying-glass mr-1 text-teal"></i><strong>La lupa sobre la fototrampa:</strong> cada filtro recorre la foto viendo un pequeño círculo a la vez (campo receptivo local) con el mismo criterio en toda la imagen (pesos compartidos); ReLU conserva lo útil, el <em>pooling</em> resume y las capas densas emiten el veredicto («jaguar: 95 %»).</p>
                     </div>
                 </div>
             </div>
@@ -381,12 +385,12 @@
                         <g><circle cx="70" cy="62" r="8" fill="#3D008D"/><text x="70" y="40" font-size="11" font-weight="700" fill="#001A4D">LeNet-5</text><text x="70" y="86" font-size="9" fill="#64748B">1998 · 7 capas</text><text x="70" y="100" font-size="8" fill="#94A3B8">cheques MNIST</text></g>
                         <g><circle cx="210" cy="62" r="8" fill="#ED1E79"/><text x="210" y="40" font-size="11" font-weight="700" fill="#001A4D">AlexNet</text><text x="210" y="86" font-size="9" fill="#64748B">2012 · 8 capas</text><text x="210" y="100" font-size="8" fill="#94A3B8">ReLU + GPU + Dropout</text></g>
                         <g><circle cx="350" cy="62" r="8" fill="#0E7490"/><text x="350" y="40" font-size="11" font-weight="700" fill="#001A4D">VGG</text><text x="350" y="86" font-size="9" fill="#64748B">2014 · 16 capas</text><text x="350" y="100" font-size="8" fill="#94A3B8">filtros 3×3 apilados</text></g>
-                        <g><circle cx="490" cy="62" r="8" fill="#B45309"/><text x="490" y="40" font-size="11" font-weight="700" fill="#001A4D">Inception</text><text x="490" y="86" font-size="9" fill="#64748B">2014 · módulos ∥</text><text x="490" y="100" font-size="8" fill="#94A3B8">conv 1×1, 4M params</text></g>
+                        <g><circle cx="490" cy="62" r="8" fill="#B45309"/><text x="490" y="40" font-size="11" font-weight="700" fill="#001A4D">Inception</text><text x="490" y="86" font-size="9" fill="#64748B">2014 · módulos ∥</text><text x="490" y="100" font-size="8" fill="#94A3B8">conv 1×1, ≈5 M parám.</text></g>
                         <g><circle cx="630" cy="62" r="9" fill="#5B1C9E"/><text x="630" y="40" font-size="11" font-weight="700" fill="#001A4D">ResNet</text><text x="630" y="86" font-size="9" fill="#64748B">2015 · 152 capas</text><text x="630" y="100" font-size="8" fill="#94A3B8">skip connections</text></g>
                     </g>
                 </svg>
                 <div class="callout mt-3" style="border-color:#5B1C9E; background:#FAF8FF">
-                    <p class="text-[0.86rem] text-gray-700"><i class="fas fa-link mr-1" style="color:#5B1C9E"></i><strong>Conexiones residuales (ResNet):</strong> al superar las 20 capas, el gradiente se degradaba. ResNet aprende una función residual \(\mathcal{F}(x)\) y suma la identidad: salida \(=\mathcal{F}(x)+x\). Si una capa no aporta, basta con \(\mathcal{F}(x)=0\). Así se entrenaron 152 capas, superando al humano en ImageNet (error 3,57 %). Sigue siendo el <em>backbone</em> más usado en Transfer Learning.</p>
+                    <p class="text-[0.86rem] text-gray-700"><i class="fas fa-link mr-1" style="color:#5B1C9E"></i><strong>Conexiones residuales (ResNet):</strong> al apilar más capas, el error de <em>entrenamiento</em> empeoraba (problema de degradación). ResNet aprende una función residual \(\mathcal{F}(x)\) y suma la identidad: salida \(=\mathcal{F}(x)+x\). Si una capa no aporta, basta con \(\mathcal{F}(x)=0\). Así se entrenaron 152 capas, con un error top-5 de 3,57 % en ImageNet (ensamble de modelos), por debajo del ~5 % humano de referencia. Sigue siendo una de las redes base (<em>backbones</em>) de referencia en Transfer Learning.</p>
                 </div>
             </div>
 
@@ -394,7 +398,7 @@
             <div class="grid lg:grid-cols-2 gap-5 mb-5">
                 <div class="card p-6">
                     <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-table-cells text-primary"></i>Vision Transformer (ViT): la imagen como secuencia de parches</h3>
-                    <p class="text-[0.86rem] text-gray-600 mb-3">En vez de deslizar filtros, el ViT trocea la imagen en <strong>parches</strong> cuadrados, los trata como "palabras visuales" y deja que la <strong>autoatención</strong> relacione cada parche con todos los demás: campo receptivo <strong>global</strong> desde la primera capa.</p>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">En vez de deslizar filtros, el ViT trocea la imagen en <strong>parches</strong> cuadrados, los trata como «palabras visuales» y deja que la <strong>autoatención</strong> relacione cada parche con todos los demás: campo receptivo <strong>global</strong> desde la primera capa.</p>
                     <div class="eq text-center my-2">$$N = \frac{H\cdot W}{P^2}\quad(224\times224,\;P{=}16 \Rightarrow N{=}196)$$</div>
                     <!-- SVG parches -->
                     <svg viewBox="0 0 360 130" class="w-full" role="img" aria-labelledby="vitTitle vitDesc">
@@ -419,7 +423,7 @@
                         <text x="240" y="98" text-anchor="middle" font-size="9" fill="#64748B" font-family="Montserrat">+ codificación posicional → autoatención</text>
                     </svg>
                     <div class="callout mt-2" style="border-color:#B45309; background:#FFFBEB">
-                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-database mr-1" style="color:#B45309"></i><strong>Hambre de datos:</strong> el ViT carece del <em>sesgo inductivo</em> de la convolución, así que necesita millones de imágenes (JFT-300M) o pre-entrenamiento masivo. Con pocos datos, una ResNet suele ganarle.</p>
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-database mr-1" style="color:#B45309"></i><strong>Hambre de datos:</strong> el ViT carece del <em>sesgo inductivo</em> de la convolución, así que necesita millones de imágenes (JFT-300M) o preentrenamiento masivo. Con pocos datos, una ResNet suele ganarle.</p>
                     </div>
                 </div>
 
@@ -444,7 +448,7 @@
                         </table>
                     </div>
                     <div class="callout mt-3" style="border-color:#15803D; background:#F0FDF4">
-                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-leaf mr-1" style="color:#15803D"></i><strong>Para campo (cámaras trampa, hojas de café):</strong> partir de una CNN pre-entrenada (ResNet, EfficientNet) por su eficiencia muestral. El ViT brilla con pre-entrenamiento a gran escala o arquitecturas híbridas.</p>
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-leaf mr-1" style="color:#15803D"></i><strong>Para campo (cámaras trampa, hojas de café):</strong> partir de una CNN preentrenada (ResNet, EfficientNet) por su eficiencia muestral. El ViT brilla con pre-entrenamiento a gran escala o arquitecturas híbridas.</p>
                     </div>
                 </div>
             </div>
@@ -457,7 +461,7 @@
                     <div class="rounded-xl border border-primary/15 bg-[#FAF8FF] p-4">
                         <span class="text-[11px] font-bold uppercase tracking-wider text-primary"><i class="fas fa-lock mr-1"></i>Extracción de características</span>
                         <ul class="text-[0.84rem] text-gray-600 mt-2 space-y-1.5">
-                            <li><strong>Cuándo:</strong> dataset pequeño y similar a ImageNet.</li>
+                            <li><strong>Cuándo:</strong> conjunto de datos pequeño y similar a ImageNet.</li>
                             <li><strong>Cómo:</strong> congelar (<em>freeze</em>) todos los pesos base; reemplazar y entrenar solo la capa de clasificación final.</li>
                             <li><strong>Ejemplo:</strong> clasificar 100 fotos de flores locales.</li>
                         </ul>
@@ -465,7 +469,7 @@
                     <div class="rounded-xl border border-secondary/15 bg-[#FCE7F1]/40 p-4">
                         <span class="text-[11px] font-bold uppercase tracking-wider text-secondary"><i class="fas fa-unlock mr-1"></i>Fine-Tuning (ajuste fino)</span>
                         <ul class="text-[0.84rem] text-gray-600 mt-2 space-y-1.5">
-                            <li><strong>Cuándo:</strong> dataset grande o muy distinto (médico, satelital).</li>
+                            <li><strong>Cuándo:</strong> conjunto de datos grande o muy distinto (médico, satelital).</li>
                             <li><strong>Cómo:</strong> descongelar las últimas capas convolucionales y reentrenar con tasa de aprendizaje <strong>muy baja</strong>.</li>
                             <li><strong>Ejemplo:</strong> detectar tuberculosis en 5.000 radiografías.</li>
                         </ul>
@@ -480,19 +484,20 @@
                     <p class="text-[0.86rem] text-gray-600 mb-3">Sin internet, con batería solar y procesadores diminutos, hay que comprimir el modelo:</p>
                     <ul class="space-y-2 text-[0.84rem] text-gray-700">
                         <li class="flex gap-2"><span class="font-bold text-primary">·</span><span><strong>Cuantización</strong> (FP32→INT8): \(\approx 4\times\) más pequeño. \(25{\cdot}10^{6}\) params: 100 MB → 25 MB.</span></li>
-                        <li class="flex gap-2"><span class="font-bold text-primary">·</span><span><strong>Pruning</strong> (poda): elimina pesos cercanos a cero (red <em>sparse</em>), como podar un cafetal.</span></li>
-                        <li class="flex gap-2"><span class="font-bold text-primary">·</span><span><strong>Destilación</strong>: un modelo "estudiante" pequeño imita al "maestro" grande.</span></li>
+                        <li class="flex gap-2"><span class="font-bold text-primary">·</span><span><strong>Poda</strong> (<em>pruning</em>): elimina pesos cercanos a cero (red dispersa, <em>sparse</em>), como el guardaparques que despeja una trocha.</span></li>
+                        <li class="flex gap-2"><span class="font-bold text-primary">·</span><span><strong>Destilación</strong>: un modelo «estudiante» pequeño imita al «maestro» grande (el guardaparques novato que aprende del rastreador veterano).</span></li>
                         <li class="flex gap-2"><span class="font-bold text-primary">·</span><span><strong>Eficientes por diseño</strong>: MobileNet (conv. separables), EfficientNet (escalado compuesto).</span></li>
                     </ul>
                     <div class="callout mt-3" style="border-color:#B45309; background:#FFFBEB">
-                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-scale-unbalanced mr-1" style="color:#B45309"></i><strong>Trade-off precisión ↔ tamaño:</strong> una compresión agresiva puede confundir un tigrillo con un ocelote. Verificar la caída de sensibilidad antes de desplegar.</p>
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-scale-unbalanced mr-1" style="color:#B45309"></i><strong>Compromiso precisión ↔ tamaño:</strong> una compresión agresiva puede confundir un jaguar con un ocelote. Verificar la caída de sensibilidad antes de desplegar.</p>
                     </div>
                 </div>
                 <div class="card p-6">
                     <h3 class="font-bold text-navy mb-3 flex items-center gap-2"><i class="fas fa-earth-americas text-primary"></i>Ojos digitales en la biodiversidad colombiana</h3>
+                    <p class="text-[0.84rem] text-gray-600 mb-3">Colombia es uno de los países con mayor biodiversidad del planeta, primero en especies de aves, orquídeas y mariposas (SiB Colombia, 2026). Clasificar a mano las fotos de sus cámaras trampa es inviable.</p>
                     <div class="grid sm:grid-cols-1 gap-3 text-[0.84rem]">
-                        <div class="bg-gray-50 rounded-lg p-3"><strong class="text-primary">Wildlife Insights</strong> — CNN que filtra los falsos positivos de cámaras trampa (más de 13.000 imágenes en una campaña de 2023, Instituto Humboldt + Red Otus).</div>
-                        <div class="bg-gray-50 rounded-lg p-3"><strong class="text-primary">Re-identificación</strong> — las manchas únicas del jaguar permiten rastrear individuos ("Jaguar #04") y verificar corredores biológicos Andes-Amazonía.</div>
+                        <div class="bg-gray-50 rounded-lg p-3"><strong class="text-primary">Wildlife Insights</strong> — plataforma que usa CNN para filtrar los disparos en vacío (ramas, viento) de las cámaras trampa, que generan miles de imágenes por campaña (Ahumada et al., 2020).</div>
+                        <div class="bg-gray-50 rounded-lg p-3"><strong class="text-primary">Reidentificación</strong> — las manchas únicas del jaguar permiten rastrear individuos («Jaguar #04») y verificar corredores biológicos Andes-Amazonía.</div>
                         <div class="bg-gray-50 rounded-lg p-3"><strong class="text-secondary">Especies monitoreadas</strong> — oso andino, danta, jaguar y tigrillo en la Orinoquía y los Andes.</div>
                     </div>
                 </div>
@@ -510,13 +515,13 @@
             </div>
 
             <div class="callout mb-5" style="border-color:#ED1E79; background:#FFF1F7">
-                <p class="text-[0.9rem] text-gray-700"><i class="fas fa-clock-rotate-left text-secondary mr-1"></i>Las redes <em>feedforward</em> suponen entradas independientes, pero la realidad es <strong>secuencial</strong>: la lluvia de mayo depende de ciclos anuales (\(t{-}12\)); "dar papaya" no significa entregar una fruta sino <em>exponerse a un riesgo</em>; una transacción en Miami una hora después de otra en Bogotá es sospechosa. Se requiere una red con <strong>memoria</strong> que procese token por token.</p>
+                <p class="text-[0.9rem] text-gray-700"><i class="fas fa-clock-rotate-left text-secondary mr-1"></i>Las redes <em>feedforward</em> suponen entradas independientes, pero la realidad es <strong>secuencial</strong>: la lluvia de mayo depende de ciclos anuales (\(t{-}12\)); «dar papaya» no significa entregar una fruta sino <em>exponerse a un riesgo</em>; una transacción en Miami una hora después de otra en Bogotá es sospechosa. Se requiere una red con <strong>memoria</strong> que procese token por token.</p>
             </div>
 
             <!-- RNN diagrama -->
             <div class="card p-6 mb-5">
                 <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-arrows-spin text-secondary"></i>La RNN: una red con bucle de retroalimentación</h3>
-                <p class="text-[0.86rem] text-gray-600 mb-3">La RNN es la misma celda copiada en el tiempo: en cada paso recibe la entrada \(x_t\) y el estado oculto anterior \(h_{t-1}\), y produce un nuevo estado \(h_t\) que actúa como su "memoria".</p>
+                <p class="text-[0.86rem] text-gray-600 mb-3">La RNN es la misma celda copiada en el tiempo: en cada paso recibe la entrada \(x_t\) y el estado oculto anterior \(h_{t-1}\), y produce un nuevo estado \(h_t\) que actúa como su «memoria».</p>
                 <div class="eq text-center my-3">$$h_t = \tanh(W_{xh}\,x_t + W_{hh}\,h_{t-1} + b_h)\qquad \hat{y}_t = \operatorname{softmax}(W_{hy}\,h_t + b_y)$$</div>
                 <!-- SVG RNN desenrollada -->
                 <svg viewBox="0 0 640 150" class="w-full" role="img" aria-labelledby="rnnTitle rnnDesc">
@@ -552,7 +557,7 @@
                     </g>
                 </svg>
                 <div class="callout mt-3" style="border-color:#DC2626; background:#FEF2F2">
-                    <p class="text-[0.86rem] text-gray-700"><i class="fas fa-phone-slash mr-1 text-red-600"></i><strong>El "teléfono roto" (desvanecimiento del gradiente):</strong> al entrenar con <strong>BPTT</strong>, el término \(\frac{\partial h_t}{\partial h_k}=\prod \operatorname{diag}(1-\tanh^2)\,W_{hh}^{\top}\) multiplica muchas matrices. Si sus valores son \(<1\), el gradiente tiende <strong>exponencialmente a cero</strong>: la red aprende lo reciente pero <strong>olvida lo lejano</strong> (el sujeto plural "estudiantes" al inicio de una frase larga).</p>
+                    <p class="text-[0.86rem] text-gray-700"><i class="fas fa-phone-slash mr-1 text-red-600"></i><strong>El «teléfono roto» (desvanecimiento del gradiente):</strong> al entrenar con <strong>BPTT</strong>, el término \(\frac{\partial h_t}{\partial h_k}=\prod_{j=k+1}^{t}\operatorname{diag}\big(1-h_j^{2}\big)\,W_{hh}\) multiplica muchas matrices (con la convención de gradiente cada factor aparece traspuesto; la norma es la misma). Si el mayor valor singular de \(W_{hh}\) es menor que 1 (condición suficiente), el gradiente tiende <strong>exponencialmente a cero</strong>: la red aprende lo reciente pero <strong>olvida lo lejano</strong> (el sujeto plural «estudiantes» al inicio de una frase larga).</p>
                 </div>
             </div>
 
@@ -560,7 +565,7 @@
             <div class="grid lg:grid-cols-2 gap-5 mb-5">
                 <div class="card p-6">
                     <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-door-closed text-secondary"></i>LSTM: la cinta transportadora con compuertas</h3>
-                    <p class="text-[0.86rem] text-gray-600 mb-3">La LSTM (1997) separa la memoria a <strong>largo plazo</strong> (estado de celda \(C_t\)) de la de <strong>corto plazo</strong> (\(h_t\)). Tres compuertas sigmoides regulan el flujo: valores entre 0 (olvidar) y 1 (recordar).</p>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">La LSTM (1997) separa la memoria a <strong>largo plazo</strong> (estado de celda \(C_t\)) de la de <strong>corto plazo</strong> (\(h_t\)). Tres compuertas sigmoides regulan el flujo con valores en \((0, 1)\); la de olvido, hoy estándar, la añadieron Gers et al. (2000).</p>
                     <!-- SVG compuertas LSTM -->
                     <svg viewBox="0 0 380 170" class="w-full" role="img" aria-labelledby="lstmTitle lstmDesc">
                         <title id="lstmTitle">Celda LSTM con sus tres compuertas y el estado de la celda</title>
@@ -591,20 +596,20 @@
                     </svg>
                     <div class="text-[0.78rem] text-gray-600 space-y-1 mt-2">
                         <div class="eq text-center">$$C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$$</div>
-                        <p class="text-center text-gray-500">La <strong>suma</strong> (no multiplicación) deja fluir el gradiente "intacto": ese es el «carrusel de error constante».</p>
+                        <p class="text-center text-gray-500">Por la cinta, \(\partial C_t/\partial C_{t-1}=\operatorname{diag}(f_t)\): el gradiente se multiplica solo por la compuerta de olvido y cruza <strong>casi intacto</strong> mientras \(f_t\approx 1\). Ese es el «carrusel de error constante».</p>
                     </div>
                 </div>
 
                 <div class="card p-6">
                     <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-chart-line text-secondary"></i>El estado de celda preserva la memoria</h3>
-                    <p class="text-[0.86rem] text-gray-600 mb-3">Mientras la RNN simple <strong>diluye</strong> la señal de pasos lejanos, la "autopista" aditiva de la LSTM la <strong>conserva</strong>. Las curvas comparan cuánta señal del paso inicial sobrevive a lo largo de la secuencia (generadas a partir de funciones reales).</p>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">Mientras la RNN simple <strong>diluye</strong> la señal de pasos lejanos, la «autopista» aditiva de la LSTM la <strong>conserva</strong>. Las curvas comparan cuánta señal del paso inicial sobrevive a lo largo de la secuencia (generadas a partir de funciones reales).</p>
                     <div class="plot-mem" role="img" aria-label="Gráfica comparativa: la señal de la RNN simple decae exponencialmente hasta casi cero a lo largo de los pasos de tiempo, mientras que la de la LSTM se mantiene cercana a uno gracias al estado de la celda aditivo."></div>
                     <div class="grid grid-cols-2 gap-2 text-[0.76rem] text-center mt-2">
                         <div class="bg-[#FEF2F2] rounded p-1.5 text-red-700"><strong>RNN simple</strong><br>la memoria se desvanece</div>
                         <div class="bg-[#F0FDF4] rounded p-1.5 text-green-700"><strong>LSTM</strong><br>la memoria persiste</div>
                     </div>
                     <div class="callout mt-3" style="border-color:#0E7490; background:#ECFEFF">
-                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-shield-halved mr-1 text-teal"></i><strong>Bancolombia / Nubank:</strong> la LSTM mantiene el perfil de gasto del usuario; al ver "compra grande en Miami 1 hora después de Bogotá", detecta la discrepancia con el estado oculto y dispara verificación. <em>Precog</em> de Nubank predice incluso la intención del cliente.</p>
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-shield-halved mr-1 text-teal"></i><strong>Un banco digital (caso ilustrativo):</strong> una LSTM puede mantener en su estado oculto el perfil de gasto del usuario; al ver «compra grande en Miami una hora después de una en Bogotá», detecta la discrepancia y dispara una verificación.</p>
                     </div>
                 </div>
             </div>
@@ -612,12 +617,12 @@
             <!-- GRU vs LSTM -->
             <div class="card p-6 mb-5">
                 <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-bolt-lightning text-secondary"></i>GRU: la simplificación veloz</h3>
-                <p class="text-[0.86rem] text-gray-600 mb-3">La GRU (2014) fusiona el estado de celda y el oculto en un solo vector, y combina olvido+entrada en una sola <strong>compuerta de actualización</strong> \(z_t\). Menos parámetros → entrena más rápido.</p>
+                <p class="text-[0.86rem] text-gray-600 mb-3">La GRU (2014) fusiona el estado de celda y el oculto en un solo vector, y combina olvido y entrada en una sola <strong>compuerta de actualización</strong> \(z_t\). Menos parámetros por unidad → cada paso cuesta menos cómputo.</p>
                 <div class="grid md:grid-cols-2 gap-4 items-center">
                     <div class="text-[0.8rem] text-gray-700 space-y-1.5">
                         <div class="eq text-center">$$z_t = \sigma(W_{xz}x_t + W_{hz}h_{t-1}+b_z)$$</div>
-                        <div class="eq text-center">$$h_t = (1-z_t)\odot h_{t-1} + z_t\odot \tilde{h}_t$$</div>
-                        <p class="text-center text-gray-500">Interpolación lineal entre el pasado y el candidato.</p>
+                        <div class="eq text-center">$$h_t = z_t\odot h_{t-1} + (1-z_t)\odot \tilde{h}_t$$</div>
+                        <p class="text-center text-gray-500">Interpolación entre el pasado (peso \(z_t\)) y el candidato (peso \(1-z_t\)): con \(z_t\approx 1\) se conserva la memoria. Es la convención de Cho et al. (2014), de Goodfellow et al. (2016) y de <code>nn.GRU</code>; otras fuentes (Olah, 2015) intercambian \(z_t\) y \(1-z_t\).</p>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-[0.78rem] border-collapse">
@@ -625,24 +630,24 @@
                             <tbody class="text-gray-700">
                                 <tr><td class="p-2 border border-gray-200 font-semibold">Compuertas / estados</td><td class="p-2 border border-gray-200">3 / 2</td><td class="p-2 border border-gray-200">2 / 1</td></tr>
                                 <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Parámetros</td><td class="p-2 border border-gray-200">Más</td><td class="p-2 border border-gray-200">Menos (ligero)</td></tr>
-                                <tr><td class="p-2 border border-gray-200 font-semibold">Velocidad</td><td class="p-2 border border-gray-200">Lenta</td><td class="p-2 border border-gray-200">Rápida</td></tr>
-                                <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Mejor en</td><td class="p-2 border border-gray-200">Secuencias muy largas</td><td class="p-2 border border-gray-200">Medias/cortas, edge</td></tr>
+                                <tr><td class="p-2 border border-gray-200 font-semibold">Velocidad</td><td class="p-2 border border-gray-200">Algo más lenta (4 bloques de pesos)</td><td class="p-2 border border-gray-200">Algo más rápida (3 bloques)</td></tr>
+                                <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Rendimiento</td><td class="p-2 border border-gray-200">Ventaja en conteo o memoria muy larga</td><td class="p-2 border border-gray-200">Comparable en muchas tareas</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
                 <div class="callout mt-3" style="border-color:#B45309; background:#FFFBEB">
-                    <p class="text-[0.82rem] text-gray-700"><i class="fas fa-motorcycle mr-1" style="color:#B45309"></i><strong>Rappi "Turbo":</strong> predecir pedidos en Chapinero Alto en los próximos 20 minutos exige <strong>latencia de milisegundos</strong>. La GRU, más ligera, gana: lo de hace 30 minutos importa más que lo de hace 6 meses. IDEAM, en cambio, usa LSTM para el ciclo de El Niño.</p>
+                    <p class="text-[0.82rem] text-gray-700"><i class="fas fa-motorcycle mr-1" style="color:#B45309"></i><strong>Una plataforma de domicilios (caso ilustrativo):</strong> predecir pedidos de un barrio en los próximos 20 minutos exige <strong>latencia de milisegundos</strong>. Una GRU, más ligera, sería una elección razonable: lo de hace 30 minutos importa más que lo de hace 6 meses. Para ciclos largos, como El Niño, una LSTM es una candidata natural (conviene comparar ambas).</p>
                 </div>
             </div>
 
             <!-- Encoder-decoder + atención -->
             <div class="card p-6">
                 <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-right-left text-secondary"></i>Del cuello de botella seq2seq a la atención</h3>
-                <p class="text-[0.86rem] text-gray-600 mb-4">El <strong>encoder-decoder</strong> comprime toda la frase de entrada en un único vector de contexto \(c\). En frases largas ese vector se satura (el "mensajero que solo puede memorizar una frase"). La <strong>atención</strong> (Bahdanau, 2015) deja que el decodificador <strong>mire de regreso</strong> a todos los estados del encoder y pondere los relevantes.</p>
+                <p class="text-[0.86rem] text-gray-600 mb-4">El <strong>codificador-decodificador</strong> (<em>encoder-decoder</em>) comprime toda la frase de entrada en un único vector de contexto \(c\). En frases largas ese vector se satura (el «mensajero que solo puede memorizar una frase»). La <strong>atención</strong> (Bahdanau et al., 2015) deja que el decodificador <strong>mire de regreso</strong> a todos los estados del codificador y pondere los relevantes.</p>
                 <!-- SVG atención -->
                 <svg viewBox="0 0 600 160" class="w-full" role="img" aria-labelledby="attnTitle attnDesc">
-                    <title id="attnTitle">Mecanismo de atención entre encoder y decoder</title>
+                    <title id="attnTitle">Mecanismo de atención entre codificador y decodificador</title>
                     <desc id="attnDesc">Una fila de estados del codificador en la parte inferior se conecta mediante pesos de atención de distinto grosor a un paso del decodificador en la parte superior; las conexiones más gruesas indican mayor atención.</desc>
                     <g font-family="Montserrat" text-anchor="middle">
                         <!-- encoder states -->
@@ -653,9 +658,9 @@
                             <rect x="340" y="110" width="44" height="34" rx="6" fill="#FCE7F1" stroke="#ED1E79"/><text x="362" y="132" font-size="11" fill="#ED1E79" font-weight="700">h₄</text>
                             <rect x="440" y="110" width="44" height="34" rx="6" fill="#FCE7F1" stroke="#ED1E79"/><text x="462" y="132" font-size="11" fill="#ED1E79" font-weight="700">h₅</text>
                         </g>
-                        <text x="262" y="158" font-size="9" fill="#64748B">Estados del encoder (entrada completa, disponible)</text>
+                        <text x="262" y="158" font-size="9" fill="#64748B">Estados del codificador (entrada completa, disponible)</text>
                         <!-- decoder step -->
-                        <rect x="500" y="20" width="60" height="40" rx="8" fill="#F5F0FA" stroke="#3D008D" stroke-width="2"/><text x="530" y="38" font-size="11" fill="#3D008D" font-weight="700">sₜ</text><text x="530" y="52" font-size="8" fill="#475569">decoder</text>
+                        <rect x="500" y="20" width="60" height="40" rx="8" fill="#F5F0FA" stroke="#3D008D" stroke-width="2"/><text x="530" y="38" font-size="11" fill="#3D008D" font-weight="700">sₜ</text><text x="530" y="52" font-size="7" fill="#475569">decodif.</text>
                         <!-- pesos de atención: grosor distinto -->
                         <g fill="none" stroke="#3D008D">
                             <line x1="62" y1="110" x2="510" y2="58" stroke-width="0.8" opacity="0.45"/>
@@ -677,7 +682,7 @@
                     </div>
                 </div>
                 <div class="callout mt-3" style="border-color:#5B1C9E; background:#FAF8FF">
-                    <p class="text-[0.84rem] text-gray-700"><i class="fas fa-arrow-right-long mr-1" style="color:#5B1C9E"></i><strong>Puente a los Transformers:</strong> ¿y si una secuencia se "presta atención a sí misma" y se elimina por completo la recurrencia? Esa <strong>autoatención</strong> es el corazón del Transformer, que se desarrolla en el Capítulo 2.3.</p>
+                    <p class="text-[0.84rem] text-gray-700"><i class="fas fa-arrow-right-long mr-1" style="color:#5B1C9E"></i><strong>Puente a los Transformers:</strong> ¿y si una secuencia se «presta atención a sí misma» y se elimina por completo la recurrencia? Esa <strong>autoatención</strong> es el corazón del Transformer, que se desarrolla en el Capítulo 2.3.</p>
                 </div>
             </div>
         </section>
@@ -693,17 +698,17 @@
             </div>
 
             <div class="callout mb-5" style="border-color:#B45309; background:#FFFBEB">
-                <p class="text-[0.9rem] text-gray-700"><i class="fas fa-guitar mr-1" style="color:#B45309"></i><strong>La piquería vallenata:</strong> un verseador no recita canciones memorizadas (eso sería <em>overfitting</em>); interioriza la <strong>distribución de probabilidad</strong> del género (métrica, rima, ritmo) y, ante un pie forzado, improvisa una estrofa nueva pero coherente. Un modelo generativo aprende \(p_{\text{data}}(x)\) para crear instancias \(\tilde{x}\) inéditas pero plausibles.</p>
+                <p class="text-[0.9rem] text-gray-700"><i class="fas fa-guitar mr-1" style="color:#B45309"></i><strong>La piquería vallenata:</strong> un verseador no recita canciones memorizadas (eso sería <em>sobreajuste</em>); interioriza la <strong>distribución de probabilidad</strong> del género (métrica, rima, ritmo) y, ante un pie forzado, improvisa una estrofa nueva pero coherente. Un modelo generativo aprende \(p_{\text{data}}(x)\) para crear instancias \(\tilde{x}\) inéditas pero plausibles.</p>
             </div>
 
             <!-- AE + VAE -->
             <div class="grid lg:grid-cols-2 gap-5 mb-5">
                 <div class="card p-6">
-                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-compress-arrows-alt" style="color:#B45309"></i>Autoencoder (AE): comprimir y reconstruir</h3>
-                    <p class="text-[0.86rem] text-gray-600 mb-3">El "reloj de arena": un <strong>encoder</strong> comprime hasta el <strong>cuello de botella</strong> (código latente \(z\)) y un <strong>decoder</strong> reconstruye. La restricción impide copiar la identidad: la red conserva solo lo esencial.</p>
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-compress-arrows-alt" style="color:#B45309"></i>Autocodificador (AE): comprimir y reconstruir</h3>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">El «reloj de arena»: un <strong>codificador</strong> (<em>encoder</em>) comprime hasta el <strong>cuello de botella</strong> (código latente \(z\)) y un <strong>decodificador</strong> (<em>decoder</em>) reconstruye. La restricción impide copiar la identidad: la red conserva solo lo esencial.</p>
                     <!-- SVG AE hourglass -->
                     <svg viewBox="0 0 380 150" class="w-full" role="img" aria-labelledby="aeTitle aeDesc">
-                        <title id="aeTitle">Arquitectura de reloj de arena de un autoencoder</title>
+                        <title id="aeTitle">Arquitectura de reloj de arena de un autocodificador</title>
                         <desc id="aeDesc">Una columna de muchos nodos a la izquierda (entrada) se estrecha hacia un cuello de botella central de pocos nodos (código latente) y se vuelve a expandir a la derecha (reconstrucción).</desc>
                         <g fill="#FCE7F1" stroke="#ED1E79">
                             <circle cx="36" cy="30" r="9"/><circle cx="36" cy="55" r="9"/><circle cx="36" cy="80" r="9"/><circle cx="36" cy="105" r="9"/><circle cx="36" cy="130" r="9"/>
@@ -723,15 +728,15 @@
                         </g>
                         <g font-family="Montserrat" text-anchor="middle" font-size="9" fill="#64748B">
                             <text x="36" y="148">x (entrada)</text>
-                            <text x="110" y="138" fill="#3D008D">encoder f</text>
+                            <text x="110" y="138" fill="#3D008D">codificador f</text>
                             <text x="190" y="118" fill="#B45309" font-weight="700">z (latente)</text>
-                            <text x="270" y="138" fill="#3D008D">decoder g</text>
+                            <text x="270" y="138" fill="#3D008D">decodificador g</text>
                             <text x="344" y="148" fill="#15803D">x̂</text>
                         </g>
                     </svg>
                     <div class="eq text-center my-2 text-sm">$$\mathcal{L}_{\text{rec}} = \lVert x - g(f(x))\rVert^2$$</div>
                     <div class="callout mt-1" style="border-color:#0E7490; background:#ECFEFF">
-                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-bus mr-1 text-teal"></i><strong>TransMilenio:</strong> los alimentadores (encoder) canalizan pasajeros dispersos hacia el bus articulado rojo (vector latente \(z\)); al llegar, se dispersan (decoder). Un <strong>elefante</strong> que intenta entrar no se comprime → alto error de reconstrucción → <strong>detección de anomalías</strong> (fraude en Nequi, denoising de audio bioacústico).</p>
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-bus mr-1 text-teal"></i><strong>TransMilenio:</strong> los alimentadores (codificador) canalizan pasajeros dispersos hacia el bus articulado rojo (vector latente \(z\)); al llegar, se dispersan (decodificador). Un <strong>elefante</strong> que intenta entrar no se comprime → alto error de reconstrucción → <strong>detección de anomalías</strong> (fraude en un banco digital, eliminación de ruido en audio bioacústico).</p>
                     </div>
                 </div>
 
@@ -785,7 +790,7 @@
                         <!-- D -->
                         <rect x="330" y="50" width="70" height="44" rx="8" fill="#F5F0FA" stroke="#3D008D" stroke-width="2"/><text x="365" y="70" font-size="13" fill="#3D008D" font-weight="700">D</text><text x="365" y="84" font-size="8" fill="#5B1C9E">Discriminador</text>
                         <!-- salida -->
-                        <text x="475" y="70" font-size="10" fill="#475569">D(x) ∈ [0,1]</text>
+                        <text x="475" y="70" font-size="10" fill="#475569">D(x) ∈ (0, 1)</text>
                         <text x="475" y="84" font-size="8" fill="#64748B">¿real o falsa?</text>
                         <!-- flechas -->
                         <g stroke="#94A3B8" stroke-width="1.5" fill="none" marker-end="url(#arrGan)">
@@ -801,7 +806,7 @@
                 <div class="eq text-center my-2">$$\min_G \max_D V(D,G) = \mathbb{E}_{x\sim p_{\text{data}}}[\log D(x)] + \mathbb{E}_{z\sim p_z}[\log(1 - D(G(z)))]$$</div>
                 <div class="grid md:grid-cols-2 gap-3 mt-2">
                     <div class="callout" style="border-color:#DC2626; background:#FEF2F2">
-                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-clone mr-1 text-red-600"></i><strong>Mode collapse:</strong> el verseador repite siempre su única estrofa ganadora. Soluciones: <em>non-saturating loss</em> (maximizar \(\log D(G(z))\)), DCGAN (convoluciones) y WGAN (distancia de Wasserstein).</p>
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-clone mr-1 text-red-600"></i><strong>Colapso de modos (<em>mode collapse</em>):</strong> el verseador repite siempre su única estrofa ganadora. Remedios: pérdida no saturante (maximizar \(\log D(G(z))\)), DCGAN (convoluciones) y WGAN (distancia de Wasserstein; sus autores no observaron colapso en sus experimentos).</p>
                     </div>
                     <div class="callout" style="border-color:#B45309; background:#FFFBEB">
                         <p class="text-[0.82rem] text-gray-700"><i class="fas fa-triangle-exclamation mr-1" style="color:#B45309"></i><strong>Entrenamiento frágil:</strong> no hay pérdida monótona que interpretar. Una pérdida que baja no garantiza mejores muestras. La <strong>inspección visual</strong> periódica suele ser más informativa.</p>
@@ -811,12 +816,12 @@
 
             <!-- Difusión -->
             <div class="card p-6 mb-5">
-                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-water" style="color:#B45309"></i>Modelos de Difusión: destruir para aprender a reconstruir</h3>
-                <p class="text-[0.86rem] text-gray-600 mb-4">El proceso <strong>forward</strong> (fijo, sin parámetros) añade ruido gaussiano paso a paso hasta convertir la imagen en estática pura. El proceso <strong>reverse</strong> (aprendido) entrena una red para <strong>quitar</strong> ese ruido y recuperar la imagen. Generar = partir de ruido y aplicar el reverse \(T\) veces.</p>
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-water" style="color:#B45309"></i>Modelos de difusión: destruir para aprender a reconstruir</h3>
+                <p class="text-[0.86rem] text-gray-600 mb-4">El proceso <strong>directo</strong> (<em>forward</em>; fijo, sin parámetros) añade ruido gaussiano paso a paso hasta convertir la imagen en estática pura. El proceso <strong>inverso</strong> (<em>reverse</em>; aprendido) entrena una red para <strong>quitar</strong> ese ruido y recuperar la imagen. Generar = partir de ruido y aplicar el proceso inverso \(T\) veces.</p>
                 <!-- SVG difusión -->
                 <svg viewBox="0 0 600 130" class="w-full" role="img" aria-labelledby="diffTitle diffDesc">
-                    <title id="diffTitle">Procesos forward y reverse de un modelo de difusión</title>
-                    <desc id="diffDesc">Una imagen nítida se degrada progresivamente en cuatro pasos hacia la izquierda hasta convertirse en ruido puro (proceso forward, en rojo); el proceso reverse, en verde, recorre la cadena en sentido inverso reconstruyendo la imagen.</desc>
+                    <title id="diffTitle">Procesos directo e inverso de un modelo de difusión</title>
+                    <desc id="diffDesc">Una imagen nítida se degrada progresivamente en cuatro pasos hacia la izquierda hasta convertirse en ruido puro (proceso directo, en rojo); el proceso inverso, en verde, recorre la cadena en sentido inverso reconstruyendo la imagen.</desc>
                     <g>
                         <!-- estados con niveles de ruido crecientes -->
                         <rect x="30" y="40" width="60" height="60" rx="6" fill="#DCFCE7" stroke="#15803D"/><text x="60" y="74" text-anchor="middle" font-size="9" fill="#166534" font-family="Montserrat">x₀</text>
@@ -833,15 +838,15 @@
                     <g stroke="#DC2626" stroke-width="2" fill="none" marker-end="url(#arrFwd)">
                         <line x1="92" y1="34" x2="158" y2="34"/><line x1="222" y1="34" x2="288" y2="34"/><line x1="352" y1="34" x2="418" y2="34"/><line x1="482" y1="34" x2="508" y2="34"/>
                     </g>
-                    <text x="300" y="20" text-anchor="middle" font-size="10" fill="#DC2626" font-weight="600" font-family="Montserrat">▶ Forward: añadir ruido (fijo)</text>
+                    <text x="300" y="20" text-anchor="middle" font-size="10" fill="#DC2626" font-weight="600" font-family="Montserrat">▶ Directo: añadir ruido (fijo)</text>
                     <!-- reverse (verde, abajo) -->
                     <g stroke="#15803D" stroke-width="2" fill="none" marker-end="url(#arrRev)">
                         <line x1="508" y1="106" x2="482" y2="106"/><line x1="418" y1="106" x2="352" y2="106"/><line x1="288" y1="106" x2="222" y2="106"/><line x1="158" y1="106" x2="92" y2="106"/>
                     </g>
-                    <text x="300" y="124" text-anchor="middle" font-size="10" fill="#15803D" font-weight="600" font-family="Montserrat">◀ Reverse: quitar ruido (aprendido, pθ)</text>
+                    <text x="300" y="124" text-anchor="middle" font-size="10" fill="#15803D" font-weight="600" font-family="Montserrat">◀ Inverso: quitar ruido (aprendido, pθ)</text>
                 </svg>
                 <div class="callout mt-2" style="border-color:#5B1C9E; background:#FAF8FF">
-                    <p class="text-[0.84rem] text-gray-700"><i class="fas fa-hammer mr-1" style="color:#5B1C9E"></i><strong>La escultura inversa / el Río Bogotá:</strong> la planta de tratamiento aprende a revertir la contaminación por etapas. Hoy <strong>dominan</strong> la generación de imágenes (DALL·E, Stable Diffusion, Midjourney): entrenamiento estable, gran diversidad y control texto-a-imagen. Desventaja: muestreo lento (cientos de pasos).</p>
+                    <p class="text-[0.84rem] text-gray-700"><i class="fas fa-water mr-1" style="color:#5B1C9E"></i><strong>La limpieza del río Bogotá:</strong> el río cristalino de páramo recibe vertimientos paso a paso (proceso directo, fijo); una planta de tratamiento aprende a revertir la contaminación por etapas (proceso inverso, aprendido). Hoy <strong>dominan</strong> la generación de imágenes: sustentan DALL·E 2, Stable Diffusion y buena parte de los generadores actuales (el DALL·E original de 2021 era un Transformer autorregresivo). Ventajas: entrenamiento estable, gran diversidad y control texto-a-imagen. Desventaja: muestreo lento (decenas a cientos de pasos; uno o pocos con destilación).</p>
                 </div>
             </div>
 
@@ -863,7 +868,7 @@
                                 <tr><td class="p-2 border border-gray-200 font-semibold">Calidad</td><td class="p-2 border border-gray-200">Alta</td><td class="p-2 border border-gray-200">Media (borrosa)</td><td class="p-2 border border-gray-200">Muy alta</td></tr>
                                 <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Diversidad</td><td class="p-2 border border-gray-200">Baja</td><td class="p-2 border border-gray-200">Alta</td><td class="p-2 border border-gray-200">Muy alta</td></tr>
                                 <tr><td class="p-2 border border-gray-200 font-semibold">Estabilidad</td><td class="p-2 border border-gray-200">Baja</td><td class="p-2 border border-gray-200">Alta</td><td class="p-2 border border-gray-200">Alta</td></tr>
-                                <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Muestreo</td><td class="p-2 border border-gray-200">1 pasada</td><td class="p-2 border border-gray-200">1 pasada</td><td class="p-2 border border-gray-200">Cientos de pasos</td></tr>
+                                <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Muestreo</td><td class="p-2 border border-gray-200">1 pasada</td><td class="p-2 border border-gray-200">1 pasada</td><td class="p-2 border border-gray-200">Decenas a cientos de pasos</td></tr>
                                 <tr><td class="p-2 border border-gray-200 font-semibold">Latente navegable</td><td class="p-2 border border-gray-200">Parcial</td><td class="p-2 border border-gray-200">Sí</td><td class="p-2 border border-gray-200">No directo</td></tr>
                             </tbody>
                         </table>
@@ -872,10 +877,10 @@
 
                 <div class="card p-6">
                     <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-key" style="color:#B45309"></i>Transformers: autoatención con Q, K, V</h3>
-                    <p class="text-[0.86rem] text-gray-600 mb-3">El significado de una palabra depende de su relación con todas las demás <strong>en paralelo</strong>. Cada token emite una <strong>Query</strong> ("¿qué soy aquí?"), las demás ofrecen sus <strong>Keys</strong>, y si encajan se transfiere su <strong>Value</strong>.</p>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">El significado de una palabra depende de su relación con todas las demás <strong>en paralelo</strong>. Cada token emite una <strong>Query</strong> («¿qué soy aquí?»), las demás ofrecen sus <strong>Keys</strong>, y si encajan se transfiere su <strong>Value</strong>.</p>
                     <div class="eq text-center my-3">$$\operatorname{Attention}(Q,K,V) = \operatorname{softmax}\!\left(\frac{QK^{\top}}{\sqrt{d_k}}\right)V$$</div>
                     <div class="callout" style="border-color:#B45309; background:#FFFBEB">
-                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-comment-dots mr-1" style="color:#B45309"></i><strong>La palabra "vaina":</strong> en "pásame esa vaina" la atención la liga a un objeto; en "¡qué vaina tan buena!" a una situación. <strong>Multi-Head</strong> mira la frase de varias formas a la vez (gramática, tono, tiempo); el <strong>positional encoding</strong> (senos y cosenos) le devuelve el orden perdido.</p>
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-comment-dots mr-1" style="color:#B45309"></i><strong>La palabra «vaina»:</strong> en «pásame esa vaina» la atención la liga a un objeto; en «¡qué vaina tan buena!», a una situación. La <strong>atención multicabeza</strong> (<em>multi-head</em>) mira la frase de varias formas a la vez (gramática, tono, tiempo); la <strong>codificación posicional</strong> (<em>positional encoding</em>: senos y cosenos fijos o un vector aprendido) añade a cada token su posición absoluta y le devuelve el orden perdido.</p>
                     </div>
                 </div>
             </div>
@@ -896,7 +901,7 @@
         <section id="cheatsheet" class="scroll-mt-20 mt-14 reveal">
             <div class="flex items-center gap-3 mb-5">
                 <span class="usta-gradient text-white p-2.5 rounded-xl shadow"><i class="fas fa-square-root-variable"></i></span>
-                <h2 class="sec-title text-2xl md:text-3xl text-navy">Hoja de fórmulas &amp; glosario rápido</h2>
+                <h2 class="sec-title text-2xl md:text-3xl text-navy">Hoja de fórmulas y glosario rápido</h2>
             </div>
 
             <div class="grid lg:grid-cols-2 gap-5">
@@ -909,9 +914,9 @@
                         <div class="eq">Parches ViT \(\;N=\frac{H\cdot W}{P^2}\)</div>
                         <div class="eq">RNN \(\;h_t=\tanh(W_{xh}x_t+W_{hh}h_{t-1}+b_h)\)</div>
                         <div class="eq">Celda LSTM \(\;C_t=f_t\odot C_{t-1}+i_t\odot\tilde C_t\)</div>
-                        <div class="eq">Estado GRU \(\;h_t=(1-z_t)\odot h_{t-1}+z_t\odot\tilde h_t\)</div>
+                        <div class="eq">Estado GRU \(\;h_t=z_t\odot h_{t-1}+(1-z_t)\odot\tilde h_t\)</div>
                         <div class="eq">Atención \(\;c_t=\sum_i \alpha_{t,i}h_i\)</div>
-                        <div class="eq">Autoencoder \(\;\mathcal{L}=\lVert x-g(f(x))\rVert^2\)</div>
+                        <div class="eq">Autocodificador \(\;\mathcal{L}=\lVert x-g(f(x))\rVert^2\)</div>
                         <div class="eq">VAE \(\;\mathcal{L}_{\text{ELBO}}=\mathbb{E}[\log p_\theta(x|z)]-D_{\text{KL}}\)</div>
                         <div class="eq">GAN \(\;\min_G\max_D \mathbb{E}[\log D(x)]+\mathbb{E}[\log(1{-}D(G(z)))]\)</div>
                         <div class="eq">Transformer \(\;\operatorname{softmax}(\frac{QK^{\top}}{\sqrt{d_k}})V\)</div>
@@ -923,13 +928,14 @@
                     <dl class="text-[0.83rem] space-y-2">
                         <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Convolución</dt><dd class="text-gray-600">un escáner deslizante que detecta bordes y texturas.</dd></div>
                         <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Pooling</dt><dd class="text-gray-600">resumir un cuadrante quedándose con lo más fuerte.</dd></div>
-                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Transfer Learning</dt><dd class="text-gray-600">reciclar el "ojo" de una red entrenada en ImageNet.</dd></div>
-                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Vanishing gradient</dt><dd class="text-gray-600">el teléfono roto que diluye el mensaje del gerente.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Transfer Learning</dt><dd class="text-gray-600">reciclar el «ojo» de una red entrenada en ImageNet.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Desvanecimiento del gradiente</dt><dd class="text-gray-600">el teléfono roto: una frase susurrada por 50 personas llega irreconocible al final.</dd></div>
                         <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Estado de celda</dt><dd class="text-gray-600">la cinta transportadora que conserva la memoria.</dd></div>
                         <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Atención</dt><dd class="text-gray-600">el examen con apuntes abiertos: resaltar lo pertinente.</dd></div>
-                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Espacio latente</dt><dd class="text-gray-600">el bus rojo de TransMilenio que comprime al esencial.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Cuello de botella del AE</dt><dd class="text-gray-600">el bus rojo de TransMilenio que comprime lo esencial.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Espacio latente del VAE</dt><dd class="text-gray-600">el ajiaco como receta conceptual: entre dos ajiacos válidos hay infinitos intermedios.</dd></div>
                         <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">GAN</dt><dd class="text-gray-600">el verseador vs. el jurado en la piquería vallenata.</dd></div>
-                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Difusión</dt><dd class="text-gray-600">limpiar el Río Bogotá por etapas hasta volverlo cristalino.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Difusión</dt><dd class="text-gray-600">limpiar el río Bogotá por etapas hasta volverlo cristalino.</dd></div>
                     </dl>
                 </div>
             </div>
@@ -942,7 +948,7 @@
                     <i class="fas fa-book-open-reader text-gold text-2xl"></i>
                     <h2 class="text-xl md:text-2xl font-extrabold">Esta infografía resume el Módulo 2 completo</h2>
                 </div>
-                <p class="text-white/85 text-sm leading-relaxed max-w-3xl">El <strong>material principal de aprendizaje autónomo</strong> permite profundizar en cada tema y preparar los dos hitos evaluativos del módulo, que conforman la <strong>Fase 2 del Proyecto Centinela</strong>: la <strong>Actividad 2.1</strong> (clasificación con CNN / Transfer Learning, 15 %) y la <strong>Actividad 2.2</strong> (series temporales con RNN/LSTM/GRU, 15 %), integradas en una rama multimodal de fusión.</p>
+                <p class="text-white/85 text-sm leading-relaxed max-w-3xl">El <strong>material principal de aprendizaje autónomo</strong> permite profundizar en cada tema y preparar los hitos del módulo (35 % = Guía 2 (5 %) + Fase 2 (15 % + 15 %)): la <strong>Guía de Profundización 2</strong> (5 %) y la <strong>Fase 2 del Proyecto Centinela</strong>, registrada como <strong>Actividad 2.1</strong> (CNN / Transfer Learning, 15 %) y <strong>Actividad 2.2</strong> (RNN/LSTM/GRU, 15 %), integradas por la rama C de fusión.</p>
                 <div class="flex flex-wrap gap-2 mt-5 no-print">
                     <a href="02_Modulo_2_Arquitecturas_Deep_Learning.html" class="inline-flex items-center gap-2 bg-white text-primary text-sm font-bold px-4 py-2 rounded-full hover:opacity-90 transition"><i class="fas fa-graduation-cap"></i>Material principal</a>
                     <a href="21_Modulo_2_Actividad_Fase2_Centinela.html" class="inline-flex items-center gap-2 bg-white/15 border border-white/30 text-white text-sm font-bold px-4 py-2 rounded-full hover:bg-white/25 transition"><i class="fas fa-flask-vial"></i>Actividad · Centinela Fase 2</a>
@@ -955,6 +961,7 @@
             <div class="text-center text-xs text-gray-500 mt-4 space-y-1">
                 <p><strong class="text-navy">Experto temático:</strong> Javier Mauricio Sierra · <i class="fas fa-envelope mr-1"></i>javiersierra@usta.edu.co</p>
                 <p>Universidad Santo Tomás · Maestría en Ciencia de Datos · Espacio académico EA-N-F-004 · Documento HTML autocontenido (Tailwind + MathJax 3).</p>
+                <p class="max-w-3xl mx-auto"><strong class="text-navy">Fuentes de las cifras:</strong> ResNet y su error top-5 (He et al., 2016); ViT y JFT-300M (Dosovitskiy et al., 2021); ImageNet (Deng et al., 2009); Wildlife Insights (Ahumada et al., 2020); biodiversidad de Colombia (SiB Colombia, 2026). Los casos de banca y domicilios son ilustrativos. El detalle está en el material principal del módulo.</p>
             </div>
         </footer>
     </main>

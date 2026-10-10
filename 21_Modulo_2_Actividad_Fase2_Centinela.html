@@ -170,6 +170,10 @@
         .tab-btn.active { color:#3D008D; border-bottom-color:#ED1E79; }
         .tab-panel[hidden] { display: none; }
 
+        /* Móvil: los hijos de las rejillas pueden encogerse por debajo de su contenido
+           (las ecuaciones anchas quedan dentro del desplazamiento propio de .eq). */
+        .grid > * { min-width: 0; }
+
         /* Tabla genérica */
         .tbl { width:100%; border-collapse: collapse; font-size:.9rem; }
         .tbl th, .tbl td { border:1px solid #E2E8F0; padding:.6rem .7rem; vertical-align: top; text-align:left; }
@@ -215,7 +219,7 @@
             </h1>
             <p class="text-lg md:text-2xl font-light text-white/90 mt-3">Módulo 2 · Arquitecturas de Redes Neuronales Especializadas (CNN · RNN · Fusión)</p>
             <div class="flex flex-wrap gap-2 mt-6 text-xs md:text-sm">
-                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-weight-hanging mr-1.5 text-gold"></i>Peso evaluativo 30 %</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-weight-hanging mr-1.5 text-gold"></i>Peso evaluativo 30 % (15 % + 15 %)</span>
                 <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-clock mr-1.5 text-gold"></i>46 horas</span>
                 <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-user mr-1.5 text-gold"></i>Individual</span>
                 <span class="bg-white/15 rounded-full px-3 py-1"><i class="fas fa-layer-group mr-1.5 text-gold"></i>Fase 2 de 3</span>
@@ -264,7 +268,7 @@
                 </div>
                 <div class="card p-5">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Fase 3 · Módulo 3</div>
-                    <div class="font-bold text-navy mb-1"><i class="fas fa-microchip text-primary mr-1.5"></i>Pipeline y despliegue</div>
+                    <div class="font-bold text-navy mb-1"><i class="fas fa-microchip text-primary mr-1.5"></i>Flujo de datos y despliegue</div>
                     <p class="text-sm text-slate-600">Industrializa sobre todo la <strong>rama visual</strong> para el despliegue <em>offline</em> (la temporal se sirve por API); GPU, precisión mixta y optimización para borde.</p>
                 </div>
             </div>
@@ -297,7 +301,11 @@
             <p class="text-slate-600 mb-6 max-w-3xl">La fase se compone de tres entregables encadenados. Las ramas <strong>A</strong> y <strong>B</strong> pueden desarrollarse en paralelo; la <strong>C</strong> las integra y requiere que ambas existan.</p>
 
             <div class="callout callout-warn mb-6">
-                <p class="text-sm"><i class="fas fa-clipboard-check text-amber-600 mr-2"></i><strong>Ejemplo resuelto — para calibrar tu nivel, no para copiar.</strong> El curso publica un <a href="https://colab.research.google.com/github/JotaMao1985/Deep_Learning_Usta/blob/main/notebooks/06-ejemplo-centinela-fase2-tulipanes.ipynb" target="_blank" rel="noopener" style="color:#0E7490;font-weight:600">ejemplo resuelto de las tres ramas</a> sobre un problema distinto al tuyo —el sistema multimodal del tulipán (Países Bajos): CNN con <em>transfer learning</em> sobre imágenes Sentinel-2, RNN/LSTM/GRU sobre el clima KNMI y una fusión honesta por parcela con ablación—, al nivel <strong>Estratégico</strong> de la rúbrica e incluyendo auditoría de IA, propuesta, bitácora e informe. <strong>Ese escenario queda vetado como entrega</strong>: continúa el ejemplo de la Fase 1 y ya está resuelto públicamente, así que no supera el <em>gate</em> de la Propuesta de Datos.</p>
+                <p class="text-sm"><i class="fas fa-clipboard-check text-amber-600 mr-2"></i><strong>Ejemplo resuelto — para calibrar el nivel, no para copiar.</strong> El curso publica un <a href="https://colab.research.google.com/github/JotaMao1985/Deep_Learning_Usta/blob/main/notebooks/06-ejemplo-centinela-fase2-tulipanes.ipynb" target="_blank" rel="noopener" style="color:#0E7490;font-weight:600">ejemplo resuelto de las tres ramas</a> sobre un problema distinto al propio —el sistema multimodal del tulipán (Países Bajos): CNN con <em>transfer learning</em> sobre imágenes Sentinel-2, RNN/LSTM/GRU sobre el clima KNMI y una fusión honesta por parcela con ablación—, al nivel <strong>Estratégico</strong> de la rúbrica e incluyendo auditoría de IA, propuesta, bitácora e informe. <strong>Ese escenario queda vetado como entrega</strong>: continúa el ejemplo de la Fase 1 y ya está resuelto públicamente, así que no supera la compuerta de la Propuesta de Datos.</p>
+            </div>
+
+            <div class="callout callout-tip mb-6">
+                <p class="text-sm"><i class="fas fa-flask text-emerald-600 mr-2"></i><strong>Andamiaje opcional.</strong> El curso ofrece un <a href="https://colab.research.google.com/github/JotaMao1985/Deep_Learning_Usta/blob/main/notebooks/04-scaffold-centinela-fase2.ipynb" target="_blank" rel="noopener" style="color:#0E7490;font-weight:600">notebook de andamiaje de la Fase 2</a> (PyTorch —recomendado— o Keras 3) con la estructura de las tres ramas y las funciones de graficación ya resueltas; <strong>no contiene la solución</strong>.</p>
             </div>
 
             <figure class="card p-6 overflow-x-auto">
@@ -377,8 +385,8 @@
                 </div>
             </div>
             <div class="callout callout-warn mt-5">
-                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i>El escenario de referencia <strong>"Centinela del Café"</strong> combina imágenes de hoja (RoCoLe, rama A) con la serie climática del municipio (NASA POWER / IDEAM, rama B), donde la temperatura, la humedad y la lluvia condicionan el brote de roya. Sirve de ejemplo; el problema propio del estudiante se rige por la misma lógica multimodal.</p>
-                <p class="text-sm mt-2"><i class="fas fa-circle-exclamation text-amber-600 mr-2"></i><strong>Honestidad sobre la alineación.</strong> En este escenario, imagen y clima <strong>solo se alinean a nivel agregado</strong> (región/periodo): RoCoLe <strong>no trae fecha ni GPS por imagen</strong>, así que <strong>no</strong> existe una clave genuina por muestra. Emparejar artificialmente cada hoja con una ventana climática, o adjuntar una <em>feature</em> climática <strong>constante</strong> a todas las muestras, es <strong>fuga de datos</strong> (leakage). La alineación agregada es <strong>aceptable si se declara con sus limitaciones</strong>; el detalle se trabaja en la rama C.</p>
+                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i>El escenario de referencia <strong>«Centinela del Café»</strong> combina imágenes de hoja (RoCoLe, rama A) con la serie climática del municipio (NASA POWER / IDEAM, rama B), donde la temperatura, la humedad y la lluvia condicionan el brote de roya. Sirve de ejemplo; el problema propio del estudiante se rige por la misma lógica multimodal.</p>
+                <p class="text-sm mt-2"><i class="fas fa-circle-exclamation text-amber-600 mr-2"></i><strong>Honestidad sobre la alineación.</strong> En este escenario, imagen y clima <strong>solo se alinean a nivel agregado</strong> (región/periodo): RoCoLe <strong>no trae fecha ni GPS por imagen</strong>, así que <strong>no</strong> existe una clave genuina por muestra. Emparejar artificialmente cada hoja con una ventana climática, o adjuntar una <em>feature</em> climática <strong>constante</strong> a todas las muestras, es <strong>fuga de datos</strong> (<em>leakage</em>). La alineación agregada es <strong>aceptable si se declara con sus limitaciones</strong>; el detalle se trabaja en la rama C.</p>
             </div>
         </section>
 
@@ -405,8 +413,8 @@
                         <p class="text-sm text-slate-700 mb-3">Un filtro (o <em>kernel</em>) \(K\) se desliza sobre la imagen \(I\); en cada posición calcula un producto punto que mide cuánto se parece la región a ese patrón:</p>
                         <div class="eq mb-3">$$ S(i,j) = (I * K)(i,j) = \sum_{m}\sum_{n} I(i+m,\, j+n)\, K(m,n) $$</div>
                         <p class="text-xs text-slate-500 mb-3"><i class="fas fa-circle-info text-teal-600 mr-1"></i>Las librerías (PyTorch/Keras) implementan en realidad la <strong>correlación cruzada</strong> (no invierten el <em>kernel</em>); por convención se la llama convolución. La convolución estricta usaría \(I(i-m,\, j-n)\).</p>
-                        <p class="text-sm text-slate-700 mb-2">El tamaño del mapa de características de salida depende del tamaño de entrada \(W\), el filtro \(F\), el relleno (<em>padding</em>) \(P\) y el paso (<em>stride</em>) \(S\):</p>
-                        <div class="eq">$$ O = \left\lfloor \dfrac{W - F + 2P}{S} \right\rfloor + 1 $$</div>
+                        <p class="text-sm text-slate-700 mb-2">El tamaño del mapa de características de salida depende del tamaño de entrada \(W\), el tamaño del filtro \(K\), el relleno (<em>padding</em>) \(P\) y el paso (<em>stride</em>) \(S\):</p>
+                        <div class="eq">$$ O = \left\lfloor \dfrac{W - K + 2P}{S} \right\rfloor + 1 $$</div>
                     </div>
                     <figure class="card p-5">
                         <svg viewBox="0 0 360 220" width="100%" role="img" aria-labelledby="convTitle convDesc">
@@ -440,7 +448,7 @@
                                 </marker>
                             </defs>
                         </svg>
-                        <figcaption>Figura 2. La convolución reutiliza el mismo filtro en toda la imagen (<em>parameter sharing</em>), lo que reduce drásticamente los parámetros frente a un MLP y aporta invariancia a la traslación.</figcaption>
+                        <figcaption>Figura 2. La convolución reutiliza el mismo filtro en toda la imagen (pesos compartidos, <em>parameter sharing</em>), lo que reduce drásticamente los parámetros frente a un MLP y aporta equivarianza a la traslación: si el patrón se desplaza, su respuesta en el mapa se desplaza con él.</figcaption>
                     </figure>
                 </div>
 
@@ -452,7 +460,7 @@
                 <ol class="space-y-4">
                     <li class="flex gap-4"><span class="step-num">1</span><div><p class="font-semibold text-navy">Análisis exploratorio de imágenes</p><p class="text-sm text-slate-600">Distribución de clases, dimensiones, calidad, balance/desbalance; identificación de ruido visual, oclusiones y variabilidad de iluminación, con muestras representativas por clase.</p></div></li>
                     <li class="flex gap-4"><span class="step-num">2</span><div><p class="font-semibold text-navy">Selección y justificación de arquitectura</p><p class="text-sm text-slate-600">Comparación de al menos <strong>dos</strong> arquitecturas preentrenadas (ResNet50, VGG16 o EfficientNet) por número de parámetros, profundidad, velocidad de inferencia y similitud con ImageNet. Decisión entre <em>Feature Extraction</em> (congelar pesos) y <em>Fine-Tuning</em> (reentrenar capas superiores) según tamaño y similitud del conjunto propio.</p></div></li>
-                    <li class="flex gap-4"><span class="step-num">3</span><div><p class="font-semibold text-navy">Implementación</p><p class="text-sm text-slate-600">Adaptación de la capa de clasificación final, <em>data augmentation</em> pertinente (rotación, <em>flip</em>, <em>zoom</em>, brillo), partición 70/15/15 justificada, <em>early stopping</em> y <em>callbacks</em>.</p></div></li>
+                    <li class="flex gap-4"><span class="step-num">3</span><div><p class="font-semibold text-navy">Implementación</p><p class="text-sm text-slate-600">Adaptación de la capa de clasificación final, aumento de datos (<em>data augmentation</em>) pertinente (rotación, volteo, acercamiento, brillo), partición 70/15/15 justificada, parada anticipada (<em>early stopping</em>) y puntos de control.</p><p class="text-sm text-slate-600 mt-1">Marco recomendado: PyTorch (como los cuadernos del curso); Keras 3 se admite como alternativa.</p></div></li>
                     <li class="flex gap-4"><span class="step-num">4</span><div><p class="font-semibold text-navy">Evaluación e interpretabilidad</p><p class="text-sm text-slate-600">Matriz de confusión, precisión/recall/F1 por clase, análisis de errores con ejemplos visuales y <strong>Grad-CAM</strong> —que eleva la evaluación al nivel Estratégico— para verificar que la red mira la región correcta (la lesión, no el fondo).</p></div></li>
                 </ol>
 
@@ -460,15 +468,16 @@
                     <div class="code-window-bar">
                         <span class="code-window-dots"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></span>
                         <span class="code-window-title">transfer_learning.py</span>
-                        <span class="code-window-lang">Python · Keras</span>
+                        <span class="code-window-lang">Python · PyTorch</span>
                         <button class="code-copy" type="button" aria-label="Copiar código" title="Copiar"><i class="fas fa-copy"></i></button>
                     </div>
-                    <div class="codeblock"><span class="cm"># Transfer Learning — Feature Extraction (Keras)</span>
-<span class="kw">from</span> tensorflow.keras.applications <span class="kw">import</span> ResNet50
-base = <span class="fn">ResNet50</span>(weights=<span class="st">"imagenet"</span>, include_top=<span class="kw">False</span>, pooling=<span class="st">"avg"</span>)
-base.trainable = <span class="kw">False</span>            <span class="cm"># se congelan los pesos preentrenados</span>
-salida = <span class="fn">Dense</span>(n_clases, activation=<span class="st">"softmax"</span>)(base.output)
-modelo = <span class="fn">Model</span>(base.input, salida)   <span class="cm"># solo se entrena la cabeza</span></div>
+                    <div class="codeblock"><span class="cm"># Transfer Learning — extracción de características (PyTorch)</span>
+<span class="kw">import</span> torch.nn <span class="kw">as</span> nn
+<span class="kw">from</span> torchvision <span class="kw">import</span> models
+base = models.<span class="fn">resnet50</span>(weights=models.ResNet50_Weights.DEFAULT)
+<span class="kw">for</span> p <span class="kw">in</span> base.<span class="fn">parameters</span>():
+    p.requires_grad = <span class="kw">False</span>                        <span class="cm"># se congelan los pesos preentrenados</span>
+base.fc = nn.<span class="fn">Linear</span>(base.fc.in_features, n_clases)  <span class="cm"># solo se entrena la cabeza nueva</span></div>
                 </div>
 
                 <div class="callout callout-info mt-6">
@@ -476,14 +485,14 @@ modelo = <span class="fn">Model</span>(base.input, salida)   <span class="cm"># 
                 </div>
 
                 <div class="callout callout-warn mt-4">
-                    <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i><strong>Cómputo en Colab y <em>checkpointing</em>.</strong> La fase exige entregar los <strong>pesos entrenados</strong> (<span class="icode">.h5</span> / <span class="icode">.pth</span>) y el entrenamiento de la CNN puede <strong>no caber en una sola sesión</strong> de Google Colab por su cuota de uso. Conviene guardar <em>checkpoints</em> periódicos en Google Drive y reanudar desde ellos.</p>
+                    <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i><strong>Cómputo en Colab y <em>checkpointing</em>.</strong> La fase exige entregar los <strong>pesos entrenados</strong> (<span class="icode">.pth</span>, el <span class="icode">state_dict</span> de PyTorch; o <span class="icode">.keras</span> / <span class="icode">.weights.h5</span> si se usa Keras 3) y el entrenamiento de la CNN puede <strong>no caber en una sola sesión</strong> de Google Colab por su cuota de uso. Conviene guardar puntos de control (<em>checkpoints</em>) periódicos en Google Drive y reanudar desde ellos.</p>
                 </div>
             </div>
 
             <!-- ============ PANEL B: RNN ============ -->
             <div class="tab-panel" data-panel="b" hidden>
                 <div class="callout callout-info mb-6">
-                    <p class="text-sm"><strong>Meta de la rama B.</strong> Modelar la <strong>serie temporal</strong> del problema (clima, demanda, casos) con arquitecturas recurrentes que recuerdan el pasado. El reto central es el <em>desvanecimiento del gradiente</em>: por qué una RNN simple olvida y cómo las compuertas de LSTM y GRU lo resuelven.</p>
+                    <p class="text-sm"><strong>Meta de la rama B.</strong> Modelar la <strong>serie temporal</strong> del problema (clima, demanda, casos) con arquitecturas recurrentes que recuerdan el pasado. El reto central es el <em>desvanecimiento del gradiente</em>: por qué una RNN simple olvida y cómo las compuertas de LSTM y GRU lo mitigan.</p>
                 </div>
 
                 <div class="grid md:grid-cols-2 gap-6 mb-7 items-start">
@@ -491,7 +500,7 @@ modelo = <span class="fn">Model</span>(base.input, salida)   <span class="cm"># 
                         <h3 class="font-bold text-primary mb-2">La recurrencia y su talón de Aquiles</h3>
                         <p class="text-sm text-slate-700 mb-3">Una RNN simple actualiza su estado oculto \(h_t\) combinando la entrada actual con la memoria previa:</p>
                         <div class="eq mb-3">$$ h_t = \tanh\!\left(W_{hh}\,h_{t-1} + W_{xh}\,x_t + b_h\right) $$</div>
-                        <p class="text-sm text-slate-700 mb-3">Al retropropagar a través de muchos pasos (BPTT), el gradiente se vuelve un <strong>producto de Jacobianos</strong>; si sus normas son menores que 1, decae exponencialmente y la red no aprende dependencias largas:</p>
+                        <p class="text-sm text-slate-700 mb-3">Al retropropagar a través de muchos pasos (BPTT), el gradiente se vuelve un <strong>producto de matrices jacobianas</strong>; si sus normas son menores que 1, decae exponencialmente y la red no aprende dependencias largas:</p>
                         <div class="eq">$$ \dfrac{\partial h_t}{\partial h_k} = \prod_{\tau=k+1}^{t} \dfrac{\partial h_\tau}{\partial h_{\tau-1}} \;\xrightarrow[\;t-k \text{ grande}\;]{}\; 0 $$</div>
                     </div>
                     <figure class="card p-5">
@@ -556,9 +565,9 @@ modelo = <span class="fn">Model</span>(base.input, salida)   <span class="cm"># 
                         z_t &= \sigma(W_z[h_{t-1},x_t]+b_z)\\
                         r_t &= \sigma(W_r[h_{t-1},x_t]+b_r)\\
                         \tilde{h}_t &= \tanh(W[r_t \odot h_{t-1},\,x_t]+b)\\
-                        h_t &= (1-z_t)\odot h_{t-1} + z_t \odot \tilde{h}_t
+                        h_t &= z_t\odot h_{t-1} + (1-z_t) \odot \tilde{h}_t
                         \end{aligned}$$
-                        <p class="text-xs text-slate-500 mt-2">La GRU fusiona memoria y estado oculto y usa menos parámetros: más eficiente, frecuentemente comparable en desempeño.</p>
+                        <p class="text-xs text-slate-500 mt-2">La GRU fusiona memoria y estado oculto y usa menos parámetros: más eficiente, frecuentemente comparable en desempeño. Con \(z_t\approx 1\) se conserva la memoria; es la convención de <span class="icode">nn.GRU</span> (Cho et al., 2014). Algunos textos (Olah, 2015) intercambian \(z_t\) y \(1-z_t\).</p>
                     </div>
                 </div>
 
@@ -566,7 +575,7 @@ modelo = <span class="fn">Model</span>(base.input, salida)   <span class="cm"># 
                 <ol class="space-y-4">
                     <li class="flex gap-4"><span class="step-num">1</span><div><p class="font-semibold text-navy">Análisis exploratorio de la serie</p><p class="text-sm text-slate-600">Tendencia, estacionalidad y ruido; estadísticas móviles y autocorrelación (ACF/PACF); detección de atípicos, faltantes y periodicidades. Justificación del uso de modelos recurrentes frente a alternativas clásicas (ARIMA).</p></div></li>
                     <li class="flex gap-4"><span class="step-num">2</span><div><p class="font-semibold text-navy">Preprocesamiento y ventaneo</p><p class="text-sm text-slate-600">Normalización; construcción de secuencias con <em>ventana deslizante</em> de un <strong>tamaño de referencia</strong> (p. ej. 14 pasos); explorar otros tamaños (7, 30) es <strong>opcional</strong>. Partición que <strong>respeta el orden temporal</strong>; variables exógenas si aplica (día de semana, festivos, indicadores).</p></div></li>
-                    <li class="flex gap-4"><span class="step-num">3</span><div><p class="font-semibold text-navy">Implementación comparativa</p><p class="text-sm text-slate-600">Entrenamiento <strong>obligatorio de LSTM y GRU</strong>, con una <strong>RNN simple solo como contraste</strong> para evidenciar el desvanecimiento (no es un barrido de tres arquitecturas). Hiperparámetros comparables (estado oculto 64–128, <em>learning rate</em> ≈0,001, <em>batch</em> 32) y <em>early stopping</em>.</p></div></li>
+                    <li class="flex gap-4"><span class="step-num">3</span><div><p class="font-semibold text-navy">Implementación comparativa</p><p class="text-sm text-slate-600">Entrenamiento <strong>obligatorio de LSTM y GRU</strong>, con una <strong>RNN simple solo como contraste</strong> para evidenciar el desvanecimiento (no es un barrido de tres arquitecturas). Hiperparámetros comparables (estado oculto 64–128, tasa de aprendizaje ≈ 0,001, tamaño de lote 32) y parada anticipada (<em>early stopping</em>).</p></div></li>
                     <li class="flex gap-4"><span class="step-num">4</span><div><p class="font-semibold text-navy">Evaluación y evidencia del desvanecimiento</p><p class="text-sm text-slate-600">Comparación con RMSE, MAE y MAPE; predicciones vs. valores reales. Para evidenciar el desvanecimiento basta <strong>una</strong> vía: una traza de las normas de gradiente <strong>o</strong> la diferencia de desempeño de la RNN frente a LSTM/GRU en dependencias largas (opcionalmente con una secuencia sintética larga). Se justifica cuándo usar cada celda.</p></div></li>
                 </ol>
 
@@ -595,7 +604,7 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
                     <div>
                         <h3 class="font-bold text-primary mb-2">Fusión tardía (recomendada como base)</h3>
                         <p class="text-sm text-slate-700 mb-3">Cada rama se entrena hasta producir su <em>embedding</em>; ambos se concatenan y una pequeña cabeza densa emite la predicción:</p>
-                        <div class="eq mb-3">$$ \hat{y} = \sigma\!\left(W_f\,[\,z_{img} \,\Vert\, z_{seq}\,] + b_f\right) $$</div>
+                        <div class="eq mb-3">$$ \hat{y} = \sigma\!\left(W_{\text{fus}}\,[\,z_{img} \,\Vert\, z_{seq}\,] + b_{\text{fus}}\right) $$</div>
                         <p class="text-sm text-slate-700">donde \(z_{img}\) proviene de la CNN, \(z_{seq}\) de la red recurrente, y \(\Vert\) denota concatenación. La <strong>fusión temprana</strong> (combinar antes de procesar) y la <strong>fusión por atención</strong> se admiten como extensiones de nivel avanzado.</p>
                     </div>
                     <figure class="card p-5">
@@ -671,7 +680,7 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
                         <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Notebook</strong> ejecutable (.ipynb) con las ramas A, B y la fusión C, documentado.</li>
                         <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Informe técnico único</strong> (PDF, máx. 8 páginas) con metodología, resultados, ablación y limitaciones de las tres ramas.</li>
                         <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Visualizaciones</strong> estáticas comentadas para el cliente (<em>dashboard</em> interactivo opcional/bonus).</li>
-                        <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Pesos</strong> de los modelos entrenados (.h5 / .pth).</li>
+                        <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Pesos</strong> de los modelos entrenados (.pth, o .keras si se usa Keras 3).</li>
                         <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Bitácora de IA</strong> diligenciada.</li>
                     </ul>
                     <p class="text-xs text-slate-500 mt-4">Carpeta comprimida: <span class="icode">Apellido_Nombre_Centinela_Fase2.zip</span>. La sustentación se agenda aparte.</p>
@@ -688,7 +697,7 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
                             <tr style="background:#FAF8FF;font-weight:700"><td>Total</td><td>46</td></tr>
                         </tbody>
                     </table>
-                    <p class="text-sm text-slate-600 mt-3"><strong>Modalidad:</strong> individual. <strong>Peso:</strong> 30 % del curso (Fase 2 = ramas A+B+C; reemplaza las Actividades 2.1 y 2.2).</p>
+                    <p class="text-sm text-slate-600 mt-3"><strong>Modalidad:</strong> individual. <strong>Peso:</strong> 30 % del curso, registrado como las dos actividades del esquema oficial —Actividad 2.1, rama visual (15 %), y Actividad 2.2, rama temporal (15 %)—, ambas calificadas con esta rúbrica unificada (ramas A + B + C). La Fase 2 integra las Actividades 2.1 y 2.2.</p>
                 </div>
             </div>
 
@@ -711,7 +720,7 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
                     </li>
                     <li class="flex gap-3">
                         <i class="fas fa-square-check text-emerald-500 mt-0.5"></i>
-                        <span><strong>Pesos de los modelos entrenados</strong> (<span class="icode">.h5</span> / <span class="icode">.pth</span>).</span>
+                        <span><strong>Pesos de los modelos entrenados</strong> (<span class="icode">.pth</span>, o <span class="icode">.keras</span> si se usa Keras 3).</span>
                     </li>
                     <li class="flex gap-3">
                         <i class="fas fa-square-check text-emerald-500 mt-0.5"></i>
@@ -905,17 +914,18 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
                 <table class="tbl" style="min-width:680px">
                     <thead><tr style="background:#3D008D"><th style="width:34%">Referencia (APA 7)</th><th>Aporte a la fase</th><th style="width:18%">Enlace</th></tr></thead>
                     <tbody>
-                        <tr><td>He, K., Zhang, X., Ren, S., &amp; Sun, J. (2016). Deep residual learning for image recognition. <em>CVPR</em>.</td><td>ResNet: conexiones residuales, base del Transfer Learning de la rama A.</td><td><a href="https://arxiv.org/abs/1512.03385" target="_blank" rel="noopener" style="color:#ED1E79">arXiv</a></td></tr>
-                        <tr><td>Tan, M., &amp; Le, Q. (2019). EfficientNet: Rethinking model scaling for CNNs. <em>ICML</em>.</td><td>Escalado compuesto; arquitectura candidata eficiente para borde.</td><td><a href="https://arxiv.org/abs/1905.11946" target="_blank" rel="noopener" style="color:#ED1E79">arXiv</a></td></tr>
-                        <tr><td>Selvaraju, R. R., et al. (2017). Grad-CAM: Visual explanations from deep networks. <em>ICCV</em>.</td><td>Interpretabilidad visual exigida en la rama A.</td><td><a href="https://arxiv.org/abs/1610.02391" target="_blank" rel="noopener" style="color:#ED1E79">arXiv</a></td></tr>
-                        <tr><td>Hochreiter, S., &amp; Schmidhuber, J. (1997). Long short-term memory. <em>Neural Computation, 9</em>(8).</td><td>LSTM y la solución al desvanecimiento del gradiente.</td><td><a href="https://www.bioinf.jku.at/publications/older/2604.pdf" target="_blank" rel="noopener" style="color:#ED1E79">PDF</a></td></tr>
-                        <tr><td>Cho, K., et al. (2014). Learning phrase representations using RNN encoder-decoder. <em>arXiv:1406.1078</em>.</td><td>GRU: compuertas de actualización y reinicio.</td><td><a href="https://arxiv.org/abs/1406.1078" target="_blank" rel="noopener" style="color:#ED1E79">arXiv</a></td></tr>
-                        <tr><td>Goodfellow, I., Bengio, Y., &amp; Courville, A. (2016). <em>Deep Learning</em> (Cap. 9 y 10). MIT Press.</td><td>Fundamento teórico de convoluciones y modelado de secuencias.</td><td><a href="https://www.deeplearningbook.org/" target="_blank" rel="noopener" style="color:#ED1E79">deeplearningbook.org</a></td></tr>
-                        <tr><td>Baltrušaitis, T., Ahuja, C., &amp; Morency, L.-P. (2019). Multimodal machine learning: A survey and taxonomy. <em>IEEE TPAMI, 41</em>(2).</td><td>Taxonomía de fusión (temprana/tardía) para la rama C.</td><td><a href="https://arxiv.org/abs/1705.09406" target="_blank" rel="noopener" style="color:#ED1E79">arXiv</a></td></tr>
+                        <tr><td>He, K., Zhang, X., Ren, S. y Sun, J. (2016). Deep residual learning for image recognition. En <em>Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)</em> (pp. 770–778). IEEE. https://doi.org/10.1109/CVPR.2016.90</td><td>ResNet: conexiones residuales, base del aprendizaje por transferencia de la rama A.</td><td><a href="https://doi.org/10.1109/CVPR.2016.90" target="_blank" rel="noopener" style="color:#ED1E79">doi.org/10.1109/CVPR.2016.90</a></td></tr>
+                        <tr><td>Tan, M. y Le, Q. V. (2019). EfficientNet: Rethinking model scaling for convolutional neural networks. En <em>Proceedings of the 36th International Conference on Machine Learning</em> (Vol. 97, pp. 6105–6114). PMLR. https://proceedings.mlr.press/v97/tan19a.html</td><td>Escalado compuesto; arquitectura candidata eficiente para el borde.</td><td><a href="https://proceedings.mlr.press/v97/tan19a.html" target="_blank" rel="noopener" style="color:#ED1E79">PMLR</a></td></tr>
+                        <tr><td>Selvaraju, R. R., Cogswell, M., Das, A., Vedantam, R., Parikh, D. y Batra, D. (2017). Grad-CAM: Visual explanations from deep networks via gradient-based localization. En <em>2017 IEEE International Conference on Computer Vision (ICCV)</em> (pp. 618–626). IEEE. https://doi.org/10.1109/ICCV.2017.74</td><td>Interpretabilidad visual exigida en la rama A.</td><td><a href="https://doi.org/10.1109/ICCV.2017.74" target="_blank" rel="noopener" style="color:#ED1E79">doi.org/10.1109/ICCV.2017.74</a></td></tr>
+                        <tr><td>Hochreiter, S. y Schmidhuber, J. (1997). Long short-term memory. <em>Neural Computation</em>, <em>9</em>(8), 1735–1780. https://doi.org/10.1162/neco.1997.9.8.1735</td><td>LSTM: el estado de celda y las compuertas que mitigan el desvanecimiento del gradiente.</td><td><a href="https://doi.org/10.1162/neco.1997.9.8.1735" target="_blank" rel="noopener" style="color:#ED1E79">doi.org/10.1162/neco.1997.9.8.1735</a></td></tr>
+                        <tr><td>Cho, K., van Merriënboer, B., Gulcehre, C., Bahdanau, D., Bougares, F., Schwenk, H. y Bengio, Y. (2014). Learning phrase representations using RNN encoder–decoder for statistical machine translation. En <em>Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing (EMNLP)</em> (pp. 1724–1734). Association for Computational Linguistics. https://doi.org/10.3115/v1/D14-1179</td><td>GRU: compuertas de actualización y reinicio (convención de <span class="icode">nn.GRU</span>).</td><td><a href="https://doi.org/10.3115/v1/D14-1179" target="_blank" rel="noopener" style="color:#ED1E79">doi.org/10.3115/v1/D14-1179</a></td></tr>
+                        <tr><td>Goodfellow, I., Bengio, Y. y Courville, A. (2016). <em>Deep learning</em>. MIT Press. https://www.deeplearningbook.org</td><td>Fundamento teórico de convoluciones (Cap. 9) y modelado de secuencias (Cap. 10).</td><td><a href="https://www.deeplearningbook.org/" target="_blank" rel="noopener" style="color:#ED1E79">deeplearningbook.org</a></td></tr>
+                        <tr><td>Baltrušaitis, T., Ahuja, C. y Morency, L.-P. (2019). Multimodal machine learning: A survey and taxonomy. <em>IEEE Transactions on Pattern Analysis and Machine Intelligence</em>, <em>41</em>(2), 423–443. https://doi.org/10.1109/TPAMI.2018.2798607</td><td>Taxonomía de fusión (temprana/tardía) para la rama C.</td><td><a href="https://doi.org/10.1109/TPAMI.2018.2798607" target="_blank" rel="noopener" style="color:#ED1E79">doi.org/10.1109/TPAMI.2018.2798607</a></td></tr>
                     </tbody>
                 </table>
             </div>
-            <p class="text-xs text-slate-500 mt-3">Documentación oficial sugerida: <a href="https://www.tensorflow.org/tutorials/images/transfer_learning" target="_blank" rel="noopener" style="color:#ED1E79">TensorFlow · Transfer Learning</a> · <a href="https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html" target="_blank" rel="noopener" style="color:#ED1E79">PyTorch · Transfer Learning</a> · <a href="https://www.tensorflow.org/tutorials/structured_data/time_series" target="_blank" rel="noopener" style="color:#ED1E79">TensorFlow · Time Series</a>.</p>
+            <p class="text-xs text-slate-500 mt-3">Documentación oficial sugerida: <a href="https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html" target="_blank" rel="noopener" style="color:#ED1E79">PyTorch · aprendizaje por transferencia</a> · <a href="https://www.tensorflow.org/tutorials/images/transfer_learning" target="_blank" rel="noopener" style="color:#ED1E79">TensorFlow · aprendizaje por transferencia</a> · <a href="https://www.tensorflow.org/tutorials/structured_data/time_series" target="_blank" rel="noopener" style="color:#ED1E79">TensorFlow · series de tiempo</a>.</p>
+            <p class="text-xs text-slate-500 mt-2">Material del curso: <a href="02_Modulo_2_Arquitecturas_Deep_Learning.html" style="color:#ED1E79">material principal del Módulo 2</a> · <a href="020_ruta-aprendizaje-modulo-2.html" style="color:#ED1E79">ruta de aprendizaje del Módulo 2</a> · <a href="https://colab.research.google.com/github/JotaMao1985/Deep_Learning_Usta/blob/main/notebooks/04-scaffold-centinela-fase2.ipynb" target="_blank" rel="noopener" style="color:#ED1E79">notebook de andamiaje de la Fase 2 (Colab)</a> · <a href="https://colab.research.google.com/github/JotaMao1985/Deep_Learning_Usta/blob/main/notebooks/06-ejemplo-centinela-fase2-tulipanes.ipynb" target="_blank" rel="noopener" style="color:#ED1E79">ejemplo resuelto (Colab)</a>.</p>
         </section>
 
         <!-- ====================== RELACIONADO ====================== -->
@@ -927,14 +937,14 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
                         <p class="font-bold mb-1">Documento maestro</p>
                         <p class="text-white/85">Proyecto Integrador: Centinela — define las tres fases, la política de datos y la integridad de IA.</p>
                     </div>
-                    <div class="bg-white/10 rounded-xl p-4">
-                        <p class="font-bold mb-1">Fase anterior</p>
+                    <a href="11_Modulo_1_Actividad_Fase1_Centinela.html" class="bg-white/10 hover:bg-white/20 transition rounded-xl p-4 block">
+                        <p class="font-bold mb-1"><i class="fas fa-arrow-left mr-1 text-xs"></i> Fase anterior</p>
                         <p class="text-white/85">Fase 1 (Módulo 1): línea base con MLP sobre datos tabulares.</p>
-                    </div>
-                    <div class="bg-white/10 rounded-xl p-4">
-                        <p class="font-bold mb-1">Fase siguiente</p>
-                        <p class="text-white/85">Fase 3 (Módulo 3): industrializa sobre todo la rama visual para el despliegue <em>offline</em> (la temporal se sirve por API); pipeline con GPU, precisión mixta y optimización para borde.</p>
-                    </div>
+                    </a>
+                    <a href="31_Modulo_3_Actividad_Fase3_Centinela.html" class="bg-white/10 hover:bg-white/20 transition rounded-xl p-4 block">
+                        <p class="font-bold mb-1">Fase siguiente <i class="fas fa-arrow-right ml-1 text-xs"></i></p>
+                        <p class="text-white/85">Fase 3 (Módulo 3): industrializa sobre todo la rama visual para el despliegue <em>offline</em> (la temporal se sirve por API); flujo de datos con GPU, precisión mixta y optimización para el borde.</p>
+                    </a>
                 </div>
             </div>
         </section>
@@ -946,7 +956,7 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
         <div class="max-w-6xl mx-auto px-5 md:px-8 py-8">
             <p class="font-bold text-white mb-1">Universidad Santo Tomás · Maestría en Ciencia de Datos</p>
             <p>Profundización I: Redes Neuronales — Deep Learning (EA-N-F-004) · Experto temático: Javier Mauricio Sierra</p>
-            <p class="text-white/55 mt-3 text-xs">Proyecto Centinela · Fase 2 — Arquitecturas de Redes Neuronales Especializadas. Material de aprendizaje autónomo. Metodología "Ingeniería de Trinchera": si una arquitectura no corre en Google Colab, no existe.</p>
+            <p class="text-white/55 mt-3 text-xs">Proyecto Centinela · Fase 2 — Arquitecturas de Redes Neuronales Especializadas. Material de aprendizaje autónomo. Metodología «Ingeniería de Trinchera»: si una arquitectura no corre en Google Colab, no existe.</p>
         </div>
     </footer>
 
@@ -1072,7 +1082,7 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
                 'Notebook ejecutable (.ipynb) con las ramas A, B y la fusión C, documentado.',
                 'Informe técnico único (PDF, máx. 8 páginas) con metodología, resultados, ablación y limitaciones de las tres ramas.',
                 'Visualizaciones estáticas comentadas para el cliente (dashboard interactivo opcional/bonus).',
-                'Pesos de los modelos entrenados (.h5 / .pth).',
+                'Pesos de los modelos entrenados (.pth, o .keras si se usa Keras 3).',
                 'Bitácora de IA diligenciada.'
             ];
 
@@ -1114,7 +1124,7 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
                         '<span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">' + c.peso + ' %</span>' +
                     '</div>' +
                     '<select id="' + selId + '" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary" aria-describedby="ae-desc-' + i + '">' +
-                        '<option value="-1" selected>— Elige un nivel —</option>' + opciones +
+                        '<option value="-1" selected>— Nivel —</option>' + opciones +
                     '</select>' +
                     '<p id="ae-desc-' + i + '" class="text-sm text-slate-600 mt-3 leading-relaxed" aria-live="polite"></p>' +
                     '<p id="ae-feed-' + i + '" class="text-sm mt-2 leading-relaxed font-medium"></p>';
