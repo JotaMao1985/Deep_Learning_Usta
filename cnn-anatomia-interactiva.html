@@ -2,7 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Anatomía de una CNN - Animación Interactiva</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anatomía de una CNN — animación interactiva</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -12,6 +13,7 @@
     min-height: 0;
     padding: 14px 14px 4px;
   }
+  :root { --cell: 42px; }
   .container { max-width: 1400px; margin: 0 auto; }
   header {
     text-align: center; margin-bottom: 18px; padding: 16px;
@@ -36,7 +38,9 @@
   .step-indicator {
     display: flex; flex-direction: column; align-items: center; gap: 8px;
     z-index: 1; cursor: pointer; transition: transform 0.2s; flex: 1;
+    background: none; border: 0; padding: 0; font: inherit; color: inherit;
   }
+  .step-indicator:focus-visible { outline: 2px solid #ED1E79; outline-offset: 4px; border-radius: 10px; }
   .step-indicator:hover { transform: translateY(-3px); }
   .step-dot {
     width: 38px; height: 38px; border-radius: 50%;
@@ -77,7 +81,7 @@
   body { overflow-x: hidden; }
   .matrix { display: grid; gap: 3px; padding: 10px; background: #F1F5F9; border-radius: 10px; position: relative; }
   .cell {
-    width: 42px; height: 42px; border-radius: 6px;
+    width: var(--cell); height: var(--cell); border-radius: 6px;
     display: flex; align-items: center; justify-content: center;
     font-size: 0.85rem; font-weight: 600; transition: all 0.3s; position: relative;
   }
@@ -135,15 +139,34 @@
   }
   .bar-fill.x-bar { background: linear-gradient(90deg, #3b82f6, #1e40af); }
   .bar-fill.o-bar { background: linear-gradient(90deg, #ED1E79, #be185d); }
+  .dense-note { font-size: 0.78rem; color: #475569; margin-top: 8px; line-height: 1.45; text-align: left; }
+  .dense-note code { font-family: 'Courier New', monospace; font-size: 0.76rem; color: #334155; }
 
   @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } h1 { font-size: 1.4rem; } }
+  @media (max-width: 640px) {
+    body { padding: 10px 8px 4px; }
+    header { padding: 12px; }
+    h1 { font-size: 1.2rem; }
+    .progress-bar { flex-wrap: wrap; gap: 6px; padding: 10px 6px; }
+    .progress-bar::before { display: none; }
+    .step-indicator { flex: 1 0 30%; }
+    .step-dot { width: 32px; height: 32px; font-size: 0.8rem; }
+    .panel { padding: 12px; min-height: 0; }
+    .btn { padding: 10px 16px; font-size: 0.9rem; }
+    .explanation { padding: 14px; }
+    .explanation p { font-size: 0.9rem; }
+  }
+  @media (max-width: 420px) { :root { --cell: 32px; } .cell { font-size: 0.75rem; } }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  }
 </style>
 </head>
 <body>
 <div class="container">
   <header>
-    <h1>🧠 Anatomía de una Red Neuronal Convolucional</h1>
-    <p class="subtitle">Animación interactiva paso a paso — Inspirado en StatQuest</p>
+    <h1>🧠 Anatomía de una red neuronal convolucional</h1>
+    <p class="subtitle">Animación interactiva paso a paso — adaptada del ejemplo «X / O» de StatQuest (J. Starmer)</p>
   </header>
 
   <div class="image-selector">
@@ -151,40 +174,40 @@
     <button class="img-btn" data-img="O">Imagen: O</button>
   </div>
 
-  <div class="progress-bar">
-    <div class="step-indicator active" data-step="0">
-      <div class="step-dot">1</div>
-      <div class="step-label">Entrada</div>
-    </div>
-    <div class="step-indicator" data-step="1">
-      <div class="step-dot">2</div>
-      <div class="step-label">Filtro</div>
-    </div>
-    <div class="step-indicator" data-step="2">
-      <div class="step-dot">3</div>
-      <div class="step-label">Convolución</div>
-    </div>
-    <div class="step-indicator" data-step="3">
-      <div class="step-dot">4</div>
-      <div class="step-label">ReLU</div>
-    </div>
-    <div class="step-indicator" data-step="4">
-      <div class="step-dot">5</div>
-      <div class="step-label">Max Pooling</div>
-    </div>
-    <div class="step-indicator" data-step="5">
-      <div class="step-dot">6</div>
-      <div class="step-label">Clasificación</div>
-    </div>
+  <div class="progress-bar" role="group" aria-label="Pasos de la animación">
+    <button type="button" class="step-indicator active" data-step="0" aria-label="Paso 1: Entrada">
+      <span class="step-dot">1</span>
+      <span class="step-label">Entrada</span>
+    </button>
+    <button type="button" class="step-indicator" data-step="1" aria-label="Paso 2: Filtro">
+      <span class="step-dot">2</span>
+      <span class="step-label">Filtro</span>
+    </button>
+    <button type="button" class="step-indicator" data-step="2" aria-label="Paso 3: Convolución">
+      <span class="step-dot">3</span>
+      <span class="step-label">Convolución</span>
+    </button>
+    <button type="button" class="step-indicator" data-step="3" aria-label="Paso 4: ReLU">
+      <span class="step-dot">4</span>
+      <span class="step-label">ReLU</span>
+    </button>
+    <button type="button" class="step-indicator" data-step="4" aria-label="Paso 5: Max-pooling">
+      <span class="step-dot">5</span>
+      <span class="step-label"><i>Max-pooling</i></span>
+    </button>
+    <button type="button" class="step-indicator" data-step="5" aria-label="Paso 6: Clasificación">
+      <span class="step-dot">6</span>
+      <span class="step-label">Clasificación</span>
+    </button>
   </div>
 
   <div class="main-grid">
     <div class="panel" id="panel1">
-      <div class="panel-title"><span class="icon icon-input">📷</span>Imagen de Entrada</div>
+      <div class="panel-title"><span class="icon icon-input">📷</span>Imagen de entrada</div>
       <div class="matrix-container" id="matrix1"></div>
     </div>
     <div class="panel" id="panel2">
-      <div class="panel-title"><span class="icon icon-filter">🔍</span>Feature Map</div>
+      <div class="panel-title"><span class="icon icon-filter">🔍</span>Mapa de características</div>
       <div class="matrix-container" id="matrix2"></div>
       <div class="calc-display" id="calcDisplay">—</div>
     </div>
@@ -193,20 +216,20 @@
       <div class="matrix-container" id="matrix3"></div>
       <div class="output-bars" id="outputBars" style="display:none;">
         <div class="output-bar">
-          <div class="output-label" style="color:#3b82f6;">X</div>
-          <div class="bar-track"><div class="bar-fill x-bar" id="barX" style="width:0%;">0%</div></div>
+          <div class="output-label" style="color:#1D4ED8;">X</div>
+          <div class="bar-track"><div class="bar-fill x-bar" id="barX" style="width:0%;">0 %</div></div>
         </div>
         <div class="output-bar">
-          <div class="output-label" style="color:#ec4899;">O</div>
-          <div class="bar-track"><div class="bar-fill o-bar" id="barO" style="width:0%;">0%</div></div>
+          <div class="output-label" style="color:#BE185D;">O</div>
+          <div class="bar-track"><div class="bar-fill o-bar" id="barO" style="width:0%;">0 %</div></div>
         </div>
       </div>
     </div>
   </div>
 
   <div class="explanation" id="explanation">
-    <h3>Bienvenido</h3>
-    <p>Esta animación te guiará por cada paso del procesamiento de una imagen en una CNN. Usa los controles para avanzar.</p>
+    <h3>Introducción</h3>
+    <p>Esta animación recorre cada paso del procesamiento de una imagen en una CNN; los controles permiten avanzar.</p>
   </div>
 
   <div class="controls">
@@ -238,12 +261,21 @@ const IMAGES = {
   ]
 };
 
-// Filtro 3x3 detector de bordes diagonales (como en el video)
+// Filtro 3x3 que detecta trazos en la diagonal principal («\») y penaliza la
+// antidiagonal (ejemplo adaptado de StatQuest, J. Starmer)
 const FILTER = [
   [1, 0, -1],
   [0, 1, 0],
   [-1, 0, 1]
 ];
+
+// Capa densa ilustrativa (pesos elegidos a mano, NO entrenados) sobre el vector
+// aplanado [p11, p12, p21, p22] del max-pooling: premia la activación en las
+// esquinas de la diagonal principal (X) y penaliza la de la antidiagonal (O).
+const DENSE_W = [[1,-1,-1,1],[-1,1,1,-1]].map(r => r.map(w => 0.25*w));   // filas: X, O
+const fmtNum = (v, d) => v.toFixed(d).replace('.', ',').replace(/^-/, '−');
+const fmtPct = v => fmtNum(v*100, 1) + ' %';
+const reduceMotion = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
 let currentImage = 'X';
 let currentStep = 0;
@@ -272,7 +304,7 @@ function renderMatrix(containerId, matrix, size, highlightCells = []) {
   container.innerHTML = '';
   const grid = document.createElement('div');
   grid.className = 'matrix';
-  grid.style.gridTemplateColumns = `repeat(${size}, 42px)`;
+  grid.style.gridTemplateColumns = `repeat(${size}, var(--cell))`;
   
   for (let i = 0; i < matrix.length; i++) {
     for (let j = 0; j < matrix[i].length; j++) {
@@ -281,7 +313,7 @@ function renderMatrix(containerId, matrix, size, highlightCells = []) {
       cell.dataset.row = i;
       cell.dataset.col = j;
       const val = matrix[i][j];
-      cell.textContent = val;
+      cell.textContent = typeof val === 'number' ? fmtNum(val, 0) : val;   // signo menos tipográfico
       if (size === 6) {
         cell.style.background = val === 1 ? '#334155' : '#E2E8F0';
         cell.style.color = val === 1 ? '#FFFFFF' : '#94A3B8';
@@ -347,6 +379,7 @@ function updateStepIndicators() {
     ind.classList.remove('active', 'completed');
     if (idx === currentStep) ind.classList.add('active');
     else if (idx < currentStep) ind.classList.add('completed');
+    if (idx === currentStep) ind.setAttribute('aria-current', 'step'); else ind.removeAttribute('aria-current');
   });
 }
 
@@ -366,11 +399,11 @@ function step0() {
   clearPanels();
   highlightPanel('panel1');
   renderMatrix('matrix1', IMAGES[currentImage], 6);
-  document.getElementById('matrix2').innerHTML = '<p style="color:#6b7280;text-align:center;">Esperando...</p>';
-  document.getElementById('matrix3').innerHTML = '<p style="color:#6b7280;text-align:center;">Esperando...</p>';
+  document.getElementById('matrix2').innerHTML = '<p style="color:#64748B;text-align:center;">En espera…</p>';
+  document.getElementById('matrix3').innerHTML = '<p style="color:#64748B;text-align:center;">En espera…</p>';
   setExplanation(
-    'Paso 1: Imagen de Entrada',
-    `La imagen se representa como una matriz de 6×6 píxeles. Cada celda contiene un valor: <b>1 (trazo de la figura)</b> o <b>0 (fondo)</b>. En una imagen real a color tendríamos 3 canales (RGB) y valores de 0 a 255.`,
+    'Paso 1: Imagen de entrada',
+    `La imagen se representa como una matriz de 6×6 píxeles. Cada celda contiene un valor: <b>1 (trazo de la figura)</b> o <b>0 (fondo)</b>. Una imagen real a color tendría 3 canales (RGB) y valores de 0 a 255.`,
     `Entrada: matriz 6×6 → 36 píxeles`
   );
 }
@@ -381,11 +414,11 @@ function step1() {
   highlightPanel('panel2');
   renderMatrix('matrix1', IMAGES[currentImage], 6);
   renderMatrix('matrix2', FILTER, 3);
-  document.getElementById('matrix3').innerHTML = '<p style="color:#6b7280;text-align:center;">Esperando...</p>';
+  document.getElementById('matrix3').innerHTML = '<p style="color:#64748B;text-align:center;">En espera…</p>';
   setExplanation(
-    'Paso 2: El Filtro (Kernel 3×3)',
-    `El <b>filtro</b> es una matriz pequeña (3×3) cuyos valores la red <i>aprende</i> automáticamente. Este filtro en particular detecta <b>bordes diagonales</b>. Se deslizará sobre la imagen calculando productos punto.`,
-    `Filtro: 3×3 = 9 parámetros (en lugar de 36×N de una red densa)`
+    'Paso 2: El filtro (<i>kernel</i> de 3×3)',
+    `El <b>filtro</b> es una matriz pequeña (3×3) cuyos valores la red <i>aprende</i> automáticamente. Este filtro en particular detecta trazos en la <b>diagonal principal</b> («\\») y penaliza la antidiagonal. Se deslizará sobre la imagen calculando productos punto.`,
+    `Filtro: 3×3 = 9 pesos + 1 sesgo (frente a 36×N pesos de una capa densa con N neuronas)`
   );
 }
 
@@ -403,12 +436,12 @@ function step2() {
   // Crear matriz vacía para el feature map
   const emptyResult = Array.from({length: rows}, () => Array(cols).fill(''));
   renderMatrix('matrix2', emptyResult, cols);
-  document.getElementById('matrix3').innerHTML = '<p style="color:#6b7280;text-align:center;">Esperando...</p>';
+  document.getElementById('matrix3').innerHTML = '<p style="color:#64748B;text-align:center;">En espera…</p>';
   
   setExplanation(
     'Paso 3: Convolución (deslizamiento del filtro)',
-    `El filtro se desliza sobre la imagen. En cada posición se calcula el <b>producto punto</b> entre los 9 píxeles de la imagen y los 9 valores del filtro. El resultado forma el <b>Feature Map</b>.`,
-    `Feature Map[i,j] = Σ (imagen[i+di, j+dj] × filtro[di, dj]) + bias`
+    `El filtro se desliza sobre la imagen. En cada posición se calcula el <b>producto punto</b> entre los 9 píxeles de la imagen y los 9 valores del filtro. El resultado forma el <b>mapa de características</b> (<i>feature map</i>).`,
+    `Mapa[i, j] = Σ imagen[i+di, j+dj] × filtro[di, dj] + b   (aquí, b = 0)`
   );
   
   // Animar el deslizamiento
@@ -424,7 +457,7 @@ function step2() {
     if (pos >= positions.length) {
       // Finalizar mostrando el feature map completo
       renderMatrix('matrix2', result, cols);
-      document.getElementById('calcDisplay').textContent = `✓ Feature Map completo: ${rows}×${cols}`;
+      document.getElementById('calcDisplay').textContent = `✓ Mapa de características completo: ${rows}×${cols}`;
       return;
     }
     const [i, j] = positions[pos];
@@ -447,11 +480,18 @@ function step2() {
       for (let fj = 0; fj < 3; fj++) {
         const v = img[i+fi][j+fj] * FILTER[fi][fj];
         sum += v;
-        if (FILTER[fi][fj] !== 0) terms.push(`${img[i+fi][j+fj]}×${FILTER[fi][fj]}`);
+        if (FILTER[fi][fj] !== 0) terms.push(`${img[i+fi][j+fj]}×${FILTER[fi][fj] < 0 ? '(−' + Math.abs(FILTER[fi][fj]) + ')' : FILTER[fi][fj]}`);
       }
     }
     document.getElementById('calcDisplay').innerHTML = 
-      `Pos (${i},${j}): ${terms.join(' + ')} = <b style="color:#ED1E79;">${sum}</b>`;
+      `Pos. (${i}, ${j}): ${terms.join(' + ')} = <b style="color:#BE185D;">${fmtNum(sum, 0)}</b>`;
+    if (reduceMotion()) {
+      // Movimiento reducido: sin recorrido animado; se muestra el mapa completo y el cálculo de (0, 0).
+      renderMatrix('matrix2', result, cols, [[0, 0]]);
+      document.getElementById('calcDisplay').innerHTML +=
+        ` · ✓ Mapa de características completo: ${rows}×${cols}`;
+      return;
+    }
     
     // Actualizar feature map progresivamente
     const partialResult = Array.from({length: rows}, (_, ri) => 
@@ -485,11 +525,11 @@ function step3() {
   
   // Feature map con ReLU aplicado
   renderMatrix('matrix2', reluMap, 4);
-  document.getElementById('matrix3').innerHTML = '<p style="color:#6b7280;text-align:center;">Esperando...</p>';
+  document.getElementById('matrix3').innerHTML = '<p style="color:#64748B;text-align:center;">En espera…</p>';
   
   setExplanation(
-    'Paso 4: Función de Activación ReLU',
-    `ReLU (<i>Rectified Linear Unit</i>) convierte todos los valores <b>negativos a cero</b> y mantiene los positivos. Esto introduce <b>no-linealidad</b> y elimina "ruido" de correlaciones negativas.`,
+    'Paso 4: Función de activación ReLU',
+    `ReLU (<i>Rectified Linear Unit</i>) convierte todos los valores <b>negativos en cero</b> y mantiene los positivos. Así introduce <b>no linealidad</b>: sin ella, apilar capas equivaldría a una sola transformación lineal.`,
     `ReLU(x) = max(0, x)`
   );
   
@@ -510,12 +550,12 @@ function step4() {
   
   renderMatrix('matrix1', reluMap, 4);
   renderMatrix('matrix2', pooled, 2);
-  document.getElementById('matrix3').innerHTML = '<p style="color:#6b7280;text-align:center;">Esperando...</p>';
+  document.getElementById('matrix3').innerHTML = '<p style="color:#64748B;text-align:center;">En espera…</p>';
   
   setExplanation(
-    'Paso 5: Max Pooling (Submuestreo)',
-    `Un filtro de 2×2 se desliza <b>sin solapamiento</b> sobre el Feature Map y selecciona el <b>valor máximo</b> de cada región. Esto reduce la dimensionalidad (de 4×4 a 2×2) y hace a la red <b>invariante a pequeñas traslaciones</b>.`,
-    `Salida: 4×4 → 2×2 (reducción del 75%)`
+    'Paso 5: <i>Max-pooling</i> (submuestreo)',
+    `Una ventana de 2×2 se desliza <b>sin solapamiento</b> sobre el mapa de características y selecciona el <b>valor máximo</b> de cada región. Esto reduce la dimensionalidad (de 4×4 a 2×2) y aporta cierta <b>invariancia a pequeñas traslaciones</b>.`,
+    `Salida: 4×4 → 2×2 (reducción del 75 %)`
   );
   
   // Mostrar regiones de pooling
@@ -534,64 +574,59 @@ function step4() {
     `4 regiones de 2×2 → 4 valores máximos`;
 }
 
-// PASO 5: Clasificación
+// PASO 5: Clasificación (capa densa ilustrativa + softmax calculada)
 function step5() {
   clearPanels();
   highlightPanel('panel3');
   const img = IMAGES[currentImage];
   const pooled = maxPool(applyRelu(convolve(img, FILTER)));
   
-  // Flatten
+  // Aplanado (flatten)
   const flat = pooled.flat();
-  document.getElementById('matrix1').innerHTML = `
-    <div style="text-align:center;">
-      <p style="color:#9ca3af;font-size:0.85rem;margin-bottom:10px;">Pooled (2×2)</p>
-    </div>
-  `;
   renderMatrix('matrix1', pooled, 2);
   
   document.getElementById('matrix2').innerHTML = `
     <div style="text-align:center;">
-      <p style="color:#9ca3af;font-size:0.85rem;margin-bottom:10px;">Flatten → 4 valores</p>
+      <p style="color:#64748B;font-size:0.85rem;margin-bottom:10px;">Aplanado (<i>flatten</i>) → 4 valores</p>
       <div style="display:flex;gap:5px;justify-content:center;">
         ${flat.map(v => `<div style="width:40px;height:40px;background:${getHeatColor(v,4)};border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:600;">${v}</div>`).join('')}
       </div>
     </div>
   `;
   
-  // Calcular probabilidades simuladas (softmax simple)
-  const sum = flat.reduce((a,b) => a + Math.exp(b*0.5), 0);
-  let probX, probO;
-  if (currentImage === 'X') {
-    probX = 0.94; probO = 0.06;
-  } else {
-    probX = 0.12; probO = 0.88;
-  }
+  // Capa densa: z = W · flat ; softmax(z) — valores calculados, no fijos
+  const z = DENSE_W.map(r => r.reduce((acc, w, k) => acc + w*flat[k], 0));
+  const e = z.map(Math.exp), S = e[0] + e[1];
+  const probX = e[0]/S, probO = e[1]/S;
+  const pred = probX >= probO ? 'X' : 'O';
   
   document.getElementById('matrix3').innerHTML = `
     <div style="text-align:center;">
-      <p style="color:#9ca3af;font-size:0.85rem;margin-bottom:15px;">Capa Densa + Softmax</p>
-      <div style="font-size:2rem;margin:15px 0;">${currentImage === 'X' ? '✖️' : '⭕'}</div>
-      <div style="color:#10b981;font-weight:600;">Predicción: ${currentImage}</div>
+      <p style="color:#64748B;font-size:0.85rem;margin-bottom:6px;">Capa densa + softmax</p>
+      <div style="font-size:2rem;margin:8px 0;" aria-hidden="true">${pred === 'X' ? '✖️' : '⭕'}</div>
+      <div style="color:#15803D;font-weight:600;">Predicción: ${pred}</div>
+      <p class="dense-note">Pesos ilustrativos, no entrenados:
+        <code>z<sub>X</sub> = 0,25·(p₁ − p₂ − p₃ + p₄)</code> y <code>z<sub>O</sub> = −z<sub>X</sub></code>.
+        Con [${flat.join('; ')}]: z<sub>X</sub> = ${fmtNum(z[0], 2)} y z<sub>O</sub> = ${fmtNum(z[1], 2)}.</p>
     </div>
   `;
   
   document.getElementById('outputBars').style.display = 'block';
   setTimeout(() => {
     document.getElementById('barX').style.width = `${probX*100}%`;
-    document.getElementById('barX').textContent = `${(probX*100).toFixed(1)}%`;
+    document.getElementById('barX').textContent = fmtPct(probX);
     document.getElementById('barO').style.width = `${probO*100}%`;
-    document.getElementById('barO').textContent = `${(probO*100).toFixed(1)}%`;
+    document.getElementById('barO').textContent = fmtPct(probO);
   }, 100);
   
   setExplanation(
-    'Paso 6: Clasificación Final',
-    `El resultado del pooling se <b>aplasta</b> (flatten) en un vector y se alimenta a una red neuronal densa tradicional. La capa final usa <b>Softmax</b> para convertir las salidas en probabilidades que suman 1. ¡La red ha clasificado la imagen!`,
-    `Softmax(zᵢ) = e^(zᵢ) / Σⱼ e^(zⱼ)`
+    'Paso 6: Clasificación final',
+    `El resultado del <i>max-pooling</i> se <b>aplana</b> (<i>flatten</i>) en un vector de 4 valores que alimenta una capa densa. Sus pesos son <b>ilustrativos</b> (elegidos a mano, no entrenados): premian la activación en las esquinas de la diagonal principal, típica de la «X», y penalizan la de la antidiagonal, típica de la «O». La capa final aplica <b>softmax</b> para convertir las dos puntuaciones (<i>logits</i>) en probabilidades que suman 1. Con estos pesos, la imagen «${currentImage}» se clasifica como «${pred}».`,
+    `Softmax: P(X) = e^(z_X) / (e^(z_X) + e^(z_O)) = e^(${fmtNum(z[0], 2)}) / (e^(${fmtNum(z[0], 2)}) + e^(${fmtNum(z[1], 2)})) = ${fmtPct(probX)}`
   );
   
   document.getElementById('calcDisplay').innerHTML = 
-    `✓ Imagen "${currentImage}" clasificada con ${(Math.max(probX,probO)*100).toFixed(1)}% de confianza`;
+    `✓ Imagen «${currentImage}» → predicción «${pred}» con ${fmtPct(Math.max(probX, probO))} de probabilidad`;
 }
 
 const steps = [step0, step1, step2, step3, step4, step5];

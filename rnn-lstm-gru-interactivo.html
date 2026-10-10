@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RNN vs LSTM vs GRU — Explorador Interactivo</title>
+<title>RNN, LSTM y GRU — explorador interactivo</title>
 <!--
   ============================================================================
   EXPLORADOR INTERACTIVO  ·  RNN  vs  LSTM  vs  GRU
@@ -18,7 +18,8 @@
       su valor real calculado (0..1) en cada paso. Ver la compuerta de olvido
       cerca de 1 mientras la RNN oscila es el momento "ajá".
     - El gradiente que se desvanece se vuelve FÍSICO: una barra que retrocede
-      en el tiempo se apaga rápido en la RNN y se conserva en LSTM/GRU.
+      en el tiempo (norma del producto de jacobianos REALES, sin constantes
+      ocultas) se apaga antes en la RNN que en LSTM/GRU.
   Todo es JavaScript puro + SVG en línea. Funciona sin servidor y sin internet.
   ============================================================================
 -->
@@ -28,11 +29,12 @@
     --usta-morado:#3D008D;   --usta-magenta:#ED1E79;
     --tinta:#334155;         --tinta-suave:#64748B;   --tinta-fuerte:#1E293B;
     --borde:#E2E8F0;         --lienzo:#F8FAFC;         --lila:#FBF8FF;
-    --rnn:#2563EB;           --lstm:#8B5CF6;           --gru:#0D9488;
+    --rnn:#2563EB;           --lstm:#8B5CF6;           --gru:#0F766E;
     --olvido:#EF4444;        --entrada:#22C55E;        --salida:#F59E0B;
-    --candidato:#3B82F6;     --reset:#F43F5E;          --update:#8B5CF6;
-    --celda:#F59E0B;         /* estado de celda c_t (la "cinta transportadora") */
-    --ok:#15803D;
+    --candidato:#3B82F6;     --reset:#F43F5E;          --update:#6D28D9;
+    --celda:#F59E0B;         /* estado de celda C_t (la "cinta transportadora"); relleno */
+    --celda-texto:#B45309;   /* mismo tono para texto: contraste AA sobre blanco */
+    --ok:#15803D;            --mal:#B91C1C;            --aviso:#B45309;
   }
   *{margin:0;padding:0;box-sizing:border-box;}
   body{
@@ -167,6 +169,10 @@
   .decay-bars .db{flex:1;border-radius:3px 3px 0 0;transition:height .5s ease,opacity .5s;min-height:2px;}
   .decay-x{display:flex;justify-content:space-between;font-size:.62rem;color:var(--tinta-suave);margin-top:4px;}
   .verdict{font-size:.76rem;margin-top:8px;padding:7px 9px;border-radius:8px;line-height:1.35;}
+  .verdict.bien{background:#F0FDF4;color:var(--ok);}
+  .verdict.aviso{background:#FFFBEB;color:var(--aviso);}
+  .verdict.mal{background:#FEF2F2;color:var(--mal);}
+  .grad-card .factor{font-size:.7rem;color:var(--tinta-suave);margin-top:6px;font-variant-numeric:tabular-nums;}
 
   /* ---- Cuadro comparativo ---------------------------------------------- */
   .compare-section{background:#fff;border:1px solid var(--borde);border-radius:16px;
@@ -217,18 +223,24 @@
   .foot{text-align:center;font-size:.74rem;color:var(--tinta-suave);margin-top:20px;}
   .kbd{background:#EEF2F7;border:1px solid var(--borde);border-radius:5px;padding:1px 6px;
     font-size:.72rem;font-family:monospace;}
+
+  /* ---- Accesibilidad: foco visible y movimiento reducido ---------------- */
+  [data-tip]:focus-visible{outline:2px solid var(--usta-magenta);outline-offset:2px;}
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important;}
+  }
 </style>
 </head>
 <body>
 <div class="container">
 
   <header>
-    <h1>RNN · LSTM · GRU — Explorador Interactivo</h1>
+    <h1>RNN · LSTM · GRU — explorador interactivo</h1>
     <p class="subtitle">
       Las tres arquitecturas procesan <b>la misma secuencia</b> paso a paso. Se observa cómo se
-      actualiza el estado oculto <b>h<sub>t</sub></b> (y el estado de celda <b>c<sub>t</sub></b> en la LSTM),
+      actualiza el estado oculto <b>h<sub>t</sub></b> (y el estado de celda <b>C<sub>t</sub></b> en la LSTM),
       cómo las <b>compuertas</b> deciden qué recordar y por qué la RNN simple sufre el
-      <b>desvanecimiento del gradiente</b>. Al pasar el cursor sobre cualquier elemento se muestra su explicación.
+      <b>desvanecimiento del gradiente</b>. Al pasar el cursor (o el foco del teclado) sobre cualquier elemento se muestra su explicación.
     </p>
   </header>
 
@@ -239,12 +251,12 @@
     <button class="btn btn-reset" id="btnReset">↺ Reiniciar</button>
 
     <div class="slider-group">
-      <label>Magnitud de la entrada <b><span id="magVal">1.0</span>×</b></label>
-      <input type="range" id="magSlider" min="0.2" max="2" step="0.1" value="1">
+      <label for="magSlider">Magnitud de la entrada <b><span id="magVal">1,0</span>×</b></label>
+      <input type="range" id="magSlider" min="0.2" max="2" step="0.1" value="1" aria-valuetext="1,0 veces">
     </div>
     <div class="slider-group">
-      <label>Longitud de la secuencia <b><span id="lenVal">5</span> pasos</b></label>
-      <input type="range" id="lenSlider" min="3" max="8" step="1" value="5">
+      <label for="lenSlider">Longitud de la secuencia <b><span id="lenVal">6</span> pasos</b></label>
+      <input type="range" id="lenSlider" min="3" max="20" step="1" value="6" aria-valuetext="6 pasos">
     </div>
   </div>
 
@@ -259,10 +271,15 @@
     <h2>🌫️ ¿Por qué la RNN «olvida»? El gradiente que se desvanece</h2>
     <p class="lead">
       Al entrenar, el error debe viajar <b>hacia atrás en el tiempo</b> para corregir pasos lejanos.
-      En cada salto, la RNN simple multiplica por factores cuya magnitud suele ser &lt; 1 (derivada de <i>tanh</i> × pesos), así que
-      la señal <b>se apaga exponencialmente</b>. LSTM y GRU tienen una «autopista» (la compuerta de olvido /
-      de actualización cerca de 1) que <b>preserva</b> la señal a larga distancia. Al mover el deslizador de longitud
-      se recalcula cuánto gradiente sobrevive a esa distancia.
+      En cada salto, la RNN simple multiplica el gradiente por el jacobiano real
+      ∂h<sub>t</sub>/∂h<sub>t−1</sub> = diag(1 − h<sub>t</sub><sup>2</sup>)·W<sub>hh</sub> (derivada de <i>tanh</i> × pesos);
+      las barras muestran la norma ‖·‖<sub>2</sub> del producto de esos jacobianos, calculada con los pesos y el recorrido
+      de esta herramienta, y la señal <b>se apaga exponencialmente</b> con la distancia. LSTM y GRU tienen una «autopista»:
+      en la LSTM se sigue el camino directo de la cinta (∂C<sub>t</sub>/∂C<sub>t−1</sub> = diag(f<sub>t</sub>)) y en la GRU el término
+      z<sub>t</sub>⊙h<sub>t−1</sub> (diag(z<sub>t</sub>)); los demás caminos se omiten. Con secuencias cortas las tres celdas conservan
+      una fracción parecida; al llevar el deslizador de longitud hacia 20 pasos, el producto de la RNN cae muy por debajo.
+      Los pesos son ilustrativos (aleatorios con semilla fija, sin entrenar): en una red entrenada, la compuerta de olvido
+      puede acercarse aún más a 1.
     </p>
     <div class="grad-grid" id="gradGrid"></div>
   </div>
@@ -294,7 +311,7 @@
           <tr>
             <td class="crit" data-tip="Cuántos canales de estado transporta la celda entre pasos.">Estado que transporta</td>
             <td>Solo h<sub>t</sub></td>
-            <td>h<sub>t</sub> + celda c<sub>t</sub></td>
+            <td>h<sub>t</sub> + celda C<sub>t</sub></td>
             <td>Solo h<sub>t</sub></td>
           </tr>
           <tr>
@@ -359,7 +376,7 @@
   <!-- ============ LEYENDA ============ -->
   <div class="legend">
     <div class="li"><span class="sw line" style="background:var(--usta-magenta)"></span> Flujo activo en el paso actual</div>
-    <div class="li"><span class="sw" style="background:var(--celda)"></span> Estado de celda c<sub>t</sub> (memoria de largo plazo)</div>
+    <div class="li"><span class="sw" style="background:var(--celda)"></span> Estado de celda C<sub>t</sub> (memoria de largo plazo)</div>
     <div class="li"><span class="sw" style="background:var(--olvido)"></span> Compuerta de olvido</div>
     <div class="li"><span class="sw" style="background:var(--entrada)"></span> Compuerta de entrada</div>
     <div class="li"><span class="sw" style="background:var(--salida)"></span> Compuerta de salida</div>
@@ -426,8 +443,8 @@ function stepLSTM(hPrev,cPrev,x){
   const i=addBias(matVec(lW.Wi,cat),lW.bi).map(sig);   // entrada
   const o=addBias(matVec(lW.Wo,cat),lW.bo).map(sig);   // salida
   const g=addBias(matVec(lW.Wg,cat),lW.bg).map(tanh);  // candidato
-  const c=hPrev.map((_,k)=>f[k]*cPrev[k]+i[k]*g[k]);   // c_t = f∘c_{t-1} + i∘g
-  const h=c.map((ck,k)=>o[k]*tanh(ck));                // h_t = o∘tanh(c_t)
+  const c=hPrev.map((_,k)=>f[k]*cPrev[k]+i[k]*g[k]);   // C_t = f⊙C_{t-1} + i⊙C̃_t (PyTorch llama g al candidato)
+  const h=c.map((ck,k)=>o[k]*tanh(ck));                // h_t = o⊙tanh(C_t)
   return {h,c,gates:{f,i,o,g}, fMean:mean(f)};
 }
 function stepGRU(hPrev,x){
@@ -436,19 +453,21 @@ function stepGRU(hPrev,x){
   const rr=addBias(matVec(gW.Wr,cat),gW.br).map(sig);  // reinicio
   const catN=[...hadam(rr,hPrev),x];                   // el reset filtra la memoria antes del candidato
   const n=addBias(matVec(gW.Wn,catN),gW.bn).map(tanh); // candidato
-  const h=hPrev.map((_,k)=>(1-z[k])*n[k]+z[k]*hPrev[k]); // h_t = (1-z)∘n + z∘h_{t-1}
+  const h=hPrev.map((_,k)=>(1-z[k])*n[k]+z[k]*hPrev[k]); // h_t = z⊙h_{t-1} + (1-z)⊙h̃_t (CP0: Cho et al., 2014; PyTorch llama n al candidato)
   return {h,gates:{z,r:rr,n}, zMean:mean(z)};
 }
 
 /* =========================================================================
    2) DATOS: la secuencia (tokens) y su "embedding" escalar
    -------------------------------------------------------------------------
-   Usamos una frase en español con una DEPENDENCIA DE LARGO ALCANCE: el sujeto
-   "gato" (singular) determina el verbo final, muchos pasos después. Ese es el
-   caso donde importa la memoria. Cada palabra se mapea a un valor escalar
-   determinista (su "embedding" simplificado a 1D).
+   Frase en español con DEPENDENCIAS DE LARGO ALCANCE: el sujeto "gato"
+   (singular) determina los verbos «corría» (paso 6) y «durmió» (paso 20),
+   muchos pasos después. Ese es el caso donde importa la memoria. Cada palabra
+   se mapea a un valor escalar determinista (su "embedding" simplificado a 1D).
+   Las 8 primeras palabras son las de la versión anterior (mismo recorrido).
    ========================================================================= */
-const BASE_WORDS = ["El","gato","que","perseguía","ratones","corría","muy","rápido"];
+const BASE_WORDS = ["El","gato","que","perseguía","ratones","corría","muy","rápido",
+  "por","el","patio","de","la","vieja","casa","hasta","que","por","fin","durmió"];
 function wordValue(w){ // hash determinista -> valor en ~[-1,1]
   let h=0; for(let i=0;i<w.length;i++) h=(h*31+w.charCodeAt(i))>>>0;
   return ((h%1000)/1000)*2-1;
@@ -462,7 +481,7 @@ function wordValue(w){ // hash determinista -> valor en ~[-1,1]
    ========================================================================= */
 const App = {
   step:0,          // 0 = estado inicial (antes de procesar el primer token)
-  len:5,
+  len:6,           // por defecto incluye «corría», el verbo que depende de «gato»
   mag:1,
   seq:[],          // [{word, x}]
   traj:{rnn:[], lstm:[], gru:[]},  // traj.arch[t] = estado tras procesar el token t (t=1..len)
@@ -495,7 +514,7 @@ function computeTrajectories(){
    4) DIAGRAMAS SVG DE CADA CELDA
    -------------------------------------------------------------------------
    Diagramas esquemáticos pero fieles: la RNN es un único nodo tanh con un
-   lazo recurrente; la LSTM muestra la "cinta transportadora" c_t arriba con
+   lazo recurrente; la LSTM muestra la "cinta transportadora" C_t arriba con
    sus tres compuertas; la GRU muestra reinicio, actualización y la mezcla.
    Cada nodo tiene data-tip (tooltip) y un id para colorearlo según su valor.
    ========================================================================= */
@@ -505,20 +524,20 @@ function svgRNN(){return `
     <path d="M0,0 L6,3 L0,6 Z" fill="#94A3B8"/></marker></defs>
   <!-- entrada x_t -->
   <rect class="node" x="130" y="168" width="60" height="30" rx="7" fill="#DBEAFE" stroke="var(--rnn)"
-        data-tip="<b>Entrada x_t</b>: el token actual de la secuencia. Se combina con la memoria previa."/>
-  <text class="svglabel" x="160" y="187" text-anchor="middle">x_t</text>
+        data-tip="<b>Entrada x<sub>t</sub></b>: el <i>token</i> (unidad de la secuencia) actual. Se combina con la memoria previa."/>
+  <text class="svglabel" x="160" y="187" text-anchor="middle">x<tspan baseline-shift="sub" font-size="75%">t</tspan></text>
   <!-- h_{t-1} entra por la izquierda -->
   <line class="flow" id="rnn-fin" x1="10" y1="95" x2="120" y2="95" stroke="#94A3B8" stroke-width="2" marker-end="url(#ar)"/>
-  <text class="svgsub" x="12" y="86">h_(t-1)</text>
+  <text class="svgsub" x="12" y="86">h<tspan baseline-shift="sub" font-size="75%">t−1</tspan></text>
   <line class="flow" x1="160" y1="168" x2="160" y2="128" stroke="#94A3B8" stroke-width="2" marker-end="url(#ar)"/>
   <!-- nodo tanh -->
   <circle class="node" id="rnn-tanh" cx="160" cy="95" r="34" fill="#EFF6FF" stroke="var(--rnn)" stroke-width="2"
-     data-tip="<b>Activación tanh</b>: única transformación de la RNN. h_t = tanh(W·[h_(t-1),x_t]). Aquí se pierde/atenúa el gradiente al retropropagar."/>
+     data-tip="<b>Activación tanh</b>: única transformación de la RNN. h<sub>t</sub> = tanh(W·[h<sub>t−1</sub>, x<sub>t</sub>]). Al retropropagar, su derivada (1 − h<sub>t</sub><sup>2</sup>) multiplica el gradiente en cada paso."/>
   <text class="svglabel" x="160" y="92" text-anchor="middle">tanh</text>
-  <text class="svgsub" x="160" y="106" text-anchor="middle">h_t</text>
+  <text class="svgsub" x="160" y="106" text-anchor="middle">h<tspan baseline-shift="sub" font-size="75%">t</tspan></text>
   <!-- salida a la derecha -->
   <line class="flow" id="rnn-fout" x1="194" y1="95" x2="308" y2="95" stroke="#94A3B8" stroke-width="2" marker-end="url(#ar)"/>
-  <text class="svgsub" x="284" y="86">h_t</text>
+  <text class="svgsub" x="284" y="86">h<tspan baseline-shift="sub" font-size="75%">t</tspan></text>
   <!-- lazo recurrente -->
   <path class="flow" d="M255,95 C255,30 65,30 65,95" fill="none" stroke="#CBD5E1" stroke-width="1.6"
         stroke-dasharray="5 4" marker-end="url(#ar)"/>
@@ -530,63 +549,63 @@ function svgLSTM(){return `
   <defs><marker id="al" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
     <path d="M0,0 L6,3 L0,6 Z" fill="#94A3B8"/></marker></defs>
 
-  <!-- CINTA c_t: memoria de largo plazo; recorre la celda casi sin alterarse -->
+  <!-- CINTA C_t: memoria de largo plazo; recorre la celda casi sin alterarse -->
   <line class="flow" id="lstm-cline" x1="8" y1="36" x2="332" y2="36" stroke="var(--celda)" stroke-width="4" marker-end="url(#al)"/>
-  <text class="svgsub" x="10" y="28">c_(t-1)</text>
-  <text class="svgsub" x="306" y="28" fill="var(--celda)">c_t</text>
+  <text class="svgsub" x="10" y="28">C<tspan baseline-shift="sub" font-size="75%">t−1</tspan></text>
+  <text class="svgsub" x="306" y="28" fill="var(--celda-texto)">C<tspan baseline-shift="sub" font-size="75%">t</tspan></text>
 
   <!-- operador de olvido (×) sobre la cinta -->
   <circle class="node" id="lstm-fx" cx="95" cy="36" r="12" fill="#fff" stroke="var(--olvido)" stroke-width="2"
-    data-tip="<b>× (olvido)</b>: multiplica la memoria previa por la compuerta f_t. Con f≈1 se conserva; con f≈0 se borra."/>
+    data-tip="<b>× (olvido)</b>: multiplica la memoria previa C<sub>t−1</sub> por la compuerta f<sub>t</sub>. Con f<sub>t</sub> ≈ 1 se conserva; con f<sub>t</sub> ≈ 0 se borra."/>
   <text class="svglabel" x="95" y="40" text-anchor="middle" fill="var(--olvido)">×</text>
   <!-- operador de suma (+) de información nueva -->
   <circle class="node" id="lstm-add" cx="175" cy="36" r="12" fill="#fff" stroke="var(--entrada)" stroke-width="2"
-    data-tip="<b>+ (agregar)</b>: suma a la memoria la información nueva ya filtrada, es decir el producto i∘g."/>
+    data-tip="<b>+ (agregar)</b>: suma a la memoria la información nueva ya filtrada, es decir, el producto i<sub>t</sub> ⊙ C̃<sub>t</sub>."/>
   <text class="svglabel" x="175" y="40" text-anchor="middle" fill="var(--entrada)">+</text>
 
-  <!-- toma de la cinta hacia la salida: tanh(c_t) -->
+  <!-- toma de la cinta hacia la salida: tanh(C_t) -->
   <line class="flow" x1="250" y1="38" x2="250" y2="59" stroke="var(--celda)" stroke-width="2" marker-end="url(#al)"/>
   <circle class="node" cx="250" cy="72" r="13" fill="#FFF7ED" stroke="var(--celda)" stroke-width="2"
-    data-tip="<b>tanh(c_t)</b>: comprime la memoria al rango (−1,1) antes de exponerla como salida."/>
+    data-tip="<b>tanh(C<sub>t</sub>)</b>: comprime la memoria al intervalo (−1, 1) antes de exponerla como salida."/>
   <text class="gateval" x="250" y="76" text-anchor="middle" fill="#B45309">tanh</text>
 
-  <!-- estado oculto h_t = o ∘ tanh(c_t) -->
+  <!-- estado oculto h_t = o ⊙ tanh(C_t) -->
   <line class="flow" x1="263" y1="72" x2="278" y2="72" stroke="var(--salida)" stroke-width="2" marker-end="url(#al)"/>
   <circle class="node" id="lstm-h" cx="295" cy="72" r="15" fill="#F5F3FF" stroke="var(--lstm)" stroke-width="2"
-    data-tip="<b>Estado oculto h_t = o_t ∘ tanh(c_t)</b>: la parte de la memoria que se expone; es la salida en cada paso."/>
-  <text class="gateval" x="295" y="76" text-anchor="middle" fill="var(--lstm)">h_t</text>
+    data-tip="<b>Estado oculto h<sub>t</sub> = o<sub>t</sub> ⊙ tanh(C<sub>t</sub>)</b>: la parte de la memoria que se expone; es la salida en cada paso."/>
+  <text class="gateval" x="295" y="76" text-anchor="middle" fill="var(--lstm)">h<tspan baseline-shift="sub" font-size="75%">t</tspan></text>
 
   <!-- COMPUERTAS (fila inferior) -->
   <rect class="node" id="lstm-f" x="73" y="118" width="44" height="26" rx="7" fill="#FEE2E2" stroke="var(--olvido)"
-    data-tip="<b>Compuerta de olvido f_t = σ(W_f·[h,x])</b>: decide qué fracción de la memoria previa se conserva (0=borrar, 1=guardar)."/>
+    data-tip="<b>Compuerta de olvido f<sub>t</sub> = σ(W<sub>f</sub>·[h<sub>t−1</sub>, x<sub>t</sub>] + b<sub>f</sub>)</b>: decide qué fracción de la memoria previa se conserva; toma valores en (0, 1): cerca de 0 borra y cerca de 1 conserva."/>
   <text class="gateval" id="lstm-f-t" x="95" y="135" text-anchor="middle" fill="var(--olvido)">σ f</text>
   <line class="flow" x1="95" y1="118" x2="95" y2="49" stroke="var(--olvido)" stroke-width="2" marker-end="url(#al)"/>
 
   <rect class="node" id="lstm-i" x="128" y="118" width="44" height="26" rx="7" fill="#DCFCE7" stroke="var(--entrada)"
-    data-tip="<b>Compuerta de entrada i_t = σ(W_i·[h,x])</b>: decide cuánto del candidato nuevo se escribe en la memoria."/>
+    data-tip="<b>Compuerta de entrada i<sub>t</sub> = σ(W<sub>i</sub>·[h<sub>t−1</sub>, x<sub>t</sub>] + b<sub>i</sub>)</b>: decide cuánto del candidato nuevo se escribe en la memoria."/>
   <text class="gateval" id="lstm-i-t" x="150" y="135" text-anchor="middle" fill="var(--entrada)">σ i</text>
 
   <rect class="node" id="lstm-g" x="178" y="118" width="44" height="26" rx="7" fill="#DBEAFE" stroke="var(--candidato)"
-    data-tip="<b>Candidato g_t = tanh(W_g·[h,x])</b>: la nueva información propuesta para añadir a la memoria."/>
-  <text class="gateval" id="lstm-g-t" x="200" y="135" text-anchor="middle" fill="var(--candidato)">tanh g</text>
+    data-tip="<b>Candidato C̃<sub>t</sub> = tanh(W<sub>C</sub>·[h<sub>t−1</sub>, x<sub>t</sub>] + b<sub>C</sub>)</b>: la nueva información propuesta para añadir a la memoria (PyTorch lo llama g<sub>t</sub>)."/>
+  <text class="gateval" id="lstm-g-t" x="200" y="135" text-anchor="middle" fill="var(--candidato)">tanh C̃</text>
 
-  <!-- producto i∘g: la entrada filtra al candidato antes de sumarlo a la memoria -->
+  <!-- producto i⊙C̃: la entrada filtra al candidato antes de sumarlo a la memoria -->
   <circle class="node" cx="175" cy="90" r="10" fill="#fff" stroke="#94A3B8" stroke-width="1.6"
-    data-tip="<b>i ∘ g</b>: la compuerta de entrada filtra al candidato; su producto es lo que realmente se añade a la memoria."/>
+    data-tip="<b>i<sub>t</sub> ⊙ C̃<sub>t</sub></b>: la compuerta de entrada filtra al candidato; su producto es lo que realmente se añade a la memoria."/>
   <text class="svglabel" x="175" y="93" text-anchor="middle" fill="#64748B">×</text>
   <line class="flow" x1="150" y1="118" x2="169" y2="98" stroke="var(--entrada)" stroke-width="1.8"/>
   <line class="flow" x1="200" y1="118" x2="181" y2="98" stroke="var(--candidato)" stroke-width="1.8"/>
   <line class="flow" x1="175" y1="80" x2="175" y2="49" stroke="var(--entrada)" stroke-width="2" marker-end="url(#al)"/>
 
   <rect class="node" id="lstm-o" x="273" y="118" width="44" height="26" rx="7" fill="#FEF3C7" stroke="var(--salida)"
-    data-tip="<b>Compuerta de salida o_t = σ(W_o·[h,x])</b>: decide qué parte de la memoria se expone como estado oculto h_t."/>
+    data-tip="<b>Compuerta de salida o<sub>t</sub> = σ(W<sub>o</sub>·[h<sub>t−1</sub>, x<sub>t</sub>] + b<sub>o</sub>)</b>: decide qué parte de la memoria se expone como estado oculto h<sub>t</sub>."/>
   <text class="gateval" id="lstm-o-t" x="295" y="135" text-anchor="middle" fill="var(--salida)">σ o</text>
   <line class="flow" x1="295" y1="118" x2="295" y2="89" stroke="var(--salida)" stroke-width="2" marker-end="url(#al)"/>
 
   <!-- ENTRADAS concatenadas -> bus -> las cuatro compuertas -->
   <rect class="node" x="18" y="200" width="120" height="26" rx="7" fill="#F1F5F9" stroke="#CBD5E1"
-    data-tip="<b>Entradas</b>: se concatenan el estado previo h_(t-1) y el token x_t; alimentan a las cuatro compuertas."/>
-  <text class="svgsub" x="78" y="217" text-anchor="middle">[ h_(t-1) , x_t ]</text>
+    data-tip="<b>Entradas</b>: se concatenan el estado previo h<sub>t−1</sub> y el <i>token</i> x<sub>t</sub>; alimentan las tres compuertas y el candidato."/>
+  <text class="svgsub" x="78" y="217" text-anchor="middle">[h<tspan baseline-shift="sub" font-size="75%">t−1</tspan>, x<tspan baseline-shift="sub" font-size="75%">t</tspan>]</text>
   <line class="flow" x1="78" y1="200" x2="78" y2="170" stroke="#94A3B8" stroke-width="1.6"/>
   <line class="flow" x1="78" y1="170" x2="295" y2="170" stroke="#94A3B8" stroke-width="1.6"/>
   <line class="flow" x1="95"  y1="170" x2="95"  y2="144" stroke="#94A3B8" stroke-width="1.6"/>
@@ -602,43 +621,43 @@ function svgGRU(){return `
 
   <!-- CANAL h: la GRU fusiona memoria y salida en un solo estado -->
   <line class="flow" id="gru-hline" x1="8" y1="36" x2="332" y2="36" stroke="var(--gru)" stroke-width="4" marker-end="url(#ag)"/>
-  <text class="svgsub" x="10" y="28">h_(t-1)</text>
-  <text class="svgsub" x="306" y="28" fill="var(--gru)">h_t</text>
-  <text class="svgsub" x="150" y="28" fill="var(--update)">z∘h_(t-1)</text>
+  <text class="svgsub" x="10" y="28">h<tspan baseline-shift="sub" font-size="75%">t−1</tspan></text>
+  <text class="svgsub" x="306" y="28" fill="var(--gru)">h<tspan baseline-shift="sub" font-size="75%">t</tspan></text>
+  <text class="svgsub" x="150" y="28" fill="var(--update)">z<tspan baseline-shift="sub" font-size="75%">t</tspan>⊙h<tspan baseline-shift="sub" font-size="75%">t−1</tspan></text>
 
-  <!-- mezcla:  h_t = (1−z)∘n + z∘h_(t-1) -->
+  <!-- mezcla (CP0):  h_t = z⊙h_(t-1) + (1−z)⊙h̃_t -->
   <circle class="node" id="gru-mix" cx="235" cy="36" r="14" fill="#fff" stroke="var(--update)" stroke-width="2"
-    data-tip="<b>Mezcla:  h_t = (1−z)∘n + z∘h_(t-1)</b>. Es una interpolación: z pondera la memoria vieja y (1−z) el candidato nuevo."/>
+    data-tip="<b>Mezcla: h<sub>t</sub> = z<sub>t</sub> ⊙ h<sub>t−1</sub> + (1 − z<sub>t</sub>) ⊙ h̃<sub>t</sub></b>. Es una interpolación: z<sub>t</sub> pondera la memoria vieja y (1 − z<sub>t</sub>), el candidato nuevo (convención de Cho et al., 2014, y de PyTorch)."/>
   <text class="gateval" x="235" y="40" text-anchor="middle" fill="var(--update)">mix</text>
 
   <!-- COMPUERTA de actualización -->
   <rect class="node" id="gru-z" x="203" y="100" width="64" height="26" rx="7" fill="#EDE9FE" stroke="var(--update)"
-    data-tip="<b>Compuerta de actualización z_t = σ(W_z·[h,x])</b>: fusiona olvido y entrada. z≈1 conserva la memoria; z≈0 la reemplaza por lo nuevo."/>
+    data-tip="<b>Compuerta de actualización z<sub>t</sub> = σ(W<sub>z</sub>·[h<sub>t−1</sub>, x<sub>t</sub>] + b<sub>z</sub>)</b>: fusiona olvido y entrada. z<sub>t</sub> ≈ 1 conserva la memoria; z<sub>t</sub> ≈ 0 la reemplaza por lo nuevo."/>
   <text class="gateval" id="gru-z-t" x="235" y="117" text-anchor="middle" fill="var(--update)">σ z</text>
   <line class="flow" x1="235" y1="100" x2="235" y2="52" stroke="var(--update)" stroke-width="2" marker-end="url(#ag)"/>
 
   <!-- COMPUERTA de reinicio -->
   <rect class="node" id="gru-r" x="52" y="100" width="56" height="26" rx="7" fill="#FFE4E6" stroke="var(--reset)"
-    data-tip="<b>Compuerta de reinicio r_t = σ(W_r·[h,x])</b>: decide cuánta memoria pasada IGNORAR al calcular el candidato. r≈0 = «empezar casi de cero»."/>
+    data-tip="<b>Compuerta de reinicio r<sub>t</sub> = σ(W<sub>r</sub>·[h<sub>t−1</sub>, x<sub>t</sub>] + b<sub>r</sub>)</b>: decide cuánta memoria pasada se ignora al calcular el candidato. r<sub>t</sub> ≈ 0 equivale a «empezar casi de cero»."/>
   <text class="gateval" id="gru-r-t" x="80" y="117" text-anchor="middle" fill="var(--reset)">σ r</text>
 
-  <!-- CANDIDATO n = tanh(W_n·[r∘h, x]) -->
+  <!-- CANDIDATO h̃ = tanh(W_h·[r⊙h, x])  (PyTorch: n) -->
   <rect class="node" id="gru-n" x="120" y="150" width="70" height="26" rx="7" fill="#DBEAFE" stroke="var(--candidato)"
-    data-tip="<b>Candidato n_t = tanh(W_n·[r∘h, x])</b>: nuevo contenido propuesto, usando solo la parte de memoria que el reinicio dejó pasar."/>
-  <text class="gateval" id="gru-n-t" x="155" y="167" text-anchor="middle" fill="var(--candidato)">tanh n</text>
+    data-tip="<b>Candidato h̃<sub>t</sub> = tanh(W<sub>h</sub>·[r<sub>t</sub> ⊙ h<sub>t−1</sub>, x<sub>t</sub>] + b<sub>h</sub>)</b>: nuevo contenido propuesto, con solo la parte de la memoria que el reinicio deja pasar (PyTorch lo llama n<sub>t</sub> y aplica r<sub>t</sub> después de la capa lineal)."/>
+  <text class="gateval" id="gru-n-t" x="155" y="167" text-anchor="middle" fill="var(--candidato)">tanh h̃</text>
 
-  <!-- el reinicio filtra la memoria (r∘h) y alimenta al candidato -->
+  <!-- el reinicio filtra la memoria (r⊙h) y alimenta al candidato -->
   <line class="flow" x1="80" y1="126" x2="128" y2="150" stroke="var(--reset)" stroke-width="1.8" marker-end="url(#ag)"/>
-  <text class="svgsub" x="86" y="147" fill="var(--reset)">r∘h</text>
+  <text class="svgsub" x="84" y="147" fill="var(--reset)">r<tspan baseline-shift="sub" font-size="75%">t</tspan>⊙h<tspan baseline-shift="sub" font-size="75%">t−1</tspan></text>
 
   <!-- el candidato, ponderado por (1−z), confluye en la mezcla -->
   <path class="flow" d="M155,150 Q182,84 224,49" fill="none" stroke="var(--candidato)" stroke-width="2" marker-end="url(#ag)"/>
-  <text class="svgsub" x="120" y="98" fill="var(--candidato)">(1−z)∘n</text>
+  <text class="svgsub" x="112" y="98" fill="var(--candidato)">(1−z<tspan baseline-shift="sub" font-size="75%">t</tspan>)⊙h̃<tspan baseline-shift="sub" font-size="75%">t</tspan></text>
 
   <!-- ENTRADAS concatenadas -> bus -> reinicio, actualización y candidato -->
   <rect class="node" x="16" y="202" width="120" height="26" rx="7" fill="#F1F5F9" stroke="#CBD5E1"
-    data-tip="<b>Entradas</b>: se concatenan h_(t-1) y x_t; alimentan reinicio, actualización y candidato."/>
-  <text class="svgsub" x="76" y="219" text-anchor="middle">[ h_(t-1) , x_t ]</text>
+    data-tip="<b>Entradas</b>: se concatenan h<sub>t−1</sub> y x<sub>t</sub>; alimentan reinicio, actualización y candidato."/>
+  <text class="svgsub" x="76" y="219" text-anchor="middle">[h<tspan baseline-shift="sub" font-size="75%">t−1</tspan>, x<tspan baseline-shift="sub" font-size="75%">t</tspan>]</text>
   <line class="flow" x1="76" y1="202" x2="76" y2="188" stroke="#94A3B8" stroke-width="1.6"/>
   <line class="flow" x1="76" y1="188" x2="235" y2="188" stroke="#94A3B8" stroke-width="1.6"/>
   <line class="flow" x1="80"  y1="188" x2="80"  y2="126" stroke="#94A3B8" stroke-width="1.6"/>
@@ -654,24 +673,24 @@ const PANELS=[
    pitch:"Memoria de un solo canal. Simple y rápida, pero el gradiente se desvanece: olvida el pasado lejano.",
    svg:svgRNN,
    gates:[], // la RNN no tiene compuertas
-   states:[{id:"h",label:"h_t",tip:"Estado oculto: la única memoria de la RNN. Cambia por completo en cada paso."}]},
-  {key:"lstm", name:"LSTM", tag:"3 compuertas + celda c_t",
-   pitch:"Añade una «cinta de memoria» c_t protegida por 3 compuertas (olvido, entrada, salida). Preserva dependencias largas.",
+   states:[{id:"h",label:"h<sub>t</sub>",tip:"Estado oculto: la única memoria de la RNN. Se reescribe por completo en cada paso."}]},
+  {key:"lstm", name:"LSTM", tag:"3 compuertas + celda C<sub>t</sub>",
+   pitch:"La LSTM añade una «cinta de memoria» C<sub>t</sub> protegida por 3 compuertas (olvido, entrada, salida). Preserva dependencias largas.",
    svg:svgLSTM,
    gates:[
-     {id:"f",label:"Olvido",sub:"f_t",color:"var(--olvido)",tip:"f_t ≈ 1 conserva la memoria previa; ≈ 0 la borra. Sesgada a recordar."},
-     {id:"i",label:"Entrada",sub:"i_t",color:"var(--entrada)",tip:"Cuánto del candidato nuevo se escribe en la memoria."},
-     {id:"o",label:"Salida",sub:"o_t",color:"var(--salida)",tip:"Qué parte de la memoria se expone como h_t."}],
+     {id:"f",label:"Olvido",sub:"f<sub>t</sub>",color:"var(--olvido)",tip:"f<sub>t</sub> ≈ 1 conserva la memoria previa; ≈ 0 la borra. Sesgada a recordar (promedio de las 4 unidades)."},
+     {id:"i",label:"Entrada",sub:"i<sub>t</sub>",color:"var(--entrada)",tip:"Cuánto del candidato nuevo se escribe en la memoria (promedio de las 4 unidades)."},
+     {id:"o",label:"Salida",sub:"o<sub>t</sub>",color:"var(--salida)",tip:"Qué parte de la memoria se expone como h<sub>t</sub> (promedio de las 4 unidades)."}],
    states:[
-     {id:"c",label:"c_t",tip:"Estado de celda: memoria de LARGO plazo. Se edita poco a poco (suma), no se reescribe."},
-     {id:"h",label:"h_t",tip:"Estado oculto: la salida en cada paso, derivada de c_t vía la compuerta de salida."}]},
-  {key:"gru",  name:"GRU", tag:"2 compuertas · sin c_t",
-   pitch:"Versión ligera de la LSTM: fusiona memoria y salida en h_t con solo 2 compuertas (reinicio y actualización).",
+     {id:"c",label:"C<sub>t</sub>",tip:"Estado de celda: memoria de LARGO plazo. Se edita poco a poco (suma), no se reescribe."},
+     {id:"h",label:"h<sub>t</sub>",tip:"Estado oculto: la salida en cada paso, derivada de C<sub>t</sub> vía la compuerta de salida."}]},
+  {key:"gru",  name:"GRU", tag:"2 compuertas · sin C<sub>t</sub>",
+   pitch:"Versión ligera de la LSTM: fusiona memoria y salida en h<sub>t</sub> con solo 2 compuertas (reinicio y actualización).",
    svg:svgGRU,
    gates:[
-     {id:"r",label:"Reinicio",sub:"r_t",color:"var(--reset)",tip:"Cuánta memoria pasada se ignora al proponer el candidato."},
-     {id:"z",label:"Actualización",sub:"z_t",color:"var(--update)",tip:"z ≈ 1 conserva la memoria vieja; z ≈ 0 la reemplaza. Sesgada a conservar."}],
-   states:[{id:"h",label:"h_t",tip:"Estado oculto único: en la GRU es a la vez memoria y salida."}]}
+     {id:"r",label:"Reinicio",sub:"r<sub>t</sub>",color:"var(--reset)",tip:"Cuánta memoria pasada se ignora al proponer el candidato (promedio de las 4 unidades)."},
+     {id:"z",label:"Actualización",sub:"z<sub>t</sub>",color:"var(--update)",tip:"z<sub>t</sub> ≈ 1 conserva la memoria vieja; z<sub>t</sub> ≈ 0 la reemplaza. Sesgada a conservar (promedio de las 4 unidades)."}],
+   states:[{id:"h",label:"h<sub>t</sub>",tip:"Estado oculto único: en la GRU es a la vez memoria y salida."}]}
 ];
 
 function buildPanels(){
@@ -687,7 +706,7 @@ function buildPanels(){
 
     const statesHTML = `<h3>Vector de estado (H=${H})</h3>` + p.states.map(s=>`
       <div class="statevec" data-tip="${s.tip}">
-        <span class="slabel" style="color:${s.id==='c'?'var(--celda)':'var(--'+p.key+')'}">${s.label}</span>
+        <span class="slabel" style="color:${s.id==='c'?'var(--celda-texto)':'var(--'+p.key+')'}">${s.label}</span>
         <span class="vbars" id="${p.key}-vec-${s.id}"></span>
       </div>`).join("");
 
@@ -713,6 +732,8 @@ function buildPanels(){
 /* =========================================================================
    6) RENDER: pintar el estado del paso actual
    ========================================================================= */
+// número con coma decimal y signo menos tipográfico (convención es-CO del curso)
+const fmt=(v,d)=>v.toFixed(d).replace('.',',').replace(/^-/,'−');
 function renderStrip(){
   const strip=document.getElementById("strip");
   strip.innerHTML=App.seq.map((tk,idx)=>{
@@ -721,7 +742,7 @@ function renderStrip(){
     return `<div class="token ${cls}">
       <span class="tstep">${t}</span>
       <div class="word">${tk.word}</div>
-      <div class="val">x=${tk.x.toFixed(2)}</div>
+      <div class="val">x = ${fmt(tk.x,2)}</div>
     </div>`;
   }).join("") + `<div class="dep-arc">↖ dependencia de largo alcance: el sujeto influye en pasos lejanos</div>`;
 }
@@ -732,7 +753,7 @@ function setGate(panelKey,gateId,value){
   const num=document.getElementById(`${panelKey}-num-${gateId}`);
   if(!bar)return;
   bar.style.width=(value*100).toFixed(0)+"%";
-  num.textContent=value.toFixed(2);
+  num.textContent=fmt(value,2);
 }
 // pinta un vector de estado (-1..1) como barras centradas en el medio
 function setStateVec(panelKey,stateId,vec,color){
@@ -796,64 +817,92 @@ function render(){
 }
 
 /* =========================================================================
-   7) GRADIENTE QUE SE DESVANECE
+   7) GRADIENTE QUE SE DESVANECE (jacobianos reales del recorrido actual)
    -------------------------------------------------------------------------
-   Modelo cualitativo (fiel a la intuición del BPTT):
-     factor_por_paso(RNN)   = |tanh'| promedio · norma efectiva  -> < 1  (decae)
-     factor_por_paso(LSTM)  = compuerta de olvido promedio       -> ≈ 1  (conserva)
-     factor_por_paso(GRU)   = compuerta de actualización promedio -> ≈ 1  (conserva)
-   La señal que sobrevive tras k pasos = factor^k.
-   Ligamos los factores a los valores REALES del recorrido actual, así el
-   slider de magnitud/longitud también afecta esta gráfica.
+   Señal que sobrevive a k pasos del final de la secuencia (L = longitud):
+       s_k = ‖ J_L · J_{L-1} ⋯ J_{L-k+1} ‖₂        (norma espectral)
+     RNN : J_t = ∂h_t/∂h_{t-1} = diag(1 − h_t²) · W_hh   (jacobiano completo;
+           W_hh = primeras H columnas de W, la parte que multiplica a h_{t-1})
+     LSTM: camino directo de la cinta, ∂C_t/∂C_{t-1} = diag(f_t)
+     GRU : camino directo z_t ⊙ h_{t-1} (convención CP0), diag(z_t)
+   En LSTM y GRU se omiten los caminos a través de las compuertas y del
+   candidato: son los que la «autopista» evita. En una matriz diagonal la
+   norma espectral es el mayor |elemento|. No hay constantes ocultas: todo
+   sale de los pesos y del recorrido que se dibujan arriba.
    ========================================================================= */
-function decayFactors(){
-  // promedios sobre los pasos ya definidos por la secuencia
-  const steps=App.len;
-  let rAcc=0,lAcc=0,gAcc=0,n=0;
-  for(let t=1;t<=steps;t++){
-    // RNN: tanh' (≤1) × ganancia recurrente efectiva SIN compuerta que la eleve a 1.
-    // Ese 0.6 es el punto clave: la RNN no tiene forma de acercar el factor a 1,
-    // así que se queda muy por debajo de las "autopistas" de LSTM/GRU y decae rápido.
-    rAcc += App.traj.rnn[t].gDeriv * 0.6;
-    lAcc += App.traj.lstm[t].fMean;                // compuerta de olvido media (puede aprender ≈1)
-    gAcc += App.traj.gru[t].zMean;                 // compuerta de actualización media (puede aprender ≈1)
-    n++;
+const W_HH = rW.Wh.map(fila=>fila.slice(0,H));          // bloque recurrente de W
+function matMul(A,B){return A.map(f=>B[0].map((_,j)=>f.reduce((s,a,k)=>s+a*B[k][j],0)));}
+function identidad(n){return Array.from({length:n},(_,i)=>Array.from({length:n},(_,j)=>i===j?1:0));}
+function norma2(A){                                      // ‖A‖₂ por iteración de potencia sobre AᵀA
+  const AtA=matMul(A[0].map((_,j)=>A.map(f=>f[j])),A);
+  let v=AtA.map((_,i)=>1+0.1*i), lam=0;
+  for(let it=0;it<200;it++){
+    const w=matVec(AtA,v), nw=Math.hypot(...w);
+    if(nw===0) return 0;
+    v=w.map(x=>x/nw); lam=nw;
   }
-  return {
-    rnn:  Math.min(0.98, rAcc/n),                  // típicamente ~0.5-0.6 -> decae fuerte
-    lstm: Math.min(0.995,lAcc/n),                  // ~0.8-0.9
-    gru:  Math.min(0.995,gAcc/n)                   // ~0.85-0.92
-  };
+  return Math.sqrt(lam);
 }
+function supervivencia(){
+  const L=App.len, out={rnn:[],lstm:[],gru:[]};
+  let P=identidad(H), pf=Array(H).fill(1), pz=Array(H).fill(1);
+  for(let k=1;k<=L;k++){
+    const t=L-k+1;                                       // paso que se atraviesa al retroceder
+    const h=App.traj.rnn[t].h;
+    const J=W_HH.map((fila,i)=>fila.map(w=>(1-h[i]*h[i])*w));
+    P=matMul(P,J);                    out.rnn.push(norma2(P));
+    pf=pf.map((p,i)=>p*App.traj.lstm[t].gates.f[i]);  out.lstm.push(Math.max(...pf.map(Math.abs)));
+    pz=pz.map((p,i)=>p*App.traj.gru[t].gates.z[i]);   out.gru.push(Math.max(...pz.map(Math.abs)));
+  }
+  return out;
+}
+const pct=v=>fmt(v*100, v<0.01?2:1)+' %';
 function renderGradient(){
-  const f=decayFactors();
-  const maxK=App.len;                              // distancia = longitud de la secuencia
+  const S=supervivencia();
+  const L=App.len;
+  const sR=S.rnn[L-1];
   const cfg=[
-    {key:"rnn", name:"RNN simple", color:"var(--rnn)",  factor:f.rnn,
-     good:"", bad:"El gradiente casi se anula: la RNN <b>no aprende</b> dependencias lejanas."},
-    {key:"lstm",name:"LSTM",       color:"var(--lstm)", factor:f.lstm,
-     good:"La cinta c_t mantiene el gradiente vivo: <b>aprende</b> dependencias largas.", bad:""},
-    {key:"gru", name:"GRU",        color:"var(--gru)",  factor:f.gru,
-     good:"La compuerta de actualización preserva la señal con menos parámetros que la LSTM.", bad:""}
+    {key:"rnn", name:"RNN simple", color:"var(--rnn)"},
+    {key:"lstm",name:"LSTM",       color:"var(--lstm)"},
+    {key:"gru", name:"GRU",        color:"var(--gru)"}
   ];
   document.getElementById("gradGrid").innerHTML=cfg.map(c=>{
-    const surv=Math.pow(c.factor,maxK);            // % que sobrevive a la distancia máxima
-    const bars=Array.from({length:maxK},(_,i)=>{
-      const k=i+1, v=Math.pow(c.factor,k);
-      return `<div class="db" title="a ${k} pasos: ${(v*100).toFixed(1)}%"
-        style="height:${(v*100).toFixed(1)}%;background:${c.color};opacity:${(0.35+0.65*v).toFixed(2)}"></div>`;
+    const serie=S[c.key];
+    const surv=serie[L-1];                         // lo que sobrevive a la distancia máxima
+    const factor=Math.pow(surv,1/L);               // factor medio (geométrico) por paso
+    const bars=serie.map((v,i)=>{
+      const k=i+1, alto=Math.min(v,1);             // > 100 %: el gradiente crece a corta distancia
+      return `<div class="db" title="a ${k} ${k===1?'paso':'pasos'}: ${pct(v)}"
+        style="height:${(alto*100).toFixed(1)}%;background:${c.color};opacity:${(0.35+0.65*alto).toFixed(2)}"></div>`;
     }).join("");
-    const strong = surv>0.15;
-    const verdict = strong
-      ? `<div class="verdict" style="background:#F0FDF4;color:var(--ok)">✔ ${c.good||c.bad}</div>`
-      : `<div class="verdict" style="background:#FEF2F2;color:var(--olvido)">✘ ${c.bad||c.good}</div>`;
+    // Veredicto: mismo signo (✔/◐/✘), color y texto; depende del número calculado.
+    let estado, texto;
+    if(c.key==="rnn"){
+      if(surv<0.05){ estado="mal";
+        texto=`✘ A ${L} pasos sobrevive menos del 5 %: el gradiente casi se anula y la RNN <b>no aprende</b> dependencias tan lejanas.`;
+      } else { estado="aviso";
+        texto=`◐ A esta distancia todavía sobrevive parte de la señal, pero cada paso la multiplica por ≈ ${fmt(factor,2)}: al alargar la secuencia se apaga.`;
+      }
+    } else {
+      // cociente redondeado a 1 decimal: el umbral se aplica al mismo número que se muestra
+      const ratio=Math.round(10*surv/Math.max(sR,1e-12))/10;
+      const via = c.key==="lstm" ? "La cinta C<sub>t</sub>" : "La compuerta de actualización";
+      if(ratio>=2){ estado="bien";
+        texto=`✔ ${via} conserva ${fmt(ratio,1)} veces más gradiente que la RNN a esta distancia: <b>aprende</b> dependencias más largas`+
+              (c.key==="gru" ? ", con menos parámetros que la LSTM." : ".");
+      } else if(ratio>=1.25){ estado="aviso";
+        texto=`◐ Conserva algo más de gradiente que la RNN (${fmt(ratio,1)} veces); la ventaja crece al alargar la secuencia.`;
+      } else { estado="aviso";
+        texto=`◐ A esta distancia conserva una fracción parecida a la de la RNN (${fmt(ratio,1)} veces): la ventaja de la compuerta aparece al alargar la secuencia.`;
+      }
+    }
     return `<div class="grad-card">
       <div class="gc-head"><b style="color:${c.color}">${c.name}</b>
-        <span class="surv" style="color:${strong?'var(--ok)':'var(--olvido)'}">
-          sobrevive ${(surv*100).toFixed(surv<0.1?2:1)}%</span></div>
-      <div class="decay-bars">${bars}</div>
-      <div class="decay-x"><span>cerca (1 paso)</span><span>lejos (${maxK} pasos)</span></div>
-      ${verdict}
+        <span class="surv" style="color:var(--${estado==="bien"?"ok":estado})">sobrevive ${pct(surv)}</span></div>
+      <div class="decay-bars" role="img" aria-label="${c.name}: gradiente que sobrevive de 1 a ${L} pasos; a ${L} pasos, ${pct(surv)}">${bars}</div>
+      <div class="decay-x"><span>cerca (1 paso)</span><span>lejos (${L} pasos)</span></div>
+      <div class="factor">Factor medio por paso: ${fmt(factor,2)}</div>
+      <div class="verdict ${estado}">${texto}</div>
     </div>`;
   }).join("");
 }
@@ -889,12 +938,14 @@ document.getElementById("btnAuto").addEventListener("click",toggleAuto);
 
 document.getElementById("magSlider").addEventListener("input",e=>{
   App.mag=parseFloat(e.target.value);
-  document.getElementById("magVal").textContent=App.mag.toFixed(1);
+  document.getElementById("magVal").textContent=fmt(App.mag,1);
+  e.target.setAttribute("aria-valuetext",fmt(App.mag,1)+" veces");
   resetAll();
 });
 document.getElementById("lenSlider").addEventListener("input",e=>{
   App.len=parseInt(e.target.value);
   document.getElementById("lenVal").textContent=App.len;
+  e.target.setAttribute("aria-valuetext",App.len+" pasos");
   resetAll();
 });
 
@@ -919,11 +970,28 @@ document.addEventListener("mousemove",e=>{
     else   tip.classList.remove("show");
   }
 });
+// Teclado: los elementos con explicación reciben foco y muestran el mismo tooltip.
+function hacerEnfocables(){
+  document.querySelectorAll("[data-tip]").forEach(el=>{
+    if(el.hasAttribute("tabindex")) return;
+    el.setAttribute("tabindex","0");
+    if(el instanceof SVGElement){
+      el.setAttribute("role","img");
+      el.setAttribute("aria-label",el.getAttribute("data-tip").replace(/<[^>]+>/g,""));
+    }
+  });
+}
+document.addEventListener("focusin",e=>{
+  const el=e.target.closest && e.target.closest("[data-tip]");
+  if(el){ const r=el.getBoundingClientRect(); showTip(el.getAttribute("data-tip"),r.right,r.bottom); }
+});
+document.addEventListener("focusout",()=>tip.classList.remove("show"));
 
 /* =========================================================================
    9) ARRANQUE
    ========================================================================= */
 buildPanels();
+hacerEnfocables();
 resetAll();
 </script>
 
