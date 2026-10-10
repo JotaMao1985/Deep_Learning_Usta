@@ -426,5 +426,7 @@ if (new URLSearchParams(location.search).get('selftest') === '1') {
   console.log(caja.textContent); window.__capa3d.resultadoAutotest = R; avisarAltura();
 }
 </script>
+<!-- Botón «Portal» al abrir la herramienta sola; dentro del iframe del módulo no actúa (auditoría 2026-10, D-09). -->
+<script defer src="portal-nav.js"></script>
 </body>
 </html>

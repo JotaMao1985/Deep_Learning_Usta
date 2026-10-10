@@ -702,6 +702,8 @@ window.addEventListener('resize', __postHeight);
 new MutationObserver(__postHeight).observe(document.body, { subtree: true, childList: true });
 __postHeight();
 </script>
+<!-- Botón «Portal» al abrir la herramienta sola; dentro del iframe del módulo no actúa (auditoría 2026-10, D-09). -->
+<script defer src="portal-nav.js"></script>
 </body>
 </html>
 

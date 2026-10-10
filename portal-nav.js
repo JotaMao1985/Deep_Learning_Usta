@@ -3,7 +3,8 @@
  * Se inserta FUERA del árbol de React (hermano de #root en <body>), así funciona
  * igual en los SPA React y en los HTML estáticos, sin riesgo de romper el render.
  * Incluir con: <script defer src="portal-nav.js"></script>
- * NO incluir en index.html (es el portal) ni en los widgets embebidos por iframe.
+ * NO incluir en index.html (es el portal). En las herramientas embebidas por iframe es inocuo:
+ * dentro del iframe no actúa y, abiertas solas, muestran el botón «Portal».
  */
 (function () {
   'use strict';
