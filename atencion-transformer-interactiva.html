@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Autoatención Interactiva — La palabra «vaina»</title>
+<title>Autoatención interactiva — la palabra «vaina»</title>
 <!--
   ============================================================================
   AUTOATENCIÓN INTERACTIVA · Capítulo 2.3 §6 — Transformers
@@ -21,7 +21,7 @@
     - El "momento ajá": la MISMA palabra «vaina» produce tres vectores de
       significado distintos según la frase — eso ES la autoatención.
     - El panel autorregresivo (softmax con temperatura + muestreo) conecta la
-      atención con la generación token a token, retomando la Piqueria (§ GAN).
+      atención con la generación token a token, retomando la piquería (§ GAN).
   Todo es JavaScript puro + SVG en línea. Funciona sin servidor y sin internet.
   ============================================================================
 -->
@@ -70,7 +70,7 @@
     padding:14px;margin-bottom:6px;}
   .tok{padding:8px 14px;border-radius:10px;border:2px solid var(--borde);
     background:var(--lienzo);cursor:pointer;font-weight:700;color:var(--tinta-fuerte);
-    transition:all .25s;font-size:.95rem;}
+    transition:all .25s;font-size:.95rem;font-family:inherit;line-height:1.5;}
   .tok:hover{transform:translateY(-3px);}
   .tok.query{border-color:var(--usta-morado);background:#F5F0FF;color:var(--usta-morado);
     box-shadow:0 0 0 3px rgba(61,0,141,.14);}
@@ -106,7 +106,8 @@
   .heat-wrap{overflow-x:auto;}
   table.heat{border-collapse:collapse;margin:0 auto;}
   table.heat th{font-size:.7rem;color:var(--tinta-suave);padding:4px 5px;font-weight:600;}
-  table.heat th.rowh{text-align:right;cursor:pointer;white-space:nowrap;}
+  table.heat th.rowh{text-align:right;white-space:nowrap;}
+  .rowbtn{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;}
   table.heat th.rowh:hover{color:var(--usta-magenta);}
   table.heat th.rowh.sel{color:var(--usta-morado);font-weight:800;}
   table.heat td{width:34px;height:30px;border:1px solid #fff;border-radius:5px;
@@ -178,16 +179,39 @@
   #tooltip.show{opacity:1;transform:translateY(0);}
   #tooltip b{color:#FBCFE8;}
   .foot{text-align:center;font-size:.74rem;color:var(--tinta-suave);margin-top:20px;}
+
+  /* ---- Foco visible para teclado (S-10) ---- */
+  .tok:focus-visible,.sbtn:focus-visible,.rowbtn:focus-visible,.btn:focus-visible,
+  [data-tip][tabindex]:focus-visible{outline:2px solid var(--usta-magenta);outline-offset:2px;}
+
+  /* ---- Pantallas estrechas / iframe a 301 px (S-06, C-09): sin desborde horizontal ---- */
+  .grid2 > *,.gen-grid > *{min-width:0;}
+  .panel h2{overflow-wrap:anywhere;}
+  @media (max-width:480px){
+    body{padding:10px 8px 32px;}
+    h1{font-size:1.3rem;}
+    header{padding:14px 10px;}
+    .panel,.meaning,.genpanel{padding:12px;}
+    .panel h2{font-size:.95rem;}
+    .wrow,.whead{grid-template-columns:62px minmax(0,1fr) 36px minmax(0,1fr) 44px;gap:5px;}
+    .prob-row{grid-template-columns:62px minmax(0,1fr) 48px;}
+    .tok{padding:6px 10px;}
+  }
+
+  /* ---- Movimiento reducido (S-10) ---- */
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important;}
+  }
 </style>
 </head>
 <body>
 <div class="container">
 
   <header>
-    <h1>Autoatención Interactiva — la palabra «vaina»</h1>
+    <h1>Autoatención interactiva — la palabra «vaina»</h1>
     <p class="subtitle">
       La misma palabra adquiere significados distintos según su contexto. Aquí se calcula en vivo la
-      <b> atención escalada de producto punto</b> — softmax(QK<sup>T</sup>/√d<sub>k</sub>)·V — sobre tres
+      <b> atención escalada de producto punto</b> — softmax(QKᵀ/√d<sub>k</sub>)·V — sobre tres
       frases colombianas. Al elegir una frase y un token se muestra a quién «atiende», y cómo esa mezcla
       construye su significado. Al pasar el cursor sobre cualquier elemento se muestra su explicación.
     </p>
@@ -198,8 +222,9 @@
     <span><b>Modelo de juguete (honesto):</b> cada palabra usa vectores Q, K y V de solo 4 dimensiones
     <b>interpretables</b> —acción, objeto físico, valoración y humor— fijadas a mano con fines didácticos.
     En un Transformer real, las matrices W<sub>Q</sub>, W<sub>K</sub> y W<sub>V</sub> se <b>aprenden</b> del
-    corpus y sus cientos de dimensiones no son legibles a simple vista. La <b>mecánica</b> del cálculo, en
-    cambio, es exactamente la misma y se ejecuta en vivo.</span>
+    corpus y sus cientos de dimensiones no son legibles a simple vista. Además, <b>en este juguete K y V
+    coinciden</b> (ambos codifican «lo que la palabra es»); en un Transformer real son proyecciones distintas.
+    La <b>mecánica</b> del cálculo, en cambio, es exactamente la misma y se ejecuta en vivo.</span>
   </div>
 
   <!-- ============ SELECTOR DE FRASE ============ -->
@@ -216,16 +241,18 @@
       <p class="lead">Para el token seleccionado se calculan las tres etapas: el puntaje crudo
         Q·K (¿qué tan afín es cada palabra?), la división por √d<sub>k</sub> = 2 y la
         <b> softmax</b>, que convierte los puntajes en pesos que suman 1.</p>
-      <div class="whead"><span></span><span>puntaje Q·K ÷ √d_k</span><span></span><span>peso softmax</span><span></span></div>
+      <div class="whead"><span></span><span>puntaje Q·K ÷ √dₖ</span><span></span><span>peso softmax</span><span></span></div>
       <div id="weights"></div>
       <div class="stage-note" id="stageNote"></div>
     </div>
     <div class="panel">
       <h2>🔥 Matriz de autoatención completa</h2>
       <p class="lead">Cada fila es un token que pregunta (Query); cada columna, un token que responde (Key).
-        Cuanto más intenso el color, más atención. Al hacer clic en una fila se selecciona ese token.</p>
+        Cuanto más intenso el color, más atención. Al hacer clic en el nombre de una fila se selecciona ese token.
+        La atención es <b>bidireccional</b>: cada token ve la frase completa, también las palabras que vienen después.</p>
       <div class="heat-wrap" id="heat"></div>
-      <p class="heat-hint">Cada fila suma 1 (softmax por fila): la atención es un reparto, no un puntaje absoluto.</p>
+      <p class="heat-hint">Cada fila suma 1 (softmax por fila): la atención es un reparto, no un puntaje absoluto.
+        Las celdas muestran porcentajes <b>redondeados</b> a enteros, de modo que una fila puede sumar 99 o 101.</p>
     </div>
   </div>
 
@@ -247,8 +274,10 @@
     <p class="lead">
       Un Transformer generativo repite este ciclo: atiende a lo ya escrito (con <b>máscara causal</b>: no puede
       mirar tokens futuros), produce una distribución sobre el vocabulario y <b>muestrea</b> el siguiente token.
+      (La matriz de arriba usa, en cambio, atención bidireccional, como un codificador tipo BERT; con máscara
+      causal, «vaina» no vería «mesa».)
       La <b>temperatura</b> reescala los puntajes antes de la softmax: baja → conservador y repetitivo;
-      alta → diverso y arriesgado. Como el verseador de la Piqueria: la métrica restringe, pero el verso se
+      alta → diverso y arriesgado. Como el verseador de la piquería: la métrica restringe, pero el verso se
       improvisa palabra a palabra.
     </p>
     <div class="gen-grid">
@@ -258,13 +287,13 @@
       </div>
       <div class="gen-controls">
         <div class="slider-group">
-          <label>Temperatura <b><span id="tempVal">1.0</span></b></label>
+          <label for="tempSlider">Temperatura <b><span id="tempVal">1,0</span></b></label>
           <input type="range" id="tempSlider" min="0.3" max="2" step="0.1" value="1">
         </div>
         <button class="btn btn-sample" id="btnSample">🎲 Muestrear siguiente token</button>
         <button class="btn btn-clear" id="btnClear">↺ Limpiar muestras</button>
         <div class="samples" id="samples"></div>
-        <div class="gen-note">Con temperatura 0.3 casi siempre sale la opción más probable; con 2.0 aparecen
+        <div class="gen-note">Con temperatura 0,3 casi siempre sale la opción más probable; con 2,0 aparecen
           opciones raras. Ni un extremo ni otro: la generación de calidad vive en el medio.</div>
       </div>
     </div>
@@ -296,10 +325,10 @@
    en todas las direcciones: por eso absorbe el significado del contexto.
    ========================================================================= */
 const DIMS=[
-  {key:"acción",   color:"var(--d-accion)", tip:"<b>Dimensión acción</b>: verbos y movimiento. Alta en «Pásame», «Echó», «rió»."},
+  {key:"acción",   color:"var(--d-accion)", tip:"<b>Dimensión acción</b>: verbos y movimiento. Alta en «Pásame», «Echó», «rio»."},
   {key:"objeto físico", color:"var(--d-objeto)", tip:"<b>Dimensión objeto físico</b>: cosas tangibles y lugares. Alta en «mesa»."},
   {key:"valoración", color:"var(--d-valor)", tip:"<b>Dimensión valoración</b>: juicios y emociones. Alta en «buena», «tan»."},
-  {key:"humor",    color:"var(--d-humor)", tip:"<b>Dimensión humor</b>: chiste y risa. Alta en «rió»."}
+  {key:"humor",    color:"var(--d-humor)", tip:"<b>Dimensión humor</b>: chiste y risa. Alta en «rio»."}
 ];
 const SQRT_DK=2;   // √d_k con d_k=4
 
@@ -318,7 +347,7 @@ const VOCAB={
   "una":   {content:[0,0.3,0,0],     query:[0.2,0.2,0.2,0.2], gloss:"artículo funcional"},
   "y":     {content:[0,0,0,0.05],    query:[0.2,0.2,0.2,0.2], gloss:"conector"},
   "se":    {content:[0.2,0,0,0.1],   query:[0.2,0.2,0.2,0.2], gloss:"pronombre reflexivo"},
-  "rió":   {content:[0.6,0,0.3,1.8], query:[0.9,0,0,0.6],     gloss:"verbo de risa: humor fuerte"}
+  "rio":   {content:[0.6,0,0.3,1.8], query:[0.9,0,0,0.6],     gloss:"verbo de risa: humor fuerte"}
 };
 
 const SENTENCES=[
@@ -326,14 +355,18 @@ const SENTENCES=[
    sentido:"objeto físico", explica:"la atención liga «vaina» con «Pásame» y «mesa»: aquí es una cosa tangible"},
   {frase:"Qué vaina tan buena", tokens:["Qué","vaina","tan","buena"],
    sentido:"situación valorada", explica:"la atención se concentra en «buena»: aquí «vaina» es una situación que se valora"},
-  {frase:"Echó una vaina y se rió", tokens:["Echó","una","vaina","y","se","rió"],
-   sentido:"chiste", explica:"la atención apunta a «rió» y «Echó»: aquí «vaina» es un chiste"}
+  {frase:"Echó una vaina y se rio", tokens:["Echó","una","vaina","y","se","rio"],
+   sentido:"chiste", explica:"la atención apunta a «rio» y «Echó»: aquí «vaina» es un chiste"}
 ];
 
 /* =========================================================================
    2) NÚCLEO: atención escalada de producto punto (en vivo)
    ========================================================================= */
 const dot=(a,b)=>a.reduce((s,x,i)=>s+x*b[i],0);
+// Formato es-CO en la interfaz (auditoría 2026-10, L-6): coma decimal y «%» con espacio.
+// Los anchos CSS de las barras conservan el punto (toFixed directo).
+const dec=(v,d)=>v.toFixed(d).replace(".",",").replace("-","−");
+const pct=(w,d)=>dec(w*100,d)+" %";
 function softmax(xs){
   const m=Math.max(...xs);
   const es=xs.map(x=>Math.exp(x-m));
@@ -363,7 +396,7 @@ function q(id){return document.getElementById(id);}
 
 function renderPicker(){
   q("picker").innerHTML=SENTENCES.map((s,k)=>`
-    <button class="sbtn ${k===App.si?'active':''}" data-si="${k}">
+    <button type="button" class="sbtn ${k===App.si?'active':''}" data-si="${k}" aria-pressed="${k===App.si}">
       «${s.frase}»<small>vaina = ${s.sentido}</small>
     </button>`).join("");
   [...q("picker").querySelectorAll(".sbtn")].forEach(b=>b.addEventListener("click",()=>{
@@ -371,16 +404,18 @@ function renderPicker(){
     const toks=SENTENCES[App.si].tokens;
     App.qi=Math.max(0,toks.findIndex(t=>t.toLowerCase()==="vaina"));
     render();
+    refocus(q("picker").querySelectorAll(".sbtn")[App.si]);
   }));
 }
 
 function renderStrip(){
   const s=SENTENCES[App.si];
   q("strip").innerHTML=s.tokens.map((t,i)=>`
-    <span class="tok ${i===App.qi?'query':''}" data-i="${i}"
-      data-tip="<b>${t}</b>: ${vec(t).gloss}. Al hacer clic se convierte en la Query.">${t}</span>`).join("");
+    <button type="button" class="tok ${i===App.qi?'query':''}" data-i="${i}" aria-pressed="${i===App.qi}"
+      data-tip="<b>${t}</b>: ${vec(t).gloss}. Al hacer clic se convierte en la Query.">${t}</button>`).join("");
   [...q("strip").querySelectorAll(".tok")].forEach(el=>el.addEventListener("click",()=>{
     App.qi=parseInt(el.dataset.i); render();
+    refocus(q("strip").querySelectorAll(".tok")[App.qi]);
   }));
 }
 
@@ -389,18 +424,18 @@ function renderWeights(){
   const A=attendRow(s.tokens,App.qi);
   const maxScaled=Math.max(...A.scaled.map(Math.abs),0.01);
   q("weights").innerHTML=s.tokens.map((t,j)=>`
-    <div class="wrow ${j===App.qi?'self':''}"
-      data-tip="<b>${s.tokens[App.qi]} → ${t}</b><br>Q·K = ${A.raw[j].toFixed(2)} · ÷√d_k = ${A.scaled[j].toFixed(2)} · softmax = ${(A.w[j]*100).toFixed(1)}%">
+    <div class="wrow ${j===App.qi?'self':''}" tabindex="0"
+      data-tip="<b>${s.tokens[App.qi]} → ${t}</b><br>Q·K = ${dec(A.raw[j],2)} · ÷√dₖ = ${dec(A.scaled[j],2)} · softmax = ${pct(A.w[j],1)}">
       <span class="wword">${t}${j===App.qi?' ·yo·':''}</span>
       <span class="bar-track"><span class="bar-fill raw-fill" style="width:${Math.min(100,Math.abs(A.scaled[j])/maxScaled*100).toFixed(0)}%"></span></span>
-      <span class="wnum">${A.scaled[j].toFixed(2)}</span>
+      <span class="wnum">${dec(A.scaled[j],2)}</span>
       <span class="bar-track"><span class="bar-fill w-fill" style="width:${(A.w[j]*100).toFixed(1)}%"></span></span>
-      <span class="wnum">${(A.w[j]*100).toFixed(0)}%</span>
+      <span class="wnum">${pct(A.w[j],0)}</span>
     </div>`).join("");
   // nota de etapa: cuál gana
   const best=[...A.w.keys()].sort((a,b)=>A.w[b]-A.w[a]).filter(j=>j!==App.qi).slice(0,2)
-    .map(j=>`«${s.tokens[j]}» (${(A.w[j]*100).toFixed(0)}%)`);
-  q("stageNote").innerHTML=`La softmax reparte la atención de <b>«${s.tokens[App.qi]}»</b> principalmente hacia ${best.join(" y ")}. El factor ÷√d_k = ${SQRT_DK} evita que los puntajes crezcan tanto que la softmax se sature en un solo token.`;
+    .map(j=>`«${s.tokens[j]}» (${pct(A.w[j],0)})`);
+  q("stageNote").innerHTML=`La softmax reparte la atención de <b>«${s.tokens[App.qi]}»</b> principalmente hacia ${best.join(" y ")}. El factor ÷√dₖ = ${SQRT_DK} evita que los puntajes crezcan tanto que la softmax se sature en un solo token.`;
 }
 
 function heatColor(w){
@@ -415,19 +450,22 @@ function renderHeat(){
   const rows=s.tokens.map((_,i)=>attendRow(s.tokens,i));
   let html=`<table class="heat"><tr><th></th>${s.tokens.map(t=>`<th>${t}</th>`).join("")}</tr>`;
   s.tokens.forEach((t,i)=>{
-    html+=`<tr><th class="rowh ${i===App.qi?'sel':''}" data-i="${i}">${t} →</th>`;
+    const resumen=s.tokens.map((k,j)=>`${k} ${pct(rows[i].w[j],1)}`).join(" · ");
+    html+=`<tr><th class="rowh ${i===App.qi?'sel':''}" scope="row"><button type="button" class="rowbtn" data-i="${i}"
+      aria-pressed="${i===App.qi}" data-tip="<b>Fila «${t}»</b> (redondeada a un decimal): ${resumen}">${t} →</button></th>`;
     s.tokens.forEach((k,j)=>{
       const w=rows[i].w[j];
       const dark=w*1.9>0.55;
       html+=`<td style="background:${heatColor(w)};color:${dark?'#fff':'#475569'}"
-        data-tip="<b>${t} → ${k}</b>: peso ${(w*100).toFixed(1)}%. La fila «${t}» reparte su atención y suma 100%.">${(w*100).toFixed(0)}</td>`;
+        data-tip="<b>${t} → ${k}</b>: peso ${pct(w,1)}. La fila «${t}» reparte su atención y suma 100 % (las celdas muestran el valor redondeado).">${(w*100).toFixed(0)}</td>`;
     });
     html+="</tr>";
   });
   html+="</table>";
   q("heat").innerHTML=html;
-  [...q("heat").querySelectorAll(".rowh")].forEach(el=>el.addEventListener("click",()=>{
+  [...q("heat").querySelectorAll(".rowbtn")].forEach(el=>el.addEventListener("click",()=>{
     App.qi=parseInt(el.dataset.i); render();
+    refocus(q("heat").querySelectorAll(".rowbtn")[App.qi]);
   }));
 }
 
@@ -436,10 +474,10 @@ function renderDims(){
   const A=attendRow(s.tokens,App.qi);
   const maxV=Math.max(...A.out,0.35);
   q("dims").innerHTML=DIMS.map((d,k)=>`
-    <div class="dim" data-tip="${d.tip}">
+    <div class="dim" tabindex="0" data-tip="${d.tip}">
       <div class="dname"><span class="sw" style="background:${d.color}"></span>${d.key}</div>
       <div class="dtrack"><div class="dfill" style="width:${(A.out[k]/maxV*100).toFixed(0)}%;background:${d.color}"></div></div>
-      <div class="dval">${A.out[k].toFixed(2)}</div>
+      <div class="dval">${dec(A.out[k],2)}</div>
     </div>`).join("");
   const tok=s.tokens[App.qi];
   const domIdx=A.out.indexOf(Math.max(...A.out));
@@ -451,10 +489,10 @@ function renderDims(){
 /* =========================================================================
    4) PANEL AUTORREGRESIVO: softmax con temperatura + muestreo
    -------------------------------------------------------------------------
-   Prefijo fijo ligado a la Piqueria; puntajes (logits) didácticos fijados a
+   Prefijo fijo ligado a la piquería; puntajes (logits) didácticos fijados a
    mano. p = softmax(logit / T). El muestreo usa la distribución mostrada.
    ========================================================================= */
-const PREFIX="En la piqueria, el verseador improvisó una";
+const PREFIX="En la piquería, el verseador improvisó una";
 const CANDS=[
   {tok:"estrofa", logit:2.3},
   {tok:"rima",    logit:1.5},
@@ -472,10 +510,10 @@ function renderGen(){
   q("prefix").innerHTML=`${PREFIX} <span class="cursor"></span>`;
   const p=genProbs();
   q("probs").innerHTML=CANDS.map((c,i)=>`
-    <div class="prob-row" data-tip="<b>${c.tok}</b>: puntaje ${c.logit.toFixed(1)} · con T=${Gen.T.toFixed(1)} la probabilidad es ${(p[i]*100).toFixed(1)}%.">
+    <div class="prob-row" tabindex="0" data-tip="<b>${c.tok}</b>: puntaje ${dec(c.logit,1)} · con T = ${dec(Gen.T,1)} la probabilidad es ${pct(p[i],1)}.">
       <span class="pword">${c.tok}</span>
       <span class="bar-track"><span class="bar-fill prob-fill" style="width:${(p[i]*100).toFixed(1)}%"></span></span>
-      <span class="wnum">${(p[i]*100).toFixed(1)}%</span>
+      <span class="wnum">${pct(p[i],1)}</span>
     </div>`).join("");
   q("samples").innerHTML=Gen.samples.map(t=>`<span class="chip">${t}</span>`).join("");
 }
@@ -487,7 +525,8 @@ function sampleToken(){
 }
 q("tempSlider").addEventListener("input",e=>{
   Gen.T=parseFloat(e.target.value);
-  q("tempVal").textContent=Gen.T.toFixed(1);
+  q("tempVal").textContent=dec(Gen.T,1);
+  e.target.setAttribute("aria-valuetext","Temperatura "+dec(Gen.T,1));
   renderGen();
 });
 q("btnSample").addEventListener("click",()=>{
@@ -520,6 +559,15 @@ document.addEventListener("mousemove",e=>{
     else tip.classList.remove("show");
   }
 });
+
+// Con teclado: el foco en un elemento con data-tip muestra la misma explicación.
+document.addEventListener("focusin",e=>{
+  const el=e.target.closest&&e.target.closest("[data-tip]");
+  if(el){ const r=el.getBoundingClientRect(); showTip(el.getAttribute("data-tip"),r.left,r.bottom); }
+});
+document.addEventListener("focusout",()=>tip.classList.remove("show"));
+// Tras re-pintar, el foco vuelve al control equivalente (sin saltar al inicio de la página).
+function refocus(el){ if(el) el.focus({preventScroll:true}); }
 
 function render(){renderStrip();renderWeights();renderHeat();renderDims();}
 renderPicker();

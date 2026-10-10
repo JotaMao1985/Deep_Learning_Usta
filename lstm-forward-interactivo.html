@@ -3,34 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>El Paso Hacia Adelante de una LSTM — Simulador Interactivo</title>
+<title>El paso hacia adelante de una LSTM — simulador interactivo</title>
 <!-- Si se abre embebido en un iframe, se marca <html> para adaptar el layout (sin 100vh ni pie pegajoso). -->
 <script>if(window.self!==window.top)document.documentElement.classList.add('embedded');</script>
 <!--
   ============================================================================
   SIMULADOR INTERACTIVO · PASO HACIA ADELANTE DE UNA CELDA LSTM
-  Maestria en Ciencia de Datos — Universidad Santo Tomas
-  Modulo 2: Arquitecturas · Redes secuenciales
+  Maestría en Ciencia de Datos — Universidad Santo Tomás
+  Módulo 2: Arquitecturas · Redes secuenciales
   ----------------------------------------------------------------------------
-  QUE ES:
-    Herramienta autonoma (un solo archivo, sin CDN, funciona sin internet) que
-    simula PASO A PASO el forward pass de una LSTM ESCALAR (una sola unidad).
-    Traduce las seis ecuaciones a un fenomeno observable.
+  QUÉ ES:
+    Herramienta autónoma (un solo archivo, sin CDN, funciona sin internet) que
+    simula PASO A PASO el paso hacia adelante de una LSTM ESCALAR (una sola unidad).
+    Traduce las seis ecuaciones a un fenómeno observable.
 
-  LOGICA PEDAGOGICA:
+  LÓGICA PEDAGÓGICA:
     - Las compuertas no se "explican con etiquetas": se ENCIENDEN con su valor
-      real calculado (0..1). Ver la compuerta de olvido caer a ~0 ante una
-      entrada negativa fuerte es el momento "aja".
-    - El estado de celda c_t se dibuja como una CINTA TRANSPORTADORA horizontal
-      cuyo grosor crece con |c_t|; el estado oculto h_t emerge por debajo.
-    - Cada operacion muestra su SUSTITUCION NUMERICA EXACTA al pasar el cursor:
-      en vez de sigma(w*x+b) se ve sigma(0.7x0.5 + 0.1x0 + 0). El estudiante
-      puede verificar con calculadora -> se derriba la "caja negra".
-    - Estetica "a mano" (jitter con semilla fija) para reducir la intimidacion.
+      real calculado (entre 0 y 1). Ver la compuerta de olvido caer a ~0 ante una
+      entrada negativa fuerte es el momento "ajá".
+    - El estado de celda C_t (notación CP0; en el código, c) se dibuja como una
+      CINTA TRANSPORTADORA horizontal cuyo grosor crece con |C_t|; el estado
+      oculto h_t emerge por debajo.
+    - Cada operación muestra su SUSTITUCIÓN NUMÉRICA EXACTA al pasar el cursor:
+      en vez de sigma(w*x+b) se ve sigma(0,70·0,500 + 0,10·0,000 + 0,000). El
+      estudiante puede verificar con calculadora -> se derriba la "caja negra".
+    - Estética "a mano" (jitter con semilla fija) para reducir la intimidación.
 
-  VALIDACION:
-    Abrir con ?selftest=1 corre el auto-test que compara el motor JS contra los
-    valores dorados de lstm-forward-referencia.py (NumPy), epsilon 1e-9.
+  VALIDACIÓN:
+    Abrir con ?selftest=1 corre la autoprueba que compara el motor JS contra los
+    valores dorados de lstm-forward-referencia.py (Python, solo el módulo math),
+    epsilon 1e-9 (el mismo valor que registra lstm-forward-referencia.json).
 
   ARQUITECTURA:  vanilla HTML + CSS + JS + SVG en linea. Sin dependencias.
   ============================================================================
@@ -208,6 +210,23 @@
   html.embedded, html.embedded body{height:auto;}
   html.embedded body{min-height:0;}
   html.embedded footer.temporal{position:static;}
+
+  /* ---- Pantallas estrechas (auditoría 2026-10, S-05): en lugar de encoger el diagrama
+     hasta una letra de 4 px, se fija un ancho mínimo (letra efectiva ≥ 10 px) y el
+     diagrama se desplaza en horizontal dentro de su panel. ---- */
+  main > *{min-width:0;}
+  .svg-scroll{width:100%;}
+  .aviso-desplazar{display:none;font-size:.72rem;color:var(--tinta-suave);text-align:center;padding:2px 8px 4px;}
+  @media (max-width:640px){
+    .svg-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    #svg-lstm{min-width:700px;touch-action:pan-x pan-y;}
+    .aviso-desplazar{display:block;}
+  }
+
+  /* ---- Movimiento reducido (S-10) ---- */
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important;}
+  }
 </style>
 </head>
 <body>
@@ -215,10 +234,10 @@
 <header>
   <div class="brand">
     <h1>El paso hacia adelante de una LSTM</h1>
-    <p>Simulador interactivo · Modulo 2 · Redes secuenciales — Maestria en Ciencia de Datos, USTA</p>
+    <p>Simulador interactivo · Módulo 2 · Redes secuenciales — Maestría en Ciencia de Datos, USTA</p>
   </div>
   <div class="acciones">
-    <button class="btn ghost" id="btn-ayuda">Como se usa</button>
+    <button class="btn ghost" id="btn-ayuda">Cómo se usa</button>
     <button class="btn" id="btn-reiniciar">Reiniciar</button>
   </div>
 </header>
@@ -226,14 +245,14 @@
 <main>
   <!-- ============ PANEL DE CONFIGURACION (izquierda) ==================== -->
   <aside class="panel" id="panel-config">
-    <h2>Configuracion</h2>
+    <h2>Configuración</h2>
     <div class="cuerpo">
       <div class="campo">
-        <label for="sel-escenario">Escenario guiado «¿que pasaria si…?»</label>
+        <label for="sel-escenario">Escenario guiado «¿qué pasaría si…?»</label>
         <select id="sel-escenario">
-          <option value="manual">Exploracion libre</option>
+          <option value="manual">Exploración libre</option>
           <option value="context_switch">Cambio de contexto (la compuerta de olvido limpia)</option>
-          <option value="long_bridge">Puente de dependencia larga (la señal viaja intacta)</option>
+          <option value="long_bridge">Puente de dependencia larga (la señal viaja casi intacta)</option>
         </select>
         <div class="hint" id="hint-escenario">Se ajustan pesos y secuencia para revelar un comportamiento clave.</div>
       </div>
@@ -241,7 +260,7 @@
       <div class="campo">
         <label for="in-secuencia">Secuencia de entrada (x, separada por comas)</label>
         <input type="text" id="in-secuencia" value="0.5, -1, 2" spellcheck="false">
-        <div class="hint">Cada valor es un paso temporal. La red los procesa uno a uno.</div>
+        <div class="hint">Cada valor es un paso temporal; la red los procesa uno a uno. En este campo, el decimal se escribe con punto, como en código.</div>
       </div>
 
       <p style="font-size:.78rem;font-weight:700;color:var(--tinta-fuerte);margin:10px 0 6px;">Pesos y sesgos (escalares)</p>
@@ -263,19 +282,20 @@
       <div class="leyenda">
         <span><i style="background:var(--olvido)"></i> Olvido f<sub>t</sub></span>
         <span><i style="background:var(--entrada)"></i> Entrada i<sub>t</sub></span>
-        <span><i style="background:var(--candidato)"></i> Candidato ~c<sub>t</sub></span>
+        <span><i style="background:var(--candidato)"></i> Candidato C&#771;<sub>t</sub></span>
         <span><i style="background:var(--salida)"></i> Salida o<sub>t</sub></span>
-        <span><i style="background:var(--celda);height:6px"></i> Estado de celda c<sub>t</sub></span>
+        <span><i style="background:var(--celda);height:6px"></i> Estado de celda C<sub>t</sub></span>
         <span><i style="background:var(--oculto)"></i> Estado oculto h<sub>t</sub></span>
       </div>
       <!-- El SVG se construye por JS (geometria "a mano" con semilla fija) -->
-      <svg id="svg-lstm" viewBox="0 0 760 492" role="img" aria-label="Diagrama de una celda LSTM"></svg>
+      <div class="aviso-desplazar" aria-hidden="true">← El diagrama se desplaza en horizontal →</div>
+      <div class="svg-scroll"><svg id="svg-lstm" viewBox="0 0 760 492" role="img" aria-label="Diagrama de una celda LSTM"></svg></div>
     </div>
   </section>
 
   <!-- ============ PANEL CONTEXTUAL (derecha) =========================== -->
   <aside class="panel" id="panel-contexto">
-    <h2>Detalle del calculo</h2>
+    <h2>Detalle del cálculo</h2>
     <div class="cuerpo" id="contexto-cuerpo">
       <div id="ctx-vacio-msg" class="ctx-vacio">Al posar el cursor sobre una compuerta, una multiplicación o la cinta se muestran aquí su fórmula, su sustitución numérica exacta y su definición.</div>
       <div id="ctx-detalle" style="display:none;">
@@ -292,19 +312,19 @@
 <!-- ============ CONTROL TEMPORAL (pie) ================================= -->
 <footer class="temporal">
   <div class="ctrl-botones">
-    <button class="btn mini" id="btn-inicio" title="Ir al inicio">⏮</button>
-    <button class="btn mini" id="btn-atras" title="Paso atras">◀</button>
+    <button class="btn mini" id="btn-inicio" title="Ir al inicio" aria-label="Ir al inicio">⏮</button>
+    <button class="btn mini" id="btn-atras" title="Paso atrás" aria-label="Paso atrás">◀</button>
     <button class="btn mini" id="btn-play" title="Reproducir / pausar" style="min-width:70px">▶ Reproducir</button>
-    <button class="btn mini" id="btn-adelante" title="Paso adelante">▶</button>
+    <button class="btn mini" id="btn-adelante" title="Paso adelante" aria-label="Paso adelante">▶</button>
   </div>
   <div class="linea-tiempo">
     <span class="badge-t" id="badge-t">t = 0</span>
-    <input type="range" id="barra-tiempo" min="0" max="2" step="1" value="0">
+    <input type="range" id="barra-tiempo" min="0" max="2" step="1" value="0" aria-label="Paso temporal t">
     <span class="badge-t" id="badge-total">/ 2</span>
   </div>
   <div class="vel">
     Velocidad
-    <input type="range" id="vel-tiempo" min="300" max="1600" step="100" value="900" style="width:90px" title="Milisegundos por paso">
+    <input type="range" id="vel-tiempo" min="300" max="1600" step="100" value="900" style="width:90px" title="Milisegundos por paso" aria-label="Velocidad de reproducción (milisegundos por paso)">
   </div>
 </footer>
 
@@ -315,30 +335,30 @@
 <div class="modal-fondo" id="modal-ayuda">
   <div class="modal">
     <button class="cerrar-modal" id="cerrar-ayuda">×</button>
-    <h2>Como leer este simulador</h2>
-    <p>Una <strong>LSTM</strong> (memoria larga a corto plazo) procesa una secuencia <em>un paso a la vez</em>. En cada paso decide <em>que olvidar</em>, <em>que memorizar de nuevo</em> y <em>que exponer</em> al resto de la red. Aqui se usa una celda <strong>escalar</strong> (un solo numero por variable) para que toda la aritmetica sea visible.</p>
+    <h2>Cómo leer este simulador</h2>
+    <p>Una <strong>LSTM</strong> (memoria larga a corto plazo) procesa una secuencia <em>un paso a la vez</em>. En cada paso decide <em>qué olvidar</em>, <em>qué memorizar de nuevo</em> y <em>qué exponer</em> al resto de la red. Aquí se usa una celda <strong>escalar</strong> (un solo número por variable) para que toda la aritmética sea visible.</p>
 
     <p style="background:var(--lila);border:1px solid var(--borde);border-left:4px solid var(--usta-magenta);border-radius:8px;padding:10px 12px;font-size:.84rem;margin:10px 0;">
-      <strong>Del escalar al vector.</strong> En una LSTM real, cada variable (x, h, c y las compuertas) es un <strong>vector</strong> de tamaño oculto, y los pesos w y u son <strong>matrices</strong>. Aqui se usa dimensión 1 para poder ver toda la aritmética; las compuertas se aplican <strong>elemento a elemento</strong> (producto de Hadamard, ⊙). La lógica es idéntica: en la práctica solo se repite en paralelo sobre muchas dimensiones.</p>
+      <strong>Del escalar al vector.</strong> En una LSTM real, cada variable (x, h, C y las compuertas) es un <strong>vector</strong> de tamaño oculto, y los pesos w y u son <strong>matrices</strong>. Aquí se usa dimensión 1 para poder ver toda la aritmética; las compuertas se aplican <strong>elemento a elemento</strong> (producto de Hadamard, ⊙). La lógica es idéntica: en la práctica solo se repite en paralelo sobre muchas dimensiones.</p>
 
     <h3>Las dos memorias</h3>
     <ul>
-      <li><strong>Estado de celda c<sub>t</sub></strong> (la cinta carbon de arriba): la memoria de <em>largo plazo</em>. Es una «cinta transportadora» por la que la informacion fluye casi sin modificarse.</li>
+      <li><strong>Estado de celda C<sub>t</sub></strong> (la cinta gris carbón de arriba): la memoria de <em>largo plazo</em>. Es una «cinta transportadora» por la que la información fluye casi sin modificarse.</li>
       <li><strong>Estado oculto h<sub>t</sub></strong> (violeta, abajo): la memoria de <em>corto plazo</em> y la salida del paso. Es lo que la celda «expone» hacia afuera.</li>
     </ul>
 
     <h3>Las tres compuertas</h3>
     <ul>
-      <li><strong style="color:var(--olvido)">Olvido f<sub>t</sub></strong> (amarillo, σ∈[0,1]): que fraccion de la memoria previa se conserva. 0 = borrar todo, 1 = conservar todo.</li>
-      <li><strong style="color:var(--entrada)">Entrada i<sub>t</sub></strong> (azul, σ∈[0,1]) + <strong style="color:var(--candidato)">candidato ~c<sub>t</sub></strong> (tanh∈[-1,1]): cuanta memoria nueva se inyecta y cual.</li>
-      <li><strong style="color:var(--salida)">Salida o<sub>t</sub></strong> (rojo, σ∈[0,1]): que parte del estado de celda se deja ver como estado oculto.</li>
+      <li><strong style="color:var(--olvido)">Olvido f<sub>t</sub></strong> (amarillo, σ ∈ (0, 1)): qué fracción de la memoria previa se conserva. Cerca de 0 se borra casi todo; cerca de 1 se conserva casi todo.</li>
+      <li><strong style="color:var(--entrada)">Entrada i<sub>t</sub></strong> (azul, σ ∈ (0, 1)) + <strong style="color:var(--candidato)">candidato C&#771;<sub>t</sub></strong> (tanh ∈ (−1, 1)): cuánta memoria nueva se inyecta y cuál.</li>
+      <li><strong style="color:var(--salida)">Salida o<sub>t</sub></strong> (rojo, σ ∈ (0, 1)): qué parte del estado de celda se deja ver como estado oculto.</li>
     </ul>
 
-    <h3>Que observar</h3>
+    <h3>Qué observar</h3>
     <ul>
-      <li>El <strong>grosor y la opacidad</strong> de cada trazo crecen con el valor de su compuerta: una compuerta cerrada (≈0) casi desaparece.</li>
-      <li>Al pasar el cursor por cualquier bloque, el panel derecho muestra la <strong>sustitucion numerica exacta</strong>, lista para verificar con calculadora.</li>
-      <li>La salida <strong>h<sub>t</sub></strong> se <strong>realimenta</strong>: es la entrada h<sub>t-1</sub> del paso siguiente (el lazo punteado violeta del diagrama).</li>
+      <li>El <strong>grosor y la opacidad</strong> de cada trazo crecen con el valor de su compuerta: una compuerta cerrada (≈ 0) casi desaparece.</li>
+      <li>Al pasar el cursor por cualquier bloque, el panel derecho muestra la <strong>sustitución numérica exacta</strong>, lista para verificar con calculadora.</li>
+      <li>La salida <strong>h<sub>t</sub></strong> se <strong>realimenta</strong>: es la entrada h<sub>t−1</sub> del paso siguiente (el lazo punteado violeta del diagrama).</li>
       <li>Se recomienda emplear los <strong>escenarios guiados</strong> y avanzar paso a paso con los controles inferiores.</li>
     </ul>
     <p style="margin-top:10px;font-size:.8rem;color:var(--tinta-suave)">Sugerencia: al abrir esta página con <code>?selftest=1</code> se muestra la validación matemática frente a la referencia en Python.</p>
@@ -346,7 +366,7 @@
 </div>
 
 <!-- Panel de auto-test (solo con ?selftest=1) -->
-<div id="selftest"><h3>Auto-test matematico</h3><div id="selftest-cont"></div></div>
+<div id="selftest"><h3>Autoprueba matemática</h3><div id="selftest-cont"></div></div>
 
 <script>
 "use strict";
@@ -436,13 +456,13 @@ const DEF_W = {wf:0.7,uf:0.10,bf:0.0, wi:0.9,ui:0.20,bi:-0.10, wc:0.8,uc:0.15,bc
 const ESCENARIOS = {
   context_switch:{
     nombre:"Cambio de contexto",
-    hint:"Entradas positivas sostenidas y luego una entrada negativa fuerte: la compuerta de olvido cae a ~0 y limpia la cinta.",
+    hint:"Entradas positivas sostenidas y luego una entrada negativa fuerte: la compuerta de olvido cae a ≈ 0 y limpia la cinta.",
     inputs:[1,1,1,-4,1],
     W:{wf:2.0,uf:0.0,bf:1.5, wi:1.5,ui:0.0,bi:0.0, wc:1.0,uc:0.0,bc:0.0, wo:1.0,uo:0.0,bo:0.5}
   },
   long_bridge:{
     nombre:"Puente de dependencia larga",
-    hint:"Informacion importante en t=0 y luego ruido ~0. El olvido queda ≈1: la señal viaja casi intacta por la cinta.",
+    hint:"Información importante en t = 0 y luego ruido ≈ 0. El olvido queda ≈ 1: la señal viaja casi intacta por la cinta.",
     inputs:[2,0,0,0,0],
     W:{wf:0.0,uf:0.0,bf:4.0, wi:5.0,ui:0.0,bi:-1.0, wc:2.0,uc:0.0,bc:0.0, wo:0.0,uo:0.0,bo:2.0}
   }
@@ -516,8 +536,8 @@ function construirDiagrama(){
   const beltOut=el('path',{d:sketchLine(G.add.x,G.beltY,G.outCX,G.beltY,203,1.2),fill:'none',stroke:'var(--celda)','stroke-linecap':'round'});
   dyn.beltOut={path:beltOut,kind:'belt'}; frag.appendChild(beltOut);
 
-  const cIn=el('text',{x:26,y:G.beltY-9,'font-size':12,fill:'var(--celda)','font-weight':700}); cIn.textContent='cₜ₋₁'; frag.appendChild(cIn);
-  const cOut=el('text',{x:G.outCX-2,y:G.beltY-9,'font-size':12,fill:'var(--celda)','font-weight':700,'text-anchor':'end'}); cOut.textContent='cₜ'; frag.appendChild(cOut);
+  const cIn=el('text',{x:26,y:G.beltY-9,'font-size':12,fill:'var(--celda)','font-weight':700}); cIn.textContent='Cₜ₋₁'; frag.appendChild(cIn);
+  const cOut=el('text',{x:G.outCX-2,y:G.beltY-9,'font-size':12,fill:'var(--celda)','font-weight':700,'text-anchor':'end'}); cOut.textContent='Cₜ'; frag.appendChild(cOut);
 
   // --- BUS DE ENTRADAS x_t , h_{t-1} -------------------------------------
   const bus=el('path',{d:sketchLine(90,G.busY,G.ox,G.busY,210,1.0),fill:'none',stroke:'#94A3B8','stroke-width':1.6}); frag.appendChild(bus);
@@ -645,7 +665,7 @@ function actualizarDiagrama(){
     const mag = rango01 ? val : Math.abs(val);
     D.path.setAttribute('opacity',(0.28+0.72*Math.min(1,mag)).toFixed(3));
     D.path.setAttribute('stroke-width',(1.8+2.4*Math.min(1,mag)).toFixed(2));
-    if(D.label) D.label.textContent = val.toFixed(2);
+    if(D.label) D.label.textContent = dec(val,2);
   };
   setGate('f',s.f,true);
   setGate('i',s.i,true);
@@ -691,65 +711,68 @@ function actualizarDiagrama(){
   detectarConceptoErroneo(s);
   renderContexto();
 }
-const fmt=(v)=> (Math.abs(v)<1e-9?0:v).toFixed(3);
+// Formato es-CO en la interfaz (auditoría 2026-10, L-6): coma decimal en rótulos, alertas y
+// sustituciones numéricas. El campo de la secuencia y la tabla de la autoprueba conservan el punto.
+const dec=(v,d)=> (Math.abs(v)<1e-9?0:v).toFixed(d).replace('.',',').replace('-','−');
+const fmt=(v)=> dec(v,3);
 
 /* ==========================================================================
    5)  PANEL CONTEXTUAL — sustitucion numerica exacta (Fase 4)
    ========================================================================== */
 const DEFS = {
-  f:{nom:'Compuerta de olvido  fₜ',col:'var(--olvido)',rango:'σ(z) ∈ [0, 1]  ·  0 = borrar todo, 1 = conservar todo',
-     def:'Decide que fraccion del estado de celda previo cₜ₋₁ se conserva. Multiplica a la memoria de largo plazo en la cinta.',
-     abs:'f<sub>t</sub> = σ( w<sub>f</sub>·x<sub>t</sub> + u<sub>f</sub>·h<sub>t-1</sub> + b<sub>f</sub> )',
+  f:{nom:'Compuerta de olvido  fₜ',col:'var(--olvido)',rango:'σ(z) ∈ (0, 1)  ·  cerca de 0 borra casi todo; cerca de 1 conserva casi todo',
+     def:'Decide qué fracción del estado de celda previo Cₜ₋₁ se conserva. Multiplica a la memoria de largo plazo en la cinta.',
+     abs:'f<sub>t</sub> = σ( w<sub>f</sub>·x<sub>t</sub> + u<sub>f</sub>·h<sub>t−1</sub> + b<sub>f</sub> )',
      num:s=>`σ( ${gw('wf')}·${par(s.x)} + ${gw('uf')}·${par(s.hPrev)}${suma(state.W.bf)} )  =  σ(${fd(s.zf)})  = <span class="res">${md(s.f)}</span>`},
-  i:{nom:'Compuerta de entrada  iₜ',col:'var(--entrada)',rango:'σ(z) ∈ [0, 1]',
-     def:'Decide que fraccion de la memoria candidata se inyecta a la cinta en este paso.',
-     abs:'i<sub>t</sub> = σ( w<sub>i</sub>·x<sub>t</sub> + u<sub>i</sub>·h<sub>t-1</sub> + b<sub>i</sub> )',
+  i:{nom:'Compuerta de entrada  iₜ',col:'var(--entrada)',rango:'σ(z) ∈ (0, 1)',
+     def:'Decide qué fracción de la memoria candidata se inyecta a la cinta en este paso.',
+     abs:'i<sub>t</sub> = σ( w<sub>i</sub>·x<sub>t</sub> + u<sub>i</sub>·h<sub>t−1</sub> + b<sub>i</sub> )',
      num:s=>`σ( ${gw('wi')}·${par(s.x)} + ${gw('ui')}·${par(s.hPrev)}${suma(state.W.bi)} )  =  σ(${fd(s.zi)})  = <span class="res">${md(s.i)}</span>`},
-  g:{nom:'Memoria candidata  ~cₜ',col:'var(--candidato)',rango:'tanh(z) ∈ [-1, 1]',
+  g:{nom:'Memoria candidata  C̃ₜ',col:'var(--candidato)',rango:'tanh(z) ∈ (−1, 1)',
      def:'La memoria NUEVA que se propone añadir. tanh permite valores negativos: puede empujar la memoria hacia abajo o hacia arriba. En el diagrama, el grosor del trazo codifica su magnitud y el trazo discontinuo indica un candidato negativo.',
-     abs:'~c<sub>t</sub> = tanh( w<sub>c</sub>·x<sub>t</sub> + u<sub>c</sub>·h<sub>t-1</sub> + b<sub>c</sub> )',
+     abs:'C&#771;<sub>t</sub> = tanh( w<sub>c</sub>·x<sub>t</sub> + u<sub>c</sub>·h<sub>t−1</sub> + b<sub>c</sub> )',
      num:s=>`tanh( ${gw('wc')}·${par(s.x)} + ${gw('uc')}·${par(s.hPrev)}${suma(state.W.bc)} )  =  tanh(${fd(s.zc)})  = <span class="res">${md(s.cand)}</span>`},
-  o:{nom:'Compuerta de salida  oₜ',col:'var(--salida)',rango:'σ(z) ∈ [0, 1]',
-     def:'Decide que parte del estado de celda (ya filtrado por tanh) se expone como estado oculto hₜ.',
-     abs:'o<sub>t</sub> = σ( w<sub>o</sub>·x<sub>t</sub> + u<sub>o</sub>·h<sub>t-1</sub> + b<sub>o</sub> )',
+  o:{nom:'Compuerta de salida  oₜ',col:'var(--salida)',rango:'σ(z) ∈ (0, 1)',
+     def:'Decide qué parte del estado de celda (ya filtrado por tanh) se expone como estado oculto hₜ.',
+     abs:'o<sub>t</sub> = σ( w<sub>o</sub>·x<sub>t</sub> + u<sub>o</sub>·h<sub>t−1</sub> + b<sub>o</sub> )',
      num:s=>`σ( ${gw('wo')}·${par(s.x)} + ${gw('uo')}·${par(s.hPrev)}${suma(state.W.bo)} )  =  σ(${fd(s.zo)})  = <span class="res">${md(s.o)}</span>`},
-  multF:{nom:'Producto de olvido  fₜ · cₜ₋₁',col:'var(--olvido)',rango:'producto punto a punto (⊙)',
-     def:'La compuerta de olvido escala la memoria previa. Si fₜ≈0, la cinta se «limpia»; si fₜ≈1, pasa intacta.',
-     abs:'f<sub>t</sub> · c<sub>t-1</sub>',
+  multF:{nom:'Producto de olvido  fₜ ⊙ Cₜ₋₁',col:'var(--olvido)',rango:'producto punto a punto (⊙)',
+     def:'La compuerta de olvido escala la memoria previa. Si fₜ ≈ 0, la cinta se «limpia»; si fₜ ≈ 1, pasa casi intacta.',
+     abs:'f<sub>t</sub> ⊙ C<sub>t−1</sub>',
      num:s=>`${md(s.f)} · ${pd(s.cPrev)}  = <span class="res">${md(s.f*s.cPrev)}</span>`},
-  prodIG:{nom:'Memoria nueva  iₜ · ~cₜ',col:'var(--entrada)',rango:'producto punto a punto (⊙)',
+  prodIG:{nom:'Memoria nueva  iₜ ⊙ C̃ₜ',col:'var(--entrada)',rango:'producto punto a punto (⊙)',
      def:'La compuerta de entrada escala a la memoria candidata. Este es el aporte NUEVO que se suma a la cinta.',
-     abs:'i<sub>t</sub> · ~c<sub>t</sub>',
+     abs:'i<sub>t</sub> ⊙ C&#771;<sub>t</sub>',
      num:s=>`${md(s.i)} · ${pd(s.cand)}  = <span class="res">${md(s.i*s.cand)}</span>`},
-  add:{nom:'Actualizacion de la cinta  cₜ',col:'var(--celda)',rango:'suma lineal → gradiente sin obstruccion',
-     def:'El corazon de la LSTM: se olvida una parte y se suma memoria nueva. La suma (no multiplicacion) es lo que evita que el gradiente se desvanezca.',
-     abs:'c<sub>t</sub> = f<sub>t</sub>·c<sub>t-1</sub> + i<sub>t</sub>·~c<sub>t</sub>',
+  add:{nom:'Actualización de la cinta  Cₜ',col:'var(--celda)',rango:'suma lineal → el gradiente circula sin obstrucción',
+     def:'El corazón de la LSTM: se olvida una parte y se suma memoria nueva. La suma (no la multiplicación) es lo que mitiga el desvanecimiento del gradiente.',
+     abs:'C<sub>t</sub> = f<sub>t</sub> ⊙ C<sub>t−1</sub> + i<sub>t</sub> ⊙ C&#771;<sub>t</sub>',
      num:s=>`${md(s.f*s.cPrev)}${add4(s.i*s.cand)}  = <span class="res">${md(s.c)}</span>`},
-  tcell:{nom:'tanh( cₜ )',col:'var(--celda)',rango:'tanh(z) ∈ [-1, 1]',
-     def:'Antes de exponer la memoria, se comprime al rango [-1,1]. Esto es lo que la compuerta de salida filtrara.',
-     abs:'tanh( c<sub>t</sub> )',
+  tcell:{nom:'tanh( Cₜ )',col:'var(--celda)',rango:'tanh(z) ∈ (−1, 1)',
+     def:'Antes de exponer la memoria, se comprime al intervalo (−1, 1). Esto es lo que la compuerta de salida filtrará.',
+     abs:'tanh( C<sub>t</sub> )',
      num:s=>`tanh(${md(s.c)})  = <span class="res">${md(s.tcell)}</span>`},
-  prodO:{nom:'Estado oculto  hₜ',col:'var(--oculto)',rango:'oₜ ∈ [0,1] · tanh(cₜ) ∈ [-1,1]  ⇒  hₜ ∈ [-1,1]',
+  prodO:{nom:'Estado oculto  hₜ',col:'var(--oculto)',rango:'oₜ ∈ (0, 1) · tanh(Cₜ) ∈ (−1, 1)  ⇒  hₜ ∈ (−1, 1)',
      def:'La salida del paso y la memoria de corto plazo. Se realimenta como hₜ₋₁ en el siguiente paso.',
-     abs:'h<sub>t</sub> = o<sub>t</sub> · tanh( c<sub>t</sub> )',
+     abs:'h<sub>t</sub> = o<sub>t</sub> ⊙ tanh( C<sub>t</sub> )',
      num:s=>`${md(s.o)} · ${pd(s.tcell)}  = <span class="res">${md(s.h)}</span>`},
-  beltIn:{nom:'Estado de celda previo  cₜ₋₁',col:'var(--celda)',rango:'sin cota — memoria acumulada',
+  beltIn:{nom:'Estado de celda previo  Cₜ₋₁',col:'var(--celda)',rango:'sin cota — memoria acumulada',
      def:'La «cinta transportadora»: memoria de largo plazo que llega del paso anterior. Fluye casi sin modificarse.',
-     abs:'c<sub>t-1</sub>  (entra desde el paso anterior)',
-     num:s=>`c<sub>t-1</sub> = <span class="res">${fd(s.cPrev)}</span>`},
-  beltOut:{nom:'Estado de celda  cₜ',col:'var(--celda)',rango:'sin cota — memoria acumulada',
+     abs:'C<sub>t−1</sub>  (entra desde el paso anterior)',
+     num:s=>`C<sub>t−1</sub> = <span class="res">${fd(s.cPrev)}</span>`},
+  beltOut:{nom:'Estado de celda  Cₜ',col:'var(--celda)',rango:'sin cota — memoria acumulada',
      def:'La memoria de largo plazo que sale hacia el siguiente paso, ya actualizada.',
-     abs:'c<sub>t</sub> = f<sub>t</sub>·c<sub>t-1</sub> + i<sub>t</sub>·~c<sub>t</sub>',
-     num:s=>`c<sub>t</sub> = <span class="res">${fd(s.c)}</span>`},
+     abs:'C<sub>t</sub> = f<sub>t</sub> ⊙ C<sub>t−1</sub> + i<sub>t</sub> ⊙ C&#771;<sub>t</sub>',
+     num:s=>`C<sub>t</sub> = <span class="res">${fd(s.c)}</span>`},
 };
 DEFS.beltMid=DEFS.add;
 // --- Formateadores para las sustituciones numericas (signos limpios, sin «+ -») ---
 function g(k){ return (+state.W[k]).toFixed(2); }                                   // peso 2 decimales
 const fd  = v => fmt(v).replace('-','−');                                           // 3 dec, menos tipografico (x, h, z)
-const md  = v => (Math.abs(v)<1e-9?0:v).toFixed(4).replace('-','−');                // 4 dec (activaciones/resultados)
+const md  = v => dec(v,4).replace('-','−');                                          // 4 dec (activaciones/resultados)
 const par = v => v<0 ? '('+fd(v)+')' : fd(v);                                       // operando 3dec entre parentesis si negativo
 const pd  = v => v<0 ? '('+md(v)+')' : md(v);                                       // operando 4dec entre parentesis si negativo
-const gw  = k => { const w=+state.W[k]; return w<0?'('+w.toFixed(2).replace('-','−')+')':w.toFixed(2); }; // peso con parentesis si negativo
+const gw  = k => { const w=+state.W[k]; return w<0?'('+dec(w,2).replace('-','−')+')':dec(w,2); }; // peso con paréntesis si negativo
 const suma= v => (v<0?' − ':' + ')+fd(Math.abs(v));                                 // termino aditivo (peso/sesgo)
 const add4= v => (v<0?' − ':' + ')+md(Math.abs(v));                                 // termino aditivo (producto, 4 dec)
 
@@ -789,10 +812,10 @@ function detectarConceptoErroneo(s){
   const frac=[['olvido',s.f],['entrada',s.i],['salida',s.o]].find(([,v])=>v>0.12 && v<0.88);
   if(frac){
     const pct=Math.round(frac[1]*100);
-    msgs.push(`<strong>Las compuertas no son interruptores 0/1.</strong> La compuerta de ${frac[0]} vale <b>${frac[1].toFixed(2)}</b>: es un valor <em>continuo</em> (sigmoide). Aqui significa una retencion <em>parcial</em> del ${pct}%, y por eso la red es diferenciable y se puede entrenar.`);
+    msgs.push(`<strong>Las compuertas no son interruptores 0/1.</strong> La compuerta de ${frac[0]} vale <b>${dec(frac[1],2)}</b>: es un valor <em>continuo</em> (sigmoide). Aquí significa una retención <em>parcial</em> del ${pct} %, y por eso la red es diferenciable y se puede entrenar.`);
   }
   if(Math.abs(s.c - s.h)>0.6){
-    msgs.push(`<strong>cₜ y hₜ no son lo mismo.</strong> La cinta cₜ=<b>${fmt(s.c)}</b> es la memoria de largo plazo; el estado oculto hₜ=<b>${fmt(s.h)}</b> es solo lo que la salida deja ver (hₜ = oₜ·tanh(cₜ)).`);
+    msgs.push(`<strong>Cₜ y hₜ no son lo mismo.</strong> La cinta Cₜ = <b>${fmt(s.c)}</b> es la memoria de largo plazo; el estado oculto hₜ = <b>${fmt(s.h)}</b> es solo lo que la salida deja ver (hₜ = oₜ ⊙ tanh(Cₜ)).`);
   }
   if(!msgs.length) return;
   mostrarAlerta(msgs[s.t % msgs.length]);   // rotacion por indice de paso
@@ -852,7 +875,7 @@ function construirPesos(){
     const c=det.querySelector('.cont');
     grp.pesos.forEach(([k,etq])=>{
       const row=document.createElement('div'); row.className='desliza';
-      row.innerHTML=`<label>${etq}</label><input type="range" min="-5" max="5" step="0.05" value="${state.W[k]}" data-w="${k}"><span class="val" id="val-${k}">${(+state.W[k]).toFixed(2)}</span>`;
+      row.innerHTML=`<label for="rng-${k}">${etq}</label><input type="range" id="rng-${k}" min="-5" max="5" step="0.05" value="${state.W[k]}" data-w="${k}" aria-label="${grp.nom}: ${etq}"><span class="val" id="val-${k}">${dec(+state.W[k],2)}</span>`;
       c.appendChild(row);
     });
     cont.appendChild(det);
@@ -860,7 +883,7 @@ function construirPesos(){
   cont.querySelectorAll('input[type=range]').forEach(r=>{
     r.addEventListener('input',()=>{
       const k=r.dataset.w; state.W[k]=parseFloat(r.value);
-      document.getElementById('val-'+k).textContent=parseFloat(r.value).toFixed(2);
+      document.getElementById('val-'+k).textContent=dec(parseFloat(r.value),2);
       document.getElementById('sel-escenario').value='manual';
       recomputar(true);
     });
@@ -869,7 +892,7 @@ function construirPesos(){
 function sincronizarPesosUI(){
   for(const k in state.W){
     const r=document.querySelector(`input[data-w="${k}"]`); if(r){ r.value=state.W[k]; }
-    const v=document.getElementById('val-'+k); if(v) v.textContent=(+state.W[k]).toFixed(2);
+    const v=document.getElementById('val-'+k); if(v) v.textContent=dec(+state.W[k],2);
   }
 }
 
@@ -882,7 +905,7 @@ function parsearSecuencia(txt){
    9)  CABLEADO DE LA INTERFAZ
    ========================================================================== */
 function aplicarEscenario(clave){
-  if(clave==='manual'){ document.getElementById('hint-escenario').textContent='Ajuste libremente pesos y secuencia.'; return; }
+  if(clave==='manual'){ document.getElementById('hint-escenario').textContent='Los pesos y la secuencia pueden ajustarse libremente.'; return; }
   const E=ESCENARIOS[clave];
   state.inputs=E.inputs.slice(); state.W=Object.assign({},E.W);
   document.getElementById('in-secuencia').value=E.inputs.join(', ');
@@ -929,7 +952,7 @@ function wire(){
 /* ==========================================================================
    10)  AUTO-TEST  (?selftest=1)  — paridad con lstm-forward-referencia.py
    ========================================================================== */
-// Valores DORADOS (NumPy, precision completa) para el caso canonico:
+// Valores DORADOS (referencia en Python con el módulo math, precisión completa) para el caso canónico:
 // W = DEF_W ; X = [0.5,-1,2]
 const GOLDEN = {
   W:{wf:0.7,uf:0.10,bf:0.0, wi:0.9,ui:0.20,bi:-0.10, wc:0.8,uc:0.15,bc:0.05, wo:0.6,uo:0.25,bo:0.0},
@@ -975,10 +998,10 @@ function runSelfTest(){
   const panel=document.getElementById('selftest');
   const linea=(c,t)=>`<div class="${c?'pass':'fail'}">${t}: ${c?'PASA':'FALLA'}</div>`;
   document.getElementById('selftest-cont').innerHTML=
-    linea(ok,'Paridad NumPy (ε=1e-9)')+
-    linea(bounds,'Acotamiento σ∈[0,1], tanh∈[-1,1]')+
+    linea(ok,'Paridad con la referencia en Python (math), ε = 1e-9')+
+    linea(bounds,'Acotamiento numérico σ ∈ [0, 1], tanh ∈ [−1, 1]')+
     linea(csOK,'Escenario «cambio de contexto» (olvido cierra y limpia)')+
-    linea(lbOK,'Escenario «puente largo» (olvido≈1, señal sobrevive)')+
+    linea(lbOK,'Escenario «puente largo» (olvido ≈ 1, la señal sobrevive)')+
     linea(edgeOK,'Casos borde (1 paso · vacío · NaN · parser UI)')+
     `<table>${filas.join('')}</table>`;
   panel.classList.add('visible');

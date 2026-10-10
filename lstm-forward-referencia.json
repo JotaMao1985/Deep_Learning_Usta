@@ -1,5 +1,5 @@
 {
-  "epsilon": 1e-06,
+  "epsilon": 1e-09,
   "canonical": {
     "weights": {
       "wf": 0.7,
