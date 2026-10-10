@@ -40,12 +40,14 @@ El portal `index.html` es un punto de entrada multi-módulo (selector Módulo 1 
 
 ## Herramientas interactivas embebidas
 
-Exploradores autónomos (HTML + JS/SVG, sin CDN salvo el material principal) que se embeben vía `iframe` con auto-ajuste de altura dentro del material principal de cada módulo. También funcionan abriéndolos directamente.
+Exploradores autónomos (HTML + JS/SVG o three.js empaquetado en `vendor/`, sin CDN) que se embeben vía `iframe` con auto-ajuste de altura dentro del material principal de cada módulo. También funcionan abriéndolos directamente.
 
 | Archivo | Módulo / Capítulo | Descripción |
 |---|---|---|
+| `capa-oculta-3d.html` | M1 · Cap 1.2 | Animación 3D (three.js): una red 2-3-1 entrenada en el navegador deforma el plano de entrada hasta la capa oculta, donde la frontera curva queda sobre el plano de la neurona de salida. `?selftest=1` |
 | `cnn-anatomia-interactiva.html` | M2 · Cap 2.1 | Animación paso a paso del pipeline de una CNN (entrada → convolución → ReLU → pooling → clasificación) |
 | `vit-anatomia-interactiva.html` | M2 · Cap 2.1 | Explorador ViT vs. CNN (anatomía del ViT, campo receptivo local vs. global, bloque encoder) |
+| `lstm-forward-interactivo.html` | M2 · Cap 2.2 | El paso hacia adelante de una LSTM escalar, paso a paso, con sustitución numérica exacta. `?selftest=1` (paridad con `lstm-forward-referencia.py`) |
 | `rnn-lstm-gru-interactivo.html` | M2 · Cap 2.2 | Explorador RNN·LSTM·GRU: misma secuencia en las 3 celdas, compuertas en vivo, desvanecimiento del gradiente y cuadro comparativo |
 | `atencion-transformer-interactiva.html` | M2 · Cap 2.3 §6 | Autoatención en vivo sobre la palabra «vaina»: pesos QKV, matriz de atención y generación autorregresiva con temperatura |
 | `ae-vae-gan-transformer-interactivo.html` | M2 · Cap 2.3 | Comparador AE·VAE·GAN·Transformer: diagramas, fichas técnicas y laboratorios 2-D/secuencias con entrenamiento real (retropropagación + Adam) en el navegador |
@@ -66,6 +68,7 @@ Exploradores autónomos (HTML + JS/SVG, sin CDN salvo el material principal) que
 | `notebooks/02-scaffold-centinela-fase1.ipynb` | Andamiaje del proyecto · Fase 1 |
 | `notebooks/03-lab-arquitecturas-modulo-2.ipynb` | Laboratorio M2 (CNN/FashionMNIST, LSTM, autoencoder) |
 | `notebooks/04-scaffold-centinela-fase2.ipynb` | Andamiaje del proyecto · Fase 2 (ramas A/B/C) |
+| `notebooks/08-lab-lstm-forward-paso-a-paso.ipynb` | Laboratorio M2 · Cap 2.2: la LSTM paso a paso, a mano, frente al simulador y a `nn.LSTMCell` |
 | `notebooks/06-lab-implementacion-modulo-3.ipynb` | Laboratorio M3 (frameworks TF/PyTorch, GPU + precisión mixta, pipelines, ONNX) |
 | `notebooks/07-scaffold-centinela-fase3.ipynb` | Andamiaje del proyecto · Fase 3 (pipeline + GPU + despliegue offline) |
 
@@ -75,4 +78,4 @@ Exploradores autónomos (HTML + JS/SVG, sin CDN salvo el material principal) que
 |---|---|
 | `notebooks/app-laboratorio-regularizacion.py` | Laboratorio de **Regularización, Estabilización y Diagnóstico** (M1 · Cap 5): L1/L2/Dropout, BatchNorm y curvas de aprendizaje en vivo. Se ejecuta localmente con `streamlit run notebooks/app-laboratorio-regularizacion.py`. |
 
-Sitio estático (React + Tailwind vía CDN); no requiere compilación. Servido con GitHub Pages.
+Sitio estático (React + Tailwind vía CDN en los materiales principales); no requiere compilación. Servido con GitHub Pages. Las animaciones 3D usan `vendor/three-r160.iife.min.js` (three.js r160, MIT; ver `vendor/BUILD.md`).
