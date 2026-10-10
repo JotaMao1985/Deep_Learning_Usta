@@ -8,3 +8,6 @@ __pycache__/
 
 # Documentos internos de planificación (no se publican en GitHub Pages)
 IMPLEMENTATION_PLAN_*.md
+
+# Archivo de otro curso (Lógica de Programación Financiera) — no publicar (auditoría 2026-10, CP0)
+01_Logica_Programacion_Financiera_Intro.html
