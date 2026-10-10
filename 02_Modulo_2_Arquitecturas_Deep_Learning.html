@@ -25,9 +25,6 @@
     <!-- Font Awesome (iconografía de apoyo) -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
-    <!-- Plotly (gráficas interactivas: activaciones, descenso del gradiente, curvas de aprendizaje) -->
-    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
-
     <!-- MathJax 3 — JUSTIFICACIÓN: el material es matemáticamente denso ($...$ y $$...$$);
          MathJax renderiza LaTeX de forma nativa y accesible sin dependencias locales. -->
     <script>
@@ -167,19 +164,6 @@
             border-radius: 4px;
             font-size: 0.88em;
             font-family: 'Fira Code', monospace;
-        }
-
-        /* Contenedores de gráficas Plotly */
-        .chart-h-320 {
-            height: 320px;
-        }
-
-        .chart-h-360 {
-            height: 360px;
-        }
-
-        .chart-h-420 {
-            height: 420px;
         }
 
         /* Tipografía de contenido */
@@ -885,26 +869,47 @@
         };
 
         /* ============================================================
-           GRÁFICA PLOTLY (hook + contenedor)
+           FIGURAS: pie normalizado, coma decimal y aviso de desplazamiento
         ============================================================ */
-        const usePlotly = (id, dataFn, layoutFn, deps = []) => {
-            useEffect(() => {
-                const el = document.getElementById(id);
-                if (el && window.Plotly) {
-                    window.Plotly.newPlot(id, dataFn(), layoutFn(), { responsive: true, displayModeBar: false });
-                }
-                return () => { if (window.Plotly) { try { window.Plotly.purge(id); } catch (e) { } } };
-            }, deps);
-        };
+        /* Número con coma decimal para el texto visible (regla B: coma en prosa, leyendas, SVG y UI; punto en código y LaTeX). */
+        const fmtDec = (v, d) => v.toFixed(d).replace('.', ',');
 
-        const ChartFrame = ({ id, height = 'chart-h-360', caption }) => (
-            <>
-                <div className="bg-white border border-gray-200 rounded-xl p-2 shadow-sm my-3">
-                    <div id={id} className={height} style={{ width: '100%' }}></div>
-                </div>
-                {caption && <p className="text-xs text-gray-500 italic text-center mb-4">{caption}</p>}
-            </>
+        /* Pie de figura normalizado (canon del M1): «Figura c.n.» + descripción + fuente.
+           Numeración por capítulo del módulo, como en el M1: c = orden del capítulo dentro del módulo
+           (Cap 2.1 → 1, Cap 2.2 → 2, Cap 2.3 → 3) y n = orden de aparición dentro del capítulo.
+           Los iframes de herramientas no llevan número. */
+        const PieFigura = ({ n, fuente = 'elaboración propia.', className = '', children }) => (
+            <p className={`text-xs text-gray-500 italic text-center ${className}`}>
+                <strong className="not-italic text-navy">Figura {n}.</strong> {children} <span className="not-italic">Fuente: {fuente}</span>
+            </p>
         );
+
+        /* Aviso bajo los diagramas SVG anchos: por debajo de sm el diagrama conserva su ancho mínimo
+           (para que la letra siga legible) y se desplaza dentro de su marco. */
+        const AvisoDesplazar = () => (
+            <p className="sm:hidden text-[0.7rem] text-gray-500 text-center mt-1" aria-hidden="true">← desplazar para ver el diagrama completo →</p>
+        );
+
+        /* Auto-altura de herramientas embebidas por iframe (auditoría 2026-10, canon del M1). Protocolo del curso:
+           {type:'embed-tool-height', id, height}. Solo acepta mensajes del propio iframe (e.source) y del mismo
+           origen (o de file://, donde el origen es 'null'), con una altura numérica acotada. */
+        const useEmbedHeight = (ids) => {
+            const clave = [].concat(ids).join('|');
+            useEffect(() => {
+                const permitidos = clave.split('|');
+                const onMsg = (e) => {
+                    const d = e && e.data;
+                    if (!d || d.type !== 'embed-tool-height' || permitidos.indexOf(d.id) < 0) return;
+                    const fr = document.getElementById(d.id);
+                    if (!fr || fr.tagName !== 'IFRAME' || e.source !== fr.contentWindow) return;
+                    const mismoOrigen = e.origin === window.location.origin || (window.location.protocol === 'file:' && e.origin === 'null');
+                    if (!mismoOrigen) return;
+                    if (Number.isFinite(d.height) && d.height >= 100 && d.height <= 20000) fr.style.height = (d.height + 4) + 'px';
+                };
+                window.addEventListener('message', onMsg);
+                return () => window.removeEventListener('message', onMsg);
+            }, [clave]);
+        };
 
         /* ============================================================
            TÉRMINO con definición emergente (tooltip por portal)
@@ -1112,7 +1117,8 @@
             const mx0 = 560, my0 = 95; // origen del mapa de características
 
             return (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                    <div className="overflow-x-auto">
                     <svg viewBox="0 0 740 336" className="w-full" style={{ minWidth: 620 }} role="img"
                         aria-label="Operación de convolución: un kernel 3 por 3 se desliza sobre una matriz de entrada 5 por 5 y produce un mapa de características 3 por 3.">
                         <title>La ventana 3×3 resaltada sobre la entrada se multiplica elemento a elemento por el kernel; la suma de los productos genera un valor del mapa de características.</title>
@@ -1171,9 +1177,11 @@
                             la suma de productos llena una celda del mapa y luego la ventana se desplaza (stride).
                         </text>
                     </svg>
-                    <p className="text-xs text-gray-500 italic text-center mt-1">
-                        Operación de convolución: el kernel recorre la entrada produciendo, en cada posición, un único valor del mapa de características.
-                    </p>
+                    </div>
+                    <AvisoDesplazar />
+                    <PieFigura n="2.1.2" className="mt-2">
+                        Operación de convolución: el kernel recorre la entrada produciendo, en cada posición, un único valor del mapa de características (aquí, S<sub>0,0</sub> = −5).
+                    </PieFigura>
                 </div>
             );
         };
@@ -1184,7 +1192,8 @@
            produce UN mapa; N filtros producen N mapas (profundidad N).
         ============================================================ */
         const MultiChannelConvSVG = () => (
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                <div className="overflow-x-auto">
                 <svg viewBox="0 0 740 250" className="w-full" style={{ minWidth: 640 }} role="img"
                     aria-label="Convolución multicanal: un filtro con la misma profundidad que la entrada RGB de tres canales produce un único mapa de características; aplicar N filtros distintos genera N mapas que se apilan en un volumen de profundidad N.">
                     <title>Cada filtro abarca los tres canales de la entrada y produce un solo mapa 2D; el número de filtros N fija la profundidad del volumen de salida.</title>
@@ -1210,24 +1219,16 @@
                     ))}
                     <text x="650" y="192" textAnchor="middle" fontSize="11" fill="#64748B" fontStyle="italic">profundidad N</text>
                 </svg>
-                <p className="text-xs text-gray-500 italic text-center mt-1">Convolución multicanal: cada filtro abarca los tres canales y produce un único mapa; el número de filtros N determina la profundidad del volumen de salida. Fuente: elaboración propia.</p>
+                </div>
+                <AvisoDesplazar />
+                <PieFigura n="2.1.3" className="mt-2">Convolución multicanal: cada filtro abarca los tres canales y produce un único mapa; el número de filtros N determina la profundidad del volumen de salida.</PieFigura>
             </div>
         );
 
         const Cap21Section = () => {
             const ref = useRef(null);
             useTypeset(ref, []);
-            useEffect(() => {
-                const onMsg = (e) => {
-                    const d = e && e.data;
-                    if (d && d.type === 'embed-tool-height' && d.id && d.height) {
-                        const fr = document.getElementById(d.id);
-                        if (fr) fr.style.height = (d.height + 4) + 'px';
-                    }
-                };
-                window.addEventListener('message', onMsg);
-                return () => window.removeEventListener('message', onMsg);
-            }, []);
+            useEmbedHeight(['cnn-anatomia-frame', 'vit-anatomia-frame']);
             return (
                 <div ref={ref} className="prose-usta">
                     <SectionHeader title="Capítulo 2.1 — Redes convolucionales (CNN) y Vision Transformers" icon={Icons.Grid} />
@@ -1264,13 +1265,13 @@
                     <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                             {[
-                                { src: 'images/modulo-2/hier-1-bordes.png', t: '1 · Bordes', d: 'Capas iniciales (≈ V1)' },
-                                { src: 'images/modulo-2/hier-2-textura.png', t: '2 · Texturas', d: 'Capas intermedias (≈ V2)' },
-                                { src: 'images/modulo-2/hier-3-partes.png', t: '3 · Partes', d: 'Capas profundas (≈ V4)' },
-                                { src: 'images/modulo-2/hier-4-objeto.png', t: '4 · Objeto', d: 'Capas finales (≈ corteza temporal inferior)' },
+                                { src: 'images/modulo-2/hier-1-bordes.webp', t: '1 · Bordes', d: 'Capas iniciales (≈ V1)', alt: 'Boceto en escala de grises de la fotografía del jaguar, que conserva sobre todo sus contornos y manchas: nivel 1, bordes; capas iniciales, comparables a V1.' },
+                                { src: 'images/modulo-2/hier-2-textura.webp', t: '2 · Texturas', d: 'Capas intermedias (≈ V2)', alt: 'Primer plano de las rosetas del flanco del jaguar: nivel 2, texturas; capas intermedias, comparables a V2.' },
+                                { src: 'images/modulo-2/hier-3-partes.webp', t: '3 · Partes', d: 'Capas profundas (≈ V4)', alt: 'Primer plano de la cabeza del jaguar, con los ojos y las orejas: nivel 3, partes; capas profundas, comparables a V4.' },
+                                { src: 'images/modulo-2/hier-4-objeto.webp', t: '4 · Objeto', d: 'Capas finales (≈ corteza temporal inferior)', alt: 'Fotografía de un jaguar (Panthera onca) de pie entre la vegetación, mirando a la cámara: nivel 4, objeto completo; capas finales, comparables a la corteza temporal inferior.' },
                             ].map((p, i) => (
                                 <figure key={i} className="m-0">
-                                    <img src={p.src} alt={`Jaguar — ${p.t}: ${p.d}`} className="w-full rounded-lg border border-gray-200" loading="lazy" />
+                                    <img src={p.src} alt={p.alt} width="400" height="400" className="w-full h-auto rounded-lg border border-gray-200" loading="lazy" />
                                     <figcaption className="text-center mt-1">
                                         <span className="block text-sm font-bold text-primary">{p.t}</span>
                                         <span className="block text-xs text-gray-500">{p.d}</span>
@@ -1278,11 +1279,13 @@
                                 </figure>
                             ))}
                         </div>
-                        <p className="text-xs text-gray-500 italic text-center mt-3">
-                            Jerarquía de características: una CNN compone su comprensión de lo simple a lo complejo —bordes → texturas →
-                            partes → objeto—, reflejando la jerarquía del córtex visual (V1 → V2 → V4 → corteza temporal inferior). El
-                            mapa de bordes y los recortes proceden de la misma fotografía. Fuente: elaboración propia (imagen base generada localmente).
-                        </p>
+                        <PieFigura n="2.1.1" className="mt-3" fuente={<>fotografía de Giles Laurent (2024), <a href="https://commons.wikimedia.org/wiki/File:145_Jaguar_in_Encontro_das_%C3%81guas_State_Park_Photo_by_Giles_Laurent.jpg" target="_blank" rel="noopener noreferrer" style={{ color: '#ED1E79', textDecoration: 'underline' }}>Wikimedia Commons</a>, licencia <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es" target="_blank" rel="noopener noreferrer" style={{ color: '#ED1E79', textDecoration: 'underline' }}>CC BY-SA 4.0</a>; recortes y filtro de elaboración propia (CC BY-SA 4.0).</>}>
+                            Analogía visual de la jerarquía de características: una CNN compone su comprensión de lo simple a lo
+                            complejo —bordes → texturas → partes → objeto—, como la jerarquía del córtex visual (V1 → V2 → V4 → corteza
+                            temporal inferior). Los paneles <strong>no son activaciones reales de una CNN</strong>: el primero es un filtro de
+                            bordes aplicado a la fotografía de un jaguar del Pantanal (Brasil) y los otros tres son recortes de ella. Para ver
+                            activaciones reales, véase Olah et al. (2017).
+                        </PieFigura>
                     </div>
 
                     <Box type="eth" label="Diferencias con el cerebro">
@@ -1746,7 +1749,8 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
            solo texto nativo, <tspan baselineShift="sub"> y Unicode.
         ============================================================ */
         const LSTMCellSVG = () => (
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                <div className="overflow-x-auto">
                 <svg viewBox="0 0 780 400" className="w-full" style={{ minWidth: 680 }} role="img"
                     aria-label="Celda LSTM vista como tuberías y válvulas: la memoria antigua C(t-1) circula por la cinta superior; la válvula de olvido la multiplica, se le suma la memoria nueva (memoria candidata por la válvula de entrada) y la válvula de salida expone el estado oculto h(t).">
                     <title>Analogía de tuberías y válvulas: la tubería de memoria C sufre solo dos interacciones lineales —una multiplicación por la válvula de olvido y una suma de memoria nueva—; la válvula de salida decide cuánta memoria, filtrada por tanh, se expone como h(t).</title>
@@ -1773,7 +1777,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <line x1="215" y1="250" x2="215" y2="140" stroke="#B91C1C" strokeWidth="2" />
                     <polygon points="215,138 209,150 221,150" fill="#B91C1C" />
                     <text x="232" y="196" fontSize="11" fill="#B91C1C" fontWeight="bold">f<tspan baselineShift="sub" fontSize="8">t</tspan></text>
-                    <text x="232" y="210" fontSize="9" fill="#94A3B8" fontStyle="italic">∈ (0,1)</text>
+                    <text x="232" y="210" fontSize="9" fill="#94A3B8" fontStyle="italic">∈ (0, 1)</text>
 
                     {/* ===== Suma (+): une memoria antigua filtrada y memoria nueva ===== */}
                     <circle cx="450" cy="120" r="16" fill="#F0FDF4" stroke="#15803D" strokeWidth="2" />
@@ -1832,13 +1836,15 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <line x1="452" y1="326" x2="452" y2="308" stroke="#94A3B8" strokeWidth="1.4" strokeDasharray="3 3" />
                     <line x1="642" y1="326" x2="642" y2="308" stroke="#94A3B8" strokeWidth="1.4" strokeDasharray="3 3" />
                 </svg>
-                <p className="text-xs text-gray-500 italic text-center mt-1">
+                </div>
+                <AvisoDesplazar />
+                <PieFigura n="2.2.3" className="mt-2" fuente="elaboración propia; la «cinta» del estado de la celda retoma la metáfora de Olah (2015).">
                     La LSTM como <strong>tuberías y válvulas</strong>: la memoria C recorre la tubería superior sufriendo solo
                     <strong> dos interacciones lineales</strong> —la válvula de olvido la multiplica (⊙ por f<sub>t</sub>) y se le suma (+) la
                     <strong> memoria nueva</strong> (i<sub>t</sub> ⊙ C̃<sub>t</sub>)—, lo que preserva el gradiente. La válvula de salida (o<sub>t</sub>)
-                    decide cuánta memoria, filtrada por tanh, se expone como estado oculto h<sub>t</sub>. Las tres válvulas σ comparten la
-                    entrada x<sub>t</sub>, h<sub>t−1</sub>.
-                </p>
+                    decide cuánta memoria, filtrada por tanh, se expone como estado oculto h<sub>t</sub>. Las tres válvulas σ y la memoria
+                    candidata reciben las mismas entradas: x<sub>t</sub> y h<sub>t−1</sub>.
+                </PieFigura>
             </div>
         );
 
@@ -1862,13 +1868,14 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
             const gx = 200, gy = 90; // origen de la rejilla de pesos
             const tono = (v) => `rgba(61,0,141,${(0.12 + 0.82 * v).toFixed(3)})`; // morado USTA con opacidad ∝ α
             return (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                    <div className="overflow-x-auto">
                     <svg viewBox="0 0 560 380" className="w-full" style={{ minWidth: 520 }} role="img"
                         aria-label="Mapa de calor de los pesos de atención que alinean cada palabra de salida con las palabras de entrada relevantes.">
-                        <title>Cada fila corresponde a una palabra generada (salida) y cada columna a un estado del encoder (entrada); la intensidad de la celda es el peso de atención α que indica dónde mira el decodificador.</title>
+                        <title>Cada fila corresponde a una palabra generada (salida) y cada columna a un estado del codificador (entrada); la intensidad de la celda es el peso de atención α que indica dónde mira el decodificador.</title>
 
                         <text x={gx + (3 * cel) / 2} y="40" textAnchor="middle" fontSize="13" fill="#3D008D" fontWeight="bold">Pesos de atención α</text>
-                        <text x={gx + (3 * cel) / 2} y="58" textAnchor="middle" fontSize="11" fill="#64748B" fontStyle="italic">entrada (encoder) ↔ salida (decoder)</text>
+                        <text x={gx + (3 * cel) / 2} y="58" textAnchor="middle" fontSize="11" fill="#64748B" fontStyle="italic">entrada (codificador) ↔ salida (decodificador)</text>
 
                         {/* Encabezados de columna: estados del encoder h_i */}
                         {entradaLbl.map((h, j) => (
@@ -1881,7 +1888,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                                 <rect x={gx + i * cel} y={gy + t * cel} width={cel} height={cel}
                                     fill={tono(v)} stroke="#FFFFFF" strokeWidth="2" />
                                 <text x={gx + i * cel + cel / 2} y={gy + t * cel + cel / 2 + 4} textAnchor="middle"
-                                    fontSize="13" fill={v > 0.5 ? '#FFFFFF' : '#3D008D'} fontWeight="bold">{v.toFixed(2)}</text>
+                                    fontSize="13" fill={v > 0.5 ? '#FFFFFF' : '#3D008D'} fontWeight="bold">{fmtDec(v, 2)}</text>
                             </g>
                         )))}
 
@@ -1901,10 +1908,13 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                             Cada fila suma 1 (softmax); el color marca dónde se concentra la atención.
                         </text>
                     </svg>
-                    <p className="text-xs text-gray-500 italic text-center mt-1">
-                        Mapa de alineamiento: al generar «wayuu» el decodificador vuelca el 85 % de su atención sobre el tercer
-                        estado del codificador; el contexto dinámico c<sub>t</sub> recupera selectivamente la información pertinente.
-                    </p>
+                    </div>
+                    <AvisoDesplazar />
+                    <PieFigura n="2.2.5" className="mt-2" fuente="elaboración propia (pesos ilustrativos, no calculados).">
+                        Mapa de alineamiento de una traducción del wayuunaiki al español: al generar «wayuu», el decodificador vuelca el
+                        85 % de su atención sobre el tercer estado del codificador; el contexto dinámico c<sub>t</sub> recupera selectivamente
+                        la información pertinente.
+                    </PieFigura>
                 </div>
             );
         };
@@ -1918,7 +1928,8 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
             const steps = [1, 2, 3, 4];
             const colX = [170, 320, 470, 620];
             return (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                    <div className="overflow-x-auto">
                     <svg viewBox="0 0 760 320" className="w-full" style={{ minWidth: 700 }} role="img"
                         aria-label="Red neuronal recurrente desenrollada en cuatro pasos temporales. En cada paso, la entrada x sub t entra por abajo, una caja RNN con pesos W la procesa, el estado oculto h fluye horizontalmente de izquierda a derecha y la salida y gorro sub t sale por arriba. Los mismos pesos W se comparten en todos los pasos.">
                         <title>RNN desenrollada: el estado oculto h se propaga hacia la derecha mientras la misma caja de pesos W se reutiliza en cada paso temporal.</title>
@@ -1947,7 +1958,9 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                             );
                         })}
                     </svg>
-                    <p className="text-xs text-gray-500 italic text-center mt-1">RNN desenrollada en el tiempo: la misma caja de pesos W procesa cada entrada x<sub>t</sub>, propaga el estado oculto h<sub>t</sub> (cinta verde) y emite ŷ<sub>t</sub>. Fuente: elaboración propia.</p>
+                    </div>
+                    <AvisoDesplazar />
+                    <PieFigura n="2.2.1" className="mt-2">RNN desenrollada en el tiempo: la misma caja de pesos W (que resume W<sub>xh</sub>, W<sub>hh</sub> y W<sub>hy</sub>) procesa cada entrada x<sub>t</sub>, propaga el estado oculto h<sub>t</sub> (cinta verde) y emite ŷ<sub>t</sub>.</PieFigura>
                 </div>
             );
         };
@@ -1966,16 +1979,17 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                 { x: 700, label: '5' },
             ];
             const backArrows = [
-                { from: 4, to: 3, color: '#ED1E79', mag: '1.0' },
-                { from: 3, to: 2, color: '#A855C7', mag: '0.25' },
-                { from: 2, to: 1, color: '#94A3B8', mag: '0.06' },
-                { from: 1, to: 0, color: '#CBD5E1', mag: '0.015' },
+                { from: 4, to: 3, color: '#ED1E79', mag: '1,0' },
+                { from: 3, to: 2, color: '#A855C7', mag: '0,25' },
+                { from: 2, to: 1, color: '#94A3B8', mag: '0,06' },
+                { from: 1, to: 0, color: '#CBD5E1', mag: '0,016' },
             ];
             return (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                    <div className="overflow-x-auto">
                     <svg viewBox="0 0 760 300" className="w-full" style={{ minWidth: 700 }} role="img"
-                        aria-label="Desvanecimiento del gradiente en una RNN desenrollada de cinco pasos. La retropropagación viaja de derecha a izquierda y su color se desvanece de rosa intenso a gris claro, mientras la magnitud del gradiente decae exponencialmente de 1.0 a 0.25, 0.06, 0.015 y 0.004.">
-                        <title>El gradiente parte con magnitud 1.0 en el último paso y se desvanece exponencialmente al retroceder en el tiempo, perdiendo casi toda su intensidad antes de alcanzar los primeros pasos.</title>
+                        aria-label="Desvanecimiento del gradiente en una RNN desenrollada de cinco pasos. La retropropagación viaja de derecha a izquierda y su color se desvanece de rosa intenso a gris claro, mientras la magnitud del gradiente decae exponencialmente, con un factor ilustrativo de 0,25 por paso: 1,0; 0,25; 0,06; 0,016 y 0,004.">
+                        <title>El gradiente parte con magnitud 1,0 en el último paso y se desvanece exponencialmente al retroceder en el tiempo, perdiendo casi toda su intensidad antes de alcanzar los primeros pasos.</title>
                         <line x1="70" y1="150" x2="730" y2="150" stroke="#15803D" strokeWidth="3" />
                         {nodes.map((n) => (
                             <g key={`node-${n.label}`}>
@@ -1998,14 +2012,16 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                                 </g>
                             );
                         })}
-                        <text x={nodes[4].x} y={108} textAnchor="middle" fontSize="11" fill="#ED1E79" fontWeight="bold">∂L (1.0)</text>
+                        <text x={nodes[4].x} y={108} textAnchor="middle" fontSize="11" fill="#ED1E79" fontWeight="bold">∂L (1,0)</text>
                         <line x1={nodes[4].x} y1={113} x2={nodes[4].x} y2={129} stroke="#ED1E79" strokeWidth="3" />
                         <polygon points={`${nodes[4].x},131 ${nodes[4].x - 6},119 ${nodes[4].x + 6},119`} fill="#ED1E79" />
-                        <text x="44" y="118" textAnchor="middle" fontSize="11" fill="#CBD5E1" fontWeight="bold">0.004</text>
+                        <text x="44" y="118" textAnchor="middle" fontSize="11" fill="#CBD5E1" fontWeight="bold">0,004</text>
                         <rect x="180" y="232" width="400" height="30" rx="14" fill="#FCE9F3" stroke="#ED1E79" strokeWidth="1.4" />
                         <text x="380" y="251" textAnchor="middle" fontSize="12" fill="#B91C1C" fontWeight="bold">∂L/∂h decae exponencialmente al retroceder en el tiempo</text>
                     </svg>
-                    <p className="text-xs text-gray-500 italic text-center mt-1">Desvanecimiento del gradiente: al retropropagar de derecha a izquierda, ∂L/∂h<sub>t</sub> decae exponencialmente (1.0 → 0.25 → 0.06 → 0.015 → 0.004), impidiendo aprender dependencias de largo plazo. Fuente: elaboración propia.</p>
+                    </div>
+                    <AvisoDesplazar />
+                    <PieFigura n="2.2.2" className="mt-2" fuente="elaboración propia (factor ilustrativo).">Desvanecimiento del gradiente: al retropropagar de derecha a izquierda, ∂L/∂h<sub>t</sub> decae exponencialmente; con un factor ilustrativo de 0,25 por paso, 1,0 → 0,25 → 0,06 → 0,016 → 0,004, lo que impide aprender dependencias de largo plazo.</PieFigura>
                 </div>
             );
         };
@@ -2016,9 +2032,10 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
            actualización z. Notablemente más simple que la LSTM.
         ============================================================ */
         const GRUCellSVG = () => (
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                <div className="overflow-x-auto">
                 <svg viewBox="0 0 760 360" className="w-full" style={{ minWidth: 660 }} role="img"
-                    aria-label="Celda GRU: variante simplificada de la LSTM con un único estado oculto h y solo dos compuertas. La compuerta de reinicio r y la de actualización z, ambas sigmoides, regulan cómo se combina el estado anterior con el candidato (tangente hiperbólica). El estado final es una interpolación lineal entre el estado anterior y el candidato.">
+                    aria-label="Celda GRU: variante simplificada de la LSTM con un único estado oculto h y solo dos compuertas. La compuerta de reinicio r y la de actualización z, ambas sigmoides, reciben la entrada x sub t y el estado anterior h sub t menos 1; el candidato (tangente hiperbólica) recibe x sub t y el estado anterior filtrado por r. El estado final es una interpolación lineal entre el estado anterior y el candidato, ponderada por z.">
                     <title>La GRU usa un solo estado h: la compuerta de reinicio r decide cuánto del pasado entra al candidato, y la compuerta de actualización z interpola entre el estado anterior y el candidato para producir h sub t.</title>
                     <rect x="40" y="70" width="680" height="240" rx="16" fill="#FBF8FF" stroke="#3D008D" strokeWidth="2" />
                     <text x="58" y="98" fontSize="13" fill="#3D008D" fontWeight="bold">Celda GRU · paso t · 1 estado, 2 compuertas (más simple que la LSTM)</text>
@@ -2047,7 +2064,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <text x="355" y="240" textAnchor="middle" fontSize="12" fill="#15803D" fontWeight="bold">Candidato</text>
                     <text x="355" y="258" textAnchor="middle" fontSize="13" fill="#15803D">h̃<tspan baselineShift="sub" fontSize="8">t</tspan> · tanh</text>
                     {/* la compuerta de reinicio modula cuánto del pasado entra al candidato */}
-                    <text x="273" y="212" textAnchor="middle" fontSize="8.5" fill="#B91C1C" fontWeight="bold">r<tspan baselineShift="sub" fontSize="6.5">t</tspan> ⊙ h<tspan baselineShift="sub" fontSize="6.5">t−1</tspan></text>
+                    <text x="273" y="212" textAnchor="middle" fontSize="9.5" fill="#B91C1C" fontWeight="bold">r<tspan baselineShift="sub" fontSize="7.5">t</tspan> ⊙ h<tspan baselineShift="sub" fontSize="7.5">t−1</tspan></text>
                     <line x1="246" y1="246" x2="298" y2="246" stroke="#B91C1C" strokeWidth="2" />
                     <polygon points="300,246 288,240 288,252" fill="#B91C1C" />
 
@@ -2055,7 +2072,11 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <rect x="464" y="218" width="110" height="56" rx="10" fill="#FEF2F2" stroke="#B91C1C" strokeWidth="1.8" />
                     <text x="519" y="240" textAnchor="middle" fontSize="12" fill="#B91C1C" fontWeight="bold">Actualización</text>
                     <text x="519" y="258" textAnchor="middle" fontSize="13" fill="#B91C1C">z · σ</text>
-                    <line x1="519" y1="218" x2="519" y2="145" stroke="#94A3B8" strokeWidth="1.6" strokeDasharray="4 3" />
+                    {/* salida z_t → ⊙ de la cinta (como f_t en la LSTM) */}
+                    <line x1="519" y1="218" x2="519" y2="150" stroke="#B91C1C" strokeWidth="1.8" />
+                    <polygon points="519,146 513,158 525,158" fill="#B91C1C" />
+                    {/* h_{t−1} también alimenta la compuerta de actualización (se toma antes del ⊙) */}
+                    <line x1="490" y1="130" x2="490" y2="218" stroke="#94A3B8" strokeWidth="1.6" strokeDasharray="4 3" />
 
                     {/* rama (1−z)⊙h̃ que asciende a la suma, ruteada por debajo de las cajas; z también la pondera */}
                     <line x1="355" y1="274" x2="355" y2="292" stroke="#15803D" strokeWidth="2" />
@@ -2065,34 +2086,31 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <line x1="519" y1="274" x2="519" y2="284" stroke="#B91C1C" strokeWidth="1.6" strokeDasharray="3 2" />
                     <circle cx="519" cy="292" r="8" fill="#FEF2F2" stroke="#B91C1C" strokeWidth="1.6" />
                     <text x="519" y="296" textAnchor="middle" fontSize="10" fill="#B91C1C" fontWeight="bold">⊙</text>
-                    <text x="440" y="286" textAnchor="middle" fontSize="10" fill="#15803D" fontWeight="bold">(1−z<tspan baselineShift="sub" fontSize="8">t</tspan>) ⊙ h̃<tspan baselineShift="sub" fontSize="8">t</tspan> → suma</text>
+                    <text x="588" y="285" textAnchor="middle" fontSize="9.5" fill="#15803D" fontWeight="bold">(1−z<tspan baselineShift="sub" fontSize="7.5">t</tspan>) ⊙ h̃<tspan baselineShift="sub" fontSize="7.5">t</tspan> → suma</text>
 
-                    {/* Entrada x_t alimentando las compuertas */}
-                    <text x="110" y="300" textAnchor="middle" fontSize="13" fill="#001A4D" fontWeight="bold">x<tspan baselineShift="sub" fontSize="9">t</tspan></text>
-                    <line x1="110" y1="290" x2="110" y2="246" stroke="#001A4D" strokeWidth="1.6" strokeDasharray="3 3" />
+                    {/* Entrada x_t: entra por debajo y alimenta las tres cajas (reinicio, candidato y actualización) */}
+                    <text x="110" y="336" textAnchor="middle" fontSize="13" fill="#001A4D" fontWeight="bold">x<tspan baselineShift="sub" fontSize="9">t</tspan></text>
+                    <line x1="110" y1="322" x2="110" y2="246" stroke="#001A4D" strokeWidth="1.6" strokeDasharray="3 3" />
                     <line x1="110" y1="246" x2="148" y2="246" stroke="#001A4D" strokeWidth="1.6" strokeDasharray="3 3" />
+                    <line x1="110" y1="300" x2="470" y2="300" stroke="#001A4D" strokeWidth="1.6" strokeDasharray="3 3" />
+                    <line x1="330" y1="300" x2="330" y2="280" stroke="#001A4D" strokeWidth="1.6" strokeDasharray="3 3" />
+                    <polygon points="330,276 325,286 335,286" fill="#001A4D" />
+                    <line x1="470" y1="300" x2="470" y2="280" stroke="#001A4D" strokeWidth="1.6" strokeDasharray="3 3" />
+                    <polygon points="470,276 465,286 475,286" fill="#001A4D" />
 
                     {/* Fórmula de la interpolación lineal */}
                     <text x="380" y="340" textAnchor="middle" fontSize="13" fill="#3D008D" fontWeight="bold">h<tspan baselineShift="sub" fontSize="9">t</tspan> = z<tspan baselineShift="sub" fontSize="9">t</tspan> ⊙ h<tspan baselineShift="sub" fontSize="9">t−1</tspan> + (1−z<tspan baselineShift="sub" fontSize="9">t</tspan>) ⊙ h̃<tspan baselineShift="sub" fontSize="9">t</tspan></text>
                 </svg>
-                <p className="text-xs text-gray-500 italic text-center mt-1">Celda GRU: un único estado h<sub>t</sub> y dos compuertas (reinicio r, actualización z). El estado final es la interpolación h<sub>t</sub> = z<sub>t</sub> ⊙ h<sub>t−1</sub> + (1−z<sub>t</sub>) ⊙ h̃<sub>t</sub> (forma de Cho et al., 2014, y de PyTorch), notablemente más simple que la LSTM. Fuente: elaboración propia.</p>
+                </div>
+                <AvisoDesplazar />
+                <PieFigura n="2.2.4" className="mt-2">Celda GRU: un único estado h<sub>t</sub> y dos compuertas (reinicio r, actualización z), alimentadas por x<sub>t</sub> y h<sub>t−1</sub>; el candidato h̃<sub>t</sub> recibe x<sub>t</sub> y r<sub>t</sub> ⊙ h<sub>t−1</sub>. El estado final es la interpolación h<sub>t</sub> = z<sub>t</sub> ⊙ h<sub>t−1</sub> + (1−z<sub>t</sub>) ⊙ h̃<sub>t</sub> (forma de Cho et al., 2014, y de PyTorch), notablemente más simple que la LSTM.</PieFigura>
             </div>
         );
 
         const Cap22Section = () => {
             const ref = useRef(null);
             useTypeset(ref, []);
-            useEffect(() => {
-                const onMsg = (e) => {
-                    const d = e && e.data;
-                    if (d && d.type === 'embed-tool-height' && d.id && d.height) {
-                        const fr = document.getElementById(d.id);
-                        if (fr) fr.style.height = (d.height + 4) + 'px';
-                    }
-                };
-                window.addEventListener('message', onMsg);
-                return () => window.removeEventListener('message', onMsg);
-            }, []);
+            useEmbedHeight(['rnn-lstm-gru-frame', 'lstm-forward-frame']);
             return (
                 <div ref={ref} className="prose-usta">
                     <SectionHeader title="Capítulo 2.2 — Modelos secuenciales (RNN, LSTM, GRU) y atención" icon={Icons.Repeat} />
@@ -2540,19 +2558,20 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
            solo texto nativo, <tspan baselineShift="sub"> y Unicode.
         ============================================================ */
         const AutoencoderSVG = () => (
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                <div className="overflow-x-auto">
                 <svg viewBox="0 0 760 340" className="w-full" style={{ minWidth: 660 }} role="img"
-                    aria-label="Arquitectura de un autoencoder: el codificador reduce la entrada hasta un cuello de botella latente z, y el decodificador la reconstruye.">
+                    aria-label="Arquitectura de un autocodificador: el codificador reduce la entrada hasta un cuello de botella latente z, y el decodificador la reconstruye.">
                     <title>La entrada x atraviesa el codificador que reduce su dimensión hasta el código latente z (cuello de botella); el decodificador expande z para producir la reconstrucción x̂.</title>
 
                     {/* --- Encoder: trapecio que se estrecha --- */}
                     <polygon points="90,60 200,110 200,230 90,280" fill="#F5F0FA" stroke="#3D008D" strokeWidth="2" />
-                    <text x="145" y="170" textAnchor="middle" fontSize="14" fill="#3D008D" fontWeight="bold">Encoder</text>
+                    <text x="145" y="170" textAnchor="middle" fontSize="12.5" fill="#3D008D" fontWeight="bold">Codificador</text>
                     <text x="145" y="190" textAnchor="middle" fontSize="11" fill="#64748B" fontStyle="italic">z = f(x)</text>
 
                     {/* --- Decoder: trapecio que se ensancha --- */}
                     <polygon points="560,110 670,60 670,280 560,230" fill="#FCE9F3" stroke="#ED1E79" strokeWidth="2" />
-                    <text x="615" y="170" textAnchor="middle" fontSize="14" fill="#ED1E79" fontWeight="bold">Decoder</text>
+                    <text x="615" y="170" textAnchor="middle" fontSize="12.5" fill="#ED1E79" fontWeight="bold">Decodificador</text>
                     <text x="615" y="190" textAnchor="middle" fontSize="11" fill="#64748B" fontStyle="italic">x̂ = g(z)</text>
 
                     {/* --- Cuello de botella: vector latente z --- */}
@@ -2588,10 +2607,12 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                     <line x1="673" y1="170" x2="700" y2="170" stroke="#94A3B8" strokeWidth="2" />
                     <polygon points="704,170 694,165 694,175" fill="#94A3B8" />
                 </svg>
-                <p className="text-xs text-gray-500 italic text-center mt-1">
+                </div>
+                <AvisoDesplazar />
+                <PieFigura n="2.3.3" className="mt-2">
                     Reloj de arena del autocodificador: el codificador comprime x hasta el código latente z; el decodificador
-                    reconstruye x̂. En el VAE, z no es un punto fijo sino una distribución 𝒩(μ, σ²) muestreada. Fuente: elaboración propia.
-                </p>
+                    reconstruye x̂. En el VAE, z no es un punto fijo sino una distribución 𝒩(μ, σ²) muestreada.
+                </PieFigura>
             </div>
         );
 
@@ -2603,7 +2624,8 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
            y Unicode (sin delimitadores MathJax).
         ============================================================ */
         const GanGameSVG = () => (
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                <div className="overflow-x-auto">
                 <svg viewBox="0 0 760 360" className="w-full" style={{ minWidth: 680 }} role="img"
                     aria-label="Juego adversario de una GAN: el generador transforma ruido en muestras falsas que, junto a datos reales, alimentan al discriminador, que decide real o falso.">
                     <title>El generador G convierte el ruido z en una muestra falsa G(z); el discriminador D recibe tanto datos reales como falsos y emite la probabilidad de que sean reales. El error de D retroalimenta a G.</title>
@@ -2657,10 +2679,12 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                     <polygon points="210,155 204,167 216,167" fill="#FDB913" />
                     <text x="385" y="345" textAnchor="middle" fontSize="11" fill="#B45309" fontWeight="bold">gradiente adversario: el error de D entrena a G</text>
                 </svg>
-                <p className="text-xs text-gray-500 italic text-center mt-1">
+                </div>
+                <AvisoDesplazar />
+                <PieFigura n="2.3.5" className="mt-2">
                     El juego minimax de una GAN: G aprende a engañar a D y D aprende a no dejarse engañar; el bucle dorado
-                    cierra la competencia que perfecciona al generador. Fuente: elaboración propia.
-                </p>
+                    cierra la competencia que perfecciona al generador.
+                </PieFigura>
             </div>
         );
 
@@ -2676,10 +2700,11 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
             const subt = ['imagen', '', '', '', 'ruido 𝒩(0, I)'];
             const cx = (i) => 80 + i * 150;
             return (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                    <div className="overflow-x-auto">
                     <svg viewBox="0 0 760 300" className="w-full" style={{ minWidth: 700 }} role="img"
-                        aria-label="Cadena de difusión: el proceso forward añade ruido gaussiano paso a paso hasta convertir la imagen en ruido puro; el proceso reverse, aprendido por una red, lo revierte.">
-                        <title>El proceso forward q(xₜ | xₜ₋₁) destruye la imagen x₀ añadiendo ruido hasta llegar a ruido puro x_T; el proceso reverse p_θ(xₜ₋₁ | xₜ), aprendido por la red, regenera la imagen.</title>
+                        aria-label="Cadena de difusión: el proceso directo añade ruido gaussiano paso a paso hasta convertir la imagen en ruido puro; el proceso inverso, aprendido por una red, lo revierte.">
+                        <title>El proceso directo q(xₜ | xₜ₋₁) destruye la imagen x₀ añadiendo ruido hasta llegar a ruido puro x_T; el proceso inverso p_θ(xₜ₋₁ | xₜ), aprendido por la red, regenera la imagen.</title>
 
                         {/* --- Estados de la cadena --- */}
                         {xs.map((lbl, i) => {
@@ -2705,7 +2730,7 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                                 <polygon points={`${cx(i + 1) - 34},100 ${cx(i + 1) - 44},95 ${cx(i + 1) - 44},105`} fill="#B91C1C" />
                             </g>
                         ))}
-                        <text x="380" y="48" textAnchor="middle" fontSize="13" fill="#B91C1C" fontWeight="bold">Forward (fijo): añade ruido →</text>
+                        <text x="380" y="48" textAnchor="middle" fontSize="13" fill="#B91C1C" fontWeight="bold">Directo (fijo): añade ruido →</text>
                         <text x="380" y="70" textAnchor="middle" fontSize="12" fill="#B91C1C">q(x<tspan baselineShift="sub" fontSize="8">t</tspan> | x<tspan baselineShift="sub" fontSize="8">t−1</tspan>) = 𝒩(√(1−β<tspan baselineShift="sub" fontSize="8">t</tspan>) x<tspan baselineShift="sub" fontSize="8">t−1</tspan>, β<tspan baselineShift="sub" fontSize="8">t</tspan> I)</text>
 
                         {/* --- Flechas REVERSE (abajo, quita ruido) --- */}
@@ -2715,13 +2740,15 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                                 <polygon points={`${cx(i) + 34},188 ${cx(i) + 44},183 ${cx(i) + 44},193`} fill="#15803D" />
                             </g>
                         ))}
-                        <text x="380" y="244" textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="bold">← Reverse (aprendido): quita ruido</text>
+                        <text x="380" y="244" textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="bold">← Inverso (aprendido): quita ruido</text>
                         <text x="380" y="266" textAnchor="middle" fontSize="12" fill="#15803D">p<tspan baselineShift="sub" fontSize="8">θ</tspan>(x<tspan baselineShift="sub" fontSize="8">t−1</tspan> | x<tspan baselineShift="sub" fontSize="8">t</tspan>) = 𝒩(μ<tspan baselineShift="sub" fontSize="8">θ</tspan>, Σ<tspan baselineShift="sub" fontSize="8">θ</tspan>)</text>
                     </svg>
-                    <p className="text-xs text-gray-500 italic text-center mt-1">
-                        Cadena de difusión: el proceso forward (rojo) destruye la imagen grano a grano; el proceso reverse (verde),
-                        aprendido por la red, la reconstruye paso a paso desde el ruido puro. Fuente: elaboración propia.
-                    </p>
+                    </div>
+                    <AvisoDesplazar />
+                    <PieFigura n="2.3.7" className="mt-2">
+                        Cadena de difusión: el proceso directo (rojo) destruye la imagen grano a grano; el proceso inverso (verde),
+                        aprendido por la red, la reconstruye paso a paso desde el ruido puro.
+                    </PieFigura>
                 </div>
             );
         };
@@ -2751,12 +2778,13 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                 { x: 615, y: 165 }, { x: 665, y: 235 },
             ];
             return (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                    <div className="overflow-x-auto">
                     <svg viewBox="0 0 760 340" className="w-full" style={{ minWidth: 700 }} role="img"
-                        aria-label="Comparación del espacio latente. A la izquierda, un Autoencoder produce puntos fijos y aislados con huecos vacíos entre ellos: espacio discontinuo. A la derecha, un Autoencoder variacional produce distribuciones gaussianas solapadas que cubren el espacio sin huecos, permitiendo una interpolación suave y navegable.">
-                        <title>El Autoencoder mapea cada entrada a un punto fijo dejando huecos sin sentido, mientras el VAE codifica distribuciones gaussianas que se solapan y cubren un espacio latente continuo y navegable.</title>
+                        aria-label="Comparación del espacio latente. A la izquierda, un autocodificador (AE) produce puntos fijos y aislados con huecos vacíos entre ellos: espacio discontinuo. A la derecha, un autocodificador variacional (VAE) produce distribuciones gaussianas solapadas que cubren el espacio sin huecos, permitiendo una interpolación suave y navegable.">
+                        <title>El autocodificador mapea cada entrada a un punto fijo dejando huecos sin sentido, mientras el VAE codifica distribuciones gaussianas que se solapan y cubren un espacio latente continuo y navegable.</title>
                         <rect x="30" y="50" width="330" height="250" rx="12" fill="#F8FAFC" stroke="#475569" strokeWidth="1.5" />
-                        <text x="195" y="72" textAnchor="middle" fontSize="14" fill="#001A4D" fontWeight="bold">Autoencoder (AE)</text>
+                        <text x="195" y="72" textAnchor="middle" fontSize="14" fill="#001A4D" fontWeight="bold">Autocodificador (AE)</text>
                         {aePoints.map((p, i) => (
                             <circle key={`ae-${i}`} cx={p.x} cy={p.y} r="6" fill="#001A4D" />
                         ))}
@@ -2765,7 +2793,7 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                         ))}
                         <text x="195" y="320" textAnchor="middle" fontSize="11" fill="#B91C1C" fontWeight="bold">discontinuo · interpolar cae en el vacío</text>
                         <rect x="400" y="50" width="330" height="250" rx="12" fill="#FBF8FF" stroke="#3D008D" strokeWidth="1.5" />
-                        <text x="565" y="72" textAnchor="middle" fontSize="14" fill="#3D008D" fontWeight="bold">VAE · 𝒩(μ, σ)</text>
+                        <text x="565" y="72" textAnchor="middle" fontSize="14" fill="#3D008D" fontWeight="bold">VAE · 𝒩(μ, σ²)</text>
                         {vaeClouds.map((c, i) => (
                             <g key={`vae-${i}`}>
                                 <circle cx={c.x} cy={c.y} r={c.r} fill={`rgba(61,0,141,${c.op})`} stroke="#7C3AED" strokeWidth="1" />
@@ -2778,7 +2806,9 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                         ))}
                         <text x="565" y="320" textAnchor="middle" fontSize="11" fill="#15803D" fontWeight="bold">continuo · interpolar transita suave</text>
                     </svg>
-                    <p className="text-xs text-gray-500 italic text-center mt-1">Espacio latente AE vs VAE: el AE deja huecos sin significado entre puntos aislados; el VAE codifica distribuciones 𝒩(μ,σ) solapadas que forman un espacio continuo donde interpolar produce transiciones graduales. Fuente: elaboración propia.</p>
+                    </div>
+                    <AvisoDesplazar />
+                    <PieFigura n="2.3.4" className="mt-2">Espacio latente del AE frente al del VAE: el AE deja huecos sin significado entre puntos aislados; el VAE codifica distribuciones 𝒩(μ, σ²) solapadas que forman un espacio continuo donde interpolar produce transiciones graduales.</PieFigura>
                 </div>
             );
         };
@@ -2798,7 +2828,8 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
             ];
             const baseY = 240;
             return (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                    <div className="overflow-x-auto">
                     <svg viewBox="0 0 760 320" className="w-full" style={{ minWidth: 700 }} role="img"
                         aria-label="Colapso de modos en una GAN. A la izquierda, la distribución real de datos es multimodal con cuatro picos bien separados que representan diversidad. A la derecha, el generador colapsado concentra toda su masa en un único pico y deja los otros tres modos vacíos, perdiendo la diversidad.">
                         <title>La distribución real tiene cuatro modos distintos; el generador colapsado produce solo uno, abandonando los demás y empobreciendo la diversidad de las muestras generadas.</title>
@@ -2832,7 +2863,9 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                         <rect x="150" y="288" width="460" height="26" rx="13" fill="#FCE9F3" stroke="#ED1E79" strokeWidth="1.4" />
                         <text x="380" y="305" textAnchor="middle" fontSize="12" fill="#B91C1C" fontStyle="italic">El verseador repite siempre su única estrofa ganadora.</text>
                     </svg>
-                    <p className="text-xs text-gray-500 italic text-center mt-1">Mode collapse: frente a una p<sub>data</sub> multimodal y diversa, el generador colapsa toda la masa en un único modo y abandona los demás. Fuente: elaboración propia.</p>
+                    </div>
+                    <AvisoDesplazar />
+                    <PieFigura n="2.3.6" className="mt-2">Colapso de modos (<em>mode collapse</em>): frente a una p<sub>data</sub> multimodal y diversa, el generador colapsa toda la masa en un único modo y abandona los demás.</PieFigura>
                 </div>
             );
         };
@@ -2846,18 +2879,22 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
         ============================================================ */
         const SelfAttentionSVG = () => {
             const toks = ['Pásame', 'esa', 'vaina'];
-            // filas = consulta (Q); columnas = clave (K); cada fila suma 1
+            // filas = consulta (Q); columnas = clave (K); cada fila suma 1.
+            // Pesos del modelo de juguete de atencion-transformer-interactiva.html (VOCAB, √d_k = 2) para «Pásame esa vaina»,
+            // redondeados por el método del mayor resto para que cada fila sume exactamente 1
+            // (exactos: [0.4271, 0.3164, 0.2565], [0.3839, 0.3112, 0.3050], [0.6514, 0.1848, 0.1639]).
             const W = [
-                [0.60, 0.20, 0.20],
-                [0.25, 0.50, 0.25],
-                [0.45, 0.15, 0.40],
+                [0.43, 0.31, 0.26],
+                [0.38, 0.31, 0.31],
+                [0.65, 0.19, 0.16],
             ];
             const gx = 250, gy = 120, cell = 70, rh = 52;
             return (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                    <div className="overflow-x-auto">
                     <svg viewBox="0 0 700 350" className="w-full" style={{ minWidth: 620 }} role="img"
-                        aria-label="Matriz de autoatención: cada fila es un token que consulta (Query) y cada columna un token que ofrece su clave (Key). El peso de cada celda es softmax(Q por K traspuesta dividido por raíz de d_k): cuánta atención presta el token de la fila al de la columna. Los valores (Value) se mezclan según esos pesos para producir una representación de cada token sensible a su contexto. Se ilustra cómo la palabra vaina reparte su atención hacia pásame, ganando el sentido de objeto físico.">
-                        <title>Autoatención: la matriz de pesos softmax(QKᵀ/√d_k) indica cuánta atención presta cada token (fila, Query) a cada token (columna, Key); la mezcla ponderada de los Value produce la salida contextual.</title>
+                        aria-label="Matriz de autoatención: cada fila es un token que consulta (Q) y cada columna un token que ofrece su clave (K). El peso de cada celda es softmax(Q por K traspuesta dividido por raíz de d_k): cuánta atención presta el token de la fila al de la columna. Los valores (V) se mezclan según esos pesos para producir una representación de cada token sensible a su contexto, c sub 1 a c sub 3. Se ilustra cómo la palabra vaina dirige el 65 % de su atención hacia pásame, ganando el sentido de objeto físico.">
+                        <title>Autoatención: la matriz de pesos softmax(QKᵀ/√d_k) indica cuánta atención presta cada token (fila, consulta Q) a cada token (columna, clave K); la mezcla ponderada de los valores V produce la salida contextual.</title>
 
                         <text x={gx + cell * 1.5} y={28} textAnchor="middle" fontSize="12" fill="#0E7490" fontWeight="bold">Claves (K) — ¿con quién se compara?</text>
                         <text x={40} y={gy + rh * 1.5} textAnchor="middle" fontSize="12" fill="#3D008D" fontWeight="bold" transform={`rotate(-90 40 ${gy + rh * 1.5})`}>Consultas (Q)</text>
@@ -2872,7 +2909,7 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                         {W.map((row, i) => row.map((w, j) => (
                             <g key={'c' + i + '-' + j}>
                                 <rect x={gx + cell * j} y={gy + rh * i} width={cell - 4} height={rh - 4} rx="6" fill={`rgba(237,30,121,${(0.12 + w * 0.85).toFixed(3)})`} stroke="#ED1E79" strokeWidth="1" />
-                                <text x={gx + cell * j + (cell - 4) / 2} y={gy + rh * i + (rh - 4) / 2 + 4} textAnchor="middle" fontSize="12" fill={w > 0.45 ? '#FFFFFF' : '#7A1740'} fontWeight="bold">{w.toFixed(2)}</text>
+                                <text x={gx + cell * j + (cell - 4) / 2} y={gy + rh * i + (rh - 4) / 2 + 4} textAnchor="middle" fontSize="12" fill={w > 0.45 ? '#FFFFFF' : '#7A1740'} fontWeight="bold">{fmtDec(w, 2)}</text>
                             </g>
                         )))}
 
@@ -2881,20 +2918,22 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                         <text x={gx + cell * 3 + 21} y={gy + rh * 1.5 - 8} textAnchor="middle" fontSize="12" fill="#15803D" fontWeight="bold">× V</text>
 
                         {toks.map((t, i) => (
-                            <g key={'z' + i}>
+                            <g key={'c' + i}>
                                 <rect x={gx + cell * 3 + 48} y={gy + rh * i + 6} width={64} height={rh - 16} rx="8" fill="#F0FDF4" stroke="#15803D" strokeWidth="1.6" />
-                                <text x={gx + cell * 3 + 80} y={gy + rh * i + rh / 2 + 2} textAnchor="middle" fontSize="12" fill="#15803D" fontWeight="bold">z<tspan baselineShift="sub" fontSize="8">{i + 1}</tspan></text>
+                                <text x={gx + cell * 3 + 80} y={gy + rh * i + rh / 2 + 2} textAnchor="middle" fontSize="12" fill="#15803D" fontWeight="bold">c<tspan baselineShift="sub" fontSize="8">{i + 1}</tspan></text>
                             </g>
                         ))}
                         <text x={gx + cell * 3 + 80} y={gy + rh * 3 + 14} textAnchor="middle" fontSize="10" fill="#15803D" fontStyle="italic">salida contextual</text>
 
                         <text x={gx + cell * 1.5} y={gy + rh * 3 + 34} textAnchor="middle" fontSize="13" fill="#001A4D" fontWeight="bold">peso = softmax( Q·Kᵀ / √d<tspan baselineShift="sub" fontSize="9">k</tspan> )</text>
                     </svg>
-                    <p className="text-xs text-gray-500 italic text-center mt-1">
+                    </div>
+                    <AvisoDesplazar />
+                    <PieFigura n="2.3.8" className="mt-2" fuente="elaboración propia; pesos calculados con el modelo de juguete de la herramienta interactiva de esta sección (en él, K y V coinciden), redondeados para que cada fila sume 1.">
                         Autoatención: cada token (fila) consulta a todos los tokens (columnas) y obtiene un peso softmax(Q·Kᵀ/√d<sub>k</sub>);
-                        la mezcla ponderada de los <em>Value</em> produce una representación sensible al contexto. Aquí «vaina» reparte su
-                        atención hacia «pásame», ganando el sentido de <em>objeto físico</em>. Fuente: elaboración propia.
-                    </p>
+                        la mezcla ponderada de los valores (V) produce una representación sensible al contexto, c<sub>1</sub>…c<sub>3</sub>. Aquí
+                        «vaina» dirige el 65 % de su atención hacia «pásame», ganando el sentido de <em>objeto físico</em>.
+                    </PieFigura>
                 </div>
             );
         };
@@ -2902,17 +2941,7 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
         const Cap23Section = () => {
             const ref = useRef(null);
             useTypeset(ref, []);
-            useEffect(() => {
-                const onMsg = (e) => {
-                    const d = e && e.data;
-                    if (d && d.type === 'embed-tool-height' && d.id && d.height) {
-                        const fr = document.getElementById(d.id);
-                        if (fr) fr.style.height = (d.height + 4) + 'px';
-                    }
-                };
-                window.addEventListener('message', onMsg);
-                return () => window.removeEventListener('message', onMsg);
-            }, []);
+            useEmbedHeight(['atencion-frame', 'generativos-frame']);
             return (
                 <div ref={ref} className="prose-usta">
                     <SectionHeader title="Capítulo 2.3 — Modelos generativos y espacios latentes" icon={Icons.Sparkles} />
@@ -2959,11 +2988,11 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                     </p>
 
                     <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
-                        <img src="images/modulo-2/manifold-hipotesis.png" alt="Ilustración conceptual de un manifold: numerosos puntos de datos sobre una superficie curva enrollada de baja dimensión dentro de un espacio tridimensional." className="w-full rounded-lg" loading="lazy" />
-                        <p className="text-xs text-gray-500 italic text-center mt-2">
-                            Hipótesis del manifold: los datos reales (puntos) no llenan todo el espacio, sino que se concentran sobre una
-                            superficie curva de dimensión mucho menor incrustada en él. Ilustración conceptual generada localmente.
-                        </p>
+                        <img src="images/modulo-2/manifold-hipotesis.webp" width="1216" height="832" alt="Ilustración generada con IA: miles de puntos luminosos, de cian a magenta, dispuestos sobre una superficie curva en forma de tubo, sobre fondo negro; evoca datos concentrados en una superficie de baja dimensión dentro de un espacio tridimensional." className="w-full h-auto rounded-lg" loading="lazy" />
+                        <PieFigura n="2.3.1" className="mt-2" fuente="imagen generada con IA (Flux.1 schnell, 2026), ilustrativa; no representa datos reales.">
+                            Hipótesis de la variedad (<em>manifold</em>): los datos reales (puntos) no llenan todo el espacio, sino que se
+                            concentran sobre una superficie curva de dimensión mucho menor incrustada en él.
+                        </PieFigura>
                     </div>
 
                     <ul>
@@ -2972,11 +3001,13 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                     </ul>
 
                     <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
-                        <img src="images/modulo-2/interpolacion-latente.png" alt="Fila de orquídeas que transita gradualmente de blanco a magenta, ilustrando la interpolación entre dos puntos del espacio latente." className="w-full rounded-lg" loading="lazy" />
-                        <p className="text-xs text-gray-500 italic text-center mt-2">
-                            Interpolación en el espacio latente: desplazarse suavemente entre dos puntos produce transiciones graduales y
-                            coherentes —aquí, entre dos variedades de orquídea—. Ilustración conceptual generada localmente.
-                        </p>
+                        <img src="images/modulo-2/interpolacion-latente.webp" width="1216" height="832" alt="Ilustración generada con IA: una vara de orquídea con un botón y seis flores sobre fondo claro; el color pasa del blanco al lila pálido y a un morado intenso, y la última flor vuelve al lila pálido." className="w-full h-auto rounded-lg" loading="lazy" />
+                        <PieFigura n="2.3.2" className="mt-2" fuente="imagen generada con IA (Flux.1 schnell, 2026), ilustrativa; no es una interpolación calculada ni representa datos reales.">
+                            Idea de la interpolación en el espacio latente: en un latente continuo, desplazarse entre dos puntos produce
+                            transiciones graduales, aquí evocadas con orquídeas de distintos tonos. Un barrido real del latente, decodificado
+                            por un VAE entrenado en el navegador, se observa en el laboratorio del VAE de la herramienta interactiva que
+                            cierra el §6.
+                        </PieFigura>
                     </div>
 
                     {/* ============== 2. Autoencoders ============== */}
@@ -3946,7 +3977,7 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                 const saved = parseInt(localStorage.getItem(STORAGE_KEY), 10);
                 return Number.isInteger(saved) && saved >= 0 ? saved : 0;
             });
-            const [sidebarOpen, setSidebarOpen] = useState(true);
+            const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 1024);   // en móvil y tableta, el menú arranca cerrado
 
             const safeIndex = Math.min(activeLessonIndex, curriculum.length - 1);
             const activeLesson = curriculum[safeIndex];
@@ -4011,7 +4042,7 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
 
                         <div id="contenido-scroll" className="flex-1 overflow-y-auto p-6 lg:p-12">
                             <div className="max-w-4xl mx-auto w-full">
-                                <div className="mb-6 flex items-center justify-between flex-wrap gap-3">
+                                <div className="mb-6 flex items-center justify-between flex-wrap gap-3 pl-12 lg:pl-0">
                                     <span className="text-xs font-bold tracking-wider text-secondary uppercase">
                                         Lección {safeIndex + 1} de {curriculum.length} · {progreso} %
                                     </span>
