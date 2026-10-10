@@ -247,20 +247,20 @@ def figura_frontera(modelo, datos):
 
 
 def figura_curvas(historia):
-    """Curvas de pérdida y precisión: train vs. validación."""
+    """Curvas de pérdida y exactitud: entrenamiento (morado) vs. validación (rosa), como en el Módulo 1."""
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 3.6))
     epocas = range(1, len(historia["perdida_tr"]) + 1)
 
-    ax1.plot(epocas, historia["perdida_tr"], label="Entrenamiento", color="#1B4965")
+    ax1.plot(epocas, historia["perdida_tr"], label="Entrenamiento", color="#3D008D")
     ax1.plot(epocas, historia["perdida_val"], label="Validación",
-             color="#D7263D", linestyle="--")
-    ax1.set_title("Pérdida (Loss)"); ax1.set_xlabel("Época")
+             color="#ED1E79", linestyle="--")
+    ax1.set_title("Pérdida"); ax1.set_xlabel("Época")
     ax1.legend(fontsize=8); ax1.grid(alpha=0.3)
 
-    ax2.plot(epocas, historia["acc_tr"], label="Entrenamiento", color="#1B4965")
+    ax2.plot(epocas, historia["acc_tr"], label="Entrenamiento", color="#3D008D")
     ax2.plot(epocas, historia["acc_val"], label="Validación",
-             color="#D7263D", linestyle="--")
-    ax2.set_title("Precisión (Accuracy)"); ax2.set_xlabel("Época")
+             color="#ED1E79", linestyle="--")
+    ax2.set_title("Exactitud (accuracy)"); ax2.set_xlabel("Época")
     ax2.set_ylim(0, 1.02); ax2.legend(fontsize=8); ax2.grid(alpha=0.3)
 
     fig.tight_layout()
@@ -446,8 +446,8 @@ if "modelo" in st.session_state:
     getattr(st, nivel)(f"**{titulo}** — {mensaje}")
 
     c1, c2 = st.columns(2)
-    c1.metric("Precisión entrenamiento", f"{historia['acc_tr'][-1]:.1%}")
-    c2.metric("Precisión validación", f"{historia['acc_val'][-1]:.1%}")
+    c1.metric("Exactitud entrenamiento", f"{historia['acc_tr'][-1]:.1%}")
+    c2.metric("Exactitud validación", f"{historia['acc_val'][-1]:.1%}")
 else:
     st.info("👈 Configura los hiperparámetros y pulsa **🚀 Entrenar red** "
             "para comenzar el experimento.")
