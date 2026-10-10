@@ -264,6 +264,12 @@
             outline: none;
         }
 
+        /* Accesibilidad: foco visible también en los deslizadores (WCAG 2.4.7) */
+        .usta-range:focus-visible {
+            outline: 2px solid #ED1E79;
+            outline-offset: 3px;
+        }
+
         .usta-range::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
@@ -703,7 +709,7 @@
                         <i className="fas fa-circle-question text-secondary mt-1"></i>
                         <span>{pregunta}</span>
                     </div>
-                    {multiple && <p className="text-xs text-gray-400 mb-2 ml-6">Selección múltiple</p>}
+                    {multiple && <p className="text-xs text-gray-500 mb-2 ml-6">Selección múltiple</p>}
                     <div className="space-y-2 mt-3">
                         {opciones.map((o, i) => {
                             const isSel = sel.includes(i);
@@ -795,7 +801,7 @@
                         <div key={qi} className="mb-5">
                             <div className="font-semibold text-navy text-[0.95rem] mb-2">
                                 {qi + 1}. {q.pregunta}
-                                {q.multiple && <span className="ml-2 text-xs text-gray-400 font-normal">(selección múltiple)</span>}
+                                {q.multiple && <span className="ml-2 text-xs text-gray-500 font-normal">(selección múltiple)</span>}
                             </div>
                             <div className="space-y-1.5">
                                 {q.opciones.map((o, oi) => {
@@ -860,20 +866,55 @@
         ============================================================ */
         const usePlotly = (id, dataFn, layoutFn, deps = []) => {
             useEffect(() => {
+                // Se captura el NODO (no el id): la limpieza corre cuando React ya retiró el div del DOM,
+                // y Plotly.purge(id) fallaba en silencio, dejando vivo el bucle WebGL de las gráficas 3D.
                 const el = document.getElementById(id);
-                if (el && window.Plotly) {
-                    window.Plotly.newPlot(id, dataFn(), layoutFn(), { responsive: true, displayModeBar: false });
+                if (!el || !window.Plotly) return undefined;
+                window.Plotly.newPlot(el, dataFn(), { separators: ',.', ...layoutFn() }, { responsive: true, displayModeBar: false });
+                // Reajuste al tamaño real del contenedor: en móvil la gráfica puede montarse mientras el menú
+                // lateral aún se cierra (transición) y quedarse con el ancho de ese instante.
+                let ro = null;
+                if (window.ResizeObserver) {
+                    ro = new ResizeObserver(() => {
+                        if (el.isConnected && el.offsetWidth > 0) {
+                            try { const p = window.Plotly.Plots.resize(el); if (p && p.catch) p.catch(() => { }); } catch (e) { }
+                        }
+                    });
+                    ro.observe(el);
                 }
-                return () => { if (window.Plotly) { try { window.Plotly.purge(id); } catch (e) { } } };
+                return () => {
+                    if (ro) ro.disconnect();
+                    try { window.Plotly.purge(el); } catch (e) { }
+                };
             }, deps);
         };
 
-        const ChartFrame = ({ id, height = 'chart-h-360', caption }) => (
+        /* Número con coma decimal para el texto visible (regla B: coma en prosa, leyendas y UI; punto en código y LaTeX). */
+        const fmtDec = (v, d) => v.toFixed(d).replace('.', ',');
+
+        /* Pie de figura normalizado: «Figura c.n.» + descripción + fuente.
+           Numeración por capítulo del módulo (c = capítulo, n = orden de aparición dentro del capítulo). */
+        const PieFigura = ({ n, fuente = 'elaboración propia.', className = '', children }) => (
+            <p className={`text-xs text-gray-500 italic text-center ${className}`}>
+                <strong className="not-italic text-navy">Figura {n}.</strong> {children} <span className="not-italic">Fuente: {fuente}</span>
+            </p>
+        );
+
+        /* «Antes de interactuar»: pide una predicción falsable antes de usar cada simulación. */
+        const AntesDeInteractuar = ({ children }) => (
+            <p className="rounded-lg px-4 py-2.5 my-3 text-[0.92rem] text-gray-700 border border-dashed" style={{ borderColor: 'rgba(61,0,141,0.35)', background: '#FCFAFF' }}>
+                <i className="fas fa-circle-question mr-2" style={{ color: '#3D008D' }} aria-hidden="true"></i><strong className="text-navy">Antes de interactuar:</strong> {children}
+            </p>
+        );
+
+        const ChartFrame = ({ id, height = 'chart-h-360', caption, fig, fuente = 'elaboración propia (cálculo en el navegador).', alt }) => (
             <>
                 <div className="bg-white border border-gray-200 rounded-xl p-2 shadow-sm my-3">
-                    <div id={id} className={height} style={{ width: '100%' }}></div>
+                    <div id={id} className={height} style={{ width: '100%' }} role="img" aria-label={alt || caption || 'Gráfica interactiva'}></div>
                 </div>
-                {caption && <p className="text-xs text-gray-500 italic text-center mb-4">{caption}</p>}
+                {fig
+                    ? <PieFigura n={fig} fuente={fuente} className="mb-4">{caption}</PieFigura>
+                    : (caption && <p className="text-xs text-gray-500 italic text-center mb-4">{caption}</p>)}
             </>
         );
 
@@ -903,7 +944,7 @@
                     <circle cx="600" cy="120" r="22" fill="#F0FDF4" stroke="#15803D" strokeWidth="2" />
                     <text x="600" y="125" textAnchor="middle" fontSize="14" fill="#15803D" fontWeight="bold">ŷ</text>
                 </svg>
-                <p className="text-xs text-gray-500 italic text-center">Suma ponderada de las entradas más el sesgo, seguida de una función de activación no lineal.</p>
+                <PieFigura n="2.1" className="mt-2">Anatomía de una neurona artificial: suma ponderada de las entradas más el sesgo, seguida de una función de activación no lineal.</PieFigura>
             </div>
         );
 
@@ -1113,7 +1154,8 @@ def caracteristicas_manuales(imagen):
                             </button>
                         ))}
                     </div>
-                    <ChartFrame id="chart-compuertas" height="chart-h-360" caption={`${puerta}: ${cfg.desc}`} />
+                    <ChartFrame id="chart-compuertas" height="chart-h-360" fig="1.2" caption={`Compuerta ${puerta} sobre el plano de entradas. ${cfg.desc}`}
+                        alt={`Gráfica de las cuatro combinaciones de entradas binarias (x₁, x₂) coloreadas según la salida de la compuerta ${puerta}${cfg.sep ? ', con la recta de frontera del perceptrón' : '; ninguna recta separa las salidas'}.`} />
                     <div key={puerta} className="text-[0.9rem] text-gray-700 bg-bg rounded-lg p-4 border-l-4" style={{ borderColor: '#3D008D' }}>
                         {cfg.sep
                             ? <span>Una sola neurona puede resolver <strong>{puerta}</strong>: existe una recta ({cfg.eq}) que separa las salidas 1 de las 0. Esa recta es exactamente su frontera de decisión, con {cfg.wb}.</span>
@@ -1171,9 +1213,9 @@ def caracteristicas_manuales(imagen):
                     <text x="600" y="213" textAnchor="middle" fontSize="14" fill="#001A4D" fontWeight="bold">ŷ</text>
                     <text x="648" y="285" textAnchor="end" fontSize="10" fill="#64748B" fontStyle="italic">axón (salida)</text>
                 </svg>
-                <p className="text-xs text-gray-500 italic text-center">
-                    Misma estructura (entradas · pesos · suma · sesgo). La diferencia está en la activación: el perceptrón usa un escalón (salida 0 o 1); la neurona moderna, una función suave.
-                </p>
+                <PieFigura n="1.1" className="mt-2">
+                    Perceptrón y neurona moderna, con los nombres biológicos de cada parte: misma estructura (entradas · pesos · suma · sesgo). La diferencia está en la activación: el perceptrón usa un escalón (salida 0 o 1); la neurona moderna, una función suave.
+                </PieFigura>
             </div>
         );
 
@@ -1220,9 +1262,9 @@ def caracteristicas_manuales(imagen):
                         <circle cx="648" cy="98" r="14" fill="#15803D" />
                         <path d="M641 98 l5 5 l9 -11" stroke="#fff" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                    <p className="text-xs text-gray-500 italic text-center">
-                        En Deep Learning nadie programa estas etapas: la red las aprende sola, capa a capa —de los píxeles crudos al concepto final—.
-                    </p>
+                    <PieFigura n="1.3" className="mt-2">
+                        Jerarquía de características. En Deep Learning nadie programa estas etapas: la red las aprende sola, capa a capa —de los píxeles crudos al concepto final—.
+                    </PieFigura>
                 </div>
             );
         };
@@ -1314,6 +1356,7 @@ def caracteristicas_manuales(imagen):
                     geométricamente, a trazar <strong>una única línea recta</strong> —la frontera rosada— que separa las salidas 1 de
                     las 0. Al alternar entre las compuertas se aprecia la diferencia:
                 </p>
+                <AntesDeInteractuar>al pasar de AND a OR, ¿se espera que la recta frontera se desplace en paralelo, gire o desaparezca? Y para XOR, ¿cuántas rectas harían falta como mínimo?</AntesDeInteractuar>
                 <CompuertasLogicas />
                 <p>
                     La <strong>conjunción (AND)</strong> y la <strong>disyunción (OR)</strong> son linealmente separables: una sola
@@ -1494,7 +1537,7 @@ def caracteristicas_manuales(imagen):
                             </g>
                         ))}
                     </svg>
-                    <p className="text-xs text-gray-500 italic text-center">Red prealimentada (<em>feedforward</em>): la información fluye de izquierda a derecha, transformándose en cada capa.</p>
+                    <PieFigura n="2.2" className="mt-2">Red prealimentada (<em>feedforward</em>): la información fluye de izquierda a derecha, transformándose en cada capa.</PieFigura>
                 </div>
             );
         };
@@ -1537,7 +1580,9 @@ def caracteristicas_manuales(imagen):
                             {deriv ? 'Ver función' : 'Ver derivada'}
                         </button>
                     </div>
-                    <ChartFrame id="chart-activaciones" caption={deriv
+                    <ChartFrame id="chart-activaciones" fig="2.5"
+                        alt={deriv ? 'Derivadas de las funciones de activación seleccionadas entre z = −6 y z = 6.' : 'Funciones de activación seleccionadas (ReLU, Leaky ReLU, sigmoide, tanh) entre z = −6 y z = 6.'}
+                        caption={deriv
                         ? "Derivadas: la de Sigmoide/Tanh ≈ 0 en los extremos (origen del desvanecimiento del gradiente); la de ReLU vale 1 para z>0. (En Leaky ReLU la pendiente negativa se dibuja en 0,1, exagerada para visibilidad; el valor típico es 0,01.)"
                         : "ReLU no satura para valores positivos; Sigmoide y Tanh se aplanan en los extremos. (Softmax opera sobre un vector; véase el acordeón inferior.) En Leaky ReLU la pendiente negativa se dibuja en 0,1, exagerada para visibilidad; el valor típico es 0,01."} />
                 </div>
@@ -1559,7 +1604,8 @@ def caracteristicas_manuales(imagen):
                 xaxis: { title: 'θ (parámetro)', gridcolor: '#eee' }, yaxis: { title: 'Error', gridcolor: '#eee' },
                 font: { family: 'Montserrat', size: 11 }, paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
             }), []);
-            return <ChartFrame id="chart-gradiente" caption="Cada paso del descenso se da en dirección opuesta a la pendiente; los pasos se acortan al acercarse al valle (error mínimo)." />;
+            return <ChartFrame id="chart-gradiente" fig="3.2" caption="Cada paso del descenso se da en dirección opuesta a la pendiente; los pasos se acortan al acercarse al valle (error mínimo)."
+                alt="Parábola L(θ) = θ² con los pasos sucesivos del descenso del gradiente desde θ = 2,7, cada vez más cortos al acercarse al mínimo." />;
         };
 
         /* Gráfico interactivo: cómo una capa oculta resuelve el XOR */
@@ -1602,7 +1648,8 @@ def caracteristicas_manuales(imagen):
                             </button>
                         ))}
                     </div>
-                    <ChartFrame id="chart-xor-mlp" height="chart-h-360" caption="XOR resuelto por un MLP: 2 entradas → 2 neuronas ocultas → 1 salida." />
+                    <ChartFrame id="chart-xor-mlp" height="chart-h-360" fig="2.3" caption="XOR resuelto por un MLP: 2 entradas → 2 neuronas ocultas → 1 salida."
+                        alt="Plano de entradas del XOR con las rectas de las dos neuronas ocultas (OR y NAND) y la franja entre ambas donde la salida vale 1, según el paso seleccionado." />
                     <div key={paso} className="text-[0.9rem] text-gray-700 bg-bg rounded-lg p-4 border-l-4" style={{ borderColor: '#15803D' }}>
                         {pasos[paso].d}
                     </div>
@@ -1690,7 +1737,9 @@ modelo = nn.Sequential(
                             perfil de la carretera. Aquí el relieve es la función que se quiere imitar; en el Capítulo 3, el relieve
                             representará otra cosa: el error del modelo.
                         </p>
-                        <ChartFrame id="chart-teorema" height="chart-h-320" />
+                        <ChartFrame id="chart-teorema" height="chart-h-320" fig="2.4"
+                            caption="Función objetivo (morado) y su aproximación por bloques constantes (rosa): con más bloques, la escalera se ciñe cada vez más a la curva."
+                            alt="Curva continua y su aproximación por una escalera de bloques constantes; al aumentar el número de bloques, la escalera se ajusta mejor a la curva." />
                         <div className="flex flex-wrap items-center gap-2">
                             <span className="text-xs font-semibold text-gray-500 mr-1">Neuronas:</span>
                             {[3, 6, 12, 24].map(k => (
@@ -1699,7 +1748,7 @@ modelo = nn.Sequential(
                                     {k}
                                 </button>
                             ))}
-                            <span className="text-xs text-gray-400 ml-1">→ más neuronas, mejor aproximación</span>
+                            <span className="text-xs text-gray-500 ml-1">→ más neuronas, mejor aproximación</span>
                         </div>
                     </div>
                 </div>
@@ -1734,7 +1783,7 @@ modelo = nn.Sequential(
                                 <div key={i}>
                                     <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1">
                                         <span>{etiquetas[i]} · <span className="text-primary">w{i + 1} = {wi.toFixed(2)}</span></span>
-                                        <span className="text-gray-400">x{i + 1} = {x[i]}</span>
+                                        <span className="text-gray-500">x{i + 1} = {x[i]}</span>
                                     </div>
                                     <input type="range" min="-2" max="2" step="0.05" value={wi} onChange={e => setWi(i, +e.target.value)} className="usta-range" aria-label={`Peso w${i + 1} (${etiquetas[i]})`} />
                                 </div>
@@ -1764,7 +1813,7 @@ modelo = nn.Sequential(
                                 <div className="mt-3 h-3 rounded-full bg-gray-200 overflow-hidden">
                                     <div className="h-full usta-gradient transition-all duration-150" style={{ width: `${Math.max(0, Math.min(1, aNorm)) * 100}%` }}></div>
                                 </div>
-                                <div className="text-center text-[0.7rem] text-gray-400 mt-1">{nota}</div>
+                                <div className="text-center text-[0.7rem] text-gray-500 mt-1">{nota}</div>
                             </div>
                         </div>
                     </div>
@@ -1791,11 +1840,11 @@ modelo = nn.Sequential(
                 return { TP, FP, FN, TN, n, fnr: (FN + TP) > 0 ? FN / (FN + TP) : null, fpr: (FP + TN) > 0 ? FP / (FP + TN) : null, acc: n > 0 ? (TP + TN) / n : null };
             };
             const A = stats(0), B = stats(1);
-            const pct = v => v == null ? '—' : `${Math.round(v * 100)}%`;
+            const pct = v => v == null ? '—' : `${Math.round(v * 100)} %`;
             const brechaFNR = (A.fnr != null && B.fnr != null) ? Math.abs(A.fnr - B.fnr) : null;
             const matriz = (S, nombre, color) => (
                 <div className="rounded-lg border-2 p-2" style={{ borderColor: color }}>
-                    <div className="text-xs font-bold mb-1" style={{ color }}>Subgrupo {nombre} <span className="text-gray-400 font-normal">(n={S.n})</span></div>
+                    <div className="text-xs font-bold mb-1" style={{ color }}>Subgrupo {nombre} <span className="text-gray-500 font-normal">(n = {S.n})</span></div>
                     <div className="grid gap-1 text-[0.62rem]" style={{ gridTemplateColumns: 'auto 1fr 1fr' }}>
                         <div></div><div className="text-center font-semibold text-gray-500">Pred +</div><div className="text-center font-semibold text-gray-500">Pred −</div>
                         <div className="font-semibold text-gray-500 flex items-center">Real +</div>
@@ -1816,11 +1865,11 @@ modelo = nn.Sequential(
                         <p className="text-[0.7rem] text-gray-500 mb-3 rounded-lg px-2 py-1.5" style={{ background: '#F8FAFC', border: '1px solid #E2E8F0' }}><i className="fas fa-book-open mr-1"></i><strong>Cómo leer cada tabla:</strong> <strong style={{ color: '#B91C1C' }}>FN</strong> = caso positivo real que quedó <em>sin alerta</em> (el error más grave aquí) · <strong style={{ color: '#B45309' }}>FP</strong> = falsa alarma · <strong>FNR</strong> = % de positivos reales sin alerta (cuanto más bajo, mejor).</p>
                         <div className="grid sm:grid-cols-2 gap-3">{matriz(A, 'A', '#15803D')}{matriz(B, 'B', '#B45309')}</div>
                         <div className="mt-3">
-                            <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1"><span>Umbral de decisión <span className="text-gray-400">(probabilidad mínima para emitir la alerta; solo afecta al auditor)</span></span><span className="text-primary">{umbral.toFixed(2)}</span></div>
+                            <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1"><span>Umbral de decisión <span className="text-gray-500">(probabilidad mínima para emitir la alerta; solo afecta al auditor)</span></span><span className="text-primary">{fmtDec(umbral, 2)}</span></div>
                             <input type="range" min="0.05" max="0.95" step="0.05" value={umbral} onChange={e => setUmbral(+e.target.value)} className="usta-range" aria-label="Umbral de decisión del auditor" />
                         </div>
                         <div className="mt-3 rounded-lg p-3 text-[0.78rem]" style={{ background: '#FAF5FF', border: '1px solid rgba(61,0,141,0.15)' }}>
-                            <strong className="text-navy">Veredicto:</strong> con el umbral en {umbral.toFixed(2)}, quedan <em>sin alerta</em> el <strong style={{ color: '#B91C1C' }}>{pct(B.fnr)}</strong> de los casos positivos del <strong>subgrupo B</strong> y el <strong style={{ color: '#15803D' }}>{pct(A.fnr)}</strong> de los del subgrupo A.{brechaFNR != null && <> Esa diferencia —<strong>{Math.round(brechaFNR * 100)} puntos</strong>— es la <strong>brecha de igualdad de oportunidad</strong>.{Math.round(brechaFNR * 100) < 3 && <span className="text-gray-500"> (En esta corrida la brecha resultó pequeña: el sesgo es una <em>tendencia</em> estadística, no una constante. Al reiniciar pesos y reentrenar, o al mover el umbral, suele emerger con claridad.)</span>}</>}
+                            <strong className="text-navy">Veredicto:</strong> con el umbral en {fmtDec(umbral, 2)}, quedan <em>sin alerta</em> el <strong style={{ color: '#B91C1C' }}>{pct(B.fnr)}</strong> de los casos positivos del <strong>subgrupo B</strong> y el <strong style={{ color: '#15803D' }}>{pct(A.fnr)}</strong> de los del subgrupo A.{brechaFNR != null && <> Esa diferencia —<strong>{Math.round(brechaFNR * 100)} puntos</strong>— es la <strong>brecha de igualdad de oportunidad</strong>.{Math.round(brechaFNR * 100) < 3 && <span className="text-gray-500"> (En esta corrida la brecha resultó pequeña: el sesgo es una <em>tendencia</em> estadística, no una constante. Al reiniciar pesos y reentrenar, o al mover el umbral, suele emerger con claridad.)</span>}</>}
                         </div>
                         <div className="mt-3 flex items-center justify-between gap-2 flex-wrap">
                             <span className="text-[0.76rem] text-gray-700"><strong>Costo del falso negativo (6×):</strong> la pérdida castiga seis veces más dejar un positivo sin alerta (prioriza el recall sobre la exactitud). Tras activarlo, conviene <strong>reiniciar los pesos y reentrenar</strong> para ver su efecto.</span>
@@ -1836,7 +1885,7 @@ modelo = nn.Sequential(
             const [nCapas, setNCapas] = useState(2);                // capas ocultas: 1..3
             const [nNodos, setNNodos] = useState(6);                // nodos por capa: 1..10
             const [activacion, setActivacion] = useState('tanh');   // 'relu'|'sigmoide'|'tanh'
-            const [lrExp, setLrExp] = useState(0.8);                // 0..1 -> lr logarítmico
+            const [lrExp, setLrExp] = useState(0.6);                // 0..1 -> lr logarítmico (0.6 -> η ≈ 0.251)
             const [corriendo, setCorriendo] = useState(false);      // animación activa
             const [metricas, setMetricas] = useState({ epoca: 0, perdida: NaN, acc: 0 });
             const [hayCongelada, setHayCongelada] = useState(false);
@@ -1844,8 +1893,9 @@ modelo = nn.Sequential(
             const [lambda, setLambda] = useState(0);               // regularización L2 (revelado en Cap 5)
             const [dropout, setDropout] = useState(0);             // dropout en capas ocultas (revelado en Cap 5)
             const [costoFN, setCostoFN] = useState(false);         // ponderar el costo del falso negativo (Cap 5 ética)
+            const [gradLin, setGradLin] = useState(null);          // gradiente RMS por peso de cada capa, mostrado bajo la linterna (Cap 4)
 
-            const lr = Math.pow(10, -3 + 3 * lrExp);                // escala logarítmica: 0.001 .. 1.0
+            const lr = Math.pow(10, -3 + 4 * lrExp);                // escala logarítmica: 0.001 .. 10 (la divergencia aparece hacia η ≈ 10)
 
             // --- Refs de trabajo (no provocan re-render) ---
             const canvasRef = useRef(null);
@@ -2007,8 +2057,9 @@ modelo = nn.Sequential(
                 return { gW, gB };
             };
 
-            // Norma L2 del gradiente MEDIO de cada capa de conexiones (alimenta el "modo linterna" del Cap 4)
-            const normaDeCapa = (gW, N) => gW.map(Wl => Math.sqrt(Wl.reduce((s, row) => s + row.reduce((a, w) => a + w * w, 0), 0)) / N);
+            // Magnitud del gradiente MEDIO de cada capa de conexiones, como RMS POR PESO: ‖∇W‖_F / √(n_in·n_out).
+            // Así las capas (y las redes) son comparables entre sí; alimenta el "modo linterna" del Cap 4.
+            const normaDeCapa = (gW, N) => gW.map(Wl => { const nW = Math.max(1, Wl.length * (Wl[0] ? Wl[0].length : 1)); return Math.sqrt(Wl.reduce((s, row) => s + row.reduce((a, w) => a + w * w, 0), 0) / nW) / N; });
             const normasGradiente = (red, datos) => normaDeCapa(acumularGradientes(red, datos).gW, Math.max(1, datos.length));
 
             const entrenarEpoca = (red, datos, tasa, optim = 'sgd', beta = 0.9, lambda = 0, dropout = 0, classW = [1, 1]) => {
@@ -2176,6 +2227,8 @@ modelo = nn.Sequential(
             // ===== "Modo linterna" (Cap 4): anima el flujo forward → pausa → backward sobre el diagrama;
             //       en el backward, el grosor de cada capa ∝ su norma de gradiente (desvanecimiento visible) =====
             const faseLinterna = (prog, nConn) => prog < nConn ? 'forward' : (prog < nConn + 1 ? 'pausa' : 'backward');
+            const SUBIND = '₀₁₂₃₄₅₆₇₈₉';
+            const fmtGrad = (g) => !isFinite(g) ? '—' : g < 1e-6 ? '< 0,000001' : g.toPrecision(2).replace('.', ',');
             const pintarLinterna = () => {
                 const cv = redCanvasRef.current, red = redRef.current;
                 if (!cv || !red) return;
@@ -2191,7 +2244,9 @@ modelo = nn.Sequential(
                 const activa = fase === 'forward' ? Math.floor(lin.prog)
                     : fase === 'backward' ? nConn - 1 - Math.floor(lin.prog - (nConn + 1)) : -1;
                 const gn = lin.gradNorm || red.gradNorm || sz.slice(1).map(() => 1);
-                const gmax = Math.max(1e-12, ...gn);
+                // Escala logarítmica COMÚN y FIJA (de 10⁻⁴ a 1): no se normaliza por la capa máxima de la misma red,
+                // para que el desvanecimiento (capas cercanas a la entrada con gradientes diminutos) se vea tal cual.
+                const escalaLog = (g) => Math.min(1, Math.max(0, (Math.log10(Math.max(g, 1e-12)) + 4) / 4));
                 // 1) todas las conexiones, como "fantasma" tenue
                 for (let l = 0; l < nConn; l++) {
                     const Wl = red.W[l];
@@ -2203,7 +2258,7 @@ modelo = nn.Sequential(
                 // 2) capa activa: azul plena en forward; rosa con intensidad ∝ gradiente en backward
                 if (activa >= 0) {
                     const Wl = red.W[activa], esFwd = fase === 'forward';
-                    const rel = esFwd ? 1 : (gn[activa] / gmax), col = esFwd ? '59,130,246' : '237,30,121';
+                    const rel = esFwd ? 1 : escalaLog(gn[activa]), col = esFwd ? '59,130,246' : '237,30,121';
                     for (let j = 0; j < Wl.length; j++) for (let i = 0; i < Wl[j].length; i++) {
                         ctx.beginPath(); ctx.moveTo(xs[activa], ys[activa][i]); ctx.lineTo(xs[activa + 1], ys[activa + 1][j]);
                         ctx.strokeStyle = `rgba(${col},${0.12 + 0.85 * rel})`; ctx.lineWidth = 0.5 + 4 * rel; ctx.stroke();
@@ -2222,7 +2277,7 @@ modelo = nn.Sequential(
                 ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '700 12px Montserrat';
                 ctx.fillStyle = fase === 'forward' ? '#3b82f6' : fase === 'backward' ? '#ED1E79' : '#94A3B8';
                 ctx.fillText(fase === 'forward' ? '▶  Hacia adelante: la predicción fluye'
-                    : fase === 'backward' ? '◀  Retropropagación: grosor ∝ gradiente de la capa'
+                    : fase === 'backward' ? '◀  Retropropagación: grosor ∝ log del gradiente (escala fija)'
                         : '·  ·  ·', Wd / 2, 14);
             };
             const avanzarLinterna = () => {
@@ -2230,7 +2285,7 @@ modelo = nn.Sequential(
                 const lin = linternaRef.current, nConn = red.W.length, total = 2 * nConn + 1;
                 const antes = faseLinterna(lin.prog, nConn);
                 lin.prog += 0.05; if (lin.prog >= total) lin.prog = 0;
-                if (faseLinterna(lin.prog, nConn) === 'backward' && antes !== 'backward') lin.gradNorm = red.gradNorm || normasGradiente(red, datosRef.current);
+                if (faseLinterna(lin.prog, nConn) === 'backward' && antes !== 'backward') { lin.gradNorm = red.gradNorm || normasGradiente(red, datosRef.current); setGradLin(lin.gradNorm.slice()); }
                 pintarLinterna();
             };
             const pasoLinterna = () => {
@@ -2249,7 +2304,7 @@ modelo = nn.Sequential(
                 const plotW = Wd - padL - padR, plotH = Hd - padT - padB;
                 ctx.strokeStyle = '#E2E8F0'; ctx.lineWidth = 1;
                 ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, padT + plotH); ctx.lineTo(padL + plotW, padT + plotH); ctx.stroke();
-                ctx.fillStyle = '#94A3B8'; ctx.font = '9px Montserrat'; ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#64748B'; ctx.font = '9px Montserrat'; ctx.textBaseline = 'middle';
                 if (h.length < 2) { ctx.textAlign = 'center'; ctx.fillText('La curva aparece al pulsar «Entrenar»', Wd / 2, Hd / 2); return; }
                 let lo = Infinity, hi = -Infinity;
                 for (const v of h) { if (v < lo) lo = v; if (v > hi) hi = v; }
@@ -2263,12 +2318,12 @@ modelo = nn.Sequential(
                     ctx.stroke();
                 };
                 ctx.textAlign = 'right';
-                ctx.fillText(hi.toFixed(2), padL - 4, padT);
-                ctx.fillText(lo.toFixed(2), padL - 4, padT + plotH);
-                traza(h, '#ED1E79');                          // entrenamiento (rosa)
-                if (hv.length >= 2) traza(hv, '#3D008D');      // validación (morado) — la «U»
+                ctx.fillText(fmtDec(hi, 2), padL - 4, padT);
+                ctx.fillText(fmtDec(lo, 2), padL - 4, padT + plotH);
+                traza(h, '#3D008D');                          // entrenamiento (morado), como en las figuras del Cap 5
+                if (hv.length >= 2) traza(hv, '#ED1E79');      // validación (rosa) — la «U»
                 ctx.fillStyle = '#64748B'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-                ctx.fillText(hv.length >= 2 ? 'BCE — rosa: entrenamiento · morado: validación (la «U»)' : 'Pérdida (BCE) vs. época', padL + plotW / 2, Hd - 3);
+                ctx.fillText(hv.length >= 2 ? 'BCE — morado: entrenamiento · rosa: validación (la «U»)' : 'Pérdida (BCE) vs. época', padL + plotW / 2, Hd - 3);
             };
 
             // ===== Bucle de entrenamiento animado =====
@@ -2299,6 +2354,7 @@ modelo = nn.Sequential(
                 epocaRef.current = 0;
                 lossHistRef.current = []; valHistRef.current = [];
                 if (datosRef.current.length) setMetricas({ epoca: 0, ...evaluar(redRef.current, datosRef.current) });
+                if (chapter === 4 && datosRef.current.length) { linternaRef.current.gradNorm = normasGradiente(redRef.current, datosRef.current); setGradLin(linternaRef.current.gradNorm.slice()); }
                 pintar(); pintarCurva();
             };
             const congelar = () => { congeladaRef.current = predecirGrilla(redRef.current); setHayCongelada(true); pintar(); };
@@ -2326,7 +2382,7 @@ modelo = nn.Sequential(
             useEffect(() => {
                 if (chapter !== 4) return;
                 const lin = linternaRef.current; lin.prog = 0;
-                if (redRef.current && datosRef.current.length) lin.gradNorm = normasGradiente(redRef.current, datosRef.current);
+                if (redRef.current && datosRef.current.length) { lin.gradNorm = normasGradiente(redRef.current, datosRef.current); setGradLin(lin.gradNorm.slice()); }
                 pasoLinterna();
                 return () => { if (lin.raf) cancelAnimationFrame(lin.raf); lin.raf = null; };
             }, [chapter]);
@@ -2473,10 +2529,10 @@ modelo = nn.Sequential(
                             </div>
                             <div>
                                 <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1">
-                                    <span>Tasa de aprendizaje</span><span className="text-secondary">{lr < 0.01 ? lr.toFixed(4) : lr.toFixed(3)}</span>
+                                    <span>Tasa de aprendizaje (η)</span><span className="text-secondary">{fmtDec(lr, lr < 0.01 ? 4 : lr < 1 ? 3 : 2)}</span>
                                 </div>
-                                <input type="range" min="0" max="1" step="0.01" value={lrExp} onChange={e => setLrExp(+e.target.value)} className="usta-range" aria-label="Tasa de aprendizaje (escala logarítmica)" />
-                                <div className="flex justify-between text-[0.65rem] text-gray-400 mt-0.5"><span>0.001</span><span>escala logarítmica</span><span>1.0</span></div>
+                                <input type="range" min="0" max="1" step="0.01" value={lrExp} onChange={e => setLrExp(+e.target.value)} className="usta-range" aria-label="Tasa de aprendizaje (escala logarítmica)" aria-valuetext={`η = ${fmtDec(lr, lr < 0.01 ? 4 : lr < 1 ? 3 : 2)}`} />
+                                <div className="flex justify-between text-[0.65rem] text-gray-500 mt-0.5"><span>0,001</span><span>escala logarítmica</span><span>10</span></div>
                             </div>
                             {chapter >= 3 && (
                                 <div>
@@ -2500,7 +2556,7 @@ modelo = nn.Sequential(
                                 <div>
                                     <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1">
                                         <span className="flex items-center gap-2">Regularización L2 (λ) <span className="text-[0.55rem] font-bold text-white px-1.5 py-0.5 rounded-full" style={{ background: '#15803D' }}>NUEVO · Cap 5</span></span>
-                                        <span className="text-primary">{lambda.toFixed(3)}</span>
+                                        <span className="text-primary">{fmtDec(lambda, 3)}</span>
                                     </div>
                                     <input type="range" min="0" max="0.2" step="0.005" value={lambda} onChange={e => setLambda(+e.target.value)} className="usta-range" aria-label="Fuerza de regularización L2 (lambda)" />
                                     <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1 mt-3">
@@ -2516,7 +2572,7 @@ modelo = nn.Sequential(
                                     <i className={`fas ${corriendo ? 'fa-pause' : 'fa-play'} mr-1`}></i>{corriendo ? 'Pausar' : (metricas.epoca > 0 ? 'Reanudar' : 'Entrenar')}
                                 </button>
                                 <button onClick={reconstruir} className="px-3 py-1.5 rounded-lg text-xs font-bold text-primary bg-gray-100 hover:bg-gray-200 transition"><i className="fas fa-rotate-left mr-1"></i>Reiniciar pesos</button>
-                                <button onClick={congelar} className="px-3 py-1.5 rounded-lg text-xs font-bold text-white shadow hover:opacity-90 transition" style={{ background: '#D97706' }}><i className="fas fa-snowflake mr-1"></i>Congelar frontera</button>
+                                <button onClick={congelar} className="px-3 py-1.5 rounded-lg text-xs font-bold text-white shadow hover:opacity-90 transition" style={{ background: '#B45309' }}><i className="fas fa-snowflake mr-1"></i>Congelar frontera</button>
                                 <button onClick={limpiar} disabled={!hayCongelada} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${hayCongelada ? 'text-gray-700 bg-gray-100 hover:bg-gray-200' : 'text-gray-300 bg-gray-50 cursor-not-allowed'}`}><i className="fas fa-eraser mr-1"></i>Limpiar congelada</button>
                             </div>
                         </div>
@@ -2528,11 +2584,11 @@ modelo = nn.Sequential(
                             <div className="grid grid-cols-3 gap-2 mt-3">
                                 {[
                                     { etq: 'Época', val: metricas.epoca, col: '#001A4D' },
-                                    { etq: 'Pérdida (BCE)', val: isFinite(metricas.perdida) ? metricas.perdida.toFixed(4) : '—', col: '#ED1E79' },
+                                    { etq: 'Pérdida (BCE)', val: isFinite(metricas.perdida) ? fmtDec(metricas.perdida, 4) : '—', col: '#ED1E79' },
                                     { etq: 'Exactitud', val: `${Math.round(metricas.acc * 100)} %`, col: '#15803D' },
                                 ].map(m => (
                                     <div key={m.etq} className="rounded-lg bg-bg border border-gray-200 px-2 py-1.5 text-center">
-                                        <div className="text-[0.62rem] uppercase tracking-wide text-gray-400">{m.etq}</div>
+                                        <div className="text-[0.62rem] uppercase tracking-wide text-gray-500">{m.etq}</div>
                                         <div className="font-mono font-bold text-sm" style={{ color: m.col }}>{m.val}</div>
                                     </div>
                                 ))}
@@ -2541,7 +2597,7 @@ modelo = nn.Sequential(
                                 <span><span className="inline-block w-2.5 h-2.5 rounded-full align-middle mr-1" style={{ background: '#CBB6FF' }}></span>Clase 0</span>
                                 <span><span className="inline-block w-2.5 h-2.5 rounded-full align-middle mr-1" style={{ background: '#FF9DC8' }}></span>Clase 1</span>
                                 <span><span className="inline-block w-3 h-2 align-middle mr-1" style={{ background: '#D97706' }}></span>Frontera congelada</span>
-                                <span className="text-gray-400">Arquitectura {sizes.join('→')} · {nParams.toLocaleString('es-CO')} parámetros</span>
+                                <span className="text-gray-500">Arquitectura {sizes.join('→')} · {nParams.toLocaleString('es-CO')} parámetros</span>
                             </div>
                             {chapter >= 3 && (
                                 <div className="mt-3 rounded-lg border border-gray-200 bg-white p-2">
@@ -2557,7 +2613,7 @@ modelo = nn.Sequential(
                             <div className="px-4 py-2 border-b border-gray-200 bg-white flex items-center gap-2 flex-wrap">
                                 <i className="fas fa-diagram-project text-primary"></i>
                                 <span className="text-xs font-bold text-navy">Estado de la red</span>
-                                <span className="text-[0.7rem] text-gray-400">— {chapter === 4 ? 'el flujo recorre la red: azul hacia adelante, rosa la retropropagación' : 'las conexiones son los pesos; se reajustan en cada época de entrenamiento'}</span>
+                                <span className="text-[0.7rem] text-gray-500">— {chapter === 4 ? 'el flujo recorre la red: azul hacia adelante, rosa la retropropagación' : 'las conexiones son los pesos; se reajustan en cada época de entrenamiento'}</span>
                             </div>
                             <div className="p-4 grid md:grid-cols-2 gap-4 items-center">
                                 {/* Diagrama de neuronas y conexiones */}
@@ -2567,11 +2623,12 @@ modelo = nn.Sequential(
                                         {chapter === 4 ? (<>
                                             <span><span className="inline-block w-4 align-middle mr-1" style={{ borderTop: '3px solid #3b82f6' }}></span>Hacia adelante</span>
                                             <span><span className="inline-block w-4 align-middle mr-1" style={{ borderTop: '3px solid #ED1E79' }}></span>Retropropagación</span>
-                                            <span className="text-gray-400">grosor ∝ gradiente de la capa</span>
+                                            <span className="text-gray-500">grosor e intensidad ∝ log₁₀ del gradiente RMS por peso (escala fija de 10⁻⁴ a 1)</span>
+                                            {gradLin && <span className="w-full text-center font-mono text-gray-600" aria-live="polite">Gradiente RMS por peso, de la entrada a la salida: {gradLin.map((g, i) => `∇W${SUBIND[i + 1] || i + 1} = ${fmtGrad(g)}`).join(' · ')}</span>}
                                         </>) : (<>
                                             <span><span className="inline-block w-4 align-middle mr-1" style={{ borderTop: '3px solid #7C4DC9' }}></span>Peso positivo</span>
                                             <span><span className="inline-block w-4 align-middle mr-1" style={{ borderTop: '3px solid #ED1E79' }}></span>Peso negativo</span>
-                                            <span className="text-gray-400">grosor ∝ magnitud</span>
+                                            <span className="text-gray-500">grosor ∝ magnitud</span>
                                         </>)}
                                     </div>
                                 </div>
@@ -2582,7 +2639,7 @@ modelo = nn.Sequential(
                                         { ic: 'fa-layer-group', col: '#3D008D', t: 'Capas ocultas', d: 'Transforman los datos en características; más capas o nodos curvan más la frontera.' },
                                         { ic: 'fa-flag-checkered', col: '#15803D', t: 'Capa de salida', d: 'Una neurona con sigmoide: la probabilidad ŷ de pertenecer a la clase 1.' },
                                         { ic: 'fa-rotate', col: '#ED1E79', t: 'Época', d: 'Una pasada completa por todos los datos ajustando los pesos; el contador sube al entrenar.' },
-                                        { ic: 'fa-snowflake', col: '#D97706', t: 'Congelar frontera', d: 'Guarda la frontera actual (banda dorada) y la fija para comparar el antes y el después de reentrenar.' },
+                                        { ic: 'fa-snowflake', col: '#B45309', t: 'Congelar frontera', d: 'Guarda la frontera actual (banda dorada) y la fija para comparar el antes y el después de reentrenar.' },
                                     ].map(c => (
                                         <div key={c.t} className="flex gap-2.5 items-start">
                                             <span className="mt-0.5 flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center text-white text-xs" style={{ background: c.col }}><i className={`fas ${c.ic}`}></i></span>
@@ -2785,6 +2842,8 @@ modelo = nn.Sequential(
                 return { px, py, wx: DX0 + px / LW * (DX1 - DX0), wy: DY1 - py / LH * (DY1 - DY0) };
             };
             const clamp = (v) => Math.max(-1, Math.min(1, v));
+            // El MSE mostrado se recalcula también al añadir o arrastrar puntos (aunque el entrenamiento esté en pausa)
+            const actualizarMSE = () => { if (redRef.current) setMetricas(m => ({ ...m, mse: errorCuadratico(redRef.current, datosRef.current) })); };
             const onDown = (e) => {
                 e.preventDefault();
                 const { px, py, wx, wy } = eventoMundo(e);
@@ -2793,15 +2852,15 @@ modelo = nn.Sequential(
                 if (idx === -1 && datosRef.current.length < 24) { datosRef.current.push({ x: clamp(wx), y: clamp(wy) }); idx = datosRef.current.length - 1; }
                 dragRef.current = idx >= 0 ? idx : null;
                 if (e.pointerId != null && e.target.setPointerCapture) { try { e.target.setPointerCapture(e.pointerId); } catch (_) { } }
-                pintar();
+                pintar(); actualizarMSE();
             };
             const onMove = (e) => {
                 if (dragRef.current == null) return;
                 const { wx, wy } = eventoMundo(e);
                 datosRef.current[dragRef.current] = { x: clamp(wx), y: clamp(wy) };
-                if (!corriendoRef.current) pintar();
+                if (!corriendoRef.current) { pintar(); actualizarMSE(); }
             };
-            const onUp = () => { dragRef.current = null; pintar(); };
+            const onUp = () => { const habia = dragRef.current != null; dragRef.current = null; pintar(); if (habia) actualizarMSE(); };
 
             useEffect(() => { datosRef.current = puntosEjemplo(); reconstruir(); }, []);
             useEffect(() => { reconstruir(); }, [nCapas, nNodos, activacion]);
@@ -2844,7 +2903,7 @@ modelo = nn.Sequential(
                                     </div>
                                 </div>
                                 <div>
-                                    <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1"><span>Tasa de aprendizaje</span><span className="text-secondary">{lr < 0.01 ? lr.toFixed(4) : lr.toFixed(3)}</span></div>
+                                    <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1"><span>Tasa de aprendizaje (η)</span><span className="text-secondary">{fmtDec(lr, lr < 0.01 ? 4 : 3)}</span></div>
                                     <input type="range" min="0" max="1" step="0.01" value={lrExp} onChange={e => setLrExp(+e.target.value)} className="usta-range" aria-label="Tasa de aprendizaje (escala logarítmica)" />
                                 </div>
                             </div>
@@ -2868,8 +2927,8 @@ modelo = nn.Sequential(
                             <button onClick={ejemplo} className="px-3 py-1.5 rounded-lg text-xs font-bold text-primary bg-gray-100 hover:bg-gray-200 transition"><i className="fas fa-wave-square mr-1"></i>Puntos de ejemplo</button>
                             <button onClick={borrarUltimo} className="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition"><i className="fas fa-delete-left mr-1"></i>Borrar último</button>
                             <div className="ml-auto flex gap-2">
-                                <span className="rounded-lg bg-bg border border-gray-200 px-2.5 py-1 text-center"><span className="text-[0.62rem] uppercase tracking-wide text-gray-400 mr-1">Época</span><span className="font-mono font-bold text-sm text-navy">{metricas.epoca}</span></span>
-                                <span className="rounded-lg bg-bg border border-gray-200 px-2.5 py-1 text-center"><span className="text-[0.62rem] uppercase tracking-wide text-gray-400 mr-1">MSE</span><span className="font-mono font-bold text-sm" style={{ color: '#ED1E79' }}>{isFinite(metricas.mse) ? metricas.mse.toFixed(4) : '—'}</span></span>
+                                <span className="rounded-lg bg-bg border border-gray-200 px-2.5 py-1 text-center"><span className="text-[0.62rem] uppercase tracking-wide text-gray-500 mr-1">Época</span><span className="font-mono font-bold text-sm text-navy">{metricas.epoca}</span></span>
+                                <span className="rounded-lg bg-bg border border-gray-200 px-2.5 py-1 text-center"><span className="text-[0.62rem] uppercase tracking-wide text-gray-500 mr-1">MSE</span><span className="font-mono font-bold text-sm" style={{ color: '#ED1E79' }} aria-live="polite">{isFinite(metricas.mse) ? fmtDec(metricas.mse, 4) : '—'}</span></span>
                             </div>
                         </div>
                     </div>
@@ -2937,6 +2996,7 @@ modelo = nn.Sequential(
                     de una neurona influye en su salida. Al mover los <strong>pesos</strong> y el <strong>sesgo</strong>{' '}
                     y cambiar la <strong>activación</strong>, se observa cómo varían la suma ponderada y la salida en tiempo real.
                 </p>
+                <AntesDeInteractuar>si el sesgo b baja hasta −2 sin tocar los pesos, ¿qué valor se espera para la salida con ReLU? ¿Y con sigmoide: exactamente cero, casi cero o un valor intermedio?</AntesDeInteractuar>
                 <NeuronaInteractiva />
                 <Box type="tip" label="Qué se debe concluir">
                     <p>Tras experimentar, se puede afirmar que:</p>
@@ -2987,6 +3047,7 @@ modelo = nn.Sequential(
                     usar <strong>dos neuronas ocultas</strong>, cada una con su propia recta, y una <strong>neurona de salida</strong>{' '}
                     que las combina. Al avanzar paso a paso se observa cómo el problema imposible se vuelve resoluble:
                 </p>
+                <AntesDeInteractuar>con dos rectas, una por neurona oculta, ¿qué forma se espera que tenga la región donde la red responde 1: un semiplano, una franja entre ambas rectas o una región cerrada? Conviene esbozarla antes de avanzar los pasos.</AntesDeInteractuar>
                 <XorMLP />
                 <p>
                     La capa oculta transforma un problema no separable en uno resoluble: <strong>combina fronteras lineales simples
@@ -2994,6 +3055,7 @@ modelo = nn.Sequential(
                     universal generaliza a cualquier función continua sobre un dominio acotado.
                 </p>
 
+                <AntesDeInteractuar>con pocas neuronas (pocos bloques), ¿en qué tramos se espera que la escalera se aleje más de la curva: donde la curva es casi plana o donde sube y baja con rapidez?</AntesDeInteractuar>
                 <TeoremaAproximacion />
 
                 <h3>Interpolar puntos: la red como función</h3>
@@ -3006,6 +3068,7 @@ modelo = nn.Sequential(
                     teje la curva con tramos rectos (es poligonal), mientras <strong>Tanh</strong> y <strong>Sigmoide</strong>{' '}
                     producen curvas suaves.
                 </p>
+                <AntesDeInteractuar>con una sola capa oculta de un único nodo y activación Tanh, ¿qué forma se espera que adopte la curva sobre los puntos de ejemplo (una onda): una recta, una sola «S» o la onda completa? ¿Llegará el MSE a cero?</AntesDeInteractuar>
                 <InterpoladorCurva />
                 <Box type="tip" label="Qué conviene observar en la curva">
                     <ul>
@@ -3021,6 +3084,7 @@ modelo = nn.Sequential(
                     Sin no linealidades, apilar capas es inútil: la composición de transformaciones lineales sigue siendo lineal.
                     Las activaciones introducen las «curvas» y «quiebres» necesarios.
                 </p>
+                <AntesDeInteractuar>al pulsar «Ver derivada», ¿qué valor máximo se espera para la derivada de la sigmoide (¿1?, ¿0,5?, ¿menos?) y en qué valor de z se alcanza?</AntesDeInteractuar>
                 <ActivacionesChart />
                 <Accordion items={[
                     { titulo: 'ReLU — el estándar moderno', contenido: <span>{String.raw`\(f(z)=\max(0,z)\)`}. Rango {String.raw`\([0,\infty)\)`}. Muy rápida (solo una comparación) y mitiga el desvanecimiento del gradiente. Riesgo: neuronas «muertas» (<em>dying ReLU</em>), atascadas en 0. Es el «portero» que deja pasar lo positivo y anula lo negativo.</span> },
@@ -3080,13 +3144,14 @@ modelo = nn.Sequential(
                     una curva capaz de envolver los datos. Este mismo laboratorio reaparecerá en los Capítulos 3, 4 y 5, ganando
                     controles nuevos en cada uno.
                 </p>
+                <AntesDeInteractuar>con una sola capa oculta de un nodo, ¿qué forma se espera que tenga la frontera sobre las dos lunas? ¿Cuántos nodos y capas harán falta, aproximadamente, para separarlas casi sin errores?</AntesDeInteractuar>
                 <RedFrontera chapter={2} />
                 <Box type="tip" label="Qué conviene observar en la frontera">
                     <ul>
                         <li>Con <strong>una sola capa y pocos nodos</strong>, la frontera es casi recta: no logra separar las lunas ni los círculos.</li>
                         <li>Al <strong>añadir nodos y capas</strong>, la frontera se curva y abraza la forma de los datos: el teorema de aproximación universal en vivo.</li>
                         <li>La <strong>activación importa</strong>: <em>ReLU</em> produce fronteras de tramos rectos (poligonales); <em>Tanh</em> y <em>Sigmoide</em>, curvas suaves. La <em>Sigmoide</em>, por su saturación (desvanecimiento del gradiente), suele <strong>converger más lento</strong> que <em>ReLU</em> o <em>Tanh</em>.</li>
-                        <li>Una <strong>tasa de aprendizaje</strong> muy alta hace oscilar o divergir la pérdida; una muy baja, aprender a paso lento (ambos conceptos se formalizan en el Capítulo 3).</li>
+                        <li>Una <strong>tasa de aprendizaje</strong> muy alta (hacia el extremo derecho del deslizador, η ≈ 10 en esta red) hace oscilar la pérdida con picos bruscos; una muy baja, aprender a paso lento (ambos conceptos se formalizan en el Capítulo 3).</li>
                         <li>El botón <strong>«Congelar frontera»</strong> fija la frontera actual como banda dorada, para contrastar el «antes» y el «después» tras cambiar la arquitectura y reentrenar.</li>
                     </ul>
                 </Box>
@@ -3217,7 +3282,8 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                             aria-label="Tasa de aprendizaje eta" />
                         <span className="text-xs font-bold px-3 py-1 rounded-full text-white whitespace-nowrap" style={{ background: color }}>{estado}</span>
                     </div>
-                    <ChartFrame id="chart-lr-playground" caption="Al variar η: con pasos pequeños el descenso es recto; cerca de η=0.5 alcanza el valle casi de un salto; por encima de η=1 diverge." />
+                    <ChartFrame id="chart-lr-playground" fig="3.3" caption="Al variar η: con pasos pequeños el descenso es recto; cerca de η=0.5 alcanza el valle casi de un salto; por encima de η=1 diverge."
+                        alt={`Parábola L(θ) = θ² con los pasos del descenso del gradiente para η = ${fmtDec(lr, 2)}; régimen: ${estado}.`} />
                 </div>
             );
         };
@@ -3239,13 +3305,15 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                     }
                     return { px, py };
                 };
-                const gd = traj(() => ({}), (x, y, dx, dy) => [x - 0.13 * dx, y - 0.13 * dy]);
-                const mom = traj(() => ({ vx: 0, vy: 0 }), (x, y, dx, dy, s) => {
-                    s.vx = 0.85 * s.vx - 0.045 * dx; s.vy = 0.85 * s.vy - 0.045 * dy;
+                // Parámetros verificados en Python (auditoría 2026-10): distancia al mínimo en el paso 48 →
+                // GD ≈ 0.048 (zigzag de pared a pared), Momentum ≈ 0.010; Adam ≈ 0.034 ya en el paso 20.
+                const gd = traj(() => ({}), (x, y, dx, dy) => [x - 0.16 * dx, y - 0.16 * dy]);      // GD, η = 0.16
+                const mom = traj(() => ({ vx: 0, vy: 0 }), (x, y, dx, dy, s) => {                    // Momentum, η = 0.03, β = 0.8
+                    s.vx = 0.8 * s.vx - 0.03 * dx; s.vy = 0.8 * s.vy - 0.03 * dy;
                     return [x + s.vx, y + s.vy];
                 });
-                const adam = traj(() => ({ mx: 0, my: 0, vx: 0, vy: 0 }), (x, y, dx, dy, s, t) => {
-                    const b1 = 0.9, b2 = 0.999, e = 1e-8, lr = 0.35;
+                const adam = traj(() => ({ mx: 0, my: 0, vx: 0, vy: 0 }), (x, y, dx, dy, s, t) => {   // Adam, η = 0.15
+                    const b1 = 0.9, b2 = 0.999, e = 1e-8, lr = 0.15;
                     s.mx = b1 * s.mx + (1 - b1) * dx; s.my = b1 * s.my + (1 - b1) * dy;
                     s.vx = b2 * s.vx + (1 - b2) * dx * dx; s.vy = b2 * s.vy + (1 - b2) * dy * dy;
                     const mxh = s.mx / (1 - Math.pow(b1, t)), myh = s.my / (1 - Math.pow(b1, t));
@@ -3283,7 +3351,9 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                             </button>
                         ))}
                     </div>
-                    <ChartFrame id="chart-optim-compare" height="chart-h-360" caption="Tazón mal condicionado (valle estrecho 10:1). GD simple zigzaguea; Momentum amortigua el rebote; Adam adapta el paso de cada eje y baja casi recto al mínimo (★)." />
+                    <ChartFrame id="chart-optim-compare" height="chart-h-360" fig="3.6"
+                        caption="Tazón mal condicionado (10:1), 48 pasos desde (−2,6; 2,6). GD (η = 0,16) zigzaguea de pared a pared; Momentum (η = 0,03, β = 0,8) amortigua el zigzag; Adam (η = 0,15) avanza casi en línea recta y llega antes al mínimo (★)."
+                        alt="Curvas de nivel de un valle elíptico 10:1 y las trayectorias de GD, Momentum y Adam desde (−2,6; 2,6) hasta el mínimo en (0; 0)." />
                 </div>
             );
         };
@@ -3327,7 +3397,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                             </g>
                         ))}
                         {xticks.map(t => (
-                            <text key={'x' + t} x={xPix(t)} y={padT + plotH + 18} textAnchor="middle" fontSize="11" fill="#64748B" fontFamily="Montserrat">{t.toFixed(2)}</text>
+                            <text key={'x' + t} x={xPix(t)} y={padT + plotH + 18} textAnchor="middle" fontSize="11" fill="#64748B" fontFamily="Montserrat">{fmtDec(t, 2)}</text>
                         ))}
                         <line x1={padL} y1={padT} x2={padL} y2={padT + plotH} stroke="#94A3B8" strokeWidth="1.5" />
                         <line x1={padL} y1={padT + plotH} x2={W - padR} y2={padT + plotH} stroke="#94A3B8" strokeWidth="1.5" />
@@ -3336,16 +3406,16 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                             <g key={'pt' + i}>
                                 <circle cx={xPix(pt.p)} cy={yPix(pt.L)} r="5" fill="#3D008D" stroke="#fff" strokeWidth="1.5" />
                                 <text x={xPix(pt.p) + (pt.p > 0.8 ? -9 : 9)} y={yPix(pt.L) - 7}
-                                    textAnchor={pt.p > 0.8 ? 'end' : 'start'} fontSize="10.5" fill="#3D008D" fontFamily="Montserrat" fontWeight="700">{pt.L.toFixed(2)}</text>
+                                    textAnchor={pt.p > 0.8 ? 'end' : 'start'} fontSize="10.5" fill="#3D008D" fontFamily="Montserrat" fontWeight="700">{fmtDec(pt.L, 2)}</text>
                             </g>
                         ))}
                         <text x={padL + plotW / 2} y={H - 8} textAnchor="middle" fontSize="12" fill="#334155" fontFamily="Montserrat" fontWeight="600">ŷ — probabilidad asignada a la clase correcta</text>
                         <text transform={`rotate(-90 16 ${cy})`} x="16" y={cy} textAnchor="middle" fontSize="12" fill="#334155" fontFamily="Montserrat" fontWeight="600">Costo  −log(ŷ)</text>
                     </svg>
-                    <p className="text-xs text-gray-500 text-center mt-2" style={{ fontStyle: 'italic' }}>
-                        El costo vale 0 cuando la red asigna toda la probabilidad a la clase correcta (ŷ = 1) y crece sin límite a medida que ŷ → 0:
+                    <PieFigura n="3.1" className="mt-2">
+                        Curva de la entropía cruzada. El costo vale 0 cuando la red asigna toda la probabilidad a la clase correcta (ŷ = 1) y crece sin límite a medida que ŷ → 0:
                         equivocarse con seguridad se penaliza de forma desmedida. Los puntos marcan los valores de la tabla anterior.
-                    </p>
+                    </PieFigura>
                 </div>
             );
         };
@@ -3355,7 +3425,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
             <figure className="my-4 not-prose">
                 <div className="relative rounded-xl overflow-hidden border border-gray-200 shadow-sm mx-auto" style={{ maxWidth: 640 }}>
                     <img src="images/paisaje-error-3d.jpg" className="w-full block"
-                        alt="Render 3D de una superficie de error no convexa: colinas y valles, con un valle profundo, mínimos locales más pequeños, una meseta plana y un paso tipo silla entre dos picos." />
+                        alt="Ilustración generada con IA de una superficie de error no convexa, con colinas y valles; tres etiquetas orientativas señalan un punto silla, un mínimo local y una meseta." />
                     {[
                         { l: 'Punto silla', x: 53, y: 25, c: '#B45309' },
                         { l: 'Mínimo local', x: 39, y: 70, c: '#B91C1C' },
@@ -3368,8 +3438,9 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                     ))}
                 </div>
                 <figcaption className="text-xs text-gray-500 italic text-center mt-2">
-                    El paisaje de error de una red profunda es <strong>no convexo</strong>: una superficie rugosa con valles, mesetas y
-                    puntos silla. (Render ilustrativo; las etiquetas señalan ejemplos de cada accidente.)
+                    <strong className="not-italic text-navy">Figura 3.4.</strong> El paisaje de error de una red profunda es <strong>no convexo</strong>: una superficie rugosa con valles, mesetas y
+                    puntos silla. Las etiquetas son orientativas: señalan ejemplos de cada accidente.{' '}
+                    <span className="not-italic">Fuente: imagen generada con IA (ilustrativa); etiquetas superpuestas de elaboración propia.</span>
                 </figcaption>
             </figure>
         );
@@ -3426,12 +3497,13 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                         ))}
                     </div>
                     <div className="bg-white border border-gray-200 rounded-xl p-2 shadow-sm">
-                        <div id="chart-paisaje-3d" className="chart-h-360" style={{ width: '100%' }}></div>
+                        <div id="chart-paisaje-3d" className="chart-h-360" style={{ width: '100%' }} role="img"
+                            aria-label="Superficie 3D del error sobre dos parámetros. En modo convexo es un cuenco con un único fondo; en modo no convexo presenta varios valles, sillas y zonas planas, y un rombo dorado marca el mínimo global."></div>
                     </div>
-                    <p className="text-xs text-gray-500 italic text-center mt-2">
+                    <PieFigura n="3.5" className="mt-2" fuente="elaboración propia (superficie sintética calculada en el navegador).">
                         Superficie interactiva: <strong>rota al arrastrarla con el ratón</strong>. El <strong>cuenco convexo</strong> tiene un único
                         fondo; el <strong>paisaje real</strong>, varios valles, sillas y mesetas. El punto dorado marca el mínimo global.
-                    </p>
+                    </PieFigura>
                 </div>
             );
         };
@@ -3636,6 +3708,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                     El siguiente laboratorio usa el mismo valle simple {String.raw`\(L(\theta)=\theta^2\)`}. Al variar la tasa de aprendizaje
                     {String.raw` \(\eta\)`} se aprecia cómo cambia el comportamiento del descenso; el resumen de los tres regímenes aparece debajo:
                 </p>
+                <AntesDeInteractuar>en cada paso θ se multiplica por {String.raw`\(1 - 2\eta\)`}. ¿A partir de qué valor de {String.raw`\(\eta\)`} se espera que el descenso deje de converger, y para qué valor llegaría al valle en un solo salto?</AntesDeInteractuar>
                 <LRPlayground />
                 <Tabs tabs={[
                     { label: 'Muy alta', content: <p>Saltos de 50 metros: probablemente pase por encima del valle y suba la ladera opuesta, o se desbarranque. En matemáticas, esto es <strong>divergencia</strong>: el error aumenta en vez de disminuir.</p> },
@@ -3749,6 +3822,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                     entre el <strong>cuenco convexo ideal</strong> (un único fondo, como {String.raw`\(L(\theta)=\theta^2\)`}) y ese mismo
                     <strong> paisaje no convexo</strong>.
                 </p>
+                <AntesDeInteractuar>en el paisaje «No convexo», si el descenso arrancara desde distintos puntos, ¿se espera que todos lleguen al mismo fondo? ¿Cuántos valles se espera encontrar al rotar la superficie?</AntesDeInteractuar>
                 <div className="grid md:grid-cols-2 gap-4 my-4 items-start">
                     <PaisajeErrorFigura />
                     <PaisajeInteractivo3D />
@@ -3811,8 +3885,10 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                     con un solo eje no se aprecia: un <strong>valle alargado</strong>, mucho más empinado en una dirección que en la otra (aquí, una
                     relación de pendientes de 10:1). En esa geometría —que se denomina problema <strong>mal condicionado</strong>— el descenso
                     simple zigzaguea de pared a pared en lugar de avanzar hacia el fondo. Sobre ese mismo valle estrecho se contrastan las tres
-                    estrategias; cada botón activa o desactiva una trayectoria:
+                    estrategias (la tasa de aprendizaje y el coeficiente de inercia de cada una se indican en el pie); cada botón activa o
+                    desactiva una trayectoria:
                 </p>
+                <AntesDeInteractuar>en un valle diez veces más empinado en una dirección que en la otra, ¿qué trayectoria se espera que zigzaguee más y cuál llegue antes al mínimo: GD, Momentum o Adam?</AntesDeInteractuar>
                 <OptimizerCompare />
                 <Box type="tip" label="¿Cuál elegir?">
                     En la práctica conviene empezar con <strong>Adam</strong> o <strong>AdamW</strong> ({String.raw`\(\eta \approx 0.001\)`}): convergen rápido y son menos sensibles que el SGD a la elección de la tasa de aprendizaje (aunque no inmunes).{' '}
@@ -3828,12 +3904,13 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                     en vivo, debería descender. En lugar de la frontera de decisión, la atención se centra ahora en esa curva de pérdida
                     y, sobre todo, en la <strong>tasa de aprendizaje</strong>.
                 </p>
+                <AntesDeInteractuar>si la tasa de aprendizaje se lleva al extremo derecho del deslizador ({String.raw`\(\eta = 10\)`}), ¿se espera que la curva de pérdida baje más rápido, se estanque o dé saltos hacia arriba? ¿Y en el extremo izquierdo ({String.raw`\(\eta = 0.001\)`})?</AntesDeInteractuar>
                 <RedFrontera chapter={3} />
                 <Box type="tip" label="Qué conviene observar (desde el Capítulo 3)">
                     <ul>
                         <li>Con una <strong>tasa de aprendizaje diminuta</strong> ({String.raw`\(\eta \approx 0.001\)`}), la pérdida baja con una lentitud exasperante: muchas épocas para avanzar muy poco.</li>
                         <li>Al <strong>subirla</strong> de forma moderada, la pérdida cae con rapidez: es el «punto dulce» del descenso.</li>
-                        <li>Con una <strong>tasa demasiado alta</strong> (cercana a {String.raw`\(1.0\)`}), la pérdida <strong>oscila o se dispara</strong>: el paso es tan grande que el algoritmo «rebota» entre las paredes del valle —la divergencia del Páramo de Letras, ahora sobre una red real—.</li>
+                        <li>Con una <strong>tasa demasiado alta</strong> (del orden de {String.raw`\(\eta = 10\)`}, el extremo derecho del deslizador), la pérdida <strong>oscila y se dispara</strong> en picos varias veces mayores que su valor inicial: el paso es tan grande que el algoritmo «rebota» entre las paredes del valle —la divergencia del Páramo de Letras, ahora sobre una red real—. Esta red tolera bien {String.raw`\(\eta \approx 1\)`}: el umbral de la divergencia depende del problema.</li>
                         <li>El botón <strong>«Reiniciar pesos»</strong> repite el experimento desde otro punto de partida aleatorio: conviene comprobar que la conclusión sobre la tasa de aprendizaje se mantiene.</li>
                     </ul>
                 </Box>
@@ -4000,6 +4077,10 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                     <rect x="512" y="48" width="58" height="40" rx="10" fill="#FDF2F8" stroke="#ED1E79" strokeWidth="2" />
                     <text x="541" y="73" textAnchor="middle" fontSize="13" fill="#ED1E79" fontWeight="bold">f = 20</text>
                 </svg>
+                <PieFigura n="4.1" className="mt-2">
+                    Grafo aritmético de f = (a + b) · c con a = 2, b = 3 y c = 4. Hacia adelante se obtiene f = 20; hacia atrás, en una sola
+                    pasada, ∂f/∂a = ∂f/∂b = 4 y ∂f/∂c = 5.
+                </PieFigura>
             </div>
         );
 
@@ -4038,6 +4119,10 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                         <text x="20" y="30" fontSize="11" fill="#2563EB" fontWeight="bold">▶ Pasada hacia adelante (predicción)</text>
                         <text x="20" y="150" fontSize="11" fill="#DC2626" fontWeight="bold">◀ Pasada hacia atrás (gradientes / regla de la cadena)</text>
                     </svg>
+                    <PieFigura n="4.2" className="mt-2">
+                        Grafo computacional de una neurona: producto, suma, ReLU, predicción y pérdida. Las flechas continuas llevan la predicción
+                        hacia adelante; las discontinuas, los gradientes hacia atrás por la regla de la cadena.
+                    </PieFigura>
                 </div>
             );
         };
@@ -4260,18 +4345,22 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
                 <p>
                     Es la <strong>misma red</strong> de los Capítulos 2 y 3, pero el diagrama inferior pasa a <strong>«modo linterna»</strong>:
                     primero la señal viaja <strong>hacia adelante</strong> (azul, de la entrada a la salida) y luego la <strong>responsabilidad
-                    retropropaga</strong> (rosa, de la salida hacia la entrada). En la fase de retropropagación, el <strong>grosor de cada
-                    capa es proporcional a la norma de su gradiente</strong>: así se <em>ve</em> qué capas reciben señal de aprendizaje y
-                    cuáles apenas la perciben.
+                    retropropaga</strong> (rosa, de la salida hacia la entrada). En la fase de retropropagación, el <strong>grosor y la
+                    intensidad de cada capa crecen con su gradiente</strong>, medido como RMS por peso y dibujado en una escala logarítmica
+                    fija (de 10⁻⁴ a 1), la misma para todas las capas y todas las redes; bajo el diagrama aparece el valor numérico de cada
+                    capa. Así se <em>ve</em> qué capas reciben señal de aprendizaje y cuáles apenas la perciben.
                 </p>
+                <AntesDeInteractuar>con Sigmoide y tres capas ocultas, ¿qué capa se espera que reciba menos gradiente: la más cercana a la entrada o la más cercana a la salida? ¿Cambiará la respuesta con ReLU?</AntesDeInteractuar>
                 <RedFrontera chapter={4} />
                 <Box type="tip" label="Qué conviene observar (desde el Capítulo 4)">
                     <ul>
                         <li>Con <strong>Sigmoide</strong> y varias <strong>capas ocultas</strong>, las flechas rosadas de la retropropagación
                             <strong> se apagan</strong> al acercarse a la entrada: es el <strong>desvanecimiento del gradiente</strong> en vivo —las
-                            primeras capas casi no aprenden—.</li>
-                        <li>Al cambiar a <strong>ReLU</strong>, el flujo hacia atrás llega <strong>mucho más brillante</strong> a las capas iniciales (su
-                            derivada vale 1 en la zona activa).</li>
+                            primeras capas casi no aprenden—. Con tres capas ocultas, el gradiente por peso de la primera capa suele ser decenas de
+                            veces menor que el de la última (véanse los valores bajo el diagrama).</li>
+                        <li>Al cambiar a <strong>ReLU</strong>, el gradiente que llega a las capas iniciales suele ser <strong>varias veces mayor</strong> que
+                            con sigmoide (su derivada vale 1 en la zona activa). No es una regla fija para cada corrida: según los pesos iniciales,
+                            alguna capa puede recibir menos, por lo que conviene repetir la comparación con «Reiniciar pesos».</li>
                         <li>La fase <strong>azul</strong> (predicción) siempre se completa <strong>antes</strong> de que empiece la fase <strong>rosa</strong>{' '}
                             (cálculo del gradiente): es el orden real, primero hacia adelante y luego hacia atrás (<em>forward → backward</em>).</li>
                     </ul>
@@ -4382,7 +4471,9 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
                 annotations: [{ x: 50, y: 0.78, text: 'Parada temprana', showarrow: false, font: { color: '#15803D', size: 10 } }],
                 font: { family: 'Montserrat', size: 11 }, paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
             }), []);
-            return <ChartFrame id="chart-curvas" caption="Sobreajuste: el error de entrenamiento sigue bajando, pero el de validación forma una «U». La parada temprana detiene en el mínimo de validación." />;
+            return <ChartFrame id="chart-curvas" fig="5.2" fuente="elaboración propia (curvas sintéticas ilustrativas)."
+                caption="Sobreajuste: el error de entrenamiento (morado) sigue bajando, pero el de validación (rosa) forma una «U». La parada temprana detiene en el mínimo de validación."
+                alt="Curvas de aprendizaje a lo largo de 100 épocas: el error de entrenamiento baja sin cesar y el de validación alcanza su mínimo en la época 50 y luego repunta; una línea vertical marca la parada temprana." />;
         };
 
         /* Matriz de confusión (analogía cafetera) */
@@ -4405,6 +4496,10 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
                         {cell('FP', 'No grave → Grave. Falsa alarma: recursos de más.', '#FFFBEB', '#B45309')}
                         {cell('VN', 'No grave → No grave. Descartado correctamente.', '#F0FDF4', '#15803D')}
                     </div>
+                    <PieFigura n="5.4" className="mt-2">
+                        Matriz de confusión para la alerta de dengue grave: las filas son la clase real y las columnas, la predicción. El falso
+                        negativo (un caso grave sin alerta) es el error más costoso.
+                    </PieFigura>
                 </div>
             );
         };
@@ -4440,8 +4535,8 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
                         {ticks.map(t => (
                             <g key={'g' + t}>
                                 <line x1={padL} y1={yPix(t)} x2={W - padR} y2={yPix(t)} stroke="#E2E8F0" strokeWidth="1" />
-                                <text x={padL - 8} y={yPix(t) + 4} textAnchor="end" fontSize="11" fill="#64748B" fontFamily="Montserrat">{t.toFixed(2)}</text>
-                                <text x={xPix(t)} y={padT + plotH + 18} textAnchor="middle" fontSize="11" fill="#64748B" fontFamily="Montserrat">{t.toFixed(2)}</text>
+                                <text x={padL - 8} y={yPix(t) + 4} textAnchor="end" fontSize="11" fill="#64748B" fontFamily="Montserrat">{fmtDec(t, 2)}</text>
+                                <text x={xPix(t)} y={padT + plotH + 18} textAnchor="middle" fontSize="11" fill="#64748B" fontFamily="Montserrat">{fmtDec(t, 2)}</text>
                             </g>
                         ))}
                         <line x1={padL} y1={padT} x2={padL} y2={padT + plotH} stroke="#94A3B8" strokeWidth="1.5" />
@@ -4456,10 +4551,10 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
                         <text x={padL + plotW / 2} y={H - 8} textAnchor="middle" fontSize="12" fill="#334155" fontFamily="Montserrat" fontWeight="600">Tasa de falsos positivos — FPR = FP / (FP + VN)</text>
                         <text transform={`rotate(-90 16 ${cy})`} x="16" y={cy} textAnchor="middle" fontSize="12" fill="#334155" fontFamily="Montserrat" fontWeight="600">Tasa de verdaderos positivos (sensibilidad)</text>
                     </svg>
-                    <p className="text-xs text-gray-500 text-center mt-2" style={{ fontStyle: 'italic' }}>
+                    <PieFigura n="5.5" className="mt-2" fuente="elaboración propia (curvas ilustrativas).">
                         La curva ROC recorre todos los umbrales: cuanto más se abomba hacia la esquina superior izquierda, mejor separa las
                         clases. El área bajo la curva (AUC) resume ese desempeño en un solo número, independiente del umbral; con clases muy desbalanceadas conviene complementarla con la curva precisión–sensibilidad.
-                    </p>
+                    </PieFigura>
                 </div>
             );
         };
@@ -4521,10 +4616,10 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
                         {panel('Ajuste óptimo', 'sigue la tendencia', dGood, '#15803D', 'Ajuste óptimo: una curva suave que sigue la tendencia general sin perseguir cada punto.')}
                         {panel('Sobreajuste', 'varianza alta · memoriza el ruido', dOver, '#ED1E79', 'Sobreajuste: una curva que serpentea para pasar por todos los puntos, incluido el ruido, y generaliza mal.')}
                     </div>
-                    <p className="text-xs text-gray-500 italic text-center mt-2">
+                    <PieFigura n="5.1" className="mt-2" fuente="elaboración propia (datos sintéticos).">
                         Los tres modelos ven los <strong>mismos</strong> puntos. El subajuste (izquierda) es demasiado rígido; el sobreajuste
                         (derecha) memoriza el ruido; el ajuste óptimo (centro) sigue la tendencia sin perseguir cada dato.
-                    </p>
+                    </PieFigura>
                 </div>
             );
         };
@@ -4569,11 +4664,11 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
                         <text x={padL + plotW / 2} y={H - 12} textAnchor="middle" fontSize="12" fill="#334155" fontFamily="Montserrat" fontWeight="600">Complejidad del modelo (capacidad) →</text>
                         <text transform={`rotate(-90 16 ${padT + plotH / 2})`} x="16" y={padT + plotH / 2} textAnchor="middle" fontSize="12" fill="#334155" fontFamily="Montserrat" fontWeight="600">Error</text>
                     </svg>
-                    <p className="text-xs text-gray-500 italic text-center mt-2">
+                    <PieFigura n="5.3" className="mt-2" fuente="elaboración propia (curvas ilustrativas).">
                         A más capacidad, el error de <strong>entrenamiento</strong> siempre baja, pero el de <strong>validación</strong> forma una «U»:
                         la zona izquierda es <strong>subajuste</strong> (sesgo alto) y la derecha <strong>sobreajuste</strong> (varianza alta). El mínimo
                         marca la capacidad que mejor generaliza. Conviene no confundir este eje —la <em>complejidad</em>— con el de las <em>épocas</em>.
-                    </p>
+                    </PieFigura>
                 </div>
             );
         };
@@ -5001,11 +5096,11 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                 <p>
                     Todo el capítulo converge aquí, en <strong>dos actos</strong> sobre la misma red de los capítulos previos. El laboratorio
                     reserva un <strong>30 % de los datos como validación</strong> (la red <em>no</em> los usa para entrenar) y dibuja
-                    <strong> dos curvas</strong> de pérdida: entrenamiento (rosa) y validación (morado).
+                    <strong> dos curvas</strong> de pérdida: entrenamiento (morado) y validación (rosa), los mismos colores de las figuras de este capítulo.
                 </p>
                 <p>
                     <strong>Acto 1 · sobreajuste y regularización.</strong> Al subir la <strong>capacidad</strong> (nodos y capas) y entrenar
-                    muchas épocas, la curva rosa sigue bajando mientras la morada <strong>repunta</strong>: esa es la «U» de las curvas de
+                    muchas épocas, la curva morada sigue bajando mientras la rosa <strong>repunta</strong>: esa es la «U» de las curvas de
                     aprendizaje. Al activar luego <strong>λ (L2)</strong> o el <strong><em>dropout</em></strong>, la brecha se cierra.
                 </p>
                 <p>
@@ -5013,10 +5108,11 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                     matriz de confusión <em>por subgrupo</em> —la misma tabla de esta sección, ahora una por subgrupo— y compara la tasa de falsos
                     negativos (FNR) entre A y B: la <strong>brecha de igualdad de oportunidad</strong> recién definida, medida en la propia red.
                 </p>
+                <AntesDeInteractuar>con muchos nodos y muchas épocas, ¿se espera que la pérdida de validación siga bajando junto con la de entrenamiento? Y en el Auditor, ¿bastará con mover el umbral de decisión para que desaparezca la brecha de falsos negativos entre A y B?</AntesDeInteractuar>
                 <RedFrontera chapter={5} />
                 <Box type="tip" label="Acto 1 · qué conviene observar (sobreajuste y regularización)">
                     <ul>
-                        <li><strong>Para inducir el sobreajuste:</strong> con muchos nodos y muchas épocas, la pérdida de <strong>validación (morada)</strong>{' '}
+                        <li><strong>Para inducir el sobreajuste:</strong> con muchos nodos y muchas épocas, la pérdida de <strong>validación (rosa)</strong>{' '}
                             forma una <strong>«U»</strong> mientras la de entrenamiento sigue cayendo: la red memoriza el ruido.</li>
                         <li><strong>Al regularizar:</strong> al subir <strong>λ</strong> la frontera se <em>suaviza</em>; el término L2 empuja los pesos hacia cero y la «U» se aplana.</li>
                         <li><strong><em>Dropout</em>:</strong> apaga neuronas al azar en cada época de entrenamiento; rompe la coadaptación y reduce la brecha entre entrenamiento y validación
@@ -5441,7 +5537,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                 const saved = parseInt(localStorage.getItem(STORAGE_KEY), 10);
                 return Number.isInteger(saved) && saved >= 0 ? saved : 0;
             });
-            const [sidebarOpen, setSidebarOpen] = useState(true);
+            const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 1024);   // en móvil y tableta, el menú arranca cerrado
 
             const safeIndex = Math.min(activeLessonIndex, curriculum.length - 1);
             const activeLesson = curriculum[safeIndex];
@@ -5506,7 +5602,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
 
                         <div id="contenido-scroll" className="flex-1 overflow-y-auto p-6 lg:p-12">
                             <div className="max-w-4xl mx-auto w-full">
-                                <div className="mb-6 flex items-center justify-between flex-wrap gap-3">
+                                <div className="mb-6 flex items-center justify-between flex-wrap gap-3 pl-12 lg:pl-0">
                                     <span className="text-xs font-bold tracking-wider text-secondary uppercase">
                                         Lección {safeIndex + 1} de {curriculum.length} · {progreso} %
                                     </span>

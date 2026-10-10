@@ -31,11 +31,15 @@
       '#portal-nav-btn svg{width:16px;height:16px;flex:none;display:block;}' +
       '#portal-nav-btn .pn-label{white-space:nowrap;}' +
       '@media print{#portal-nav-btn{display:none;}}' +
+      // Módulos SPA: por debajo de 1024 px la fila «Anterior · Siguiente» ocupa la esquina superior derecha;
+      // el botón baja a la esquina inferior derecha para no taparla (auditoría 2026-10, S-09).
+      '@media (max-width:1023px){#portal-nav-btn.pn-modulo{top:auto;bottom:14px;}}' +
       '@media (max-width:480px){#portal-nav-btn{padding:11px;}#portal-nav-btn .pn-label{display:none;}}';
     document.head.appendChild(css);
 
     var a = document.createElement('a');
     a.id = 'portal-nav-btn';
+    if (/(^|\/)0[1-3]_modulo_[^\/]*\.html$/.test(path)) a.className = 'pn-modulo';
     a.href = 'index.html';
     a.setAttribute('aria-label', 'Volver al portal del curso');
     a.title = 'Volver al portal del curso';
