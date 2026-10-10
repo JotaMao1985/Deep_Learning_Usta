@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La capa oculta dobla el espacio</title>
+<script>if (window.self !== window.top) document.documentElement.classList.add('embedded');</script>
+<!--
+  ============================================================================
+  ANIMACIÓN 3D · LA CAPA OCULTA DOBLA EL ESPACIO (3D-2, Módulo 1 · Cap 1.2)
+  Maestría en Ciencia de Datos — Universidad Santo Tomás · auditoría 2026-10
+  ----------------------------------------------------------------------------
+  Qué muestra: un MLP 2-3-1 (tanh en la capa oculta, sigmoide en la salida) se
+  entrena aquí mismo sobre XOR o «lunas». El deslizador α interpola cada punto
+  entre su posición en el plano de entrada (x₁, x₂, 0) y su representación en la
+  capa oculta (h₁, h₂, h₃). Con α = 1 la frontera de decisión —una curva en el
+  plano de entrada— queda contenida en un PLANO: el que define la neurona de
+  salida, w₂·h + b₂ = 0. La capa oculta «dobla» el espacio hasta que el problema
+  se vuelve linealmente separable.
+  Modelo y vista separados: el modelo es JS puro y se verifica con ?selftest=1
+  (gradiente analítico vs. numérico, exactitud, plano = frontera de la salida).
+  Sin CDN: three.js r160 empaquetado en vendor/ (ver vendor/BUILD.md). Funciona
+  por file://, en GitHub Pages y dentro del iframe del módulo.
+  ============================================================================
+-->
+<style>
+  :root { --morado: #3D008D; --rosa: #ED1E79; --oro: #FDB913; --tinta: #1F2937; --gris: #6B7280; --fondo: #F8F7FC; --borde: #E5E1F0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #fff; color: var(--tinta); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.55; }
+  body { padding: 16px; }
+  html.embedded body { padding: 4px; }
+  .envoltura { max-width: 980px; margin: 0 auto; }
+  h1 { font-size: 1.25rem; margin: 0 0 4px; color: var(--morado); }
+  .bajada { margin: 0 0 12px; color: #374151; font-size: .95rem; }
+  .antes { border-left: 4px solid var(--oro); background: #FFFBEB; padding: 8px 12px; border-radius: 6px; font-size: .92rem; margin: 0 0 12px; }
+  .rejilla { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 14px; }
+  @media (max-width: 760px) { .rejilla { grid-template-columns: minmax(0, 1fr); } }
+  .lienzo { position: relative; width: 100%; aspect-ratio: 4 / 3; max-height: 560px; border: 1px solid var(--borde); border-radius: 12px; background: radial-gradient(circle at 50% 40%, #FFFFFF 0%, var(--fondo) 75%); overflow: hidden; touch-action: none; }
+  .lienzo canvas { display: block; width: 100%; height: 100%; outline: none; }
+  .lienzo canvas:focus-visible { outline: 2px solid var(--rosa); outline-offset: -2px; }
+  .rotulo { position: absolute; transform: translate(-50%, -50%); font-size: .85rem; font-weight: 700; color: var(--morado); pointer-events: none; white-space: nowrap; text-shadow: 0 0 3px #fff, 0 0 3px #fff; }
+  .panel { border: 1px solid var(--borde); border-radius: 12px; padding: 12px; background: #fff; font-size: .9rem; }
+  .panel h2 { font-size: .95rem; margin: 0 0 8px; color: var(--morado); }
+  .grupo { margin-bottom: 12px; }
+  .botones { display: flex; flex-wrap: wrap; gap: 6px; }
+  button { font: inherit; font-size: .85rem; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--borde); background: #fff; color: var(--tinta); cursor: pointer; }
+  button[aria-pressed="true"] { background: var(--morado); color: #fff; border-color: var(--morado); }
+  button.primario { background: var(--rosa); color: #fff; border-color: var(--rosa); }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--rosa); outline-offset: 2px; }
+  input[type=range] { width: 100%; accent-color: var(--rosa); }
+  label { display: flex; gap: 6px; align-items: center; margin: 3px 0; }
+  .lectura { font-variant-numeric: tabular-nums; background: var(--fondo); border-radius: 8px; padding: 8px; }
+  .lectura b { color: var(--morado); }
+  .leyenda { display: flex; flex-wrap: wrap; gap: 10px; font-size: .82rem; color: #374151; margin-top: 8px; }
+  .punto { display: inline-block; width: 10px; height: 10px; border-radius: 50%; vertical-align: middle; margin-right: 4px; }
+  .explica { margin-top: 12px; font-size: .92rem; }
+  .explica p { margin: 6px 0; }
+  .aviso { display: none; padding: 10px; border-radius: 8px; background: #FEF2F2; color: #991B1B; font-size: .9rem; margin-bottom: 8px; }
+  #autotest { display: none; margin-top: 12px; font: 12px/1.5 ui-monospace, Menlo, monospace; background: #0F172A; color: #E2E8F0; padding: 10px; border-radius: 8px; white-space: pre-wrap; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .pie { font-size: .8rem; color: var(--gris); margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="envoltura">
+  <h1>La capa oculta dobla el espacio</h1>
+  <p class="bajada">Una red 2-3-1 (tres neuronas <em>tanh</em> y una salida sigmoide) se entrena en esta página. El deslizador α lleva cada punto desde el plano de entrada (x₁, x₂) hasta su representación en la capa oculta (h₁, h₂, h₃).</p>
+  <p class="antes"><strong>Antes de interactuar:</strong> ¿puede una sola recta separar las cuatro esquinas del XOR en el plano de entrada? ¿Y un plano, una vez que la capa oculta lleva los puntos a tres dimensiones?</p>
+
+  <div class="rejilla">
+    <div>
+      <div class="aviso" id="aviso" role="alert"></div>
+      <div class="lienzo" id="lienzo" role="img" aria-label="Nube de puntos de dos clases que la capa oculta deforma desde el plano de entrada hasta un espacio de tres dimensiones, donde un plano los separa."></div>
+      <div class="leyenda" aria-hidden="true">
+        <span><span class="punto" style="background:#3D008D"></span>Clase 0</span>
+        <span><span class="punto" style="background:#ED1E79"></span>Clase 1</span>
+        <span><span class="punto" style="background:#B8860B;border-radius:2px"></span>Frontera de decisión (p = 0,5)</span>
+        <span><span class="punto" style="background:#FDB913;opacity:.6;border-radius:2px"></span>Plano de la neurona de salida</span>
+      </div>
+      <p class="pie">Figura interactiva. Elaboración propia; datos sintéticos generados con semilla fija. Arrastrar para rotar, rueda o pellizco para acercar.</p>
+    </div>
+
+    <div class="panel">
+      <div class="grupo">
+        <h2>Datos</h2>
+        <div class="botones" role="group" aria-label="Conjunto de datos">
+          <button type="button" id="btn-xor" aria-pressed="true">XOR</button>
+          <button type="button" id="btn-lunas" aria-pressed="false">Lunas</button>
+          <button type="button" id="btn-semilla" title="Reentrena desde otra inicialización de pesos">Otra inicialización</button>
+        </div>
+      </div>
+      <div class="grupo">
+        <h2><label for="alfa" style="display:inline;margin:0">Deformación α</label></h2>
+        <input type="range" id="alfa" min="0" max="100" value="0" step="1" aria-describedby="alfa-valor">
+        <div id="alfa-valor" class="lectura">α = <b>0,00</b> · plano de entrada</div>
+        <div class="botones" style="margin-top:6px">
+          <button type="button" class="primario" id="btn-animar">▶ Animar</button>
+          <button type="button" id="btn-superior">Vista superior</button>
+          <button type="button" id="btn-3d">Vista 3D</button>
+        </div>
+      </div>
+      <div class="grupo">
+        <h2>Mostrar</h2>
+        <label><input type="checkbox" id="ver-malla" checked> Malla del plano de entrada</label>
+        <label><input type="checkbox" id="ver-frontera" checked> Frontera de decisión</label>
+        <label><input type="checkbox" id="ver-plano" checked> Plano de la neurona de salida</label>
+      </div>
+      <div class="lectura" id="metricas" aria-live="polite">Entrenando…</div>
+    </div>
+  </div>
+
+  <div class="explica">
+    <p id="descripcion" aria-live="polite"></p>
+    <p><strong>Qué conviene observar.</strong> Con α = 0 la frontera de decisión es una curva: ninguna recta del plano separa las clases. Al subir α, la capa oculta pliega la malla; con α = 1 todos los puntos de la frontera quedan sobre el plano dorado, porque la neurona de salida solo calcula w₂·h + b₂ y compara con 0. Lo que en la entrada exigía una frontera curva, en la capa oculta lo resuelve un clasificador lineal.</p>
+    <p><strong>Para pensar.</strong> «Otra inicialización» entrena la misma red desde otros pesos: la forma del pliegue cambia, pero las clases siguen quedando a lados opuestos de un plano. La representación interna no es única; lo que se aprende es <em>una</em> transformación que vuelve el problema linealmente separable.</p>
+  </div>
+  <div id="autotest" aria-live="polite"></div>
+</div>
+
+<!-- three.js r160 + OrbitControls empaquetados como script clásico (window.THREE). Ver vendor/BUILD.md. -->
+<script src="vendor/three-r160.iife.min.js"></script>
+<script>
+/* ===================================== MODELO (JS puro, sin DOM) ===================================== */
+const Modelo = (() => {
+  function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  const gauss = (rnd) => { let u = 0; for (let k = 0; k < 6; k++) u += rnd(); return (u - 3) / Math.sqrt(0.5); };
+  function datosXOR(n, ruido, rnd) {
+    const esq = [[-1, -1, 0], [1, 1, 0], [-1, 1, 1], [1, -1, 1]]; const pts = [];
+    for (let i = 0; i < n; i++) { const [cx, cy, y] = esq[i % 4]; pts.push({ x: [cx * 0.75 + ruido * gauss(rnd), cy * 0.75 + ruido * gauss(rnd)], y }); }
+    return pts;
+  }
+  function datosLunas(n, ruido, rnd) {
+    const pts = [];
+    for (let i = 0; i < n; i++) {
+      const y = i % 2; const t = Math.PI * rnd();
+      const p = y === 0 ? [Math.cos(t), Math.sin(t)] : [1 - Math.cos(t), 0.5 - Math.sin(t)];
+      pts.push({ x: [(p[0] - 0.5) * 1.2 + ruido * gauss(rnd), (p[1] - 0.25) * 1.6 + ruido * gauss(rnd)], y });
+    }
+    return pts;
+  }
+  const sig = (z) => 1 / (1 + Math.exp(-z));
+  function crearRed(rnd) {
+    const r = () => rnd() * 2 - 1;
+    return { W1: [[r() * 1.2, r() * 1.2], [r() * 1.2, r() * 1.2], [r() * 1.2, r() * 1.2]], b1: [r() * 0.3, r() * 0.3, r() * 0.3], w2: [r(), r(), r()], b2: 0 };
+  }
+  const oculta = (red, x) => red.W1.map((w, j) => Math.tanh(w[0] * x[0] + w[1] * x[1] + red.b1[j]));
+  const logit = (red, h) => red.w2[0] * h[0] + red.w2[1] * h[1] + red.w2[2] * h[2] + red.b2;
+  const salida = (red, h) => sig(logit(red, h));
+  const aVector = (red) => [red.W1[0][0], red.W1[0][1], red.W1[1][0], red.W1[1][1], red.W1[2][0], red.W1[2][1], ...red.b1, ...red.w2, red.b2];
+  const deVector = (red, v) => { red.W1 = [[v[0], v[1]], [v[2], v[3]], [v[4], v[5]]]; red.b1 = v.slice(6, 9); red.w2 = v.slice(9, 12); red.b2 = v[12]; };
+  function perdida(red, datos) {
+    let L = 0;
+    for (const { x, y } of datos) { const p = salida(red, oculta(red, x)); L -= y * Math.log(p + 1e-12) + (1 - y) * Math.log(1 - p + 1e-12); }
+    return L / datos.length;
+  }
+  // Gradiente analítico de la BCE media (retropropagación a mano).
+  function gradiente(red, datos) {
+    const g = new Array(13).fill(0);
+    for (const { x, y } of datos) {
+      const h = oculta(red, x); const d = salida(red, h) - y;
+      for (let j = 0; j < 3; j++) {
+        g[9 + j] += d * h[j];
+        const dz = d * red.w2[j] * (1 - h[j] * h[j]);
+        g[2 * j] += dz * x[0]; g[2 * j + 1] += dz * x[1]; g[6 + j] += dz;
+      }
+      g[12] += d;
+    }
+    return g.map((v) => v / datos.length);
+  }
+  // Adam con penalización L2 suave sobre los pesos (no sobre los sesgos): evita que la tanh se sature del todo
+  // y deja ver el pliegue; con λ = 0,003 la exactitud sigue siendo del 100 % en XOR y lunas.
+  const LAMBDA = 0.003;
+  function entrenar(red, datos, pasos = 800, lr = 0.05) {
+    const m = new Array(13).fill(0), s = new Array(13).fill(0);
+    for (let t = 1; t <= pasos; t++) {
+      const g = gradiente(red, datos); const v = aVector(red);
+      for (let i = 0; i < 13; i++) if (i < 6 || (i >= 9 && i < 12)) g[i] += LAMBDA * v[i];
+      for (let i = 0; i < 13; i++) {
+        m[i] = 0.9 * m[i] + 0.1 * g[i]; s[i] = 0.999 * s[i] + 0.001 * g[i] * g[i];
+        v[i] -= lr * (m[i] / (1 - 0.9 ** t)) / (Math.sqrt(s[i] / (1 - 0.999 ** t)) + 1e-8);
+      }
+      deVector(red, v);
+    }
+    return perdida(red, datos);
+  }
+  // α = 0 → (x₁, x₂, 0); α = 1 → (h₁, h₂, h₃). Interpolación lineal punto a punto.
+  function posicion(red, x, a) { const h = oculta(red, x); return [(1 - a) * x[0] + a * h[0], (1 - a) * x[1] + a * h[1], a * h[2]]; }
+  // Frontera de decisión en el plano de entrada (logit = 0) por marching squares.
+  function frontera(red, lim = 1.7, n = 140) {
+    const paso = 2 * lim / n; const f = []; const segs = [];
+    for (let i = 0; i <= n; i++) { f.push([]); for (let j = 0; j <= n; j++) f[i].push(logit(red, oculta(red, [-lim + i * paso, -lim + j * paso]))); }
+    const cruce = (x0, y0, v0, x1, y1, v1) => { const t = v0 / (v0 - v1); return [x0 + t * (x1 - x0), y0 + t * (y1 - y0)]; };
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+      const x0 = -lim + i * paso, y0 = -lim + j * paso, x1 = x0 + paso, y1 = y0 + paso;
+      const v = [f[i][j], f[i + 1][j], f[i + 1][j + 1], f[i][j + 1]];
+      const c = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
+      const pts = [];
+      for (let k = 0; k < 4; k++) { const a = v[k], b = v[(k + 1) % 4]; if ((a < 0) !== (b < 0)) pts.push(cruce(c[k][0], c[k][1], a, c[(k + 1) % 4][0], c[(k + 1) % 4][1], b)); }
+      if (pts.length === 2) segs.push(pts);
+      else if (pts.length === 4) { segs.push([pts[0], pts[1]]); segs.push([pts[2], pts[3]]); }
+    }
+    return segs;
+  }
+  function exactitud(red, datos) { let ok = 0; for (const { x, y } of datos) if ((salida(red, oculta(red, x)) > 0.5) === (y === 1)) ok++; return ok / datos.length; }
+  function construir(tipo, semillaPesos) {
+    const datos = (tipo === 'lunas' ? datosLunas : datosXOR)(200, 0.12, mulberry32(7));
+    const red = crearRed(mulberry32(semillaPesos));
+    const L = entrenar(red, datos);
+    return { tipo, datos, red, perdida: L, exactitud: exactitud(red, datos) };
+  }
+  function autotest() {
+    const r = [];
+    // 1) Gradiente analítico frente a diferencias centradas.
+    const datos = datosXOR(24, 0.1, mulberry32(3)); const red = crearRed(mulberry32(5)); const g = gradiente(red, datos); let maxRel = 0;
+    for (let i = 0; i < 13; i++) {
+      const v = aVector(red); const e = 1e-6; const a = { ...red }; const b = { ...red };
+      const va = v.slice(); va[i] += e; deVector(a, va); const vb = v.slice(); vb[i] -= e; deVector(b, vb);
+      const num = (perdida(a, datos) - perdida(b, datos)) / (2 * e);
+      maxRel = Math.max(maxRel, Math.abs(num - g[i]) / Math.max(1e-8, Math.abs(num) + Math.abs(g[i])));
+    }
+    r.push({ prueba: 'gradiente analítico = numérico', ok: maxRel < 1e-6, valor: maxRel });
+    for (const tipo of ['xor', 'lunas']) for (const semilla of [11, 27, 42]) {
+      const M = construir(tipo, semilla);
+      let coincide = true; for (const { x } of M.datos) { const h = oculta(M.red, x); if ((logit(M.red, h) > 0) !== (salida(M.red, h) > 0.5)) coincide = false; }
+      const segs = frontera(M.red); let maxRes = 0; const nw = Math.hypot(...M.red.w2);
+      for (const s of segs) for (const p of s) { const q = posicion(M.red, p, 1); maxRes = Math.max(maxRes, Math.abs(logit(M.red, q)) / nw); }
+      r.push({ prueba: `${tipo} · semilla ${semilla} · exactitud ≥ 97 %`, ok: M.exactitud >= 0.97, valor: M.exactitud });
+      r.push({ prueba: `${tipo} · semilla ${semilla} · plano = frontera de la salida`, ok: coincide, valor: coincide });
+      r.push({ prueba: `${tipo} · semilla ${semilla} · frontera con α=1 sobre el plano (dist. < 0,02)`, ok: maxRes < 0.02, valor: maxRes });
+      if (tipo === 'xor') {
+        const lado = (x) => Math.sign(logit(M.red, oculta(M.red, x)));
+        const ok = lado([-.75, -.75]) === lado([.75, .75]) && lado([-.75, .75]) === lado([.75, -.75]) && lado([-.75, -.75]) !== lado([-.75, .75]);
+        r.push({ prueba: `xor · semilla ${semilla} · esquinas en lados opuestos`, ok, valor: ok });
+      }
+    }
+    return { pasa: r.every((x) => x.ok), resultados: r };
+  }
+  return { construir, posicion, frontera, oculta, logit, salida, autotest };
+})();
+
+/* ===================================== VISTA (three.js) ===================================== */
+const fmt = (v, d = 2) => v.toFixed(d).replace('.', ',').replace('-', '−');
+const reducirMov = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const estado = { tipo: 'xor', semilla: 11, alfa: 0, M: null, animando: false, visible: true };
+const $ = (id) => document.getElementById(id);
+
+function hayWebGL() { try { const c = document.createElement('canvas'); return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl'))); } catch (e) { return false; } }
+
+const Vista = (() => {
+  if (!window.THREE || !hayWebGL()) return null;
+  const T = window.THREE; const cont = $('lienzo');
+  const renderer = new T.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.localClippingEnabled = true;
+  renderer.domElement.tabIndex = 0;
+  renderer.domElement.setAttribute('aria-label', 'Vista 3D; las flechas del teclado rotan la cámara');
+  cont.appendChild(renderer.domElement);
+  const escena = new T.Scene();
+  const camara = new T.PerspectiveCamera(38, 4 / 3, 0.1, 100);
+  const controles = new T.OrbitControls(camara, renderer.domElement);
+  controles.enablePan = false; controles.minDistance = 2; controles.maxDistance = 9;
+  escena.add(new T.AmbientLight(0xffffff, 0.75));
+  const luz = new T.DirectionalLight(0xffffff, 0.9); luz.position.set(3, 5, 4); escena.add(luz);
+  // Modelo (a, b, c) → three (a, c, −b): el plano de entrada queda horizontal y h₃ vertical.
+  const V = (p) => new T.Vector3(p[0], p[2], -p[1]);
+
+  const ejes = new T.Group(); escena.add(ejes);
+  const matEje = new T.LineBasicMaterial({ color: 0x9CA3AF });
+  [[[-1.8, 0, 0], [1.8, 0, 0]], [[0, -1.8, 0], [0, 1.8, 0]], [[0, 0, -1.3], [0, 0, 1.3]]].forEach(([a, b], k) => {
+    const l = new T.Line(new T.BufferGeometry().setFromPoints([V(a), V(b)]), matEje); l.userData.k = k; ejes.add(l);
+  });
+  const caja = new T.LineSegments(new T.EdgesGeometry(new T.BoxGeometry(2, 2, 2)), new T.LineBasicMaterial({ color: 0x3D008D, transparent: true, opacity: 0 }));
+  escena.add(caja);
+
+  const geoBola = new T.SphereGeometry(0.035, 12, 8);
+  let bolas = [];
+  const malla = new T.LineSegments(new T.BufferGeometry(), new T.LineBasicMaterial({ color: 0xA5A1B8, transparent: true, opacity: 0.55 }));
+  const curva = new T.LineSegments(new T.BufferGeometry(), new T.LineBasicMaterial({ color: 0xB8860B }));
+  escena.add(malla); escena.add(curva);
+  const recorte = [new T.Plane(new T.Vector3(1, 0, 0), 1.25), new T.Plane(new T.Vector3(-1, 0, 0), 1.25), new T.Plane(new T.Vector3(0, 1, 0), 1.25), new T.Plane(new T.Vector3(0, -1, 0), 1.25), new T.Plane(new T.Vector3(0, 0, 1), 1.25), new T.Plane(new T.Vector3(0, 0, -1), 1.25)];
+  const plano = new T.Mesh(new T.PlaneGeometry(5, 5), new T.MeshBasicMaterial({ color: 0xFDB913, transparent: true, opacity: 0, side: T.DoubleSide, depthWrite: false, clippingPlanes: recorte }));
+  escena.add(plano);
+
+  const rotulos = {};
+  ['e1', 'e2', 'e3'].forEach((k) => { const d = document.createElement('div'); d.className = 'rotulo'; d.setAttribute('aria-hidden', 'true'); cont.appendChild(d); rotulos[k] = d; });
+
+  let lineasMalla = [], segsFrontera = [];
+  function preparar(M) {
+    bolas.forEach((b) => escena.remove(b)); bolas = [];
+    const mats = [new T.MeshStandardMaterial({ color: 0x3D008D, roughness: 0.5 }), new T.MeshStandardMaterial({ color: 0xED1E79, roughness: 0.5 })];
+    for (const y of [0, 1]) {
+      const ds = M.datos.filter((d) => d.y === y);
+      const im = new T.InstancedMesh(geoBola, mats[y], ds.length); im.userData.datos = ds; escena.add(im); bolas.push(im);
+    }
+    lineasMalla = []; const lim = 1.25, nL = 11, nP = 70;
+    for (let i = 0; i < nL; i++) {
+      const c = -lim + 2 * lim * i / (nL - 1); const h = [], v = [];
+      for (let j = 0; j < nP; j++) { const t = -lim + 2 * lim * j / (nP - 1); h.push([t, c]); v.push([c, t]); }
+      lineasMalla.push(h, v);
+    }
+    segsFrontera = Modelo.frontera(M.red, 1.35);
+    // Plano w₂·h + b₂ = 0 en coordenadas three: normal n = (w₁, w₃, −w₂).
+    const w = M.red.w2; const n = new T.Vector3(w[0], w[2], -w[1]); const L = n.length(); n.normalize();
+    plano.position.copy(n.clone().multiplyScalar(-M.red.b2 / L));
+    plano.quaternion.setFromUnitVectors(new T.Vector3(0, 0, 1), n);
+  }
+  const m4 = new T.Matrix4();
+  function actualizar(M, a) {
+    for (const im of bolas) { im.userData.datos.forEach((d, i) => { const p = V(Modelo.posicion(M.red, d.x, a)); m4.makeTranslation(p.x, p.y, p.z); im.setMatrixAt(i, m4); }); im.instanceMatrix.needsUpdate = true; }
+    const pm = [];
+    for (const l of lineasMalla) for (let j = 0; j < l.length - 1; j++) { pm.push(V(Modelo.posicion(M.red, l[j], a)), V(Modelo.posicion(M.red, l[j + 1], a))); }
+    malla.geometry.dispose(); malla.geometry = new T.BufferGeometry().setFromPoints(pm);
+    const pf = []; for (const s of segsFrontera) pf.push(V(Modelo.posicion(M.red, s[0], a)), V(Modelo.posicion(M.red, s[1], a)));
+    curva.geometry.dispose(); curva.geometry = new T.BufferGeometry().setFromPoints(pf);
+    const s = Math.min(1, Math.max(0, (a - 0.65) / 0.35)); plano.material.opacity = 0.42 * s * s * (3 - 2 * s);
+    caja.material.opacity = 0.25 * a;
+    ejes.children.forEach((l) => { if (l.userData.k === 2) l.visible = a > 0.02; });
+    malla.visible = $('ver-malla').checked; curva.visible = $('ver-frontera').checked; plano.visible = $('ver-plano').checked;
+    const enOculta = a >= 0.5;
+    rotulos.e1.textContent = enOculta ? 'h₁' : 'x₁'; rotulos.e2.textContent = enOculta ? 'h₂' : 'x₂'; rotulos.e3.textContent = 'h₃';
+    rotulos.e3.style.display = a > 0.02 ? '' : 'none';
+    dibujar();
+  }
+  function tam() { const w = cont.clientWidth, h = cont.clientHeight; renderer.setSize(w, h, false); camara.aspect = w / Math.max(1, h); camara.updateProjectionMatrix(); dibujar(); }
+  function dibujar() {
+    renderer.render(escena, camara);
+    const w = cont.clientWidth, h = cont.clientHeight;
+    [['e1', [1.95, 0, 0]], ['e2', [0, 1.95, 0]], ['e3', [0, 0, 1.4]]].forEach(([k, p]) => {
+      const q = V(p).project(camara); rotulos[k].style.left = ((q.x + 1) / 2 * w) + 'px'; rotulos[k].style.top = ((1 - q.y) / 2 * h) + 'px';
+    });
+  }
+  function vista(tipo) {
+    if (tipo === 'superior') camara.position.set(0, 5.2, 0.001); else camara.position.set(2.9, 2.3, 3.4);
+    controles.target.set(0, 0, 0); controles.update(); dibujar();
+  }
+  controles.addEventListener('change', dibujar);
+  renderer.domElement.addEventListener('keydown', (e) => {
+    const paso = 0.12; const off = camara.position.clone().sub(controles.target); const sph = new T.Spherical().setFromVector3(off);
+    if (e.key === 'ArrowLeft') sph.theta -= paso; else if (e.key === 'ArrowRight') sph.theta += paso;
+    else if (e.key === 'ArrowUp') sph.phi = Math.max(0.05, sph.phi - paso); else if (e.key === 'ArrowDown') sph.phi = Math.min(Math.PI - 0.05, sph.phi + paso); else return;
+    e.preventDefault(); camara.position.copy(controles.target).add(new T.Vector3().setFromSpherical(sph)); controles.update(); dibujar();
+  });
+  if ('ResizeObserver' in window) new ResizeObserver(tam).observe(cont); else window.addEventListener('resize', tam);
+  vista('3d'); tam();
+  return { preparar, actualizar, vista, dibujar };
+})();
+
+/* ===================== Respaldo sin WebGL: vista plana del espacio de entrada (canvas 2D) ===================== */
+const Plano2D = (() => {
+  if (Vista) return null;
+  const aviso = $('aviso'); aviso.style.display = 'block';
+  aviso.textContent = (window.THREE ? 'Este navegador no ofrece WebGL' : 'No se pudo cargar la biblioteca 3D (vendor/three-r160.iife.min.js)') +
+    ': se muestra la vista plana del espacio de entrada (α = 0) con la frontera de decisión. La deformación 3D requiere WebGL.';
+  const cont = $('lienzo'); const c = document.createElement('canvas'); cont.appendChild(c); const ctx = c.getContext('2d');
+  function actualizar(M) {
+    const w = c.width = cont.clientWidth * 2, h = c.height = cont.clientHeight * 2; const lim = 1.7;
+    const X = (x) => (x + lim) / (2 * lim) * w, Y = (y) => h - (y + lim) / (2 * lim) * h;
+    ctx.clearRect(0, 0, w, h); ctx.strokeStyle = '#B8860B'; ctx.lineWidth = 3;
+    for (const s of Modelo.frontera(M.red)) { ctx.beginPath(); ctx.moveTo(X(s[0][0]), Y(s[0][1])); ctx.lineTo(X(s[1][0]), Y(s[1][1])); ctx.stroke(); }
+    for (const d of M.datos) { ctx.fillStyle = d.y ? '#ED1E79' : '#3D008D'; ctx.beginPath(); ctx.arc(X(d.x[0]), Y(d.x[1]), 6, 0, 2 * Math.PI); ctx.fill(); }
+  }
+  return { actualizar };
+})();
+
+/* ===================================== CONTROLADOR ===================================== */
+function describir(a) {
+  if (a < 0.05) return 'α = 0: los puntos están en el plano de entrada. La frontera de decisión es una curva; ninguna recta separa las clases.';
+  if (a < 0.95) return `α = ${fmt(a)}: la capa oculta pliega el plano de entrada hacia el espacio (h₁, h₂, h₃); la frontera curva se va aplanando.`;
+  return 'α = 1: cada punto está en su representación oculta. La frontera queda sobre el plano dorado de la neurona de salida: el problema es linealmente separable.';
+}
+function pintar() {
+  const a = estado.alfa;
+  $('alfa').value = Math.round(a * 100);
+  $('alfa-valor').innerHTML = `α = <b>${fmt(a)}</b> · ${a < 0.5 ? 'plano de entrada' : 'espacio de la capa oculta'}`;
+  $('descripcion').textContent = describir(a);
+  if (Vista) Vista.actualizar(estado.M, a); else if (Plano2D) Plano2D.actualizar(estado.M);
+}
+function reconstruir() {
+  estado.M = Modelo.construir(estado.tipo, estado.semilla);
+  $('metricas').innerHTML = `Exactitud en entrenamiento: <b>${fmt(estado.M.exactitud * 100, 1)} %</b><br>Pérdida (BCE) final: <b>${fmt(estado.M.perdida, 4)}</b><br>Optimizador: Adam + L2 (λ = 0,003), 800 pasos`;
+  if (Vista) Vista.preparar(estado.M);
+  pintar();
+  avisarAltura();
+}
+let ultimo = 0;
+function cuadro(t) {
+  if (!estado.animando) return;
+  if (!estado.visible) { requestAnimationFrame(cuadro); ultimo = t; return; }
+  const dt = ultimo ? Math.min(0.05, (t - ultimo) / 1000) : 0; ultimo = t;
+  estado.alfa = Math.min(1, estado.alfa + dt / 2.8); pintar();
+  if (estado.alfa >= 1) { estado.animando = false; $('btn-animar').textContent = '▶ Animar'; return; }
+  requestAnimationFrame(cuadro);
+}
+$('btn-animar').addEventListener('click', () => {
+  if (estado.animando) { estado.animando = false; $('btn-animar').textContent = '▶ Animar'; return; }
+  if (estado.alfa >= 1) estado.alfa = 0;
+  if (reducirMov || !Vista) { estado.alfa = 1; pintar(); return; } // sin movimiento: salta al estado final
+  estado.animando = true; ultimo = 0; $('btn-animar').textContent = '❚❚ Pausa'; requestAnimationFrame(cuadro);
+});
+$('alfa').addEventListener('input', (e) => { estado.animando = false; $('btn-animar').textContent = '▶ Animar'; estado.alfa = e.target.value / 100; pintar(); });
+const conjunto = (tipo) => { estado.tipo = tipo; $('btn-xor').setAttribute('aria-pressed', tipo === 'xor'); $('btn-lunas').setAttribute('aria-pressed', tipo === 'lunas'); reconstruir(); };
+$('btn-xor').addEventListener('click', () => conjunto('xor'));
+$('btn-lunas').addEventListener('click', () => conjunto('lunas'));
+$('btn-semilla').addEventListener('click', () => { estado.semilla = estado.semilla === 11 ? 27 : estado.semilla === 27 ? 42 : 11; reconstruir(); });
+$('btn-superior').addEventListener('click', () => Vista && Vista.vista('superior'));
+$('btn-3d').addEventListener('click', () => Vista && Vista.vista('3d'));
+['ver-malla', 'ver-frontera', 'ver-plano'].forEach((id) => $(id).addEventListener('change', pintar));
+if ('IntersectionObserver' in window) new IntersectionObserver((es) => { estado.visible = es[0].isIntersecting; }).observe($('lienzo'));
+
+/* Auto-altura cuando se embebe (protocolo del curso: {type:'embed-tool-height', id, height}). */
+let tAltura;
+function avisarAltura() {
+  if (window.self === window.top) return;
+  clearTimeout(tAltura);
+  tAltura = setTimeout(() => { try { parent.postMessage({ type: 'embed-tool-height', id: 'capa-oculta-3d-frame', height: Math.ceil(document.documentElement.getBoundingClientRect().height) }, '*'); } catch (e) { } }, 90);
+}
+window.addEventListener('load', avisarAltura); window.addEventListener('resize', avisarAltura);
+
+reconstruir();
+
+/* Gancho de verificación y autotest (?selftest=1). */
+window.__capa3d = { Modelo, estado, fijarAlfa: (a) => { estado.alfa = a; pintar(); }, autotest: Modelo.autotest, webgl: !!Vista };
+if (new URLSearchParams(location.search).get('selftest') === '1') {
+  const R = Modelo.autotest(); const caja = $('autotest'); caja.style.display = 'block';
+  caja.textContent = (R.pasa ? 'AUTOTEST: PASA' : 'AUTOTEST: FALLA') + '\n' + R.resultados.map((r) => `${r.ok ? '✓' : '✗'} ${r.prueba} → ${typeof r.valor === 'number' ? r.valor.toExponential(2) : r.valor}`).join('\n');
+  console.log(caja.textContent); window.__capa3d.resultadoAutotest = R; avisarAltura();
+}
+</script>
+</body>
+</html>
