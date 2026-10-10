@@ -298,6 +298,8 @@
         mjx-container svg {
             display: inline-block;
         }
+        /* Citas APA (auditoría 2026-10): el título muestra la referencia completa */
+        .cita { cursor: help; }
     </style>
 </head>
 
@@ -948,6 +950,139 @@
             </div>
         );
 
+        // ===== Citas APA 7 (auditoría 2026-10) =====
+        // Datos generados con .claude/auditoria-2026-10/scripts/refs_js.py desde recursos/bibliografia-maestra.json.
+        // No editar a mano: regenerar el bloque REFS si cambia la bibliografía maestra.
+        const REFS = {
+            goodfellow2016deep: { a: 'Goodfellow et al.', y: '2016', u: 'https://www.deeplearningbook.org', r: [['Goodfellow, I., Bengio, Y. y Courville, A. (2016). ', 0], ['Deep learning', 1], ['. ', 0], ['MIT Press.', 0]] },
+            zhang2023dive: { a: 'Zhang et al.', y: '2023', u: 'https://d2l.ai/', r: [['Zhang, A., Lipton, Z. C., Li, M. y Smola, A. J. (2023). ', 0], ['Dive into deep learning', 1], ['. ', 0], ['Cambridge University Press.', 0]] },
+            lecun2015deep: { a: 'LeCun et al.', y: '2015', u: 'https://doi.org/10.1038/nature14539', r: [['LeCun, Y., Bengio, Y. y Hinton, G. (2015). ', 0], ['Deep learning. ', 0], ['Nature', 1], [', ', 0], ['521', 1], ['(7553)', 0], [', 436–444', 0], ['.', 0]] },
+            schmidhuber2015deep: { a: 'Schmidhuber', y: '2015', u: 'https://doi.org/10.1016/j.neunet.2014.09.003', r: [['Schmidhuber, J. (2015). ', 0], ['Deep learning in neural networks: An overview. ', 0], ['Neural Networks', 1], [', ', 0], ['61', 1], [', 85–117', 0], ['.', 0]] },
+            mcculloch1943logical: { a: 'McCulloch y Pitts', y: '1943', u: 'https://doi.org/10.1007/BF02478259', r: [['McCulloch, W. S. y Pitts, W. (1943). ', 0], ['A logical calculus of the ideas immanent in nervous activity. ', 0], ['The Bulletin of Mathematical Biophysics', 1], [', ', 0], ['5', 1], ['(4)', 0], [', 115–133', 0], ['.', 0]] },
+            rosenblatt1958perceptron: { a: 'Rosenblatt', y: '1958', u: 'https://doi.org/10.1037/h0042519', r: [['Rosenblatt, F. (1958). ', 0], ['The perceptron: A probabilistic model for information storage and organization in the brain. ', 0], ['Psychological Review', 1], [', ', 0], ['65', 1], ['(6)', 0], [', 386–408', 0], ['.', 0]] },
+            rosenblatt1962principles: { a: 'Rosenblatt', y: '1962', u: '', r: [['Rosenblatt, F. (1962). ', 0], ['Principles of neurodynamics: Perceptrons and the theory of brain mechanisms', 1], ['. ', 0], ['Spartan Books.', 0]] },
+            minsky1969perceptrons: { a: 'Minsky y Papert', y: '1969', u: '', r: [['Minsky, M. y Papert, S. (1969). ', 0], ['Perceptrons: An introduction to computational geometry', 1], ['. ', 0], ['MIT Press.', 0]] },
+            lighthill1973artificial: { a: 'Lighthill', y: '1973', u: 'https://www.chilton-computing.org.uk/inf/literature/reports/lighthill_report/p001.htm', r: [['Lighthill, J. (1973). ', 0], ['Artificial intelligence: A general survey. ', 0], ['En ', 0], ['Artificial intelligence: A paper symposium', 1], ['. ', 0], ['Science Research Council.', 0]] },
+            rumelhart1986learning: { a: 'Rumelhart et al.', y: '1986', u: 'https://doi.org/10.1038/323533a0', r: [['Rumelhart, D. E., Hinton, G. E. y Williams, R. J. (1986). ', 0], ['Learning representations by back-propagating errors. ', 0], ['Nature', 1], [', ', 0], ['323', 1], ['(6088)', 0], [', 533–536', 0], ['.', 0]] },
+            werbos1974beyond: { a: 'Werbos', y: '1974', u: '', r: [['Werbos, P. J. (1974). ', 0], ['Beyond regression: New tools for prediction and analysis in the behavioral sciences', 1], [' [Tesis doctoral, Harvard University].', 0]] },
+            lecun1989backpropagation: { a: 'LeCun et al.', y: '1989', u: 'https://doi.org/10.1162/neco.1989.1.4.541', r: [['LeCun, Y., Boser, B., Denker, J. S., Henderson, D., Howard, R. E., Hubbard, W. y Jackel, L. D. (1989). ', 0], ['Backpropagation applied to handwritten zip code recognition. ', 0], ['Neural Computation', 1], [', ', 0], ['1', 1], ['(4)', 0], [', 541–551', 0], ['.', 0]] },
+            lecun1998gradient: { a: 'LeCun et al.', y: '1998', u: 'https://doi.org/10.1109/5.726791', r: [['LeCun, Y., Bottou, L., Bengio, Y. y Haffner, P. (1998). ', 0], ['Gradient-based learning applied to document recognition. ', 0], ['Proceedings of the IEEE', 1], [', ', 0], ['86', 1], ['(11)', 0], [', 2278–2324', 0], ['.', 0]] },
+            cortes1995support: { a: 'Cortes y Vapnik', y: '1995', u: 'https://doi.org/10.1007/BF00994018', r: [['Cortes, C. y Vapnik, V. (1995). ', 0], ['Support-vector networks. ', 0], ['Machine Learning', 1], [', ', 0], ['20', 1], ['(3)', 0], [', 273–297', 0], ['.', 0]] },
+            hinton2006fast: { a: 'Hinton et al.', y: '2006', u: 'https://doi.org/10.1162/neco.2006.18.7.1527', r: [['Hinton, G. E., Osindero, S. y Teh, Y.-W. (2006). ', 0], ['A fast learning algorithm for deep belief nets. ', 0], ['Neural Computation', 1], [', ', 0], ['18', 1], ['(7)', 0], [', 1527–1554', 0], ['.', 0]] },
+            dechter1986learning: { a: 'Dechter', y: '1986', u: 'https://www.aaai.org/Papers/AAAI/1986/AAAI86-029.pdf', r: [['Dechter, R. (1986). ', 0], ['Learning while searching in constraint-satisfaction-problems. ', 0], ['En ', 0], ['Proceedings of the Fifth National Conference on Artificial Intelligence (AAAI-86)', 1], [' (pp. 178–183)', 0], ['. ', 0], ['AAAI Press.', 0]] },
+            aizenberg2000multivalued: { a: 'Aizenberg et al.', y: '2000', u: 'https://doi.org/10.1007/978-1-4757-3115-6', r: [['Aizenberg, I. N., Aizenberg, N. N. y Vandewalle, J. (2000). ', 0], ['Multi-valued and universal binary neurons: Theory, learning and applications', 1], ['. ', 0], ['Springer.', 0]] },
+            krizhevsky2012imagenet: { a: 'Krizhevsky et al.', y: '2012', u: 'https://proceedings.neurips.cc/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf', r: [['Krizhevsky, A., Sutskever, I. y Hinton, G. E. (2012). ', 0], ['ImageNet classification with deep convolutional neural networks. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 25, pp. 1097–1105)', 0], ['. ', 0], ['Curran Associates.', 0]] },
+            russakovsky2015imagenet: { a: 'Russakovsky et al.', y: '2015', u: 'https://doi.org/10.1007/s11263-015-0816-y', r: [['Russakovsky, O., Deng, J., Su, H., Krause, J., Satheesh, S., Ma, S., Huang, Z., Karpathy, A., Khosla, A., Bernstein, M., Berg, A. C. y Fei-Fei, L. (2015). ', 0], ['ImageNet large scale visual recognition challenge. ', 0], ['International Journal of Computer Vision', 1], [', ', 0], ['115', 1], ['(3)', 0], [', 211–252', 0], ['.', 0]] },
+            vaswani2017attention: { a: 'Vaswani et al.', y: '2017', u: 'https://arxiv.org/abs/1706.03762', r: [['Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, Ł. y Polosukhin, I. (2017). ', 0], ['Attention is all you need. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 30, pp. 5998–6008)', 0], ['. ', 0], ['Curran Associates.', 0]] },
+            devlin2019bert: { a: 'Devlin et al.', y: '2019', u: 'https://doi.org/10.18653/v1/N19-1423', r: [['Devlin, J., Chang, M.-W., Lee, K. y Toutanova, K. (2019). ', 0], ['BERT: Pre-training of deep bidirectional transformers for language understanding. ', 0], ['En ', 0], ['Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies', 1], [' (Vol. 1, pp. 4171–4186)', 0], ['. ', 0], ['Association for Computational Linguistics.', 0]] },
+            brown2020language: { a: 'Brown et al.', y: '2020', u: 'https://arxiv.org/abs/2005.14165', r: [['Brown, T. B., Mann, B., Ryder, N., Subbiah, M., Kaplan, J., Dhariwal, P., Neelakantan, A., Shyam, P., Sastry, G., Askell, A., Agarwal, S., Herbert-Voss, A., Krueger, G., Henighan, T., Child, R., Ramesh, A., Ziegler, D. M., Wu, J., Winter, C., … Amodei, D. (2020). ', 0], ['Language models are few-shot learners. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 33, pp. 1877–1901)', 0], ['. ', 0], ['Curran Associates.', 0]] },
+            deng2009imagenet: { a: 'Deng et al.', y: '2009', u: 'https://doi.org/10.1109/CVPR.2009.5206848', r: [['Deng, J., Dong, W., Socher, R., Li, L.-J., Li, K. y Fei-Fei, L. (2009). ', 0], ['ImageNet: A large-scale hierarchical image database. ', 0], ['En ', 0], ['2009 IEEE Conference on Computer Vision and Pattern Recognition', 1], [' (pp. 248–255)', 0], ['. ', 0], ['IEEE.', 0]] },
+            raina2009large: { a: 'Raina et al.', y: '2009', u: 'https://doi.org/10.1145/1553374.1553486', r: [['Raina, R., Madhavan, A. y Ng, A. Y. (2009). ', 0], ['Large-scale deep unsupervised learning using graphics processors. ', 0], ['En ', 0], ['Proceedings of the 26th Annual International Conference on Machine Learning', 1], [' (pp. 873–880)', 0], ['. ', 0], ['ACM.', 0]] },
+            nair2010rectified: { a: 'Nair y Hinton', y: '2010', u: 'https://icml.cc/Conferences/2010/papers/432.pdf', r: [['Nair, V. y Hinton, G. E. (2010). ', 0], ['Rectified linear units improve restricted Boltzmann machines. ', 0], ['En ', 0], ['Proceedings of the 27th International Conference on Machine Learning', 1], [' (pp. 807–814)', 0], ['. ', 0], ['Omnipress.', 0]] },
+            glorot2011deep: { a: 'Glorot et al.', y: '2011', u: 'https://proceedings.mlr.press/v15/glorot11a.html', r: [['Glorot, X., Bordes, A. y Bengio, Y. (2011). ', 0], ['Deep sparse rectifier neural networks. ', 0], ['En ', 0], ['Proceedings of the Fourteenth International Conference on Artificial Intelligence and Statistics', 1], [' (Vol. 15, pp. 315–323)', 0], ['. ', 0], ['PMLR.', 0]] },
+            hinton2012improving: { a: 'Hinton et al.', y: '2012', u: 'https://doi.org/10.48550/arXiv.1207.0580', r: [['Hinton, G. E., Srivastava, N., Krizhevsky, A., Sutskever, I. y Salakhutdinov, R. R. (2012). ', 0], ['Improving neural networks by preventing co-adaptation of feature detectors', 1], [' [Preprint]. ', 0], ['arXiv.', 0]] },
+            srivastava2014dropout: { a: 'Srivastava et al.', y: '2014', u: 'https://jmlr.org/papers/v15/srivastava14a.html', r: [['Srivastava, N., Hinton, G., Krizhevsky, A., Sutskever, I. y Salakhutdinov, R. (2014). ', 0], ['Dropout: A simple way to prevent neural networks from overfitting. ', 0], ['Journal of Machine Learning Research', 1], [', ', 0], ['15', 1], ['(56)', 0], [', 1929–1958', 0], ['.', 0]] },
+            ioffe2015batch: { a: 'Ioffe y Szegedy', y: '2015', u: 'https://proceedings.mlr.press/v37/ioffe15.html', r: [['Ioffe, S. y Szegedy, C. (2015). ', 0], ['Batch normalization: Accelerating deep network training by reducing internal covariate shift. ', 0], ['En ', 0], ['Proceedings of the 32nd International Conference on Machine Learning', 1], [' (Vol. 37, pp. 448–456)', 0], ['. ', 0], ['PMLR.', 0]] },
+            ribeiro2016why: { a: 'Ribeiro et al.', y: '2016', u: 'https://doi.org/10.1145/2939672.2939778', r: [['Ribeiro, M. T., Singh, S. y Guestrin, C. (2016). ', 0], ['«Why should I trust you?»: Explaining the predictions of any classifier. ', 0], ['En ', 0], ['Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining', 1], [' (pp. 1135–1144)', 0], ['. ', 0], ['ACM.', 0]] },
+            lundberg2017unified: { a: 'Lundberg y Lee', y: '2017', u: 'https://arxiv.org/abs/1705.07874', r: [['Lundberg, S. M. y Lee, S.-I. (2017). ', 0], ['A unified approach to interpreting model predictions. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 30)', 0], ['.', 0]] },
+            howard2017mobilenets: { a: 'Howard et al.', y: '2017', u: 'https://doi.org/10.48550/arXiv.1704.04861', r: [['Howard, A. G., Zhu, M., Chen, B., Kalenichenko, D., Wang, W., Weyand, T., Andreetto, M. y Adam, H. (2017). ', 0], ['MobileNets: Efficient convolutional neural networks for mobile vision applications', 1], [' [Preprint]. ', 0], ['arXiv.', 0]] },
+            starmer2020essential: { a: 'Starmer', y: '2020', u: 'https://www.youtube.com/watch?v=CqOfi41LfDw', r: [['Starmer, J. [StatQuest with Josh Starmer]. (2020, 30 de agosto). ', 0], ['The essential main ideas of neural networks', 1], [' [Video]. ', 0], ['YouTube.', 0]] },
+            cybenko1989approximation: { a: 'Cybenko', y: '1989', u: 'https://doi.org/10.1007/BF02551274', r: [['Cybenko, G. (1989). ', 0], ['Approximation by superpositions of a sigmoidal function. ', 0], ['Mathematics of Control, Signals and Systems', 1], [', ', 0], ['2', 1], ['(4)', 0], [', 303–314', 0], ['.', 0]] },
+            hornik1991approximation: { a: 'Hornik', y: '1991', u: 'https://doi.org/10.1016/0893-6080(91)90009-T', r: [['Hornik, K. (1991). ', 0], ['Approximation capabilities of multilayer feedforward networks. ', 0], ['Neural Networks', 1], [', ', 0], ['4', 1], ['(2)', 0], [', 251–257', 0], ['.', 0]] },
+            leshno1993multilayer: { a: 'Leshno et al.', y: '1993', u: 'https://doi.org/10.1016/S0893-6080(05)80131-5', r: [['Leshno, M., Lin, V. Y., Pinkus, A. y Schocken, S. (1993). ', 0], ['Multilayer feedforward networks with a nonpolynomial activation function can approximate any function. ', 0], ['Neural Networks', 1], [', ', 0], ['6', 1], ['(6)', 0], [', 861–867', 0], ['.', 0]] },
+            telgarsky2016benefits: { a: 'Telgarsky', y: '2016', u: 'https://proceedings.mlr.press/v49/telgarsky16.html', r: [['Telgarsky, M. (2016). ', 0], ['Benefits of depth in neural networks. ', 0], ['En ', 0], ['29th Annual Conference on Learning Theory', 1], [' (Vol. 49, pp. 1517–1539)', 0], ['. ', 0], ['PMLR.', 0]] },
+            eldan2016power: { a: 'Eldan y Shamir', y: '2016', u: 'https://proceedings.mlr.press/v49/eldan16.html', r: [['Eldan, R. y Shamir, O. (2016). ', 0], ['The power of depth for feedforward neural networks. ', 0], ['En ', 0], ['29th Annual Conference on Learning Theory', 1], [' (Vol. 49, pp. 907–940)', 0], ['. ', 0], ['PMLR.', 0]] },
+            maas2013rectifier: { a: 'Maas et al.', y: '2013', u: '', r: [['Maas, A. L., Hannun, A. Y. y Ng, A. Y. (2013). ', 0], ['Rectifier nonlinearities improve neural network acoustic models. ', 0], ['En ', 0], ['ICML Workshop on Deep Learning for Audio, Speech and Language Processing', 1], ['.', 0]] },
+            glorot2010understanding: { a: 'Glorot y Bengio', y: '2010', u: 'https://proceedings.mlr.press/v9/glorot10a.html', r: [['Glorot, X. y Bengio, Y. (2010). ', 0], ['Understanding the difficulty of training deep feedforward neural networks. ', 0], ['En ', 0], ['Proceedings of the Thirteenth International Conference on Artificial Intelligence and Statistics', 1], [' (Vol. 9, pp. 249–256)', 0], ['. ', 0], ['PMLR.', 0]] },
+            he2015delving: { a: 'He et al.', y: '2015', u: 'https://doi.org/10.1109/ICCV.2015.123', r: [['He, K., Zhang, X., Ren, S. y Sun, J. (2015). ', 0], ['Delving deep into rectifiers: Surpassing human-level performance on ImageNet classification. ', 0], ['En ', 0], ['2015 IEEE International Conference on Computer Vision (ICCV)', 1], [' (pp. 1026–1034)', 0], ['. ', 0], ['IEEE.', 0]] },
+            smilkov2016playground: { a: 'Smilkov y Carter', y: 's. f.', u: 'https://playground.tensorflow.org', r: [['Smilkov, D. y Carter, S. (s. f.). ', 0], ['TensorFlow Playground', 1], [' [Software]. ', 0], ['Google.', 0]] },
+            smilkov2017direct: { a: 'Smilkov et al.', y: '2017', u: 'https://doi.org/10.48550/arXiv.1708.03788', r: [['Smilkov, D., Carter, S., Sculley, D., Viégas, F. B. y Wattenberg, M. (2017). ', 0], ['Direct-manipulation visualization of deep networks', 1], [' [Preprint]. ', 0], ['arXiv.', 0]] },
+            huber1964robust: { a: 'Huber', y: '1964', u: 'https://doi.org/10.1214/aoms/1177703732', r: [['Huber, P. J. (1964). ', 0], ['Robust estimation of a location parameter. ', 0], ['The Annals of Mathematical Statistics', 1], [', ', 0], ['35', 1], ['(1)', 0], [', 73–101', 0], ['.', 0]] },
+            elkan2001foundations: { a: 'Elkan', y: '2001', u: 'https://cseweb.ucsd.edu/~elkan/rescale.pdf', r: [['Elkan, C. (2001). ', 0], ['The foundations of cost-sensitive learning. ', 0], ['En ', 0], ['Proceedings of the 17th International Joint Conference on Artificial Intelligence', 1], [' (pp. 973–978)', 0], ['.', 0]] },
+            robbins1951stochastic: { a: 'Robbins y Monro', y: '1951', u: 'https://doi.org/10.1214/aoms/1177729586', r: [['Robbins, H. y Monro, S. (1951). ', 0], ['A stochastic approximation method. ', 0], ['The Annals of Mathematical Statistics', 1], [', ', 0], ['22', 1], ['(3)', 0], [', 400–407', 0], ['.', 0]] },
+            bottou2018optimization: { a: 'Bottou et al.', y: '2018', u: 'https://doi.org/10.1137/16M1080173', r: [['Bottou, L., Curtis, F. E. y Nocedal, J. (2018). ', 0], ['Optimization methods for large-scale machine learning. ', 0], ['SIAM Review', 1], [', ', 0], ['60', 1], ['(2)', 0], [', 223–311', 0], ['.', 0]] },
+            keskar2017large: { a: 'Keskar et al.', y: '2017', u: 'https://arxiv.org/abs/1609.04836', r: [['Keskar, N. S., Mudigere, D., Nocedal, J., Smelyanskiy, M. y Tang, P. T. P. (2017). ', 0], ['On large-batch training for deep learning: Generalization gap and sharp minima. ', 0], ['En ', 0], ['5th International Conference on Learning Representations (ICLR 2017)', 1], ['.', 0]] },
+            dauphin2014identifying: { a: 'Dauphin et al.', y: '2014', u: 'https://arxiv.org/abs/1406.2572', r: [['Dauphin, Y. N., Pascanu, R., Gulcehre, C., Cho, K., Ganguli, S. y Bengio, Y. (2014). ', 0], ['Identifying and attacking the saddle point problem in high-dimensional non-convex optimization. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 27, pp. 2933–2941)', 0], ['.', 0]] },
+            choromanska2015loss: { a: 'Choromanska et al.', y: '2015', u: 'https://proceedings.mlr.press/v38/choromanska15.html', r: [['Choromanska, A., Henaff, M., Mathieu, M., Ben Arous, G. y LeCun, Y. (2015). ', 0], ['The loss surfaces of multilayer networks. ', 0], ['En ', 0], ['Proceedings of the Eighteenth International Conference on Artificial Intelligence and Statistics', 1], [' (Vol. 38, pp. 192–204)', 0], ['. ', 0], ['PMLR.', 0]] },
+            polyak1964some: { a: 'Polyak', y: '1964', u: 'https://doi.org/10.1016/0041-5553(64)90137-5', r: [['Polyak, B. (1964). ', 0], ['Some methods of speeding up the convergence of iteration methods. ', 0], ['USSR Computational Mathematics and Mathematical Physics', 1], [', ', 0], ['4', 1], ['(5)', 0], [', 1–17', 0], ['.', 0]] },
+            sutskever2013importance: { a: 'Sutskever et al.', y: '2013', u: 'https://proceedings.mlr.press/v28/sutskever13.html', r: [['Sutskever, I., Martens, J., Dahl, G. y Hinton, G. (2013). ', 0], ['On the importance of initialization and momentum in deep learning. ', 0], ['En ', 0], ['Proceedings of the 30th International Conference on Machine Learning', 1], [' (Vol. 28, pp. 1139–1147)', 0], ['. ', 0], ['PMLR.', 0]] },
+            tieleman2012lecture: { a: 'Tieleman y Hinton', y: '2012', u: 'https://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf', r: [['Tieleman, T. y Hinton, G. (2012). ', 0], ['Lecture 6.5—RMSProp: Divide the gradient by a running average of its recent magnitude', 1], [' [Diapositivas de clase]. ', 0], ['Coursera: Neural Networks for Machine Learning.', 0]] },
+            kingma2015adam: { a: 'Kingma y Ba', y: '2015', u: 'https://arxiv.org/abs/1412.6980', r: [['Kingma, D. P. y Ba, J. (2015). ', 0], ['Adam: A method for stochastic optimization. ', 0], ['En ', 0], ['3rd International Conference on Learning Representations (ICLR 2015)', 1], ['.', 0]] },
+            loshchilov2019decoupled: { a: 'Loshchilov y Hutter', y: '2019', u: 'https://arxiv.org/abs/1711.05101', r: [['Loshchilov, I. y Hutter, F. (2019). ', 0], ['Decoupled weight decay regularization. ', 0], ['En ', 0], ['7th International Conference on Learning Representations (ICLR 2019)', 1], ['.', 0]] },
+            wilson2017marginal: { a: 'Wilson et al.', y: '2017', u: 'https://arxiv.org/abs/1705.08292', r: [['Wilson, A. C., Roelofs, R., Stern, M., Srebro, N. y Recht, B. (2017). ', 0], ['The marginal value of adaptive gradient methods in machine learning. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 30, pp. 4148–4158)', 0], ['.', 0]] },
+            santana2018descenso: { a: 'Santana Vega', y: '2018a', u: 'https://www.youtube.com/watch?v=A6FiCDoz8_4', r: [['Santana Vega, C. [Dot CSV]. (2018a, 4 de febrero). ', 0], ['¿Qué es el descenso del gradiente? Algoritmo de inteligencia artificial', 1], [' [Video]. ', 0], ['YouTube.', 0]] },
+            khanacademy_gd: { a: 'Khan Academy', y: 's. f.', u: 'https://es.khanacademy.org/math/multivariable-calculus/applications-of-multivariable-derivatives/optimizing-multivariable-functions/a/what-is-gradient-descent', r: [['Khan Academy. (s. f.). ', 0], ['¿Qué es el descenso de gradiente?', 1], ['', 0]] },
+            baydin2018automatic: { a: 'Baydin et al.', y: '2018', u: 'https://jmlr.org/papers/v18/17-468.html', r: [['Baydin, A. G., Pearlmutter, B. A., Radul, A. A. y Siskind, J. M. (2018). ', 0], ['Automatic differentiation in machine learning: A survey. ', 0], ['Journal of Machine Learning Research', 1], [', ', 0], ['18', 1], ['(153)', 0], [', 1–43', 0], ['.', 0]] },
+            paszke2019pytorch: { a: 'Paszke et al.', y: '2019', u: 'https://arxiv.org/abs/1912.01703', r: [['Paszke, A., Gross, S., Massa, F., Lerer, A., Bradbury, J., Chanan, G., Killeen, T., Lin, Z., Gimelshein, N., Antiga, L., Desmaison, A., Köpf, A., Yang, E., DeVito, Z., Raison, M., Tejani, A., Chilamkurthy, S., Steiner, B., Fang, L., … Chintala, S. (2019). ', 0], ['PyTorch: An imperative style, high-performance deep learning library. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 32, pp. 8024–8035)', 0], ['. ', 0], ['Curran Associates.', 0]] },
+            nielsen2015neural: { a: 'Nielsen', y: '2015', u: 'http://neuralnetworksanddeeplearning.com/', r: [['Nielsen, M. A. (2015). ', 0], ['Neural networks and deep learning', 1], ['. ', 0], ['Determination Press.', 0]] },
+            bengio1994learning: { a: 'Bengio et al.', y: '1994', u: 'https://doi.org/10.1109/72.279181', r: [['Bengio, Y., Simard, P. y Frasconi, P. (1994). ', 0], ['Learning long-term dependencies with gradient descent is difficult. ', 0], ['IEEE Transactions on Neural Networks', 1], [', ', 0], ['5', 1], ['(2)', 0], [', 157–166', 0], ['.', 0]] },
+            pascanu2013difficulty: { a: 'Pascanu et al.', y: '2013', u: 'https://proceedings.mlr.press/v28/pascanu13.html', r: [['Pascanu, R., Mikolov, T. y Bengio, Y. (2013). ', 0], ['On the difficulty of training recurrent neural networks. ', 0], ['En ', 0], ['Proceedings of the 30th International Conference on Machine Learning', 1], [' (Vol. 28, pp. 1310–1318)', 0], ['. ', 0], ['PMLR.', 0]] },
+            santana2018backprop: { a: 'Santana Vega', y: '2018b', u: 'https://www.youtube.com/watch?v=eNIqz_noix8', r: [['Santana Vega, C. [Dot CSV]. (2018b, 3 de octubre). ', 0], ['¿Qué es una red neuronal? Parte 3: Backpropagation', 1], [' [Video]. ', 0], ['YouTube.', 0]] },
+            sanderson2017series: { a: 'Sanderson', y: 's. f.', u: 'https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi', r: [['Sanderson, G. [3Blue1Brown]. (s. f.). ', 0], ['Neural networks', 1], [' [Lista de reproducción]. ', 0], ['YouTube.', 0]] },
+            geman1992neural: { a: 'Geman et al.', y: '1992', u: 'https://doi.org/10.1162/neco.1992.4.1.1', r: [['Geman, S., Bienenstock, E. y Doursat, R. (1992). ', 0], ['Neural networks and the bias/variance dilemma. ', 0], ['Neural Computation', 1], [', ', 0], ['4', 1], ['(1)', 0], [', 1–58', 0], ['.', 0]] },
+            krogh1992simple: { a: 'Krogh y Hertz', y: '1992', u: '', r: [['Krogh, A. y Hertz, J. A. (1992). ', 0], ['A simple weight decay can improve generalization. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 4, pp. 950–957)', 0], ['. ', 0], ['Morgan Kaufmann.', 0]] },
+            tibshirani1996regression: { a: 'Tibshirani', y: '1996', u: 'https://doi.org/10.1111/j.2517-6161.1996.tb02080.x', r: [['Tibshirani, R. (1996). ', 0], ['Regression shrinkage and selection via the lasso. ', 0], ['Journal of the Royal Statistical Society: Series B (Methodological)', 1], [', ', 0], ['58', 1], ['(1)', 0], [', 267–288', 0], ['.', 0]] },
+            zou2005regularization: { a: 'Zou y Hastie', y: '2005', u: 'https://doi.org/10.1111/j.1467-9868.2005.00503.x', r: [['Zou, H. y Hastie, T. (2005). ', 0], ['Regularization and variable selection via the elastic net. ', 0], ['Journal of the Royal Statistical Society: Series B (Statistical Methodology)', 1], [', ', 0], ['67', 1], ['(2)', 0], [', 301–320', 0], ['.', 0]] },
+            santurkar2018how: { a: 'Santurkar et al.', y: '2018', u: 'https://arxiv.org/abs/1805.11604', r: [['Santurkar, S., Tsipras, D., Ilyas, A. y Madry, A. (2018). ', 0], ['How does batch normalization help optimization? ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 31, pp. 2483–2493)', 0], ['. ', 0], ['Curran Associates.', 0]] },
+            prechelt1998early: { a: 'Prechelt', y: '1998', u: 'https://doi.org/10.1007/3-540-49430-8_3', r: [['Prechelt, L. (1998). ', 0], ['Early stopping — but when? ', 0], ['En ', 0], ['Neural networks: Tricks of the trade', 1], [' (pp. 55–69)', 0], ['. ', 0], ['Springer.', 0]] },
+            belkin2019reconciling: { a: 'Belkin et al.', y: '2019', u: 'https://doi.org/10.1073/pnas.1903070116', r: [['Belkin, M., Hsu, D., Ma, S. y Mandal, S. (2019). ', 0], ['Reconciling modern machine-learning practice and the classical bias–variance trade-off. ', 0], ['Proceedings of the National Academy of Sciences', 1], [', ', 0], ['116', 1], ['(32)', 0], [', 15849–15854', 0], ['.', 0]] },
+            kaufman2012leakage: { a: 'Kaufman et al.', y: '2012', u: 'https://doi.org/10.1145/2382577.2382579', r: [['Kaufman, S., Rosset, S., Perlich, C. y Stitelman, O. (2012). ', 0], ['Leakage in data mining: Formulation, detection, and avoidance. ', 0], ['ACM Transactions on Knowledge Discovery from Data', 1], [', ', 0], ['6', 1], ['(4)', 0], [', 1–21', 0], ['.', 0]] },
+            stone1974cross: { a: 'Stone', y: '1974', u: 'https://doi.org/10.1111/j.2517-6161.1974.tb00994.x', r: [['Stone, M. (1974). ', 0], ['Cross-validatory choice and assessment of statistical predictions. ', 0], ['Journal of the Royal Statistical Society: Series B (Methodological)', 1], [', ', 0], ['36', 1], ['(2)', 0], [', 111–133', 0], ['.', 0]] },
+            bergstra2012random: { a: 'Bergstra y Bengio', y: '2012', u: 'https://jmlr.org/papers/v13/bergstra12a.html', r: [['Bergstra, J. y Bengio, Y. (2012). ', 0], ['Random search for hyper-parameter optimization. ', 0], ['Journal of Machine Learning Research', 1], [', ', 0], ['13', 1], ['(10)', 0], [', 281–305', 0], ['.', 0]] },
+            fawcett2006introduction: { a: 'Fawcett', y: '2006', u: 'https://doi.org/10.1016/j.patrec.2005.10.010', r: [['Fawcett, T. (2006). ', 0], ['An introduction to ROC analysis. ', 0], ['Pattern Recognition Letters', 1], [', ', 0], ['27', 1], ['(8)', 0], [', 861–874', 0], ['.', 0]] },
+            saito2015precision: { a: 'Saito y Rehmsmeier', y: '2015', u: 'https://doi.org/10.1371/journal.pone.0118432', r: [['Saito, T. y Rehmsmeier, M. (2015). ', 0], ['The precision-recall plot is more informative than the ROC plot when evaluating binary classifiers on imbalanced datasets. ', 0], ['PLOS ONE', 1], [', ', 0], ['10', 1], ['(3)', 0], [', e0118432', 0], ['.', 0]] },
+            davis2006relationship: { a: 'Davis y Goadrich', y: '2006', u: 'https://doi.org/10.1145/1143844.1143874', r: [['Davis, J. y Goadrich, M. (2006). ', 0], ['The relationship between precision-recall and ROC curves. ', 0], ['En ', 0], ['Proceedings of the 23rd International Conference on Machine Learning', 1], [' (pp. 233–240)', 0], ['. ', 0], ['ACM.', 0]] },
+            guio2021marco: { a: 'Guío Español et al.', y: '2021', u: 'https://minciencias.gov.co/sites/default/files/marco-etico-ia-colombia-2021.pdf', r: [['Guío Español, A., Tamayo Uribe, E. y Gómez Ayerbe, P. (2021). ', 0], ['Marco ético para la inteligencia artificial en Colombia', 1], [' (Versión 1)', 0], ['. ', 0], ['Consejería Presidencial para Asuntos Económicos y Transformación Digital, Presidencia de la República de Colombia.', 0]] },
+            conpes2025ia: { a: 'Consejo Nacional de Política Económica y Social', y: '2025', u: 'https://colaboracion.dnp.gov.co/CDT/Conpes/Econ%C3%B3micos/4144.pdf', r: [['Consejo Nacional de Política Económica y Social. (2025). ', 0], ['Política nacional de inteligencia artificial', 1], [' (Documento CONPES 4144)', 0], ['. ', 0], ['Departamento Nacional de Planeación.', 0]] },
+            barocas2023fairness: { a: 'Barocas et al.', y: '2023', u: 'https://fairmlbook.org', r: [['Barocas, S., Hardt, M. y Narayanan, A. (2023). ', 0], ['Fairness and machine learning: Limitations and opportunities', 1], ['. ', 0], ['MIT Press.', 0]] },
+            rajkomar2018ensuring: { a: 'Rajkomar et al.', y: '2018', u: 'https://doi.org/10.7326/M18-1990', r: [['Rajkomar, A., Hardt, M., Howell, M. D., Corrado, G. y Chin, M. H. (2018). ', 0], ['Ensuring fairness in machine learning to advance health equity. ', 0], ['Annals of Internal Medicine', 1], [', ', 0], ['169', 1], ['(12)', 0], [', 866–872', 0], ['.', 0]] },
+            hardt2016equality: { a: 'Hardt et al.', y: '2016', u: 'https://arxiv.org/abs/1610.02413', r: [['Hardt, M., Price, E. y Srebro, N. (2016). ', 0], ['Equality of opportunity in supervised learning. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 29, pp. 3315–3323)', 0], ['. ', 0], ['Curran Associates.', 0]] },
+            kleinberg2017inherent: { a: 'Kleinberg et al.', y: '2017', u: 'https://doi.org/10.4230/LIPIcs.ITCS.2017.43', r: [['Kleinberg, J., Mullainathan, S. y Raghavan, M. (2017). ', 0], ['Inherent trade-offs in the fair determination of risk scores. ', 0], ['En ', 0], ['8th Innovations in Theoretical Computer Science Conference (ITCS 2017)', 1], [' (Vol. 67, pp. 43:1–43:23)', 0], ['. ', 0], ['Schloss Dagstuhl–Leibniz-Zentrum für Informatik.', 0]] },
+            chouldechova2017fair: { a: 'Chouldechova', y: '2017', u: 'https://doi.org/10.1089/big.2016.0047', r: [['Chouldechova, A. (2017). ', 0], ['Fair prediction with disparate impact: A study of bias in recidivism prediction instruments. ', 0], ['Big Data', 1], [', ', 0], ['5', 1], ['(2)', 0], [', 153–163', 0], ['.', 0]] },
+            quinonerocandela2009dataset: { a: 'Quiñonero-Candela et al.', y: '2009', u: 'https://doi.org/10.7551/mitpress/9780262170055.001.0001', r: [['Quiñonero-Candela, J., Sugiyama, M., Schwaighofer, A. y Lawrence, N. D. (Eds.). (2009). ', 0], ['Dataset shift in machine learning', 1], ['. ', 0], ['MIT Press.', 0]] },
+            morenotorres2012unifying: { a: 'Moreno-Torres et al.', y: '2012', u: 'https://doi.org/10.1016/j.patcog.2011.06.019', r: [['Moreno-Torres, J. G., Raeder, T., Alaiz-Rodríguez, R., Chawla, N. V. y Herrera, F. (2012). ', 0], ['A unifying view on dataset shift in classification. ', 0], ['Pattern Recognition', 1], [', ', 0], ['45', 1], ['(1)', 0], [', 521–530', 0], ['.', 0]] },
+            parragaalava2019rocoledata: { a: 'Parraga-Alava et al.', y: '2019', u: 'https://doi.org/10.17632/c5yvn32dzg.2', r: [['Parraga-Alava, J., Cusme, K., Loor, A. y Santander, E. (2019). ', 0], ['RoCoLe: A robusta coffee leaf images dataset', 1], [' (Versión 2)', 0], [' [Conjunto de datos]. ', 0], ['Mendeley Data.', 0]] },
+            geron2022hands: { a: 'Géron', y: '2022', u: '', r: [['Géron, A. (2022). ', 0], ['Hands-on machine learning with Scikit-Learn, Keras, and TensorFlow: Concepts, tools, and techniques to build intelligent systems', 1], [' (3.ª ed.)', 0], ['. ', 0], ['O\'Reilly Media.', 0]] },
+            geron2025hands: { a: 'Géron', y: '2025', u: '', r: [['Géron, A. (2025). ', 0], ['Hands-on machine learning with Scikit-Learn and PyTorch: Concepts, tools, and techniques to build intelligent systems', 1], ['. ', 0], ['O\'Reilly Media.', 0]] },
+            chollet2021deep: { a: 'Chollet', y: '2021', u: '', r: [['Chollet, F. (2021). ', 0], ['Deep learning with Python', 1], [' (2.ª ed.)', 0], ['. ', 0], ['Manning.', 0]] },
+            chollet2025deep: { a: 'Chollet y Watson', y: '2025', u: 'https://deeplearningwithpython.io/', r: [['Chollet, F. y Watson, M. (2025). ', 0], ['Deep learning with Python', 1], [' (3.ª ed.)', 0], ['. ', 0], ['Manning.', 0]] },
+            hornik1989multilayer: { a: 'Hornik et al.', y: '1989', u: 'https://doi.org/10.1016/0893-6080(89)90020-8', r: [['Hornik, K., Stinchcombe, M. y White, H. (1989). ', 0], ['Multilayer feedforward networks are universal approximators. ', 0], ['Neural Networks', 1], [', ', 0], ['2', 1], ['(5)', 0], [', 359–366', 0], ['.', 0]] },
+        };
+        const refTexto = (k) => (REFS[k] ? REFS[k].r.map((s) => s[0]).join('') + (REFS[k].u ? ' ' + REFS[k].u : '') : k);
+        // <Cita k="a, b" /> → «(Autor, 2015; Otro, 2016)». n: forma narrativa «Autor (2015)».
+        // Localizador por clave con «@»: k="goodfellow2016deep@sec. 6.5, nielsen2015neural@cap. 2". p: localizador único (una sola clave).
+        const Cita = ({ k, n = false, p = '' }) => {
+            const ks = k.split(',').map((s) => s.trim()).filter(Boolean).map((s) => { const [c, loc] = s.split('@'); return { c: c.trim(), loc: (loc || '').trim() }; });
+            const grupos = [];
+            ks.forEach(({ c, loc }) => {
+                const R = REFS[c] || { a: c, y: '¿?' };
+                const y = R.y + (loc ? `, ${loc}` : '');
+                const g = grupos.find((gg) => gg.a === R.a);
+                if (g) g.ys.push(y); else grupos.push({ a: R.a, ys: [y] });
+            });
+            const loc = p ? `, ${p}` : '';
+            const titulo = ks.map(({ c }) => refTexto(c)).join('\n');
+            if (n) return <span className="cita" title={titulo}>{grupos.map((g) => `${g.a} (${g.ys.join(', ')}${loc})`).join('; ')}</span>;
+            return <span className="cita" title={titulo}>({grupos.map((g) => `${g.a}, ${g.ys.join(', ')}`).join('; ')}{loc})</span>;
+        };
+        // Lista «Referencias» de un capítulo (APA 7: orden alfabético, sangría francesa).
+        const Referencias = ({ claves, titulo = 'Referencias' }) => {
+            const ks = [...new Set(claves)].filter((k) => REFS[k]).sort((x, y) => refTexto(x).localeCompare(refTexto(y), 'es'));
+            return (
+                <section className="mt-10 pt-6 border-t border-gray-200" aria-label={titulo}>
+                    <h3 className="text-lg font-bold text-primary mb-3">{titulo}</h3>
+                    <ul className="refs-apa space-y-2 text-sm text-gray-700" style={{ listStyle: 'none', paddingLeft: 0 }}>
+                        {ks.map((k) => (
+                            <li key={k} id={`ref-${k}`} style={{ paddingLeft: '2em', textIndent: '-2em' }}>
+                                {REFS[k].r.map((s, i) => (s[1] ? <em key={i}>{s[0]}</em> : <React.Fragment key={i}>{s[0]}</React.Fragment>))}
+                                {REFS[k].u ? <>{' '}<a className="text-primary underline break-all" href={REFS[k].u} target="_blank" rel="noopener noreferrer">{REFS[k].u}</a></> : null}
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            );
+        };
+
         /* ============================================================
            PORTADA + OBJETIVOS (Lección 0)
         ============================================================ */
@@ -957,7 +1092,8 @@
                     Este material es <strong>autónomo</strong>: permite avanzar a ritmo propio con los botones <em>Anterior / Siguiente</em>.
                     Cada capítulo combina teoría breve, una analogía colombiana, un diagrama, código comentado y práctica.
                     El navegador <strong>recuerda la última lección</strong>, de modo que es posible pausar y retomar en cualquier momento.
-                    Se recomienda intentar las preguntas <em>antes</em> de ver la retroalimentación.
+                    Se recomienda intentar las preguntas <em>antes</em> de ver la retroalimentación. Textos de referencia del módulo:{' '}
+                    <Cita k="goodfellow2016deep" n /> y <Cita k="zhang2023dive" n />.
                 </Box>
 
                 <h3>Identificación del espacio académico</h3>
@@ -1015,6 +1151,8 @@
                     No se requiere GPU: los ejemplos en <span className="inline-code">NumPy</span> pueden seguirse a mano y
                     los fragmentos en <span className="inline-code">PyTorch</span> ilustran el flujo del curso.
                 </Box>
+
+                <Referencias claves={['goodfellow2016deep', 'zhang2023dive']} />
             </div>
         );
 
@@ -1273,7 +1411,7 @@ def caracteristicas_manuales(imagen):
             <div className="prose-usta">
                 <p>
                     El aprendizaje profundo (<em>Deep Learning</em>) no surgió de la noche a la mañana: es el resultado de más de
-                    70 años de investigación en inteligencia artificial, neurociencia computacional y optimización matemática.
+                    70 años de investigación en inteligencia artificial, neurociencia computacional y optimización matemática <Cita k="lecun2015deep, schmidhuber2015deep" />.
                     Comprender esta historia permite entender <strong>por qué</strong> funcionan las técnicas actuales,
                     <strong> qué</strong> problemas resolvieron los investigadores del pasado y <strong>dónde</strong> están los
                     límites de hoy.
@@ -1287,15 +1425,15 @@ def caracteristicas_manuales(imagen):
 
                 <h3>Una línea de tiempo de altibajos</h3>
                 <Timeline eventos={[
-                    { year: '1943', text: 'McCulloch y Pitts proponen la primera neurona artificial: un modelo lógico binario (AND, OR, NOT).' },
-                    { year: '1958', text: 'Rosenblatt publica el perceptrón y lo simula en un computador IBM 704: es la primera neurona que aprende sus pesos a partir de ejemplos. Su versión en hardware, el Mark I, se presenta hacia 1960.' },
-                    { year: '1969', text: 'Minsky y Papert analizan los límites del perceptrón de una capa (problema XOR) y las redes neuronales pierden apoyo. Junto con otras causas —el informe Lighthill (1973) y los recortes de financiamiento de DARPA—, se abre el primer invierno de la IA (≈1974–1980).' },
-                    { year: '1986', text: 'Rumelhart, Hinton y Williams popularizan la retropropagación: se pueden entrenar capas ocultas.' },
-                    { year: '1989–1998', text: 'LeCun desarrolla las CNN (LeNet-5) que leen cheques bancarios.' },
-                    { year: 'Finales de los 90', text: 'El auge de las máquinas de soporte vectorial (SVM) y los métodos estadísticos relega de nuevo a las redes neuronales; el financiamiento vuelve a enfriarse: es un segundo invierno para las redes neuronales.' },
-                    { year: '2006', text: 'Hinton, Osindero y Teh entrenan capa a capa las redes de creencia profunda (Deep Belief Networks), y Hinton populariza el término «Deep Learning», ya usado antes por Dechter (1986) y por Aizenberg et al. (2000).' },
-                    { year: '2012', text: 'AlexNet gana ImageNet con 15,3 % de error top-5 (frente a 26,2 % del segundo). El punto de inflexión.' },
-                    { year: '2017+', text: 'Transformers, BERT, GPT-3 y modelos multimodales (GPT-4, Claude, Gemini).' },
+                    { year: '1943', text: <>McCulloch y Pitts proponen la primera neurona artificial <Cita k="mcculloch1943logical" />: un modelo lógico binario (AND, OR, NOT).</> },
+                    { year: '1958', text: <>Rosenblatt publica el perceptrón y lo simula en un computador IBM 704: es la primera neurona que aprende sus pesos a partir de ejemplos. Su versión en hardware, el Mark I, se presenta hacia 1960 <Cita k="rosenblatt1958perceptron, rosenblatt1962principles" />.</> },
+                    { year: '1969', text: <>Minsky y Papert analizan los límites del perceptrón de una capa (problema XOR) y las redes neuronales pierden apoyo <Cita k="minsky1969perceptrons" />. Junto con otras causas —el informe <Cita k="lighthill1973artificial" n /> y los recortes de financiamiento de DARPA—, se abre el primer invierno de la IA (≈1974–1980).</> },
+                    { year: '1986', text: <>Rumelhart, Hinton y Williams popularizan la retropropagación <Cita k="rumelhart1986learning, werbos1974beyond" />: se pueden entrenar capas ocultas.</> },
+                    { year: '1989–1998', text: <>LeCun desarrolla las CNN (LeNet-5) que leen cheques bancarios <Cita k="lecun1989backpropagation, lecun1998gradient" />.</> },
+                    { year: 'Finales de los 90', text: <>El auge de las máquinas de soporte vectorial (SVM) y los métodos estadísticos <Cita k="cortes1995support" /> relega de nuevo a las redes neuronales; el financiamiento vuelve a enfriarse: es un segundo invierno para las redes neuronales.</> },
+                    { year: '2006', text: <><Cita k="hinton2006fast" n /> entrenan capa a capa las redes de creencia profunda (Deep Belief Networks), y Hinton populariza el término «Deep Learning», ya usado antes por <Cita k="dechter1986learning" n /> y por <Cita k="aizenberg2000multivalued" n />.</> },
+                    { year: '2012', text: <>AlexNet gana ImageNet <Cita k="krizhevsky2012imagenet, russakovsky2015imagenet" /> con 15,3 % de error top-5 (frente a 26,2 % del segundo). El punto de inflexión.</> },
+                    { year: '2017+', text: <>Transformers <Cita k="vaswani2017attention" />, BERT <Cita k="devlin2019bert" />, GPT-3 <Cita k="brown2020language" /> y modelos multimodales (GPT-4, Claude, Gemini).</> },
                 ]} />
 
                 <h3>¿Qué es una neurona? ¿En qué se diferencia del perceptrón?</h3>
@@ -1313,7 +1451,7 @@ def caracteristicas_manuales(imagen):
                 </p>
                 <NeuronaPerceptronSVG />
                 <p>
-                    El <strong>perceptrón</strong> (Rosenblatt, 1958) fue la primera neurona artificial <em>capaz de aprender</em> sus
+                    El <strong>perceptrón</strong> <Cita k="rosenblatt1958perceptron" /> fue la primera neurona artificial <em>capaz de aprender</em> sus
                     pesos a partir de ejemplos (la de McCulloch y Pitts, de 1943, tenía pesos fijos). Comparte
                     exactamente la misma estructura —entradas, pesos, suma y sesgo—, pero usa la forma más simple de
                     activación: un <strong>escalón</strong> que solo responde «sí (1)» o «no (0)». La neurona moderna
@@ -1345,7 +1483,7 @@ def caracteristicas_manuales(imagen):
 
                 <h3>Una neurona como frontera lineal: AND y OR</h3>
                 <p>
-                    <strong>¿Para qué sirve este gráfico?</strong> Las primeras neuronas artificiales (McCulloch-Pitts, 1943) se
+                    <strong>¿Para qué sirve este gráfico?</strong> Las primeras neuronas artificiales <Cita k="mcculloch1943logical" /> se
                     diseñaron para reproducir operaciones lógicas. Cada uno de los cuatro puntos representa una combinación posible
                     de dos entradas binarias {String.raw`\((x_1, x_2)\)`}; el color indica la salida deseada (verde = 1, blanco = 0).
                     El objetivo es visualizar <strong>cuándo una sola neurona basta</strong> para resolver una tarea.
@@ -1366,8 +1504,8 @@ def caracteristicas_manuales(imagen):
 
                 <Box type="warn" label="El problema XOR">
                     Un perceptrón de una sola capa traza únicamente una línea recta, por lo que no puede aprender la función XOR
-                    (no es linealmente separable), como acaba de comprobarse en el gráfico anterior. Esta limitación, demostrada en
-                    1969 por Minsky y Papert, frenó el campo casi dos décadas, hasta que la retropropagación (1986) permitió
+                    (no es linealmente separable), como acaba de comprobarse en el gráfico anterior. Esta limitación, demostrada por{' '}
+                    <Cita k="minsky1969perceptrons" n />, frenó el campo casi dos décadas, hasta que la retropropagación (1986) permitió
                     entrenar redes con capas ocultas.
                 </Box>
                 <p>
@@ -1377,9 +1515,9 @@ def caracteristicas_manuales(imagen):
 
                 <h3>El punto de inflexión: tres fuerzas que convergen (2012)</h3>
                 <Tabs tabs={[
-                    { label: 'Datos masivos', content: <p>Internet generó cantidades masivas de datos etiquetados. <Termino def="Enorme base de datos de imágenes etiquetadas; con el tiempo llegó a reunir unos 14 millones de imágenes en más de 20.000 categorías. Presentada en 2009, se convirtió en el estándar para entrenar y comparar modelos de visión por computador.">ImageNet</Termino> (presentada en 2009 por Fei-Fei Li) llegó a reunir unos 14 millones de imágenes en más de 20.000 categorías, dando a las redes el «alimento» que necesitaban.</p> },
-                    { label: 'GPU', content: <p>Las <Termino def="Unidad de procesamiento gráfico. Hardware creado para videojuegos que resultó ideal para las operaciones con matrices de las redes neuronales; entrena modelos mucho más rápido que una CPU. Se profundiza en el Módulo 3.">GPU</Termino>, diseñadas para videojuegos, resultaron ideales para las operaciones matriciales de las redes. Una GPU podía entrenar modelos entre 10 y 100 veces más rápido que una CPU.</p> },
-                    { label: 'Mejores algoritmos', content: <p><Termino def="Función de activación muy usada. Deja pasar los valores positivos tal cual y convierte los negativos en cero: f(x) = máx(0, x). Se estudia a fondo en el Capítulo 2.">ReLU</Termino> reemplazó a sigmoide/tanh en las capas ocultas y mitigó el <Termino def="Problema de las redes profundas en el que la señal de aprendizaje (el gradiente) se hace tan pequeña en las primeras capas que casi no aprenden. ReLU ayuda a mitigarlo. Se ve en el Capítulo 4.">desvanecimiento del gradiente</Termino>, y el <Termino def="Técnica de regularización: durante el entrenamiento «apaga» neuronas al azar para que la red no dependa de unas pocas y generalice mejor. Se estudia en el Capítulo 5."><em>dropout</em></Termino> (2012) atacó el sobreajuste. Poco después, la <Termino def="Técnica que estandariza (reescala) las activaciones entre capas para que el entrenamiento sea más rápido y estable. Se estudia en el Capítulo 5.">normalización por lotes (<em>Batch Normalization</em>)</Termino> (2015) consolidó ese avance al estabilizar el entrenamiento; no formó parte del hito de 2012.</p> },
+                    { label: 'Datos masivos', content: <p>Internet generó cantidades masivas de datos etiquetados. <Termino def="Enorme base de datos de imágenes etiquetadas; con el tiempo llegó a reunir unos 14 millones de imágenes en más de 20.000 categorías. Presentada en 2009, se convirtió en el estándar para entrenar y comparar modelos de visión por computador.">ImageNet</Termino> <Cita k="deng2009imagenet" />, presentada en 2009 por Fei-Fei Li, llegó a reunir unos 14 millones de imágenes en más de 20.000 categorías, dando a las redes el «alimento» que necesitaban.</p> },
+                    { label: 'GPU', content: <p>Las <Termino def="Unidad de procesamiento gráfico. Hardware creado para videojuegos que resultó ideal para las operaciones con matrices de las redes neuronales; entrena modelos mucho más rápido que una CPU. Se profundiza en el Módulo 3.">GPU</Termino>, diseñadas para videojuegos, resultaron ideales para las operaciones matriciales de las redes. Una GPU podía entrenar modelos entre 10 y 100 veces más rápido que una CPU <Cita k="raina2009large" />.</p> },
+                    { label: 'Mejores algoritmos', content: <p><Termino def="Función de activación muy usada. Deja pasar los valores positivos tal cual y convierte los negativos en cero: f(x) = máx(0, x). Se estudia a fondo en el Capítulo 2.">ReLU</Termino> reemplazó a sigmoide/tanh en las capas ocultas y mitigó el <Termino def="Problema de las redes profundas en el que la señal de aprendizaje (el gradiente) se hace tan pequeña en las primeras capas que casi no aprenden. ReLU ayuda a mitigarlo. Se ve en el Capítulo 4.">desvanecimiento del gradiente</Termino> <Cita k="glorot2011deep, nair2010rectified" />, y el <Termino def="Técnica de regularización: durante el entrenamiento «apaga» neuronas al azar para que la red no dependa de unas pocas y generalice mejor. Se estudia en el Capítulo 5."><em>dropout</em></Termino> (2012) atacó el sobreajuste <Cita k="hinton2012improving, srivastava2014dropout" />. Poco después, la <Termino def="Técnica que estandariza (reescala) las activaciones entre capas para que el entrenamiento sea más rápido y estable. Se estudia en el Capítulo 5.">normalización por lotes (<em>Batch Normalization</em>)</Termino> (2015) consolidó ese avance al estabilizar el entrenamiento <Cita k="ioffe2015batch" />; no formó parte del hito de 2012.</p> },
                 ]} />
 
                 <h3>Deep Learning frente al aprendizaje automático (ML) clásico</h3>
@@ -1408,8 +1546,8 @@ def caracteristicas_manuales(imagen):
                 <Accordion items={[
                     { titulo: '¿De qué tipo son los datos?', contenido: <span>Tabulares → ML clásico (XGBoost, Random Forest). Imágenes → conviene una <Termino def="Red neuronal convolucional. Arquitectura especializada en imágenes que aprende sola a detectar bordes, texturas y formas. Se estudia en el Módulo 2.">CNN</Termino>. Texto → <Termino def="Arquitectura de 2017 que es la base de los modelos de lenguaje modernos como GPT y BERT. Se estudia en el Módulo 2.">Transformers</Termino>. Series temporales → según complejidad (ARIMA/XGBoost vs. <Termino def="Long Short-Term Memory: red recurrente especializada en secuencias y series temporales. Se estudia en el Módulo 2.">LSTM</Termino>).</span> },
                     { titulo: '¿Cuántos ejemplos etiquetados hay?', contenido: <span>Menos de 1.000 → ML clásico (DL sobreajusta). Entre 1.000 y 10.000 → ML clásico o DL con <Termino def="Reutilizar un modelo ya entrenado en un gran conjunto de datos y ajustarlo a un problema propio con pocos ejemplos. Muy útil cuando hay pocos datos. Se estudia en el Módulo 2.">aprendizaje por transferencia (<em>transfer learning</em>)</Termino>. Entre 10.000 y 100.000 → el DL desde cero empieza a ser competitivo, sobre todo con imágenes, audio o texto. Más de 100.000 → DL probablemente supere al ML clásico.</span> },
-                    { titulo: '¿Se necesita interpretabilidad?', contenido: <span>En salud, finanzas o justicia puede ser legalmente exigible explicar las decisiones; es preferible el ML clásico o DL con técnicas de explicabilidad (LIME, SHAP).</span> },
-                    { titulo: '¿Qué recursos de cómputo hay?', contenido: <span>Solo CPU/portátil → ML clásico. Con GPU (local o nube) → DL factible. En zonas rurales con baja conectividad, conviene la <Termino def="Ejecutar el modelo directamente en el dispositivo final (un celular, una Raspberry Pi, un Jetson Nano) en vez de en la nube. Clave donde la conectividad es limitada. Se ve en el Módulo 3.">computación en el borde (<em>edge computing</em>)</Termino> con modelos ligeros (MobileNet) y cuantización.</span> },
+                    { titulo: '¿Se necesita interpretabilidad?', contenido: <span>En salud, finanzas o justicia puede ser legalmente exigible explicar las decisiones; es preferible el ML clásico o DL con técnicas de explicabilidad como LIME <Cita k="ribeiro2016why" /> y SHAP <Cita k="lundberg2017unified" />.</span> },
+                    { titulo: '¿Qué recursos de cómputo hay?', contenido: <span>Solo CPU/portátil → ML clásico. Con GPU (local o nube) → DL factible. En zonas rurales con baja conectividad, conviene la <Termino def="Ejecutar el modelo directamente en el dispositivo final (un celular, una Raspberry Pi, un Jetson Nano) en vez de en la nube. Clave donde la conectividad es limitada. Se ve en el Módulo 3.">computación en el borde (<em>edge computing</em>)</Termino> con modelos ligeros como MobileNet <Cita k="howard2017mobilenets" /> y cuantización.</span> },
                 ]} />
 
                 <h3>Deep Learning en Colombia y América Latina</h3>
@@ -1461,13 +1599,13 @@ def caracteristicas_manuales(imagen):
                             { texto: 'las GPU eran demasiado caras.', correcta: false },
                             { texto: 'no existía internet.', correcta: false },
                         ],
-                        justificacion: 'El libro Perceptrons (Minsky y Papert, 1969) evidenció que un perceptrón simple no resuelve problemas no linealmente separables y las redes neuronales perdieron apoyo. El invierno de la IA tuvo además otras causas, como el informe Lighthill (1973) y los recortes de DARPA.'
+                        justificacion: <>El libro Perceptrons <Cita k="minsky1969perceptrons" /> evidenció que un perceptrón simple no resuelve problemas no linealmente separables y las redes neuronales perdieron apoyo. El invierno de la IA tuvo además otras causas, como el informe <Cita k="lighthill1973artificial" n /> y los recortes de DARPA.</>
                     },
                     {
                         pregunta: '¿Qué evento se considera el punto de inflexión del Deep Learning moderno?',
                         opciones: [
                             { texto: 'AlexNet ganando ImageNet en 2012.', correcta: true },
-                            { texto: 'La simulación del perceptrón de Rosenblatt (1958).', correcta: false },
+                            { texto: <>La simulación del perceptrón de <Cita k="rosenblatt1958perceptron" n />.</>, correcta: false },
                             { texto: 'El lanzamiento de ChatGPT en 2022.', correcta: false },
                         ],
                         justificacion: 'AlexNet redujo el error top-5 de 26,2 % a 15,3 %, una brecha tan grande que volvió innegable la superioridad del DL en visión.'
@@ -1501,6 +1639,16 @@ def caracteristicas_manuales(imagen):
                         <li>Frente al ML clásico, el Deep Learning <strong>aprende las características</strong> desde los datos crudos, a cambio de más datos, más cómputo y menos interpretabilidad.</li>
                     </ul>
                 </Box>
+
+                <Referencias claves={[
+                    'lecun2015deep', 'schmidhuber2015deep', 'mcculloch1943logical', 'rosenblatt1958perceptron', 'rosenblatt1962principles',
+                    'minsky1969perceptrons', 'lighthill1973artificial', 'rumelhart1986learning', 'werbos1974beyond',
+                    'lecun1989backpropagation', 'lecun1998gradient', 'cortes1995support', 'hinton2006fast', 'dechter1986learning',
+                    'aizenberg2000multivalued', 'krizhevsky2012imagenet', 'russakovsky2015imagenet', 'vaswani2017attention',
+                    'devlin2019bert', 'brown2020language', 'deng2009imagenet', 'raina2009large', 'glorot2011deep', 'nair2010rectified',
+                    'hinton2012improving', 'srivastava2014dropout', 'ioffe2015batch', 'ribeiro2016why', 'lundberg2017unified',
+                    'howard2017mobilenets',
+                ]} />
             </div>
         );
 
@@ -1689,7 +1837,7 @@ modelo = nn.Sequential(
 
         /* Tarjeta del Teorema de Aproximación Universal con gráfica interactiva:
            una función objetivo y su aproximación por bloques (más neuronas = mejor ajuste). */
-        const TeoremaAproximacion = () => {
+        const TeoremaAproximacion = ({ cita = null }) => {
             const [n, setN] = useState(6);
             const target = (x) => 1.7 + 0.9 * Math.sin(x * 0.9) + 0.5 * Math.sin(x * 1.9 + 0.8) + 0.3 * Math.cos(x * 0.5);
             usePlotly('chart-teorema', () => {
@@ -1726,7 +1874,7 @@ modelo = nn.Sequential(
                         <div className="rounded-xl px-4 py-3 mb-4 text-[0.95rem] text-gray-800 border-l-4" style={{ background: 'rgba(61,0,141,0.05)', borderColor: '#ED1E79' }}>
                             Una red con <strong>al menos una capa oculta</strong>, una activación no polinómica (sigmoide, tanh, ReLU…) y
                             suficientes neuronas puede aproximar, con un error tan pequeño como se desee, <strong>cualquier función
-                                continua sobre un dominio acotado</strong> (Cybenko, 1989; Hornik, 1991). El teorema garantiza que esa red{' '}
+                                continua sobre un dominio acotado</strong>{cita ? <> {cita}</> : null}. El teorema garantiza que esa red{' '}
                             <strong>existe</strong>; no dice cuántas neuronas hacen falta ni que el entrenamiento la encuentre.
                         </div>
                         <p className="text-[0.92rem] text-gray-700 leading-relaxed mb-3">
@@ -3038,7 +3186,7 @@ modelo = nn.Sequential(
                 <Eq>{String.raw`$$ \mathbf{a}^{[l]} = \sigma\!\left( \mathbf{W}^{[l]}\,\mathbf{a}^{[l-1]} + \mathbf{b}^{[l]} \right) $$`}</Eq>
                 <p>
                     donde {String.raw`\(\mathbf{W}^{[l]}\)`} agrupa los pesos de la capa, {String.raw`\(\mathbf{b}^{[l]}\)`} sus sesgos
-                    y {String.raw`\(\mathbf{a}^{[0]} = \mathbf{x}\)`} son los datos de entrada: <strong>la salida de una capa es la entrada de la siguiente</strong>.
+                    y {String.raw`\(\mathbf{a}^{[0]} = \mathbf{x}\)`} son los datos de entrada: <strong>la salida de una capa es la entrada de la siguiente</strong> <Cita k="goodfellow2016deep" p="cap. 6" />.
                 </p>
 
                 <h3>Cómo una capa oculta resuelve el XOR</h3>
@@ -3056,7 +3204,7 @@ modelo = nn.Sequential(
                 </p>
 
                 <AntesDeInteractuar>con pocas neuronas (pocos bloques), ¿en qué tramos se espera que la escalera se aleje más de la curva: donde la curva es casi plana o donde sube y baja con rapidez?</AntesDeInteractuar>
-                <TeoremaAproximacion />
+                <TeoremaAproximacion cita={<Cita k="cybenko1989approximation, hornik1991approximation, leshno1993multilayer" />} />
 
                 <h3>Interpolar puntos: la red como función</h3>
                 <p>
@@ -3087,8 +3235,8 @@ modelo = nn.Sequential(
                 <AntesDeInteractuar>al pulsar «Ver derivada», ¿qué valor máximo se espera para la derivada de la sigmoide (¿1?, ¿0,5?, ¿menos?) y en qué valor de z se alcanza?</AntesDeInteractuar>
                 <ActivacionesChart />
                 <Accordion items={[
-                    { titulo: 'ReLU — el estándar moderno', contenido: <span>{String.raw`\(f(z)=\max(0,z)\)`}. Rango {String.raw`\([0,\infty)\)`}. Muy rápida (solo una comparación) y mitiga el desvanecimiento del gradiente. Riesgo: neuronas «muertas» (<em>dying ReLU</em>), atascadas en 0. Es el «portero» que deja pasar lo positivo y anula lo negativo.</span> },
-                    { titulo: 'Leaky ReLU', contenido: <span>{String.raw`\(\text{LeakyReLU}(z)=\max(0.01z,\,z)\)`}. Permite una pequeña pendiente negativa para que las neuronas nunca tengan gradiente nulo: evita las neuronas muertas.</span> },
+                    { titulo: 'ReLU — el estándar moderno', contenido: <span>{String.raw`\(f(z)=\max(0,z)\)`}. Rango {String.raw`\([0,\infty)\)`}. Muy rápida (solo una comparación) y mitiga el desvanecimiento del gradiente <Cita k="glorot2011deep, nair2010rectified" />. Riesgo: neuronas «muertas» (<em>dying ReLU</em>), atascadas en 0. Es el «portero» que deja pasar lo positivo y anula lo negativo.</span> },
+                    { titulo: 'Leaky ReLU', contenido: <span>{String.raw`\(\text{LeakyReLU}(z)=\max(0.01z,\,z)\)`}. Permite una pequeña pendiente negativa para que las neuronas nunca tengan gradiente nulo: evita las neuronas muertas <Cita k="maas2013rectifier" />.</span> },
                     { titulo: 'Sigmoide', contenido: <span>{String.raw`\(\sigma(z)=\frac{1}{1+e^{-z}}\)`}. Rango {String.raw`\((0,1)\)`}, interpretable como probabilidad. Hoy se usa sobre todo en la salida de la clasificación binaria y en las compuertas de LSTM/GRU. Sufre desvanecimiento (derivada máxima 0,25).</span> },
                     { titulo: 'Tanh', contenido: <span>{String.raw`\(\tanh(z)=\frac{e^z-e^{-z}}{e^z+e^{-z}}\)`}. Rango {String.raw`\((-1,1)\)`}, centrada en cero (ayuda a converger). También satura en los extremos. Usada internamente en LSTM/GRU.</span> },
                     { titulo: 'Softmax', contenido: <span>{String.raw`\(\text{softmax}(\mathbf{z})_i=\frac{e^{z_i}}{\sum_j e^{z_j}}\)`}. Convierte {String.raw`\(C\)`} <em>logits</em> (puntajes sin normalizar) en probabilidades que suman 1. Capa de salida para clasificación multiclase (p. ej., {`{café, plátano, yuca, maíz}`}).</span> },
@@ -3130,7 +3278,7 @@ modelo = nn.Sequential(
                 <Box type="tip" label="¿Cuántos parámetros tiene esa red?">
                     <p>Cada capa lineal aporta <em>pesos</em> (entradas × neuronas) + <em>sesgos</em> (uno por neurona). Para la red 4 → 16 → 8 → 1:</p>
                     <Eq>{String.raw`$$ \underbrace{(4{\times}16+16)}_{80} + \underbrace{(16{\times}8+8)}_{136} + \underbrace{(8{\times}1+1)}_{9} = 225 \text{ parámetros} $$`}</Eq>
-                    <p className="!mb-0">Son justamente los {String.raw`\(w\)`} y {String.raw`\(b\)`} que el entrenamiento ajustará. <strong>Profundidad frente a anchura:</strong> el teorema garantiza que <em>basta</em> una capa oculta, pero apilar varias capas suele lograr el mismo poder con <strong>muchos menos parámetros</strong> (de ahí el «profundo» de <em>aprendizaje profundo</em>).</p>
+                    <p className="!mb-0">Son justamente los {String.raw`\(w\)`} y {String.raw`\(b\)`} que el entrenamiento ajustará. <strong>Profundidad frente a anchura:</strong> el teorema garantiza que <em>basta</em> una capa oculta, pero apilar varias capas suele lograr el mismo poder con <strong>muchos menos parámetros</strong> <Cita k="eldan2016power, telgarsky2016benefits" />: de ahí el «profundo» de <em>aprendizaje profundo</em>.</p>
                 </Box>
 
                 <h3>Laboratorio: la arquitectura en acción</h3>
@@ -3164,7 +3312,7 @@ modelo = nn.Sequential(
                             { texto: 'existe una red que aproxima cualquier función continua sobre un dominio acotado.', correcta: true },
                             { texto: 'la red aproxima bien la función también fuera del rango de los datos.', correcta: false },
                         ],
-                        justificacion: 'El teorema garantiza la existencia de la red (Cybenko, 1989; Hornik, 1991), no que el entrenamiento la encuentre ni que extrapole. Cada neurona aporta una «pieza de Lego»; sumadas, recrean perfiles arbitrariamente complejos.'
+                        justificacion: <>El teorema garantiza la existencia de la red <Cita k="cybenko1989approximation, hornik1991approximation" />, no que el entrenamiento la encuentre ni que extrapole. Cada neurona aporta una «pieza de Lego»; sumadas, recrean perfiles arbitrariamente complejos.</>
                     },
                     {
                         pregunta: '¿Cuál es la función de las capas ocultas?',
@@ -3204,6 +3352,11 @@ modelo = nn.Sequential(
                         <li>La <strong>propagación hacia adelante</strong> encadena {String.raw`\(\mathbf{a}^{[l]}=\sigma(\mathbf{W}^{[l]}\mathbf{a}^{[l-1]}+\mathbf{b}^{[l]})\)`}; entrenar es ajustar esos {String.raw`\(\mathbf{W}\)`} y {String.raw`\(\mathbf{b}\)`}.</li>
                     </ul>
                 </Box>
+
+                <Referencias claves={[
+                    'goodfellow2016deep', 'cybenko1989approximation', 'hornik1991approximation', 'leshno1993multilayer',
+                    'glorot2011deep', 'nair2010rectified', 'maas2013rectifier', 'eldan2016power', 'telgarsky2016benefits',
+                ]} />
             </div>
         );
 
@@ -3574,7 +3727,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                     con suavidad.
                 </Box>
                 <p>
-                    La <strong>pérdida de Huber</strong> combina las ventajas de ambas: se comporta como el <strong>MSE</strong> para
+                    La <strong>pérdida de Huber</strong> <Cita k="huber1964robust" /> combina las ventajas de ambas: se comporta como el <strong>MSE</strong> para
                     errores pequeños —suave y diferenciable— y como el <strong>MAE</strong> para errores grandes —robusta a atípicos—. Un
                     umbral {String.raw`\(\delta\)`} marca la frontera entre ambos regímenes:
                 </p>
@@ -3668,14 +3821,14 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                     bajo un supuesto distinto sobre su naturaleza —un ruido gaussiano de varianza constante conduce al <strong>MSE</strong> (y uno de Laplace, al MAE); un resultado
                     Bernoulli (sí/no), a la <strong>BCE</strong>; y una variable categórica de {String.raw`\(C\)`} clases, a la{' '}
                     <strong>CCE</strong>—. Minimizar la pérdida equivale, en los tres casos, a hacer que los datos observados resulten
-                    lo más probables posible para el modelo.
+                    lo más probables posible para el modelo <Cita k="goodfellow2016deep" p="secs. 5.5 y 6.2" />.
                 </Box>
 
                 <CalloutPro tema="eth" titulo="Dimensión ética" subtitulo="Cuando los datos están desbalanceados">
                     Si los datos de dengue están muy desbalanceados (95 % no graves, 5 % graves), una función de pérdida estándar
                     podría minimizar el error global <strong>ignorando los casos graves</strong>. En salud pública, un falso negativo
                     puede ser fatal. La elección de la pérdida no es solo técnica, también ética: conviene incorporar <strong>pesos
-                        diferenciales</strong> que indiquen que equivocarse en un caso grave cuesta, por ejemplo, diez veces más.
+                        diferenciales</strong> <Cita k="elkan2001foundations" /> que indiquen que equivocarse en un caso grave cuesta, por ejemplo, diez veces más.
                 </CalloutPro>
 
                 <h3>Descenso del gradiente: una analogía andina</h3>
@@ -3690,9 +3843,9 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                 <CodeBlock title="Descenso del gradiente en NumPy" code={sgdNumpy} />
 
                 <Box type="tip" label="Recurso en video · explicación visual (en español)">
-                    Para fijar la intuición antes del formalismo, conviene ver el descenso <em>en movimiento</em>. DotCSV lo explica
+                    Para fijar la intuición antes del formalismo, conviene ver el descenso <em>en movimiento</em>. Dot CSV lo explica
                     de forma visual e intuitiva en{' '}
-                    <a className="text-primary underline" href="https://www.youtube.com/watch?v=A6FiCDoz8_4" target="_blank" rel="noopener noreferrer">«¿Qué es el Descenso del Gradiente?»</a>:
+                    <a className="text-primary underline" href="https://www.youtube.com/watch?v=A6FiCDoz8_4" target="_blank" rel="noopener noreferrer">«¿Qué es el Descenso del Gradiente?»</a> <Cita k="santana2018descenso" />:
                     cómo el algoritmo tantea la pendiente y, paso a paso, desciende hacia el valle del error.
                 </Box>
 
@@ -3761,7 +3914,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                 </p>
                 <p>
                     <strong>2. SGD puro (<em>stochastic gradient descent</em>) — un solo ejemplo.</strong> El extremo opuesto: estimar la pendiente con
-                    <strong> un único ejemplo</strong> y dar el paso de inmediato. Los pasos resultan baratísimos y hay millones por época,
+                    <strong> un único ejemplo</strong> y dar el paso de inmediato <Cita k="robbins1951stochastic" />. Los pasos resultan baratísimos y hay millones por época,
                     y el ruido incluso ayuda a escapar de mínimos pobres. Pero un ejemplo no representa al conjunto: la estimación es
                     <strong> muy ruidosa</strong> y la convergencia, inestable.
                 </p>
@@ -3772,7 +3925,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                 </p>
                 <Box type="info" label="La intuición clave">
                     El gradiente de un minilote es un <strong>estimador insesgado</strong> del gradiente verdadero: en promedio apunta en la
-                    dirección correcta, solo que con ruido. Por eso conviene cambiar <strong>pocos pasos exactos y costosos por muchos pasos
+                    dirección correcta, solo que con ruido <Cita k="bottou2018optimization" />. Por eso conviene cambiar <strong>pocos pasos exactos y costosos por muchos pasos
                     aproximados y baratos</strong>: se avanza más en el mismo tiempo.
                 </Box>
                 <div className="overflow-x-auto my-4">
@@ -3801,8 +3954,8 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                 <Box type="tip" label="El tamaño del lote importa">
                     Lotes <strong>pequeños</strong> (8–32) → más ruido por paso: el camino zigzaguea, pero ese ruido ayuda a escapar de malos
                     mínimos y suele generalizar mejor. Lotes <strong>grandes</strong> (256–1024) → gradiente más estable y mejor uso de la GPU,
-                    pero exigen más memoria; además, algunos estudios los asocian con mínimos «afilados» que generalizarían peor (Keskar et
-                    al., 2017), un resultado todavía debatido. El tamaño de lote es, por eso, un hiperparámetro que se ajusta.
+                    pero exigen más memoria; además, algunos estudios los asocian con mínimos «afilados» que generalizarían peor <Cita k="keskar2017large" />,
+                    un resultado todavía debatido. El tamaño de lote es, por eso, un hiperparámetro que se ajusta.
                 </Box>
 
                 <h3>El paisaje del error: convexo frente a real</h3>
@@ -3828,8 +3981,8 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                     <PaisajeInteractivo3D />
                 </div>
                 <Box type="info" label="Buenas noticias en alta dimensión">
-                    Paradójicamente, con muchísimos parámetros los mínimos locales «malos» parecen ser raros: los análisis teóricos y empíricos
-                    (Dauphin et al., 2014; Choromanska et al., 2015) sugieren que la mayoría de los puntos de gradiente nulo son puntos silla
+                    Paradójicamente, con muchísimos parámetros los mínimos locales «malos» parecen ser raros: los análisis teóricos y empíricos{' '}
+                    <Cita k="choromanska2015loss, dauphin2014identifying" /> sugieren que la mayoría de los puntos de gradiente nulo son puntos silla
                     y que, al menos en modelos simplificados, la mayoría de los mínimos son casi tan buenos como el global. Además, el <strong>ruido del
                     SGD</strong> (lotes pequeños) da pequeños empujones que ayudan a salir de sillas y mesetas. Por eso, en la práctica, no se
                     persigue «el» óptimo global: basta con un mínimo suficientemente bueno.
@@ -3844,7 +3997,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                 </p>
                 <Eq>{String.raw`$$ v_{t+1} = \beta\,v_t - \eta\,\nabla_\theta L(\theta_t), \qquad \theta_{t+1} = \theta_t + v_{t+1} $$`}</Eq>
                 <p>
-                    El coeficiente {String.raw`\(\beta\)`} (típicamente {String.raw`\(0.9\)`}) fija cuánta inercia se conserva. Pero existe una idea
+                    El coeficiente {String.raw`\(\beta\)`} (típicamente {String.raw`\(0.9\)`}) fija cuánta inercia se conserva <Cita k="polyak1964some, sutskever2013importance" />. Pero existe una idea
                     aún más potente: <strong>adaptar la tasa de aprendizaje a cada parámetro</strong>.
                 </p>
 
@@ -3854,7 +4007,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                     <strong>RMSProp</strong> lleva una media móvil del <em>cuadrado</em> del gradiente reciente de cada parámetro y divide
                     el paso por la raíz cuadrada de esa media (su valor RMS, de ahí el nombre): los parámetros con gradientes grandes y
                     ruidosos avanzan con cautela, y los de gradientes pequeños y constantes avanzan más rápido. Con{' '}
-                    {String.raw`\(g_t = \nabla_\theta L(\theta_t)\)`}, la regla es (Tieleman y Hinton, 2012):
+                    {String.raw`\(g_t = \nabla_\theta L(\theta_t)\)`}, la regla es <Cita k="tieleman2012lecture" />:
                 </p>
                 <Eq>{String.raw`$$ s_t = \rho\,s_{t-1} + (1-\rho)\,g_t^{2}, \qquad \theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{s_t}+\epsilon}\,g_t $$`}</Eq>
                 <p>
@@ -3864,7 +4017,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
 
                 <h4>Adam: inercia más paso adaptativo</h4>
                 <p>
-                    <strong>Adam</strong> (<em>Adaptive Moment Estimation</em>; Kingma y Ba, 2015) combina ambas ideas: el{' '}
+                    <strong>Adam</strong> (<em>Adaptive Moment Estimation</em>), propuesto por <Cita k="kingma2015adam" n />, combina ambas ideas: el{' '}
                     <em>momentum</em> (inercia, el primer momento del gradiente, {String.raw`\(m_t\)`}) <strong>+</strong> un{' '}
                     <strong>paso adaptativo por parámetro</strong> al estilo RMSProp (el segundo momento, {String.raw`\(v_t\)`}):
                 </p>
@@ -3876,7 +4029,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                     sesgados hacia cero; la <strong>corrección de sesgo</strong> ({String.raw`\(\hat{m}_t\)`}, {String.raw`\(\hat{v}_t\)`})
                     compensa ese arranque en frío. Es exactamente el cálculo que implementa el laboratorio de este módulo. Adam es robusto
                     y suele funcionar bien con sus valores por defecto, aunque no es inmune a una mala elección de {String.raw`\(\eta\)`}; por
-                    eso Adam —y su variante <strong>AdamW</strong>, que aplica el decaimiento de pesos por separado (Capítulo 5)— es hoy el
+                    eso Adam —y su variante <strong>AdamW</strong> <Cita k="loshchilov2019decoupled" />, que aplica el decaimiento de pesos por separado (Capítulo 5)— es hoy el
                     punto de partida habitual en la mayoría de proyectos de Deep Learning.
                 </p>
                 <CodeBlock title="Optimizadores en PyTorch (ilustrativo)" code={optimTorch} lang="pytorch" />
@@ -3892,7 +4045,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                 <OptimizerCompare />
                 <Box type="tip" label="¿Cuál elegir?">
                     En la práctica conviene empezar con <strong>Adam</strong> o <strong>AdamW</strong> ({String.raw`\(\eta \approx 0.001\)`}): convergen rápido y son menos sensibles que el SGD a la elección de la tasa de aprendizaje (aunque no inmunes).{' '}
-                    <strong>SGD con <em>momentum</em></strong> a veces generaliza un poco mejor en visión por computador (Wilson et al., 2017; el resultado depende del problema), pero exige ajustar con más cuidado la
+                    <strong>SGD con <em>momentum</em></strong> a veces generaliza un poco mejor en visión por computador <Cita k="wilson2017marginal" /> —el resultado depende del problema—, pero exige ajustar con más cuidado la
                     tasa de aprendizaje. Ante la duda, Adam es un punto de partida razonable.
                 </Box>
 
@@ -4015,6 +4168,12 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                         <li><strong>Adam</strong> = <em>momentum</em> (inercia) + paso adaptativo por parámetro, con corrección de sesgo; junto con AdamW, es el punto de partida habitual. Cómo se calcula ese gradiente es el tema del Capítulo 4.</li>
                     </ul>
                 </Box>
+
+                <Referencias claves={[
+                    'huber1964robust', 'goodfellow2016deep', 'elkan2001foundations', 'santana2018descenso', 'robbins1951stochastic',
+                    'bottou2018optimization', 'keskar2017large', 'choromanska2015loss', 'dauphin2014identifying', 'polyak1964some',
+                    'sutskever2013importance', 'tieleman2012lecture', 'kingma2015adam', 'loshchilov2019decoupled', 'wilson2017marginal',
+                ]} />
             </div>
         );
 
@@ -4194,14 +4353,14 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
                 </Box>
 
                 <p>
-                    La <strong>retropropagación</strong> es el «mecanismo administrativo» perfecto para resolverlo: rastrea el error desde el
+                    La <strong>retropropagación</strong> <Cita k="rumelhart1986learning" /> es el «mecanismo administrativo» perfecto para resolverlo: rastrea el error desde el
                     resultado final hacia atrás, capa por capa, calculando la contribución exacta de cada neurona al desastre.
                 </p>
 
                 <Box type="tip" label="Recurso en video · explicación visual (en español)">
-                    Antes de entrar en el formalismo, conviene ver la retropropagación <em>en movimiento</em>. DotCSV —el mismo
+                    Antes de entrar en el formalismo, conviene ver la retropropagación <em>en movimiento</em>. Dot CSV —el mismo
                     divulgador citado en el Capítulo 3— la explica de forma visual e intuitiva en{' '}
-                    <a className="text-primary underline" href="https://www.youtube.com/watch?v=eNIqz_noix8" target="_blank" rel="noopener noreferrer">«¿Qué es una Red Neuronal? · Parte 3: Backpropagation»</a>:
+                    <a className="text-primary underline" href="https://www.youtube.com/watch?v=eNIqz_noix8" target="_blank" rel="noopener noreferrer">«¿Qué es una Red Neuronal? · Parte 3: Backpropagation»</a> <Cita k="santana2018backprop" />:
                     cómo el error se reparte hacia atrás, capa por capa, mediante la regla de la cadena. Es un complemento ideal para
                     afianzar la intuición antes de revisar los grafos y las fórmulas de este capítulo.
                 </Box>
@@ -4226,7 +4385,7 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
                     valor ya calculado en la pasada hacia adelante— y el gradiente global se obtiene multiplicando esas derivadas locales a lo largo de
                     cada camino, por ejemplo {String.raw`\(\partial f/\partial a = \partial f/\partial s \cdot \partial s/\partial a = 4\cdot 1\)`}.
                     Así, derivar una función de millones de parámetros deja de ser un problema monstruoso y se vuelve un conjunto de pasos
-                    triviales enlazados por la <strong>regla de la cadena</strong>.
+                    triviales enlazados por la <strong>regla de la cadena</strong> <Cita k="baydin2018automatic" />.
                 </p>
                 <p>
                     Conviene abandonar la analogía del «cerebro» y ver la red como un <strong>grafo computacional</strong> mucho mayor:
@@ -4264,7 +4423,7 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
                     Conviene separar dos cantidades en cada capa: la <strong>preactivación</strong> {String.raw`\(\mathbf{z}^{[l]}=\mathbf{W}^{[l]}\mathbf{a}^{[l-1]}+\mathbf{b}^{[l]}\)`}{' '}
                     (la suma ponderada) y la <strong>activación</strong> {String.raw`\(\mathbf{a}^{[l]}=\sigma(\mathbf{z}^{[l]})\)`} (tras la no linealidad). La
                     retropropagación define un vector de <strong>error por capa</strong> {String.raw`\(\delta^{[l]}=\partial L/\partial \mathbf{z}^{[l]}\)`}
-                    —cuánta responsabilidad del error carga la preactivación de esa capa— y lo calcula <strong>de atrás hacia adelante</strong> con tres reglas
+                    —cuánta responsabilidad del error carga la preactivación de esa capa— y lo calcula <strong>de atrás hacia adelante</strong> <Cita k="goodfellow2016deep@sec. 6.5, nielsen2015neural@cap. 2" /> con tres reglas
                     (el superíndice {String.raw`\([L]\)`} denota la última capa):
                 </p>
                 <Eq>{String.raw`$$ \delta^{[L]} = \nabla_{\mathbf{a}}L \;\odot\; \sigma'(\mathbf{z}^{[L]}) \qquad \text{(error en la salida)} $$`}</Eq>
@@ -4287,8 +4446,8 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
                     El código de la regla de la cadena (con {String.raw`\(z=-2\)`}) muestra el caso extremo: una ReLU apagada (factor 0) corta la cadena y anula por completo el
                     gradiente. De forma más sutil, si la señal atraviesa muchas capas y cada una la multiplica por su factor local {String.raw`\(\sigma'(z)\)`}
                     <strong> menor que 1</strong> —la sigmoide, por ejemplo, tiene una derivada máxima de 0,25—, el producto encadenado
-                    se vuelve diminuto y las primeras capas apenas aprenden: es el <strong>desvanecimiento del gradiente</strong>,
-                    anticipado en el Capítulo 1. ReLU, con derivada igual a 1 en su zona activa, lo mitiga (aunque a cambio arriesga
+                    se vuelve diminuto y las primeras capas apenas aprenden: es el <strong>desvanecimiento del gradiente</strong> <Cita k="bengio1994learning, glorot2010understanding" />,
+                    anticipado en el Capítulo 1. ReLU <Cita k="glorot2011deep" />, con derivada igual a 1 en su zona activa, lo mitiga (aunque a cambio arriesga
                     «morir» si una neurona queda apagada).
                 </Box>
 
@@ -4297,7 +4456,7 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
                     producto encadenado <strong>crece sin control</strong>: los gradientes explotan, los pesos saltan a {String.raw`\(\pm\infty\)`} y la
                     pérdida se vuelve <span className="inline-code">NaN</span>. Es típico de las redes recurrentes (Módulo 2). La cura habitual es el
                     <strong> recorte de gradiente</strong> (<em>gradient clipping</em>): si la norma del gradiente supera un umbral, se reescala hacia
-                    abajo antes de dar el paso. <strong>Desvanecimiento</strong> y <strong>explosión</strong> son las dos caras de multiplicar muchos
+                    abajo antes de dar el paso <Cita k="pascanu2013difficulty" />. <strong>Desvanecimiento</strong> y <strong>explosión</strong> son las dos caras de multiplicar muchos
                     factores en cadena: el primero los hace {String.raw`\(\to 0\)`}; el segundo, {String.raw`\(\to\infty\)`}.
                 </Box>
 
@@ -4369,7 +4528,7 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
                 <h3>Autograd en PyTorch</h3>
                 <p>
                     Durante décadas estas fórmulas se derivaron a mano; desde los años 2010, los marcos con diferenciación automática
-                    (Theano, TensorFlow, PyTorch) las calculan solos. En PyTorch ese mecanismo se llama <strong>autograd</strong>. Al crear
+                    (Theano, TensorFlow, PyTorch) las calculan solos. En PyTorch ese mecanismo se llama <strong>autograd</strong> <Cita k="paszke2019pytorch" />. Al crear
                     un tensor con <span className="inline-code">requires_grad=True</span>, PyTorch asigna un «secretario invisible»
                     que registra cada operación. Al llamar <span className="inline-code">loss.backward()</span>, autograd lee la
                     bitácora de atrás hacia adelante y calcula todos los gradientes con la regla de la cadena, automáticamente.
@@ -4451,6 +4610,11 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
                         <li>En PyTorch, <span className="inline-code">loss.backward()</span> <strong>calcula</strong> el gradiente; <span className="inline-code">optimizer.step()</span> <strong>actualiza</strong> los pesos.</li>
                     </ul>
                 </Box>
+
+                <Referencias claves={[
+                    'rumelhart1986learning', 'santana2018backprop', 'baydin2018automatic', 'goodfellow2016deep', 'nielsen2015neural',
+                    'bengio1994learning', 'glorot2010understanding', 'glorot2011deep', 'pascanu2013difficulty', 'paszke2019pytorch',
+                ]} />
             </div>
         );
 
@@ -4752,7 +4916,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                 </p>
                 <CodeBlock title="El bucle de entrenamiento en PyTorch" code={trainingLoopTorch} lang="pytorch" />
                 <Box type="warn" label="¿Por qué zero_grad()?">
-                    PyTorch <strong>acumula</strong> gradientes por defecto. Si no se limpian antes de cada paso, se sumarían los de
+                    PyTorch <strong>acumula</strong> gradientes por defecto <Cita k="paszke2019pytorch" />. Si no se limpian antes de cada paso, se sumarían los de
                     iteraciones previas y se corrompería la dirección de descenso, como una brújula que no se reinicia y mezcla la
                     lectura actual con las de todos los tramos anteriores.
                 </Box>
@@ -4782,7 +4946,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                 <p>
                     El extremo opuesto es igual de dañino. El <strong>subajuste</strong> (<em>underfitting</em>) aparece cuando el modelo es
                     <em> demasiado simple</em> para la estructura de los datos: ni siquiera logra ajustar bien el entrenamiento y, por tanto,
-                    también falla con datos nuevos. Ambos fallos tienen nombre propio en la teoría del aprendizaje: el subajuste es exceso de
+                    también falla con datos nuevos. Ambos fallos tienen nombre propio en la teoría del aprendizaje <Cita k="geman1992neural" />: el subajuste es exceso de
                     <strong> sesgo</strong> —el modelo impone una forma demasiado rígida— y el sobreajuste es exceso de <strong>varianza</strong>
                     —el modelo cambia demasiado con cada peculiaridad de los datos—. Entrenar bien es hallar el punto intermedio, ni rígido ni
                     caprichoso, que mejor <strong>generaliza</strong>:
@@ -4813,7 +4977,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                     El principio de Ockham aconseja, entre dos explicaciones igual de buenas, quedarse con la <strong>más simple</strong>. El
                     término {String.raw`\(\lambda\,\Omega(\mathbf{w})\)`} traduce esa idea a número: a igualdad de ajuste, gana el modelo de
                     <strong> pesos más pequeños</strong>. En el descenso del gradiente, L2 suma {String.raw`\(\lambda\,\mathbf{w}\)`}{' '}
-                    al gradiente de cada peso, de manera que cada paso <strong>descuenta una fracción del propio peso</strong> —de ahí su otro
+                    al gradiente de cada peso, de manera que cada paso <strong>descuenta una fracción del propio peso</strong> <Cita k="krogh1992simple" /> —de ahí su otro
                     nombre, <em>decaimiento de pesos</em> (<span className="inline-code">weight_decay</span>)—.
                 </Box>
                 <Tabs tabs={[
@@ -4821,19 +4985,19 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                         label: 'L2 (Ridge)', content: <div>
                             <p>{String.raw`\(\Omega(\mathbf{w})=\tfrac{1}{2}\sum_j w_j^2\)`} — penaliza el <strong>cuadrado</strong> de cada peso. Su efecto es <strong>repartir la importancia</strong> entre muchas variables en lugar de concentrarla en unas pocas.</p>
                             <p>Como la penalización crece con el cuadrado, el «tirón» hacia cero es <strong>proporcional a la magnitud</strong> del peso: los grandes se reducen mucho y los pequeños casi nada. Por eso L2 <strong>encoge todos los pesos de forma suave, pero ninguno llega a cero exacto</strong>: los encoge sin eliminarlos.</p>
-                            <p className="!mb-0"><strong>Cuándo conviene:</strong> es la opción por defecto. Brilla cuando se cree que <em>muchas</em> variables aportan un poco y cuando hay variables <strong>correlacionadas</strong> (las promedia en vez de quedarse con una al azar). En PyTorch se activa con <span className="inline-code">weight_decay</span> en el optimizador. Con <strong>SGD</strong> equivale al {String.raw`\(\lambda\)`} de la fórmula; con <strong>Adam</strong>, en cambio, <span className="inline-code">weight_decay</span> suma {String.raw`\(\lambda\mathbf{w}\)`} al gradiente <em>antes</em> del reescalado adaptativo y deja de equivaler a descontar una fracción fija del peso. Por eso, con Adam conviene <span className="inline-code">torch.optim.AdamW</span>, que aplica el decaimiento por separado (Loshchilov y Hutter, 2019).</p>
+                            <p className="!mb-0"><strong>Cuándo conviene:</strong> es la opción por defecto. Brilla cuando se cree que <em>muchas</em> variables aportan un poco y cuando hay variables <strong>correlacionadas</strong> (las promedia en vez de quedarse con una al azar). En PyTorch se activa con <span className="inline-code">weight_decay</span> en el optimizador. Con <strong>SGD</strong> equivale al {String.raw`\(\lambda\)`} de la fórmula; con <strong>Adam</strong>, en cambio, <span className="inline-code">weight_decay</span> suma {String.raw`\(\lambda\mathbf{w}\)`} al gradiente <em>antes</em> del reescalado adaptativo y deja de equivaler a descontar una fracción fija del peso. Por eso, con Adam conviene <span className="inline-code">torch.optim.AdamW</span>, que aplica el decaimiento por separado <Cita k="loshchilov2019decoupled" />.</p>
                         </div>
                     },
                     {
                         label: 'L1 (Lasso)', content: <div>
-                            <p>{String.raw`\(\Omega(\mathbf{w})=\sum_j |w_j|\)`} — penaliza el <strong>valor absoluto</strong> de cada peso. Su efecto es una <strong>selección tajante</strong>: en el óptimo, muchos pesos valen <strong>exactamente cero</strong> (con SGD en una red quedan muy cerca de cero).</p>
+                            <p>{String.raw`\(\Omega(\mathbf{w})=\sum_j |w_j|\)`} — penaliza el <strong>valor absoluto</strong> de cada peso <Cita k="tibshirani1996regression" />. Su efecto es una <strong>selección tajante</strong>: en el óptimo, muchos pesos valen <strong>exactamente cero</strong> (con SGD en una red quedan muy cerca de cero).</p>
                             <p>La clave está en que su «tirón» hacia cero es <strong>constante</strong>, no depende de la magnitud del peso: ese empuje fijo puede llevar un peso pequeño hasta cero y <strong>mantenerlo ahí</strong>. Geométricamente, la región que L1 permite es un <strong>rombo con esquinas sobre los ejes</strong>, y el óptimo tiende a caer en una de esas esquinas —donde algún peso vale cero—.</p>
-                            <p className="!mb-0">El resultado es un modelo <strong>disperso</strong> (<em>sparse</em>): equivale a una <strong>selección automática de variables</strong> (descarta, p. ej., «color del vehículo») y por eso resulta más <strong>interpretable</strong>. <strong>Cuándo conviene:</strong> cuando se sospecha que solo <em>unas pocas</em> variables importan o cuando la interpretabilidad es prioritaria. Usar L1 y L2 a la vez se llama <em>Elastic Net</em>.</p>
+                            <p className="!mb-0">El resultado es un modelo <strong>disperso</strong> (<em>sparse</em>): equivale a una <strong>selección automática de variables</strong> (descarta, p. ej., «color del vehículo») y por eso resulta más <strong>interpretable</strong>. <strong>Cuándo conviene:</strong> cuando se sospecha que solo <em>unas pocas</em> variables importan o cuando la interpretabilidad es prioritaria. Usar L1 y L2 a la vez se llama <em>Elastic Net</em> <Cita k="zou2005regularization" />.</p>
                         </div>
                     },
                     {
                         label: 'Dropout', content: <div>
-                            <p>En cada iteración de entrenamiento <strong>apaga al azar</strong> una fracción {String.raw`\(p\)`} de las neuronas (típicamente entre el 20 % y el 50 %). Es como ir rotando, en cada sesión, a quién se le pide <strong>ausentarse del grupo de estudio</strong> —incluida la «estrella»—: nadie puede depender de una sola neurona, así que todos aprenden a resolver. Eso <strong>rompe la coadaptación</strong>.</p>
+                            <p>En cada iteración de entrenamiento <strong>apaga al azar</strong> una fracción {String.raw`\(p\)`} de las neuronas (típicamente entre el 20 % y el 50 %). Es como ir rotando, en cada sesión, a quién se le pide <strong>ausentarse del grupo de estudio</strong> —incluida la «estrella»—: nadie puede depender de una sola neurona, así que todos aprenden a resolver. Eso <strong>rompe la coadaptación</strong> <Cita k="hinton2012improving, srivastava2014dropout" />.</p>
                             <p>Visto de otro modo: como cada paso entrena una <strong>subred distinta</strong> (con diferentes neuronas activas), es casi como entrenar y promediar un <strong>enorme conjunto de redes</strong> que comparten pesos. De ahí surgen representaciones <strong>redundantes y distribuidas</strong>, que generalizan mejor.</p>
                             <p className="!mb-0">En <strong>inferencia</strong> el <em>dropout</em> se <strong>apaga</strong>: participan todas las neuronas y la predicción es <strong>determinista</strong>. Para que la magnitud esperada de las activaciones coincida en ambas fases, PyTorch (<span className="inline-code">nn.Dropout</span>) y el laboratorio de este módulo usan el <strong><em>dropout</em> invertido</strong>: <em>durante el entrenamiento</em> dividen por {String.raw`\(1-p\)`} las activaciones de las neuronas que siguen activas, de modo que al predecir no hay que reescalar nada. (El artículo original hacía lo contrario: multiplicaba por la probabilidad de retención {String.raw`\(1-p\)`} al predecir.)</p>
                         </div>
@@ -4869,9 +5033,9 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                     eso, pero <strong>entre capas</strong> y lote a lote: recentra y reescala las activaciones para que cada neurona reciba una
                     distribución estable, lo que permite usar tasas de aprendizaje más altas sin que el entrenamiento se desestabilice. Sus
                     autores lo atribuyeron a que reduce el <strong>desplazamiento de covariables interno</strong> (<em>internal covariate
-                    shift</em>): la distribución de las entradas de cada capa cambia conforme se actualizan los pesos de las capas previas
-                    (Ioffe y Szegedy, 2015). Estudios posteriores matizan esa explicación y relacionan su beneficio sobre todo con un
-                    paisaje de pérdida más suave, que tolera tasas de aprendizaje mayores (Santurkar et al., 2018).
+                    shift</em>): la distribución de las entradas de cada capa cambia conforme se actualizan los pesos de las capas previas{' '}
+                    <Cita k="ioffe2015batch" />. Estudios posteriores matizan esa explicación y relacionan su beneficio sobre todo con un
+                    paisaje de pérdida más suave, que tolera tasas de aprendizaje mayores <Cita k="santurkar2018how" />.
                 </p>
                 <Accordion items={[
                     { titulo: '1. Centrado (restar la media del lote)', contenido: <span>{String.raw`\(\mu_{\mathcal{B}}=\frac{1}{m}\sum_i x_i\)`}. Se le resta a cada valor la media de su lote: el conjunto queda <strong>centrado en cero</strong>.</span> },
@@ -4911,7 +5075,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                     <em>apartado</em> que <em>no</em> usa para entrenar y que anticipa cómo se comportará ante datos nuevos (esa <strong>partición
                     honesta</strong> de los datos se detalla más adelante). Su forma diagnostica la salud del modelo: si el de entrenamiento baja
                     pero el de validación sube (la <strong>«U»</strong>),
-                    hay <strong>sobreajuste</strong>; si ambos quedan altos, hay <strong>subajuste</strong>. La <Termino def="Detener el entrenamiento en la época donde el error de validación toca su mínimo, conservando esos pesos, antes de que el modelo empiece a memorizar ruido.">parada temprana</Termino> (<em>early stopping</em>) aprovecha esa «U»: detiene el entrenamiento en el mínimo del error de validación y conserva esos pesos —un remedio que <em>depende</em> directamente de este diagnóstico—.
+                    hay <strong>sobreajuste</strong>; si ambos quedan altos, hay <strong>subajuste</strong>. La <Termino def="Detener el entrenamiento en la época donde el error de validación toca su mínimo, conservando esos pesos, antes de que el modelo empiece a memorizar ruido.">parada temprana</Termino> (<em>early stopping</em>) aprovecha esa «U»: detiene el entrenamiento en el mínimo del error de validación y conserva esos pesos <Cita k="prechelt1998early" /> —un remedio que <em>depende</em> directamente de este diagnóstico—.
                 </p>
                 <CurvaAprendizajeChart />
                 <p>
@@ -4939,7 +5103,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                     los pesos de su <strong>inicialización pequeña</strong>: cada época los empuja un poco más lejos, y detener pronto los mantiene
                     cerca de cero —exactamente el efecto que persigue el término {String.raw`\(\lambda\,\Omega(\mathbf{w})\)`} de la
                     <strong> navaja de Ockham</strong>—. En lugar de penalizar la complejidad en la función de costo, la acota a través del
-                    <strong> tiempo de entrenamiento</strong>: menos épocas ⇒ menor capacidad <em>efectiva</em>.
+                    <strong> tiempo de entrenamiento</strong>: menos épocas ⇒ menor capacidad <em>efectiva</em> <Cita k="goodfellow2016deep" p="sec. 7.8" />.
                 </p>
                 <CodeBlock title="Parada temprana en PyTorch" code={earlyStoppingTorch} lang="pytorch" />
                 <Box type="tip" label="Ventajas y límites de la parada temprana">
@@ -4975,7 +5139,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                 </p>
                 <Box type="danger" label="El pecado capital: la fuga de datos (data leakage)">
                     Ocurre cuando información del futuro —o del conjunto de prueba— se <strong>filtra</strong> al entrenamiento e infla el desempeño
-                    de forma ficticia. Casos típicos: <strong>(1)</strong> normalizar (restar la media, escalar) usando <em>todo</em> el conjunto de datos
+                    de forma ficticia <Cita k="kaufman2012leakage" />. Casos típicos: <strong>(1)</strong> normalizar (restar la media, escalar) usando <em>todo</em> el conjunto de datos
                     antes de partirlo, de modo que el conjunto de entrenamiento «ve» estadísticas del de prueba; <strong>(2)</strong> incluir una variable que en realidad es
                     <em> consecuencia</em> del objetivo (predecir dengue usando «días de hospitalización»); <strong>(3)</strong> en series temporales,
                     barajar y mezclar pasado con futuro. El síntoma es siempre el mismo: <strong>95 % en validación, fracaso en producción</strong>.
@@ -4986,7 +5150,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                 <p>
                     La partición anterior reserva <em>un</em> conjunto de validación, pero con pocos datos —lo habitual, por ejemplo, en un
                     conjunto de fotos de hojas de café reunido por una cooperativa— ese conjunto es pequeño y su puntaje se vuelve una <strong>lotería</strong>: cambia según qué
-                    ejemplos cayeron, por azar, en la validación. La <strong>validación cruzada K-Fold</strong> reparte ese azar: divide
+                    ejemplos cayeron, por azar, en la validación. La <strong>validación cruzada K-Fold</strong> <Cita k="stone1974cross" /> reparte ese azar: divide
                     los datos en {String.raw`\(K\)`} pliegues (p. ej. {String.raw`\(K=5\)`}) y los rota —en cada vuelta entrena con {String.raw`\(K-1\)`} y
                     valida con el restante—, de modo que <strong>cada ejemplo valida exactamente una vez</strong>. La métrica final es el
                     promedio de las {String.raw`\(K\)`} vueltas: una estimación mucho más estable y menos dependiente de la suerte del corte.
@@ -5008,7 +5172,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                 </div>
                 <Accordion items={[
                     { titulo: 'Grid Search (búsqueda en cuadrícula)', contenido: <span>Evalúa sistemáticamente todas las combinaciones de una rejilla —p. ej. tasa de aprendizaje {`{0,01; 0,001; 0,0001}`} cruzada con λ {`{0; 1e-4; 1e-3}`}—. Exhaustiva pero costosa: su costo crece con el <strong>producto</strong> de las opciones.</span> },
-                    { titulo: 'Random Search (búsqueda aleatoria)', contenido: <span>Prueba combinaciones al azar dentro de rangos razonables. Suele ser más eficiente: si solo unos pocos hiperparámetros importan, prueba muchos más valores distintos de cada uno que una rejilla del mismo costo (Bergstra y Bengio, 2012).</span> },
+                    { titulo: 'Random Search (búsqueda aleatoria)', contenido: <span>Prueba combinaciones al azar dentro de rangos razonables. Suele ser más eficiente: si solo unos pocos hiperparámetros importan, prueba muchos más valores distintos de cada uno que una rejilla del mismo costo <Cita k="bergstra2012random" />.</span> },
                 ]} />
 
                 <h3>Matriz de confusión y métricas</h3>
@@ -5044,7 +5208,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                 <p>La fórmula del <strong>F1</strong> definido arriba es:</p>
                 <Eq>{String.raw`$$ F_1 = 2\cdot\frac{\text{precisión}\cdot\text{sensibilidad}}{\text{precisión}+\text{sensibilidad}} $$`}</Eq>
                 <p>
-                    El balancín anterior mueve <em>un</em> umbral; la <strong>curva ROC</strong> los recorre <em>todos</em>. Para cada umbral
+                    El balancín anterior mueve <em>un</em> umbral; la <strong>curva ROC</strong> <Cita k="fawcett2006introduction" /> los recorre <em>todos</em>. Para cada umbral
                     toma dos cantidades que ya vienen de la matriz de confusión —la <strong>sensibilidad</strong> (positivos detectados) frente a
                     la <strong>tasa de falsos positivos</strong> (FPR = FP/(FP+VN): la fracción de negativos reales que dispararon alerta)— y
                     las dibuja como un punto; al barrer el umbral, esos puntos forman la curva.
@@ -5053,7 +5217,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                     como sus dos tasas se calculan dentro de cada clase, es <strong>menos sensible al desbalance</strong> que la exactitud con
                     que abrió esta sección: es un buen resumen para <em>comparar</em> modelos. Pero esa misma insensibilidad es su límite: con
                     clases muy desbalanceadas —como el 5 % de casos graves del dengue— un AUC alto puede convivir con una precisión baja, y
-                    conviene complementarlo con la <strong>curva precisión–sensibilidad</strong> (PR) (Saito y Rehmsmeier, 2015).
+                    conviene complementarlo con la <strong>curva precisión–sensibilidad</strong> (PR) <Cita k="davis2006relationship, saito2015precision" />.
                 </p>
                 <ROCChart />
                 <Box type="info" label="Por qué no se optimiza la exactitud directamente">
@@ -5061,16 +5225,17 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                     umbral</strong>, por lo que su gradiente es nulo o indefinido y no pueden optimizarse directamente por descenso del
                     gradiente. Lo que sí se optimiza es la <strong>pérdida</strong> (p. ej., la entropía cruzada); las métricas
                     <strong> guían las decisiones de ingeniería</strong>: ante muchos falsos negativos (fraude bancario o dengue),
-                    se asignan <em>pesos de clase</em> para penalizarlos más (en PyTorch, p. ej., con el argumento{' '}
+                    se asignan <em>pesos de clase</em> <Cita k="elkan2001foundations" /> para penalizarlos más (en PyTorch, p. ej., con el argumento{' '}
                     <span className="inline-code">pos_weight</span> de <span className="inline-code">nn.BCEWithLogitsLoss</span>).
                 </Box>
                 <CalloutPro tema="eth" titulo="Marco ético para la IA en Colombia" subtitulo="Transparencia, explicabilidad y sensibilidad">
                     En aplicaciones críticas para Colombia —deslizamientos, enfermedades, plagas— suele ser más ético priorizar la
                     <strong> sensibilidad</strong> sobre la exactitud global. El <em>Marco ético para la inteligencia artificial en
-                    Colombia</em>, emitido en 2021 por la Presidencia de la República (Consejería Presidencial para Asuntos Económicos y
+                    Colombia</em> <Cita k="guio2021marco" />, emitido en 2021 por la Presidencia de la República (Consejería Presidencial para Asuntos Económicos y
                     Transformación Digital), <strong>recomienda</strong> como principios la <strong>transparencia y la explicabilidad</strong>.
                     Aunque no es vinculante, orienta a que una decisión que afecta derechos fundamentales no sea una «caja negra», sino
-                    que pueda auditarse y explicarse ante las comunidades afectadas.
+                    que pueda auditarse y explicarse ante las comunidades afectadas. En 2025, el país adoptó además una
+                    política nacional de inteligencia artificial, el Documento CONPES 4144 <Cita k="conpes2025ia" />.
                 </CalloutPro>
 
                 <h3>Equidad algorítmica: el sesgo que se hereda</h3>
@@ -5080,12 +5245,12 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                     calcular esas mismas métricas <em>por grupo</em> para que la desigualdad salte a la vista. Y el sesgo casi nunca se
                     programa: se <strong>hereda de los datos</strong> (subgrupos con menos ejemplos, registros de peor calidad o etiquetas
                     históricamente injustas). El descenso del gradiente solo minimiza la pérdida <em>promedio</em>, así que lo reproduce y a
-                    veces lo amplifica. Tres ideas para nombrarlo:
+                    veces lo amplifica <Cita k="barocas2023fairness, rajkomar2018ensuring" />. Tres ideas para nombrarlo:
                 </p>
                 <Tabs tabs={[
-                    { label: 'Atributo protegido', content: <span>Una característica sobre la que es injusto o ilegal discriminar (sexo, etnia, edad, origen…). <strong>No debe entrar como variable</strong> del modelo… pero quitarla no basta (<em>«fairness through unawareness»</em>): otras variables actúan como <strong>variables sustitutas</strong> (<em>proxy</em>) —el barrio, el municipio o la región pueden codificar la etnia o el estrato—.</span> },
+                    { label: 'Atributo protegido', content: <span>Una característica sobre la que es injusto o ilegal discriminar (sexo, etnia, edad, origen…). <strong>No debe entrar como variable</strong> del modelo… pero quitarla no basta (<em>«fairness through unawareness»</em>): otras variables actúan como <strong>variables sustitutas</strong> (<em>proxy</em>) —el barrio, el municipio o la región pueden codificar la etnia o el estrato— <Cita k="barocas2023fairness" />.</span> },
                     { label: 'Impacto dispar', content: <span>(<em>disparate impact</em>) Cuando una decisión perjudica de forma <strong>desproporcionada</strong> a un grupo, aunque el atributo protegido no se haya usado de forma explícita. Se mide comparando tasas de selección (p. ej., de aprobación) entre subgrupos; las brechas de error corresponden a otro criterio, la igualdad de oportunidad.</span> },
-                    { label: 'Igualdad de oportunidad', content: <span>Que la tasa de acierto en los casos <strong>positivos</strong> (la sensibilidad) sea parecida entre subgrupos. Su incumplimiento es justo la <strong>brecha de falsos negativos</strong> que reporta el Auditor de Equidad: un grupo al que se le «escapan» más casos graves.</span> },
+                    { label: 'Igualdad de oportunidad', content: <span>Que la tasa de acierto en los casos <strong>positivos</strong> (la sensibilidad) sea parecida entre subgrupos <Cita k="hardt2016equality" />. Su incumplimiento es justo la <strong>brecha de falsos negativos</strong> que reporta el Auditor de Equidad: un grupo al que se le «escapan» más casos graves.</span> },
                 ]} />
                 <Box type="eth" label="Caso colombiano · alerta temprana de deslizamientos">
                     Un modelo entrenado sobre todo con datos de zonas urbanas instrumentadas puede tener <strong>muchos menos —y más ruidosos—
@@ -5134,7 +5299,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                 </Box>
                 <p>
                     De hecho, distintas definiciones de «justicia» —la paridad demográfica (la misma tasa de decisiones positivas en cada grupo) frente a la igualdad de oportunidad— pueden ser <strong>matemáticamente
-                    incompatibles</strong> entre sí: la equidad obliga a <em>elegir</em> qué se prioriza, de forma transparente y con las comunidades afectadas.
+                    incompatibles</strong> entre sí <Cita k="barocas2023fairness, chouldechova2017fair, kleinberg2017inherent" />: la equidad obliga a <em>elegir</em> qué se prioriza, de forma transparente y con las comunidades afectadas.
                 </p>
                 <MCQ
                     pregunta="Un modelo de crédito no usa la etnia como variable, pero rechaza al doble de solicitantes de una región donde se concentra cierto grupo étnico. Esto es…"
@@ -5149,7 +5314,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                     opciones={[
                         { texto: 'Sobreajuste: el modelo memorizó el ruido de sus datos de entrenamiento y por eso falla con cualquier dato nuevo.', correcta: false },
                         { texto: 'Subajuste: el modelo es demasiado simple y no captó los patrones del problema en ninguna de las dos ciudades.', correcta: false },
-                        { texto: 'Cambio de distribución (dataset shift): los datos de Cúcuta difieren de los de Medellín, donde se validó el modelo.', correcta: true, justificacion: 'El sobreajuste es la brecha entre entrenamiento y validación dentro de una misma población; aquí la validación en Medellín fue buena (98 %) y lo que cambió fue la población. Es un cambio de distribución (dataset shift): el remedio no es más regularización, sino validar con datos de la región de destino y recoger datos representativos de ella.' },
+                        { texto: 'Cambio de distribución (dataset shift): los datos de Cúcuta difieren de los de Medellín, donde se validó el modelo.', correcta: true, justificacion: <>El sobreajuste es la brecha entre entrenamiento y validación dentro de una misma población; aquí la validación en Medellín fue buena (98 %) y lo que cambió fue la población. Es un cambio de distribución (dataset shift): el remedio no es más regularización, sino validar con datos de la región de destino y recoger datos representativos de ella <Cita k="morenotorres2012unifying, quinonerocandela2009dataset" />.</> },
                         { texto: 'Fuga de datos: información del conjunto de prueba se filtró al entrenamiento e infló el 98 % inicial.', correcta: false },
                     ]} />
 
@@ -5211,7 +5376,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                         justificacion: 'Los pesos se optimizan automáticamente; los hiperparámetros se buscan con Grid/Random Search.'
                     },
                     {
-                        pregunta: 'Entre los principios que recomienda el Marco ético para la IA en Colombia (Presidencia de la República, 2021) se encuentran…',
+                        pregunta: <>Entre los principios que recomienda el Marco ético para la IA en Colombia <Cita k="guio2021marco" /> se encuentran…</>,
                         opciones: [
                             { texto: 'la certificación obligatoria de cada modelo ante una autoridad antes de desplegarlo.', correcta: false },
                             { texto: 'la transparencia y la explicabilidad de las decisiones algorítmicas.', correcta: true },
@@ -5261,6 +5426,15 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                     obliga a priorizar la sensibilidad y a garantizar transparencia. Con esto se cierra el contenido del Módulo 1; la
                     siguiente sección consolida la evaluación integradora, el glosario y los recursos.
                 </Box>
+
+                <Referencias claves={[
+                    'paszke2019pytorch', 'geman1992neural', 'krogh1992simple', 'loshchilov2019decoupled', 'tibshirani1996regression',
+                    'zou2005regularization', 'hinton2012improving', 'srivastava2014dropout', 'ioffe2015batch', 'santurkar2018how',
+                    'prechelt1998early', 'goodfellow2016deep', 'kaufman2012leakage', 'stone1974cross', 'bergstra2012random',
+                    'fawcett2006introduction', 'davis2006relationship', 'saito2015precision', 'elkan2001foundations', 'guio2021marco', 'conpes2025ia',
+                    'barocas2023fairness', 'rajkomar2018ensuring', 'hardt2016equality', 'chouldechova2017fair', 'kleinberg2017inherent',
+                    'morenotorres2012unifying', 'quinonerocandela2009dataset',
+                ]} />
             </div>
         );
 
@@ -5388,7 +5562,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                             { texto: 'El teorema solo vale para activaciones polinómicas, de modo que no se aplica a una red con ReLU.', correcta: false },
                             { texto: 'El teorema exige al menos dos capas ocultas, así que con una sola no puede cumplirse.', correcta: false },
                         ],
-                        justificacion: 'El teorema (Cybenko, 1989; Hornik, 1991) es de existencia: con una activación no polinómica y suficientes neuronas hay una red que aproxima la función, pero no dice cuántas neuronas hacen falta ni que el descenso del gradiente la encuentre.'
+                        justificacion: <>El teorema <Cita k="cybenko1989approximation, hornik1991approximation" /> es de existencia: con una activación no polinómica y suficientes neuronas hay una red que aproxima la función, pero no dice cuántas neuronas hacen falta ni que el descenso del gradiente la encuentre.</>
                     },
                     {
                         pregunta: 'Una tasa de aprendizaje demasiado alta (el excursionista del Páramo de Letras que da saltos enormes) provoca que el descenso…',
@@ -5453,7 +5627,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                             { texto: 'Transparencia y explicabilidad.', correcta: true },
                             { texto: 'No maleficencia.', correcta: false },
                         ],
-                        justificacion: 'La alerta afecta derechos de la familia y nadie puede explicar en qué se basó: es una «caja negra». El Marco ético para la IA en Colombia (Presidencia de la República, 2021) recomienda la transparencia y la explicabilidad, sobre todo cuando la decisión afecta a comunidades vulnerables.'
+                        justificacion: <>La alerta afecta derechos de la familia y nadie puede explicar en qué se basó: es una «caja negra». El Marco ético para la IA en Colombia <Cita k="guio2021marco" /> recomienda la transparencia y la explicabilidad, sobre todo cuando la decisión afecta a comunidades vulnerables.</>
                     },
                 ]} />
 
@@ -5471,22 +5645,21 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                 <Accordion items={[
                     {
                         titulo: 'Videos y herramientas por capítulo', contenido: <ul className="text-sm">
-                            <li>Cap. 1 — StatQuest: <a className="text-primary underline" href="https://www.youtube.com/watch?v=CqOfi41LfDw" target="_blank" rel="noopener noreferrer">The Essential Main Ideas of Neural Networks</a>.</li>
-                            <li>Cap. 2 — <a className="text-primary underline" href="https://playground.tensorflow.org" target="_blank" rel="noopener noreferrer">TensorFlow Playground</a> (permite experimentar con redes en tiempo real).</li>
-                            <li>Cap. 3 — Dot CSV: <a className="text-primary underline" href="https://www.youtube.com/watch?v=A6FiCDoz8_4" target="_blank" rel="noopener noreferrer">¿Qué es el Descenso del Gradiente?</a></li>
-                            <li>Cap. 4 — Khan Academy: <a className="text-primary underline" href="https://es.khanacademy.org/math/multivariable-calculus" target="_blank" rel="noopener noreferrer">Cálculo multivariable y descenso del gradiente</a>.</li>
-                            <li>Cap. 5 — Presidencia de la República (Consejería Presidencial para Asuntos Económicos y Transformación Digital, 2021): <a className="text-primary underline" href="https://minciencias.gov.co/sites/default/files/marco-etico-ia-colombia-2021.pdf" target="_blank" rel="noopener noreferrer"><em>Marco ético para la inteligencia artificial en Colombia</em></a>.</li>
-                        </ul>
-                    },
-                    {
-                        titulo: 'Bibliografía base', contenido: <ul className="text-sm">
-                            <li>Goodfellow, I., Bengio, Y. y Courville, A. (2016). <em>Deep learning</em>. MIT Press. <a className="text-primary underline" href="https://www.deeplearningbook.org" target="_blank" rel="noopener noreferrer">https://www.deeplearningbook.org</a></li>
-                            <li>Géron, A. (2022). <em>Hands-on machine learning with Scikit-Learn, Keras, and TensorFlow</em> (3.ª ed.). O'Reilly Media.</li>
-                            <li>Chollet, F. (2021). <em>Deep learning with Python</em> (2.ª ed.). Manning.</li>
-                            <li>Zhang, A., Lipton, Z. C., Li, M. y Smola, A. J. (2023). <em>Dive into deep learning</em>. Cambridge University Press. <a className="text-primary underline" href="https://d2l.ai/" target="_blank" rel="noopener noreferrer">https://d2l.ai/</a></li>
+                            <li>Cap. 1 — StatQuest <Cita k="starmer2020essential" />: <a className="text-primary underline" href="https://www.youtube.com/watch?v=CqOfi41LfDw" target="_blank" rel="noopener noreferrer">The Essential Main Ideas of Neural Networks</a>.</li>
+                            <li>Cap. 2 — <a className="text-primary underline" href="https://playground.tensorflow.org" target="_blank" rel="noopener noreferrer">TensorFlow Playground</a> <Cita k="smilkov2016playground, smilkov2017direct" />: permite experimentar con redes en tiempo real.</li>
+                            <li>Cap. 3 — Dot CSV <Cita k="santana2018descenso" />: <a className="text-primary underline" href="https://www.youtube.com/watch?v=A6FiCDoz8_4" target="_blank" rel="noopener noreferrer">¿Qué es el Descenso del Gradiente?</a></li>
+                            <li>Cap. 3 — <Cita k="khanacademy_gd" n />: <a className="text-primary underline" href="https://es.khanacademy.org/math/multivariable-calculus/applications-of-multivariable-derivatives/optimizing-multivariable-functions/a/what-is-gradient-descent" target="_blank" rel="noopener noreferrer">¿Qué es el descenso de gradiente?</a></li>
+                            <li>Cap. 4 — 3Blue1Brown <Cita k="sanderson2017series" />: <a className="text-primary underline" href="https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi" target="_blank" rel="noopener noreferrer">Neural networks</a>, serie de videos cuyos capítulos sobre retropropagación desarrollan su cálculo con la regla de la cadena.</li>
+                            <li>Cap. 5 — Presidencia de la República <Cita k="guio2021marco" />: <a className="text-primary underline" href="https://minciencias.gov.co/sites/default/files/marco-etico-ia-colombia-2021.pdf" target="_blank" rel="noopener noreferrer"><em>Marco ético para la inteligencia artificial en Colombia</em></a>.</li>
                         </ul>
                     },
                 ]} />
+
+                <Referencias titulo="Bibliografía base" claves={['goodfellow2016deep', 'geron2022hands', 'chollet2021deep', 'zhang2023dive']} />
+                <p className="text-sm text-gray-700 mt-3">
+                    Existen ediciones más recientes de dos de estas obras: <Cita k="geron2025hands" n />, con Scikit-Learn y PyTorch,
+                    y <Cita k="chollet2025deep" n />, 3.ª ed.
+                </p>
 
                 <Box type="info" label="De la teoría a la práctica · Proyecto Centinela · Fase 1">
                     Toda la teoría del módulo se pone en práctica en la <strong>actividad evaluable</strong>: construir la
@@ -5509,6 +5682,12 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                     minicuestionario quedó por debajo del 80 %, conviene repasar ese capítulo: aprender es, al fin y al cabo, iterar para
                     minimizar el error.
                 </Box>
+
+                <Referencias claves={[
+                    'cybenko1989approximation', 'hornik1991approximation', 'guio2021marco', 'starmer2020essential',
+                    'smilkov2016playground', 'smilkov2017direct', 'santana2018descenso', 'khanacademy_gd', 'sanderson2017series',
+                    'geron2025hands', 'chollet2025deep', 'ioffe2015batch', 'rosenblatt1958perceptron',
+                ]} />
             </div>
         );
 
