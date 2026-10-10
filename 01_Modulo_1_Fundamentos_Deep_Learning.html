@@ -1260,7 +1260,7 @@ def caracteristicas_manuales(imagen):
                     Una <strong>neurona artificial</strong> es la unidad de cálculo más básica del aprendizaje profundo,
                     inspirada en las neuronas del cerebro. Hace algo muy simple en tres pasos: <strong>(1)</strong> recibe
                     varias <strong>entradas</strong>; <strong>(2)</strong> las combina ponderándolas por su
-                    <strong> importancia</strong> (los <em>pesos</em>) y les suma un <em>sesgo</em>; y <strong>(3)</strong>
+                    <strong> importancia</strong> (los <em>pesos</em>) y les suma un <em>sesgo</em>; y <strong>(3)</strong>{' '}
                     pasa ese resultado por una <strong>función de activación</strong> que decide cuánto «dispara» como salida.
                 </p>
                 <p>
@@ -2916,7 +2916,7 @@ modelo = nn.Sequential(
                 </ol>
                 <p>
                     <strong>¿Para qué sirve?</strong> Esta herramienta permite ver —sin escribir código— cómo cada parámetro
-                    de una neurona influye en su salida. Al mover los <strong>pesos</strong> y el <strong>sesgo</strong>
+                    de una neurona influye en su salida. Al mover los <strong>pesos</strong> y el <strong>sesgo</strong>{' '}
                     y cambiar la <strong>activación</strong>, se observa cómo varían la suma ponderada y la salida en tiempo real.
                 </p>
                 <NeuronaInteractiva />
@@ -2966,7 +2966,7 @@ modelo = nn.Sequential(
                 <h3>Cómo una capa oculta resuelve el XOR</h3>
                 <p>
                     En el Capítulo 1 se comprobó que una sola recta no puede separar el XOR. La solución del MLP es elegante:
-                    usar <strong>dos neuronas ocultas</strong>, cada una con su propia recta, y una <strong>neurona de salida</strong>
+                    usar <strong>dos neuronas ocultas</strong>, cada una con su propia recta, y una <strong>neurona de salida</strong>{' '}
                     que las combina. Al avanzar paso a paso se observa cómo el problema imposible se vuelve resoluble:
                 </p>
                 <XorMLP />
@@ -2981,10 +2981,10 @@ modelo = nn.Sequential(
                 <h3>Interpolar puntos: la red como función</h3>
                 <p>
                     El Teorema garantiza que una red puede aproximar cualquier función continua; aquí puede comprobarse de
-                    forma directa. En el siguiente laboratorio se colocan puntos en el plano y una red de <strong>regresión</strong>
+                    forma directa. En el siguiente laboratorio se colocan puntos en el plano y una red de <strong>regresión</strong>{' '}
                     (salida lineal, pérdida del error cuadrático medio) ajusta la curva <em>y = f(x)</em> que mejor los explica.
-                    Al cambiar la <strong>función de activación</strong> se observa un contraste revelador: <strong>ReLU</strong>
-                    teje la curva con tramos rectos (es poligonal), mientras <strong>Tanh</strong> y <strong>Sigmoide</strong>
+                    Al cambiar la <strong>función de activación</strong> se observa un contraste revelador: <strong>ReLU</strong>{' '}
+                    teje la curva con tramos rectos (es poligonal), mientras <strong>Tanh</strong> y <strong>Sigmoide</strong>{' '}
                     producen curvas suaves.
                 </p>
                 <InterpoladorCurva />
@@ -3054,7 +3054,7 @@ modelo = nn.Sequential(
                 <p>
                     Las ideas anteriores —capas, nodos y activaciones— cobran sentido al verlas operar sobre datos. El
                     siguiente laboratorio entrena, <strong>desde cero y dentro del navegador</strong> (sin librerías de aprendizaje
-                    automático), un MLP de clasificación binaria sobre dos conjuntos clásicos no lineales: <strong>dos lunas</strong>
+                    automático), un MLP de clasificación binaria sobre dos conjuntos clásicos no lineales: <strong>dos lunas</strong>{' '}
                     entrelazadas y <strong>círculos concéntricos</strong>. El fondo del lienzo es un mapa de calor de la predicción
                     de la red en cada punto del plano; la franja donde el color cambia de morado a rosa es la <strong>frontera de
                     decisión</strong>. Conviene modificar la arquitectura y observar cómo esa frontera pasa de una recta rígida a
@@ -3524,7 +3524,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
 
                 <h4>Entropía Cruzada Categórica (CCE) — clasificación multiclase</h4>
                 <p>
-                    Cuando hay más de dos clases —por ejemplo, diagnosticar si una hoja de café tiene <em>roya</em>, <em>mancha de hierro</em>,
+                    Cuando hay más de dos clases —por ejemplo, diagnosticar si una hoja de café tiene <em>roya</em>, <em>mancha de hierro</em>,{' '}
                     <em>antracnosis</em> o está <em>sana</em>— la última capa entrega un puntaje crudo por clase, los
                     {' '}<Termino def="Salidas numéricas sin normalizar de la última capa, antes de convertirse en probabilidades.">logits</Termino>
                     {' '}{String.raw`\(z_k\)`}. La función <strong>Softmax</strong> los convierte en una distribución de probabilidad que suma 1:
@@ -3570,7 +3570,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                 <Box type="tip" label="El hilo común: máxima verosimilitud">
                     Estas tres funciones no son arbitrarias: cada una surge de <strong>maximizar la verosimilitud</strong> de los datos
                     bajo un supuesto distinto sobre su naturaleza —un ruido gaussiano conduce al <strong>MSE</strong>; un resultado
-                    Bernoulli (sí/no), a la <strong>BCE</strong>; y una variable categórica de {String.raw`\(C\)`} clases, a la
+                    Bernoulli (sí/no), a la <strong>BCE</strong>; y una variable categórica de {String.raw`\(C\)`} clases, a la{' '}
                     <strong>CCE</strong>—. Minimizar el costo equivale, en los tres casos, a hacer que los datos observados resulten
                     lo más probables posible para el modelo.
                 </Box>
@@ -3585,7 +3585,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                 <h3>Descenso del gradiente: una analogía andina</h3>
                 <p>
                     Un excursionista se halla en el <strong>Páramo de Letras</strong>, a 3.677 m, de noche y con niebla densa (visibilidad &lt; 1 m).
-                    Debe llegar al valle (error mínimo) pero no ve nada, así que tantea con los pies la inclinación: el <strong>gradiente</strong>
+                    Debe llegar al valle (error mínimo) pero no ve nada, así que tantea con los pies la inclinación: el <strong>gradiente</strong>{' '}
                     es la flecha que apunta hacia arriba. Para descender, da un paso en la dirección <strong>opuesta</strong>:
                 </p>
                 <Eq>{String.raw`$$ \theta_{t+1} = \theta_t - \eta\,\nabla_\theta L(\theta_t) $$`}</Eq>
@@ -3751,7 +3751,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
 
                 <h4>RMSProp: un paso a la medida de cada parámetro</h4>
                 <p>
-                    Una sola {String.raw`\(\eta\)`} para todos los pesos es un traje genérico. <strong>RMSProp</strong> lleva una media móvil del
+                    Una sola {String.raw`\(\eta\)`} para todos los pesos es un traje genérico. <strong>RMSProp</strong> lleva una media móvil del{' '}
                     <em>cuadrado</em> del gradiente reciente de cada parámetro (su valor RMS, de ahí el nombre) y divide su paso por esa raíz: los parámetros con gradientes grandes y
                     ruidosos avanzan con cautela, y los de gradientes pequeños y constantes avanzan más rápido. Es como dar pasos largos en terreno
                     parejo y pasos cortos donde hay piedras.
@@ -3774,7 +3774,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                 </p>
                 <OptimizerCompare />
                 <Box type="tip" label="¿Cuál elegir?">
-                    En la práctica conviene empezar con <strong>Adam</strong> ({String.raw`\(\eta \approx 0.001\)`}): converge rápido y tolera una mala elección de la tasa de aprendizaje.
+                    En la práctica conviene empezar con <strong>Adam</strong> ({String.raw`\(\eta \approx 0.001\)`}): converge rápido y tolera una mala elección de la tasa de aprendizaje.{' '}
                     <strong>SGD con momentum</strong> a veces generaliza un poco mejor en visión por computador, pero exige ajustar con más cuidado la
                     tasa de aprendizaje. Ante la duda, Adam es un punto de partida seguro.
                 </Box>
@@ -4134,7 +4134,7 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
 
                 <h4>De la cadena escalar a la red: las ecuaciones del backprop</h4>
                 <p>
-                    Conviene separar dos cantidades en cada capa: la <strong>preactivación</strong> {String.raw`\(\mathbf{z}^{[l]}=\mathbf{W}^{[l]}\mathbf{a}^{[l-1]}+\mathbf{b}^{[l]}\)`}
+                    Conviene separar dos cantidades en cada capa: la <strong>preactivación</strong> {String.raw`\(\mathbf{z}^{[l]}=\mathbf{W}^{[l]}\mathbf{a}^{[l-1]}+\mathbf{b}^{[l]}\)`}{' '}
                     (la suma ponderada) y la <strong>activación</strong> {String.raw`\(\mathbf{a}^{[l]}=\sigma(\mathbf{z}^{[l]})\)`} (tras la no linealidad). La
                     retropropagación define un vector de <strong>error por capa</strong> {String.raw`\(\delta^{[l]}=\partial L/\partial \mathbf{z}^{[l]}\)`}
                     —cuánta responsabilidad del error carga la preactivación de esa capa— y lo calcula <strong>de atrás hacia adelante</strong> con tres reglas:
@@ -4182,20 +4182,20 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
                 <Reto titulo="Reto · Retropropagación a mano (2 capas)"
                     solucion={
                         <div className="space-y-2 text-[0.95rem]">
-                            <p><strong>(a) Forward:</strong> {String.raw`\(z_1=w_1x+b_1=0{,}5\cdot2=1\)`}; {String.raw`\(a_1=\mathrm{ReLU}(1)=1\)`};
+                            <p><strong>(a) Forward:</strong> {String.raw`\(z_1=w_1x+b_1=0{,}5\cdot2=1\)`}; {String.raw`\(a_1=\mathrm{ReLU}(1)=1\)`};{' '}
                                 {String.raw`\(z_2=w_2a_1+b_2=2\cdot1=2\)`}; {String.raw`\(\hat{y}=z_2=2\)`}. Error {String.raw`\(L=(2-0)^2=4\)`}.</p>
                             <p><strong>(b) δ de salida:</strong> {String.raw`\(\delta_2=\dfrac{\partial L}{\partial z_2}=2(\hat{y}-y)=4\)`} (salida lineal).
                                 Gradientes: {String.raw`\(\partial L/\partial w_2=\delta_2\,a_1=4\)`}, {String.raw`\(\partial L/\partial b_2=\delta_2=4\)`}.</p>
                             <p><strong>(c) Propagar a la oculta:</strong> {String.raw`\(\delta_1=(w_2\,\delta_2)\cdot\mathrm{ReLU}'(z_1)=(2\cdot4)\cdot1=8\)`}.
                                 Gradientes: {String.raw`\(\partial L/\partial w_1=\delta_1\,x=16\)`}, {String.raw`\(\partial L/\partial b_1=\delta_1=8\)`}.</p>
                             <p style={{ color: '#B45309' }}><strong>Conviene observar la recursión:</strong> {String.raw`\(\delta_1=w_2\,\delta_2\,\sigma'(z_1)\)`}. Si la
-                                oculta fuera <strong>sigmoide</strong>, {String.raw`\(\sigma'(z_1)\approx0{,}20\)`} en vez de {String.raw`\(1\)`}, y {String.raw`\(\delta_1\)`}
+                                oculta fuera <strong>sigmoide</strong>, {String.raw`\(\sigma'(z_1)\approx0{,}20\)`} en vez de {String.raw`\(1\)`}, y {String.raw`\(\delta_1\)`}{' '}
                                 caería de {String.raw`\(8\)`} a {String.raw`\(1{,}6\)`}: el <strong>desvanecimiento</strong>, visible en una sola capa.</p>
-                            <p style={{ color: '#15803D' }}><strong>Un paso (η = 0,1):</strong> {String.raw`\(w_2\leftarrow2-0{,}1\cdot4=1{,}6\)`};
+                            <p style={{ color: '#15803D' }}><strong>Un paso (η = 0,1):</strong> {String.raw`\(w_2\leftarrow2-0{,}1\cdot4=1{,}6\)`};{' '}
                                 {String.raw`\(w_1\leftarrow0{,}5-0{,}1\cdot16=-1{,}1\)`}. ✓</p>
                         </div>
                     }>
-                    Una mini-red con {String.raw`\(x=2\)`}, objetivo {String.raw`\(y=0\)`} y pesos {String.raw`\(w_1=0{,}5,\ b_1=0,\ w_2=2,\ b_2=0\)`}
+                    Una mini-red con {String.raw`\(x=2\)`}, objetivo {String.raw`\(y=0\)`} y pesos {String.raw`\(w_1=0{,}5,\ b_1=0,\ w_2=2,\ b_2=0\)`}{' '}
                     (oculta ReLU, salida lineal). Se pide calcular a mano: (a) el <strong>forward</strong> ({String.raw`\(z_1,a_1,z_2,\hat{y},L\)`}),
                     (b) {String.raw`\(\delta_2\)`} y {String.raw`\(\partial L/\partial w_2\)`}, y (c) propagar para hallar {String.raw`\(\delta_1\)`} y {String.raw`\(\partial L/\partial w_1\)`}.
                 </Reto>
@@ -4224,7 +4224,7 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
                             primeras capas casi no aprenden—.</li>
                         <li>Al cambiar a <strong>ReLU</strong>, el flujo hacia atrás llega <strong>mucho más brillante</strong> a las capas iniciales (su
                             derivada vale 1 en la zona activa).</li>
-                        <li>La fase <strong>azul</strong> (predicción) siempre se completa <strong>antes</strong> de que empiece la fase <strong>rosa</strong>
+                        <li>La fase <strong>azul</strong> (predicción) siempre se completa <strong>antes</strong> de que empiece la fase <strong>rosa</strong>{' '}
                             (cálculo del gradiente): es el orden real <em>forward → backward</em>.</li>
                     </ul>
                 </Box>
@@ -4739,7 +4739,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                 </p>
                 <p>
                     Consisten en graficar, a lo largo de las épocas, dos errores. El de <strong>entrenamiento</strong> es el que la red comete
-                    sobre los mismos datos con los que aprende; el de <strong>validación</strong>, el que comete sobre un conjunto de datos
+                    sobre los mismos datos con los que aprende; el de <strong>validación</strong>, el que comete sobre un conjunto de datos{' '}
                     <em>apartado</em> que <em>no</em> usa para entrenar y que anticipa cómo se comportará ante datos nuevos (esa <strong>partición
                     honesta</strong> de los datos se detalla más adelante). Su forma diagnostica la salud del modelo: si el de entrenamiento baja
                     pero el de validación sube (la <strong>«U»</strong>),
@@ -4937,7 +4937,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                 <RedFrontera chapter={5} />
                 <Box type="tip" label="Acto 1 · qué conviene observar (sobreajuste y regularización)">
                     <ul>
-                        <li><strong>Para inducir el sobreajuste:</strong> con muchos nodos y muchas épocas, la pérdida de <strong>validación (morada)</strong>
+                        <li><strong>Para inducir el sobreajuste:</strong> con muchos nodos y muchas épocas, la pérdida de <strong>validación (morada)</strong>{' '}
                             forma una <strong>«U»</strong> mientras la de entrenamiento sigue cayendo: la red memoriza el ruido.</li>
                         <li><strong>Al regularizar:</strong> al subir <strong>λ</strong> la frontera se <em>suaviza</em>; el término L2 empuja los pesos hacia cero y la «U» se aplana.</li>
                         <li><strong>Dropout:</strong> apaga neuronas al azar en cada época de entrenamiento; rompe la co-adaptación y reduce la brecha train/validación
@@ -5081,7 +5081,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                     Para que el modelo aprenda en vez de memorizar, se <strong>regulariza</strong> (L1/L2, Dropout) y se
                     <strong> estabiliza</strong> (Batch Norm); para evaluarlo con honestidad, se leen las <strong>curvas de
                     aprendizaje</strong>, se aplica Early Stopping, se valida con <strong>K-Fold</strong> y se mira más allá de la
-                    exactitud con la <strong>matriz de confusión</strong>. En aplicaciones críticas, además, la <strong>ética</strong>
+                    exactitud con la <strong>matriz de confusión</strong>. En aplicaciones críticas, además, la <strong>ética</strong>{' '}
                     obliga a priorizar la sensibilidad y a garantizar transparencia. Con esto se cierra el contenido del Módulo 1; la
                     siguiente sección consolida la evaluación integradora, el glosario y los recursos.
                 </Box>
