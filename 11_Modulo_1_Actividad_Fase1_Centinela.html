@@ -188,6 +188,10 @@
         /* MathJax (tex-svg) + Preflight de Tailwind (svg{display:block}) rompe la
            matematica inline: cada formula salta de linea. Se restaura el flujo inline. */
         mjx-container svg { display: inline-block; }
+
+        /* Los hijos de una rejilla pueden encogerse: las fórmulas anchas se desplazan dentro
+           de su píldora .eq en lugar de ensanchar la página en móvil (375 px). */
+        .grid > * { min-width: 0; }
     </style>
 </head>
 
@@ -240,7 +244,7 @@
         <section id="contexto" class="reveal">
             <div class="callout callout-info">
                 <p class="font-bold text-primary mb-1"><i class="fas fa-flag-checkered mr-2"></i>Aquí empieza el Proyecto Centinela</p>
-                <p class="text-sm leading-relaxed">El <strong>Proyecto Centinela</strong> es un sistema de alerta temprana que el estudiante construye una sola vez y hace crecer a lo largo del curso. Esta <strong>Fase 1 (Módulo 1)</strong> levanta el <strong>cimiento</strong>: con un <strong>Perceptrón Multicapa (MLP)</strong> sobre datos <strong>tabulares</strong> se predice un evento de riesgo y se audita la "caja negra" del modelo. En las fases siguientes ese mismo problema y ese mismo cliente se conservan, pero el sistema aprende de datos crudos (imágenes y series) y termina desplegándose en campo. Lo que se entregue aquí es el punto de partida reutilizado después.</p>
+                <p class="text-sm leading-relaxed">El <strong>Proyecto Centinela</strong> es un sistema de alerta temprana que el estudiante construye una sola vez y hace crecer a lo largo del curso. Esta <strong>Fase 1 (Módulo 1)</strong> levanta el <strong>cimiento</strong>: con un <strong>Perceptrón Multicapa (MLP)</strong> sobre datos <strong>tabulares</strong> se predice un evento de riesgo y se audita la «caja negra» del modelo. En las fases siguientes ese mismo problema y ese mismo cliente se conservan, pero el sistema aprende de datos crudos (imágenes y series) y termina desplegándose en campo. Lo que se entregue aquí es el punto de partida reutilizado después.</p>
             </div>
 
             <div class="grid md:grid-cols-3 gap-4 mt-6">
@@ -256,7 +260,7 @@
                 </div>
                 <div class="card p-5">
                     <div class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Fase 3 · Módulo 3</div>
-                    <div class="font-bold text-navy mb-1"><i class="fas fa-microchip text-primary mr-1.5"></i>Pipeline y despliegue</div>
+                    <div class="font-bold text-navy mb-1"><i class="fas fa-microchip text-primary mr-1.5"></i>Flujo de datos y despliegue</div>
                     <p class="text-sm text-slate-600">Industrialización con GPU, precisión mixta y despliegue <em>offline</em> en campo.</p>
                 </div>
             </div>
@@ -351,16 +355,16 @@
                 <div class="card p-5">
                     <div class="text-secondary text-2xl mb-2"><i class="fas fa-table-list"></i></div>
                     <h3 class="font-bold text-navy mb-1">Fase 1 = versión tabular de una modalidad</h3>
-                    <p class="text-sm text-slate-600">En este módulo se trabaja con <strong>características numéricas</strong> de <strong>una sola</strong> de las dos modalidades (por ejemplo, promedios espectrales de una imagen). La propuesta declara cuál se aplana y muestra el camino hacia imagen y serie en la Fase 2.</p>
+                    <p class="text-sm text-slate-600">En este módulo se trabaja con <strong>características numéricas</strong> de <strong>una sola</strong> de las dos modalidades (por ejemplo, promedios de intensidad por canal de una imagen). La propuesta declara cuál se aplana y muestra el camino hacia imagen y serie en la Fase 2.</p>
                 </div>
                 <div class="card p-5">
                     <div class="text-red-600 text-2xl mb-2"><i class="fas fa-ban"></i></div>
                     <h3 class="font-bold text-navy mb-1">Prohibido Kaggle</h3>
-                    <p class="text-sm text-slate-600">Quedan vetados los <em>datasets</em> y competencias de Kaggle y sus <em>mirrors</em>: son retos ya resueltos y con datos demasiado limpios. El detalle de fuentes válidas está en el Catálogo de Fuentes de Datos del curso.</p>
+                    <p class="text-sm text-slate-600">Quedan vetados los conjuntos de datos y las competencias de Kaggle y sus réplicas (<em>mirrors</em>): son retos ya resueltos y con datos demasiado limpios. El detalle de fuentes válidas está en el Catálogo de Fuentes de Datos del curso.</p>
                 </div>
             </div>
             <div class="callout callout-warn mt-5">
-                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i>El escenario de referencia <strong>"Centinela del Café"</strong> clasifica el estado de la hoja (<strong>Sana</strong> vs. <strong>Enferma</strong> por roya) a partir de un vector de características (promedios de intensidad RGB e Infrarrojo) del conjunto <strong>RoCoLe</strong> (la versión tabular de la modalidad <strong>imagen</strong>). Sirve de ejemplo; el estudiante puede adoptarlo o proponer el suyo con la misma lógica.</p>
+                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i>El escenario de referencia <strong>«Centinela del Café»</strong> clasifica el estado de la hoja (<strong>sana</strong> frente a <strong>enferma</strong>, sobre todo por roya) a partir de un vector de características —promedios de intensidad por canal R, G, B y descriptores derivados, calculados sobre las fotografías RGB del conjunto <strong>RoCoLe</strong>— (la versión tabular de la modalidad <strong>imagen</strong>). Sirve de ejemplo; el estudiante puede adoptarlo o proponer el suyo con la misma lógica.</p>
             </div>
             <div class="callout callout-eth mt-4">
                 <p class="text-sm"><i class="fas fa-scale-balanced text-teal-600 mr-2"></i><strong>Datos honestos.</strong> En esta fase se modela <strong>una sola modalidad</strong> en su forma tabular. Si en la Fase 2 el escenario del café se fusiona con datos de <strong>clima</strong>, la alineación imagen↔clima es <strong>agregada</strong> (por región y periodo), <strong>no muestra a muestra</strong>: una foto de una hoja no tiene su propio registro climático individual. Esa limitación de alineación se profundiza en la Fase 2; aquí solo se deja declarada.</p>
@@ -391,7 +395,7 @@
                         <p class="text-sm"><i class="fas fa-flask text-emerald-600 mr-2"></i><strong>Andamiaje opcional.</strong> El curso ofrece un <a href="https://colab.research.google.com/github/JotaMao1985/Deep_Learning_Usta/blob/main/notebooks/02-scaffold-centinela-fase1.ipynb" target="_blank" rel="noopener" style="color:#0E7490;font-weight:600">notebook de andamiaje</a> con la estructura de secciones y funciones de graficación ya resueltas; <strong>no contiene la solución</strong> (la arquitectura y el bucle de entrenamiento quedan como ejercicio).</p>
                     </div>
                     <div class="callout callout-warn mt-3">
-                        <p class="text-sm"><i class="fas fa-clipboard-check text-amber-600 mr-2"></i><strong>Ejemplo resuelto — para calibrar tu nivel, no para copiar.</strong> El curso publica un <a href="https://colab.research.google.com/github/JotaMao1985/Deep_Learning_Usta/blob/main/notebooks/05-ejemplo-centinela-fase1-tulipanes.ipynb" target="_blank" rel="noopener" style="color:#0E7490;font-weight:600">ejemplo resuelto de principio a fin</a> sobre un problema distinto al tuyo —heladas en la floración del tulipán (Países Bajos), con datos reales del KNMI— que muestra el nivel <strong>Estratégico</strong> de la rúbrica e incluye como anexos la Propuesta de Datos, la Bitácora de IA y el Informe técnico-ético. <strong>Ese escenario queda vetado como entrega</strong> (estación KNMI, etiqueta de helada o variaciones menores): a diferencia del escenario del café, ya está resuelto públicamente y no supera el <em>gate</em> de la Propuesta de Datos.</p>
+                        <p class="text-sm"><i class="fas fa-clipboard-check text-amber-600 mr-2"></i><strong>Ejemplo resuelto — para calibrar el nivel, no para copiar.</strong> El curso publica un <a href="https://colab.research.google.com/github/JotaMao1985/Deep_Learning_Usta/blob/main/notebooks/05-ejemplo-centinela-fase1-tulipanes.ipynb" target="_blank" rel="noopener" style="color:#0E7490;font-weight:600">ejemplo resuelto de principio a fin</a> sobre un problema distinto al propio —heladas en la floración del tulipán (Países Bajos), con datos reales del KNMI— que muestra el nivel <strong>Estratégico</strong> de la rúbrica e incluye como anexos la Propuesta de Datos, la Bitácora de IA y el Informe técnico-ético. <strong>Ese escenario queda vetado como entrega</strong> (estación KNMI, etiqueta de helada o variaciones menores): a diferencia del escenario del café, ya está resuelto públicamente y no supera la compuerta de la Propuesta de Datos.</p>
                     </div>
                 </div>
             </div>
@@ -400,7 +404,7 @@
             <div class="flex gap-4 mb-2"><span class="step-num">2</span>
                 <div class="flex-1">
                     <h3 class="font-bold text-navy text-lg">Diseño de la arquitectura (MLP)</h3>
-                    <p class="text-sm text-slate-600 mt-1">Definición de una clase con <strong>al menos dos capas ocultas</strong> y justificación de las funciones de activación (por ejemplo, ReLU en las ocultas y Sigmoide en la salida) con base en la teoría de la no-linealidad.</p>
+                    <p class="text-sm text-slate-600 mt-1">Definición de una clase con <strong>al menos dos capas ocultas</strong> y justificación de las funciones de activación (por ejemplo, ReLU en las ocultas y sigmoide en la salida) con base en la teoría de la no linealidad.</p>
                 </div>
             </div>
             <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
@@ -484,7 +488,7 @@
                 <figure class="card p-5">
                     <svg viewBox="0 0 380 230" width="100%" role="img" aria-labelledby="bucleTitle bucleDesc">
                         <title id="bucleTitle">Bucle de entrenamiento</title>
-                        <desc id="bucleDesc">Ciclo de entrenamiento: forward, cálculo de la pérdida, backward y actualización de los pesos</desc>
+                        <desc id="bucleDesc">Ciclo de entrenamiento: limpieza de gradientes (paso 0), forward, cálculo de la pérdida, backward y actualización de los pesos</desc>
                         <defs>
                             <marker id="arrowLoop" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
                                 <path d="M0,0 L7,3 L0,6 Z" fill="#3D008D"/>
@@ -500,7 +504,7 @@
                         <text x="280" y="170" text-anchor="middle" font-size="11" font-weight="700" fill="#1E293B">3 · Backward</text>
                         <text x="280" y="186" text-anchor="middle" font-size="10" fill="#475569">∇ℒ (gradientes)</text>
                         <rect x="35"  y="150" width="130" height="48" rx="10" fill="#FEF9C3" stroke="#FEF08A"/>
-                        <text x="100" y="170" text-anchor="middle" font-size="11" font-weight="700" fill="#1E293B">4 · Optimizer</text>
+                        <text x="100" y="170" text-anchor="middle" font-size="11" font-weight="700" fill="#1E293B">4 · Actualización</text>
                         <text x="100" y="186" text-anchor="middle" font-size="10" fill="#475569">θ ← θ − η∇ℒ</text>
                         <!-- flechas del ciclo -->
                         <line x1="165" y1="52"  x2="210" y2="52"  stroke="#3D008D" stroke-width="2" marker-end="url(#arrowLoop)"/>
@@ -509,9 +513,9 @@
                         <line x1="100" y1="146" x2="100" y2="80"  stroke="#3D008D" stroke-width="2" marker-end="url(#arrowLoop)"/>
                         <text x="190" y="118" text-anchor="middle" font-size="10" font-weight="700" fill="#64748B">época</text>
                         <text x="190" y="131" text-anchor="middle" font-size="9" fill="#94A3B8">× 50</text>
-                        <text x="100" y="118" text-anchor="middle" font-size="8.5" fill="#94A3B8">zero_grad</text>
+                        <text x="94" y="118" text-anchor="end" font-size="8.5" fill="#64748B">0 · zero_grad</text>
                     </svg>
-                    <figcaption>Figura 3. El bucle de entrenamiento repite cincuenta veces el ciclo <em>forward → pérdida → backward → actualización</em>. Limpiar los gradientes (<span class="icode">zero_grad</span>) antes de cada paso es imprescindible.</figcaption>
+                    <figcaption>Figura 3. El bucle de entrenamiento repite cincuenta veces el ciclo <em>0 · zero_grad → 1 · forward → 2 · pérdida → 3 · backward → 4 · actualización</em>, con la misma numeración del código. Este orden equivale al del capítulo (forward → pérdida → zero_grad → backward → step): lo imprescindible es limpiar los gradientes (<span class="icode">zero_grad</span>) antes de <span class="icode">backward()</span>.</figcaption>
                 </figure>
             </div>
             <div class="code-window">
@@ -527,13 +531,13 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
 
 <span class="cm"># Bucle de entrenamiento explícito — 50 épocas (PyTorch)</span>
 <span class="kw">for</span> epoca <span class="kw">in</span> <span class="fn">range</span>(50):
-    optim.<span class="fn">zero_grad</span>()                  <span class="cm"># 1 · limpia los gradientes previos</span>
-    logits  = <span class="fn">modelo</span>(X_train)            <span class="cm"># 2 · forward pass (devuelve logits)</span>
-    perdida = <span class="fn">criterio</span>(logits, y_train)    <span class="cm"># 3 · cálculo del error (BCEWithLogitsLoss)</span>
-    perdida.<span class="fn">backward</span>()                 <span class="cm"># 4 · backward pass (retropropagación)</span>
-    optim.<span class="fn">step</span>()                      <span class="cm"># 5 · actualiza los pesos</span>
+    optim.<span class="fn">zero_grad</span>()                  <span class="cm"># 0 · limpia los gradientes previos</span>
+    logits  = <span class="fn">modelo</span>(X_train)            <span class="cm"># 1 · forward pass (devuelve logits)</span>
+    perdida = <span class="fn">criterio</span>(logits, y_train)    <span class="cm"># 2 · cálculo del error (BCEWithLogitsLoss)</span>
+    perdida.<span class="fn">backward</span>()                 <span class="cm"># 3 · backward pass (retropropagación)</span>
+    optim.<span class="fn">step</span>()                      <span class="cm"># 4 · actualiza los pesos</span>
 
-    <span class="kw">if</span> epoca % 10 == 0:                 <span class="cm"># Colab puede desconectarse: guarda checkpoints</span>
+    <span class="kw">if</span> epoca % 10 == 0:                 <span class="cm"># Colab puede desconectarse: guarda puntos de control</span>
         torch.<span class="fn">save</span>(modelo.<span class="fn">state_dict</span>(), <span class="st">"centinela_fase1.pt"</span>)</div>
             </div>
 
@@ -545,7 +549,7 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
             <div class="flex gap-4 mb-2 mt-8"><span class="step-num">4</span>
                 <div class="flex-1">
                     <h3 class="font-bold text-navy text-lg">Experimentación y regularización</h3>
-                    <p class="text-sm text-slate-600 mt-1">Entrenamiento por <strong>50 épocas</strong> y graficación de las curvas de pérdida de <strong>entrenamiento vs. validación</strong>. El desafío consiste en inducir intencionalmente <strong>sobreajuste</strong> (más neuronas o más épocas) y luego corregirlo con <strong>Dropout</strong> o ajustando la tasa de aprendizaje, documentando el cambio en las gráficas.</p>
+                    <p class="text-sm text-slate-600 mt-1">Entrenamiento por <strong>50 épocas</strong> y graficación de las curvas de pérdida de <strong>entrenamiento vs. validación</strong>. El desafío consiste en inducir intencionalmente <strong>sobreajuste</strong> (más neuronas o más épocas) y luego corregirlo con <strong>Dropout</strong> o ajustando la tasa de aprendizaje (ajustar la tasa ayuda si se combina con la detención temprana o con menos épocas), documentando el cambio en las gráficas.</p>
                 </div>
             </div>
             <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
@@ -570,7 +574,7 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                         <!-- validación con Dropout (se mantiene baja) -->
                         <polyline points="60,74 120,116 200,142 270,150 320,152 355,153" fill="none" stroke="#0E7490" stroke-width="2.2" stroke-dasharray="5 3"/>
                         <!-- etiquetas de texto al final de cada curva (no depender solo del color) -->
-                        <text x="362" y="181" font-size="9.5" font-weight="700" fill="#3D008D">train</text>
+                        <text x="362" y="181" font-size="9.5" font-weight="700" fill="#3D008D">entren.</text>
                         <text x="362" y="85"  font-size="9.5" font-weight="700" fill="#ED1E79">val</text>
                         <text x="362" y="156" font-size="9.5" font-weight="700" fill="#0E7490">val + Dropout</text>
                         <!-- leyenda -->
@@ -578,7 +582,7 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                         <line x1="240" y1="68" x2="262" y2="68" stroke="#ED1E79" stroke-width="2.5"/><text x="266" y="71" font-size="9" fill="#334155">validación</text>
                         <line x1="240" y1="81" x2="262" y2="81" stroke="#0E7490" stroke-width="2.2" stroke-dasharray="5 3"/><text x="266" y="84" font-size="9" fill="#334155">val. + Dropout</text>
                     </svg>
-                    <figcaption>Figura 4. Cuando la pérdida de validación deja de bajar y empieza a subir mientras la de entrenamiento sigue cayendo, hay sobreajuste. El Dropout (línea punteada) mantiene la validación estable y evita que vuelva a subir. Cada curva se rotula al final (<strong>train</strong> / <strong>val</strong> / <strong>val + Dropout</strong>) para no depender solo del color.</figcaption>
+                    <figcaption>Figura 4. Cuando la pérdida de validación deja de bajar y empieza a subir mientras la de entrenamiento sigue cayendo, hay sobreajuste. El Dropout (línea punteada) mantiene la validación estable y evita que vuelva a subir. Cada curva se rotula al final (<strong>entren.</strong> / <strong>val</strong> / <strong>val + Dropout</strong>) para no depender solo del color.</figcaption>
                 </figure>
                 <div>
                     <div class="callout callout-danger mb-4">
@@ -597,7 +601,7 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
             <div class="flex gap-4 mb-2 mt-8"><span class="step-num">5</span>
                 <div class="flex-1">
                     <h3 class="font-bold text-navy text-lg">Evaluación, análisis de errores y ética</h3>
-                    <p class="text-sm text-slate-600 mt-1">Como el modelo devuelve un <strong>logit</strong>, en la evaluación se aplica <span class="icode">torch.sigmoid</span> para obtener la probabilidad y umbralizarla (por ejemplo, en 0,5) en la clase predicha. Evaluación en el conjunto de <strong>prueba</strong> con <strong>matriz de confusión</strong>, precisión, <em>recall</em> y F1; análisis de <strong>falsos positivos vs. falsos negativos</strong>. Con el <strong>Marco Ético para la IA en Colombia (Minciencias, 2021)</strong> se discute el costo real de cada tipo de error para el cliente.</p>
+                    <p class="text-sm text-slate-600 mt-1">Como el modelo devuelve un <strong>logit</strong>, en la evaluación se aplica <span class="icode">torch.sigmoid</span> para obtener la probabilidad y umbralizarla (por ejemplo, en 0,5) en la clase predicha. Antes de evaluar se llama <span class="icode">modelo.eval()</span>, que desactiva el Dropout: PyTorch usa <em>dropout</em> invertido (las activaciones ya se escalaron por 1/(1 − <em>p</em>) durante el entrenamiento), así que en inferencia no se reescala nada; el cálculo se envuelve en <span class="icode">with torch.no_grad():</span> y, si se vuelve a entrenar, se llama de nuevo <span class="icode">modelo.train()</span>. Evaluación en el conjunto de <strong>prueba</strong> con <strong>matriz de confusión</strong>, precisión, <em>recall</em> y F1; análisis de <strong>falsos positivos vs. falsos negativos</strong>. Con el <strong><em>Marco ético para la inteligencia artificial en Colombia</em> (Guío Español et al., 2021)</strong>, de la Presidencia de la República, se discute el costo real de cada tipo de error para el cliente.</p>
                 </div>
             </div>
             <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
@@ -695,7 +699,7 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
             <!-- ✅ Antes de entregar — checklist explícito y sin ambigüedad -->
             <div class="card p-6 mt-6 border-l-4" style="border-color:#0E9F6E">
                 <h3 class="font-bold text-primary mb-1 text-lg"><i class="fas fa-clipboard-check text-emerald-600 mr-2"></i>✅ Antes de entregar</h3>
-                <p class="text-sm text-slate-600 mb-4">Revisa que tu envío cumpla <strong>todos</strong> estos puntos. Sin todos los entregables la actividad puede quedar incompleta (Nivel Nulo = sin entrega).</p>
+                <p class="text-sm text-slate-600 mb-4">Conviene revisar que el envío cumpla <strong>todos</strong> estos puntos. Sin todos los entregables la actividad puede quedar incompleta (Nivel Nulo = sin entrega).</p>
                 <ul class="space-y-3 text-sm text-slate-700">
                     <li class="flex gap-3">
                         <i class="fas fa-square-check text-emerald-500 mt-0.5"></i>
@@ -752,8 +756,8 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                             <span class="font-bold text-navy text-sm">1. Propuesta de datos y EDA</span>
                             <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">15 %</span>
                         </div>
-                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> un problema y un cliente claros, fuentes reales no-Kaggle con licencia, y un EDA que justifique tu partición y tu preprocesamiento.</p>
-                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> propuesta con modalidad aplanada y fuente, una gráfica de clases y una partición train/val/test (aunque no esté del todo justificada).</p>
+                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> un problema y un cliente claros, fuentes reales no-Kaggle con licencia, y un EDA que justifique la partición y el preprocesamiento.</p>
+                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> propuesta con problema y fuente no-Kaggle (aunque omita la modalidad que se aplana o la licencia), una gráfica de clases y una partición entrenamiento/validación/prueba (aunque no esté justificada).</p>
                     </div>
                     <!-- C2 -->
                     <div class="border border-slate-200 rounded-xl p-4">
@@ -770,8 +774,8 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                             <span class="font-bold text-navy text-sm">3. Regularización y experimentación</span>
                             <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">15 %</span>
                         </div>
-                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> curvas train vs. val. que evidencien el sobreajuste y su corrección con Dropout/LR, bien interpretadas.</p>
-                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> presentas las curvas, pero describes el sobreajuste sin señalar dónde la validación deja de bajar.</p>
+                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> curvas de entrenamiento y validación que evidencien el sobreajuste y su corrección con Dropout o con la tasa de aprendizaje, bien interpretadas.</p>
+                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> se presentan las curvas, pero se describe el sobreajuste sin señalar dónde la validación deja de bajar.</p>
                     </div>
                     <!-- C4 -->
                     <div class="border border-slate-200 rounded-xl p-4">
@@ -780,7 +784,7 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                             <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">15 %</span>
                         </div>
                         <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> matriz de confusión y métricas (precisión/recall/F1) interpretadas, con una reflexión ética ligada al costo de FN/FP para el cliente.</p>
-                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> reportas solo la exactitud global y mencionas la ética sin ligarla a FN/FP ni a una decisión.</p>
+                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> se reporta solo la exactitud global y se menciona la ética sin ligarla a FN/FP ni a una decisión.</p>
                     </div>
                     <!-- C5 -->
                     <div class="border border-slate-200 rounded-xl p-4">
@@ -788,8 +792,8 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                             <span class="font-bold text-navy text-sm">5. Uso responsable de IA</span>
                             <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">15 %</span>
                         </div>
-                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> bitácora completa y verificable (Aceptada/Modificada/Rechazada con motivo), saber explicar tus decisiones y una auditoría que corrige un fallo real de la IA.</p>
-                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> la bitácora lista prompts sin el motivo, titubeas al explicar una decisión y la auditoría describe un fallo genérico.</p>
+                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> bitácora completa y verificable (Aceptada/Modificada/Rechazada con motivo), saber explicar las decisiones propias y una auditoría que corrige un fallo real de la IA.</p>
+                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> la bitácora lista <em>prompts</em> sin el motivo, se titubea al explicar una decisión y la auditoría describe un fallo genérico.</p>
                     </div>
                     <!-- C6 -->
                     <div class="border border-slate-200 rounded-xl p-4">
@@ -841,7 +845,7 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                             <td>Reporta matriz de confusión y precisión/recall/F1 <strong>por clase</strong>, <strong>convirtiendo el logit con <span class="icode">torch.sigmoid</span> en evaluación</strong>; argumenta qué error (FN o FP) priorizar por su costo para el cliente, citando el Marco Ético.</td>
                             <td>Incluye matriz de confusión y las métricas principales interpretadas, con una reflexión ética pertinente al cliente.</td>
                             <td>Reporta solo la exactitud global y menciona la ética sin ligarla a FN/FP ni a una decisión.</td>
-                            <td><strong>Evalúa en el training set</strong>, o no hay matriz de confusión, o la ética está ausente.</td>
+                            <td><strong>Evalúa en el conjunto de entrenamiento</strong>, o no hay matriz de confusión, o la ética está ausente.</td>
                         </tr>
                         <tr>
                             <td><strong>5. Uso responsable de IA (15 %)</strong></td>
@@ -868,7 +872,7 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
         <!-- ====================== AUTOEVALUACIÓN ====================== -->
         <section id="autoevaluacion" class="reveal">
             <h2 class="sec-title text-2xl md:text-3xl text-navy mb-3"><i class="fas fa-calculator text-secondary mr-2"></i>Calculadora de autoevaluación</h2>
-            <p class="text-slate-600 mb-4 max-w-3xl">Selecciona, con honestidad, el nivel que mejor describe tu entregable en cada criterio. La nota estimada se calcula <strong>en vivo</strong> con los pesos de la rúbrica oficial. Úsala para detectar qué mejorar antes de entregar.</p>
+            <p class="text-slate-600 mb-4 max-w-3xl">Se elige, con honestidad, el nivel que mejor describe el entregable en cada criterio. La nota estimada se calcula <strong>en vivo</strong> con los pesos de la rúbrica oficial y sirve para detectar qué mejorar antes de entregar.</p>
 
             <div class="callout callout-warn mb-6">
                 <p class="text-sm"><i class="fas fa-circle-info text-amber-500 mr-2"></i><strong>Herramienta orientativa.</strong> Esta autoevaluación se basa en la rúbrica oficial, pero <strong>la calificación definitiva la asigna el docente</strong>; no reemplaza la sustentación ni la revisión del entregable.</p>
@@ -888,7 +892,7 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                         </div>
                         <div class="mt-3 flex flex-col items-center gap-2">
                             <span id="ae-banda" class="rounded-full px-4 py-1 text-sm font-bold">—</span>
-                            <span id="ae-estado" class="text-sm font-semibold" role="status" aria-live="polite">Selecciona un nivel en cada criterio</span>
+                            <span id="ae-estado" class="text-sm font-semibold" role="status" aria-live="polite">Falta seleccionar un nivel en cada criterio</span>
                         </div>
                         <button id="ae-reset" type="button" class="mt-5 w-full rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
                             <i class="fas fa-rotate-left mr-1.5"></i>Reiniciar
@@ -917,13 +921,13 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                 <table class="tbl" style="min-width:680px">
                     <thead><tr style="background:#3D008D"><th style="width:34%">Referencia (APA 7)</th><th>Aporte a la fase</th><th style="width:18%">Enlace</th></tr></thead>
                     <tbody>
-                        <tr><td>Goodfellow, I., Bengio, Y., &amp; Courville, A. (2016). <em>Deep Learning</em> (Cap. 6 y 8). MIT Press.</td><td>Fundamento del MLP (redes <em>feedforward</em>) y de la optimización del entrenamiento.</td><td><a href="https://www.deeplearningbook.org/" target="_blank" rel="noopener" style="color:#ED1E79">deeplearningbook.org</a></td></tr>
-                        <tr><td>Géron, A. (2023). <em>Hands-On Machine Learning with Scikit-Learn, Keras &amp; TensorFlow</em> (3.ª ed.). O'Reilly.</td><td>Implementación práctica de un MLP y su entrenamiento (Cap. 10 y 11).</td><td>Biblioteca USTA</td></tr>
-                        <tr><td>Chollet, F. (2021). <em>Deep Learning with Python</em> (2.ª ed.). Manning.</td><td>Intuición del aprendizaje y del descenso del gradiente con ejemplos ejecutables.</td><td>Manning</td></tr>
-                        <tr><td>Parraga-Alava, J., et al. (2019). <em>RoCoLe: A robusta coffee leaf images dataset</em>. Mendeley Data.</td><td>Dataset del escenario de referencia (se usa la versión tabular RGB + IR).</td><td><a href="https://data.mendeley.com/datasets/c5yvn32dzg/2" target="_blank" rel="noopener" style="color:#ED1E79">Mendeley</a></td></tr>
-                        <tr><td>Ministerio de Ciencia, Tecnología e Innovación. (2021). <em>Marco Ético para la IA en Colombia</em>.</td><td>Referencia de la auditoría ética transversal (falsos negativos/positivos).</td><td><a href="https://minciencias.gov.co/" target="_blank" rel="noopener" style="color:#ED1E79">minciencias.gov.co</a></td></tr>
-                        <tr><td>StatQuest (Starmer, J., 2020). <em>The Essential Main Ideas of Neural Networks</em> [Video].</td><td>Fundamentos visuales de nodos, pesos, sesgos y activación.</td><td><a href="https://www.youtube.com/watch?v=CqOfi41LfDw" target="_blank" rel="noopener" style="color:#ED1E79">YouTube</a></td></tr>
-                        <tr><td>Smilkov, D., &amp; Carter, S. <em>TensorFlow Playground</em>.</td><td>Simulador para experimentar con capas, tasa de aprendizaje y sobreajuste.</td><td><a href="https://playground.tensorflow.org" target="_blank" rel="noopener" style="color:#ED1E79">playground</a></td></tr>
+                        <tr><td>Goodfellow, I., Bengio, Y. y Courville, A. (2016). <em>Deep learning</em> (caps. 6 y 8). MIT Press.</td><td>Fundamento del MLP (redes prealimentadas, <em>feedforward</em>) y de la optimización del entrenamiento.</td><td><a href="https://www.deeplearningbook.org/" target="_blank" rel="noopener" style="color:#ED1E79">deeplearningbook.org</a></td></tr>
+                        <tr><td>Géron, A. (2022). <em>Hands-on machine learning with Scikit-Learn, Keras, and TensorFlow</em> (3.ª ed.). O'Reilly Media.</td><td>Implementación práctica de un MLP y su entrenamiento (Cap. 10 y 11).</td><td>Biblioteca USTA</td></tr>
+                        <tr><td>Chollet, F. (2021). <em>Deep learning with Python</em> (2.ª ed.). Manning Publications.</td><td>Intuición del aprendizaje y del descenso del gradiente con ejemplos ejecutables.</td><td>Manning</td></tr>
+                        <tr><td>Parraga-Alava, J., Cusme, K., Loor, A. y Santander, E. (2019). <em>RoCoLe: A robusta coffee leaf images dataset</em> (Versión 2) [Conjunto de datos]. Mendeley Data. https://doi.org/10.17632/c5yvn32dzg.2</td><td>Conjunto de datos del escenario de referencia (se usa una versión tabular con promedios por canal R, G, B y descriptores derivados).</td><td><a href="https://doi.org/10.17632/c5yvn32dzg.2" target="_blank" rel="noopener" style="color:#ED1E79">Mendeley</a></td></tr>
+                        <tr><td>Guío Español, A., Tamayo Uribe, E. y Gómez Ayerbe, P. (2021). <em>Marco ético para la inteligencia artificial en Colombia</em> (Versión 1). Consejería Presidencial para Asuntos Económicos y Transformación Digital, Presidencia de la República.</td><td>Referencia de la auditoría ética transversal (falsos negativos/positivos).</td><td><a href="https://minciencias.gov.co/sites/default/files/marco-etico-ia-colombia-2021.pdf" target="_blank" rel="noopener" style="color:#ED1E79">Marco ético (PDF)</a></td></tr>
+                        <tr><td>StatQuest with Josh Starmer. (2020). <em>The essential main ideas of neural networks</em> [Video]. YouTube.</td><td>Fundamentos visuales de nodos, pesos, sesgos y activación.</td><td><a href="https://www.youtube.com/watch?v=CqOfi41LfDw" target="_blank" rel="noopener" style="color:#ED1E79">YouTube</a></td></tr>
+                        <tr><td>Smilkov, D. y Carter, S. (2016). <em>TensorFlow Playground</em> [Aplicación web].</td><td>Simulador para experimentar con capas, tasa de aprendizaje y sobreajuste.</td><td><a href="https://playground.tensorflow.org" target="_blank" rel="noopener" style="color:#ED1E79">playground</a></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -941,12 +945,12 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                     </div>
                     <div class="bg-white/10 rounded-xl p-4">
                         <p class="font-bold mb-1">Punto de partida</p>
-                        <p class="text-white/85">Esta es la Fase 1: inicia el proyecto. Se apoya en la Guía de Profundización 1 (reflexión sobre el entrenamiento).</p>
+                        <p class="text-white/85">Esta es la Fase 1: inicia el proyecto. Se apoya en la Guía de Profundización 1 (reflexión sobre el entrenamiento), en el <a href="01_Modulo_1_Fundamentos_Deep_Learning.html" class="underline font-semibold text-white">material del Módulo 1</a> y en la <a href="00_ruta-aprendizaje-modulo-1.html" class="underline font-semibold text-white">ruta de aprendizaje</a>.</p>
                     </div>
-                    <div class="bg-white/10 rounded-xl p-4">
-                        <p class="font-bold mb-1">Fase siguiente</p>
+                    <a href="21_Modulo_2_Actividad_Fase2_Centinela.html" class="bg-white/10 hover:bg-white/20 transition rounded-xl p-4 block">
+                        <p class="font-bold mb-1">Fase siguiente <i class="fas fa-arrow-right ml-1 text-xs"></i></p>
                         <p class="text-white/85">Fase 2 (Módulo 2): el MLP evoluciona a un sistema multimodal con CNN, RNN y fusión.</p>
-                    </div>
+                    </a>
                 </div>
             </div>
         </section>
@@ -958,7 +962,7 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
         <div class="max-w-6xl mx-auto px-5 md:px-8 py-8">
             <p class="font-bold text-white mb-1">Universidad Santo Tomás · Maestría en Ciencia de Datos</p>
             <p>Profundización I: Redes Neuronales — Deep Learning (EA-N-F-004) · Experto temático: Javier Mauricio Sierra</p>
-            <p class="text-white/55 mt-3 text-xs">Proyecto Centinela · Fase 1 — Fundamentos del Aprendizaje Profundo. Material de aprendizaje autónomo. Metodología "Ingeniería de Trinchera": si una arquitectura no corre en Google Colab, no existe.</p>
+            <p class="text-white/55 mt-3 text-xs">Proyecto Centinela · Fase 1 — Fundamentos del Aprendizaje Profundo. Material de aprendizaje autónomo. Metodología «Ingeniería de Trinchera»: si una arquitectura no corre en Google Colab, no existe.</p>
         </div>
     </footer>
 
@@ -1054,7 +1058,7 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                         'Reporta matriz de confusión y precisión/recall/F1 por clase, convirtiendo el logit con torch.sigmoid en evaluación; argumenta qué error (FN o FP) priorizar por su costo para el cliente, citando el Marco Ético.',
                         'Incluye matriz de confusión y las métricas principales interpretadas, con una reflexión ética pertinente al cliente.',
                         'Reporta solo la exactitud global y menciona la ética sin ligarla a FN/FP ni a una decisión.',
-                        'Evalúa en el training set, o no hay matriz de confusión, o la ética está ausente.',
+                        'Evalúa en el conjunto de entrenamiento, o no hay matriz de confusión, o la ética está ausente.',
                         SIN_ENTREGA
                     ]
                 },
@@ -1126,7 +1130,7 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                         '<span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">' + c.peso + ' %</span>' +
                     '</div>' +
                     '<select id="' + selId + '" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary" aria-describedby="ae-desc-' + i + '">' +
-                        '<option value="-1" selected>— Elige un nivel —</option>' + opciones +
+                        '<option value="-1" selected>— Nivel —</option>' + opciones +
                     '</select>' +
                     '<p id="ae-desc-' + i + '" class="text-sm text-slate-600 mt-3 leading-relaxed" aria-live="polite"></p>' +
                     '<p id="ae-feed-' + i + '" class="text-sm mt-2 leading-relaxed font-medium"></p>';
@@ -1167,7 +1171,7 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                     bandaEl.textContent = '—';
                     bandaEl.style.background = '#F1F5F9';
                     bandaEl.style.color = '#64748B';
-                    estadoEl.textContent = 'Selecciona un nivel en cada criterio';
+                    estadoEl.textContent = 'Falta seleccionar un nivel en cada criterio';
                     estadoEl.style.color = '#64748B';
                     return;
                 }

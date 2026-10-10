@@ -182,6 +182,11 @@
         /* MathJax (tex-svg) + Preflight de Tailwind (svg{display:block}) rompe la
            matematica inline: cada formula salta de linea. Se restaura el flujo inline. */
         mjx-container svg { display: inline-block; }
+
+        /* Móvil (375 px): los hijos de una rejilla pueden encogerse y las palabras largas
+           (p. ej. Apellido_Nombre_Centinela_Fase1.zip) se parten en lugar de ensanchar la página. */
+        .grid > * { min-width: 0; }
+        .usta-card { overflow-wrap: break-word; }
     </style>
 </head>
 
@@ -360,7 +365,7 @@
                         <i className="fas fa-circle-question text-secondary mt-1"></i>
                         <span>{pregunta}</span>
                     </div>
-                    {multiple && <p className="text-xs text-gray-400 mb-2 ml-6">Selección múltiple</p>}
+                    {multiple && <p className="text-xs text-gray-500 mb-2 ml-6">Selección múltiple</p>}
                     <div className="space-y-2 mt-3">
                         {opciones.map((o, i) => {
                             const isSel = sel.includes(i);
@@ -392,16 +397,22 @@
                         {checked && (
                             <span className={`text-sm font-bold ${acierto ? 'text-green-600' : 'text-red-500'}`}>
                                 <i className={`fas ${acierto ? 'fa-circle-check' : 'fa-circle-xmark'} mr-1`}></i>
-                                {acierto ? '¡Correcto!' : 'Revisa la explicación'}
+                                {acierto ? '¡Correcto!' : 'Conviene revisar la explicación'}
                             </span>
                         )}
                     </div>
                     {checked && (() => {
                         const justifs = opciones.filter(o => o.correcta && o.justificacion).map(o => o.justificacion);
-                        if (!justifs.length) return null;
+                        const errores = acierto ? [] : sel.filter(i => !opciones[i].correcta && opciones[i].justificacion).map(i => opciones[i].justificacion);
+                        if (!justifs.length && !errores.length) return null;
                         return (
                             <div className="mt-3 text-[0.9rem] text-gray-700 bg-bg rounded-lg p-3 border-l-4 animate-fade-in" style={{ borderColor: '#FDB913' }}>
-                                <strong>Explicación: </strong>{justifs.join(' ')}
+                                {errores.length > 0 && (
+                                    <p className="mb-2"><strong>Sobre la opción elegida:</strong>{' '}{errores.join(' ')}</p>
+                                )}
+                                {justifs.length > 0 && (
+                                    <p><strong>{acierto ? 'Explicación:' : 'Respuesta correcta:'}</strong>{' '}{justifs.join(' ')}</p>
+                                )}
                             </div>
                         );
                     })()}
@@ -446,7 +457,7 @@
                 <div className="w-full">
                     <div className="flex justify-between items-center mb-1.5">
                         <span className="text-sm font-semibold text-navy">{label}</span>
-                        {showPct && <span className="text-sm font-bold text-primary">{value}%</span>}
+                        {showPct && <span className="text-sm font-bold text-primary">{value} %</span>}
                     </div>
                     <div className="w-full h-3 rounded-full bg-gray-200 overflow-hidden shadow-inner">
                         <div className="h-full usta-gradient transition-all duration-500 ease-out"
@@ -585,6 +596,8 @@
         /* ============================================================
            URL del aula virtual Teams (constante, mismo enlace los 4 encuentros)
         ============================================================ */
+        /* Datos de la cohorte (actualizar cada periodo): año del cronograma y sala de Teams */
+        const COHORTE_ANIO = '2026';
         const TEAMS_URL = 'https://teams.microsoft.com/l/meetup-join/19%3ameeting_MjkwMTczNTMtYmIwNS00NzQ5LThlMjItNWQ0NjI1NjM5NjE0%40thread.v2/0?context=%7b%22Tid%22%3a%22c1406a49-4b6f-4747-9571-871250615680%22%2c%22Oid%22%3a%22f0e54d22-6d4a-4b96-a5fb-9c84c73c3d29%22%7d';
 
         /* ============================================================
@@ -599,29 +612,28 @@
                 title: 'Introducción y Contexto Histórico',
                 icon: 'fa-clock-rotate-left',
                 tag: 'tema/historia',
+                tema: 'Tema: historia',
                 badgeColor: 'primary',
-                duracion: '~ 30 min lectura',
+                duracion: '≈ 30 min de lectura',
                 ra: [
                     'Comprender los tres ciclos del Deep Learning (1943–1969, 1986–2006, 2006–presente).',
-                    'Diferenciar entre Machine Learning clásico y Deep Learning.',
+                    'Diferenciar entre el aprendizaje automático (ML) clásico y el Deep Learning.',
                     'Aplicar el árbol de decisión ML clásico vs. DL según tipo y volumen de datos.',
                     'Reconocer aplicaciones del Deep Learning en Colombia y América Latina.',
                 ],
                 analogia: {
-                    titulo: 'Analogía local: el beneficio del café',
+                    titulo: 'Analogía local: de los píxeles al concepto',
                     contenido: (
                         <div>
                             <p>
-                                Imagine que quiere clasificar automáticamente si un lote de café será
-                                <em> "Grado Exportación"</em> o <em>"Consumo Nacional"</em>. La red neuronal se parece a la cadena
-                                de beneficio del café: una secuencia de etapas (<em>despulpado → fermentación → secado → trilla →
-                                catación</em>) que transforma materia prima "sucia" en un resultado refinado. La capa de entrada
-                                son los datos crudos (altitud, humedad, horas de sol, % broca); las capas ocultas separan,
-                                combinan y refinan características; la capa de salida emite la decisión final del "maestro catador".
+                                Para decidir si un racimo de plátano es apto para exportar, la red aprende sola, capa a capa,
+                                a pasar de los <strong>píxeles crudos</strong> a los bordes, las texturas y las partes, hasta el
+                                concepto final («apto» o «no apto»). En el ML clásico, en cambio, un experto tendría que diseñar
+                                a mano esas etapas de extracción de características.
                             </p>
                             <Box type="tip" label="Idea clave">
-                                <strong>Entrenar la red = encontrar los pesos y sesgos correctos</strong> en cada etapa, igual que
-                                un caficultor aprende con los años las proporciones y los tiempos.
+                                <strong>Entrenar la red = encontrar los pesos y sesgos correctos</strong> en cada capa, de modo
+                                que esa cadena de representaciones lleve de los datos crudos a la decisión.
                             </Box>
                         </div>
                     ),
@@ -630,21 +642,27 @@
                     {
                         pregunta: 'Sobre el perceptrón simple de Rosenblatt (1958), ¿cuál fue su limitación fatal demostrada por Minsky y Papert?',
                         opciones: [
-                            { texto: 'No podía aprender a sumar números.', correcta: false },
-                            { texto: 'No podía resolver problemas no linealmente separables como el XOR.', correcta: true,
+                            { texto: 'Solo aprendía con entradas binarias, no con números reales.', correcta: false,
+                              justificacion: 'El perceptrón admite entradas reales; su límite no está en el tipo de entrada, sino en la forma de la frontera que traza.' },
+                            { texto: 'Necesitaba más memoria de la que tenían los computadores de la época.', correcta: false,
+                              justificacion: 'La limitación no era de cómputo sino de representación: una sola capa solo traza fronteras lineales.' },
+                            { texto: 'Su regla de aprendizaje no convergía con datos linealmente separables.', correcta: false,
+                              justificacion: 'Es al revés: el teorema de convergencia del perceptrón garantiza que converge cuando los datos son linealmente separables.' },
+                            { texto: 'No podía resolver problemas no linealmente separables, como el XOR.', correcta: true,
                               justificacion: 'Un perceptrón de una sola capa traza una frontera lineal; el XOR requiere una frontera curva, lo que demuestra la necesidad de capas ocultas.' },
-                            { texto: 'Requería demasiada memoria RAM.', correcta: false },
-                            { texto: 'Solo funcionaba con números positivos.', correcta: false },
                         ],
                     },
                     {
                         pregunta: '¿Cuál de los siguientes NO es un criterio para decidir entre ML clásico y Deep Learning?',
                         opciones: [
-                            { texto: 'El tipo de datos (tabular vs. imagen/texto).', correcta: false },
-                            { texto: 'La cantidad de datos etiquetados disponibles.', correcta: false },
-                            { texto: 'La marca del fabricante de la GPU.', correcta: true,
+                            { texto: 'El tipo de datos (tabular frente a imagen, texto o audio).', correcta: false,
+                              justificacion: 'El tipo de datos sí es un criterio: con datos tabulares suele bastar el ML clásico.' },
+                            { texto: 'La cantidad de datos etiquetados disponibles.', correcta: false,
+                              justificacion: 'El volumen de datos sí es un criterio: el Deep Learning suele necesitar muchos más ejemplos.' },
+                            { texto: 'La marca del fabricante de la GPU disponible.', correcta: true,
                               justificacion: 'La marca de la GPU no es un criterio técnico de decisión; los criterios reales son tipo de datos, volumen, interpretabilidad, recursos y tiempo.' },
-                            { texto: 'La necesidad o no de interpretabilidad.', correcta: false },
+                            { texto: 'La necesidad o no de interpretar las decisiones.', correcta: false,
+                              justificacion: 'La interpretabilidad sí es un criterio: en salud o finanzas puede inclinar la balanza hacia el ML clásico.' },
                         ],
                     },
                 ],
@@ -655,11 +673,12 @@
                 title: 'El Perceptrón Multicapa (MLP) y la Arquitectura',
                 icon: 'fa-network-wired',
                 tag: 'tema/mlp',
+                tema: 'Tema: MLP',
                 badgeColor: 'secondary',
-                duracion: '~ 25 min lectura',
+                duracion: '≈ 25 min de lectura',
                 ra: [
                     'Describir la anatomía de un MLP: capas de entrada, ocultas y de salida.',
-                    'Explicar el Teorema de Aproximación Universal con la analogía de las "piezas de Lego".',
+                    'Explicar el Teorema de Aproximación Universal con la analogía de las «piezas de Lego».',
                     'Seleccionar la función de activación adecuada para cada capa.',
                     'Justificar el rol de las capas ocultas en la extracción jerárquica de características.',
                 ],
@@ -668,7 +687,7 @@
                     contenido: (
                         <div>
                             <p>
-                                Imagine la aprobación de un subsidio agrícola en una oficina gubernamental:
+                                Considérese la aprobación de un subsidio agrícola en una oficina gubernamental:
                             </p>
                             <ul>
                                 <li><strong>Capa de entrada (ventanilla):</strong> recibe documentos crudos (cédula, escrituras, facturas).</li>
@@ -678,7 +697,7 @@
                             <p>
                                 Ningún analista por sí solo aprueba el subsidio, pero la cadena de evidencia
                                 que construyen sustenta la decisión del director. <strong>Las capas ocultas no deciden,
-                                pero transforman "papeles" en "conceptos interpretables"</strong>.
+                                pero transforman «papeles» en «conceptos interpretables»</strong>.
                             </p>
                         </div>
                     ),
@@ -687,23 +706,28 @@
                     {
                         pregunta: 'El Teorema de Aproximación Universal afirma que:',
                         opciones: [
-                            { texto: 'Una red con al menos una capa oculta y suficientes neuronas puede aproximar cualquier función continua.', correcta: true,
-                              justificacion: 'Cada neurona aporta un pequeño "bloque" no lineal; sumando suficientes se reconstruye la topografía de cualquier función continua.' },
-                            { texto: 'Toda red neuronal aprende sin errores en un solo paso.', correcta: false },
-                            { texto: 'Solo las redes recurrentes pueden aproximar funciones.', correcta: false },
-                            { texto: 'Las redes necesitan más de 10 capas para ser "profundas".', correcta: false },
+                            { texto: 'Una red profunda entrenada lo suficiente siempre alcanza error cero en la prueba.', correcta: false,
+                              justificacion: 'El teorema garantiza que existe una red capaz de aproximar la función, no que el entrenamiento la encuentre ni que generalice.' },
+                            { texto: 'Con una capa oculta y neuronas suficientes se aproxima cualquier función continua.', correcta: true,
+                              justificacion: 'Cada neurona aporta un pequeño «bloque» no lineal; sumando suficientes se aproxima cualquier función continua sobre un dominio acotado (con una activación no polinómica). El teorema garantiza que esa red existe, no que el entrenamiento la encuentre.' },
+                            { texto: 'Solo las redes con más de diez capas ocultas pueden aproximar funciones no lineales.', correcta: false,
+                              justificacion: 'Basta una sola capa oculta con suficientes neuronas; la profundidad mejora la eficiencia, no la posibilidad.' },
+                            { texto: 'Cualquier función continua se aproxima con una red lineal si tiene suficientes capas.', correcta: false,
+                              justificacion: 'Sin no linealidad, apilar capas equivale a una sola transformación lineal: no puede aproximar funciones curvas.' },
                         ],
                     },
                     {
-                        pregunta: '¿Por qué ReLU se convirtió en la activación estándar de las capas ocultas? (seleccione 2)',
+                        pregunta: '¿Por qué ReLU se convirtió en la activación estándar de las capas ocultas? (dos respuestas correctas)',
                         multiple: true,
                         opciones: [
-                            { texto: 'Porque evita el desvanecimiento del gradiente en regiones positivas (derivada = 1).', correcta: true,
-                              justificacion: 'Su derivada constante (= 1 para z>0) evita que el gradiente se encoja en redes profundas.' },
-                            { texto: 'Porque es computacionalmente eficiente: solo compara con cero.', correcta: true,
-                              justificacion: 'max(0, z) es básicamente gratuito frente a sigmoid/tanh que requieren exponenciales.' },
-                            { texto: 'Porque normaliza la salida entre 0 y 1.', correcta: false },
-                            { texto: 'Porque es lineal y simplifica todas las matemáticas.', correcta: false },
+                            { texto: 'Porque acota la salida entre 0 y 1, como una probabilidad.', correcta: false,
+                              justificacion: 'Eso lo hace la sigmoide; ReLU no tiene cota superior.' },
+                            { texto: 'Porque su derivada vale 1 para z > 0 y no encoge el gradiente.', correcta: true,
+                              justificacion: 'Su derivada constante (= 1 para z > 0) mitiga el desvanecimiento del gradiente en redes profundas.' },
+                            { texto: 'Porque es lineal en todo su dominio y simplifica la matemática.', correcta: false,
+                              justificacion: 'ReLU es lineal a trozos: el quiebre en cero es justamente la no linealidad que la hace útil.' },
+                            { texto: 'Porque es barata de calcular: basta compararla con cero.', correcta: true,
+                              justificacion: 'max(0, z) es casi gratuito frente a la sigmoide o tanh, que requieren exponenciales.' },
                         ],
                     },
                 ],
@@ -714,11 +738,12 @@
                 title: 'La Matemática del Error y la Optimización',
                 icon: 'fa-arrow-trend-down',
                 tag: 'tema/optimizacion',
+                tema: 'Tema: optimización',
                 badgeColor: 'gold',
-                duracion: '~ 35 min lectura',
+                duracion: '≈ 35 min de lectura',
                 ra: [
-                    'Cuantificar el error con funciones de costo: MSE para regresión y BCE para clasificación.',
-                    'Aplicar el descenso del gradiente y sus variantes (batch, mini-batch, SGD).',
+                    'Cuantificar el error con funciones de pérdida: MSE para regresión y BCE para clasificación.',
+                    'Aplicar el descenso del gradiente y sus variantes (lote completo, minilotes, SGD).',
                     'Seleccionar la tasa de aprendizaje y entender su impacto en la convergencia.',
                     'Identificar el rol del momentum y de optimizadores adaptativos (Adam, RMSProp).',
                 ],
@@ -744,24 +769,27 @@
                 },
                 mcq: [
                     {
-                        pregunta: '¿Qué función de costo es apropiada para predecir MILÍMETROS de lluvia mensual (regresión)?',
+                        pregunta: '¿Qué función de pérdida es apropiada para predecir los milímetros de lluvia mensual (regresión)?',
                         opciones: [
-                            { texto: 'MSE (Error Cuadrático Medio): penaliza el cuadrado de la diferencia.', correcta: true,
-                              justificacion: 'MSE es el estándar para regresión: penaliza desproporcionadamente los errores grandes (útil para alertas tempranas de inundación).' },
-                            { texto: 'Binary Cross-Entropy (BCE).', correcta: false,
-                              justificacion: 'BCE se usa para clasificación binaria (probabilidades entre 0 y 1), no para valores continuos.' },
-                            { texto: 'Softmax.', correcta: false,
-                              justificacion: 'Softmax es una función de activación para clasificación multiclase, no una función de costo.' },
+                            { texto: 'Entropía cruzada binaria (BCE), la pérdida de la clasificación.', correcta: false,
+                              justificacion: 'La BCE se usa para clasificación binaria (probabilidades entre 0 y 1), no para valores continuos.' },
+                            { texto: 'Softmax, que reparte la probabilidad entre las clases posibles.', correcta: false,
+                              justificacion: 'Softmax es una función de activación para clasificación multiclase, no una función de pérdida.' },
+                            { texto: 'MSE (error cuadrático medio): penaliza el cuadrado del error.', correcta: true,
+                              justificacion: 'El MSE es el estándar para regresión: penaliza desproporcionadamente los errores grandes (útil para alertas tempranas de inundación).' },
                         ],
                     },
                     {
                         pregunta: 'Si la tasa de aprendizaje es demasiado alta, el descenso del gradiente…',
                         opciones: [
-                            { texto: 'Desciende muy lento (convergencia lenta).', correcta: false },
-                            { texto: 'Da saltos tan grandes que pasa por encima del valle y sube la ladera opuesta (divergencia).', correcta: true,
-                              justificacion: 'El algoritmo "rebota" entre las paredes de la función de costo, aumentando el error en lugar de reducirlo.' },
-                            { texto: 'Encuentra el óptimo global de inmediato.', correcta: false },
-                            { texto: 'Se queda atrapado en un mínimo local sin moverse.', correcta: false },
+                            { texto: 'Salta por encima del valle, sube la ladera opuesta y diverge.', correcta: true,
+                              justificacion: 'El algoritmo «rebota» entre las paredes de la función de pérdida y el error aumenta en lugar de reducirse.' },
+                            { texto: 'Avanza a pasos diminutos y tarda muchas épocas en converger.', correcta: false,
+                              justificacion: 'Eso ocurre con una tasa de aprendizaje muy baja.' },
+                            { texto: 'Llega al mínimo global en muy pocas iteraciones, sin oscilar.', correcta: false,
+                              justificacion: 'Si η supera cierto umbral, el algoritmo oscila o diverge y no llega al mínimo.' },
+                            { texto: 'Queda atrapado sin moverse en el primer mínimo local cercano.', correcta: false,
+                              justificacion: 'Con η muy alta el problema es la inestabilidad, no el estancamiento.' },
                         ],
                     },
                 ],
@@ -769,13 +797,14 @@
             {
                 id: 4,
                 num: '04',
-                title: 'Retropropagación (Backpropagation)',
+                title: 'Retropropagación (backpropagation)',
                 icon: 'fa-diagram-project',
                 tag: 'tema/backpropagation',
+                tema: 'Tema: retropropagación',
                 badgeColor: 'primary',
-                duracion: '~ 30 min lectura',
+                duracion: '≈ 30 min de lectura',
                 ra: [
-                    'Comprender el "problema de asignación de crédito" en redes profundas.',
+                    'Comprender el «problema de asignación de crédito» en redes profundas.',
                     'Modelar la red como un grafo computacional de operaciones elementales.',
                     'Aplicar la regla de la cadena del cálculo para propagar gradientes hacia atrás.',
                     'Usar autograd de PyTorch para calcular gradientes automáticamente.',
@@ -794,14 +823,15 @@
                                 <li>¿O de una <strong>política mal diseñada</strong> (pesos iniciales)?</li>
                             </ul>
                             <p>
-                                En deep learning esto se llama el <strong>problema de asignación de crédito</strong>: la red falló,
+                                En Deep Learning esto se llama el <strong>problema de asignación de crédito</strong>: la red falló,
                                 pero hay miles de neuronas involucradas. <em>¿Cuáles deben ajustar sus pesos y en qué medida?</em>
                             </p>
-                            <Box type="tip" label={'La regla de la cadena: el «efecto dominó»'}>
+                            <Box type="tip" label={'La regla de la cadena: un rumor que se amplifica o se apaga'}>
                                 <p>
-                                    Imagine un rumor en una oficina: si un colega distorsiona la información al pasarla al jefe,
-                                    el impacto final = (cuánto distorsiona el colega) × (intensidad del mensaje original).
-                                    Multiplicando derivadas locales en cadena, la capa final reparte la responsabilidad hacia atrás.
+                                    Considérese un rumor en una oficina: si un colega altera la información al pasarla al jefe,
+                                    el efecto final = (cuánto cambia la versión del colega con la información original) × (cuánto
+                                    reacciona el jefe a esa versión). Multiplicando derivadas locales en cadena, la capa final
+                                    reparte la responsabilidad hacia atrás.
                                 </p>
                             </Box>
                         </div>
@@ -809,23 +839,29 @@
                 },
                 mcq: [
                     {
-                        pregunta: 'Si el gradiente de un peso es exactamente cero, entonces…',
+                        pregunta: 'Si la derivada parcial de la pérdida respecto a un peso es exactamente cero, entonces…',
                         opciones: [
-                            { texto: 'Cambiar ese peso no afecta (localmente) el error: estamos en un punto estacionario.', correcta: true,
-                              justificacion: 'Gradiente cero = pendiente plana; mover el peso no sube ni baja el error, no hay dirección local de mejora.' },
-                            { texto: 'El peso es el más importante de la red.', correcta: false },
-                            { texto: 'La red ya alcanzó el óptimo global con certeza.', correcta: false },
-                            { texto: 'Hay un error de hardware.', correcta: false },
+                            { texto: 'Ese peso es el más importante de la red y conviene congelarlo.', correcta: false,
+                              justificacion: 'Una derivada nula no mide importancia: solo indica que, localmente, mover ese peso no cambia la pérdida.' },
+                            { texto: 'La red alcanzó con certeza el mínimo global de la función de pérdida.', correcta: false,
+                              justificacion: 'Ni siquiera un gradiente completo nulo garantiza el mínimo global: puede ser un mínimo local o un punto de silla.' },
+                            { texto: 'El peso dejará de actualizarse en todas las épocas siguientes.', correcta: false,
+                              justificacion: 'La derivada cambia cuando cambian los demás pesos o el lote: en el siguiente paso puede dejar de ser cero.' },
+                            { texto: 'Pendiente plana en esa coordenada: moverlo no cambia la pérdida.', correcta: true,
+                              justificacion: 'Una derivada parcial nula indica una pendiente plana solo en esa dirección. El punto es estacionario únicamente si todas las derivadas parciales (todo el gradiente) se anulan.' },
                         ],
                     },
                     {
-                        pregunta: '¿Por qué es necesario llamar <code className="inline-code">optimizer.zero_grad()</code> antes de cada backward?',
+                        pregunta: <>¿Por qué es necesario llamar <code className="inline-code">optimizer.zero_grad()</code> antes de cada <code className="inline-code">backward()</code>?</>,
                         opciones: [
-                            { texto: 'Para reiniciar los pesos a valores aleatorios.', correcta: false },
-                            { texto: 'Para liberar RAM de la GPU.', correcta: false },
-                            { texto: 'Para evitar que los gradientes del lote actual se sumen a los acumulados de lotes anteriores.', correcta: true,
+                            { texto: 'Para reiniciar los pesos a valores aleatorios antes de cada lote.', correcta: false,
+                              justificacion: 'zero_grad() no toca los pesos: solo pone en cero los gradientes almacenados.' },
+                            { texto: 'Porque PyTorch suma los gradientes nuevos a los que ya estaban.', correcta: true,
                               justificacion: 'PyTorch acumula gradientes por defecto; sin limpiarlos, se corrompería la dirección de descenso (se sumarían derivadas de iteraciones pasadas).' },
-                            { texto: 'Para ejecutar el forward pass.', correcta: false },
+                            { texto: 'Para liberar la memoria de la GPU que ocupó el lote anterior.', correcta: false,
+                              justificacion: 'No libera memoria: los gradientes siguen almacenados, solo que con valor cero.' },
+                            { texto: 'Para ejecutar el paso hacia adelante (forward) con el nuevo lote.', correcta: false,
+                              justificacion: 'El paso hacia adelante se ejecuta al llamar al modelo; zero_grad() solo limpia gradientes.' },
                         ],
                     },
                 ],
@@ -836,39 +872,40 @@
                 title: 'Ajuste, Evaluación y Ética de Modelos',
                 icon: 'fa-scale-balanced',
                 tag: 'tema/regularizacion',
+                tema: 'Temas: regularización · ética',
                 badgeColor: 'secondary',
-                duracion: '~ 40 min lectura',
+                duracion: '≈ 40 min de lectura',
                 ra: [
                     'Identificar el sobreajuste (overfitting) y distinguirlo del subajuste.',
-                    'Aplicar técnicas de regularización: L1, L2, Dropout, Early Stopping.',
+                    'Aplicar técnicas de regularización: L1, L2, dropout y parada temprana.',
                     'Comprender y aplicar Batch Normalization entre capas.',
                     'Evaluar modelos con matriz de confusión y elegir métricas éticamente alineadas.',
                     'Reconocer las implicaciones éticas del despliegue de modelos en contextos colombianos.',
                 ],
                 analogia: {
-                    titulo: 'Analogías locales: el ICFES, la Selección Colombia y el ajiaco santafereño',
+                    titulo: 'Analogías locales: el ICFES, el grupo de estudio y la estandarización',
                     contenido: (
                         <div>
                             <Box type="warn" label="El estudiante y el ICFES">
                                 <p>
-                                    Un estudiante que memoriza el cuadernillo del año pasado saca puntaje perfecto en el simulacro
+                                    Un estudiante que memoriza el cuadernillo del año pasado saca puntaje perfecto en el simulacro,
                                     pero fracasa en el examen real: <strong>memorizó en lugar de aprender</strong>. En Deep Learning
-                                    queremos emular al Estudiante B (generalización), no al A (memorización).
+                                    se busca emular al Estudiante B (generalización), no al A (memorización).
                                 </p>
                             </Box>
-                            <Box type="tip" label="La Selección Colombia y el dropout">
+                            <Box type="tip" label="El grupo de estudio y el dropout">
                                 <p>
-                                    Imagine la Selección Colombia con una "estrella" que resuelve todo. Si la estrella falta el día
-                                    del partido, el equipo colapsa. <strong>El dropout apaga neuronas al azar en cada iteración</strong>{' '}
-                                    para que ninguna neurona se convierta en "estrella" y todas aprendan a contribuir.
+                                    Es como ir rotando, en cada sesión, a quién se le pide ausentarse del grupo de estudio —incluida
+                                    la «estrella»—: nadie puede depender de una sola persona. <strong>El dropout apaga neuronas al azar
+                                    en cada iteración</strong>, de modo que ninguna se vuelve imprescindible y todas aprenden a contribuir.
                                 </p>
                             </Box>
-                            <Box type="info" label="El ajiaco santafereño y la Batch Normalization">
+                            <Box type="info" label="La estandarización y la Batch Normalization">
                                 <p>
-                                    La Batch Normalization actúa como el protocolo de homogeneización del ajiaco: la papa sabanera,
-                                    la pastusa y la criolla llegan con tamaños distintos cada lote. Si no se estandarizan (cortar en
-                                    cubos uniformes), el proceso de cocción es inestable. <strong>Normalizar las entradas a cada capa
-                                    estabiliza el entrenamiento</strong> y permite tasas de aprendizaje más altas.
+                                    Como al estandarizar columnas en escalas muy distintas (estatura en metros, peso en kilos,
+                                    ingresos en miles): se resta la media y se divide por la desviación. <strong>Batch Norm lo hace
+                                    entre capas y lote a lote</strong>, lo que estabiliza el entrenamiento y admite tasas de aprendizaje
+                                    más altas.
                                 </p>
                             </Box>
                         </div>
@@ -876,35 +913,43 @@
                 },
                 mcq: [
                     {
-                        pregunta: 'Un modelo obtiene 98 % de accuracy en Medellín pero solo 55 % en Cúcuta. ¿Qué está ocurriendo?',
+                        pregunta: 'Un modelo obtiene 98 % de exactitud en Medellín, pero solo 55 % en Cúcuta. ¿Qué está ocurriendo?',
                         opciones: [
-                            { texto: 'Underfitting (subajuste).', correcta: false },
-                            { texto: 'Overfitting: el modelo memorizó el "ruido" de Medellín en vez de conceptos generales.', correcta: true,
-                              justificacion: 'La brecha grande entre entrenamiento (alto) y prueba (bajo) es la firma del sobreajuste.' },
-                            { texto: 'Generalización correcta: el modelo funciona diferente en cada ciudad.', correcta: false },
-                            { texto: 'Error de hardware en Cúcuta.', correcta: false },
+                            { texto: 'Subajuste: el modelo es demasiado simple para ambas ciudades.', correcta: false,
+                              justificacion: 'Con 98 % en Medellín el modelo no es demasiado simple: el problema aparece al cambiar de población.' },
+                            { texto: 'Sobreajuste clásico: memorizó el ruido del conjunto de entrenamiento.', correcta: false,
+                              justificacion: 'Es un pariente del sobreajuste, pero la brecha no es entre entrenamiento y prueba de una misma población, sino entre poblaciones distintas.' },
+                            { texto: 'Cambio de distribución: Cúcuta difiere de los datos de Medellín.', correcta: true,
+                              justificacion: 'El modelo aprendió rasgos propios de Medellín que no se transfieren: falta de representatividad o cambio de distribución (dataset shift) entre poblaciones.' },
+                            { texto: 'Generalización correcta: es normal que el desempeño varíe por ciudad.', correcta: false,
+                              justificacion: 'Una caída de 43 puntos no es una variación normal: indica que los datos de entrenamiento no representan la población de despliegue.' },
                         ],
                     },
                     {
-                        pregunta: '¿Por qué Dropout ayuda contra el overfitting? (seleccione 2)',
+                        pregunta: '¿Por qué el dropout ayuda contra el sobreajuste? (dos respuestas correctas)',
                         multiple: true,
                         opciones: [
-                            { texto: 'Al apagar neuronas al azar evita depender de una "neurona estrella".', correcta: true,
-                              justificacion: 'Rompe la co-adaptación frágil entre neuronas, obligando a la red a aprender patrones distribuidos.' },
+                            { texto: 'Al apagar neuronas al azar, ninguna se vuelve «neurona estrella».', correcta: true,
+                              justificacion: 'Rompe la co-adaptación frágil entre neuronas y obliga a la red a aprender patrones distribuidos.' },
+                            { texto: 'Duplica las imágenes del conjunto de datos con pequeñas variaciones.', correcta: false,
+                              justificacion: 'Eso es aumento de datos (data augmentation), una técnica distinta.' },
                             { texto: 'Obliga a aprender representaciones redundantes y distribuidas.', correcta: true,
-                              justificacion: 'Si una neurona falla, otras pueden compensar: la red se vuelve robusta.' },
-                            { texto: 'Duplica las imágenes existentes en el dataset.', correcta: false },
-                            { texto: 'Elimina permanentemente neuronas con pesos negativos.', correcta: false },
+                              justificacion: 'Si una neurona falta, otras pueden compensar: la red se vuelve robusta.' },
+                            { texto: 'Elimina para siempre las neuronas que tienen pesos negativos.', correcta: false,
+                              justificacion: 'Las neuronas solo se apagan temporalmente en cada iteración de entrenamiento; en inferencia participan todas.' },
                         ],
                     },
                     {
                         pregunta: 'Si la curva de validación sube desde la época 50 mientras la de entrenamiento sigue bajando, lo correcto es…',
                         opciones: [
-                            { texto: 'Entrenar 1.000 épocas más, ya que el modelo seguirá mejorando.', correcta: false },
-                            { texto: 'Implementar Early Stopping, guardando los pesos de la época 50.', correcta: true,
-                              justificacion: 'La "U" invertida en validación es la firma del overfitting; Early Stopping detiene justo antes de que el modelo empiece a memorizar ruido.' },
-                            { texto: 'Eliminar el conjunto de validación para simplificar.', correcta: false },
-                            { texto: 'Aumentar la tasa de aprendizaje.', correcta: false },
+                            { texto: 'Entrenar 1.000 épocas más, ya que el modelo seguirá mejorando.', correcta: false,
+                              justificacion: 'Entrenar más solo agrava el sobreajuste.' },
+                            { texto: 'Eliminar el conjunto de validación, porque solo añade ruido.', correcta: false,
+                              justificacion: 'Sin validación se pierde la única señal que permite detectar el sobreajuste a tiempo.' },
+                            { texto: 'Aumentar la tasa de aprendizaje para escapar de ese mínimo.', correcta: false,
+                              justificacion: 'Una tasa mayor no detiene el sobreajuste; solo cambia la trayectoria del descenso.' },
+                            { texto: 'Aplicar parada temprana y conservar los pesos de la época 50.', correcta: true,
+                              justificacion: 'La «U» de la pérdida de validación (baja y luego sube) es la firma del sobreajuste. La parada temprana conserva los pesos del mínimo, antes de que el modelo empiece a memorizar ruido.' },
                         ],
                     },
                 ],
@@ -920,14 +965,14 @@
                 horas: 8,
                 desglose: '1 h directo · 1 h indirecto · 6 h autónomo',
                 entregable: 'Foro + escrito reflexivo (500–700 palabras + 2 réplicas)',
-                caso: 'Hospital público colombiano: IA entrenada con datos de Bogotá/Medellín/Cali desplegada en costa Caribe y Amazonas. Predice "bajo riesgo" a pacientes graves.',
+                caso: 'Hospital público colombiano: una IA entrenada con datos de zonas andinas se despliega en la costa Caribe y la Amazonía, y predice «bajo riesgo» para pacientes graves.',
                 pasos: [
-                    'Visualización inicial: vea el video de StatQuest sobre gradient descent y anote conceptos clave.',
-                    'Lectura crítica: lea el Capítulo 8 del Deep Learning Book (Goodfellow) y el artículo de Rajkomar et al. sobre equidad en IA médica.',
-                    'Análisis del caso: lea el caso del hospital y responda 5 preguntas orientadoras (diagnóstico, validación, ética).',
-                    'Experimentación con TensorFlow Playground: pruebe learning rates extremos y overfitting vs. generalización.',
-                    'Construya su respuesta reflexiva con tesis, evidencia, dimensión ética y conclusión (APA 7.ª).',
-                    'Revisión final: verifique citación APA, ortografía y pensamiento propio (no solo paráfrasis).',
+                    'Visualización inicial: ver el video de 3Blue1Brown sobre el descenso del gradiente (Gradient descent, how neural networks learn) y anotar los conceptos clave.',
+                    'Lectura crítica: leer el capítulo 8 del Deep Learning Book (Goodfellow et al.) y el artículo de Rajkomar et al. sobre equidad en la IA médica.',
+                    'Análisis del caso: leer el caso del hospital y preparar notas para las 7 preguntas orientadoras (diagnóstico, validación, ética).',
+                    'Experimentación con TensorFlow Playground: probar tasas de aprendizaje extremas y comparar sobreajuste frente a generalización.',
+                    'Redactar la respuesta reflexiva (al menos 3 de las 7 preguntas) con tesis, evidencia, dimensión ética y conclusión (APA 7.ª ed.).',
+                    'Revisión final: verificar la citación APA, la ortografía y el pensamiento propio (no solo paráfrasis).',
                 ],
                 rubrica: [
                     { criterio: 'Dominio conceptual técnico', peso: 25 },
@@ -955,15 +1000,15 @@
                 ],
                 /* Nota de entrega (solo Fase 1) */
                 entregaNota: 'La sustentación oral se evalúa aparte. Nivel Nulo = sin entrega del producto.',
-                caso: 'Usted es ingeniero de IA y construye la línea base de un sistema de alerta temprana "Centinela": un MLP sobre datos tabulares. Escenario guía: clasificar hoja de café (Sana vs. Enferma por roya) con la versión tabular del dataset RoCoLe (promedios RGB/IR), o un problema multimodal propio aprobado.',
+                caso: 'El rol: ingeniero de IA que construye la línea base de un sistema de alerta temprana «Centinela»: un MLP sobre datos tabulares. Escenario guía: clasificar hojas de café (sana frente a enferma) con la versión tabular del conjunto de datos RoCoLe (promedios de intensidad por canal R, G, B y descriptores derivados), o un problema multimodal propio aprobado.',
                 pasos: [
-                    'Propuesta de Datos (compuerta): declare el problema y el cliente, las dos modalidades del sistema, las fuentes reales no provenientes de Kaggle y cuál modalidad se aplana a tabla en esta fase.',
-                    'Prepare el entorno y realice el EDA del conjunto tabular: revise clases, escalas, faltantes y la partición en train/val/test.',
-                    'Diseñe el MLP con ≥ 2 capas ocultas; la salida es un logit (nn.Linear(..., 1) sin sigmoide dentro del modelo) y justifique las funciones de activación.',
-                    'Configure el entrenamiento con BCEWithLogitsLoss (estable; evita la doble sigmoide), optimizador y learning rate; escriba el bucle de entrenamiento (training loop) explícito (zero_grad → forward → loss → backward → step).',
-                    'Entrene 50 épocas, grafique la pérdida de entrenamiento vs. validación, induzca overfitting a propósito y corríjalo con Dropout o ajuste de LR.',
-                    'Evalúe con matriz de confusión y métricas; analice falsos positivos/negativos (en alerta temprana los falsos negativos suelen ser los más costosos) y realice la auditoría ética con el Marco Ético de IA Colombia.',
-                    'Documente la Bitácora de IA (qué pidió, aceptó y rechazó) y la Auditoría a la IA (un fallo de la IA que detectó y corrigió); prepárese para la sustentación oral.',
+                    'Propuesta de Datos (compuerta): declarar el problema y el cliente, las dos modalidades del sistema, las fuentes reales no provenientes de Kaggle y cuál modalidad se aplana a tabla en esta fase.',
+                    'Preparar el entorno y realizar el EDA del conjunto tabular: revisar clases, escalas, faltantes y la partición en entrenamiento, validación y prueba.',
+                    'Diseñar el MLP con ≥ 2 capas ocultas, con salida en logit (nn.Linear(..., 1) sin sigmoide dentro del modelo), y justificar las funciones de activación.',
+                    'Configurar el entrenamiento con BCEWithLogitsLoss (estable; evita la doble sigmoide), el optimizador y la tasa de aprendizaje; escribir el bucle de entrenamiento explícito (zero_grad → forward → pérdida → backward → step).',
+                    'Entrenar 50 épocas, graficar la pérdida de entrenamiento frente a la de validación, inducir el sobreajuste a propósito y corregirlo con Dropout o con el ajuste de la tasa de aprendizaje.',
+                    'Evaluar (con modelo.eval()) mediante la matriz de confusión y las métricas; analizar falsos positivos y negativos (en alerta temprana los falsos negativos suelen ser los más costosos) y realizar la auditoría ética con el Marco ético para la IA en Colombia.',
+                    'Documentar la Bitácora de IA (qué se pidió, aceptó y rechazó) y la Auditoría a la IA (un fallo de la IA detectado y corregido); preparar la sustentación oral.',
                 ],
                 rubrica: [
                     { criterio: 'Propuesta de datos y EDA', peso: 15, espera: 'Propuesta aprobada con fuentes no-Kaggle y modalidad aplanada declarada; EDA con clases, escalas, faltantes y partición train/val/test justificada.' },
@@ -1029,7 +1074,7 @@
                     estrategico: 'Reporta matriz de confusión y precisión/recall/F1 por clase, convirtiendo el logit con torch.sigmoid en evaluación; argumenta qué error (FN o FP) priorizar por su costo para el cliente, citando el Marco Ético.',
                     autonomo:    'Incluye matriz de confusión y las métricas principales interpretadas, con una reflexión ética pertinente al cliente.',
                     basico:      'Reporta solo la exactitud global y menciona la ética sin ligarla a FN/FP ni a una decisión.',
-                    inicial:     'Evalúa en el training set, o no hay matriz de confusión, o la ética está ausente.',
+                    inicial:     'Evalúa en el conjunto de entrenamiento, o no hay matriz de confusión, o la ética está ausente.',
                     nulo:        'Sin entrega del producto.',
                 },
             },
@@ -1133,7 +1178,7 @@
                         <h4 className="text-base md:text-lg font-extrabold text-navy">Calculadora de autoevaluación</h4>
                     </div>
                     <p className="text-xs text-gray-500 mb-4">
-                        Escala 0,0–5,0 (aprueba con ≥ 3,0). Elija el nivel que mejor describe su entregable en cada criterio.
+                        Escala 0,0–5,0 (aprueba con ≥ 3,0). En cada criterio se elige el nivel que mejor describe el entregable.
                     </p>
 
                     {/* Criterios */}
@@ -1238,98 +1283,110 @@
             );
         };
 
-        /* 2 videos — serie Deep Learning de 3Blue1Brown */
+        /* 2 videos propios del módulo (guiones del curso) + 1 recurso complementario externo (3Blue1Brown).
+           Los id 'seccion' y 'profundizacion' se conservan: son claves del progreso en localStorage. */
         const videos = [
             {
                 id: 'seccion',
                 tipo: 'Video de Sección',
                 icono: 'fa-circle-play',
-                titulo: '¿Qué es una red neuronal? — 3Blue1Brown (Chapter 1)',
-                duracion: '~ 20 min',
-                numEscenas: null,
-                conceptos: ['Neuronas y capas', 'Representación de funciones', 'Descenso del gradiente', 'Entrenamiento de redes', 'MNIST como caso de estudio'],
+                titulo: 'Del error al aprendizaje: reflexionando sobre el proceso de entrenamiento en redes neuronales y sus implicaciones éticas',
+                autoria: 'Pieza audiovisual propia del curso · guion de Javier Mauricio Sierra',
+                duracion: null,
+                numEscenas: 12,
+                conceptos: ['Entrenar ≠ aprender: una pérdida baja no garantiza generalización', 'Sobreajuste y sesgo geográfico de los datos', 'Falsos negativos y sensibilidad (recall)', 'Validación cruzada por grupos (ciudades excluidas)', 'Curvas de aprendizaje', 'Marco ético para la IA en Colombia', 'Transferencia de aprendizaje y regularización'],
                 textoDestacado: [
-                    '"Una red neuronal es un conjunto de capas de neuronas, donde cada neurona toma un número y lo transforma"',
-                    '"El aprendizaje es ajustar pesos y sesgos para que la salida coincida con lo esperado"',
-                    '"Las capas ocultas aprenden representaciones intermedias de los datos"',
+                    'Entrenar ≠ aprender',
+                    'Falso negativo: paciente grave clasificado como «bajo riesgo»',
+                    'Las curvas no mienten: hay que graficar los datos correctos',
+                    '¿Quién queda fuera de los datos?',
                 ],
-                url: 'https://www.youtube.com/watch?v=aircAruvnKk',
+                url: null,
                 linkMd: 'modulos/modulo-1-fundamentos/videos/video-seccion-m1.md',
             },
             {
                 id: 'profundizacion',
                 tipo: 'Video de Profundización',
                 icono: 'fa-film',
-                titulo: 'Descenso del gradiente y retropropagación — 3Blue1Brown (Chapters 2–4)',
-                duracion: '~ 50 min (3 videos)',
-                numEscenas: null,
-                conceptos: ['Función de pérdida', 'Descenso del gradiente', 'Regla de la cadena', 'Tasa de aprendizaje', 'Backpropagation y autograd', 'Optimizadores (Adam, RMSProp)', 'Batches, épocas, curvas'],
+                titulo: 'Del error al aprendizaje: cómo las redes neuronales optimizan sus parámetros mediante descenso del gradiente',
+                autoria: 'Pieza audiovisual propia del curso · guion de Javier Mauricio Sierra',
+                duracion: null,
+                numEscenas: 7,
+                conceptos: ['Función de pérdida', 'Descenso del gradiente (el excursionista del Páramo de Letras)', 'Gradiente y retropropagación', 'Tasa de aprendizaje y optimizadores (Adam, RMSProp)', 'Lotes, épocas y curvas de aprendizaje'],
                 textoDestacado: [
-                    '"El excursionista tantea el suelo con los pies"',
-                    '"LR alto: rebota; LR bajo: se congela; LR óptimo: converge"',
-                    '"Adelante van los datos; atrás va la responsabilidad del error"',
+                    'Tasa alta: curva errática y divergente',
+                    'Tasa baja: curva suave pero estancada',
+                    'Tasa óptima: convergencia eficiente al mínimo',
                 ],
-                url: 'https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi',
+                url: null,
                 linkMd: 'modulos/modulo-1-fundamentos/videos/video-profundizacion-m1.md',
             },
         ];
 
-        /* 26 términos del glosario (literales del cap 1-5) */
+        /* Video complementario externo (no cuenta para el progreso) */
+        const videoComplementario = {
+            titulo: 'Serie «Neural networks» de 3Blue1Brown (Grant Sanderson)',
+            desc: 'Los capítulos 1 a 4 de la serie explican, con animaciones y en inglés, la estructura de una red (capas, pesos, sesgos y activaciones), el descenso del gradiente y la retropropagación (intuición y cálculo). Complementan los Cap. 1–4 del módulo; los capítulos posteriores (transformers) corresponden al Módulo 2.',
+            urlCap1: 'https://www.youtube.com/watch?v=aircAruvnKk',
+            urlLista: 'https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi',
+        };
+
+        /* 31 términos del glosario (adaptados de los Cap. 1–5) */
         const glossary = [
-            { t: 'Backpropagation',     d: 'Algoritmo que calcula el gradiente del error respecto a cada peso, distribuyendo la "responsabilidad" desde la salida hacia atrás. Analogía: la cadena de mando que lee la bitácora al revés.' },
-            { t: 'Batch (Lote)',        d: 'Subconjunto pequeño de datos (ej. 32 o 64) que la red procesa simultáneamente.' },
-            { t: 'Batch Normalization', d: 'Estandariza las entradas de cada capa durante el entrenamiento. Analogía: protocolo de homogeneización del ajiaco santafereño.' },
-            { t: 'Capa Oculta',         d: 'Capas entre la entrada y la salida que extraen características y aprenden representaciones abstractas. Analogía: los "analistas técnicos" del ministerio.' },
-            { t: 'Curva de Aprendizaje', d: 'Gráfico del error a lo largo del tiempo; vital para diagnosticar la salud del entrenamiento.' },
-            { t: 'Descenso del Gradiente', d: 'Algoritmo de optimización iterativo que minimiza la pérdida ajustando pesos en dirección opuesta a la pendiente. Analogía: el ciclista bajando el Páramo de Letras en la niebla.' },
-            { t: 'Dropout',             d: 'Regularización que "apaga" neuronas al azar durante el entrenamiento para evitar el sobreajuste. Analogía: rotar a las estrellas de la Selección Colombia.' },
-            { t: 'Early Stopping',      d: 'Detener el entrenamiento en la época donde la pérdida de validación alcanza su mínimo, para evitar memorización.' },
-            { t: 'Época (Epoch)',       d: 'Un ciclo completo en el que la red ha visto todos los datos una vez.' },
-            { t: 'Forward Pass',        d: 'Propagación hacia adelante: los datos atraviesan la red desde la entrada hasta la salida, generando una predicción.' },
-            { t: 'Función de Activación', d: 'Función (ReLU, Sigmoide) que introduce no-linealidad, permitiendo aprender patrones complejos. Es el "interruptor" que decide si la neurona dispara.' },
-            { t: 'Función de Pérdida (Loss)', d: 'Cuantifica la diferencia entre predicción y valor real. Analogía: el altímetro del excursionista. Ejemplos: Cross-Entropy, MSE.' },
-            { t: 'Gamma (γ) y Beta (β)', d: 'Parámetros aprendibles de la Batch Normalization que permiten ajustar o "deshacer" la normalización.' },
+            { t: 'Capa oculta',         d: 'Capas entre la entrada y la salida que extraen características y aprenden representaciones abstractas. Analogía: los «analistas técnicos» del ministerio.' },
+            { t: 'Curva de aprendizaje', d: 'Gráfico del error a lo largo del entrenamiento; vital para diagnosticar su salud.' },
+            { t: 'Descenso del gradiente', d: 'Algoritmo de optimización iterativo que minimiza la pérdida ajustando los pesos en dirección opuesta a la pendiente. Analogía: el excursionista que tantea la pendiente en el Páramo de Letras.' },
+            { t: 'Desvanecimiento del gradiente (vanishing gradient)', d: 'Fenómeno en el que los gradientes se vuelven extremadamente pequeños en las capas tempranas y frenan el aprendizaje.' },
+            { t: 'Dropout',             d: 'Regularización que «apaga» neuronas al azar durante el entrenamiento para evitar el sobreajuste. Analogía: el grupo de estudio que rota a quién se ausenta, incluida la «estrella».' },
+            { t: 'Época (epoch)',       d: 'Un ciclo completo en el que la red ha visto todos los datos una vez.' },
+            { t: 'Función de activación', d: 'Función (ReLU, sigmoide) que introduce no linealidad y permite aprender patrones complejos. Es el «interruptor» que decide si la neurona dispara.' },
+            { t: 'Función de pérdida (loss)', d: 'Cuantifica la diferencia entre la predicción y el valor real. Analogía: el altímetro del excursionista. Ejemplos: entropía cruzada, MSE.' },
+            { t: 'Gamma (γ) y beta (β)', d: 'Parámetros aprendibles de la normalización por lotes que permiten ajustar o «deshacer» la normalización.' },
             { t: 'Gradiente',           d: 'Vector de derivadas parciales que indica la dirección de máximo aumento de la función de pérdida. El descenso va en la dirección opuesta.' },
-            { t: 'Grid / Random Search', d: 'Métodos para probar combinaciones de hiperparámetros y hallar la mejor.' },
-            { t: 'Hiperparámetro',      d: 'Configuración externa (learning rate, dropout) que no se aprende, se define antes de entrenar.' },
+            { t: 'Grid / Random Search', d: 'Métodos para probar combinaciones de hiperparámetros (p. ej., una rejilla de tasa de aprendizaje × λ) y hallar la mejor.' },
+            { t: 'Hiperparámetro',      d: 'Configuración externa (tasa de aprendizaje, dropout) que no se aprende: se define antes de entrenar.' },
             { t: 'K-Fold',              d: 'Validación cruzada que divide los datos en K partes; cada parte actúa una vez como validación.' },
-            { t: 'L1 (Lasso)',          d: 'Regularización que elimina características irrelevantes forzando pesos a cero.' },
-            { t: 'L2 (Ridge)',          d: 'Regularización que reduce la influencia excesiva de cualquier característica (pesos bajos pero no cero).' },
-            { t: 'Learning Rate (η)',   d: 'Hiperparámetro que determina el tamaño del paso en cada iteración. Muy alto diverge; muy bajo converge lento.' },
-            { t: 'Matriz de Confusión', d: 'Tabla 2×2 (VP, FP, FN, VN) que desglosa los errores de un clasificador binario. Es la base del Recall, Precision y F1.' },
-            { t: 'Media y Varianza',    d: 'El promedio (centro) y la dispersión (ancho) de los datos. La Batch Norm los usa para estandarizar.' },
-            { t: 'Momentum',            d: 'Técnica de optimización que acumula inercia de gradientes previos para suavizar el zigzagueo del SGD.' },
-            { t: 'Overfitting (Sobreajuste)', d: 'El modelo memoriza el ruido del entrenamiento y pierde capacidad de generalizar. Analogía: memorizar el cuadernillo viejo del ICFES.' },
+            { t: 'L1 (Lasso)',          d: 'Regularización de «selección tajante»: lleva a cero los pesos de las características irrelevantes.' },
+            { t: 'L2 (Ridge)',          d: 'Regularización que «reparte la importancia»: reduce la influencia excesiva de cualquier característica (pesos bajos, pero no cero).' },
+            { t: 'Lote (batch)',        d: 'Subconjunto pequeño de datos (p. ej., 32 o 64 ejemplos) que la red procesa a la vez.' },
+            { t: 'Matriz de confusión', d: 'Tabla 2×2 (VP, FP, FN, VN) que desglosa los errores de un clasificador binario. Es la base de la sensibilidad (recall), la precisión y el F1.' },
+            { t: 'Media y varianza',    d: 'El promedio (centro) y la dispersión (ancho) de los datos. La normalización por lotes los usa para estandarizar.' },
+            { t: 'Momentum',            d: 'Técnica de optimización que acumula la inercia de los gradientes previos para suavizar el zigzagueo del SGD.' },
+            { t: 'Normalización por lotes (Batch Normalization)', d: 'Estandariza las activaciones de cada capa durante el entrenamiento, lote a lote. Analogía: estandarizar columnas (z-score), pero entre capas.' },
+            { t: 'Parada temprana (early stopping)', d: 'Detener el entrenamiento en la época en que la pérdida de validación alcanza su mínimo, para evitar la memorización.' },
             { t: 'Parámetro',           d: 'Valor interno (peso w, sesgo b) que el modelo aprende por sí solo durante el entrenamiento.' },
-            { t: 'ReLU',                d: 'Activación f(x) = max(0, x); eficiente y mitiga el desvanecimiento del gradiente. Deja pasar lo positivo, anula lo negativo.' },
-            { t: 'Regularización',      d: 'Técnicas que previenen el sobreajuste penalizando la complejidad (L1, L2, Dropout, Early Stopping).' },
-            { t: 'SGD (Stochastic Gradient Descent)', d: 'Variante estocástica que actualiza pesos con mini-lotes; trayectorias en zigzag que ayudan a escapar de mínimos locales.' },
-            { t: 'Teorema de Aproximación Universal', d: 'Una red con al menos una capa oculta y suficientes neuronas aproxima cualquier función continua. Analogía: recrear los Andes sumando funciones simples.' },
-            { t: 'Validación Cruzada',  d: 'Evaluar el modelo con múltiples divisiones de los datos (K-Fold, GroupKFold) para evitar sesgos por una sola partición afortunada.' },
-            { t: 'Vanishing Gradient',  d: 'Fenómeno en el que los gradientes se vuelven extremadamente pequeños en capas tempranas, frenando el aprendizaje.' },
+            { t: 'Paso hacia adelante (forward pass)', d: 'Propagación hacia adelante: los datos atraviesan la red desde la entrada hasta la salida y generan una predicción.' },
+            { t: 'Regularización',      d: 'Técnicas que previenen el sobreajuste penalizando la complejidad (L1, L2, dropout, parada temprana).' },
+            { t: 'ReLU',                d: 'Activación f(x) = max(0, x); eficiente y mitiga el desvanecimiento del gradiente. Deja pasar lo positivo y anula lo negativo.' },
+            { t: 'Retropropagación (backpropagation)', d: 'Algoritmo que calcula el gradiente del error respecto a cada peso, distribuyendo la «responsabilidad» desde la salida hacia atrás. Analogía: la cadena de mando que lee la bitácora al revés.' },
+            { t: 'SGD (descenso del gradiente estocástico)', d: 'Variante estocástica que actualiza los pesos con minilotes; sus trayectorias en zigzag ayudan a escapar de mínimos locales.' },
+            { t: 'Sobreajuste (overfitting)', d: 'El modelo memoriza el ruido del entrenamiento y pierde capacidad de generalizar. Analogía: memorizar el cuadernillo viejo del ICFES.' },
+            { t: 'Tasa de aprendizaje (η)', d: 'Hiperparámetro que determina el tamaño del paso en cada iteración. Si es muy alta, diverge; si es muy baja, converge lentamente.' },
+            { t: 'Teorema de Aproximación Universal', d: 'Una red con al menos una capa oculta y suficientes neuronas aproxima cualquier función continua (en un dominio acotado). Analogía: recrear los Andes sumando piezas de Lego.' },
+            { t: 'Validación cruzada',  d: 'Evaluar el modelo con múltiples divisiones de los datos (K-Fold, GroupKFold) para evitar el sesgo de una sola partición afortunada.' },
         ];
 
         /* Recursos (literales del cap 1-5 y bibliografía oficial) */
         const resources = {
             bibliografia: [
-                { ref: 'Goodfellow, I., Bengio, Y., & Courville, A. (2016). Deep Learning. MIT Press.', url: 'https://www.deeplearningbook.org' },
-                { ref: 'Géron, A. (2023). Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow (3rd Ed.). O\'Reilly Media.' },
-                { ref: 'Chollet, F. (2021). Deep Learning with Python (2nd Ed.). Manning Publications.' },
-                { ref: 'Zhang, A., Lipton, Z. C., Li, M., & Smola, A. J. (2023). Dive into Deep Learning. Cambridge University Press.', url: 'https://d2l.ai' },
-                { ref: 'Nielsen, M. (2015). Neural Networks and Deep Learning. Determination Press.', url: 'http://neuralnetworksanddeeplearning.com/' },
-                { ref: 'Deisenroth, M. P., Faisal, A. A., & Ong, C. S. (2020). Mathematics for Machine Learning. Cambridge University Press.', url: 'https://mml-book.github.io/' },
+                { ref: 'Goodfellow, I., Bengio, Y. y Courville, A. (2016). Deep learning. MIT Press.', url: 'https://www.deeplearningbook.org' },
+                { ref: 'Géron, A. (2022). Hands-on machine learning with Scikit-Learn, Keras, and TensorFlow (3.ª ed.). O\'Reilly Media.' },
+                { ref: 'Chollet, F. (2021). Deep learning with Python (2.ª ed.). Manning Publications.' },
+                { ref: 'Zhang, A., Lipton, Z. C., Li, M. y Smola, A. J. (2023). Dive into deep learning. Cambridge University Press.', url: 'https://d2l.ai' },
+                { ref: 'Nielsen, M. A. (2015). Neural networks and deep learning. Determination Press.', url: 'https://neuralnetworksanddeeplearning.com/' },
+                { ref: 'Deisenroth, M. P., Faisal, A. A. y Ong, C. S. (2020). Mathematics for machine learning. Cambridge University Press.', url: 'https://mml-book.github.io/' },
             ],
             webgrafia: [
-                { ref: 'Smilkov, D., & Carter, S. TensorFlow Playground: simulación web de redes neuronales.', url: 'https://playground.tensorflow.org' },
-                { ref: '3Blue1Brown. Deep Learning (serie completa). YouTube.', url: 'https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi' },
-                { ref: 'Starmer, J. (2020). The Essential Main Ideas of Neural Networks (StatQuest).', url: 'https://www.youtube.com/watch?v=CqOfi41LfDw' },
-                { ref: 'Santana Vega, C. (2018). ¿Qué es el Descenso del Gradiente? (Dot CSV).', url: 'https://www.youtube.com/watch?v=A6FiCDoz8_4' },
-                { ref: 'Ministerio de Ciencia (2021). Marco Ético para la IA en Colombia.', url: 'https://minciencias.gov.co/sites/default/files/marco-etico-ia-colombia-2021.pdf' },
-                { ref: 'Khan Academy. Cálculo multivariable: descenso del gradiente y regla de la cadena.', url: 'https://es.khanacademy.org/math/multivariable-calculus/applications-of-multivariable-derivatives/optimizing-multivariable-functions/a/what-is-gradient-descent' },
+                { ref: 'Smilkov, D. y Carter, S. (2016). TensorFlow Playground [Aplicación web].', url: 'https://playground.tensorflow.org' },
+                { ref: '3Blue1Brown. (2017–2024). Neural networks [Lista de reproducción]. YouTube.', url: 'https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi' },
+                { ref: 'StatQuest with Josh Starmer. (2020). The essential main ideas of neural networks [Video]. YouTube.', url: 'https://www.youtube.com/watch?v=CqOfi41LfDw' },
+                { ref: 'Dot CSV [C. Santana Vega]. (2018). ¿Qué es el descenso del gradiente? [Video]. YouTube.', url: 'https://www.youtube.com/watch?v=A6FiCDoz8_4' },
+                { ref: 'Guío Español, A., Tamayo Uribe, E. y Gómez Ayerbe, P. (2021). Marco ético para la inteligencia artificial en Colombia (Versión 1). Consejería Presidencial para Asuntos Económicos y Transformación Digital, Presidencia de la República.', url: 'https://minciencias.gov.co/sites/default/files/marco-etico-ia-colombia-2021.pdf' },
+                { ref: 'Khan Academy. (s. f.). ¿Qué es el descenso del gradiente? Cálculo multivariable.', url: 'https://es.khanacademy.org/math/multivariable-calculus/applications-of-multivariable-derivatives/optimizing-multivariable-functions/a/what-is-gradient-descent' },
             ],
             datasets: [
-                { ref: 'Parraga-Alava, J. et al. (2019). RoCoLe: A robusta coffee leaf images dataset (v2). Mendeley Data.', url: 'https://data.mendeley.com/datasets/c5yvn32dzg/2' },
-                { ref: 'Instituto Nacional de Salud. Protocolo de vigilancia en salud pública: Dengue.', url: 'https://www.minsalud.gov.co/' },
+                { ref: 'Parraga-Alava, J., Cusme, K., Loor, A. y Santander, E. (2019). RoCoLe: A robusta coffee leaf images dataset (Versión 2) [Conjunto de datos]. Mendeley Data.', url: 'https://doi.org/10.17632/c5yvn32dzg.2' },
+                { ref: 'Instituto Nacional de Salud. (s. f.). Protocolo de vigilancia en salud pública: Dengue [Fichas y protocolos].', url: 'https://www.ins.gov.co/buscador-eventos/Paginas/Fichas-y-Protocolos.aspx' },
                 { ref: 'TensorFlow Playground. Simulador interactivo de redes neuronales (sin instalar nada).', url: 'https://playground.tensorflow.org' },
             ],
         };
@@ -1339,19 +1396,19 @@
             semana1: {
                 titulo: 'Semana 1 — Del perceptrón al MLP',
                 eventos: [
-                    { fecha: '03/06', hora: '19:30 – 21:00', tipo: 'Encuentro 1', tipoColor: '#3D008D', titulo: 'Introducción y Contexto Histórico del Deep Learning', desc: 'McCulloch-Pitts, Perceptrón de Rosenblatt, Inviernos de la IA y Renacimiento moderno.', link: TEAMS_URL, linkLabel: 'Teams Sincrónico' },
-                    { fecha: '04/06', hora: '19:30 – 21:00', tipo: 'Encuentro 2', tipoColor: '#3D008D', titulo: 'El Perceptrón Multicapa (MLP)', desc: 'Teorema de Aproximación Universal, Funciones de Activación (ReLU, Sigmoide, Softmax) y Arquitectura Feedforward.', link: TEAMS_URL, linkLabel: 'Teams Sincrónico' },
-                    { fecha: 'Toda la semana', tipo: 'Asincrónico', tipoColor: '#FDB913', titulo: 'Videoconferencia asincrónica 1 — Descenso del Gradiente', desc: 'Grabación disponible toda la semana. Cubre la intuición del gradiente, regla de la cadena, tasa de aprendizaje y momentum.' },
-                    { fecha: '08/06', tipo: 'Foro', tipoColor: '#15803D', titulo: 'Momento 1: Foro de reflexión', desc: 'Publicación en el foro del campus virtual sobre los fundamentos del Deep Learning.', link: 'https://campus.usta.edu.co', linkLabel: 'Campus Virtual' },
+                    { fecha: COHORTE_ANIO + '-06-03', hora: '19:30 – 21:00', tipo: 'Encuentro 1', tipoColor: '#3D008D', titulo: 'Introducción y contexto histórico del Deep Learning', desc: 'McCulloch-Pitts, perceptrón de Rosenblatt, inviernos de la IA y renacimiento moderno.', link: TEAMS_URL, linkLabel: 'Teams sincrónico' },
+                    { fecha: COHORTE_ANIO + '-06-04', hora: '19:30 – 21:00', tipo: 'Encuentro 2', tipoColor: '#3D008D', titulo: 'El perceptrón multicapa (MLP)', desc: 'Teorema de aproximación universal, funciones de activación (ReLU, sigmoide, softmax) y arquitectura prealimentada (feedforward).', link: TEAMS_URL, linkLabel: 'Teams sincrónico' },
+                    { fecha: 'Toda la semana', tipo: 'Asincrónico', tipoColor: '#FDB913', titulo: 'Videoconferencia asincrónica 1 — Descenso del gradiente', desc: 'Grabación disponible toda la semana. Cubre la intuición del gradiente, la tasa de aprendizaje y el momentum.' },
                 ],
             },
             semana2: {
-                titulo: 'Semana 2 — Optimización, backprop y entrega',
+                titulo: 'Semana 2 — Optimización, retropropagación y entrega',
                 eventos: [
-                    { fecha: '10/06', hora: '19:30 – 21:00', tipo: 'Encuentro 3', tipoColor: '#3D008D', titulo: 'Matemática del Error y Optimización', desc: 'Funciones de Costo (MSE, BCE), Descenso del Gradiente y Tasa de Aprendizaje.', link: TEAMS_URL, linkLabel: 'Teams Sincrónico' },
-                    { fecha: '11/06', hora: '19:30 – 21:00', tipo: 'Encuentro 4', tipoColor: '#3D008D', titulo: 'Retropropagación (Backpropagation)', desc: 'Regla de la Cadena, Grafos Computacionales y Autograd en PyTorch.', link: TEAMS_URL, linkLabel: 'Teams Sincrónico' },
-                    { fecha: 'Toda la semana', tipo: 'Asincrónico', tipoColor: '#FDB913', titulo: 'Videoconferencia asincrónica 2 — El Proceso de Entrenamiento', desc: 'Grabación sobre regularización, dropout, batch norm, evaluación y ética en salud.' },
-                    { fecha: '15/06', hora: '23:59', tipo: 'Entrega', tipoColor: '#BE185D', titulo: 'Momento 2: 1ra entrega', desc: 'Notebook + Informe técnico-ético de la Fase 1 del Proyecto Centinela.', link: 'https://campus.usta.edu.co', linkLabel: 'Campus Virtual' },
+                    { fecha: COHORTE_ANIO + '-06-10', hora: '19:30 – 21:00', tipo: 'Encuentro 3', tipoColor: '#3D008D', titulo: 'Matemática del error y optimización', desc: 'Funciones de pérdida (MSE, BCE), descenso del gradiente y tasa de aprendizaje.', link: TEAMS_URL, linkLabel: 'Teams sincrónico' },
+                    { fecha: COHORTE_ANIO + '-06-11', hora: '19:30 – 21:00', tipo: 'Encuentro 4', tipoColor: '#3D008D', titulo: 'Retropropagación (backpropagation)', desc: 'Regla de la cadena, grafos computacionales y autograd en PyTorch.', link: TEAMS_URL, linkLabel: 'Teams sincrónico' },
+                    { fecha: 'Toda la semana', tipo: 'Asincrónico', tipoColor: '#FDB913', titulo: 'Videoconferencia asincrónica 2 — El proceso de entrenamiento', desc: 'Grabación sobre regularización, dropout, normalización por lotes, evaluación y ética en salud.' },
+                    { fecha: COHORTE_ANIO + '-06-12', tipo: 'Foro', tipoColor: '#15803D', titulo: 'Momento 1: foro de reflexión (Guía 1)', desc: 'Publicación en el foro del campus virtual, después del Encuentro 3 y de la videoconferencia asincrónica 2: el caso del dengue exige la tasa de aprendizaje, el sobreajuste y la ética.', link: 'https://campus.usta.edu.co', linkLabel: 'Campus virtual' },
+                    { fecha: COHORTE_ANIO + '-06-15', hora: '23:59', tipo: 'Entrega', tipoColor: '#BE185D', titulo: 'Momento 2: 1.ª entrega', desc: 'Notebook + informe técnico-ético de la Fase 1 del Proyecto Centinela.', link: 'https://campus.usta.edu.co', linkLabel: 'Campus virtual' },
                 ],
             },
         };
@@ -1436,11 +1493,11 @@
                         </h1>
                         <p className="text-gray-700 leading-relaxed text-[0.98rem]">
                             Mapa navegable de los <strong>5 capítulos</strong>, las <strong>2 actividades evaluativas</strong> y los
-                            <strong> 2 videos</strong> que componen el Módulo 1. Aquí podrá consultar la ruta, marcar su progreso
-                            (se guarda en su navegador) y autoevaluarse antes de cada entrega.
+                            <strong> 2 videos</strong> que componen el Módulo 1. Aquí se consulta la ruta, se marca el progreso
+                            (se guarda en este navegador) y se hace la autoevaluación antes de cada entrega.
                         </p>
                         <div className="mt-5">
-                            <ProgressBar value={pct} label="Su progreso en el módulo" segments={segments} />
+                            <ProgressBar value={pct} label="Progreso en el módulo" segments={segments} />
                         </div>
                         <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-gray-500">
                             <span><i className="far fa-clock mr-1"></i>Última limpieza: {new Date(progress.resetAt).toLocaleString('es-CO')}</span>
@@ -1453,7 +1510,7 @@
                     </div>
                     <div className="grid grid-cols-3 lg:grid-cols-1 gap-3">
                         <Stat value="48 h" label="Carga total" sub="5 directo · 5 indirecto · 38 autónomo" icon="fa-clock" color="primary" />
-                        <Stat value="25 %" label="Peso evaluativo" sub="Guía 1 (5%) + Fase 1 (20%)" icon="fa-percent" color="secondary" />
+                        <Stat value="25 %" label="Peso evaluativo" sub="Guía 1 (5 %) + Fase 1 (20 %)" icon="fa-percent" color="secondary" />
                         <Stat value="5" label="Capítulos" sub="4 sincronías + 2 asincronías" icon="fa-book" color="gold" />
                     </div>
                 </section>
@@ -1568,10 +1625,9 @@
                                 <i className="fas fa-up-right-from-square"></i>Abrir la actividad
                             </a>
                         )}
-                        <a href={`obsidian://open?vault=Deep%20learning%20course&file=${encodeURIComponent(act.linkMd)}`}
-                            className={`${act.linkHtml ? '' : 'ml-auto '}text-xs font-semibold text-primary hover:text-secondary transition-colors`}>
-                            <i className="fas fa-file-lines mr-1"></i>Abrir ficha .md
-                        </a>
+                        <span className={`${act.linkHtml ? '' : 'ml-auto '}text-xs text-gray-500`}>
+                            <i className="fas fa-file-lines mr-1"></i>Documento base: {act.linkMd.split('/').pop()}
+                        </span>
                     </div>
                     <Accordion items={[
                         { titulo: `Rúbrica resumida (${act.rubrica.length} criterios)`, icono: 'fa-table-list',
@@ -1636,7 +1692,7 @@
                     </div>
                     <div>
                         <h2 className="text-2xl font-extrabold text-navy">Hitos evaluativos del módulo</h2>
-                        <p className="text-sm text-gray-600">Los 2 hitos del Módulo 1 suman <strong>25 % de la nota final</strong> (5% + 20%).</p>
+                        <p className="text-sm text-gray-600">Los 2 hitos del Módulo 1 suman <strong>25 % de la nota final</strong> (5 % + 20 %).</p>
                     </div>
                 </div>
                 <div className="grid md:grid-cols-2 gap-5">
@@ -1670,7 +1726,7 @@
                     </div>
                     <div className="flex-1 min-w-[200px]">
                         <div className="flex flex-wrap items-center gap-1.5 mb-1">
-                            <Tag color={ch.badgeColor} icon="fa-tag">#{ch.tag}</Tag>
+                            <Tag color={ch.badgeColor} icon="fa-tag">{ch.tema}</Tag>
                             <Tag color="gray" icon="fa-clock">{ch.duracion}</Tag>
                             {isVisto && <Tag color="green" icon="fa-circle-check">Visto</Tag>}
                         </div>
@@ -1687,7 +1743,7 @@
                 </header>
                 <div className="p-5 md:p-6">
                     <Accordion items={[
-                        { titulo: `Qué voy a aprender (${ch.ra.length} resultados)`, icono: 'fa-bullseye',
+                        { titulo: `Resultados de aprendizaje (${ch.ra.length})`, icono: 'fa-bullseye',
                           contenido: (
                             <ul className="space-y-1.5">
                                 {ch.ra.map((r, i) => (
@@ -1723,7 +1779,7 @@
                     </div>
                     <div>
                         <h2 className="text-2xl font-extrabold text-navy">Catálogo de los 5 capítulos</h2>
-                        <p className="text-sm text-gray-600">Cada capítulo cierra con preguntas de autoevaluación. Marque como visto al completar la lectura.</p>
+                        <p className="text-sm text-gray-600">Cada capítulo cierra con preguntas de autoevaluación. Al completar la lectura, el capítulo se marca como visto.</p>
                     </div>
                 </div>
                 <div className="space-y-5 mt-4">
@@ -1746,13 +1802,14 @@
             <div className="usta-card p-5 md:p-6">
                 <div className="flex flex-wrap items-center gap-2 mb-2">
                     <Tag color="navy" icon="fa-video">{v.tipo}</Tag>
-                    <Tag color="gold" icon="fa-clock">{v.duracion}</Tag>
+                    {v.duracion && <Tag color="gold" icon="fa-clock">{v.duracion}</Tag>}
                     {v.numEscenas != null && (<Tag color="gray" icon="fa-film">{v.numEscenas} escenas</Tag>)}
                     {visto && <Tag color="green" icon="fa-circle-check">Visto</Tag>}
                 </div>
                 <h3 className="text-lg md:text-xl font-extrabold text-navy leading-snug flex items-center gap-2">
                     <i className={`fas ${v.icono} text-secondary`}></i>{v.titulo}
                 </h3>
+                {v.autoria && <p className="text-xs text-gray-500 mt-1">{v.autoria}</p>}
                 <div className="grid sm:grid-cols-2 gap-4 mt-4">
                     <div>
                         <h4 className="text-xs uppercase tracking-wider font-bold text-navy mb-2">
@@ -1769,12 +1826,12 @@
                     </div>
                     <div>
                         <h4 className="text-xs uppercase tracking-wider font-bold text-navy mb-2">
-                            <i className="fas fa-quote-left text-secondary mr-1"></i>Texto en pantalla destacado
+                            <i className="fas fa-quote-left text-secondary mr-1"></i>Ideas destacadas del guion
                         </h4>
                         <ul className="space-y-1.5">
                             {v.textoDestacado.map((t, i) => (
                                 <li key={i} className="text-[0.88rem] text-gray-700 italic bg-bg px-3 py-2 rounded-lg border-l-2 border-secondary">
-                                    "{t}"
+                                    «{t}»
                                 </li>
                             ))}
                         </ul>
@@ -1793,10 +1850,9 @@
                             <i className="fab fa-youtube mr-1"></i>Ver en YouTube
                         </a>
                     )}
-                    <a href={`obsidian://open?vault=Deep%20learning%20course&file=${encodeURIComponent(v.linkMd)}`}
-                        className="ml-auto text-xs font-semibold text-primary hover:text-secondary transition-colors">
-                        <i className="fas fa-file-lines mr-1"></i>Ver guion completo
-                    </a>
+                    <span className="ml-auto text-xs text-gray-500">
+                        <i className="fas fa-file-lines mr-1"></i>Guion: {v.linkMd.split('/').pop()}
+                    </span>
                 </div>
             </div>
         );
@@ -1809,7 +1865,7 @@
                     </div>
                     <div>
                         <h2 className="text-2xl font-extrabold text-navy">Videos del módulo</h2>
-                        <p className="text-sm text-gray-600">2 piezas audiovisuales de 3Blue1Brown: una introductoria (¿qué es una red neuronal?) y una de profundización (descenso del gradiente y retropropagación).</p>
+                        <p className="text-sm text-gray-600">2 piezas audiovisuales propias del curso: el video de sección (el caso del dengue: entrenamiento, sesgo y ética) y el de profundización (pérdida, descenso del gradiente y retropropagación). Como complemento externo se recomienda la serie de 3Blue1Brown.</p>
                     </div>
                 </div>
                 <div className="grid md:grid-cols-2 gap-5 mt-4">
@@ -1822,6 +1878,23 @@
                         />
                     ))}
                 </div>
+                <div className="usta-card p-5 md:p-6 mt-5 border-l-4" style={{ borderColor: '#ED1E79' }}>
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <Tag color="secondary" icon="fa-circle-play">Video complementario (externo)</Tag>
+                    </div>
+                    <h3 className="text-lg font-extrabold text-navy leading-snug">{videoComplementario.titulo}</h3>
+                    <p className="text-[0.9rem] text-gray-700 mt-2 leading-relaxed">{videoComplementario.desc}</p>
+                    <div className="mt-3 flex flex-wrap items-center gap-4">
+                        <a href={videoComplementario.urlCap1} target="_blank" rel="noopener"
+                            className="text-xs font-semibold text-secondary hover:text-primary transition-colors">
+                            <i className="fab fa-youtube mr-1"></i>Capítulo 1 en YouTube
+                        </a>
+                        <a href={videoComplementario.urlLista} target="_blank" rel="noopener"
+                            className="text-xs font-semibold text-secondary hover:text-primary transition-colors">
+                            <i className="fab fa-youtube mr-1"></i>Lista completa en YouTube
+                        </a>
+                    </div>
+                </div>
             </section>
         );
 
@@ -1833,7 +1906,7 @@
             const grouped = useMemo(() => {
                 const map = {};
                 glossary.forEach(g => {
-                    const letter = g.t[0].toUpperCase();
+                    const letter = g.t.normalize('NFD')[0].toUpperCase();
                     (map[letter] = map[letter] || []).push(g);
                 });
                 return Object.keys(map).sort().reduce((acc, k) => (acc[k] = map[k], acc), {});
@@ -1898,7 +1971,7 @@
                         </div>
                         <div>
                             <h2 className="text-2xl font-extrabold text-navy">Recursos complementarios</h2>
-                            <p className="text-sm text-gray-600">Bibliografía oficial, webgrafía y datasets para profundizar después del módulo.</p>
+                            <p className="text-sm text-gray-600">Bibliografía oficial, webgrafía y conjuntos de datos para profundizar después del módulo.</p>
                         </div>
                     </div>
                     <div className="grid md:grid-cols-3 gap-4 mt-4">
@@ -1916,7 +1989,7 @@
                         </div>
                         <div className="usta-card p-5">
                             <h3 className="font-bold text-navy mb-3 flex items-center gap-2">
-                                <i className="fas fa-database text-gold"></i>Datasets y herramientas
+                                <i className="fas fa-database text-gold"></i>Conjuntos de datos y herramientas
                             </h3>
                             {renderList(resources.datasets, 'fa-cube', 'gold')}
                         </div>
@@ -1938,14 +2011,14 @@
                             <h2 className="text-2xl font-extrabold text-navy">¡Felicitaciones por completar el Módulo 1!</h2>
                         </div>
                         {pct === 100 ? (
-                            <Box type="tip" label="Módulo 1 completado al 100%">
-                                <p>Ha marcado los 5 capítulos, los 2 videos, las 2 entregas y todos los pasos de los 2 hitos.
-                                Ahora puede continuar con el Módulo 2: Arquitecturas de Redes Neuronales Especializadas.</p>
+                            <Box type="tip" label="Módulo 1 completado al 100 %">
+                                <p>Los 5 capítulos, los 2 videos, las 2 entregas y todos los pasos de los 2 hitos están marcados.
+                                El siguiente paso es el Módulo 2: Arquitecturas de Redes Neuronales Especializadas.</p>
                             </Box>
                         ) : (
                             <p className="text-gray-700 leading-relaxed">
-                                Si su progreso actual es <strong>{pct}%</strong>, aún le quedan actividades por marcar.
-                                Use los acordeones de cada capítulo para repasar o visite la sección de <a href="#recursos" className="text-primary font-semibold hover:text-secondary">recursos</a> para profundizar.
+                                Con un progreso de <strong>{pct} %</strong>, aún quedan actividades por marcar.
+                                Los acordeones de cada capítulo sirven para repasar, y la sección de <a href="#recursos" className="text-primary font-semibold hover:text-secondary">recursos</a>, para profundizar.
                             </p>
                         )}
                     </div>
@@ -1958,15 +2031,15 @@
                             <i className="fas fa-brain text-secondary"></i>Módulo 2: Arquitecturas de Redes Neuronales Especializadas
                         </h3>
                         <p className="text-gray-700 mt-2 leading-relaxed">
-                            Aprenderá <strong>Redes Convolucionales (CNN)</strong> para visión artificial, <strong>RNN/LSTM/GRU</strong>{' '}
-                            para series de tiempo y lenguaje, y <strong>modelos generativos (GAN, VAE, Autoencoders)</strong>.
-                            Mantiene la misma carga (48 h, 25% de la nota) con dos actividades prácticas: clasificación con
-                            Transfer Learning y modelado predictivo de series temporales.
+                            En el Módulo 2 se estudian las <strong>redes convolucionales (CNN)</strong> para visión artificial, las <strong>RNN/LSTM/GRU</strong>{' '}
+                            para series de tiempo y lenguaje, y los <strong>modelos generativos (GAN, VAE, autocodificadores)</strong>.
+                            Mantiene la carga de 48 h y pesa 35 % de la nota (Guía 2, 5 %; Proyecto Centinela · Fase 2, 15 % + 15 %):
+                            la línea base MLP evoluciona a un sistema multimodal con CNN, RNN y fusión.
                         </p>
                         <div className="mt-4 flex flex-wrap items-center gap-2">
-                            <a href="obsidian://open?vault=Deep%20learning%20course&file=Welcome"
+                            <a href="020_ruta-aprendizaje-modulo-2.html"
                                 className="inline-flex items-center gap-1.5 text-sm font-bold px-4 py-2 rounded-full text-white usta-gradient hover:opacity-90 transition-opacity shadow-md">
-                                <i className="fas fa-map-location-dot"></i>Ir al mapa del Segundo Cerebro
+                                <i className="fas fa-map-location-dot"></i>Ir a la ruta del Módulo 2
                             </a>
                             <span className="text-xs text-gray-500">Disponible al iniciar el Módulo 2</span>
                         </div>
@@ -1975,7 +2048,7 @@
                     <div className="mt-8 rounded-2xl bg-navy text-white px-6 py-8 text-center space-y-3">
                         <p className="text-sm md:text-base font-semibold text-gold italic leading-relaxed max-w-2xl mx-auto">
                             <i className="fas fa-quote-left mr-2 text-xs"></i>
-                            Metodología "Ingeniería de Trinchera": si una arquitectura no corre en Google Colab, no existe.
+                            Metodología «Ingeniería de Trinchera»: si una arquitectura no corre en Google Colab, no existe.
                         </p>
                         <div className="pt-3 border-t border-white/15 text-xs text-white/70 space-y-1">
                             <p>

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="Microlearning del Módulo 1 — Fundamentos del Aprendizaje Profundo. 5 cápsulas de 3-5 minutos sobre los conceptos esenciales: XOR, ReLU, Descenso del Gradiente, Backpropagation y Overfitting. Universidad Santo Tomás.">
+        content="Microlearning del Módulo 1 — Fundamentos del Aprendizaje Profundo. 5 cápsulas de 3–5 minutos sobre los conceptos esenciales: XOR, ReLU, descenso del gradiente, retropropagación y sobreajuste. Universidad Santo Tomás.">
     <title>Microlearning · Módulo 1 — Fundamentos del Deep Learning · USTA</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -539,13 +539,16 @@
                         {checked && (
                             <span className={`text-sm font-bold ${ok ? 'text-green-600' : 'text-red-500'}`}>
                                 <i className={`fas ${ok ? 'fa-circle-check' : 'fa-circle-xmark'} mr-1`}></i>
-                                {ok ? '¡Correcto!' : 'Revisa la explicación abajo'}
+                                {ok ? '¡Correcto!' : 'Conviene revisar la explicación'}
                             </span>
                         )}
                     </div>
                     {checked && (
                         <div className="mt-3 text-[0.9rem] text-gray-700 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-4 border-l-4 border-gold animate-fade-in shadow-sm">
-                            <strong>Explicación: </strong>{opciones[correctIdx].justificacion}
+                            {!ok && sel !== null && opciones[sel] && (
+                                <p className="mb-2"><strong>Sobre la opción elegida:</strong>{' '}{opciones[sel].justificacion}</p>
+                            )}
+                            <strong>{ok ? 'Explicación:' : 'Respuesta correcta:'}</strong>{' '}{opciones[correctIdx].justificacion}
                         </div>
                     )}
                 </div>
@@ -651,7 +654,7 @@
             return (
                 <div ref={revRef} className="visual-container reveal">
                     <h4 className="visual-title">
-                        <i className="fas fa-braille text-secondary mr-2"></i>Scatter plot XOR — ¿Se puede separar con una línea?
+                        <i className="fas fa-braille text-secondary mr-2"></i>Diagrama de dispersión del XOR — ¿se puede separar con una línea?
                     </h4>
                     <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
                         aria-label="Diagrama de dispersión del problema XOR: las clases 0 están en las esquinas (0,0) y (1,1) y las clases 1 en (0,1) y (1,0). Ninguna línea recta separa ambas clases; solo una frontera no lineal lo logra.">
@@ -771,12 +774,12 @@
                         <button onClick={() => setShowCurve(!showCurve)}
                             className={`text-xs font-bold px-4 py-1.5 rounded-full border-2 transition-all ${showCurve ? 'border-green-500 text-green-700 bg-green-50' : 'border-gray-300 text-gray-600 hover:border-green-500 hover:text-green-700'}`}>
                             <i className={`fas ${showCurve ? 'fa-eye' : 'fa-eye-slash'} mr-1`}></i>
-                            {showCurve ? 'Frontera no-lineal ✓' : 'Mostrar frontera no-lineal'}
+                            {showCurve ? 'Frontera no lineal ✓' : 'Mostrar frontera no lineal'}
                         </button>
                     </div>
                     <p className="text-center text-xs text-gray-500 mt-3 italic leading-relaxed">
-                        Rote la línea recta: <strong>ninguna posición separa las clases</strong>.
-                        Active la frontera no-lineal para ver cómo <strong>una capa oculta</strong> resuelve el problema.
+                        Al rotar la línea recta se comprueba que <strong>ninguna posición separa las clases</strong>;
+                        al activar la frontera no lineal se ve cómo <strong>una capa oculta</strong> resuelve el problema.
                     </p>
                 </div>
             );
@@ -828,10 +831,10 @@
             return (
                 <div ref={revRef} className="visual-container reveal">
                     <h4 className="visual-title">
-                        <i className="fas fa-wave-square text-secondary mr-2"></i>Funciones de activación: Sigmoid vs ReLU
+                        <i className="fas fa-wave-square text-secondary mr-2"></i>Funciones de activación: sigmoide vs. ReLU
                     </h4>
                     <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
-                        aria-label="Comparación de funciones de activación: la sigmoide satura (se aplana) en los extremos y su derivada máxima es 0.25, lo que provoca desvanecimiento del gradiente; ReLU es lineal para z mayor que cero y su derivada vale 1, dejando fluir el gradiente.">
+                        aria-label="Comparación de funciones de activación: la sigmoide satura (se aplana) en los extremos y su derivada máxima es 0,25, lo que provoca desvanecimiento del gradiente; ReLU es lineal para z mayor que cero y su derivada vale 1, dejando fluir el gradiente.">
                         <defs>
                             <linearGradient id="sigmoidGrad" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0%" stopColor="#ED1E79" stopOpacity="0.15" />
@@ -888,7 +891,7 @@
                         {/* Legend */}
                         <rect x={W - 130} y="8" width="120" height={showDerivatives ? "54" : "38"} rx="8" fill="white" stroke="#E2E8F0" strokeWidth="1" />
                         <line x1={W - 122} y1="20" x2={W - 100} y2="20" stroke="#ED1E79" strokeWidth="3" />
-                        <text x={W - 96} y="24" fontSize="10" fill="#64748B" fontWeight="600">Sigmoid σ(z)</text>
+                        <text x={W - 96} y="24" fontSize="10" fill="#64748B" fontWeight="600">Sigmoide σ(z)</text>
                         <line x1={W - 122} y1="36" x2={W - 100} y2="36" stroke="#15803D" strokeWidth="3" />
                         <text x={W - 96} y="40" fontSize="10" fill="#64748B" fontWeight="600">ReLU max(0,z)</text>
                         {showDerivatives && (
@@ -907,8 +910,8 @@
                     </div>
                     <div className="grid grid-cols-2 gap-3 mt-3">
                         <div className="bg-pink-50 rounded-xl p-3 text-center border border-pink-100">
-                            <div className="text-xs font-bold text-pink-700 mb-1">⚠️ Sigmoid</div>
-                            <div className="text-[0.72rem] text-gray-600">Derivada máx. = <strong>0.25</strong>. Se aplana en los extremos → <em>vanishing gradient</em></div>
+                            <div className="text-xs font-bold text-pink-700 mb-1">⚠️ Sigmoide</div>
+                            <div className="text-[0.72rem] text-gray-600">Derivada máx. = <strong>0,25</strong>. Se aplana en los extremos → desvanecimiento del gradiente</div>
                         </div>
                         <div className="bg-green-50 rounded-xl p-3 text-center border border-green-100">
                             <div className="text-xs font-bold text-green-700 mb-1">✅ ReLU</div>
@@ -1052,7 +1055,7 @@
                         ))}
                     </div>
                     <p className="text-center text-xs text-gray-500 mt-2 italic">
-                        Seleccione una tasa de aprendizaje para ver cómo se comporta la trayectoria del optimizador sobre la superficie de pérdida.
+                        Al elegir una tasa de aprendizaje se observa cómo se comporta la trayectoria del optimizador sobre la superficie de pérdida.
                     </p>
                 </div>
             );
@@ -1181,21 +1184,21 @@
                         {/* Phase labels */}
                         <text x="20" y="30" fontSize="12" fill="#2563EB" fontWeight="bold"
                             opacity={phase === 'forward' ? 1 : 0.4} style={{ transition: 'opacity 0.3s' }}>
-                            ▶ Forward (predicción)
+                            ▶ Hacia adelante (predicción)
                         </text>
                         <text x="20" y="185" fontSize="12" fill="#DC2626" fontWeight="bold"
                             opacity={phase === 'backward' ? 1 : 0.4} style={{ transition: 'opacity 0.3s' }}>
-                            ◀ Backward (gradiente = regla de la cadena)
+                            ◀ Hacia atrás (gradiente = regla de la cadena)
                         </text>
                     </svg>
                     <div className="flex gap-2 mt-3 justify-center flex-wrap">
                         <button onClick={() => runAnimation('forward')}
                             className="text-xs font-bold px-4 py-2 rounded-full border-2 border-blue-300 text-blue-600 hover:bg-blue-50 transition-all">
-                            <i className="fas fa-play mr-1"></i>Animar Forward
+                            <i className="fas fa-play mr-1"></i>Animar hacia adelante
                         </button>
                         <button onClick={() => runAnimation('backward')}
                             className="text-xs font-bold px-4 py-2 rounded-full border-2 border-red-300 text-red-600 hover:bg-red-50 transition-all">
-                            <i className="fas fa-backward mr-1"></i>Animar Backward
+                            <i className="fas fa-backward mr-1"></i>Animar hacia atrás
                         </button>
                     </div>
                     <p className="text-center text-xs text-gray-600 mt-2">
@@ -1253,11 +1256,11 @@
             return (
                 <div ref={revRef} className="visual-container reveal">
                     <h4 className="visual-title">
-                        <i className="fas fa-chart-line text-secondary mr-2"></i>Curvas de aprendizaje: la firma del overfitting
+                        <i className="fas fa-chart-line text-secondary mr-2"></i>Curvas de aprendizaje: la firma del sobreajuste
                     </h4>
                     <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} className="svg-chart cursor-crosshair"
                         role="img"
-                        aria-label="Curvas de aprendizaje a lo largo de 50 épocas: la pérdida de entrenamiento sigue bajando, mientras que la pérdida de validación deja de mejorar y empieza a subir a partir de la época 22, marcada con una línea de Early Stop como punto ideal para detener el entrenamiento."
+                        aria-label="Curvas de aprendizaje a lo largo de 50 épocas: la pérdida de entrenamiento sigue bajando, mientras que la pérdida de validación deja de mejorar y empieza a subir a partir de la época 22, marcada con una línea de parada temprana como punto ideal para detener el entrenamiento."
                         onMouseMove={handleMouse} onMouseLeave={() => setHoveredEpoch(null)}>
                         <defs>
                             <linearGradient id="overfitGrad" x1="0" y1="0" x2="1" y2="0">
@@ -1276,8 +1279,8 @@
                         <rect x={m.l} y={m.t} width={pw} height={ph} fill="url(#overfitDotGrid)" />
                         {/* Overfit region */}
                         <rect className="overfit-region" x={xS(stopX)} y={m.t} width={m.l + pw - xS(stopX)} height={ph} rx="4" fill="url(#overfitGrad)" />
-                        <text x={xS(36)} y={m.t + 14} textAnchor="middle" fontSize="9" fill="#ED1E79" fontWeight="600" opacity="0.7">
-                            Zona de overfitting
+                        <text x={xS(36)} y={m.t + 40} textAnchor="middle" fontSize="9" fill="#ED1E79" fontWeight="600" opacity="0.7">
+                            Zona de sobreajuste
                         </text>
                         {/* Divergence gap highlight */}
                         {mounted && <path d={divergencePath} fill="url(#gapGrad)" />}
@@ -1291,7 +1294,7 @@
                         {/* Early stop line */}
                         <line className="stop-line" x1={xS(stopX)} y1={m.t} x2={xS(stopX)} y2={m.t + ph} />
                         <text x={xS(stopX)} y={m.t - 4} textAnchor="middle" fontSize="9" fill="#15803D" fontWeight="bold">
-                            ✋ Early Stop
+                            ✋ Parada temprana
                         </text>
                         {/* Curves */}
                         <path className={`train-curve ${mounted ? 'draw-animated-slow' : ''}`} d={trainPath}
@@ -1313,16 +1316,16 @@
                                 </text>
                                 <text x={xS(he) + (he > 35 ? -60 : 58)} y={m.t + 48}
                                     textAnchor="middle" fontSize="8" fill="#A5B4FC">
-                                    Train: {trainAtH.toFixed(3)} | Val: {valAtH.toFixed(3)}
+                                    Ent. {trainAtH.toFixed(3).replace('.', ',')} · Val. {valAtH.toFixed(3).replace('.', ',')}
                                 </text>
                             </g>
                         )}
                         {/* Legend */}
-                        <rect x={W - 110} y="12" width="100" height="38" rx="8" fill="white" stroke="#E2E8F0" strokeWidth="1" />
-                        <line x1={W - 102} y1="24" x2={W - 82} y2="24" stroke="#3D008D" strokeWidth="3" />
-                        <text x={W - 78} y="28" fontSize="10" fill="#64748B" fontWeight="600">Train</text>
-                        <line x1={W - 102} y1="40" x2={W - 82} y2="40" stroke="#ED1E79" strokeWidth="3" />
-                        <text x={W - 78} y="44" fontSize="10" fill="#64748B" fontWeight="600">Validación</text>
+                        <rect x={W - 130} y="12" width="120" height="38" rx="8" fill="white" stroke="#E2E8F0" strokeWidth="1" />
+                        <line x1={W - 122} y1="24" x2={W - 102} y2="24" stroke="#3D008D" strokeWidth="3" />
+                        <text x={W - 98} y="28" fontSize="10" fill="#64748B" fontWeight="600">Entrenamiento</text>
+                        <line x1={W - 122} y1="40" x2={W - 102} y2="40" stroke="#ED1E79" strokeWidth="3" />
+                        <text x={W - 98} y="44" fontSize="10" fill="#64748B" fontWeight="600">Validación</text>
                         {/* Axis labels */}
                         <text x={m.l + pw / 2} y={H - 6} textAnchor="middle" fontSize="10" fill="#64748B" fontWeight="600">Época</text>
                         <text x="12" y={m.t + ph / 2} textAnchor="middle" fontSize="10" fill="#64748B" fontWeight="600"
@@ -1334,11 +1337,11 @@
                     <div className="grid grid-cols-2 gap-3 mt-3">
                         <div className="bg-purple-50 rounded-xl p-3 text-center border border-purple-100">
                             <i className="fas fa-arrow-down text-primary mr-1 text-sm"></i>
-                            <span className="text-[0.78rem] text-gray-700">Train sigue bajando <em>(memoriza)</em></span>
+                            <span className="text-[0.78rem] text-gray-700">Entrenamiento sigue bajando <em>(memoriza)</em></span>
                         </div>
                         <div className="bg-pink-50 rounded-xl p-3 text-center border border-pink-100">
                             <i className="fas fa-arrow-up text-secondary mr-1 text-sm"></i>
-                            <span className="text-[0.78rem] text-gray-700">Val sube desde época 22 <em>(overfitting)</em></span>
+                            <span className="text-[0.78rem] text-gray-700">Validación sube desde la época 22 <em>(sobreajuste)</em></span>
                         </div>
                     </div>
                 </div>
@@ -1346,7 +1349,7 @@
         };
 
         /* ============================================================
-           VIDEO CARD — 3Blue1Brown Recommendation
+           VIDEO CARD — video recomendado (canal por defecto: 3Blue1Brown)
         ============================================================ */
         const VideoCard = ({ video }) => {
             const revRef = useReveal();
@@ -1359,7 +1362,7 @@
                         </div>
                         <div>
                             <span className="text-[0.7rem] uppercase tracking-wider font-bold text-red-600 block">Video recomendado</span>
-                            <span className="text-[0.65rem] text-gray-500 font-semibold">3Blue1Brown · Deep Learning</span>
+                            <span className="text-[0.65rem] text-gray-500 font-semibold">{video.canal || '3Blue1Brown · Deep Learning'}</span>
                         </div>
                     </div>
                     <p className="text-[0.88rem] text-gray-700 font-semibold leading-snug mb-1">{video.titulo}</p>
@@ -1382,11 +1385,11 @@
             {
                 id: 1, num: '01', icon: 'fa-xmarks-lines', badgeColor: 'primary',
                 title: '¿Por qué una sola capa no basta?',
-                duracion: '~ 3 min',
+                duracion: '≈ 3 min',
                 video: {
                     titulo: 'But what is a Neural Network? | Deep Learning cap. 1',
                     url: 'https://www.youtube.com/watch?v=aircAruvnKk',
-                    descripcion: 'Explica la estructura de una red neuronal, por qué una sola capa no basta para problemas no lineales y el papel de las capas ocultas — la base teórica del problema XOR.',
+                    descripcion: 'Explica la estructura en capas de una red (pesos, sesgos y activaciones) con el ejemplo de los dígitos manuscritos; el XOR de esta cápsula muestra por qué esas capas son necesarias.',
                 },
                 objetivo: 'Comprender por qué el perceptrón simple de Rosenblatt no pudo resolver el problema XOR y por qué se necesitaron capas ocultas.',
                 analogia: {
@@ -1405,8 +1408,8 @@
                 contenidoExtra: (
                     <div>
                         <p>
-                            En 1958, Frank Rosenblatt construyó el <em>Mark I Perceptron</em>, una máquina que
-                            aprendía a clasificar patrones visuales simples. La Marina de EE.UU. lo financió
+                            En 1958, Frank Rosenblatt presentó el perceptrón, que luego materializó en el hardware del
+                            <em> Mark I</em>, una máquina que aprendía a clasificar patrones visuales simples. La Marina de EE. UU. lo financió
                             esperando aplicaciones militares. Pero en 1969, Minsky y Papert publicaron
                             <em> Perceptrons</em>, demostrando matemáticamente que el perceptrón simple
                             <strong> no podía resolver problemas no linealmente separables</strong>, como el
@@ -1422,7 +1425,7 @@
                             <li>1 XOR 1 = 0</li>
                         </ul>
                         <p>
-                            Si graficamos estas 4 combinaciones en un plano (eje X = entrada A, eje Y = entrada B),
+                            Al graficar estas 4 combinaciones en un plano (eje X = entrada A, eje Y = entrada B),
                             las dos clases (0 y 1) se alternan en las esquinas opuestas. <strong>Ninguna línea
                             recta puede separarlas</strong>: las clases 0 están en (0,0) y (1,1), las clases 1
                             en (0,1) y (1,0).
@@ -1433,34 +1436,34 @@
                 mcq: {
                     pregunta: '¿Por qué el perceptrón simple no puede aprender XOR?',
                     opciones: [
-                        { texto: 'Porque requiere más memoria RAM de la disponible.', correcta: false, justificacion: 'La limitación no es de cómputo sino de capacidad representacional: una sola capa solo traza rectas.' },
-                        { texto: 'Porque XOR no es linealmente separable: una sola capa solo traza una frontera recta.', correcta: true, justificacion: 'Correcto. Las clases 0 (en (0,0) y (1,1)) y 1 (en (0,1) y (1,0)) se alternan; ninguna línea recta las separa. Se requieren capas ocultas para fronteras curvas.' },
-                        { texto: 'Porque la función XOR no es derivable.', correcta: false, justificacion: 'XOR es una función lógica bien definida: el problema de XOR es de separabilidad lineal, no de diferenciabilidad.' },
-                        { texto: 'Porque necesita más datos de los que existían en 1969.', correcta: false, justificacion: 'La limitación es geométrica (separabilidad lineal), no de cantidad de datos.' },
+                        { texto: 'Porque necesita más memoria y cómputo de los que había en 1958.', correcta: false, justificacion: 'La limitación no es de cómputo sino de capacidad de representación: una sola capa solo traza rectas.' },
+                        { texto: 'Porque la función XOR no es derivable y por eso no admite gradientes.', correcta: false, justificacion: 'La regla de aprendizaje del perceptrón ni siquiera usa gradientes: el problema del XOR es de separabilidad lineal, no de diferenciabilidad.' },
+                        { texto: 'Porque XOR no es linealmente separable: una capa solo traza rectas.', correcta: true, justificacion: 'Las clases 0 (en (0,0) y (1,1)) y 1 (en (0,1) y (1,0)) se alternan en esquinas opuestas; ninguna línea recta las separa. Se requieren capas ocultas para trazar fronteras curvas.' },
+                        { texto: 'Porque cuatro ejemplos son demasiado pocos para estimar sus pesos.', correcta: false, justificacion: 'La limitación es geométrica: aun con miles de copias de esos cuatro puntos, ninguna recta los separa.' },
                     ],
                 },
             },
             {
                 id: 2, num: '02', icon: 'fa-bolt', badgeColor: 'secondary',
-                title: 'ReLU: la activación que salvó al Deep Learning',
-                duracion: '~ 3 min',
+                title: 'ReLU: la activación que destrabó las redes profundas',
+                duracion: '≈ 3 min',
                 video: {
                     titulo: 'But what is a Neural Network? | Deep Learning cap. 1',
                     url: 'https://www.youtube.com/watch?v=aircAruvnKk',
-                    descripcion: 'La sección final del video (Bonus Note) explica por qué sigmoid provoca vanishing gradient y cómo ReLU resuelve este problema permitiendo entrenar redes profundas.',
+                    descripcion: 'Al final del video se comenta por qué ReLU desplazó a la sigmoide: entrena con más facilidad en redes profundas. El desvanecimiento del gradiente, que explica esa ventaja, se desarrolla en esta cápsula.',
                 },
-                objetivo: 'Entender por qué ReLU reemplazó a sigmoid y tanh en las capas ocultas, resolviendo el problema del vanishing gradient.',
+                objetivo: 'Entender por qué ReLU reemplazó a la sigmoide y a tanh en las capas ocultas, al mitigar el desvanecimiento del gradiente (vanishing gradient).',
                 analogia: {
                     tipo: 'tip',
-                    titulo: 'Analogía: el portero de la discoteca',
+                    titulo: 'Analogía: el interruptor',
                     contenido: (
                         <>
                             <p>
-                                ReLU actúa como un <strong>portero estricto de discoteca</strong>:
+                                ReLU actúa como un <strong>interruptor</strong>:
                             </p>
                             <ul>
-                                <li>Si el valor que llega es <strong>positivo</strong> (información útil): "Pase".</li>
-                                <li>Si el valor es <strong>negativo</strong> (ruido o información inútil): "Cero. Usted no entra".</li>
+                                <li>Si el valor que llega es <strong>positivo</strong>, pasa tal cual: el interruptor está encendido.</li>
+                                <li>Si el valor es <strong>negativo</strong>, la neurona se apaga y entrega cero.</li>
                             </ul>
                             <p>Matemáticamente: {String.raw`\(f(z) = \max(0, z)\)`}</p>
                         </>
@@ -1470,19 +1473,20 @@
                 contenidoExtra: (
                     <div>
                         <p>
-                            En los años 2000, las redes neuronales estaban en su segundo "invierno". Entrenar
-                            redes profundas era casi imposible por el <strong>vanishing gradient</strong>: los
-                            gradientes se volvían microscópicos en las capas tempranas, frenando el aprendizaje.
+                            Hacia finales de los 90 y comienzos de los 2000, durante el segundo «invierno» de las redes
+                            neuronales, entrenar redes profundas era casi imposible por el <strong>desvanecimiento del
+                            gradiente</strong> (<em>vanishing gradient</em>): los gradientes se volvían microscópicos en las
+                            capas tempranas y frenaban el aprendizaje.
                         </p>
                         <p>
-                            La causa: las funciones sigmoid y tanh <strong>aplastan</strong> los valores en
-                            (0, 1) o (-1, 1), y sus derivadas se <strong>aplanan en los extremos</strong>. Cuando
-                            se encadenan 10 capas, multiplicar 10 derivadas de 0.25 (máximo de sigmoid) da{' '}
-                            <code className="inline-code">0.25<sup>10</sup> ≈ 0.000001</code>: el gradiente
+                            La causa: la sigmoide y tanh <strong>aplastan</strong> los valores en
+                            (0, 1) o (−1, 1), y sus derivadas se <strong>aplanan en los extremos</strong>. Cuando
+                            se encadenan 10 capas, multiplicar 10 derivadas de 0,25 (máximo de la sigmoide) da{' '}
+                            <code className="inline-code">0,25<sup>10</sup> ≈ 10<sup>−6</sup></code>: el gradiente
                             prácticamente desaparece.
                         </p>
                         <p>
-                            <strong>ReLU (Rectified Linear Unit)</strong> es brutalmente simple: si z &gt; 0,
+                            <strong>ReLU</strong> (unidad lineal rectificada, <em>rectified linear unit</em>) es brutalmente simple: si z &gt; 0,
                             devuelve z; si z ≤ 0, devuelve 0. Su derivada es exactamente 1 para z &gt; 0.
                             Esto significa que el gradiente <strong>fluye sin reducirse</strong> por todas las
                             capas positivas, permitiendo entrenar redes mucho más profundas (para llegar a
@@ -1492,23 +1496,23 @@
                 ),
                 formula: String.raw`$$f(z) = \max(0, z) = \begin{cases} z & \text{si } z > 0 \\ 0 & \text{si } z \leq 0 \end{cases}$$`,
                 mcq: {
-                    pregunta: '¿Por qué ReLU resolvió el problema del "vanishing gradient"?',
+                    pregunta: '¿Por qué ReLU mitigó el desvanecimiento del gradiente?',
                     opciones: [
-                        { texto: 'Porque normaliza la salida entre 0 y 1.', correcta: false, justificacion: 'Eso lo hace sigmoid; ReLU no normaliza. ReLU devuelve z tal cual si z>0, sin acotar superiormente.' },
-                        { texto: 'Porque su derivada es exactamente 1 para z > 0, evitando que el gradiente se encoja al propagarse por capas profundas.', correcta: true, justificacion: 'Correcto. En una red de 10 capas, multiplicar 10 derivadas de 1 da 1: el gradiente no se desvanece. En cambio, con sigmoid la derivada máxima es 0.25 y se encoge exponencialmente.' },
-                        { texto: 'Porque consume menos electricidad.', correcta: false, justificacion: 'Aunque ReLU es más eficiente computacionalmente, esa no es la razón principal por la que resolvió el vanishing gradient.' },
-                        { texto: 'Porque funciona mejor con datos normalizados.', correcta: false, justificacion: 'La ventaja principal es matemática (derivada constante en zona positiva), no de preprocesamiento.' },
+                        { texto: 'Porque acota la salida entre 0 y 1, como una probabilidad.', correcta: false, justificacion: 'Eso lo hace la sigmoide; ReLU no acota por arriba: devuelve z tal cual si z > 0.' },
+                        { texto: 'Porque su cálculo es más barato que el de una exponencial.', correcta: false, justificacion: 'ReLU sí es más barata de calcular, pero esa no es la razón por la que mitiga el desvanecimiento del gradiente.' },
+                        { texto: 'Porque centra las activaciones en cero, igual que hace la tanh.', correcta: false, justificacion: 'ReLU no está centrada en cero (sus salidas son ≥ 0); además, centrar en cero no evita que tanh se sature.' },
+                        { texto: 'Porque su derivada vale 1 para z > 0 y no encoge el gradiente.', correcta: true, justificacion: 'En una red de 10 capas, multiplicar 10 derivadas de 1 da 1: en la zona positiva el gradiente no se desvanece. Con la sigmoide, la derivada máxima es 0,25 y el producto se encoge exponencialmente.' },
                     ],
                 },
             },
             {
                 id: 3, num: '03', icon: 'fa-person-hiking', badgeColor: 'gold',
-                title: 'Descenso del Gradiente: el excursionista del Páramo de Letras',
-                duracion: '~ 5 min',
+                title: 'Descenso del gradiente: el excursionista del Páramo de Letras',
+                duracion: '≈ 5 min',
                 video: {
                     titulo: 'Gradient descent, how neural networks learn | Deep Learning cap. 2',
                     url: 'https://www.youtube.com/watch?v=IHZwWFHWa-w',
-                    descripcion: 'Explica visualmente el descenso del gradiente, la función de costo y por qué la tasa de aprendizaje η es crucial — exactamente lo que practica la cápsula 3.',
+                    descripcion: 'Explica visualmente el descenso del gradiente, la función de costo y por qué importa el tamaño del paso: lo mismo que se practica en esta cápsula con la tasa de aprendizaje η.',
                 },
                 objetivo: 'Comprender intuitivamente el algoritmo fundamental del Deep Learning y el impacto de la tasa de aprendizaje η.',
                 analogia: {
@@ -1547,21 +1551,21 @@
                 mcq: {
                     pregunta: 'Si η es muy alta, el descenso del gradiente…',
                     opciones: [
-                        { texto: 'Desciende muy lento (convergencia lenta).', correcta: false, justificacion: 'Eso ocurre con η muy baja. Con η muy alta, los pasos son demasiado grandes y el algoritmo rebota.' },
-                        { texto: 'Da saltos tan grandes que pasa por encima del valle y sube la ladera opuesta (divergencia).', correcta: true, justificacion: 'Correcto. El algoritmo "rebota" entre las paredes de la función de costo, aumentando el error en lugar de reducirlo. La pérdida diverge.' },
-                        { texto: 'Encuentra el óptimo global de inmediato.', correcta: false, justificacion: 'Pasos grandes no garantizan optimalidad; de hecho, garantizan que NO convergerá al mínimo.' },
-                        { texto: 'Se queda atrapado en un mínimo local sin moverse.', correcta: false, justificacion: 'Quedarse atrapado en mínimos locales es un problema opuesto: suele ocurrir con η muy baja, no muy alta.' },
+                        { texto: 'Salta por encima del valle, sube la ladera opuesta y diverge.', correcta: true, justificacion: 'El algoritmo «rebota» entre las paredes de la función de pérdida y el error aumenta en lugar de reducirse: la pérdida diverge.' },
+                        { texto: 'Avanza a pasos diminutos y tarda muchas épocas en converger.', correcta: false, justificacion: 'Eso ocurre con η muy baja. Con η muy alta, los pasos son demasiado grandes y el algoritmo rebota.' },
+                        { texto: 'Llega al mínimo global en muy pocas iteraciones, sin oscilar.', correcta: false, justificacion: 'Pasos grandes no garantizan llegar al óptimo; de hecho, si η supera cierto umbral, el algoritmo oscila o diverge y no llega al mínimo.' },
+                        { texto: 'Queda atrapado sin moverse en el primer mínimo local cercano.', correcta: false, justificacion: 'Quedar atrapado en un mínimo local es más probable con pasos pequeños; con η muy alta el problema es la inestabilidad, no el estancamiento.' },
                     ],
                 },
             },
             {
                 id: 4, num: '04', icon: 'fa-diagram-project', badgeColor: 'primary',
-                title: 'Backpropagation: leer la bitácora al revés',
-                duracion: '~ 5 min',
+                title: 'Retropropagación: leer la bitácora al revés',
+                duracion: '≈ 5 min',
                 video: {
-                    titulo: 'What is backpropagation really doing? | Deep Learning cap. 4',
+                    titulo: 'What is backpropagation really doing? | Deep Learning cap. 3',
                     url: 'https://www.youtube.com/watch?v=Ilg3gGewQ5U',
-                    descripcion: 'Un recorrido intuitivo de backpropagation: cómo se distribuye el error hacia atrás capa por capa usando la regla de la cadena, el corazón del aprendizaje profundo.',
+                    descripcion: 'Un recorrido intuitivo por la retropropagación: cómo se distribuye el error hacia atrás, capa por capa, con la regla de la cadena, el corazón del aprendizaje profundo.',
                 },
                 objetivo: 'Entender cómo la retropropagación distribuye la responsabilidad del error entre las neuronas usando la regla de la cadena.',
                 analogia: {
@@ -1580,7 +1584,7 @@
                                 <li>¿O de una <strong>política mal diseñada</strong> (pesos iniciales)?</li>
                             </ul>
                             <p>
-                                En deep learning esto es el <strong>problema de asignación de crédito</strong>:
+                                En Deep Learning esto es el <strong>problema de asignación de crédito</strong>:
                                 la red falló, pero hay miles de neuronas. <em>¿Cuáles deben ajustar sus pesos
                                 y en qué medida?</em>
                             </p>
@@ -1591,7 +1595,7 @@
                 contenidoExtra: (
                     <div>
                         <p>
-                            La retropropagación es el "mecanismo administrativo" perfecto: rastrea el error
+                            La retropropagación es el «mecanismo administrativo» perfecto: rastrea el error
                             desde el resultado final hacia atrás, capa por capa, calculando la contribución
                             exacta de cada neurona. Matemáticamente se basa en la <strong>regla de la cadena</strong>:
                         </p>
@@ -1601,23 +1605,24 @@
                 mcq: {
                     pregunta: 'La retropropagación se fundamenta matemáticamente en…',
                     opciones: [
-                        { texto: 'La regla de la cadena del cálculo diferencial.', correcta: true, justificacion: 'Correcto. Multiplica derivadas locales en cadena ("efecto dominó") para hallar el gradiente respecto a cada peso, capa por capa, desde la salida hasta la entrada.' },
-                        { texto: 'El teorema de Pitágoras.', correcta: false, justificacion: 'El teorema de Pitágoras no tiene relación con la diferenciación en grafos computacionales.' },
-                        { texto: 'La regla de tres simple.', correcta: false, justificacion: 'La regla de tres es aritmética elemental, no tiene relación con el cálculo multivariable que sustenta backprop.' },
-                        { texto: 'La transformada de Fourier.', correcta: false, justificacion: 'La transformada de Fourier se usa en procesamiento de señales, no en el algoritmo de retropropagación.' },
+                        { texto: 'El método de Newton, que usa la matriz hessiana de la pérdida.', correcta: false, justificacion: 'Newton usa segundas derivadas (la hessiana); la retropropagación solo calcula primeras derivadas, encadenando derivadas locales.' },
+                        { texto: 'La regla de la cadena, que encadena derivadas locales hacia atrás.', correcta: true, justificacion: 'Multiplica derivadas locales en cadena (cada eslabón del rumor amplifica o atenúa la señal) para hallar el gradiente respecto a cada peso, capa por capa, desde la salida hasta la entrada.' },
+                        { texto: 'Las diferencias finitas: perturbar cada peso y medir el cambio.', correcta: false, justificacion: 'Las diferencias finitas sirven para verificar gradientes, pero exigen una pasada por cada peso; la retropropagación los obtiene todos con una sola pasada hacia atrás.' },
+                        { texto: 'El descenso del gradiente, que actualiza los pesos tras cada lote.', correcta: false, justificacion: 'El descenso del gradiente usa los gradientes; la retropropagación es el procedimiento que los calcula. Son pasos distintos del bucle de entrenamiento.' },
                     ],
                 },
             },
             {
                 id: 5, num: '05', icon: 'fa-graduation-cap', badgeColor: 'secondary',
-                title: 'Overfitting: cuando la red memoriza el cuadernillo viejo',
-                duracion: '~ 5 min',
+                title: 'Sobreajuste: cuando la red memoriza el cuadernillo viejo',
+                duracion: '≈ 5 min',
                 video: {
-                    titulo: 'Regularization Part 1: Ridge (L2) Regression — StatQuest',
+                    titulo: 'Regularization Part 1: Ridge (L2) Regression',
+                    canal: 'StatQuest with Josh Starmer',
                     url: 'https://www.youtube.com/watch?v=Q81RR3yKn30',
-                    descripcion: 'Explica de forma visual y pedagógica qué es el overfitting, por qué ocurre y cómo la regularización Ridge (L2) lo corrige. Ideal para reforzar el concepto de Early Stopping y las estrategias contra el sobreajuste.',
+                    descripcion: 'Explica la regularización L2 (ridge): penalizar los pesos grandes reduce el sobreajuste de un modelo que se ajusta demasiado a sus datos de entrenamiento. Complementa la parada temprana que se practica en esta cápsula con las curvas de aprendizaje.',
                 },
-                objetivo: 'Reconocer el sobreajuste en las curvas de aprendizaje y aplicar la solución correcta (Early Stopping).',
+                objetivo: 'Reconocer el sobreajuste en las curvas de aprendizaje, aplicar la parada temprana (early stopping) y relacionarla con la regularización L2 como otra estrategia contra el sobreajuste.',
                 analogia: {
                     tipo: 'warn',
                     titulo: 'Analogía: el estudiante y el ICFES',
@@ -1628,13 +1633,13 @@
                                 del año anterior junto con sus respuestas correctas.
                             </p>
                             <ul>
-                                <li><strong>Estudiante A (memorización):</strong> memoriza asociaciones específicas como "la respuesta a la pregunta que comienza con 'Simón Bolívar...' es la opción C". En el simulacro (entrenamiento) obtiene puntaje perfecto.</li>
+                                <li><strong>Estudiante A (memorización):</strong> memoriza asociaciones específicas como «la respuesta a la pregunta que comienza con “Simón Bolívar…” es la opción C». En el simulacro (entrenamiento) obtiene puntaje perfecto.</li>
                                 <li><strong>Estudiante B (generalización):</strong> estudia los conceptos históricos y comprende las razones detrás de las acciones de Bolívar. Tal vez cometa errores en el simulacro.</li>
                             </ul>
                             <p>
                                 El día del examen real (conjunto de prueba), las preguntas presentan variaciones.
                                 El Estudiante A obtiene un desempeño deficiente. El Estudiante B logra adaptarse
-                                y obtener un resultado satisfactorio. <strong>En Deep Learning queremos emular
+                                y obtener un resultado satisfactorio. <strong>En Deep Learning se busca emular
                                 al Estudiante B.</strong>
                             </p>
                         </>
@@ -1644,13 +1649,13 @@
                 contenidoExtra: (
                     <div>
                         <p>
-                            El sobreajuste (overfitting) ocurre cuando el modelo es demasiado complejo para
+                            El sobreajuste (<em>overfitting</em>) ocurre cuando el modelo es demasiado complejo para
                             la cantidad de datos disponibles y termina <strong>memorizando ruido</strong>{' '}
                             (sombras de nubes en imágenes de café, asociaciones espurias en datos clínicos)
                             en lugar de aprender los patrones verdaderamente representativos.
                         </p>
                         <p>
-                            La firma visual del overfitting: la <strong>curva de entrenamiento sigue bajando</strong>{' '}
+                            La firma visual del sobreajuste: la <strong>curva de entrenamiento sigue bajando</strong>{' '}
                             pero la <strong>curva de validación empieza a subir</strong> (divergen). Si la
                             divergencia empieza en la época 22, esa es la <strong>época ideal para detener
                             el entrenamiento</strong> y guardar los pesos.
@@ -1661,10 +1666,10 @@
                 mcq: {
                     pregunta: 'Si la pérdida de validación sube desde la época 22 mientras la de entrenamiento sigue bajando, lo correcto es…',
                     opciones: [
-                        { texto: 'Entrenar 1.000 épocas más, ya que el modelo seguirá mejorando.', correcta: false, justificacion: 'Entrenar más solo empeorará el sobreajuste. La curva de validación subiendo es una señal clara de que el modelo está memorizando, no aprendiendo.' },
-                        { texto: 'Implementar Early Stopping, guardando los pesos de la época 22.', correcta: true, justificacion: 'Correcto. La "U" invertida en validación es la firma del overfitting. Early Stopping detiene el entrenamiento justo antes de que el modelo empiece a memorizar ruido, preservando los mejores pesos.' },
-                        { texto: 'Eliminar el conjunto de validación para simplificar.', correcta: false, justificacion: 'Sin validación perdemos la única señal que nos permite detectar el sobreajuste a tiempo.' },
-                        { texto: 'Aumentar la tasa de aprendizaje.', correcta: false, justificacion: 'Una tasa mayor no detiene el sobreajuste; solo cambia la trayectoria del descenso. La solución correcta es la parada anticipada.' },
+                        { texto: 'Entrenar 1.000 épocas más, ya que el modelo seguirá mejorando.', correcta: false, justificacion: 'Entrenar más solo empeorará el sobreajuste. Que la curva de validación suba es una señal clara de que el modelo está memorizando, no aprendiendo.' },
+                        { texto: 'Eliminar el conjunto de validación, porque solo añade ruido.', correcta: false, justificacion: 'Sin validación se pierde la única señal que permite detectar el sobreajuste a tiempo.' },
+                        { texto: 'Aplicar parada temprana y conservar los pesos de la época 22.', correcta: true, justificacion: 'La «U» de la pérdida de validación (baja y luego sube) es la firma del sobreajuste. La parada temprana conserva los pesos del mínimo, antes de que el modelo empiece a memorizar ruido.' },
+                        { texto: 'Aumentar la tasa de aprendizaje para escapar de ese mínimo.', correcta: false, justificacion: 'Una tasa mayor no detiene el sobreajuste; solo cambia la trayectoria del descenso. La solución correcta es la parada temprana.' },
                     ],
                 },
             },
@@ -1933,8 +1938,8 @@
                                     </div>
                                     <h2 className="text-2xl md:text-3xl font-extrabold text-navy mt-4">¡Felicitaciones!</h2>
                                     <p className="text-gray-700 mt-2 leading-relaxed max-w-md mx-auto">
-                                        Ha completado las 5 cápsulas del microlearning y ha respondido correctamente
-                                        todas las preguntas de autoevaluación. Tiene una base sólida para enfrentar
+                                        Las 5 cápsulas del microlearning están completas y todas las preguntas de
+                                        autoevaluación tienen respuesta correcta: hay una base sólida para enfrentar
                                         el <strong>Proyecto Centinela · Fase 1</strong>, la actividad evaluable del Módulo 1.
                                     </p>
                                 </div>
@@ -1945,7 +1950,7 @@
                                     </div>
                                     <h2 className="text-2xl md:text-3xl font-extrabold text-navy mt-4">Progreso: {pct}%</h2>
                                     <p className="text-gray-700 mt-2 leading-relaxed max-w-md mx-auto">
-                                        Ha llegado al final del recorrido. Le recomendamos volver a las cápsulas
+                                        Este es el final del recorrido. Conviene volver a las cápsulas
                                         pendientes para reforzar los conceptos antes de la <strong>Fase 1</strong> del{' '}
                                         <strong>Proyecto Centinela</strong>.
                                     </p>
@@ -1994,7 +1999,7 @@
                         <div className="text-center mt-8 rounded-2xl px-6 py-6 text-white shadow-lg"
                             style={{ background: 'linear-gradient(180deg, #001A4D 0%, #002868 100%)' }}>
                             <p className="text-sm italic font-semibold text-gold leading-relaxed max-w-xl mx-auto">
-                                Metodología "Ingeniería de Trinchera": si una arquitectura no corre en Google Colab, no existe.
+                                Metodología «Ingeniería de Trinchera»: si una arquitectura no corre en Google Colab, no existe.
                             </p>
                             <div className="mt-4 pt-4 border-t border-white/15 text-xs text-white/70 leading-relaxed">
                                 <p>Universidad Santo Tomás · Maestría en Ciencia de Datos</p>
