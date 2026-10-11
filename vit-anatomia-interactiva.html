@@ -561,7 +561,7 @@ img,video{max-width:100%;height:auto}
             <!-- Encoder del Transformer (Pre-LN, como en el ViT: LN antes de cada subcapa, suma residual después) -->
             <g id="vit-encoder" opacity="0.3">
               <rect x="60" y="250" width="280" height="130" fill="#1e1b4b" stroke="#8b5cf6" stroke-width="1" rx="6"/>
-              <text x="200" y="268" text-anchor="middle" fill="#c4b5fd" font-size="11" font-weight="bold">Encoder del Transformer × N (Pre-LN)</text>
+              <text x="200" y="268" text-anchor="middle" fill="#c4b5fd" font-size="11" font-weight="bold"><tspan font-style="italic">Encoder</tspan> del Transformer × N (Pre-LN)</text>
               
               <!-- Subcapa 1: LN → autoatención multicabeza → + -->
               <rect x="70" y="280" width="40" height="34" fill="#064e3b" stroke="#10b981" stroke-width="1" rx="3"/>
@@ -588,7 +588,7 @@ img,video{max-width:100%;height:auto}
             <!-- CLS Output -->
             <g id="vit-cls-out" opacity="0.3">
               <rect x="150" y="400" width="100" height="30" fill="#78350f" stroke="#fbbf24" stroke-width="2" rx="4"/>
-              <text x="200" y="420" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="bold">Token CLS</text>
+              <text x="200" y="420" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="bold"><tspan font-style="italic">Token</tspan> CLS</text>
             </g>
             
             <!-- MLP Head -->
@@ -653,13 +653,13 @@ img,video{max-width:100%;height:auto}
           <div class="w-12 h-12 rounded-lg bg-yellow-400/20 flex items-center justify-center mb-3 text-2xl">
             🏷️
           </div>
-          <h3 class="font-bold text-yellow-600 mb-2">Token CLS</h3>
+          <h3 class="font-bold text-yellow-600 mb-2"><i>Token</i> CLS</h3>
           <p class="text-xs text-gray-600 mb-3">Token de clasificación (<i>classification token</i>)</p>
           <p class="text-sm text-gray-700">
             Vector aprendible añadido al inicio de la secuencia. <strong>Recopila información global</strong> de todos los parches a través de las capas de atención.
           </p>
           <div class="mt-3 p-2 bg-yellow-100 rounded text-xs text-yellow-800">
-            💡 Al final, solo este token se usa para la clasificación.
+            💡 Al final, solo este <i>token</i> se usa para la clasificación.
           </div>
         </div>
         
@@ -1078,14 +1078,14 @@ const steps = [
   },
   {
     title: "Paso 4: token CLS y codificación posicional (solo ViT)",
-    description: "El ViT añade un token CLS (amarillo) que recopilará información global y una codificación posicional aprendible que preserva la estructura espacial. La CNN no lo necesita.",
+    description: "El ViT añade un <i>token</i> CLS (amarillo) que recopilará información global y una codificación posicional aprendible que preserva la estructura espacial. La CNN no lo necesita.",
     action: () => {
       pulseElement('vit-embeddings');
     }
   },
   {
     title: "Paso 5: Mecanismo de atención (solo ViT)",
-    description: "En el encoder del Transformer, cada parche «atiende» a todos los demás mediante autoatención multicabeza, con LayerNorm antes de cada subcapa (Pre-LN). Esto permite comunicación global inmediata.",
+    description: "En el <i>encoder</i> del Transformer, cada parche «atiende» a todos los demás mediante autoatención multicabeza, con LayerNorm antes de cada subcapa (Pre-LN). Esto permite comunicación global inmediata.",
     action: () => {
       highlightElement('vit-encoder', true);
       animateAttentionLines();
@@ -1101,7 +1101,7 @@ const steps = [
   },
   {
     title: "Paso 7: Clasificación final",
-    description: "Ambas arquitecturas producen una clasificación final: la CNN usa capas totalmente conectadas y el ViT, una cabeza MLP sobre el token CLS.",
+    description: "Ambas arquitecturas producen una clasificación final: la CNN usa capas totalmente conectadas y el ViT, una cabeza MLP sobre el <i>token</i> CLS.",
     action: () => {
       highlightElement('cnn-output', true);
       highlightElement('vit-mlp', true);

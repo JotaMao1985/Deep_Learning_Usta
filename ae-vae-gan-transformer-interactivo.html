@@ -270,7 +270,7 @@
 
 <!-- ======================= BARRA DE PESTAÑAS ============================ -->
 <div class="tabs" role="tablist" aria-label="Modelos">
-  <button class="tab ae"  role="tab" id="tab-ae"   aria-controls="sec-ae"   aria-selected="true" ><span class="dot"></span>Autoencoder (AE)</button>
+  <button class="tab ae"  role="tab" id="tab-ae"   aria-controls="sec-ae"   aria-selected="true" ><span class="dot"></span><em>Autoencoder</em> (AE)</button>
   <button class="tab vae" role="tab" id="tab-vae"  aria-controls="sec-vae"  aria-selected="false"><span class="dot"></span>VAE</button>
   <button class="tab gan" role="tab" id="tab-gan"  aria-controls="sec-gan"  aria-selected="false"><span class="dot"></span>GAN</button>
   <button class="tab trf" role="tab" id="tab-trf"  aria-controls="sec-trf"  aria-selected="false"><span class="dot"></span>Transformer</button>
@@ -285,7 +285,7 @@
   <div class="panel acc-ae">
     <h2>Arquitectura y flujo de datos</h2>
     <p class="pitch">
-      El autoencoder comprime la entrada <span class="formula">x</span> a un código latente
+      El <em>autoencoder</em> comprime la entrada <span class="formula">x</span> a un código latente
       <span class="formula">z</span> de menor dimensión (el «cuello de botella») y la reconstruye.
       Se entrena minimizando el error de reconstrucción; el gradiente (línea roja punteada)
       fluye de la pérdida hacia atrás por toda la red.
@@ -374,7 +374,7 @@
   <div class="panel acc-ae">
     <h2>Laboratorio · reconstruir la variedad</h2>
     <p class="pitch">
-      Un autoencoder 2 → 1 → 2 se entrena sobre puntos 2-D. El botón «Entrenar ×20» ejecuta
+      Un <em>autoencoder</em> 2 → 1 → 2 se entrena sobre puntos 2-D. El botón «Entrenar ×20» ejecuta
       20 pasos de descenso del gradiente (Adam, minilotes de 32); con «Auto» el entrenamiento
       continúa solo. La curva dorada es la <b>imagen del latente</b>: todo lo que el decodificador
       puede producir al recorrer <span class="formula">z</span> de menor a mayor.
@@ -437,7 +437,7 @@
   <div class="panel acc-vae">
     <h2>Arquitectura y flujo de datos</h2>
     <p class="pitch">
-      El VAE convierte el autoencoder en un <b>modelo probabilístico</b>: el codificador ya no
+      El VAE convierte el <em>autoencoder</em> en un <b>modelo probabilístico</b>: el codificador ya no
       produce un punto sino una distribución <span class="formula">q(z|x) = 𝒩(μ, σ²)</span>.
       El «truco de reparametrización» <span class="formula">z = μ + σ⊙ε</span> permite que el
       gradiente atraviese el muestreo, y el término KL empuja el latente hacia el prior
@@ -517,7 +517,7 @@
     <h2>Ficha técnica</h2>
     <div class="ficha">
       <div class="card"><h3>💡 Idea central</h3>
-        <p>Autoencoder probabilístico: se maximiza una cota inferior de la verosimilitud
+        <p><em>Autoencoder</em> probabilístico: se maximiza una cota inferior de la verosimilitud
         (<b>ELBO</b>). El codificador infiere <span class="formula">q(z|x)</span>, el decodificador
         modela <span class="formula">p(x|z)</span> y el prior <span class="formula">p(z) = 𝒩(0, I)</span>
         hace el latente <b>navegable</b>.</p></div>
@@ -709,7 +709,7 @@
   </div>
 
   <div class="panel acc-gan">
-    <h2>Laboratorio · el juego adversarial</h2>
+    <h2>Laboratorio · el juego <em>adversarial</em></h2>
     <p class="pitch">
       El fondo del lienzo muestra la <b>opinión del discriminador</b>: zonas rosadas =
       «parece real», zonas azules = «parece falso». Los puntos magenta son muestras de G a partir
@@ -782,7 +782,7 @@
       El Transformer modela secuencias con <b>autoatención</b>: cada posición emite una consulta
       (Q), se compara con las claves (K) de todas las posiciones y mezcla sus valores (V) según los
       pesos <span class="formula">α = softmax(QKᵀ/√dₖ)</span>. Como modelo generativo, aprende
-      <span class="formula">p(x_t | x_&lt;t)</span> y genera <b>token a token</b> (autorregresivo),
+      <span class="formula">p(x_t | x_&lt;t)</span> y genera <b><em>token</em> a <em>token</em></b> (autorregresivo),
       entrenado por máxima verosimilitud con entropía cruzada.
     </p>
     <svg class="diagrama" id="dg-trf" viewBox="0 0 680 240" role="img"
@@ -854,11 +854,11 @@
     <h2>Ficha técnica</h2>
     <div class="ficha">
       <div class="card"><h3>💡 Idea central</h3>
-        <p>Sustituir la recurrencia por <b>autoatención</b>: cada token consulta directamente a
+        <p>Sustituir la recurrencia por <b>autoatención</b>: cada <em>token</em> consulta directamente a
         todos los demás, sin importar la distancia. Como generador, factoriza
         <span class="formula">p(x) = Π p(x_t | x_&lt;t)</span> con máscara causal.</p></div>
       <div class="card"><h3>📉 Función de pérdida</h3>
-        <p>Entropía cruzada sobre el siguiente token: <span class="formula">ℒ = −Σ_t log p(x_t | x_&lt;t)</span>.
+        <p>Entropía cruzada sobre el siguiente <em>token</em>: <span class="formula">ℒ = −Σ_t log p(x_t | x_&lt;t)</span>.
         Máxima verosimilitud pura — sin adversarios ni términos KL.</p></div>
       <div class="card"><h3>⚙️ Dinámica de entrenamiento</h3>
         <p>Estable y <b>paralelizable</b>: con teacher forcing todas las posiciones se entrenan a la
@@ -873,7 +873,7 @@
         (preentrenar + ajustar) y hoy define el estado del arte generativo.</p></div>
       <div class="card"><h3>⚠️ Debilidades</h3>
         <p>La atención cuesta <span class="formula">O(L²)</span> en la longitud; exige datos y
-        cómputo masivos; la generación es secuencial (un token por paso), más lenta que una pasada
+        cómputo masivos; la generación es secuencial (un <em>token</em> por paso), más lenta que una pasada
         de G en una GAN.</p></div>
     </div>
   </div>
@@ -882,7 +882,7 @@
     <h2>Laboratorio · una cabeza de atención que aprende a mirar</h2>
     <p class="pitch">
       Versión mínima y honesta: una sola cabeza de atención donde Q y K provienen de la
-      <b>codificación posicional</b> y V es el propio token. La tarea («invertir», «desplazar» o
+      <b>codificación posicional</b> y V es el propio <em>token</em>. La tarea («invertir», «desplazar» o
       «copiar» la secuencia) se resuelve aprendiendo <b>de qué posición copiar</b>: el mapa de
       calor muestra α y converge al patrón correcto (antidiagonal, diagonal desplazada o
       diagonal). El entrenamiento usa secuencias aleatorias nuevas en cada paso — lo aprendido
@@ -904,7 +904,7 @@
         <div class="controls">
           <button class="btn btn-train" id="trf-step">Entrenar ×20</button>
           <button class="btn btn-auto"  id="trf-auto">▶ Auto</button>
-          <button class="btn btn-anim"  id="trf-anim">🎬 Generar token a token</button>
+          <button class="btn btn-anim"  id="trf-anim">🎬 Generar <em>token</em> a <em>token</em></button>
           <button class="btn btn-reset" id="trf-reset">↺ Reiniciar</button>
           <label class="sr-only" for="trf-task">Tarea de secuencia a secuencia</label>
           <select class="sel" id="trf-task" data-tip="Tarea de secuencia a secuencia que la cabeza de atención debe aprender.">
@@ -928,7 +928,7 @@
                 aprende a atender a la última posición de la entrada. Al cambiar la tarea se
                 conservan los pesos: con más entrenamiento, el mapa se reacomoda al nuevo patrón
                 (misma arquitectura, distinta atención aprendida); «Reiniciar» parte de cero.</li>
-            <li>«Generar token a token» reproduce el modo autorregresivo: cada token de salida se
+            <li>«Generar <em>token</em> a <em>token</em>» reproduce el modo autorregresivo: cada <em>token</em> de salida se
                 revela consultando su fila de atención (resaltada) sobre la entrada.</li>
           </ul>
         </div>
@@ -956,7 +956,7 @@
     <table class="comp">
       <thead><tr>
         <th>Criterio</th>
-        <th style="background:#2563EB">Autoencoder</th>
+        <th style="background:#2563EB"><em>Autoencoder</em></th>
         <th style="background:#8B5CF6">VAE</th>
         <th style="background:#ED1E79">GAN</th>
         <th style="background:#0D9488">Transformer</th>
@@ -966,7 +966,7 @@
           <td>Reconstruir la entrada a través de un cuello de botella</td>
           <td>Modelar p(x) con un latente probabilístico (maximizar la ELBO)</td>
           <td>Generar muestras indistinguibles de las reales (juego minimax)</td>
-          <td>Modelar p(x) autorregresivamente, token a token</td></tr>
+          <td>Modelar p(x) autorregresivamente, <em>token</em> a <em>token</em></td></tr>
         <tr><th>Espacio latente</th>
           <td>Determinista y sin estructura garantizada («huecos»)</td>
           <td>Continuo y regularizado hacia 𝒩(0, I): navegable e interpolable</td>
@@ -975,8 +975,8 @@
         <tr><th>Pérdida</th>
           <td>ECM: ‖x − x̂‖²</td>
           <td>ECM + β·D<sub>KL</sub>(q(z|x) ‖ 𝒩(0, I))</td>
-          <td>Adversarial (BCE): min<sub>G</sub> max<sub>D</sub></td>
-          <td>Entropía cruzada del siguiente token</td></tr>
+          <td><em>Adversarial</em> (BCE): min<sub>G</sub> max<sub>D</sub></td>
+          <td>Entropía cruzada del siguiente <em>token</em></td></tr>
         <tr><th>¿Genera muestras nuevas?</th>
           <td>No de forma fiable (z arbitrario ⇒ basura)</td>
           <td>Sí: muestrear z ~ 𝒩(0, I) y decodificar</td>

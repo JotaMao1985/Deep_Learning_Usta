@@ -718,7 +718,7 @@
                         <i className="fas fa-circle-question text-secondary mt-1"></i>
                         <span>{pregunta}</span>
                     </div>
-                    {multiple && <p className="text-xs text-gray-400 mb-2 ml-6">Selección múltiple</p>}
+                    {multiple && <p className="text-xs text-gray-500 mb-2 ml-6">Selección múltiple</p>}
                     <div className="space-y-2 mt-3">
                         {opciones.map((o, i) => {
                             const isSel = sel.includes(i);
@@ -810,7 +810,7 @@
                         <div key={qi} className="mb-5">
                             <div className="font-semibold text-navy text-[0.95rem] mb-2">
                                 {qi + 1}. {q.pregunta}
-                                {q.multiple && <span className="ml-2 text-xs text-gray-400 font-normal">(selección múltiple)</span>}
+                                {q.multiple && <span className="ml-2 text-xs text-gray-500 font-normal">(selección múltiple)</span>}
                             </div>
                             <div className="space-y-1.5">
                                 {q.opciones.map((o, oi) => {
@@ -1298,10 +1298,10 @@
                         <text x={40} y={y0 + 5 * cel + 38} textAnchor="start" fontSize="12" fill="#475569">
                             S<tspan baselineShift="sub" fontSize="9">0,0</tspan> = Σ ( I × K ) = (3·1 + 0·0 + 1·(−1)) + (1·1 + 5·0 + 8·(−1)) + (2·1 + 7·0 + 2·(−1)) = −5
                         </text>
-                        <text x={40} y={y0 + 5 * cel + 58} textAnchor="start" fontSize="11" fill="#94A3B8" fontStyle="italic">
+                        <text x={40} y={y0 + 5 * cel + 58} textAnchor="start" fontSize="11" fill="#64748B" fontStyle="italic">
                             La ventana rosa se multiplica elemento a elemento por el kernel;
                         </text>
-                        <text x={40} y={y0 + 5 * cel + 74} textAnchor="start" fontSize="11" fill="#94A3B8" fontStyle="italic">
+                        <text x={40} y={y0 + 5 * cel + 74} textAnchor="start" fontSize="11" fill="#64748B" fontStyle="italic">
                             la suma de productos llena una celda del mapa y luego la ventana se desplaza (stride).
                         </text>
                     </svg>
@@ -1483,13 +1483,13 @@
                         },
                         {
                             titulo: 'Pooling (submuestreo): invarianza y reducción',
-                            contenido: <span><strong>Max pooling</strong> toma el máximo de cada región (p. ej., 2×2): si un rasgo se detectó allí, lo conserva y descarta su ubicación exacta, dando invarianza a pequeñas traslaciones. El <strong>average pooling</strong> promedia; su variante <em>global average pooling</em> reduce todo el mapa a un vector antes de clasificar, eliminando capas densas masivas. Resulta contraintuitivo que <em>descartar</em> información mejore el modelo: al recortar la resolución, el pooling reduce los parámetros de las capas siguientes y, con ello, el sobreajuste, y suele favorecer la generalización.</span>
+                            contenido: <span><strong><em>Max pooling</em></strong> toma el máximo de cada región (p. ej., 2×2): si un rasgo se detectó allí, lo conserva y descarta su ubicación exacta, dando invarianza a pequeñas traslaciones. El <strong><em>average pooling</em></strong> promedia; su variante <em>global average pooling</em> reduce todo el mapa a un vector antes de clasificar, eliminando capas densas masivas. Resulta contraintuitivo que <em>descartar</em> información mejore el modelo: al recortar la resolución, el <em>pooling</em> reduce los parámetros de las capas siguientes y, con ello, el sobreajuste, y suele favorecer la generalización.</span>
                         },
                     ]} />
 
                     <p>
                         Esa es la división del trabajo que explica el éxito en visión: la <strong>convolución</strong> aprende{' '}
-                        <em>qué</em> patrón aparece, y el <strong>pooling</strong>, más tolerante a la posición, difumina <em>dónde</em>{' '}
+                        <em>qué</em> patrón aparece, y el <strong><em>pooling</em></strong>, más tolerante a la posición, difumina <em>dónde</em>{' '}
                         aparece exactamente —esa tolerancia a la posición es justo lo que le faltaba al MLP—.
                     </p>
 
@@ -1497,7 +1497,7 @@
                     <Eq>{String.raw`$$ O = \left\lfloor \frac{W - K + 2P}{S} \right\rfloor + 1 $$`}</Eq>
                     <p>
                         donde {String.raw`\(W\)`} es el tamaño de entrada, {String.raw`\(K\)`} el del kernel, {String.raw`\(P\)`} el
-                        relleno y {String.raw`\(S\)`} el stride. Una imagen de 224 × 224 con un filtro 3 × 3, sin relleno y stride 1,
+                        relleno y {String.raw`\(S\)`} el <em>stride</em>. Una imagen de 224 × 224 con un filtro 3 × 3, sin relleno y <em>stride</em> 1,
                         produce un mapa de {String.raw`\(\lfloor(224-3)/1\rfloor + 1 = 222\)`} de lado.
                     </p>
 
@@ -1552,8 +1552,8 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr><td><strong>Convolucional</strong></td><td>Extracción de características</td><td>Según stride/padding</td><td>Aumenta (n.º de filtros)</td><td>Kernel + sesgo</td></tr>
-                                <tr><td><strong>Pooling</strong></td><td>Reducción espacial, invarianza local</td><td>Reduce (≈ /2)</td><td>Igual</td><td>Ninguno</td></tr>
+                                <tr><td><strong>Convolucional</strong></td><td>Extracción de características</td><td>Según <em>stride</em>/<em>padding</em></td><td>Aumenta (n.º de filtros)</td><td>Kernel + sesgo</td></tr>
+                                <tr><td><strong><em>Pooling</em></strong></td><td>Reducción espacial, invarianza local</td><td>Reduce (≈ /2)</td><td>Igual</td><td>Ninguno</td></tr>
                                 <tr><td><strong>Densa (totalmente conectada)</strong></td><td>Clasificación</td><td>N/A (entrada aplanada)</td><td>N/A</td><td>Matriz densa</td></tr>
                                 <tr><td><strong>ReLU</strong></td><td>No linealidad</td><td>Igual</td><td>Igual</td><td>Ninguno</td></tr>
                             </tbody>
@@ -1573,7 +1573,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <h4>Anatomía en movimiento: el recorrido interactivo</h4>
                     <p>
                         Hasta aquí las piezas se presentaron por separado; la siguiente animación las pone en marcha de principio a fin sobre un
-                        ejemplo mínimo —clasificar una «X» o una «O» en una rejilla de 6×6—: convolución, ReLU, pooling y clasificación
+                        ejemplo mínimo —clasificar una «X» o una «O» en una rejilla de 6×6—: convolución, ReLU, <em>pooling</em> y clasificación
                         final, paso a paso o en modo automático.
                     </p>
                     <AntesDeInteractuar>en la «X», tras la convolución con el filtro diagonal, la ReLU y el <em>pooling</em>, ¿se espera que la señal más alta del mapa reducido de 2 × 2 quede repartida por igual en las cuatro casillas, concentrada en dos esquinas opuestas o en el centro? ¿Y en la «O»?</AntesDeInteractuar>
@@ -1582,8 +1582,9 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                             title="Animación interactiva: anatomía de una red convolucional, recorrido paso a paso"
                             className="w-full rounded-lg" style={{ display: 'block', width: '100%', height: 1600, border: 0 }} loading="lazy"></iframe>
                         <p className="text-xs text-gray-500 italic text-center mt-2 px-2">
-                            Animación interactiva de la cadena de procesamiento de una CNN (entrada → convolución → ReLU → pooling → clasificación) sobre el
-                            ejemplo «X / O»; las probabilidades finales son ilustrativas. Fuente: elaboración propia.
+                            Animación interactiva de la cadena de procesamiento de una CNN (entrada → convolución → ReLU → pooling → clasificación) sobre un
+                            caso adaptado del ejemplo «X / O» de StatQuest (J. Starmer); las probabilidades finales se calculan con pesos ilustrativos,
+                            no entrenados. Fuente: elaboración propia.
                         </p>
                     </div>
 
@@ -1602,11 +1603,11 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                         de transferencia de aprendizaje.
                     </p>
                     <Timeline eventos={[
-                        { year: '1998 · LeNet-5', text: <><Cita k="lecun1998gradient" n /> demuestran que una red aprende patrones visuales desde los píxeles. 7 capas, average pooling, tanh/sigmoide; se evaluó en MNIST y se desplegó para leer cheques bancarios. Limitada a imágenes pequeñas en gris (32×32).</> },
-                        { year: '2012 · AlexNet', text: <><Cita k="krizhevsky2012imagenet" n /> ganan ImageNet bajando el error top-5 de ~26 % a 15,3 % <Cita k="russakovsky2015imagenet" />. 8 capas, ReLU, dos GPU en paralelo y dropout para sus 60 millones de parámetros. El «Big Bang» del aprendizaje profundo.</> },
+                        { year: '1998 · LeNet-5', text: <><Cita k="lecun1998gradient" n /> demuestran que una red aprende patrones visuales desde los píxeles. 7 capas, <em>average pooling</em>, tanh/sigmoide; se evaluó en MNIST y se desplegó para leer cheques bancarios. Limitada a imágenes pequeñas en gris (32×32).</> },
+                        { year: '2012 · AlexNet', text: <><Cita k="krizhevsky2012imagenet" n /> ganan ImageNet bajando el error top-5 de ~26 % a 15,3 % <Cita k="russakovsky2015imagenet" />. 8 capas, ReLU, dos GPU en paralelo y <em>dropout</em> para sus 60 millones de parámetros. El «Big Bang» del aprendizaje profundo.</> },
                         { year: '2014 · VGGNet', text: <>Oxford apuesta por la uniformidad <Cita k="simonyan2015very" />: pilas de filtros 3×3. Dos capas 3×3 igualan el campo receptivo de una 5×5 con menos parámetros y más no linealidades. Desventaja: VGG-16 pesa ~138 millones de parámetros.</> },
                         { year: '2014 · GoogLeNet', text: <>El módulo Inception aplica varios tamaños de filtro en paralelo y usa convoluciones 1×1 como cuello de botella: unos 5 millones de parámetros, 12 veces menos que los 60 millones de AlexNet <Cita k="szegedy2015going, szegedy2016rethinking" />.</> },
-                        { year: '2015 · ResNet', text: <><Cita k="he2016deep" n /> introducen conexiones de salto: la red aprende F(x) y entrega F(x)+x. Permite entrenar 152 capas y alcanza un error top-5 de 3,57 % (con un ensamble de modelos), por debajo del ~5 % humano de referencia <Cita k="russakovsky2015imagenet" />. Sigue siendo una de las redes troncales (backbones) de referencia; hoy compite con CNN modernizadas como ConvNeXt <Cita k="liu2022convnet" /> y con ViT preentrenados.</> },
+                        { year: '2015 · ResNet', text: <><Cita k="he2016deep" n /> introducen conexiones de salto: la red aprende F(x) y entrega F(x)+x. Permite entrenar 152 capas y alcanza un error top-5 de 3,57 % (con un ensamble de modelos), por debajo del ~5 % humano de referencia <Cita k="russakovsky2015imagenet" />. Sigue siendo una de las redes troncales (<em>backbones</em>) de referencia; hoy compite con CNN modernizadas como ConvNeXt <Cita k="liu2022convnet" /> y con ViT preentrenados.</> },
                     ]} />
                     <p className="text-xs text-gray-500 italic">
                         Nota sobre las fechas: en la narración se indica el año de presentación de cada trabajo (el <em>preprint</em> o la
@@ -1838,7 +1839,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                             justificacion: 'Aplanar la imagen destruye la vecindad de los píxeles y conectar todo con todo dispara los parámetros y el sobreajuste; el MLP tampoco reconoce un objeto desplazado. Los canales se pueden aplanar juntos y la pérdida sigue siendo diferenciable.'
                         },
                         {
-                            pregunta: 'Una entrada de 224 con kernel 3×3, sin relleno y stride 1 produce un mapa de lado…',
+                            pregunta: <>Una entrada de 224 con kernel 3×3, sin relleno y <em>stride</em> 1 produce un mapa de lado…</>,
                             opciones: [
                                 { texto: '222', correcta: true },
                                 { texto: '224', correcta: false },
@@ -1896,7 +1897,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     {/* Caja de la celda */}
                     <rect x="25" y="52" width="730" height="316" rx="16" fill="#FBF8FF" stroke="#3D008D" strokeWidth="2" />
                     <text x="44" y="80" fontSize="13" fill="#3D008D" fontWeight="bold">Celda LSTM · paso t</text>
-                    <text x="712" y="80" textAnchor="end" fontSize="10.5" fill="#94A3B8" fontStyle="italic">analogía de tuberías y válvulas</text>
+                    <text x="712" y="80" textAnchor="end" fontSize="10.5" fill="#64748B" fontStyle="italic">analogía de tuberías y válvulas</text>
 
                     {/* ===== Cinta transportadora: estado de celda C (la "tubería" de memoria) ===== */}
                     <line x1="25" y1="120" x2="755" y2="120" stroke="#15803D" strokeWidth="4" />
@@ -1915,7 +1916,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <line x1="215" y1="250" x2="215" y2="140" stroke="#B91C1C" strokeWidth="2" />
                     <polygon points="215,138 209,150 221,150" fill="#B91C1C" />
                     <text x="232" y="196" fontSize="11" fill="#B91C1C" fontWeight="bold">f<tspan baselineShift="sub" fontSize="8">t</tspan></text>
-                    <text x="232" y="210" fontSize="9" fill="#94A3B8" fontStyle="italic">∈ (0, 1)</text>
+                    <text x="232" y="210" fontSize="9" fill="#64748B" fontStyle="italic">∈ (0, 1)</text>
 
                     {/* ===== Suma (+): une memoria antigua filtrada y memoria nueva ===== */}
                     <circle cx="450" cy="120" r="16" fill="#F0FDF4" stroke="#15803D" strokeWidth="2" />
@@ -1962,7 +1963,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <line x1="712" y1="205" x2="712" y2="343" stroke="#3D008D" strokeWidth="3" />
                     <polygon points="712,346 706,334 718,334" fill="#3D008D" />
                     <text x="722" y="343" fontSize="12.5" fill="#3D008D" fontWeight="bold">h<tspan baselineShift="sub" fontSize="9">t</tspan></text>
-                    <text x="722" y="357" fontSize="9" fill="#94A3B8" fontStyle="italic">salida</text>
+                    <text x="722" y="357" fontSize="9" fill="#64748B" fontStyle="italic">salida</text>
 
                     {/* ===== Bus de entrada compartido: x_t y h_{t-1} alimentan las 3 válvulas y la candidata ===== */}
                     <text x="92" y="343" textAnchor="middle" fontSize="12.5" fill="#001A4D" fontWeight="bold">x<tspan baselineShift="sub" fontSize="9">t</tspan></text>
@@ -2042,7 +2043,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                         <text x={gx + (3 * cel) / 2} y={gy + 3 * cel + 36} textAnchor="middle" fontSize="13" fill="#475569">
                             c<tspan baselineShift="sub" fontSize="9">t</tspan> = Σ<tspan baselineShift="sub" fontSize="9">i</tspan> α<tspan baselineShift="sub" fontSize="9">t,i</tspan> · h<tspan baselineShift="sub" fontSize="9">i</tspan>
                         </text>
-                        <text x={gx + (3 * cel) / 2} y={gy + 3 * cel + 56} textAnchor="middle" fontSize="11" fill="#94A3B8" fontStyle="italic">
+                        <text x={gx + (3 * cel) / 2} y={gy + 3 * cel + 56} textAnchor="middle" fontSize="11" fill="#64748B" fontStyle="italic">
                             Cada fila suma 1 (softmax); el color marca dónde se concentra la atención.
                         </text>
                     </svg>
@@ -2287,8 +2288,8 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <p>
                         Una «bolsa de palabras» que ignora el orden pierde el significado pragmático. «No <strong>dar papaya</strong>»
                         no habla de fruta sino de evitar riesgos; «<strong>hacer una vaca</strong>» es una colecta, no un bovino. El
-                        modelo debe procesar <Termino def="Token: unidad mínima en que se segmenta el texto (palabra, subpalabra o carácter) antes de pasar por la red.">token</Termino> a
-                        token manteniendo un «estado mental» que evolucione con la oración.
+                        modelo debe procesar <Termino def="Token: unidad mínima en que se segmenta el texto (palabra, subpalabra o carácter) antes de pasar por la red."><em>token</em></Termino> a{' '}
+                        <em>token</em> manteniendo un «estado mental» que evolucione con la oración.
                     </p>
                     <div className="overflow-x-auto my-4">
                         <table>
@@ -2804,9 +2805,9 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
 
                     {/* --- Veredicto --- */}
                     <text x="700" y="164" textAnchor="middle" fontSize="12" fill="#15803D" fontWeight="bold">real</text>
-                    <text x="700" y="181" textAnchor="middle" fontSize="10.5" fill="#94A3B8">D(x) → 1</text>
+                    <text x="700" y="181" textAnchor="middle" fontSize="10.5" fill="#64748B">D(x) → 1</text>
                     <text x="700" y="206" textAnchor="middle" fontSize="12" fill="#B91C1C" fontWeight="bold">falso</text>
-                    <text x="700" y="223" textAnchor="middle" fontSize="10.5" fill="#94A3B8">D(G(z)) → 0</text>
+                    <text x="700" y="223" textAnchor="middle" fontSize="10.5" fill="#64748B">D(G(z)) → 0</text>
 
                     {/* --- Flechas de flujo --- */}
                     <line x1="90" y1="120" x2="146" y2="120" stroke="#94A3B8" strokeWidth="2" />
@@ -3002,7 +3003,7 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                                         <line x1={m.cx - 6} y1={baseY - 20} x2={m.cx + 6} y2={baseY - 8} stroke="#CBD5E1" strokeWidth="2" />
                                     </g>
                                 )}
-                                <text x={m.cx} y={baseY + 16} textAnchor="middle" fontSize="10" fill={m.h > 0 ? '#ED1E79' : '#94A3B8'}>modo {i + 1}</text>
+                                <text x={m.cx} y={baseY + 16} textAnchor="middle" fontSize="10" fill={m.h > 0 ? '#ED1E79' : '#64748B'}>modo {i + 1}</text>
                             </g>
                         ))}
                         <text x="565" y={baseY + 34} textAnchor="middle" fontSize="11" fill="#B91C1C" fontWeight="bold">1 solo modo → sin diversidad</text>
@@ -3633,14 +3634,14 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                     <p>
                         La autoatención explica cómo un Transformer <em>entiende</em> una secuencia, pero ¿cómo la <em>genera</em>?
                         Un Transformer generativo, como los de la familia GPT <Cita k="brown2020language, radford2019language" />, funciona de forma <strong>autorregresiva</strong>: produce el
-                        texto <strong>un <em>token</em> a la vez</strong> (un token es la unidad mínima de texto que procesa el modelo: una
-                        palabra o, más a menudo, una subpalabra), y cada token nuevo se reinyecta como entrada para predecir el
+                        texto <strong>un <em>token</em> a la vez</strong> (un <em>token</em> es la unidad mínima de texto que procesa el modelo: una
+                        palabra o, más a menudo, una subpalabra), y cada <em>token</em> nuevo se reinyecta como entrada para predecir el
                         siguiente. Formalmente, modela la probabilidad de la secuencia como un producto de condicionales:
                     </p>
                     <Eq>{String.raw`$$ p(x_1, x_2, \ldots, x_T) = \prod_{t=1}^{T} p_\theta\big(x_t \mid x_1, \ldots, x_{t-1}\big) $$`}</Eq>
                     <p>
                         <strong>En palabras:</strong> la probabilidad de la secuencia completa se descompone en una cadena de
-                        decisiones, una por token: cada factor es la probabilidad del token siguiente dado todo lo ya escrito.
+                        decisiones, una por <em>token</em>: cada factor es la probabilidad del <em>token</em> siguiente dado todo lo ya escrito.
                         Es como el verseador de la piquería, que construye la estrofa verso a verso: cada verso nuevo se
                         improvisa condicionado por el pie forzado inicial y por todos los versos ya cantados.
                     </p>
@@ -3650,11 +3651,11 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                     <p>
                         La siguiente herramienta —inspirada en el <em>Transformer Explainer</em> <Cita k="cho2024transformer" />, del Polo Club
                         of Data Science (Georgia Tech)— calcula en vivo la atención escalada de producto punto sobre las tres frases
-                        de la «vaina». Al seleccionar un token se muestra a quién atiende (puntajes, softmax y matriz completa) y cómo
+                        de la «vaina». Al seleccionar un <em>token</em> se muestra a quién atiende (puntajes, softmax y matriz completa) y cómo
                         la mezcla de valores (<em>values</em>) construye su significado; el panel final conecta la atención con la
                         generación autorregresiva mediante una softmax con temperatura.
                     </p>
-                    <AntesDeInteractuar>en «Pásame esa vaina de la mesa», ¿se espera que «vaina» reparta su atención casi por igual entre las cinco palabras o que la concentre en unas pocas, y en cuáles? En el panel de generación, al bajar la temperatura a 0,3, ¿la distribución del siguiente token se volverá más uniforme o más concentrada?</AntesDeInteractuar>
+                    <AntesDeInteractuar>en «Pásame esa vaina de la mesa», ¿se espera que «vaina» reparta su atención casi por igual entre las cinco palabras o que la concentre en unas pocas, y en cuáles? En el panel de generación, al bajar la temperatura a 0,3, ¿la distribución del siguiente <em>token</em> se volverá más uniforme o más concentrada?</AntesDeInteractuar>
                     <div className="bg-white border border-gray-200 rounded-xl p-2 shadow-sm my-4 overflow-hidden">
                         <iframe id="atencion-frame" src="atencion-transformer-interactiva.html"
                             title="Herramienta interactiva de autoatención: pesos QKV en vivo, matriz de atención y generación autorregresiva con temperatura"
@@ -3666,8 +3667,8 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                         </p>
                     </div>
                     <p>
-                        En cada paso, la red estima una distribución sobre el vocabulario y se muestrea el siguiente token. Una
-                        <strong> máscara causal</strong> impide que la autoatención «mire hacia el futuro» —a tokens aún no
+                        En cada paso, la red estima una distribución sobre el vocabulario y se muestrea el siguiente <em>token</em>. Una
+                        <strong> máscara causal</strong> impide que la autoatención «mire hacia el futuro» —a <em>tokens</em> aún no
                         generados—, de modo que la predicción en la posición {String.raw`\(t\)`} solo depende de lo ya escrito. Esta
                         es la cuarta familia generativa del módulo y la que sustenta los grandes modelos de lenguaje actuales.
                     </p>

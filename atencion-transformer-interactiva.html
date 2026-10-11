@@ -212,7 +212,7 @@
     <p class="subtitle">
       La misma palabra adquiere significados distintos según su contexto. Aquí se calcula en vivo la
       <b> atención escalada de producto punto</b> — softmax(QKᵀ/√d<sub>k</sub>)·V — sobre tres
-      frases colombianas. Al elegir una frase y un token se muestra a quién «atiende», y cómo esa mezcla
+      frases colombianas. Al elegir una frase y un <em>token</em> se muestra a quién «atiende», y cómo esa mezcla
       construye su significado. Al pasar el cursor sobre cualquier elemento se muestra su explicación.
     </p>
   </header>
@@ -232,13 +232,13 @@
 
   <!-- ============ TOKENS ============ -->
   <div class="token-strip" id="strip"></div>
-  <p class="strip-hint">Cada token puede seleccionarse como <b>Query</b> (la palabra que «pregunta»). Por defecto se analiza «vaina».</p>
+  <p class="strip-hint">Cada <em>token</em> puede seleccionarse como <b>Query</b> (la palabra que «pregunta»). Por defecto se analiza «vaina».</p>
 
   <!-- ============ PESOS + MATRIZ ============ -->
   <div class="grid2">
     <div class="panel">
       <h2>⚖️ De la pregunta a los pesos</h2>
-      <p class="lead">Para el token seleccionado se calculan las tres etapas: el puntaje crudo
+      <p class="lead">Para el <em>token</em> seleccionado se calculan las tres etapas: el puntaje crudo
         Q·K (¿qué tan afín es cada palabra?), la división por √d<sub>k</sub> = 2 y la
         <b> softmax</b>, que convierte los puntajes en pesos que suman 1.</p>
       <div class="whead"><span></span><span>puntaje Q·K ÷ √dₖ</span><span></span><span>peso softmax</span><span></span></div>
@@ -247,9 +247,9 @@
     </div>
     <div class="panel">
       <h2>🔥 Matriz de autoatención completa</h2>
-      <p class="lead">Cada fila es un token que pregunta (Query); cada columna, un token que responde (Key).
-        Cuanto más intenso el color, más atención. Al hacer clic en el nombre de una fila se selecciona ese token.
-        La atención es <b>bidireccional</b>: cada token ve la frase completa, también las palabras que vienen después.</p>
+      <p class="lead">Cada fila es un <em>token</em> que pregunta (Query); cada columna, un <em>token</em> que responde (Key).
+        Cuanto más intenso el color, más atención. Al hacer clic en el nombre de una fila se selecciona ese <em>token</em>.
+        La atención es <b>bidireccional</b>: cada <em>token</em> ve la frase completa, también las palabras que vienen después.</p>
       <div class="heat-wrap" id="heat"></div>
       <p class="heat-hint">Cada fila suma 1 (softmax por fila): la atención es un reparto, no un puntaje absoluto.
         Las celdas muestran porcentajes <b>redondeados</b> a enteros, de modo que una fila puede sumar 99 o 101.</p>
@@ -261,8 +261,8 @@
     <h2>🧭 El significado que adquiere el token</h2>
     <p class="lead">
       La salida de la atención es la <b>mezcla ponderada de los Values</b>: Σ&nbsp;peso<sub>j</sub>·V<sub>j</sub>.
-      Ese vector es el «nuevo significado» del token en esta frase. La prueba clave: se puede cambiar de frase
-      con «vaina» seleccionada y observar cómo el mismo token termina con un vector completamente distinto.
+      Ese vector es el «nuevo significado» del <em>token</em> en esta frase. La prueba clave: se puede cambiar de frase
+      con «vaina» seleccionada y observar cómo el mismo <em>token</em> termina con un vector completamente distinto.
     </p>
     <div class="dims" id="dims"></div>
     <div class="verdict" id="verdict"></div>
@@ -270,10 +270,10 @@
 
   <!-- ============ GENERACIÓN AUTORREGRESIVA ============ -->
   <div class="genpanel">
-    <h2>🎲 De la atención a la generación: un token a la vez</h2>
+    <h2>🎲 De la atención a la generación: un <em>token</em> a la vez</h2>
     <p class="lead">
       Un Transformer generativo repite este ciclo: atiende a lo ya escrito (con <b>máscara causal</b>: no puede
-      mirar tokens futuros), produce una distribución sobre el vocabulario y <b>muestrea</b> el siguiente token.
+      mirar <em>tokens</em> futuros), produce una distribución sobre el vocabulario y <b>muestrea</b> el siguiente <em>token</em>.
       (La matriz de arriba usa, en cambio, atención bidireccional, como un codificador tipo BERT; con máscara
       causal, «vaina» no vería «mesa».)
       La <b>temperatura</b> reescala los puntajes antes de la softmax: baja → conservador y repetitivo;
@@ -290,7 +290,7 @@
           <label for="tempSlider">Temperatura <b><span id="tempVal">1,0</span></b></label>
           <input type="range" id="tempSlider" min="0.3" max="2" step="0.1" value="1">
         </div>
-        <button class="btn btn-sample" id="btnSample">🎲 Muestrear siguiente token</button>
+        <button class="btn btn-sample" id="btnSample">🎲 Muestrear siguiente <em>token</em></button>
         <button class="btn btn-clear" id="btnClear">↺ Limpiar muestras</button>
         <div class="samples" id="samples"></div>
         <div class="gen-note">Con temperatura 0,3 casi siempre sale la opción más probable; con 2,0 aparecen
@@ -435,7 +435,7 @@ function renderWeights(){
   // nota de etapa: cuál gana
   const best=[...A.w.keys()].sort((a,b)=>A.w[b]-A.w[a]).filter(j=>j!==App.qi).slice(0,2)
     .map(j=>`«${s.tokens[j]}» (${pct(A.w[j],0)})`);
-  q("stageNote").innerHTML=`La softmax reparte la atención de <b>«${s.tokens[App.qi]}»</b> principalmente hacia ${best.join(" y ")}. El factor ÷√dₖ = ${SQRT_DK} evita que los puntajes crezcan tanto que la softmax se sature en un solo token.`;
+  q("stageNote").innerHTML=`La softmax reparte la atención de <b>«${s.tokens[App.qi]}»</b> principalmente hacia ${best.join(" y ")}. El factor ÷√dₖ = ${SQRT_DK} evita que los puntajes crezcan tanto que la softmax se sature en un solo <em>token</em>.`;
 }
 
 function heatColor(w){
@@ -482,8 +482,8 @@ function renderDims(){
   const tok=s.tokens[App.qi];
   const domIdx=A.out.indexOf(Math.max(...A.out));
   q("verdict").innerHTML = tok.toLowerCase()==="vaina"
-    ? `✔ En esta frase, «vaina» sale de la atención con la dimensión dominante <b>«${DIMS[domIdx].key}»</b>: ${s.explica}. El mismo token, otra frase, otro vector — eso es la autoatención.`
-    : `✔ El token «${tok}» sale de la atención con la dimensión dominante «${DIMS[domIdx].key}». Al seleccionar «vaina» y cambiar de frase se aprecia el efecto completo del contexto.`;
+    ? `✔ En esta frase, «vaina» sale de la atención con la dimensión dominante <b>«${DIMS[domIdx].key}»</b>: ${s.explica}. El mismo <em>token</em>, otra frase, otro vector — eso es la autoatención.`
+    : `✔ El <em>token</em> «${tok}» sale de la atención con la dimensión dominante «${DIMS[domIdx].key}». Al seleccionar «vaina» y cambiar de frase se aprecia el efecto completo del contexto.`;
 }
 
 /* =========================================================================

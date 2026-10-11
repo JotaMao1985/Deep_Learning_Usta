@@ -182,6 +182,8 @@
         /* MathJax (tex-svg) + Preflight de Tailwind (svg{display:block}) rompe la
            matematica inline: cada formula salta de linea. Se restaura el flujo inline. */
         mjx-container svg { display: inline-block; }
+        /* Los ítems de grid no se encogen por debajo de su contenido sin esto: desbordaban a 375 px (auditoría M2-E8). */
+        .grid > * { min-width: 0; }
     </style>
 </head>
 

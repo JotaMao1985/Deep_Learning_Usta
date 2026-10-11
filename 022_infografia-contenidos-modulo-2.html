@@ -231,7 +231,7 @@
                 <a href="#cap1" class="card p-4 border-t-4 border-primary block">
                     <div class="flex items-center justify-between"><span class="text-3xl font-extrabold text-primary/25">2.1</span><i class="fas fa-eye text-primary"></i></div>
                     <h3 class="font-bold text-navy mt-1 leading-tight">Visión: CNN</h3>
-                    <p class="text-xs text-gray-500 mt-1">Convolución, pooling, LeNet→ResNet, ViT, Transfer Learning, Edge AI</p>
+                    <p class="text-xs text-gray-500 mt-1">Convolución, <em>pooling</em>, LeNet→ResNet, ViT, Transfer Learning, Edge AI</p>
                 </a>
                 <a href="#cap2" class="card p-4 border-t-4 border-secondary block">
                     <div class="flex items-center justify-between"><span class="text-3xl font-extrabold text-secondary/25">2.2</span><i class="fas fa-wave-square text-secondary"></i></div>
@@ -329,7 +329,7 @@
                 </div>
 
                 <div class="card p-6">
-                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-compress text-primary"></i>Max pooling: invarianza y reducción</h3>
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-compress text-primary"></i><em>Max pooling</em>: invarianza y reducción</h3>
                     <p class="text-[0.86rem] text-gray-600 mb-3">El <em>pooling</em> divide el mapa en regiones (p. ej. \(2\times 2\)) y conserva el <strong>máximo</strong> de cada una. Reduce el cómputo y aporta <strong>invarianza a pequeñas traslaciones</strong>: si el ojo del jaguar se movió un píxel, el valor máximo de la ventana sigue siendo el mismo.</p>
                     <!-- SVG max pooling -->
                     <svg viewBox="0 0 420 160" class="w-full" role="img" aria-labelledby="poolTitle poolDesc">
@@ -383,7 +383,7 @@
                     <line x1="40" y1="62" x2="650" y2="62" stroke="#CBD5E1" stroke-width="2"/>
                     <g font-family="Montserrat" text-anchor="middle">
                         <g><circle cx="70" cy="62" r="8" fill="#3D008D"/><text x="70" y="40" font-size="11" font-weight="700" fill="#001A4D">LeNet-5</text><text x="70" y="86" font-size="9" fill="#64748B">1998 · 7 capas</text><text x="70" y="100" font-size="8" fill="#94A3B8">cheques MNIST</text></g>
-                        <g><circle cx="210" cy="62" r="8" fill="#ED1E79"/><text x="210" y="40" font-size="11" font-weight="700" fill="#001A4D">AlexNet</text><text x="210" y="86" font-size="9" fill="#64748B">2012 · 8 capas</text><text x="210" y="100" font-size="8" fill="#94A3B8">ReLU + GPU + Dropout</text></g>
+                        <g><circle cx="210" cy="62" r="8" fill="#ED1E79"/><text x="210" y="40" font-size="11" font-weight="700" fill="#001A4D">AlexNet</text><text x="210" y="86" font-size="9" fill="#64748B">2012 · 8 capas</text><text x="210" y="100" font-size="8" fill="#94A3B8">ReLU + GPU + <tspan font-style="italic">Dropout</tspan></text></g>
                         <g><circle cx="350" cy="62" r="8" fill="#0E7490"/><text x="350" y="40" font-size="11" font-weight="700" fill="#001A4D">VGG</text><text x="350" y="86" font-size="9" fill="#64748B">2014 · 16 capas</text><text x="350" y="100" font-size="8" fill="#94A3B8">filtros 3×3 apilados</text></g>
                         <g><circle cx="490" cy="62" r="8" fill="#B45309"/><text x="490" y="40" font-size="11" font-weight="700" fill="#001A4D">Inception</text><text x="490" y="86" font-size="9" fill="#64748B">2014 · módulos ∥</text><text x="490" y="100" font-size="8" fill="#94A3B8">conv 1×1, ≈5 M parám.</text></g>
                         <g><circle cx="630" cy="62" r="9" fill="#5B1C9E"/><text x="630" y="40" font-size="11" font-weight="700" fill="#001A4D">ResNet</text><text x="630" y="86" font-size="9" fill="#64748B">2015 · 152 capas</text><text x="630" y="100" font-size="8" fill="#94A3B8">skip connections</text></g>
@@ -467,7 +467,7 @@
                         </ul>
                     </div>
                     <div class="rounded-xl border border-secondary/15 bg-[#FCE7F1]/40 p-4">
-                        <span class="text-[11px] font-bold uppercase tracking-wider text-secondary"><i class="fas fa-unlock mr-1"></i>Fine-Tuning (ajuste fino)</span>
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-secondary"><i class="fas fa-unlock mr-1"></i><em>Fine-Tuning</em> (ajuste fino)</span>
                         <ul class="text-[0.84rem] text-gray-600 mt-2 space-y-1.5">
                             <li><strong>Cuándo:</strong> conjunto de datos grande o muy distinto (médico, satelital).</li>
                             <li><strong>Cómo:</strong> descongelar las últimas capas convolucionales y reentrenar con tasa de aprendizaje <strong>muy baja</strong>.</li>
@@ -877,7 +877,7 @@
 
                 <div class="card p-6">
                     <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-key" style="color:#B45309"></i>Transformers: autoatención con Q, K, V</h3>
-                    <p class="text-[0.86rem] text-gray-600 mb-3">El significado de una palabra depende de su relación con todas las demás <strong>en paralelo</strong>. Cada token emite una <strong>Query</strong> («¿qué soy aquí?»), las demás ofrecen sus <strong>Keys</strong>, y si encajan se transfiere su <strong>Value</strong>.</p>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">El significado de una palabra depende de su relación con todas las demás <strong>en paralelo</strong>. Cada <em>token</em> emite una <strong>Query</strong> («¿qué soy aquí?»), las demás ofrecen sus <strong>Keys</strong>, y si encajan se transfiere su <strong>Value</strong>.</p>
                     <div class="eq text-center my-3">$$\operatorname{Attention}(Q,K,V) = \operatorname{softmax}\!\left(\frac{QK^{\top}}{\sqrt{d_k}}\right)V$$</div>
                     <div class="callout" style="border-color:#B45309; background:#FFFBEB">
                         <p class="text-[0.82rem] text-gray-700"><i class="fas fa-comment-dots mr-1" style="color:#B45309"></i><strong>La palabra «vaina»:</strong> en «pásame esa vaina» la atención la liga a un objeto; en «¡qué vaina tan buena!», a una situación. La <strong>atención multicabeza</strong> (<em>multi-head</em>) mira la frase de varias formas a la vez (gramática, tono, tiempo); la <strong>codificación posicional</strong> (<em>positional encoding</em>: senos y cosenos fijos o un vector aprendido) añade a cada token su posición absoluta y le devuelve el orden perdido.</p>
@@ -927,7 +927,7 @@
                     <h3 class="font-bold text-navy mb-3 text-sm uppercase tracking-wider">Glosario relámpago (analogías)</h3>
                     <dl class="text-[0.83rem] space-y-2">
                         <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Convolución</dt><dd class="text-gray-600">un escáner deslizante que detecta bordes y texturas.</dd></div>
-                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Pooling</dt><dd class="text-gray-600">resumir un cuadrante quedándose con lo más fuerte.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0"><em>Pooling</em></dt><dd class="text-gray-600">resumir un cuadrante quedándose con lo más fuerte.</dd></div>
                         <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Transfer Learning</dt><dd class="text-gray-600">reciclar el «ojo» de una red entrenada en ImageNet.</dd></div>
                         <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Desvanecimiento del gradiente</dt><dd class="text-gray-600">el teléfono roto: una frase susurrada por 50 personas llega irreconocible al final.</dd></div>
                         <div class="flex gap-2"><dt class="font-bold text-primary w-28 flex-shrink-0">Estado de celda</dt><dd class="text-gray-600">la cinta transportadora que conserva la memoria.</dd></div>
