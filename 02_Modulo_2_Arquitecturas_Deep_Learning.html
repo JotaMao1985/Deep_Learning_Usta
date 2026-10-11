@@ -276,6 +276,8 @@
         mjx-container svg {
             display: inline-block;
         }
+        /* Citas APA (auditoría 2026-10): el título muestra la referencia completa */
+        .cita { cursor: help; }
     </style>
 </head>
 
@@ -994,6 +996,129 @@
             </p>
         );
 
+        // ===== Citas APA 7 (auditoría 2026-10) =====
+        // Datos generados con .claude/auditoria-2026-10/scripts/refs_js.py desde recursos/bibliografia-maestra.json.
+        // No editar a mano: regenerar el bloque REFS si cambia la bibliografía maestra.
+        const REFS = {
+            goodfellow2016deep: { a: 'Goodfellow et al.', y: '2016', u: 'https://www.deeplearningbook.org', r: [['Goodfellow, I., Bengio, Y. y Courville, A. (2016). ', 0], ['Deep learning', 1], ['. ', 0], ['MIT Press.', 0]] },
+            zhang2023dive: { a: 'Zhang et al.', y: '2023', u: 'https://d2l.ai/', r: [['Zhang, A., Lipton, Z. C., Li, M. y Smola, A. J. (2023). ', 0], ['Dive into deep learning', 1], ['. ', 0], ['Cambridge University Press.', 0]] },
+            hubel1962receptive: { a: 'Hubel y Wiesel', y: '1962', u: 'https://doi.org/10.1113/jphysiol.1962.sp006837', r: [['Hubel, D. H. y Wiesel, T. N. (1962). ', 0], ['Receptive fields, binocular interaction and functional architecture in the cat\'s visual cortex. ', 0], ['The Journal of Physiology', 1], [', ', 0], ['160', 1], ['(1)', 0], [', 106–154', 0], ['.', 0]] },
+            fukushima1980neocognitron: { a: 'Fukushima', y: '1980', u: 'https://doi.org/10.1007/BF00344251', r: [['Fukushima, K. (1980). ', 0], ['Neocognitron: A self-organizing neural network model for a mechanism of pattern recognition unaffected by shift in position. ', 0], ['Biological Cybernetics', 1], [', ', 0], ['36', 1], ['(4)', 0], [', 193–202', 0], ['.', 0]] },
+            lecun1989backpropagation: { a: 'LeCun et al.', y: '1989', u: 'https://doi.org/10.1162/neco.1989.1.4.541', r: [['LeCun, Y., Boser, B., Denker, J. S., Henderson, D., Howard, R. E., Hubbard, W. y Jackel, L. D. (1989). ', 0], ['Backpropagation applied to handwritten zip code recognition. ', 0], ['Neural Computation', 1], [', ', 0], ['1', 1], ['(4)', 0], [', 541–551', 0], ['.', 0]] },
+            szegedy2013intriguing: { a: 'Szegedy et al.', y: '2013', u: 'https://doi.org/10.48550/arXiv.1312.6199', r: [['Szegedy, C., Zaremba, W., Sutskever, I., Bruna, J., Erhan, D., Goodfellow, I. y Fergus, R. (2013). ', 0], ['Intriguing properties of neural networks', 1], [' [Preprint]. ', 0], ['arXiv.', 0]] },
+            dumoulin2016guide: { a: 'Dumoulin y Visin', y: '2016', u: 'https://doi.org/10.48550/arXiv.1603.07285', r: [['Dumoulin, V. y Visin, F. (2016). ', 0], ['A guide to convolution arithmetic for deep learning', 1], [' [Preprint]. ', 0], ['arXiv.', 0]] },
+            wang2021cnn: { a: 'Wang et al.', y: '2021', u: 'https://doi.org/10.1109/TVCG.2020.3030418', r: [['Wang, Z. J., Turko, R., Shaikh, O., Park, H., Das, N., Hohman, F., Kahng, M. y Chau, D. H. (2021). ', 0], ['CNN Explainer: Learning convolutional neural networks with interactive visualization. ', 0], ['IEEE Transactions on Visualization and Computer Graphics', 1], [', ', 0], ['27', 1], ['(2)', 0], [', 1396–1406', 0], ['.', 0]] },
+            lecun1998gradient: { a: 'LeCun et al.', y: '1998', u: 'https://doi.org/10.1109/5.726791', r: [['LeCun, Y., Bottou, L., Bengio, Y. y Haffner, P. (1998). ', 0], ['Gradient-based learning applied to document recognition. ', 0], ['Proceedings of the IEEE', 1], [', ', 0], ['86', 1], ['(11)', 0], [', 2278–2324', 0], ['.', 0]] },
+            krizhevsky2012imagenet: { a: 'Krizhevsky et al.', y: '2012', u: 'https://proceedings.neurips.cc/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf', r: [['Krizhevsky, A., Sutskever, I. y Hinton, G. E. (2012). ', 0], ['ImageNet classification with deep convolutional neural networks. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 25, pp. 1097–1105)', 0], ['. ', 0], ['Curran Associates.', 0]] },
+            russakovsky2015imagenet: { a: 'Russakovsky et al.', y: '2015', u: 'https://doi.org/10.1007/s11263-015-0816-y', r: [['Russakovsky, O., Deng, J., Su, H., Krause, J., Satheesh, S., Ma, S., Huang, Z., Karpathy, A., Khosla, A., Bernstein, M., Berg, A. C. y Fei-Fei, L. (2015). ', 0], ['ImageNet large scale visual recognition challenge. ', 0], ['International Journal of Computer Vision', 1], [', ', 0], ['115', 1], ['(3)', 0], [', 211–252', 0], ['.', 0]] },
+            simonyan2015very: { a: 'Simonyan y Zisserman', y: '2015', u: 'https://arxiv.org/abs/1409.1556', r: [['Simonyan, K. y Zisserman, A. (2015). ', 0], ['Very deep convolutional networks for large-scale image recognition. ', 0], ['En ', 0], ['3rd International Conference on Learning Representations (ICLR 2015)', 1], ['.', 0]] },
+            szegedy2015going: { a: 'Szegedy et al.', y: '2015', u: 'https://doi.org/10.1109/CVPR.2015.7298594', r: [['Szegedy, C., Liu, W., Jia, Y., Sermanet, P., Reed, S., Anguelov, D., Erhan, D., Vanhoucke, V. y Rabinovich, A. (2015). ', 0], ['Going deeper with convolutions. ', 0], ['En ', 0], ['2015 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)', 1], [' (pp. 1–9)', 0], ['. ', 0], ['IEEE.', 0]] },
+            szegedy2016rethinking: { a: 'Szegedy et al.', y: '2016', u: 'https://doi.org/10.1109/CVPR.2016.308', r: [['Szegedy, C., Vanhoucke, V., Ioffe, S., Shlens, J. y Wojna, Z. (2016). ', 0], ['Rethinking the Inception architecture for computer vision. ', 0], ['En ', 0], ['2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)', 1], [' (pp. 2818–2826)', 0], ['. ', 0], ['IEEE.', 0]] },
+            he2016deep: { a: 'He et al.', y: '2016', u: 'https://doi.org/10.1109/CVPR.2016.90', r: [['He, K., Zhang, X., Ren, S. y Sun, J. (2016). ', 0], ['Deep residual learning for image recognition. ', 0], ['En ', 0], ['Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)', 1], [' (pp. 770–778)', 0], ['. ', 0], ['IEEE.', 0]] },
+            liu2022convnet: { a: 'Z. Liu et al.', y: '2022', u: 'https://doi.org/10.1109/CVPR52688.2022.01167', r: [['Liu, Z., Mao, H., Wu, C.-Y., Feichtenhofer, C., Darrell, T. y Xie, S. (2022). ', 0], ['A ConvNet for the 2020s. ', 0], ['En ', 0], ['2022 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)', 1], [' (pp. 11966–11976)', 0], ['. ', 0], ['IEEE.', 0]] },
+            dosovitskiy2021image: { a: 'Dosovitskiy et al.', y: '2021', u: 'https://arxiv.org/abs/2010.11929', r: [['Dosovitskiy, A., Beyer, L., Kolesnikov, A., Weissenborn, D., Zhai, X., Unterthiner, T., Dehghani, M., Minderer, M., Heigold, G., Gelly, S., Uszkoreit, J. y Houlsby, N. (2021). ', 0], ['An image is worth 16x16 words: Transformers for image recognition at scale. ', 0], ['En ', 0], ['9th International Conference on Learning Representations (ICLR 2021)', 1], ['.', 0]] },
+            touvron2021training: { a: 'Touvron et al.', y: '2021', u: 'https://proceedings.mlr.press/v139/touvron21a.html', r: [['Touvron, H., Cord, M., Douze, M., Massa, F., Sablayrolles, A. y Jégou, H. (2021). ', 0], ['Training data-efficient image transformers & distillation through attention. ', 0], ['En ', 0], ['Proceedings of the 38th International Conference on Machine Learning', 1], [' (Vol. 139, pp. 10347–10357)', 0], ['. ', 0], ['PMLR.', 0]] },
+            tolstikhin2021mlp: { a: 'Tolstikhin et al.', y: '2021', u: 'https://arxiv.org/abs/2105.01601', r: [['Tolstikhin, I., Houlsby, N., Kolesnikov, A., Beyer, L., Zhai, X., Unterthiner, T., Yung, J., Steiner, A., Keysers, D., Uszkoreit, J., Lucic, M. y Dosovitskiy, A. (2021). ', 0], ['MLP-Mixer: An all-MLP architecture for vision. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 34, pp. 24261–24272)', 0], ['. ', 0], ['Curran Associates.', 0]] },
+            selvaraju2017grad: { a: 'Selvaraju et al.', y: '2017', u: 'https://doi.org/10.1109/ICCV.2017.74', r: [['Selvaraju, R. R., Cogswell, M., Das, A., Vedantam, R., Parikh, D. y Batra, D. (2017). ', 0], ['Grad-CAM: Visual explanations from deep networks via gradient-based localization. ', 0], ['En ', 0], ['2017 IEEE International Conference on Computer Vision (ICCV)', 1], [' (pp. 618–626)', 0], ['. ', 0], ['IEEE.', 0]] },
+            deng2009imagenet: { a: 'Deng et al.', y: '2009', u: 'https://doi.org/10.1109/CVPR.2009.5206848', r: [['Deng, J., Dong, W., Socher, R., Li, L.-J., Li, K. y Fei-Fei, L. (2009). ', 0], ['ImageNet: A large-scale hierarchical image database. ', 0], ['En ', 0], ['2009 IEEE Conference on Computer Vision and Pattern Recognition', 1], [' (pp. 248–255)', 0], ['. ', 0], ['IEEE.', 0]] },
+            yosinski2014transferable: { a: 'Yosinski et al.', y: '2014', u: 'https://arxiv.org/abs/1411.1792', r: [['Yosinski, J., Clune, J., Bengio, Y. y Lipson, H. (2014). ', 0], ['How transferable are features in deep neural networks? ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 27, pp. 3320–3328)', 0], ['. ', 0], ['Curran Associates.', 0]] },
+            oquab2023dinov2: { a: 'Oquab et al.', y: '2023', u: 'https://doi.org/10.48550/arXiv.2304.07193', r: [['Oquab, M., Darcet, T., Moutakanni, T., Vo, H., Szafraniec, M., Khalidov, V., Fernandez, P., Haziza, D., Massa, F., El-Nouby, A., Assran, M., Ballas, N., Galuba, W., Howes, R., Huang, P.-Y., Li, S.-W., Misra, I., Rabbat, M., Sharma, V., … Bojanowski, P. (2023). ', 0], ['DINOv2: Learning robust visual features without supervision', 1], [' [Preprint]. ', 0], ['arXiv.', 0]] },
+            sibcolombia2026cifras: { a: 'SiB Colombia', y: '2026', u: 'https://cifras.biodiversidad.co/files/Kit_prensa-Cifras_Sobre_Biodiversidad_de_Colombia.pdf', r: [['SiB Colombia. (2026). ', 0], ['Cifras destacadas: Biodiversidad de Colombia 2025', 1], ['.', 0]] },
+            elcolombiano2023dias: { a: 'El Colombiano', y: '2023', u: 'https://www.elcolombiano.com/medio-ambiente/dias-camara-trampa-humboldt-KF22502855', r: [['El Colombiano. (2023, 30 de septiembre). ', 0], ['En Colombia empiezan los Días de Cámara Trampa y usted también puede participar. ', 0], ['El Colombiano', 1], ['.', 0]] },
+            ahumada2020wildlife: { a: 'Ahumada et al.', y: '2020', u: 'https://doi.org/10.1017/S0376892919000298', r: [['Ahumada, J. A., Fegraus, E., Birch, T., Flores, N., Kays, R., O’Brien, T. G., Palmer, J., Schuttler, S., Zhao, J. Y., Jetz, W., Kinnaird, M., Kulkarni, S., Lyet, A., Thau, D., Duong, M., Oliver, R. y Dancer, A. (2020). ', 0], ['Wildlife Insights: A platform to maximize the potential of camera trap and other passive sensor wildlife data for the planet. ', 0], ['Environmental Conservation', 1], [', ', 0], ['47', 1], ['(1)', 0], [', 1–6', 0], ['.', 0]] },
+            jacob2018quantization: { a: 'Jacob et al.', y: '2018', u: 'https://doi.org/10.1109/CVPR.2018.00286', r: [['Jacob, B., Kligys, S., Chen, B., Zhu, M., Tang, M., Howard, A., Adam, H. y Kalenichenko, D. (2018). ', 0], ['Quantization and training of neural networks for efficient integer-arithmetic-only inference. ', 0], ['En ', 0], ['2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition', 1], [' (pp. 2704–2713)', 0], ['. ', 0], ['IEEE.', 0]] },
+            lin2020mcunet: { a: 'Lin et al.', y: '2020', u: 'https://papers.nips.cc/paper_files/paper/2020/hash/86c51678350f656dcc7f490a43946ee5-Abstract.html', r: [['Lin, J., Chen, W.-M., Lin, Y., Cohn, J., Gan, C. y Han, S. (2020). ', 0], ['MCUNet: Tiny deep learning on IoT devices. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 33, pp. 11711–11722)', 0], ['.', 0]] },
+            han2015learning: { a: 'Han et al.', y: '2015', u: 'https://papers.nips.cc/paper_files/paper/2015/hash/ae0eb3eed39d2bcef4622b2499a05fe6-Abstract.html', r: [['Han, S., Pool, J., Tran, J. y Dally, W. (2015). ', 0], ['Learning both weights and connections for efficient neural network. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 28, pp. 1135–1143)', 0], ['.', 0]] },
+            hinton2015distilling: { a: 'Hinton et al.', y: '2015', u: 'https://doi.org/10.48550/arXiv.1503.02531', r: [['Hinton, G., Vinyals, O. y Dean, J. (2015). ', 0], ['Distilling the knowledge in a neural network', 1], [' [Preprint]. ', 0], ['arXiv.', 0]] },
+            howard2017mobilenets: { a: 'Howard et al.', y: '2017', u: 'https://doi.org/10.48550/arXiv.1704.04861', r: [['Howard, A. G., Zhu, M., Chen, B., Kalenichenko, D., Wang, W., Weyand, T., Andreetto, M. y Adam, H. (2017). ', 0], ['MobileNets: Efficient convolutional neural networks for mobile vision applications', 1], [' [Preprint]. ', 0], ['arXiv.', 0]] },
+            tan2019efficientnet: { a: 'Tan y Le', y: '2019', u: 'https://proceedings.mlr.press/v97/tan19a.html', r: [['Tan, M. y Le, Q. V. (2019). ', 0], ['EfficientNet: Rethinking model scaling for convolutional neural networks. ', 0], ['En ', 0], ['Proceedings of the 36th International Conference on Machine Learning', 1], [' (Vol. 97, pp. 6105–6114)', 0], ['. ', 0], ['PMLR.', 0]] },
+            olah2017feature: { a: 'Olah et al.', y: '2017', u: 'https://doi.org/10.23915/distill.00007', r: [['Olah, C., Mordvintsev, A. y Schubert, L. (2017). ', 0], ['Feature visualization. ', 0], ['Distill', 1], [', ', 0], ['2', 1], ['(11)', 0], [', e7', 0], ['.', 0]] },
+            ideam2026normales: { a: 'Instituto de Hidrología, Meteorología y Estudios Ambientales', y: '2026', u: 'https://bart.ideam.gov.co/meteorologia/CLIMA/CLIMATOLOGIA/NORMALES%20CLIMATOLOGICAS/NC_ESTANDAR_1991-2020/', r: [['Instituto de Hidrología, Meteorología y Estudios Ambientales. (2026). ', 0], ['Normales climatológicas estándar 1991–2020', 1], [' [Conjunto de datos].', 0]] },
+            olah2015understanding: { a: 'Olah', y: '2015', u: 'https://colah.github.io/posts/2015-08-Understanding-LSTMs/', r: [['Olah, C. (2015, 27 de agosto). ', 0], ['Understanding LSTM networks. ', 0], ['Colah\'s Blog', 1], ['.', 0]] },
+            elman1990finding: { a: 'Elman', y: '1990', u: 'https://doi.org/10.1207/s15516709cog1402_1', r: [['Elman, J. L. (1990). ', 0], ['Finding structure in time. ', 0], ['Cognitive Science', 1], [', ', 0], ['14', 1], ['(2)', 0], [', 179–211', 0], ['.', 0]] },
+            werbos1990backpropagation: { a: 'Werbos', y: '1990', u: 'https://doi.org/10.1109/5.58337', r: [['Werbos, P. J. (1990). ', 0], ['Backpropagation through time: What it does and how to do it. ', 0], ['Proceedings of the IEEE', 1], [', ', 0], ['78', 1], ['(10)', 0], [', 1550–1560', 0], ['.', 0]] },
+            bengio1994learning: { a: 'Bengio et al.', y: '1994', u: 'https://doi.org/10.1109/72.279181', r: [['Bengio, Y., Simard, P. y Frasconi, P. (1994). ', 0], ['Learning long-term dependencies with gradient descent is difficult. ', 0], ['IEEE Transactions on Neural Networks', 1], [', ', 0], ['5', 1], ['(2)', 0], [', 157–166', 0], ['.', 0]] },
+            pascanu2013difficulty: { a: 'Pascanu et al.', y: '2013', u: 'https://proceedings.mlr.press/v28/pascanu13.html', r: [['Pascanu, R., Mikolov, T. y Bengio, Y. (2013). ', 0], ['On the difficulty of training recurrent neural networks. ', 0], ['En ', 0], ['Proceedings of the 30th International Conference on Machine Learning', 1], [' (Vol. 28, pp. 1310–1318)', 0], ['. ', 0], ['PMLR.', 0]] },
+            hochreiter1997long: { a: 'Hochreiter y Schmidhuber', y: '1997', u: 'https://doi.org/10.1162/neco.1997.9.8.1735', r: [['Hochreiter, S. y Schmidhuber, J. (1997). ', 0], ['Long short-term memory. ', 0], ['Neural Computation', 1], [', ', 0], ['9', 1], ['(8)', 0], [', 1735–1780', 0], ['.', 0]] },
+            gers2000learning: { a: 'Gers et al.', y: '2000', u: 'https://doi.org/10.1162/089976600300015015', r: [['Gers, F. A., Schmidhuber, J. y Cummins, F. (2000). ', 0], ['Learning to forget: Continual prediction with LSTM. ', 0], ['Neural Computation', 1], [', ', 0], ['12', 1], ['(10)', 0], [', 2451–2471', 0], ['.', 0]] },
+            cho2014learning: { a: 'K. Cho et al.', y: '2014', u: 'https://doi.org/10.3115/v1/D14-1179', r: [['Cho, K., van Merriënboer, B., Gulcehre, C., Bahdanau, D., Bougares, F., Schwenk, H. y Bengio, Y. (2014). ', 0], ['Learning phrase representations using RNN encoder–decoder for statistical machine translation. ', 0], ['En ', 0], ['Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing (EMNLP)', 1], [' (pp. 1724–1734)', 0], ['. ', 0], ['Association for Computational Linguistics.', 0]] },
+            chung2014empirical: { a: 'Chung et al.', y: '2014', u: 'https://doi.org/10.48550/arXiv.1412.3555', r: [['Chung, J., Gulcehre, C., Cho, K. y Bengio, Y. (2014). ', 0], ['Empirical evaluation of gated recurrent neural networks on sequence modeling', 1], [' [Preprint]. ', 0], ['arXiv.', 0]] },
+            jozefowicz2015empirical: { a: 'Jozefowicz et al.', y: '2015', u: 'https://proceedings.mlr.press/v37/jozefowicz15.html', r: [['Jozefowicz, R., Zaremba, W. y Sutskever, I. (2015). ', 0], ['An empirical exploration of recurrent network architectures. ', 0], ['En ', 0], ['Proceedings of the 32nd International Conference on Machine Learning', 1], [' (Vol. 37, pp. 2342–2350)', 0], ['. ', 0], ['PMLR.', 0]] },
+            weiss2018practical: { a: 'Weiss et al.', y: '2018', u: 'https://doi.org/10.18653/v1/P18-2117', r: [['Weiss, G., Goldberg, Y. y Yahav, E. (2018). ', 0], ['On the practical computational power of finite precision RNNs for language recognition. ', 0], ['En ', 0], ['Proceedings of the 56th Annual Meeting of the Association for Computational Linguistics (Volume 2: Short Papers)', 1], [' (pp. 740–745)', 0], ['. ', 0], ['Association for Computational Linguistics.', 0]] },
+            sutskever2014sequence: { a: 'Sutskever et al.', y: '2014', u: 'https://arxiv.org/abs/1409.3215', r: [['Sutskever, I., Vinyals, O. y Le, Q. V. (2014). ', 0], ['Sequence to sequence learning with neural networks. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 27, pp. 3104–3112)', 0], ['. ', 0], ['Curran Associates.', 0]] },
+            bahdanau2015neural: { a: 'Bahdanau et al.', y: '2015', u: 'https://arxiv.org/abs/1409.0473', r: [['Bahdanau, D., Cho, K. y Bengio, Y. (2015). ', 0], ['Neural machine translation by jointly learning to align and translate. ', 0], ['En ', 0], ['3rd International Conference on Learning Representations (ICLR 2015)', 1], ['.', 0]] },
+            vaswani2017attention: { a: 'Vaswani et al.', y: '2017', u: 'https://arxiv.org/abs/1706.03762', r: [['Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A. N., Kaiser, Ł. y Polosukhin, I. (2017). ', 0], ['Attention is all you need. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 30, pp. 5998–6008)', 0], ['. ', 0], ['Curran Associates.', 0]] },
+            gu2023mamba: { a: 'Gu y Dao', y: '2023', u: 'https://doi.org/10.48550/arXiv.2312.00752', r: [['Gu, A. y Dao, T. (2023). ', 0], ['Mamba: Linear-time sequence modeling with selective state spaces', 1], [' [Preprint]. ', 0], ['arXiv.', 0]] },
+            beck2024xlstm: { a: 'Beck et al.', y: '2024', u: 'https://doi.org/10.52202/079017-3417', r: [['Beck, M., Pöppel, K., Spanring, M., Auer, A., Prudnikova, O., Kopp, M., Klambauer, G., Brandstetter, J. y Hochreiter, S. (2024). ', 0], ['xLSTM: Extended long short-term memory. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 37, pp. 107547–107603)', 0], ['.', 0]] },
+            bengio2013representation: { a: 'Bengio et al.', y: '2013', u: 'https://doi.org/10.1109/TPAMI.2013.50', r: [['Bengio, Y., Courville, A. y Vincent, P. (2013). ', 0], ['Representation learning: A review and new perspectives. ', 0], ['IEEE Transactions on Pattern Analysis and Machine Intelligence', 1], [', ', 0], ['35', 1], ['(8)', 0], [', 1798–1828', 0], ['.', 0]] },
+            hinton2006reducing: { a: 'Hinton y Salakhutdinov', y: '2006', u: 'https://doi.org/10.1126/science.1127647', r: [['Hinton, G. E. y Salakhutdinov, R. R. (2006). ', 0], ['Reducing the dimensionality of data with neural networks. ', 0], ['Science', 1], [', ', 0], ['313', 1], ['(5786)', 0], [', 504–507', 0], ['.', 0]] },
+            vincent2008extracting: { a: 'Vincent et al.', y: '2008', u: 'https://doi.org/10.1145/1390156.1390294', r: [['Vincent, P., Larochelle, H., Bengio, Y. y Manzagol, P.-A. (2008). ', 0], ['Extracting and composing robust features with denoising autoencoders. ', 0], ['En ', 0], ['Proceedings of the 25th International Conference on Machine Learning', 1], [' (pp. 1096–1103)', 0], ['. ', 0], ['ACM.', 0]] },
+            kingma2014auto: { a: 'Kingma y Welling', y: '2014', u: 'https://arxiv.org/abs/1312.6114', r: [['Kingma, D. P. y Welling, M. (2014). ', 0], ['Auto-encoding variational Bayes. ', 0], ['En ', 0], ['2nd International Conference on Learning Representations (ICLR 2014)', 1], ['.', 0]] },
+            kingma2019introduction: { a: 'Kingma y Welling', y: '2019', u: 'https://doi.org/10.1561/2200000056', r: [['Kingma, D. P. y Welling, M. (2019). ', 0], ['An introduction to variational autoencoders. ', 0], ['Foundations and Trends in Machine Learning', 1], [', ', 0], ['12', 1], ['(4)', 0], [', 307–392', 0], ['.', 0]] },
+            goodfellow2014generative: { a: 'Goodfellow et al.', y: '2014', u: 'https://arxiv.org/abs/1406.2661', r: [['Goodfellow, I. J., Pouget-Abadie, J., Mirza, M., Xu, B., Warde-Farley, D., Ozair, S., Courville, A. y Bengio, Y. (2014). ', 0], ['Generative adversarial nets. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 27, pp. 2672–2680)', 0], ['. ', 0], ['Curran Associates.', 0]] },
+            radford2016unsupervised: { a: 'Radford et al.', y: '2016', u: 'https://arxiv.org/abs/1511.06434', r: [['Radford, A., Metz, L. y Chintala, S. (2016). ', 0], ['Unsupervised representation learning with deep convolutional generative adversarial networks. ', 0], ['En ', 0], ['4th International Conference on Learning Representations (ICLR 2016)', 1], ['.', 0]] },
+            arjovsky2017wasserstein: { a: 'Arjovsky et al.', y: '2017', u: 'https://proceedings.mlr.press/v70/arjovsky17a.html', r: [['Arjovsky, M., Chintala, S. y Bottou, L. (2017). ', 0], ['Wasserstein generative adversarial networks. ', 0], ['En ', 0], ['Proceedings of the 34th International Conference on Machine Learning', 1], [' (Vol. 70, pp. 214–223)', 0], ['. ', 0], ['PMLR.', 0]] },
+            gulrajani2017improved: { a: 'Gulrajani et al.', y: '2017', u: 'https://papers.nips.cc/paper_files/paper/2017/hash/892c3b1c6dccd52936e27cbd0ff683d6-Abstract.html', r: [['Gulrajani, I., Ahmed, F., Arjovsky, M., Dumoulin, V. y Courville, A. (2017). ', 0], ['Improved training of Wasserstein GANs. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 30, pp. 5767–5777)', 0], ['.', 0]] },
+            sohldickstein2015deep: { a: 'Sohl-Dickstein et al.', y: '2015', u: 'https://proceedings.mlr.press/v37/sohl-dickstein15.html', r: [['Sohl-Dickstein, J., Weiss, E. A., Maheswaranathan, N. y Ganguli, S. (2015). ', 0], ['Deep unsupervised learning using nonequilibrium thermodynamics. ', 0], ['En ', 0], ['Proceedings of the 32nd International Conference on Machine Learning', 1], [' (Vol. 37, pp. 2256–2265)', 0], ['. ', 0], ['PMLR.', 0]] },
+            ho2020denoising: { a: 'Ho et al.', y: '2020', u: 'https://arxiv.org/abs/2006.11239', r: [['Ho, J., Jain, A. y Abbeel, P. (2020). ', 0], ['Denoising diffusion probabilistic models. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 33, pp. 6840–6851)', 0], ['. ', 0], ['Curran Associates.', 0]] },
+            dhariwal2021diffusion: { a: 'Dhariwal y Nichol', y: '2021', u: 'https://papers.nips.cc/paper_files/paper/2021/hash/49ad23d1ec9fa4bd8d77d02681df5cfa-Abstract.html', r: [['Dhariwal, P. y Nichol, A. (2021). ', 0], ['Diffusion models beat GANs on image synthesis. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 34, pp. 8780–8794)', 0], ['.', 0]] },
+            ramesh2021zero: { a: 'Ramesh et al.', y: '2021', u: 'https://proceedings.mlr.press/v139/ramesh21a.html', r: [['Ramesh, A., Pavlov, M., Goh, G., Gray, S., Voss, C., Radford, A., Chen, M. y Sutskever, I. (2021). ', 0], ['Zero-shot text-to-image generation. ', 0], ['En ', 0], ['Proceedings of the 38th International Conference on Machine Learning', 1], [' (Vol. 139, pp. 8821–8831)', 0], ['. ', 0], ['PMLR.', 0]] },
+            ramesh2022hierarchical: { a: 'Ramesh et al.', y: '2022', u: 'https://doi.org/10.48550/arXiv.2204.06125', r: [['Ramesh, A., Dhariwal, P., Nichol, A., Chu, C. y Chen, M. (2022). ', 0], ['Hierarchical text-conditional image generation with CLIP latents', 1], [' [Preprint]. ', 0], ['arXiv.', 0]] },
+            rombach2022high: { a: 'Rombach et al.', y: '2022', u: 'https://doi.org/10.1109/CVPR52688.2022.01042', r: [['Rombach, R., Blattmann, A., Lorenz, D., Esser, P. y Ommer, B. (2022). ', 0], ['High-resolution image synthesis with latent diffusion models. ', 0], ['En ', 0], ['2022 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)', 1], [' (pp. 10674–10685)', 0], ['. ', 0], ['IEEE.', 0]] },
+            song2021denoising: { a: 'J. Song et al.', y: '2021', u: 'https://arxiv.org/abs/2010.02502', r: [['Song, J., Meng, C. y Ermon, S. (2021). ', 0], ['Denoising diffusion implicit models. ', 0], ['En ', 0], ['9th International Conference on Learning Representations (ICLR 2021)', 1], ['.', 0]] },
+            song2023consistency: { a: 'Y. Song et al.', y: '2023', u: 'https://proceedings.mlr.press/v202/song23a.html', r: [['Song, Y., Dhariwal, P., Chen, M. y Sutskever, I. (2023). ', 0], ['Consistency models. ', 0], ['En ', 0], ['Proceedings of the 40th International Conference on Machine Learning', 1], [' (Vol. 202, pp. 32211–32252)', 0], ['. ', 0], ['PMLR.', 0]] },
+            ho2022classifier: { a: 'Ho y Salimans', y: '2022', u: 'https://doi.org/10.48550/arXiv.2207.12598', r: [['Ho, J. y Salimans, T. (2022). ', 0], ['Classifier-free diffusion guidance', 1], [' [Preprint]. ', 0], ['arXiv.', 0]] },
+            song2021score: { a: 'Y. Song et al.', y: '2021', u: 'https://arxiv.org/abs/2011.13456', r: [['Song, Y., Sohl-Dickstein, J., Kingma, D. P., Kumar, A., Ermon, S. y Poole, B. (2021). ', 0], ['Score-based generative modeling through stochastic differential equations. ', 0], ['En ', 0], ['9th International Conference on Learning Representations (ICLR 2021)', 1], ['.', 0]] },
+            lipman2023flow: { a: 'Lipman et al.', y: '2023', u: 'https://arxiv.org/abs/2210.02747', r: [['Lipman, Y., Chen, R. T. Q., Ben-Hamu, H., Nickel, M. y Le, M. (2023). ', 0], ['Flow matching for generative modeling. ', 0], ['En ', 0], ['11th International Conference on Learning Representations (ICLR 2023)', 1], ['.', 0]] },
+            liu2022flow: { a: 'X. Liu et al.', y: '2022', u: 'https://doi.org/10.48550/arXiv.2209.03003', r: [['Liu, X., Gong, C. y Liu, Q. (2022). ', 0], ['Flow straight and fast: Learning to generate and transfer data with rectified flow', 1], [' [Preprint]. ', 0], ['arXiv.', 0]] },
+            peebles2023scalable: { a: 'Peebles y Xie', y: '2023', u: 'https://doi.org/10.1109/ICCV51070.2023.00387', r: [['Peebles, W. y Xie, S. (2023). ', 0], ['Scalable diffusion models with transformers. ', 0], ['En ', 0], ['2023 IEEE/CVF International Conference on Computer Vision (ICCV)', 1], [' (pp. 4172–4182)', 0], ['. ', 0], ['IEEE.', 0]] },
+            esser2024scaling: { a: 'Esser et al.', y: '2024', u: 'https://proceedings.mlr.press/v235/esser24a.html', r: [['Esser, P., Kulal, S., Blattmann, A., Entezari, R., Müller, J., Saini, H., Levi, Y., Lorenz, D., Sauer, A., Boesel, F., Podell, D., Dockhorn, T., English, Z. y Rombach, R. (2024). ', 0], ['Scaling rectified flow transformers for high-resolution image synthesis. ', 0], ['En ', 0], ['Proceedings of the 41st International Conference on Machine Learning', 1], [' (Vol. 235, pp. 12606–12633)', 0], ['. ', 0], ['PMLR.', 0]] },
+            shaw2018self: { a: 'Shaw et al.', y: '2018', u: 'https://doi.org/10.18653/v1/N18-2074', r: [['Shaw, P., Uszkoreit, J. y Vaswani, A. (2018). ', 0], ['Self-attention with relative position representations. ', 0], ['En ', 0], ['Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 2 (Short Papers)', 1], [' (pp. 464–468)', 0], ['. ', 0], ['Association for Computational Linguistics.', 0]] },
+            su2024roformer: { a: 'Su et al.', y: '2024', u: 'https://doi.org/10.1016/j.neucom.2023.127063', r: [['Su, J., Ahmed, M., Lu, Y., Pan, S., Bo, W. y Liu, Y. (2024). ', 0], ['RoFormer: Enhanced transformer with rotary position embedding. ', 0], ['Neurocomputing', 1], [', ', 0], ['568', 1], [', Artículo 127063', 0], ['.', 0]] },
+            radford2019language: { a: 'Radford et al.', y: '2019', u: 'https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf', r: [['Radford, A., Wu, J., Child, R., Luan, D., Amodei, D. y Sutskever, I. (2019). ', 0], ['Language models are unsupervised multitask learners', 1], ['. ', 0], ['OpenAI.', 0]] },
+            brown2020language: { a: 'Brown et al.', y: '2020', u: 'https://arxiv.org/abs/2005.14165', r: [['Brown, T. B., Mann, B., Ryder, N., Subbiah, M., Kaplan, J., Dhariwal, P., Neelakantan, A., Shyam, P., Sastry, G., Askell, A., Agarwal, S., Herbert-Voss, A., Krueger, G., Henighan, T., Child, R., Ramesh, A., Ziegler, D. M., Wu, J., Winter, C., … Amodei, D. (2020). ', 0], ['Language models are few-shot learners. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 33, pp. 1877–1901)', 0], ['. ', 0], ['Curran Associates.', 0]] },
+            devlin2019bert: { a: 'Devlin et al.', y: '2019', u: 'https://doi.org/10.18653/v1/N19-1423', r: [['Devlin, J., Chang, M.-W., Lee, K. y Toutanova, K. (2019). ', 0], ['BERT: Pre-training of deep bidirectional transformers for language understanding. ', 0], ['En ', 0], ['Proceedings of the 2019 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies', 1], [' (Vol. 1, pp. 4171–4186)', 0], ['. ', 0], ['Association for Computational Linguistics.', 0]] },
+            cho2024transformer: { a: 'A. Cho et al.', y: '2024', u: 'https://arxiv.org/abs/2408.04619v1', r: [['Cho, A., Kim, G. C., Karpekov, A., Helbling, A., Wang, Z. J., Lee, S., Hoover, B. y Chau, D. H. (2024). ', 0], ['Transformer Explainer: Interactive learning of text-generative models', 1], [' [Preprint]. ', 0], ['arXiv.', 0]] },
+            guio2021marco: { a: 'Guío Español et al.', y: '2021', u: 'https://minciencias.gov.co/sites/default/files/marco-etico-ia-colombia-2021.pdf', r: [['Guío Español, A., Tamayo Uribe, E. y Gómez Ayerbe, P. (2021). ', 0], ['Marco ético para la inteligencia artificial en Colombia', 1], [' (Versión 1)', 0], ['. ', 0], ['Consejería Presidencial para Asuntos Económicos y Transformación Digital, Presidencia de la República de Colombia.', 0]] },
+            conpes2025ia: { a: 'Consejo Nacional de Política Económica y Social', y: '2025', u: 'https://colaboracion.dnp.gov.co/CDT/Conpes/Econ%C3%B3micos/4144.pdf', r: [['Consejo Nacional de Política Económica y Social. (2025). ', 0], ['Política nacional de inteligencia artificial', 1], [' (Documento CONPES 4144)', 0], ['. ', 0], ['Departamento Nacional de Planeación.', 0]] },
+            chollet2025deep: { a: 'Chollet y Watson', y: '2025', u: 'https://deeplearningwithpython.io/', r: [['Chollet, F. y Watson, M. (2025). ', 0], ['Deep learning with Python', 1], [' (3.ª ed.)', 0], ['. ', 0], ['Manning.', 0]] },
+            geron2025hands: { a: 'Géron', y: '2025', u: '', r: [['Géron, A. (2025). ', 0], ['Hands-on machine learning with Scikit-Learn and PyTorch: Concepts, tools, and techniques to build intelligent systems', 1], ['. ', 0], ['O\'Reilly Media.', 0]] },
+        };
+        const refTexto = (k) => (REFS[k] ? REFS[k].r.map((s) => s[0]).join('') + (REFS[k].u ? ' ' + REFS[k].u : '') : k);
+        // <Cita k="a, b" /> → «(Autor, 2015; Otro, 2016)». n: forma narrativa «Autor (2015)».
+        // Localizador por clave con «@»: k="goodfellow2016deep@sec. 6.5, nielsen2015neural@cap. 2". p: localizador único (una sola clave).
+        const Cita = ({ k, n = false, p = '' }) => {
+            const ks = k.split(',').map((s) => s.trim()).filter(Boolean).map((s) => { const [c, loc] = s.split('@'); return { c: c.trim(), loc: (loc || '').trim() }; });
+            const grupos = [];
+            ks.forEach(({ c, loc }) => {
+                const R = REFS[c] || { a: c, y: '¿?' };
+                const y = R.y + (loc ? `, ${loc}` : '');
+                const g = grupos.find((gg) => gg.a === R.a);
+                if (g) g.ys.push(y); else grupos.push({ a: R.a, ys: [y] });
+            });
+            const loc = p ? `, ${p}` : '';
+            const titulo = ks.map(({ c }) => refTexto(c)).join('\n');
+            if (n) return <span className="cita" title={titulo}>{grupos.map((g) => `${g.a} (${g.ys.join(', ')}${loc})`).join('; ')}</span>;
+            return <span className="cita" title={titulo}>({grupos.map((g) => `${g.a}, ${g.ys.join(', ')}`).join('; ')}{loc})</span>;
+        };
+        // Lista «Referencias» de un capítulo (APA 7: orden alfabético, sangría francesa).
+        const Referencias = ({ claves, titulo = 'Referencias' }) => {
+            const ks = [...new Set(claves)].filter((k) => REFS[k]).sort((x, y) => refTexto(x).localeCompare(refTexto(y), 'es'));
+            return (
+                <section className="mt-10 pt-6 border-t border-gray-200" aria-label={titulo}>
+                    <h3 className="text-lg font-bold text-primary mb-3">{titulo}</h3>
+                    <ul className="refs-apa space-y-2 text-sm text-gray-700" style={{ listStyle: 'none', paddingLeft: 0 }}>
+                        {ks.map((k) => (
+                            <li key={k} id={`ref-${k}`} style={{ paddingLeft: '2em', textIndent: '-2em' }}>
+                                {REFS[k].r.map((s, i) => (s[1] ? <em key={i}>{s[0]}</em> : <React.Fragment key={i}>{s[0]}</React.Fragment>))}
+                                {REFS[k].u ? <>{' '}<a className="text-primary underline break-all" href={REFS[k].u} target="_blank" rel="noopener noreferrer">{REFS[k].u}</a></> : null}
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            );
+        };
+
         /* ============================================================
            PORTADA + OBJETIVOS (Lección 0)
         ============================================================ */
@@ -1003,7 +1128,8 @@
                     Este material es <strong>autónomo</strong>: permite avanzar a ritmo propio con los botones <em>Anterior / Siguiente</em>.
                     Cada capítulo combina teoría breve, una analogía local, un diagrama, código comentado y práctica.
                     El navegador <strong>recuerda la última lección</strong>, de modo que es posible pausar y retomar en cualquier momento.
-                    Se recomienda intentar las preguntas <em>antes</em> de ver la retroalimentación.
+                    Se recomienda intentar las preguntas <em>antes</em> de ver la retroalimentación. Textos de referencia del módulo:{' '}
+                    <Cita k="goodfellow2016deep" n p="caps. 9, 10, 14 y 20" /> y <Cita k="zhang2023dive" n />.
                 </Box>
 
                 <h3>Identificación del espacio académico</h3>
@@ -1084,6 +1210,8 @@
                     optimización y regularización). Los ejemplos en <span className="inline-code">PyTorch</span> son
                     ilustrativos del flujo del curso y están pensados para ejecutarse en Google Colab.
                 </Box>
+
+                <Referencias claves={['goodfellow2016deep', 'zhang2023dive']} />
             </div>
         );
 
@@ -1248,7 +1376,7 @@
                         El diseño de las <Termino def="Convolutional Neural Networks: redes que aplican filtros aprendibles sobre rejillas de píxeles.">CNN</Termino> no
                         es arbitrario; es una abstracción matemática de cómo el cerebro procesa lo visual. La luz incide en la retina,
                         viaja por el nervio óptico hacia el <Termino def="Estación de relevo del tálamo que reenvía la señal visual de la retina hacia la corteza.">núcleo geniculado lateral</Termino> y llega a la corteza visual primaria (V1) del
-                        lóbulo occipital. Las investigaciones de Hubel y Wiesel sobre la corteza visual (1962), cuyos hallazgos
+                        lóbulo occipital. Las investigaciones de <Cita k="hubel1962receptive" n /> sobre la corteza visual, cuyos hallazgos
                         les valieron el Premio Nobel de Fisiología o Medicina en 1981, revelaron una jerarquía de
                         procesamiento con dos tipos de células:
                     </p>
@@ -1257,7 +1385,7 @@
                         <li><strong>Células complejas:</strong> con campos receptivos mayores, su respuesta es invariante a pequeñas traslaciones; agregan la información de varias células simples.</li>
                     </ul>
                     <p>
-                        Esa jerarquía es la piedra angular de las CNN: las primeras capas detectan bordes y colores (como V1), las
+                        Esa jerarquía es la piedra angular de las CNN <Cita k="fukushima1980neocognitron, lecun1989backpropagation" />: las primeras capas detectan bordes y colores (como V1), las
                         intermedias forman texturas y formas (V2, V4) y las finales reconocen objetos completos (corteza temporal
                         inferior).
                     </p>
@@ -1284,14 +1412,14 @@
                             complejo —bordes → texturas → partes → objeto—, como la jerarquía del córtex visual (V1 → V2 → V4 → corteza
                             temporal inferior). Los paneles <strong>no son activaciones reales de una CNN</strong>: el primero es un filtro de
                             bordes aplicado a la fotografía de un jaguar del Pantanal (Brasil) y los otros tres son recortes de ella. Para ver
-                            activaciones reales, véase Olah et al. (2017).
+                            activaciones reales, véase <Cita k="olah2017feature" n />.
                         </PieFigura>
                     </div>
 
                     <Box type="eth" label="Diferencias con el cerebro">
                         Aunque inspiradas en la biología, las CNN difieren en eficiencia y aprendizaje. El cerebro opera con unos
                         20 vatios y aprende categorías nuevas con poquísimos ejemplos (<em>few-shot</em>). Las CNN requieren miles de
-                        ejemplos etiquetados y cómputo masivo, y son vulnerables a <strong>ataques adversarios</strong>: perturbaciones
+                        ejemplos etiquetados y cómputo masivo, y son vulnerables a <strong>ataques adversarios</strong> <Cita k="szegedy2013intriguing" />: perturbaciones
                         invisibles al ojo humano pueden hacer que clasifiquen mal un objeto.
                     </Box>
 
@@ -1331,7 +1459,7 @@
                     </p>
                     <Eq>{String.raw`$$ S(i,j) = (I * K)(i,j) + b = \sum_{m}\sum_{n} I(i+m,\,j+n)\cdot K(m,n) + b $$`}</Eq>
                     <p className="text-xs text-gray-500 italic">
-                        Nota de rigor: con el signo {String.raw`\(+\)`} en {String.raw`\(I(i+m,\,j+n)\)`} esta operación es, en sentido estricto, una <em>correlación cruzada</em>; la convolución matemática invertiría el kernel {String.raw`\(\big(I(i-m,\,j-n)\big)\)`}. Como el kernel se <em>aprende</em>, la distinción es irrelevante en la práctica y por eso PyTorch, TensorFlow y Keras la llaman «convolución».
+                        Nota de rigor: con el signo {String.raw`\(+\)`} en {String.raw`\(I(i+m,\,j+n)\)`} esta operación es, en sentido estricto, una <em>correlación cruzada</em>; la convolución matemática invertiría el kernel {String.raw`\(\big(I(i-m,\,j-n)\big)\)`}. Como el kernel se <em>aprende</em>, la distinción es irrelevante en la práctica y por eso PyTorch, TensorFlow y Keras la llaman «convolución» <Cita k="goodfellow2016deep" p="sec. 9.1" />.
                     </p>
 
                     <ConvolucionSVG />
@@ -1365,7 +1493,7 @@
                         aparece exactamente —esa tolerancia a la posición es justo lo que le faltaba al MLP—.
                     </p>
 
-                    <p>El tamaño de salida de una capa convolucional se obtiene con la fórmula general:</p>
+                    <p>El tamaño de salida de una capa convolucional se obtiene con la fórmula general <Cita k="dumoulin2016guide" />:</p>
                     <Eq>{String.raw`$$ O = \left\lfloor \frac{W - K + 2P}{S} \right\rfloor + 1 $$`}</Eq>
                     <p>
                         donde {String.raw`\(W\)`} es el tamaño de entrada, {String.raw`\(K\)`} el del kernel, {String.raw`\(P\)`} el
@@ -1462,7 +1590,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <Box type="tip" label="Recurso externo · una CNN real para explorar">
                         Para ver estos mismos pasos sobre una red entrenada de verdad, conviene explorar{' '}
                         <a href="https://poloclub.github.io/cnn-explainer/" target="_blank" rel="noopener noreferrer" style={{ color: '#ED1E79', fontWeight: 600, textDecoration: 'underline' }}>CNN Explainer</a>{' '}
-                        (Wang et al., 2021): una CNN <em>Tiny VGG</em> que clasifica imágenes en 10 clases y permite pasar el cursor sobre las
+                        <Cita k="wang2021cnn" />: una CNN <em>Tiny VGG</em> que clasifica imágenes en 10 clases y permite pasar el cursor sobre las
                         matrices para mover el kernel y ver el producto punto, además de variar en vivo el <em>padding</em>, el tamaño de
                         kernel y el <em>stride</em>. Software libre (licencia MIT) del Polo Club of Data Science (Georgia Tech).
                     </Box>
@@ -1474,23 +1602,23 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                         de transferencia de aprendizaje.
                     </p>
                     <Timeline eventos={[
-                        { year: '1998 · LeNet-5', text: 'LeCun et al. demuestran que una red aprende patrones visuales desde los píxeles. 7 capas, average pooling, tanh/sigmoide; se evaluó en MNIST y se desplegó para leer cheques bancarios. Limitada a imágenes pequeñas en gris (32×32).' },
-                        { year: '2012 · AlexNet', text: 'Krizhevsky, Sutskever y Hinton ganan ImageNet bajando el error top-5 de ~26 % a 15,3 %. 8 capas, ReLU, dos GPU en paralelo y dropout para sus 60 millones de parámetros. El «Big Bang» del aprendizaje profundo.' },
-                        { year: '2014 · VGGNet', text: 'Oxford apuesta por la uniformidad: pilas de filtros 3×3. Dos capas 3×3 igualan el campo receptivo de una 5×5 con menos parámetros y más no linealidades. Desventaja: VGG-16 pesa ~138 millones de parámetros.' },
-                        { year: '2014 · GoogLeNet', text: 'El módulo Inception aplica varios tamaños de filtro en paralelo y usa convoluciones 1×1 como cuello de botella: unos 5 millones de parámetros, 12 veces menos que los 60 millones de AlexNet (Szegedy et al., 2015, 2016).' },
-                        { year: '2015 · ResNet', text: 'He et al. introducen conexiones de salto: la red aprende F(x) y entrega F(x)+x. Permite entrenar 152 capas y alcanza un error top-5 de 3,57 % (con un ensamble de modelos), por debajo del ~5 % humano de referencia. Sigue siendo una de las redes troncales (backbones) de referencia; hoy compite con CNN modernizadas como ConvNeXt (Liu et al., 2022) y con ViT preentrenados.' },
+                        { year: '1998 · LeNet-5', text: <><Cita k="lecun1998gradient" n /> demuestran que una red aprende patrones visuales desde los píxeles. 7 capas, average pooling, tanh/sigmoide; se evaluó en MNIST y se desplegó para leer cheques bancarios. Limitada a imágenes pequeñas en gris (32×32).</> },
+                        { year: '2012 · AlexNet', text: <><Cita k="krizhevsky2012imagenet" n /> ganan ImageNet bajando el error top-5 de ~26 % a 15,3 % <Cita k="russakovsky2015imagenet" />. 8 capas, ReLU, dos GPU en paralelo y dropout para sus 60 millones de parámetros. El «Big Bang» del aprendizaje profundo.</> },
+                        { year: '2014 · VGGNet', text: <>Oxford apuesta por la uniformidad <Cita k="simonyan2015very" />: pilas de filtros 3×3. Dos capas 3×3 igualan el campo receptivo de una 5×5 con menos parámetros y más no linealidades. Desventaja: VGG-16 pesa ~138 millones de parámetros.</> },
+                        { year: '2014 · GoogLeNet', text: <>El módulo Inception aplica varios tamaños de filtro en paralelo y usa convoluciones 1×1 como cuello de botella: unos 5 millones de parámetros, 12 veces menos que los 60 millones de AlexNet <Cita k="szegedy2015going, szegedy2016rethinking" />.</> },
+                        { year: '2015 · ResNet', text: <><Cita k="he2016deep" n /> introducen conexiones de salto: la red aprende F(x) y entrega F(x)+x. Permite entrenar 152 capas y alcanza un error top-5 de 3,57 % (con un ensamble de modelos), por debajo del ~5 % humano de referencia <Cita k="russakovsky2015imagenet" />. Sigue siendo una de las redes troncales (backbones) de referencia; hoy compite con CNN modernizadas como ConvNeXt <Cita k="liu2022convnet" /> y con ViT preentrenados.</> },
                     ]} />
                     <p className="text-xs text-gray-500 italic">
                         Nota sobre las fechas: en la narración se indica el año de presentación de cada trabajo (el <em>preprint</em> o la
                         competición ImageNet); las citas y las referencias usan el año de la versión publicada en actas o revista. Así, VGG
-                        —presentada en 2014— se cita como Simonyan y Zisserman (2015); ResNet —2015—, como He et al. (2016), y el ViT
-                        —2020—, como Dosovitskiy et al. (2021).
+                        —presentada en 2014— se cita como <Cita k="simonyan2015very" n />; ResNet —2015—, como <Cita k="he2016deep" n />, y el ViT
+                        —2020—, como <Cita k="dosovitskiy2021image" n />.
                     </p>
                     <Box type="info" label="La intuición de ResNet">
                         Las conexiones de salto permiten que la señal «brinque» capas. La red aprende una función residual
                         {String.raw` \(\mathcal{F}(x)\)`} y la salida es {String.raw`\(\mathcal{F}(x)+x\)`}: si las capas extra no aportan,
                         basta con que {String.raw`\(\mathcal{F}(x)=0\)`} y se propaga la identidad. Así se supera el <strong>problema de
-                        degradación</strong> que describieron He et al. (2016): sin conexiones de salto, añadir capas a una red
+                        degradación</strong> que describieron <Cita k="he2016deep" n />: sin conexiones de salto, añadir capas a una red
                         ya profunda <em>subía</em> el error de entrenamiento.
                     </Box>
 
@@ -1498,7 +1626,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <h3>4. Vision Transformers (ViT): la alternativa por atención</h3>
                     <p>
                         De LeNet a ResNet se asume que la convolución, con su campo receptivo local, es el operador idóneo para imágenes.
-                        En 2020, Dosovitskiy et al. (2021) cuestionaron ese supuesto en «An Image is Worth 16×16 Words», adaptando el{' '}
+                        En 2020, <Cita k="dosovitskiy2021image" n /> cuestionaron ese supuesto en «An Image is Worth 16×16 Words», adaptando el{' '}
 <Termino def="Arquitectura de red basada por completo en atención, surgida en el procesamiento de lenguaje (2017); se detalla en el Capítulo 2.3 §6.">Transformer</Termino> del lenguaje al dominio visual. La idea: en vez de deslizar filtros, trocear la imagen en una
                         cuadrícula de <em>parches</em> cuadrados de lado {String.raw`\(P\)`}. El número de parches es:
                     </p>
@@ -1527,9 +1655,9 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <Box type="warn" label="Sesgo inductivo y hambre de datos">
                         La convolución trae «de fábrica» dos supuestos útiles —localidad y equivarianza a la traslación: si el objeto se
                         desplaza, su mapa de características se desplaza igual; el <em>pooling</em> añade después una invarianza local—: su
-                        <strong> sesgo inductivo</strong>. El ViT casi carece de él y debe aprenderlo todo desde los datos, por lo que
+                        <strong> sesgo inductivo</strong> <Cita k="goodfellow2016deep" p="secs. 9.2–9.4" />. El ViT casi carece de él y debe aprenderlo todo desde los datos, por lo que
                         exige conjuntos masivos (de 14 a 300 millones de imágenes, como JFT-300M) o preentrenamiento; con aumento de
-                        datos intenso y destilación, DeiT logra entrenarlo solo con ImageNet-1k (Touvron et al., 2021). Con conjuntos de
+                        datos intenso y destilación, DeiT logra entrenarlo solo con ImageNet-1k <Cita k="touvron2021training" />. Con conjuntos de
                         datos pequeños y sin preentrenamiento, una ResNet suele ganarle al ViT.
                     </Box>
 
@@ -1545,10 +1673,10 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                                 <tr><td><strong>Campo receptivo</strong></td><td>Local, crece con la profundidad</td><td>Global desde la 1.ª capa (atención)</td></tr>
                                 <tr><td><strong>Costo de entrenamiento</strong></td><td>Menor en conjuntos de datos pequeños</td><td>Alto; escala con datos y cómputo</td></tr>
                                 <tr><td><strong>Latencia en inferencia</strong></td><td>Baja y predecible</td><td>Sensible al n.º de parches ({String.raw`\(N\)`})</td></tr>
-                                <tr><td><strong>Interpretabilidad</strong></td><td><Termino def="Técnica de interpretabilidad que resalta, como mapa de calor, las regiones de la imagen más influyentes en la predicción de una CNN.">Grad-CAM</Termino> / mapas de activación</td><td>Mapas de atención</td></tr>
+                                <tr><td><strong>Interpretabilidad</strong></td><td><Termino def={<>Técnica de interpretabilidad que resalta, como mapa de calor, las regiones de la imagen más influyentes en la predicción de una CNN <Cita k="selvaraju2017grad" />.</>}>Grad-CAM</Termino> / mapas de activación</td><td>Mapas de atención</td></tr>
                             </tbody>
                         </table>
-                        <p className="text-xs text-gray-500 italic">Elaboración propia basada en Dosovitskiy et al. (2021).</p>
+                        <p className="text-xs text-gray-500 italic">Elaboración propia basada en <Cita k="dosovitskiy2021image" n />.</p>
                     </div>
                     <Box type="tip" label="¿CNN o ViT para un proyecto de campo?">
                         Para clasificar fauna con unos pocos miles de imágenes de cámaras trampa, conviene partir de una CNN
@@ -1556,7 +1684,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                         —monitoreo satelital de deforestación o colecciones de millones de fotos ciudadanas (iNaturalist), donde la escala
                         juega a su favor— o en arquitecturas híbridas (convolución inicial + atención posterior), que combinan las
                         virtudes de ambos enfoques. Hoy también es habitual reutilizar, sin reentrenarlas, las características de un
-                        modelo fundacional autosupervisado (p. ej., DINOv2; Oquab et al., 2023).
+                        modelo fundacional autosupervisado, como DINOv2 <Cita k="oquab2023dinov2" />.
                     </Box>
 
                     {/* ============== Herramienta interactiva: ViT vs CNN ============== */}
@@ -1579,7 +1707,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     </div>
 
                     <Box type="info" label="Un tercer camino — el MLP-Mixer (2021)">
-                        Si la convolución aporta localidad y el ViT aporta atención, ¿hace falta alguna de las dos? Tolstikhin et al.
+                        Si la convolución aporta localidad y el ViT aporta atención, ¿hace falta alguna de las dos? <Cita k="tolstikhin2021mlp" n />{' '}
                         mostraron que <strong>no</strong>: el <strong>MLP-Mixer</strong> prescinde de ambas y solo usa perceptrones
                         multicapa. La clave es que <em>no</em> es el MLP «aplanado» que fracasó al inicio del capítulo: primero trocea la
                         imagen en parches (como el ViT) y luego alterna dos MLP con pesos compartidos —uno que <strong>mezcla entre
@@ -1595,8 +1723,8 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <p>
                         En Colombia, el acceso a grandes clústeres y a millones de imágenes etiquetadas (p. ej., orquídeas del Chocó) es
                         limitado. La solución estándar es la <strong>transferencia de aprendizaje</strong> (<em>transfer learning</em>):
-                        reutilizar el «conocimiento» de una red entrenada en un conjunto de datos masivo (ImageNet, 1,2 millones de imágenes). Las capas iniciales aprenden bordes, colores
-                        y texturas <em>universales</em>: un borde en la foto de un perro es igual a un borde en una radiografía.
+                        reutilizar el «conocimiento» de una red entrenada en un conjunto de datos masivo, como ImageNet <Cita k="deng2009imagenet" />, con 1,2 millones de imágenes. Las capas iniciales aprenden bordes, colores
+                        y texturas <em>universales</em> <Cita k="yosinski2014transferable" />: un borde en la foto de un perro es igual a un borde en una radiografía.
                     </p>
                     <Tabs tabs={[
                         {
@@ -1629,14 +1757,14 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <h3>6. Biodiversidad: ojos digitales en la selva</h3>
                     <p>
                         Colombia es uno de los países con mayor biodiversidad del planeta y ocupa el primer lugar mundial en especies de
-                        aves, orquídeas y mariposas (SiB Colombia, 2026). Las cámaras trampa generan miles de imágenes, muchas de ellas disparos en vacío
-                        (fotos sin animales, por ramas o viento). En la estrategia de ciencia participativa «Días de Cámara Trampa»
-                        (Instituto Humboldt, Red Colombiana de Fototrampeo y Neotropical Innovation, 2023), la ciudadanía instaló cámaras
-                        en todo el país; clasificar a mano esos volúmenes es inviable.
+                        aves, orquídeas y mariposas <Cita k="sibcolombia2026cifras" />. Las cámaras trampa generan miles de imágenes, muchas de ellas disparos en vacío
+                        (fotos sin animales, por ramas o viento). En la estrategia de ciencia participativa «Días de Cámara Trampa»,
+                        que organizaron en 2023 el Instituto Humboldt, la Red Colombiana de Fototrampeo y Neotropical Innovation{' '}
+                        <Cita k="elcolombiano2023dias" />, la ciudadanía instaló cámaras en todo el país; clasificar a mano esos volúmenes es inviable.
                     </p>
                     <CalloutPro tema="info" titulo="Wildlife Insights y la reidentificación de individuos" subtitulo="CNN al servicio de la conservación" icon="fa-paw">
                         La plataforma <strong>Wildlife Insights</strong>, una alianza de Conservation International, Google y otras
-                        organizaciones de conservación (Ahumada et al., 2020), usa CNN entrenadas con
+                        organizaciones de conservación <Cita k="ahumada2020wildlife" />, usa CNN entrenadas con
                         millones de imágenes globales para filtrar fotos vacías y clasificar especies elusivas como el oso andino,
                         la danta, el jaguar y el tigrillo en la Orinoquía y los Andes. Más allá de la especie, los patrones únicos de
                         pelaje permiten la <strong>reidentificación de individuos</strong> («Jaguar #04»), clave para estimar densidades
@@ -1655,26 +1783,26 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <p>
                         Por defecto los pesos se guardan como flotantes de 32 bits. La <strong>cuantización</strong> baja la precisión,
                         típicamente a enteros de 8 bits, mapeando el rango continuo a 256 niveles. El modelo queda ≈ 4 veces más pequeño
-                        y, en hardware con aritmética entera de 8 bits, más rápido (Jacob et al., 2018). Para 25 millones de parámetros:
+                        y, en hardware con aritmética entera de 8 bits, más rápido <Cita k="jacob2018quantization" />. Para 25 millones de parámetros:
                     </p>
                     <Eq>{String.raw`$$ 25\,000\,000 \times 4\,\text{bytes} \approx 100\,\text{MB (FP32)} \;\longrightarrow\; 25\,000\,000 \times 1\,\text{byte} \approx 25\,\text{MB (INT8)} $$`}</Eq>
                     <p>
                         Esa reducción es la diferencia entre que el modelo quepa o no en un dispositivo de borde modesto —una placa tipo
                         Raspberry Pi o Jetson en una cámara trampa con batería, en pleno dosel—. En un microcontrolador, cuya memoria es dos
-                        o tres órdenes de magnitud menor que la de un teléfono, solo caben redes diseñadas para ese presupuesto (Lin et al., 2020).
+                        o tres órdenes de magnitud menor que la de un teléfono, solo caben redes diseñadas para ese presupuesto <Cita k="lin2020mcunet" />.
                     </p>
                     <Accordion items={[
                         {
                             titulo: 'Poda (pruning): eliminar conexiones inútiles',
-                            contenido: <span>Elimina pesos o neuronas con contribución cercana a cero, generando una red dispersa (<em>sparse</em>). Comparte el espíritu de la regularización L1 —favorecer modelos dispersos—, aunque difiere en el modo: L1 induce la dispersión <em>durante</em> el entrenamiento penalizando los pesos, mientras la poda retira pesos ya entrenados según su magnitud. Si una conexión apenas aporta, retirarla aligera sin sacrificar exactitud. <em>Analogía local:</em> como el guardaparques que despeja una trocha —retira la maleza improductiva para que el sendero, la información útil, quede transitable—.</span>
+                            contenido: <span>Elimina pesos o neuronas con contribución cercana a cero, generando una red dispersa (<em>sparse</em>). Comparte el espíritu de la regularización L1 —favorecer modelos dispersos—, aunque difiere en el modo: L1 induce la dispersión <em>durante</em> el entrenamiento penalizando los pesos, mientras la poda retira pesos ya entrenados según su magnitud <Cita k="han2015learning" />. Si una conexión apenas aporta, retirarla aligera sin sacrificar exactitud. <em>Analogía local:</em> como el guardaparques que despeja una trocha —retira la maleza improductiva para que el sendero, la información útil, quede transitable—.</span>
                         },
                         {
                             titulo: 'Destilación del conocimiento (knowledge distillation)',
-                            contenido: <span>Entrena un modelo pequeño («estudiante») para imitar las salidas de uno grande y preciso («maestro»). En vez de aprender solo de etiquetas duras, absorbe las probabilidades suaves del maestro, capturando matices. <em>Analogía local:</em> es el guardaparques novato («estudiante») que, observando al rastreador veterano («maestro»), aprende a reconocer un jaguar por su huella sin revisar millones de fotos de fototrampa.</span>
+                            contenido: <span>Entrena un modelo pequeño («estudiante») para imitar las salidas de uno grande y preciso («maestro»). En vez de aprender solo de etiquetas duras, absorbe las probabilidades suaves del maestro, capturando matices <Cita k="hinton2015distilling" />. <em>Analogía local:</em> es el guardaparques novato («estudiante») que, observando al rastreador veterano («maestro»), aprende a reconocer un jaguar por su huella sin revisar millones de fotos de fototrampa.</span>
                         },
                         {
                             titulo: 'Arquitecturas eficientes por diseño',
-                            contenido: <span><strong>MobileNet</strong> sustituye la convolución estándar por convoluciones separables en profundidad (<em>depthwise separable</em>), reduciendo operaciones. <strong>EfficientNet</strong> aplica un escalado compuesto que equilibra profundidad, anchura y resolución. Ambas son puntos de partida naturales para la transferencia de aprendizaje en el borde.</span>
+                            contenido: <span><strong>MobileNet</strong> <Cita k="howard2017mobilenets" /> sustituye la convolución estándar por convoluciones separables en profundidad (<em>depthwise separable</em>), reduciendo operaciones. <strong>EfficientNet</strong> <Cita k="tan2019efficientnet" /> aplica un escalado compuesto que equilibra profundidad, anchura y resolución. Ambas son puntos de partida naturales para la transferencia de aprendizaje en el borde.</span>
                         },
                     ]} />
                     <CalloutPro tema="warn" titulo="El compromiso exactitud ↔ tamaño" subtitulo="Comprimir nunca es gratis" icon="fa-triangle-exclamation">
@@ -1725,7 +1853,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                                 { texto: 'Supera el problema de degradación: cada bloque aprende F(x) y entrega F(x)+x.', correcta: true },
                                 { texto: 'Sustituye las convoluciones por atención global entre todos los parches de la imagen.', correcta: false },
                             ],
-                            justificacion: 'Si las capas extra no aportan, basta con F(x)=0 y se propaga la identidad: añadir capas ya no sube el error de entrenamiento (el problema de degradación descrito por He et al., 2016), y la señal cruza redes de cientos de capas.'
+                            justificacion: <>Si las capas extra no aportan, basta con F(x)=0 y se propaga la identidad: añadir capas ya no sube el error de entrenamiento —el problema de degradación descrito por <Cita k="he2016deep" n />—, y la señal cruza redes de cientos de capas.</>
                         },
                         {
                             pregunta: 'Con unos pocos miles de imágenes de cámaras trampa y sin grandes recursos, lo más sensato es…',
@@ -1736,6 +1864,16 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                             ],
                             justificacion: 'El ViT necesita datos masivos o preentrenamiento, y una CNN desde cero desaprovecha lo aprendido en ImageNet; con conjuntos de datos pequeños, la CNN preentrenada es la más eficiente en muestras.'
                         },
+                    ]} />
+
+                    <Referencias claves={[
+                        'hubel1962receptive', 'fukushima1980neocognitron', 'lecun1989backpropagation', 'olah2017feature',
+                        'szegedy2013intriguing', 'goodfellow2016deep', 'dumoulin2016guide', 'wang2021cnn', 'lecun1998gradient',
+                        'krizhevsky2012imagenet', 'russakovsky2015imagenet', 'simonyan2015very', 'szegedy2015going',
+                        'szegedy2016rethinking', 'he2016deep', 'liu2022convnet', 'dosovitskiy2021image', 'touvron2021training',
+                        'selvaraju2017grad', 'oquab2023dinov2', 'tolstikhin2021mlp', 'deng2009imagenet', 'yosinski2014transferable',
+                        'sibcolombia2026cifras', 'elcolombiano2023dias', 'ahumada2020wildlife', 'jacob2018quantization',
+                        'lin2020mcunet', 'han2015learning', 'hinton2015distilling', 'howard2017mobilenets', 'tan2019efficientnet',
                     ]} />
                 </div>
             );
@@ -1748,7 +1886,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
            Regla: dentro de <text> NO se usan delimitadores MathJax;
            solo texto nativo, <tspan baselineShift="sub"> y Unicode.
         ============================================================ */
-        const LSTMCellSVG = () => (
+        const LSTMCellSVG = ({ cita = null }) => (
             <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
                 <div className="overflow-x-auto">
                 <svg viewBox="0 0 780 400" className="w-full" style={{ minWidth: 680 }} role="img"
@@ -1838,7 +1976,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                 </svg>
                 </div>
                 <AvisoDesplazar />
-                <PieFigura n="2.2.3" className="mt-2" fuente="elaboración propia; la «cinta» del estado de la celda retoma la metáfora de Olah (2015).">
+                <PieFigura n="2.2.3" className="mt-2" fuente={<>elaboración propia{cita ? <>; la «cinta» del estado de la celda retoma la metáfora de {cita}</> : null}.</>}>
                     La LSTM como <strong>tuberías y válvulas</strong>: la memoria C recorre la tubería superior sufriendo solo
                     <strong> dos interacciones lineales</strong> —la válvula de olvido la multiplica (⊙ por f<sub>t</sub>) y se le suma (+) la
                     <strong> memoria nueva</strong> (i<sub>t</sub> ⊙ C̃<sub>t</sub>)—, lo que preserva el gradiente. La válvula de salida (o<sub>t</sub>)
@@ -2031,7 +2169,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
            Un solo estado h y dos compuertas: reinicio r y
            actualización z. Notablemente más simple que la LSTM.
         ============================================================ */
-        const GRUCellSVG = () => (
+        const GRUCellSVG = ({ cita = null }) => (
             <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
                 <div className="overflow-x-auto">
                 <svg viewBox="0 0 760 360" className="w-full" style={{ minWidth: 660 }} role="img"
@@ -2103,7 +2241,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                 </svg>
                 </div>
                 <AvisoDesplazar />
-                <PieFigura n="2.2.4" className="mt-2">Celda GRU: un único estado h<sub>t</sub> y dos compuertas (reinicio r, actualización z), alimentadas por x<sub>t</sub> y h<sub>t−1</sub>; el candidato h̃<sub>t</sub> recibe x<sub>t</sub> y r<sub>t</sub> ⊙ h<sub>t−1</sub>. El estado final es la interpolación h<sub>t</sub> = z<sub>t</sub> ⊙ h<sub>t−1</sub> + (1−z<sub>t</sub>) ⊙ h̃<sub>t</sub> (forma de Cho et al., 2014, y de PyTorch), notablemente más simple que la LSTM.</PieFigura>
+                <PieFigura n="2.2.4" className="mt-2">Celda GRU: un único estado h<sub>t</sub> y dos compuertas (reinicio r, actualización z), alimentadas por x<sub>t</sub> y h<sub>t−1</sub>; el candidato h̃<sub>t</sub> recibe x<sub>t</sub> y r<sub>t</sub> ⊙ h<sub>t−1</sub>. El estado final es la interpolación h<sub>t</sub> = z<sub>t</sub> ⊙ h<sub>t−1</sub> + (1−z<sub>t</sub>) ⊙ h̃<sub>t</sub>{cita ? <>, la forma de {cita} y de PyTorch</> : null}, notablemente más simple que la LSTM.</PieFigura>
             </div>
         );
 
@@ -2138,8 +2276,8 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                         La ubicación ecuatorial y la trisección de los Andes generan en Colombia regímenes de lluvia bimodales y
                         unimodales que no caben en el patrón de cuatro estaciones. La precipitación de Bogotá sigue un
                         régimen bimodal: es del orden de 40 mm en los meses secos (enero) y de 100 a 120 mm en las temporadas
-                        lluviosas (abril-mayo y octubre-noviembre), con máximos mensuales cercanos a 200 mm en años muy húmedos
-                        (normales climatológicas del IDEAM). Así, el estado del clima en un mes <em>t</em> está correlacionado no
+                        lluviosas (abril-mayo y octubre-noviembre), con máximos mensuales cercanos a 200 mm en años muy húmedos,
+                        según las normales climatológicas del IDEAM <Cita k="ideam2026normales" />. Así, el estado del clima en un mes <em>t</em> está correlacionado no
                         solo con <em>t−1</em>, sino con la estacionalidad de <em>t−12</em>. Un modelo de riego de precisión para
                         café o flores que ignore la secuencia de lluvias de los meses previos (y, a escala diaria, de las últimas
                         semanas) recomendaría riegos innecesarios.
@@ -2170,16 +2308,16 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <h3>2. Redes recurrentes (RNN): memoria y su talón de Aquiles</h3>
                     <p>
                         Una <Termino def="Recurrent Neural Network: red que reutiliza el mismo bloque en cada paso temporal, propagando un estado oculto que actúa como memoria.">RNN</Termino> es
-                        una serie de copias de la misma red, cada una pasando un mensaje a su sucesora (Olah, 2015). En el instante {String.raw`\(t\)`} recibe
+                        una serie de copias de la misma red, cada una pasando un mensaje a su sucesora <Cita k="olah2015understanding" />. En el instante {String.raw`\(t\)`} recibe
                         la entrada {String.raw`\(x_t\)`} y el estado oculto previo {String.raw`\(h_{t-1}\)`}, y calcula el nuevo estado, que es la memoria
-                        acumulada:
+                        acumulada <Cita k="elman1990finding, goodfellow2016deep@cap. 10" />:
                     </p>
                     <Eq>{String.raw`$$ h_t = \tanh\!\big(W_{xh}\, x_t + W_{hh}\, h_{t-1} + b_h\big) \qquad \hat{y}_t = \mathrm{softmax}\!\big(W_{hy}\, h_t + b_y\big) $$`}</Eq>
 
                     <RNNUnrolledSVG />
 
                     <p>
-                        El entrenamiento usa <strong>retropropagación a través del tiempo</strong> (BPTT): como los pesos se comparten
+                        El entrenamiento usa <strong>retropropagación a través del tiempo</strong> (BPTT), descrita por <Cita k="werbos1990backpropagation" n />: como los pesos se comparten
                         en todos los pasos, el gradiente total es la suma de los gradientes de cada paso. El problema aparece en el
                         término {String.raw`\(\partial h_t / \partial h_k\)`}, que se expande como un producto de matrices jacobianas:
                     </p>
@@ -2190,7 +2328,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <p>
                         Como la derivada de {String.raw`\(\tanh\)`} está acotada en {String.raw`\((0,\,1]\)`}, si el mayor valor singular de
                         {String.raw` \(W_{hh}\)`} es menor que 1 (condición suficiente), el producto de {String.raw`\(t-k\)`} matrices tiende
-                        <strong> exponencialmente a cero</strong>: el <strong>desvanecimiento del gradiente</strong> (Bengio et al., 1994; Pascanu et al., 2013). La red aprende
+                        <strong> exponencialmente a cero</strong>: el <strong>desvanecimiento del gradiente</strong> <Cita k="bengio1994learning, pascanu2013difficulty" />. La red aprende
                         dependencias cortas, pero olvida las largas.
                     </p>
 
@@ -2217,10 +2355,10 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                         <strong> puede</strong> crecer <strong>exponencialmente</strong>: el <strong>gradiente explota</strong>, las actualizaciones se
                         vuelven enormes y la pérdida diverge (suelen aparecer valores <span className="inline-code">NaN</span>).
                         Es la imagen especular del desvanecimiento: con {String.raw`\(\lVert W_{hh}\rVert < 1\)`} la señal se
-                        diluye y con {String.raw`\(\lVert W_{hh}\rVert > 1\)`} puede amplificarse sin control (condición necesaria de la explosión; Pascanu et al., 2013).
+                        diluye y con {String.raw`\(\lVert W_{hh}\rVert > 1\)`} puede amplificarse sin control; esa es la condición necesaria de la explosión <Cita k="pascanu2013difficulty" />.
                     </p>
                     <Box type="warn" label="Remedio estándar — recorte de gradiente (gradient clipping)">
-                        El <strong>recorte de gradiente</strong> acota la norma del gradiente a un umbral {String.raw`\(\tau\)`} antes de cada actualización: si
+                        El <strong>recorte de gradiente</strong> <Cita k="pascanu2013difficulty" /> acota la norma del gradiente a un umbral {String.raw`\(\tau\)`} antes de cada actualización: si
                         {String.raw` \(\lVert g\rVert > \tau\)`}, se reescala
                         {String.raw` \(g \leftarrow \tau\, g/\lVert g\rVert\)`}, conservando la <em>dirección</em> del gradiente
                         pero limitando su <em>magnitud</em>. Es la salvaguarda habitual al entrenar redes recurrentes con
@@ -2231,16 +2369,16 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     {/* ============== 3. LSTM ============== */}
                     <h3>3. LSTM: ingeniería de la memoria persistente</h3>
                     <p>
-                        Para mantener dependencias largas, Hochreiter y Schmidhuber introdujeron en 1997 la <strong>Long Short-Term
+                        Para mantener dependencias largas, <Cita k="hochreiter1997long" n /> introdujeron la <strong>Long Short-Term
                         Memory</strong> (LSTM). Su innovación es separar la memoria en dos canales: el <strong>estado de celda</strong>
-                        {String.raw` \(C_t\)`} (memoria de largo plazo, una «cinta transportadora» con interacciones lineales, en la
-                        metáfora de Olah, 2015) y el <strong>estado oculto</strong> {String.raw`\(h_t\)`} (memoria de corto plazo y salida
+                        {String.raw` \(C_t\)`} —memoria de largo plazo, una «cinta transportadora» con interacciones lineales, en la
+                        metáfora de <Cita k="olah2015understanding" n />— y el <strong>estado oculto</strong> {String.raw`\(h_t\)`} (memoria de corto plazo y salida
                         filtrada). El flujo se regula con tres <strong>compuertas</strong> sigmoides que emiten valores entre 0
-                        (cerrar/olvidar) y 1 (abrir/recordar). La compuerta de olvido, hoy estándar, la introdujeron Gers et al. (2000):
+                        (cerrar/olvidar) y 1 (abrir/recordar). La compuerta de olvido, hoy estándar, la introdujeron <Cita k="gers2000learning" n />:
                         la LSTM original de 1997 solo tenía compuertas de entrada y de salida.
                     </p>
 
-                    <LSTMCellSVG />
+                    <LSTMCellSVG cita={<Cita k="olah2015understanding" n />} />
 
                     <h4>Compuerta de olvido</h4>
                     <p>Decide qué información del estado anterior {String.raw`\(C_{t-1}\)`} es irrelevante y debe descartarse:</p>
@@ -2256,14 +2394,14 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <Box type="tip" label="Analogía local — la cinta transportadora">
                         El estado de celda {String.raw`\(C_t\)`} es una cinta transportadora que recorre toda la secuencia: en cada
                         estación (cada paso temporal), la compuerta de olvido le quita parte de la carga y la de entrada le suma piezas
-                        nuevas, pero la cinta no se reemplaza. Por eso la información viaja lejos sin degradarse. La metáfora es de
-                        Olah (2015).
+                        nuevas, pero la cinta no se reemplaza. Por eso la información viaja lejos sin degradarse. La metáfora es de{' '}
+                        <Cita k="olah2015understanding" n />.
                     </Box>
                     <Box type="info" label="Por qué la suma protege el gradiente">
                         Por la ruta directa de la cinta, {String.raw`\(\partial C_t/\partial C_{t-1}=\mathrm{diag}(f_t)\)`}: no intervienen
                         ni {String.raw`\(W_{hh}\)`} ni la derivada de tanh, solo la compuerta de olvido. Mientras la red mantenga
                         {String.raw` \(f_t\approx 1\)`}, el gradiente cruza muchos pasos casi intacto. Es el <em>carrusel de error
-                        constante</em> de Hochreiter y Schmidhuber (1997), que en su versión original fijaba ese factor en 1. Si
+                        constante</em> de <Cita k="hochreiter1997long" n />, que en su versión original fijaba ese factor en 1. Si
                         {String.raw` \(f_t\)`} se cierra, la cinta olvida a propósito, y con ella el gradiente. Por eso la LSTM puede
                         recordar el sujeto plural del inicio de una oración larga («Los estudiantes… que estudiaron toda la noche…»)
                         para concordar el verbo al final.
@@ -2284,7 +2422,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     {/* ============== 4. GRU + comparativa ============== */}
                     <h3>4. GRU: eficiencia y velocidad</h3>
                     <p>
-                        En 2014, Cho et al. propusieron la <strong>Gated Recurrent Unit</strong> (GRU) como simplificación de la LSTM:
+                        <Cita k="cho2014learning" n /> propusieron la <strong>Gated Recurrent Unit</strong> (GRU) como simplificación de la LSTM:
                         fusiona el estado de celda y el estado oculto en un solo vector, y combina olvido y entrada en una única
                         <strong> compuerta de actualización</strong> {String.raw`\(z_t\)`}. Una <strong>compuerta de reinicio</strong>
                         {String.raw` \(r_t\)`} decide cuánto del pasado se ignora al construir el candidato:
@@ -2292,13 +2430,13 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <Eq>{String.raw`$$ z_t = \sigma\!\big(W_{xz} x_t + W_{hz} h_{t-1} + b_z\big) \qquad r_t = \sigma\!\big(W_{xr} x_t + W_{hr} h_{t-1} + b_r\big) $$`}</Eq>
                     <Eq>{String.raw`$$ \tilde{h}_t = \tanh\!\big(W_{xh} x_t + W_{hh}\,(r_t \odot h_{t-1}) + b_h\big) \qquad h_t = z_t\odot h_{t-1} + (1 - z_t)\odot \tilde{h}_t $$`}</Eq>
 
-                    <GRUCellSVG />
+                    <GRUCellSVG cita={<Cita k="cho2014learning" n />} />
 
                     <p className="text-xs text-gray-500 italic">
-                        Nota de convención: este material sigue a Cho et al. (2014), a PyTorch (<span className="inline-code">nn.GRU</span>)
-                        y a Goodfellow et al. (2016, ec. 10.45): {String.raw`\(z_t\)`} pondera la memoria {String.raw`\(h_{t-1}\)`}, de modo que
+                        Nota de convención: este material sigue a <Cita k="cho2014learning" n />, a PyTorch (<span className="inline-code">nn.GRU</span>)
+                        y a <Cita k="goodfellow2016deep" n p="ec. 10.45" />: {String.raw`\(z_t\)`} pondera la memoria {String.raw`\(h_{t-1}\)`}, de modo que
                         {String.raw` \(z_t\approx 1\)`} conserva el estado y {String.raw`\(z_t\approx 0\)`} lo reemplaza por el candidato. Otras
-                        fuentes (Chung et al., 2014; Olah, 2015) escriben la forma espejo
+                        fuentes <Cita k="chung2014empirical, olah2015understanding" /> escriben la forma espejo
                         {String.raw` \(h_t=(1-z_t)\odot h_{t-1}+z_t\odot\tilde{h}_t\)`}; ambas son equivalentes al renombrar
                         {String.raw` \(z_t\leftrightarrow 1-z_t\)`}. PyTorch, además, aplica el reinicio después de la transformación lineal,
                         {String.raw` \(\tilde{h}_t=\tanh\big(W_{xh}x_t+b_{xh}+r_t\odot(W_{hh}h_{t-1}+b_{hh})\big)\)`}, y llama {String.raw`\(n_t\)`} al candidato.
@@ -2319,7 +2457,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                                             <tr><td><strong>Compuertas / estados</strong></td><td>3 compuertas, 2 estados (C y h)</td><td>2 compuertas, 1 estado (h)</td></tr>
                                             <tr><td><strong>Parámetros</strong></td><td>Más (mayor huella de memoria)</td><td>Menos (modelo más ligero)</td></tr>
                                             <tr><td><strong>Velocidad de entrenamiento</strong></td><td>Algo más lenta (4 bloques de pesos)</td><td>Algo más rápida (3 bloques: ≈ 25 % menos cómputo por paso)</td></tr>
-                                            <tr><td><strong>Rendimiento</strong></td><td>Ventaja en tareas que exigen contar o memoria muy larga (Weiss et al., 2018)</td><td>Comparable en muchas tareas (Chung et al., 2014; Jozefowicz et al., 2015)</td></tr>
+                                            <tr><td><strong>Rendimiento</strong></td><td>Ventaja en tareas que exigen contar o memoria muy larga <Cita k="weiss2018practical" /></td><td>Comparable en muchas tareas <Cita k="chung2014empirical, jozefowicz2015empirical" /></td></tr>
                                             <tr><td><strong>Mecanismo de olvido</strong></td><td>Explícito (compuerta de olvido)</td><td>Implícito en {String.raw`\(z_t\)`}</td></tr>
                                         </tbody>
                                     </table>
@@ -2432,7 +2570,7 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                     <p>
                         Resuelta la memoria dentro de una sola secuencia, surge un reto mayor: la <Termino def="Convertir una secuencia de entrada en otra secuencia de salida, posiblemente de longitud distinta (traducir, resumir, responder).">transducción</Termino> de una
                         secuencia de entrada en otra de longitud distinta (traducir del <Termino def="Lengua del pueblo wayuu, hablada en La Guajira (Colombia) y el noroeste de Venezuela.">wayuunaiki</Termino> al
-                        español, resumir un documento jurídico, responder en un asistente conversacional o <em>chatbot</em>). Sutskever et al. (2014) propusieron la arquitectura
+                        español, resumir un documento jurídico, responder en un asistente conversacional o <em>chatbot</em>). <Cita k="sutskever2014sequence" n /> —y, en paralelo, <Cita k="cho2014learning" n />— propusieron la arquitectura
                         <strong> secuencia a secuencia</strong> (seq2seq), con dos redes recurrentes acopladas:
                     </p>
                     <Pipeline steps={[
@@ -2456,9 +2594,9 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                     </Box>
 
                     {/* ============== 7. Atención de Bahdanau ============== */}
-                    <h3>7. El mecanismo de atención (Bahdanau et al., 2015)</h3>
+                    <h3>7. El mecanismo de atención de Bahdanau</h3>
                     <p>
-                        Bahdanau et al. (2015) propusieron una idea a la vez simple y profunda: en lugar de obligar al decodificador a
+                        <Cita k="bahdanau2015neural" n /> propusieron una idea a la vez simple y profunda: en lugar de obligar al decodificador a
                         depender de un único vector estático, se le permite <strong>mirar de regreso a toda la secuencia de entrada</strong>{' '}
                         en cada paso y decidir dinámicamente qué partes son relevantes. El codificador ya no descarta sus estados
                         intermedios: conserva todos los {String.raw`\(h_1, h_2, \ldots, h_T\)`}. En cada paso {String.raw`\(t\)`} del decodificador se
@@ -2491,10 +2629,10 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                         una red recurrente que procesa los datos paso a paso. La pregunta natural fue: ¿qué ocurre si una secuencia se
                         «presta atención a sí misma», relacionando cada elemento con todos los demás dentro del mismo texto, y se
                         elimina por completo la recurrencia? Esa generalización —la <strong>autoatención</strong> (<em>self-attention</em>)— es
-                        el corazón de la arquitectura <strong>Transformer</strong>, que se desarrolla en el <strong>Capítulo 2.3 §6</strong>{' '}
+                        el corazón de la arquitectura <strong>Transformer</strong> <Cita k="vaswani2017attention" />, que se desarrolla en el <strong>Capítulo 2.3 §6</strong>{' '}
                         junto con sus vectores de consulta, clave y valor (<em>query</em>, <em>key</em> y <em>value</em>). La recurrencia, sin
                         embargo, no ha desaparecido: desde 2023 resurge en variantes de espacio de estados y de memoria exponencial
-                        —Mamba (Gu y Dao, 2023) y xLSTM (Beck et al., 2024)— que combinan entrenamiento paralelo con un costo de
+                        —Mamba <Cita k="gu2023mamba" /> y xLSTM <Cita k="beck2024xlstm" />— que combinan entrenamiento paralelo con un costo de
                         inferencia constante por paso.
                     </CalloutPro>
 
@@ -2546,6 +2684,13 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                             ],
                             justificacion: 'La información ya no debe sobrevivir comprimida en un solo vector: permanece accesible y se pondera con los pesos α (softmax) en cada paso. El decodificador sigue siendo recurrente.'
                         },
+                    ]} />
+
+                    <Referencias claves={[
+                        'ideam2026normales', 'olah2015understanding', 'elman1990finding', 'goodfellow2016deep',
+                        'werbos1990backpropagation', 'bengio1994learning', 'pascanu2013difficulty', 'hochreiter1997long',
+                        'gers2000learning', 'cho2014learning', 'chung2014empirical', 'jozefowicz2015empirical', 'weiss2018practical',
+                        'sutskever2014sequence', 'bahdanau2015neural', 'vaswani2017attention', 'gu2023mamba', 'beck2024xlstm',
                     ]} />
                 </div>
             );
@@ -2950,7 +3095,7 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                         Los <strong>modelos generativos</strong> representan un cambio de paradigma. A diferencia de los modelos
                         discriminativos —que trazan fronteras entre clases (distinguir un cafetal sano de uno con roya)—, los
                         generativos aprenden la estructura intrínseca de los datos: modelan la distribución de probabilidad
-                        subyacente {String.raw`\(p_{\text{data}}(x)\)`} para producir instancias nuevas que parezcan auténticas. Este
+                        subyacente {String.raw`\(p_{\text{data}}(x)\)`} para producir instancias nuevas que parezcan auténticas <Cita k="goodfellow2016deep" p="cap. 20" />. Este
                         capítulo recorre las <strong>cuatro familias generativas</strong>: los <strong>autocodificadores</strong> (<em>autoencoders</em>) y su
                         variante probabilística <strong>VAE</strong>, las <strong>GAN</strong>, los <strong>modelos de difusión</strong>{' '}
                         —que hoy dominan la generación de imágenes— y los <strong>Transformers</strong>, sustento de la IA generativa moderna.
@@ -2983,7 +3128,7 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                         <strong> espacio latente</strong> {String.raw`\(z \in \mathbb{R}^{d}\)`}. La <strong>hipótesis de la
                         variedad</strong> (<em>manifold hypothesis</em>) sostiene que los datos de alta dimensión (una foto de {String.raw`\(1024 \times 1024\)`}{' '}
                         píxeles) no llenan todo el espacio, sino que se concentran en una superficie curvada de dimensión mucho
-                        menor incrustada en él: una <em>variedad</em>. El modelo aprende a mapear puntos de esa variedad simplificada a la complejidad del
+                        menor incrustada en él: una <em>variedad</em> <Cita k="bengio2013representation, goodfellow2016deep@sec. 5.11.3" />. El modelo aprende a mapear puntos de esa variedad simplificada a la complejidad del
                         espacio de datos real.
                     </p>
 
@@ -3014,7 +3159,7 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                     <h3>2. Autocodificadores (AE): compresión y reconstrucción</h3>
                     <p>
                         Un <Termino def="Autocodificador (autoencoder): red de aprendizaje no supervisado que comprime la entrada y la reconstruye, forzando a quedarse con lo esencial.">autocodificador</Termino> aprende
-                        representaciones eficientes de forma no supervisada. Su arquitectura tiene una simetría de «reloj de arena»:
+                        representaciones eficientes de forma no supervisada <Cita k="hinton2006reducing" />. Su arquitectura tiene una simetría de «reloj de arena»:
                         un <strong>codificador</strong> (<em>encoder</em>) reduce progresivamente la dimensión de la entrada, un <strong>cuello de
                         botella</strong> (la capa más estrecha) aloja el código latente {String.raw`\(z\)`}, y un
                         <strong> decodificador</strong> (<em>decoder</em>) lo expande para recuperar la entrada.
@@ -3074,7 +3219,7 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
 
                     <h4>Autocodificadores de eliminación de ruido (DAE)</h4>
                     <p>
-                        Una variante poderosa, el <em>denoising autoencoder</em>, corrompe intencionalmente la entrada con ruido
+                        Una variante poderosa, el <em>denoising autoencoder</em> <Cita k="vincent2008extracting" />, corrompe intencionalmente la entrada con ruido
                         (manchar o borrar partes de una imagen) y entrena al AE para reconstruir la versión <strong>limpia</strong>. En
                         la analogía de TransMilenio, sería como si algunos pasajeros llegaran al portal con la tarjeta borrosa o sin
                         indicar su parada, y el sistema aprendiera igual a llevarlos a su destino correcto: reconstruye la señal limpia
@@ -3098,7 +3243,7 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                     {/* ============== 3. VAE ============== */}
                     <h3>3. Autocodificadores variacionales (VAE, <em>variational autoencoders</em>): un espacio latente probabilístico</h3>
                     <p>
-                        El VAE introduce una modificación sutil pero revolucionaria. Mientras un AE mapea la entrada a un
+                        El VAE <Cita k="kingma2014auto" /> introduce una modificación sutil pero revolucionaria. Mientras un AE mapea la entrada a un
                         <strong> punto fijo y determinista</strong>, el VAE la mapea a una <strong>distribución de
                         probabilidad</strong> (una gaussiana definida por la media {String.raw`\(\mu\)`} y la desviación estándar
                         {String.raw` \(\sigma\)`}). El modelo no memoriza una coordenada exacta, sino que aprende una «nube» donde es
@@ -3141,7 +3286,7 @@ print(x_rec.shape)  # torch.Size([1, 784])  -> misma forma que la entrada
                     <Eq>{String.raw`$$ \log p_\theta(x) = \mathcal{L}_{\text{ELBO}}(\theta,\phi;\,x) + D_{\text{KL}}\!\big(q_\phi(z|x)\,\|\,p_\theta(z|x)\big) \;\ge\; \mathcal{L}_{\text{ELBO}}(\theta,\phi;\,x) $$`}</Eq>
                     <p>
                         porque la divergencia KL nunca es negativa. Maximizar el ELBO sube la verosimilitud y, a la vez, acerca
-                        {String.raw` \(q_\phi(z|x)\)`} al posterior verdadero {String.raw`\(p_\theta(z|x)\)`} (Kingma y Welling, 2019).
+                        {String.raw` \(q_\phi(z|x)\)`} al posterior verdadero {String.raw`\(p_\theta(z|x)\)`} <Cita k="kingma2019introduction" />.
                     </p>
 
                     <Box type="info" label="El truco de reparametrización">
@@ -3199,7 +3344,7 @@ print(x_rec.shape, mu.shape)        # torch.Size([1, 784]) torch.Size([1, 20])`}
                     {/* ============== 4. GAN ============== */}
                     <h3>4. Redes generativas antagónicas (GAN, <em>generative adversarial networks</em>): el juego de dos redes</h3>
                     <p>
-                        Las GAN, introducidas por Goodfellow et al. en 2014, abordan la generación desde la <strong>teoría de
+                        Las GAN, introducidas por <Cita k="goodfellow2014generative" n />, abordan la generación desde la <strong>teoría de
                         juegos</strong>. En lugar de definir una pérdida fija que mida la «calidad» de una imagen (algo notoriamente
                         difícil), una GAN aprende esa noción de forma implícita enfrentando dos redes:
                     </p>
@@ -3312,7 +3457,7 @@ print(paso(torch.randn(64, 784)))   # (loss_D, loss_G) de un minilote`} />
                             content: (
                                 <div>
                                     <p className="!mt-0"><strong>Deep Convolutional GAN.</strong> Reemplaza las capas densas por capas convolucionales y transpuestas e incorpora buenas prácticas de estabilización (normalización por lotes, activaciones específicas).</p>
-                                    <p className="!mb-0">Fue una de las primeras en entrenar GAN convolucionales de forma estable en varios conjuntos de datos y se convirtió en la base práctica para la generación de imágenes con GAN (Radford et al., 2016).</p>
+                                    <p className="!mb-0">Fue una de las primeras en entrenar GAN convolucionales de forma estable en varios conjuntos de datos y se convirtió en la base práctica para la generación de imágenes con GAN <Cita k="radford2016unsupervised" />.</p>
                                 </div>
                             )
                         },
@@ -3321,7 +3466,7 @@ print(paso(torch.randn(64, 784)))   # (loss_D, loss_G) de un minilote`} />
                             content: (
                                 <div>
                                     <p className="!mt-0"><strong>Wasserstein GAN.</strong> Sustituye la divergencia implícita del juego original por una aproximación de la <em>distancia de Wasserstein</em> (<em>earth mover's distance</em>).</p>
-                                    <p className="!mb-0">Proporciona gradientes útiles incluso cuando las distribuciones real y generada apenas se solapan, y una pérdida que se correlaciona con la calidad de las muestras; como efecto, sus autores no observaron colapso de modos en sus experimentos (Arjovsky et al., 2017). La restricción de Lipschitz, impuesta al principio recortando los pesos, se sustituyó luego por una penalización del gradiente (WGAN-GP; Gulrajani et al., 2017).</p>
+                                    <p className="!mb-0">Proporciona gradientes útiles incluso cuando las distribuciones real y generada apenas se solapan, y una pérdida que se correlaciona con la calidad de las muestras; como efecto, sus autores no observaron colapso de modos en sus experimentos <Cita k="arjovsky2017wasserstein" />. La restricción de Lipschitz, impuesta al principio recortando los pesos, se sustituyó luego por una penalización del gradiente, la WGAN-GP <Cita k="gulrajani2017improved" />.</p>
                                 </div>
                             )
                         },
@@ -3330,8 +3475,8 @@ print(paso(torch.randn(64, 784)))   # (loss_D, loss_G) de un minilote`} />
                     {/* ============== 5. Modelos de difusión ============== */}
                     <h3>5. Modelos de difusión: destruir para aprender a reconstruir</h3>
                     <p>
-                        Desde aproximadamente 2021 (Dhariwal y Nichol, 2021), los <strong>modelos de difusión</strong> son la familia
-                        dominante para generar imágenes (Sohl-Dickstein et al., 2015; Ho et al., 2020). La idea, de una elegancia notable, invierte el problema: en lugar de generar una imagen de golpe
+                        Desde aproximadamente 2021 <Cita k="dhariwal2021diffusion" />, los <strong>modelos de difusión</strong> son la familia
+                        dominante para generar imágenes <Cita k="ho2020denoising, sohldickstein2015deep" />. La idea, de una elegancia notable, invierte el problema: en lugar de generar una imagen de golpe
                         (como una GAN), una red aprende a <strong>deshacer</strong>, paso a paso, un proceso conocido de destrucción de
                         información. El método encadena dos procesos a lo largo de {String.raw`\(T\)`} pasos (cientos o miles):
                     </p>
@@ -3341,12 +3486,12 @@ print(paso(torch.randn(64, 784)))   # (loss_D, loss_G) de un minilote`} />
                     <ul>
                         <li><strong>Proceso directo (<em>forward</em>), que añade ruido:</strong> es <em>fijo, sin parámetros aprendibles</em>. Parte de una imagen real {String.raw`\(x_0\)`} y le añade ruido gaussiano gradualmente hasta que {String.raw`\(x_T\)`} es indistinguible de ruido puro. Cada paso es una cadena de Markov:
                             <Eq>{String.raw`$$ q(x_t \mid x_{t-1}) = \mathcal{N}\!\Big(x_t;\, \sqrt{1 - \beta_t}\,x_{t-1},\, \beta_t I\Big) $$`}</Eq>
-                            donde {String.raw`\(\beta_t\)`} es el «calendario de ruido» que controla cuánto se inyecta en cada paso. <em>En palabras:</em> cada paso toma la imagen anterior, la atenúa levemente (el factor {String.raw`\(\sqrt{1-\beta_t}\)`}) y le suma un poco de ruido fresco (la varianza {String.raw`\(\beta_t\)`}): un vertimiento más al río. Como la composición de gaussianas es gaussiana, cualquier nivel de ruido se obtiene en un solo salto (Ho et al., 2020):
+                            donde {String.raw`\(\beta_t\)`} es el «calendario de ruido» que controla cuánto se inyecta en cada paso. <em>En palabras:</em> cada paso toma la imagen anterior, la atenúa levemente (el factor {String.raw`\(\sqrt{1-\beta_t}\)`}) y le suma un poco de ruido fresco (la varianza {String.raw`\(\beta_t\)`}): un vertimiento más al río. Como la composición de gaussianas es gaussiana, cualquier nivel de ruido se obtiene en un solo salto <Cita k="ho2020denoising" />:
                             <Eq>{String.raw`$$ q(x_t \mid x_0) = \mathcal{N}\!\Big(x_t;\, \sqrt{\bar{\alpha}_t}\,x_0,\, (1-\bar{\alpha}_t) I\Big), \qquad \bar{\alpha}_t = \prod_{s=1}^{t} (1-\beta_s) $$`}</Eq>
                         </li>
                         <li><strong>Proceso inverso (<em>reverse</em>), que quita ruido:</strong> aquí reside el aprendizaje. Una red {String.raw`\(p_\theta\)`} aprende a revertir cada paso, estimando cómo limpiar el ruido para recuperar una imagen un poco más nítida:
                             <Eq>{String.raw`$$ p_\theta(x_{t-1} \mid x_t) = \mathcal{N}\!\Big(x_{t-1};\, \mu_\theta(x_t, t),\, \Sigma_\theta(x_t, t)\Big) $$`}</Eq>
-                            En la práctica, la red {String.raw`\(\epsilon_\theta\)`} se entrena para predecir el ruido añadido con una regresión simple (Ho et al., 2020):
+                            En la práctica, la red {String.raw`\(\epsilon_\theta\)`} se entrena para predecir el ruido añadido con una regresión simple <Cita k="ho2020denoising" />:
                             <Eq>{String.raw`$$ \mathcal{L}_{\text{simple}} = \mathbb{E}_{t,\,x_0,\,\epsilon}\Big[\big\lVert\, \epsilon - \epsilon_\theta\big(\sqrt{\bar{\alpha}_t}\,x_0 + \sqrt{1-\bar{\alpha}_t}\,\epsilon,\; t\big) \big\rVert^{2}\Big] $$`}</Eq>
                             Una vez entrenada, la generación parte de ruido puro {String.raw`\(x_T \sim \mathcal{N}(0, I)\)`} y aplica el proceso inverso {String.raw`\(T\)`} veces.</li>
                     </ul>
@@ -3362,10 +3507,10 @@ print(paso(torch.randn(64, 784)))   # (loss_D, loss_G) de un minilote`} />
                     </Box>
 
                     <p>
-                        Los modelos de difusión sustentan <strong>DALL·E 2</strong> (Ramesh et al., 2022), <strong>Stable
-                        Diffusion</strong> (Rombach et al., 2022) y buena parte de los generadores actuales de imagen; el DALL·E
+                        Los modelos de difusión sustentan <strong>DALL·E 2</strong> <Cita k="ramesh2022hierarchical" />, <strong>Stable
+                        Diffusion</strong> <Cita k="rombach2022high" /> y buena parte de los generadores actuales de imagen; el DALL·E
                         original (2021), en cambio, era un Transformer autorregresivo que generaba la imagen como una secuencia de
-                        <em> tokens</em> (Ramesh et al., 2021). Sus ventajas frente a las GAN: <strong>estabilidad</strong> (optimizan un
+                        <em> tokens</em> <Cita k="ramesh2021zero" />. Sus ventajas frente a las GAN: <strong>estabilidad</strong> (optimizan un
                         objetivo de regresión simple —predecir el ruido— evitando el frágil juego adversario y el colapso de modos),
                         <strong> diversidad</strong> (cubren todo el recorrido de ruido a dato) y <strong>controlabilidad</strong> (se
                         condicionan con naturalidad a texto vía <em>embeddings</em> de Transformers, habilitando «texto a imagen»).
@@ -3373,16 +3518,17 @@ print(paso(torch.randn(64, 784)))   # (loss_D, loss_G) de un minilote`} />
                     <Box type="warn" label="El costo del muestreo">
                         La gran desventaja es el <strong>costo de inferencia</strong>: generar una sola imagen exige ejecutar el
                         proceso inverso decenas o cientos de veces (un paso de red por nivel de ruido), mientras que una GAN o un VAE
-                        generan en una sola pasada. Técnicas modernas (muestreadores acelerados, difusión en espacio latente) han
-                        reducido drásticamente esta brecha.
+                        generan en una sola pasada. Técnicas modernas —muestreadores acelerados <Cita k="song2021denoising" /> y difusión en espacio
+                        latente <Cita k="rombach2022high" />— han reducido drásticamente esta brecha.
                     </Box>
                     <Box type="info" label="Nota de vigencia (2026)">
                         Tres ideas explican los generadores actuales: la difusión en el espacio latente de un autocodificador, que
-                        abarata cada paso (Rombach et al., 2022); la guía sin clasificador, que refuerza el condicionamiento al texto
-                        (Ho y Salimans, 2022); y la lectura de la difusión como una ecuación diferencial —<em>score</em>/SDE (Y. Song et
-                        al., 2021)—, de la que derivan el <em>flow matching</em> y el flujo rectificado (Lipman et al., 2023; Liu, Gong
-                        y Liu, 2022), hoy combinados con redes Transformer en lugar de U-Net (Peebles y Xie, 2023; Esser et al., 2024).
-                        La destilación permite además muestrear en uno o pocos pasos (Song et al., 2023).
+                        abarata cada paso <Cita k="rombach2022high" />; la guía sin clasificador, que refuerza el condicionamiento al texto{' '}
+                        <Cita k="ho2022classifier" />; y la lectura de la difusión como una ecuación diferencial —<em>score</em>/SDE{' '}
+                        <Cita k="song2021score" />—, de la que derivan el <em>flow matching</em> y el flujo rectificado{' '}
+                        <Cita k="lipman2023flow, liu2022flow" />, hoy combinados con redes Transformer en lugar de U-Net{' '}
+                        <Cita k="esser2024scaling, peebles2023scalable" />. La destilación permite además muestrear en uno o pocos pasos{' '}
+                        <Cita k="song2023consistency" />.
                     </Box>
 
                     <h4>Comparación: GAN, VAE y difusión</h4>
@@ -3430,7 +3576,7 @@ print(paso(torch.randn(64, 784)))   # (loss_D, loss_G) de un minilote`} />
                         para llenar el significado.
                     </Box>
 
-                    <p>El núcleo del Transformer es la <strong>atención escalada de producto punto</strong>:</p>
+                    <p>El núcleo del Transformer es la <strong>atención escalada de producto punto</strong> <Cita k="vaswani2017attention" />:</p>
                     <Eq>{String.raw`$$ \mathrm{Attention}(Q, K, V) = \mathrm{softmax}\!\left(\frac{Q K^{\top}}{\sqrt{d_k}}\right) V $$`}</Eq>
                     <ul>
                         <li><strong>Producto punto</strong> ({String.raw`\(Q K^{\top}\)`}): mide la similitud entre la pregunta de una palabra y las claves de todas las demás —una medida de relevancia.</li>
@@ -3443,7 +3589,7 @@ print(paso(torch.randn(64, 784)))   # (loss_D, loss_G) de un minilote`} />
                         «pásame» y «mesa» a la pregunta de «vaina» ({String.raw`\(QK^{\top}\)`}), reparte la atención entre las
                         palabras según esos puntajes (softmax) y rellena el significado de «vaina» con una mezcla de sus valores
                         (× {String.raw`\(V\)`}): un objeto físico que está sobre la mesa. Este ejemplo usa atención
-                        <strong> bidireccional</strong>, como un codificador tipo BERT (Devlin et al., 2019): con la máscara causal que se
+                        <strong> bidireccional</strong>, como un codificador tipo BERT <Cita k="devlin2019bert" />: con la máscara causal que se
                         describe más abajo, «vaina» no vería «mesa», que va después.
                     </p>
                     <SelfAttentionSVG />
@@ -3474,7 +3620,7 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                     <Accordion items={[
                         {
                             titulo: 'Codificación posicional (positional encoding)',
-                            contenido: <span>Como el Transformer ve todo a la vez, no sabe el orden de las palabras. Se suma a cada <em>embedding</em> una señal de senos y cosenos que codifica su <strong>posición absoluta</strong>; por su forma periódica, además facilita que el modelo infiera distancias relativas (Vaswani et al., 2017). Es como numerar las baldosas de la foto de fototrampa (Capítulo 2.1): sin ese número, la autoatención ve las mismas piezas sin saber en qué orden van. Muchos modelos actuales codifican directamente la posición relativa, p. ej., con rotaciones (RoPE; Su et al., 2024).</span>
+                            contenido: <span>Como el Transformer ve todo a la vez, no sabe el orden de las palabras. Se suma a cada <em>embedding</em> una señal de senos y cosenos que codifica su <strong>posición absoluta</strong>; por su forma periódica, además facilita que el modelo infiera distancias relativas <Cita k="vaswani2017attention" />. Es como numerar las baldosas de la foto de fototrampa (Capítulo 2.1): sin ese número, la autoatención ve las mismas piezas sin saber en qué orden van. Muchos modelos actuales codifican directamente la posición relativa <Cita k="shaw2018self" />, p. ej., con rotaciones, como RoPE <Cita k="su2024roformer" />.</span>
                         },
                         {
                             titulo: 'Atención multicabeza (multi-head attention)',
@@ -3485,7 +3631,7 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                     <h4>De la atención a la generación: el decodificador autorregresivo</h4>
                     <p>
                         La autoatención explica cómo un Transformer <em>entiende</em> una secuencia, pero ¿cómo la <em>genera</em>?
-                        Un Transformer generativo (como la familia GPT) funciona de forma <strong>autorregresiva</strong>: produce el
+                        Un Transformer generativo, como los de la familia GPT <Cita k="brown2020language, radford2019language" />, funciona de forma <strong>autorregresiva</strong>: produce el
                         texto <strong>un <em>token</em> a la vez</strong> (un token es la unidad mínima de texto que procesa el modelo: una
                         palabra o, más a menudo, una subpalabra), y cada token nuevo se reinyecta como entrada para predecir el
                         siguiente. Formalmente, modela la probabilidad de la secuencia como un producto de condicionales:
@@ -3501,7 +3647,7 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                     {/* ============== Herramienta interactiva: autoatención ============== */}
                     <h4>Herramienta interactiva: la autoatención en vivo con la palabra «vaina»</h4>
                     <p>
-                        La siguiente herramienta —inspirada en el <em>Transformer Explainer</em> (Cho et al., 2024), del Polo Club
+                        La siguiente herramienta —inspirada en el <em>Transformer Explainer</em> <Cita k="cho2024transformer" />, del Polo Club
                         of Data Science (Georgia Tech)— calcula en vivo la atención escalada de producto punto sobre las tres frases
                         de la «vaina». Al seleccionar un token se muestra a quién atiende (puntajes, softmax y matriz completa) y cómo
                         la mezcla de valores (<em>values</em>) construye su significado; el panel final conecta la atención con la
@@ -3566,8 +3712,8 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                         electorales; los conjuntos de entrenamiento plantean preguntas de autoría y consentimiento; y traducir
                         wayuunaiki, nasa yuwe o emberá exige el consentimiento libre, previo e informado de las comunidades y su
                         soberanía sobre los datos. Los datos sintéticos, además, heredan y pueden amplificar los sesgos del conjunto
-                        original. El <em>Marco ético para la inteligencia artificial en Colombia</em> (Guío Español et al., 2021) y la
-                        política nacional de IA (Consejo Nacional de Política Económica y Social, 2025) ofrecen referentes para estas
+                        original. El <em>Marco ético para la inteligencia artificial en Colombia</em> <Cita k="guio2021marco" /> y la
+                        política nacional de IA <Cita k="conpes2025ia" /> ofrecen referentes para estas
                         decisiones.
                     </Box>
 
@@ -3627,6 +3773,16 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                             ],
                             justificacion: 'Durante la generación autorregresiva, la máscara anula la atención hacia posiciones futuras: cada predicción depende solo de lo ya escrito. Sumar senos y cosenos es la codificación posicional, y el vocabulario se fija antes del entrenamiento.'
                         },
+                    ]} />
+
+                    <Referencias claves={[
+                        'goodfellow2016deep', 'bengio2013representation', 'hinton2006reducing', 'vincent2008extracting', 'kingma2014auto',
+                        'kingma2019introduction', 'goodfellow2014generative', 'radford2016unsupervised', 'arjovsky2017wasserstein',
+                        'gulrajani2017improved', 'dhariwal2021diffusion', 'ho2020denoising', 'sohldickstein2015deep',
+                        'ramesh2022hierarchical', 'rombach2022high', 'ramesh2021zero', 'song2021denoising', 'ho2022classifier',
+                        'song2021score', 'lipman2023flow', 'liu2022flow', 'esser2024scaling', 'peebles2023scalable',
+                        'song2023consistency', 'vaswani2017attention', 'devlin2019bert', 'shaw2018self', 'su2024roformer',
+                        'brown2020language', 'radford2019language', 'cho2024transformer', 'guio2021marco', 'conpes2025ia',
                     ]} />
                 </div>
             );
@@ -3751,7 +3907,7 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                             { texto: 'El despliegue ocurre en dispositivos de borde con poca memoria.', correcta: true },
                             { texto: 'Se requieren tres compuertas y dos estados separados (C y h).', correcta: false },
                         ],
-                        justificacion: 'La GRU es más ligera (2 compuertas, 1 estado, ≈ 25 % menos cómputo por paso) y brilla en latencia y en el borde. La LSTM puede rendir mejor en tareas de memoria muy larga o de conteo (Weiss et al., 2018); en muchas otras, ambas son comparables (Chung et al., 2014).'
+                        justificacion: <>La GRU es más ligera (2 compuertas, 1 estado, ≈ 25 % menos cómputo por paso) y brilla en latencia y en el borde. La LSTM puede rendir mejor en tareas de memoria muy larga o de conteo <Cita k="weiss2018practical" />; en muchas otras, ambas son comparables <Cita k="chung2014empirical" />.</>
                     },
                     {
                         pregunta: '¿Qué cambia al pasar de la atención de Bahdanau a la autoatención del Transformer?',
@@ -3811,7 +3967,7 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                             { texto: 'mejorar la exactitud del modelo al eliminar el ruido que acumulan los pesos durante el entrenamiento.', correcta: false },
                             { texto: 'acelerar el entrenamiento en la nube, porque los gradientes se calculan con enteros de 8 bits.', correcta: false },
                         ],
-                        justificacion: 'Mapear los pesos a 256 niveles enteros hace el modelo unas 4 veces más pequeño y, en hardware con aritmética entera de 8 bits, más rápido (Jacob et al., 2018); es la diferencia entre que quepa o no en un dispositivo de borde en campo, con una pérdida de exactitud que conviene vigilar. La cuantización actúa sobre el modelo ya entrenado, no sobre el entrenamiento.'
+                        justificacion: <>Mapear los pesos a 256 niveles enteros hace el modelo unas 4 veces más pequeño y, en hardware con aritmética entera de 8 bits, más rápido <Cita k="jacob2018quantization" />; es la diferencia entre que quepa o no en un dispositivo de borde en campo, con una pérdida de exactitud que conviene vigilar. La cuantización actúa sobre el modelo ya entrenado, no sobre el entrenamiento.</>
                     },
                 ]} />
 
@@ -3836,6 +3992,8 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                     (marcos de trabajo o <em>frameworks</em>, HPC con GPU y despliegue de flujos de trabajo o <em>pipelines</em>). Los temas dudosos conviene repasarlos en los
                     capítulos correspondientes antes de avanzar.
                 </Box>
+
+                <Referencias claves={['weiss2018practical', 'chung2014empirical', 'jacob2018quantization']} />
             </div>
         );
 
@@ -3927,27 +4085,11 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                     la evaluación y como repaso antes del <strong>Módulo 3: Implementación</strong>.
                 </Box>
 
-                <h3>Referencias</h3>
-                <p>
-                    Fuentes seminales de las arquitecturas del módulo, en orden cronológico por familia (visión,
-                    secuencias y generativos):
+                <Referencias titulo="Bibliografía base" claves={['goodfellow2016deep', 'zhang2023dive', 'chollet2025deep', 'geron2025hands']} />
+                <p className="text-sm text-gray-700 mt-3">
+                    Las fuentes primarias de cada arquitectura —LeNet, AlexNet, VGG, ResNet, ViT, MLP-Mixer, LSTM, GRU, seq2seq,
+                    atención, Transformer, VAE, GAN y difusión— figuran en la lista «Referencias» al final de cada capítulo.
                 </p>
-                <ul>
-                    <li>LeCun et al. (1998) — LeNet</li>
-                    <li>Krizhevsky et al. (2012) — AlexNet</li>
-                    <li>Simonyan y Zisserman (2015) — VGG</li>
-                    <li>He et al. (2016) — ResNet</li>
-                    <li>Dosovitskiy et al. (2021) — Vision Transformer</li>
-                    <li>Tolstikhin et al. (2021) — MLP-Mixer (arXiv:2105.01601)</li>
-                    <li>Hochreiter y Schmidhuber (1997) — LSTM</li>
-                    <li>Cho et al. (2014) — GRU</li>
-                    <li>Sutskever et al. (2014) — seq2seq</li>
-                    <li>Bahdanau et al. (2015) — Atención</li>
-                    <li>Vaswani et al. (2017) — Transformer</li>
-                    <li>Kingma y Welling (2014) — VAE</li>
-                    <li>Goodfellow et al. (2014) — GAN</li>
-                    <li>Ho et al. (2020) — Modelos de difusión (DDPM)</li>
-                </ul>
                 <Box type="info" label="Material de consulta">
                     El <a className="text-primary underline" href="021_material-consulta-modulo-2.html" target="_blank" rel="noopener noreferrer">material
                     de consulta del Módulo 2</a> amplía esta bibliografía con referencias adicionales y enlaces de profundización.
