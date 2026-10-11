@@ -173,7 +173,7 @@
         }
 
         .prose-usta h3 {
-            color: #ED1E79;
+            color: #BE185D;   /* magenta USTA oscurecido para texto: 5,6:1 sobre #F8FAFC (#ED1E79 daba 3,96:1) */
             font-weight: 600;
             font-size: 1.2rem;
             margin: 1.8rem 0 0.6rem;
@@ -275,6 +275,23 @@
            (no afecta a las ecuaciones en bloque, que se centran por su contenedor). */
         mjx-container svg {
             display: inline-block;
+        }
+        /* Contraste de texto ≥ 4,5:1 (WCAG 1.4.3): el magenta USTA (#ED1E79) se conserva en degradados,
+           bordes y rellenos; como color de texto se usa #BE185D. */
+        .text-secondary {
+            color: #BE185D !important;
+        }
+
+        /* Accesibilidad: quien pide menos movimiento en el sistema no recibe animaciones,
+           transiciones ni desplazamiento suave (WCAG 2.3.3). */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation: none !important;
+                transition: none !important;
+                scroll-behavior: auto !important;
+            }
         }
         /* Citas APA (auditoría 2026-10): el título muestra la referencia completa */
         .cita { cursor: help; }
@@ -488,11 +505,11 @@
 
             return (
                 <div className="my-4 rounded-xl overflow-hidden border border-gray-700 bg-gray-900 text-gray-100 shadow-lg">
-                    <div className="bg-gray-800 px-4 py-2 text-xs font-mono text-gray-400 border-b border-gray-700 flex justify-between items-center">
+                    <div className="bg-gray-800 px-4 py-2 text-xs font-mono text-gray-400 border-b border-gray-700 flex flex-wrap gap-y-1 justify-between items-center">
                         <span><i className={`${meta.icon} mr-2`}></i>{meta.label}</span>
                         <span className="flex items-center gap-3">
-                            <button onClick={() => setHidden(h => !h)} className="flex items-center gap-1 hover:text-white transition-colors" title={hidden ? 'Mostrar código' : 'Ocultar código'}>
-                                <i className={`fas ${hidden ? 'fa-eye' : 'fa-eye-slash'}`}></i>
+                            <button onClick={() => setHidden(h => !h)} className="flex items-center gap-1 hover:text-white transition-colors" title={hidden ? 'Mostrar código' : 'Ocultar código'} aria-expanded={!hidden}>
+                                <i className={`fas ${hidden ? 'fa-eye' : 'fa-eye-slash'}`} aria-hidden="true"></i>
                                 <span>{hidden ? 'Mostrar' : 'Ocultar'}</span>
                             </button>
                             <button onClick={handleCopy} className="flex items-center gap-1 hover:text-white transition-colors" title="Copiar código">
@@ -545,8 +562,8 @@
         ============================================================ */
         const CalloutPro = ({ tema = 'eth', titulo, subtitulo, icon, children }) => {
             const temas = {
-                eth: { grad: 'linear-gradient(135deg,#0E7490 0%,#06B6D4 100%)', bg: 'rgba(8,145,178,0.06)', border: 'rgba(14,116,137,0.22)', icon: 'fa-scale-balanced' },
-                warn: { grad: 'linear-gradient(135deg,#B45309 0%,#F59E0B 100%)', bg: 'rgba(180,83,9,0.06)', border: 'rgba(180,83,9,0.22)', icon: 'fa-triangle-exclamation' },
+                eth: { grad: 'linear-gradient(135deg,#155E75 0%,#0E7490 100%)', bg: 'rgba(8,145,178,0.06)', border: 'rgba(14,116,137,0.22)', icon: 'fa-scale-balanced' },
+                warn: { grad: 'linear-gradient(135deg,#92400E 0%,#B45309 100%)', bg: 'rgba(180,83,9,0.06)', border: 'rgba(180,83,9,0.22)', icon: 'fa-triangle-exclamation' },
                 info: { grad: 'linear-gradient(135deg,#3D008D 0%,#ED1E79 100%)', bg: 'rgba(61,0,141,0.05)', border: 'rgba(61,0,141,0.18)', icon: 'fa-circle-info' },
             };
             const t = temas[tema] || temas.eth;
@@ -558,7 +575,7 @@
                         </span>
                         <div>
                             <div className="text-white font-bold text-base leading-tight">{titulo}</div>
-                            {subtitulo && <div className="text-white/80 text-xs">{subtitulo}</div>}
+                            {subtitulo && <div className="text-white text-xs">{subtitulo}</div>}
                         </div>
                     </div>
                     <div className="px-5 py-4 text-[0.95rem] text-gray-700 leading-relaxed" style={{ background: t.bg }}>
@@ -626,18 +643,19 @@
         const Tabs = ({ tabs }) => {
             const [active, setActive] = useState(0);
             const contentRef = useRef(null);
+            const uid = React.useId();   // ids únicos para enlazar pestaña ↔ panel (WAI-ARIA)
             useTypeset(contentRef, [active]);
             return (
                 <div className="my-5">
-                    <div className="flex flex-wrap gap-1 border-b border-gray-200">
+                    <div className="flex flex-wrap gap-1 border-b border-gray-200" role="tablist">
                         {tabs.map((t, i) => (
-                            <button key={i} onClick={() => setActive(i)}
+                            <button key={i} onClick={() => setActive(i)} role="tab" id={`${uid}-tab-${i}`} aria-selected={active === i} aria-controls={`${uid}-panel`}
                                 className={`px-4 py-2 text-sm font-semibold rounded-t-lg transition-colors ${active === i ? 'text-primary border-b-2 border-secondary bg-white' : 'text-gray-500 hover:text-primary'}`}>
                                 {t.label}
                             </button>
                         ))}
                     </div>
-                    <div ref={contentRef} className="p-4 bg-white border border-t-0 border-gray-200 rounded-b-lg animate-fade-in text-[0.95rem] text-gray-700">
+                    <div ref={contentRef} role="tabpanel" id={`${uid}-panel`} aria-labelledby={`${uid}-tab-${active}`} className="p-4 bg-white border border-t-0 border-gray-200 rounded-b-lg animate-fade-in text-[0.95rem] text-gray-700">
                         <div key={active}>{tabs[active].content}</div>
                     </div>
                 </div>
@@ -650,18 +668,19 @@
         const Accordion = ({ items }) => {
             const [open, setOpen] = useState(null);
             const ref = useRef(null);
+            const uid = React.useId();
             useTypeset(ref, [open]);
             return (
                 <div ref={ref} className="space-y-2 my-5">
                     {items.map((it, i) => (
                         <div key={i} className="border border-gray-200 rounded-xl overflow-hidden bg-white">
-                            <button onClick={() => setOpen(open === i ? null : i)}
+                            <button onClick={() => setOpen(open === i ? null : i)} aria-expanded={open === i} aria-controls={`${uid}-acc-${i}`}
                                 className="w-full flex justify-between items-center px-4 py-3 hover:bg-gray-50 text-left font-semibold text-navy transition-colors">
                                 <span>{it.titulo}</span>
-                                <i className={`fas fa-chevron-down transition-transform duration-300 text-secondary ${open === i ? 'rotate-180' : ''}`}></i>
+                                <i className={`fas fa-chevron-down transition-transform duration-300 text-secondary ${open === i ? 'rotate-180' : ''}`} aria-hidden="true"></i>
                             </button>
                             {open === i && (
-                                <div className="px-4 py-3 bg-gray-50 text-gray-700 text-[0.92rem] leading-relaxed animate-fade-in border-t border-gray-100">
+                                <div id={`${uid}-acc-${i}`} className="px-4 py-3 bg-gray-50 text-gray-700 text-[0.92rem] leading-relaxed animate-fade-in border-t border-gray-100">
                                     {it.contenido}
                                 </div>
                             )}
@@ -677,6 +696,7 @@
         const Reto = ({ titulo = 'Reto práctico', children, solucion }) => {
             const [show, setShow] = useState(false);
             const ref = useRef(null);
+            const uid = React.useId();
             useTypeset(ref, [show]);
             return (
                 <div ref={ref} className="my-5 rounded-xl border-2 border-dashed p-5" style={{ borderColor: '#FDB913', background: '#FFFDF5' }}>
@@ -684,12 +704,12 @@
                         <i className="fas fa-dumbbell text-gold"></i>{titulo}
                     </div>
                     <div className="text-gray-700 text-[0.95rem] mb-3">{children}</div>
-                    <button onClick={() => setShow(s => !s)}
+                    <button onClick={() => setShow(s => !s)} aria-expanded={show} aria-controls={`${uid}-sol`}
                         className="text-xs font-bold px-3 py-1.5 rounded-full text-white usta-gradient hover:opacity-90 transition-opacity">
-                        <i className={`fas ${show ? 'fa-eye-slash' : 'fa-key'} mr-1`}></i>
+                        <i className={`fas ${show ? 'fa-eye-slash' : 'fa-key'} mr-1`} aria-hidden="true"></i>
                         {show ? 'Ocultar solución' : 'Mostrar solución'}
                     </button>
-                    {show && <div className="mt-3 animate-fade-in">{solucion}</div>}
+                    {show && <div id={`${uid}-sol`} className="mt-3 animate-fade-in">{solucion}</div>}
                 </div>
             );
         };
@@ -729,14 +749,15 @@
                                 else cls = 'border-gray-200 opacity-70';
                             } else if (isSel) cls = 'border-secondary bg-pink-50';
                             return (
-                                <button key={i} onClick={() => toggle(i)} disabled={checked}
+                                <button key={i} onClick={() => toggle(i)} disabled={checked} aria-pressed={isSel}
                                     className={`w-full text-left px-4 py-2.5 rounded-lg border text-[0.92rem] flex items-center gap-3 transition-all ${cls}`}>
-                                    <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${isSel ? 'usta-gradient text-white' : 'bg-gray-100 text-gray-500'}`}>
+                                    <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${isSel ? 'usta-gradient text-white' : 'bg-gray-100 text-gray-600'}`}>
                                         {String.fromCharCode(97 + i)}
                                     </span>
                                     <span className="flex-1 text-gray-700">{o.texto}</span>
-                                    {checked && o.correcta && <i className="fas fa-check text-green-600"></i>}
-                                    {checked && isSel && !o.correcta && <i className="fas fa-xmark text-red-500"></i>}
+                                    {checked && o.correcta && <i className="fas fa-check text-green-600" aria-hidden="true"></i>}
+                                    {checked && isSel && !o.correcta && <i className="fas fa-xmark text-red-500" aria-hidden="true"></i>}
+                                    {checked && <span className="sr-only">{o.correcta ? '(correcta)' : isSel ? '(incorrecta)' : ''}</span>}
                                 </button>
                             );
                         })}
@@ -748,7 +769,7 @@
                             : <button onClick={() => { setChecked(false); setSel([]); }}
                                 className="text-sm font-bold px-4 py-1.5 rounded-full border border-primary text-primary hover:bg-primary/5">Reintentar</button>}
                         {checked && (
-                            <span className={`text-sm font-bold ${acierto ? 'text-green-600' : 'text-red-500'}`}>
+                            <span className={`text-sm font-bold ${acierto ? 'text-green-700' : 'text-red-700'}`}>
                                 <i className={`fas ${acierto ? 'fa-circle-check' : 'fa-circle-xmark'} mr-1`}></i>
                                 {acierto ? '¡Correcto!' : 'Respuesta incorrecta: véase la explicación'}
                             </span>
@@ -822,14 +843,15 @@
                                         else cls = 'border-gray-200 opacity-70';
                                     } else if (sel) cls = 'border-secondary bg-pink-50';
                                     return (
-                                        <button key={oi} onClick={() => toggle(qi, oi, q.multiple)} disabled={enviado}
+                                        <button key={oi} onClick={() => toggle(qi, oi, q.multiple)} disabled={enviado} aria-pressed={sel}
                                             className={`w-full text-left px-3 py-2 rounded-lg border text-[0.9rem] flex items-center gap-2.5 transition-all ${cls}`}>
-                                            <span className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[0.7rem] font-bold ${sel ? 'usta-gradient text-white' : 'bg-gray-100 text-gray-500'}`}>
+                                            <span className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[0.7rem] font-bold ${sel ? 'usta-gradient text-white' : 'bg-gray-100 text-gray-600'}`}>
                                                 {String.fromCharCode(97 + oi)}
                                             </span>
                                             <span className="flex-1 text-gray-700">{o.texto}</span>
-                                            {enviado && o.correcta && <i className="fas fa-check text-green-600 text-xs"></i>}
-                                            {enviado && sel && !o.correcta && <i className="fas fa-xmark text-red-500 text-xs"></i>}
+                                            {enviado && o.correcta && <i className="fas fa-check text-green-600 text-xs" aria-hidden="true"></i>}
+                                            {enviado && sel && !o.correcta && <i className="fas fa-xmark text-red-500 text-xs" aria-hidden="true"></i>}
+                                            {enviado && <span className="sr-only">{o.correcta ? '(correcta)' : sel ? '(incorrecta)' : ''}</span>}
                                         </button>
                                     );
                                 })}
@@ -958,13 +980,16 @@
                     setOpen(false);
                 };
                 // 'true' captura también el scroll del contenedor interno de la lección.
+                const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };   // WCAG 1.4.13: se descarta con Escape
                 window.addEventListener('scroll', reflow, true);
                 window.addEventListener('resize', reflow);
                 document.addEventListener('mousedown', onDoc);
+                document.addEventListener('keydown', onKey);
                 return () => {
                     window.removeEventListener('scroll', reflow, true);
                     window.removeEventListener('resize', reflow);
                     document.removeEventListener('mousedown', onDoc);
+                    document.removeEventListener('keydown', onKey);
                 };
             }, [open]);
 
@@ -972,8 +997,8 @@
                 <span className="inline-block">
                     <button ref={btnRef} type="button" onClick={openNow} onMouseEnter={openNow} onMouseLeave={scheduleClose}
                         className="text-primary font-semibold cursor-help bg-primary/5 hover:bg-primary/10 rounded px-1 transition-colors"
-                        style={{ borderBottom: '1px dotted #3D008D' }} title="Ver definición rápida">
-                        {children}<i className="fas fa-circle-info text-[0.6em] align-super ml-0.5 text-secondary"></i>
+                        style={{ borderBottom: '1px dotted #3D008D' }} title="Ver definición rápida" aria-expanded={open}>
+                        {children}<i className="fas fa-circle-info text-[0.6em] align-super ml-0.5 text-secondary" aria-hidden="true"></i>
                     </button>
                     {open && pos && ReactDOM.createPortal(
                         <span ref={popRef} role="tooltip"
@@ -1408,7 +1433,7 @@
                                 </figure>
                             ))}
                         </div>
-                        <PieFigura n="2.1.1" className="mt-3" fuente={<>fotografía de Giles Laurent (2024), <a href="https://commons.wikimedia.org/wiki/File:145_Jaguar_in_Encontro_das_%C3%81guas_State_Park_Photo_by_Giles_Laurent.jpg" target="_blank" rel="noopener noreferrer" style={{ color: '#ED1E79', textDecoration: 'underline' }}>Wikimedia Commons</a>, licencia <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es" target="_blank" rel="noopener noreferrer" style={{ color: '#ED1E79', textDecoration: 'underline' }}>CC BY-SA 4.0</a>; recortes y filtro de elaboración propia (CC BY-SA 4.0).</>}>
+                        <PieFigura n="2.1.1" className="mt-3" fuente={<>fotografía de Giles Laurent (2024), <a href="https://commons.wikimedia.org/wiki/File:145_Jaguar_in_Encontro_das_%C3%81guas_State_Park_Photo_by_Giles_Laurent.jpg" target="_blank" rel="noopener noreferrer" style={{ color: '#BE185D', textDecoration: 'underline' }}>Wikimedia Commons</a>, licencia <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es" target="_blank" rel="noopener noreferrer" style={{ color: '#BE185D', textDecoration: 'underline' }}>CC BY-SA 4.0</a>; recortes y filtro de elaboración propia (CC BY-SA 4.0).</>}>
                             Analogía visual de la jerarquía de características: una CNN compone su comprensión de lo simple a lo
                             complejo —bordes → texturas → partes → objeto—, como la jerarquía del córtex visual (V1 → V2 → V4 → corteza
                             temporal inferior). Los paneles <strong>no son activaciones reales de una CNN</strong>: el primero es un filtro de
@@ -1608,7 +1633,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
 
                     <Box type="tip" label="Recurso externo · una CNN real para explorar">
                         Para ver estos mismos pasos sobre una red entrenada de verdad, conviene explorar{' '}
-                        <a href="https://poloclub.github.io/cnn-explainer/" target="_blank" rel="noopener noreferrer" style={{ color: '#ED1E79', fontWeight: 600, textDecoration: 'underline' }}>CNN Explainer</a>{' '}
+                        <a href="https://poloclub.github.io/cnn-explainer/" target="_blank" rel="noopener noreferrer" style={{ color: '#BE185D', fontWeight: 600, textDecoration: 'underline' }}>CNN Explainer</a>{' '}
                         <Cita k="wang2021cnn" />: una CNN <em>Tiny VGG</em> que clasifica imágenes en 10 clases y permite pasar el cursor sobre las
                         matrices para mover el kernel y ver el producto punto, además de variar en vivo el <em>padding</em>, el tamaño de
                         kernel y el <em>stride</em>. Software libre (licencia MIT) del Polo Club of Data Science (Georgia Tech).
@@ -4165,7 +4190,8 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                 localStorage.setItem(STORAGE_KEY, String(safeIndex));
                 typesetMath();
                 const cont = document.getElementById('contenido-scroll');
-                if (cont) cont.scrollTo({ top: 0, behavior: 'smooth' });
+                const sinMovimiento = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                if (cont) cont.scrollTo({ top: 0, behavior: sinMovimiento ? 'auto' : 'smooth' });
             }, [safeIndex]);
 
             const irA = (idx) => {
@@ -4176,9 +4202,9 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
             return (
                 <div className="flex h-screen overflow-hidden relative">
                     <button onClick={() => setSidebarOpen(p => !p)}
-                        className="fixed top-4 left-4 z-50 p-2.5 rounded-full shadow-lg text-white transition-all hover:scale-110 usta-gradient"
-                        title={sidebarOpen ? 'Ocultar menú' : 'Mostrar menú'}>
-                        <i className={`fas ${sidebarOpen ? 'fa-times' : 'fa-bars'} text-sm`}></i>
+                        className="fixed top-4 left-4 z-50 p-2.5 rounded-full shadow-lg text-white transition-all motion-safe:hover:scale-110 usta-gradient"
+                        title={sidebarOpen ? 'Ocultar menú' : 'Mostrar menú'} aria-label={sidebarOpen ? 'Ocultar menú' : 'Mostrar menú'} aria-expanded={sidebarOpen}>
+                        <i className={`fas ${sidebarOpen ? 'fa-times' : 'fa-bars'} text-sm`} aria-hidden="true"></i>
                     </button>
 
                     {sidebarOpen && <div className="fixed inset-0 bg-black/20 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />}
@@ -4191,7 +4217,7 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                         }}>
                         <div className="p-6 pt-16 border-b border-white/10">
                             <p className="text-[0.65rem] uppercase tracking-widest text-gold font-bold">Universidad Santo Tomás</p>
-                            <h1 className="text-white font-bold text-lg tracking-tight mt-1">Deep Learning · <span className="text-secondary">Módulo 2</span></h1>
+                            <h1 className="text-white font-bold text-lg tracking-tight mt-1">Deep Learning · <span className="text-pink-300">Módulo 2</span></h1>
                             <p className="text-xs text-white/50 mt-1">Arquitecturas de Redes Neuronales Especializadas</p>
                         </div>
 
@@ -4205,7 +4231,7 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                             ))}
                         </nav>
 
-                        <div className="p-4 text-[10px] text-white/40 border-t border-white/10">
+                        <div className="p-4 text-[10px] text-white/70 border-t border-white/10">
                             <p>Maestría en Ciencia de Datos · EA-N-F-004</p>
                             <p>NumPy · PyTorch · 3 créditos</p>
                         </div>
