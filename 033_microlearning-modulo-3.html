@@ -1022,6 +1022,13 @@
                     </div>
                     <p className="text-[0.88rem] text-gray-700 font-semibold leading-snug mb-1">{video.titulo}</p>
                     <p className="text-[0.78rem] text-gray-500 mb-3">{video.descripcion}</p>
+                    {video.complemento && (
+                        <p className="text-[0.75rem] text-gray-600 mb-3">
+                            <i className="fas fa-book-open mr-1" aria-hidden="true"></i>Lectura complementaria:{' '}
+                            <a href={video.complemento.url} target="_blank" rel="noopener noreferrer" className="font-semibold underline text-primary">{video.complemento.titulo}</a>{' '}
+                            ({video.complemento.canal}).
+                        </p>
+                    )}
                     <a href={video.url} target="_blank" rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 text-sm font-bold px-4 py-2 rounded-full bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 transition-all shadow-md hover:shadow-lg">
                         <i className="fab fa-youtube"></i>
@@ -1042,11 +1049,11 @@
                 title: 'Frameworks: dos cocinas para entrenar (TF/Keras frente a PyTorch)',
                 duracion: '≈ 4 min',
                 video: {
-                    tipo: 'lectura',
-                    titulo: 'Introducing Keras 3.0',
-                    canal: 'Keras Team (2023) · keras.io, en inglés',
-                    url: 'https://keras.io/keras_3/',
-                    descripcion: 'Presentación oficial de Keras 3: el mismo código de alto nivel corre sobre TensorFlow, JAX o PyTorch, y convive con bucles de entrenamiento escritos a mano.',
+                    titulo: 'What is PyTorch? (Machine/Deep Learning)',
+                    canal: 'IBM Technology (2023, en inglés)',
+                    url: 'https://www.youtube.com/watch?v=fJ40w_2h8kk',
+                    descripcion: 'Introducción en inglés a PyTorch: qué es, quién lo respalda (la PyTorch Foundation) y cómo simplifica la preparación de los datos, la construcción y el entrenamiento de los modelos.',
+                    complemento: { titulo: 'Introducing Keras 3.0', canal: 'Keras Team, 2023, en inglés', url: 'https://keras.io/keras_3/' },
                 },
                 objetivo: 'Distinguir el estilo de alto nivel de TensorFlow/Keras (model.fit) del bucle de entrenamiento explícito de PyTorch, y entender por qué Keras 3 actúa como puente entre TF, PyTorch y JAX.',
                 analogia: {
@@ -1195,11 +1202,11 @@ loader = DataLoader(dataset, batch_size=32, shuffle=True,
                 title: 'GPU y precisión mixta: hacer más con menos',
                 duracion: '≈ 5 min',
                 video: {
-                    tipo: 'lectura',
-                    titulo: 'Automatic mixed precision examples',
-                    canal: 'PyTorch Foundation · documentación oficial, en inglés',
-                    url: 'https://docs.pytorch.org/docs/stable/notes/amp_examples.html',
-                    descripcion: 'Ejemplos oficiales de torch.autocast y torch.amp.GradScaler: el bucle típico, la acumulación y el recorte de gradientes con precisión mixta.',
+                    titulo: '¿Por qué las GPUs son buenas para la IA? | Data Coffee #12',
+                    canal: 'Dot CSV (2019, en español)',
+                    url: 'https://www.youtube.com/watch?v=C_wSHKG8_fg',
+                    descripcion: 'Explicación en español de por qué una GPU entrena modelos más rápido que una CPU: miles de núcleos sencillos en paralelo frente a pocos núcleos rápidos. El hardware citado es de 2019, pero el principio sigue vigente.',
+                    complemento: { titulo: 'Automatic mixed precision examples', canal: 'PyTorch Foundation, documentación oficial, en inglés', url: 'https://docs.pytorch.org/docs/stable/notes/amp_examples.html' },
                 },
                 objetivo: 'Entender la diferencia entre núcleos CUDA y Tensor Cores, qué son FP16/BF16, por qué la VRAM es el recurso escaso y cómo la precisión mixta acelera el entrenamiento hasta 2–3× y reduce sobre todo la memoria de las activaciones (el ahorro total es menor que la mitad).',
                 analogia: {
@@ -1346,11 +1353,11 @@ val_tfms = v2.Compose([
                 title: 'Del notebook al cafetal: exportar y desplegar',
                 duracion: '≈ 5 min',
                 video: {
-                    tipo: 'lectura',
-                    titulo: 'Introduction to ONNX',
-                    canal: 'ONNX Community · documentación oficial, en inglés',
-                    url: 'https://onnx.ai/onnx/intro/',
-                    descripcion: 'Introducción oficial a ONNX: qué es un grafo ONNX, sus operadores y cómo se ejecuta el modelo fuera del framework con que se entrenó.',
+                    titulo: '¿Qué es el EDGE AI? La Inteligencia Artificial de Bolsillo!',
+                    canal: 'Dot CSV (2021, en español)',
+                    url: 'https://www.youtube.com/watch?v=dnLWyi1KwQc',
+                    descripcion: 'Explicación en español de la IA en el borde (Edge AI): ejecutar el modelo en el propio dispositivo, sin depender de una conexión a internet, como la tableta del técnico en la finca.',
+                    complemento: { titulo: 'Introduction to ONNX', canal: 'ONNX Community, documentación oficial, en inglés', url: 'https://onnx.ai/onnx/intro/' },
                 },
                 objetivo: 'Conocer la ruta de despliegue: guardado nativo (state_dict/.keras), exportación a ONNX como «pasaporte» interoperable en un único archivo, torch.export como sucesor de TorchScript, LiteRT para el borde y la cuantización a INT8.',
                 analogia: {
