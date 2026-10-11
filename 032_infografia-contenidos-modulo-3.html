@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
         content="Infografía detallada de los contenidos del Módulo 3 — Implementación y Herramientas Profesionales de Deep Learning. Maestría en Ciencia de Datos, Universidad Santo Tomás. Síntesis visual de los 3 capítulos: frameworks (TensorFlow/Keras 3 y PyTorch), computación de alto rendimiento con GPU (Colab y Kaggle) y pipelines de datos y despliegue (tf.data, ONNX, LiteRT).">
-    <title>Infografía · Contenidos del Módulo 3 — Implementación del Aprendizaje Profundo · USTA</title>
+    <title>Infografía · Contenidos del Módulo 3 — Implementación y Herramientas Profesionales · USTA</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -149,6 +149,12 @@
         /* MathJax (tex-svg) + Preflight de Tailwind (svg{display:block}) rompe la
            matematica inline: cada formula salta de linea. Se restaura el flujo inline. */
         mjx-container svg { display: inline-block; }
+
+        /* Los hijos de grid no se encogen por debajo de su contenido (min-width:auto):
+           se fuerza min-width:0 para que .eq y .codeblock desplacen dentro de la tarjeta (375 px). */
+        .grid > * { min-width: 0; }
+        /* A 375 px, la barra de la ventana de código pasa a dos líneas en vez de ocultar el botón «Copiar» */
+        .code-window-bar { flex-wrap: wrap; row-gap: .35rem; }
     </style>
 </head>
 
@@ -186,10 +192,10 @@
                 </div>
                 <div class="bg-white/10 border border-white/15 rounded-xl px-4 py-3">
                     <div class="text-2xl md:text-3xl font-extrabold text-gold">30 %</div>
-                    <div class="text-xs text-white/75 mt-0.5">de la nota final (Guía 5 % + Fase 3 25 %)</div>
+                    <div class="text-xs text-white/75 mt-0.5">de la nota final (Guía 3: 5 %; Fase 3: 25 %); el Cuestionario Final del curso (10 %) va aparte</div>
                 </div>
                 <div class="bg-white/10 border border-white/15 rounded-xl px-4 py-3">
-                    <div class="text-2xl md:text-3xl font-extrabold text-gold">≈25</div>
+                    <div class="text-2xl md:text-3xl font-extrabold text-gold">≈30</div>
                     <div class="text-xs text-white/75 mt-0.5">términos clave del módulo</div>
                 </div>
             </div>
@@ -264,24 +270,24 @@
                 <a href="#cap1" class="card p-4 border-t-4 border-primary block">
                     <div class="flex items-center justify-between"><span class="text-3xl font-extrabold text-primary/25">3.1</span><i class="fas fa-layer-group text-primary"></i></div>
                     <h3 class="font-bold text-navy mt-1 leading-tight">Frameworks</h3>
-                    <p class="text-xs text-gray-500 mt-1">TensorFlow/Keras 3, PyTorch, grafo dinámico, multi-backend</p>
+                    <p class="text-xs text-gray-500 mt-1">TensorFlow/Keras 3, PyTorch, grafo dinámico, varios motores (<em>multi-backend</em>)</p>
                 </a>
                 <a href="#cap2" class="card p-4 border-t-4 border-secondary block">
                     <div class="flex items-center justify-between"><span class="text-3xl font-extrabold text-secondary/25">3.2</span><i class="fas fa-microchip text-secondary"></i></div>
                     <h3 class="font-bold text-navy mt-1 leading-tight">HPC / GPU</h3>
-                    <p class="text-xs text-gray-500 mt-1">CPU vs GPU, Tensor Cores, VRAM, precisión mixta, Colab/Kaggle</p>
+                    <p class="text-xs text-gray-500 mt-1">CPU frente a GPU, Tensor Cores, VRAM, precisión mixta, Colab/Kaggle</p>
                 </a>
                 <a href="#cap3" class="card p-4 border-t-4 border-gold block">
                     <div class="flex items-center justify-between"><span class="text-3xl font-extrabold text-gold/40">3.3</span><i class="fas fa-share-nodes" style="color:#B45309"></i></div>
                     <h3 class="font-bold text-navy mt-1 leading-tight">Pipelines y despliegue</h3>
-                    <p class="text-xs text-gray-500 mt-1">tf.data, prefetch, augmentation, ONNX, LiteRT</p>
+                    <p class="text-xs text-gray-500 mt-1">tf.data, prefetch, aumento de datos, ONNX, LiteRT</p>
                 </a>
             </div>
 
             <div class="grid md:grid-cols-3 gap-3 mt-3">
                 <div class="card p-4 text-center"><div class="text-secondary font-bold text-sm"><i class="fas fa-pen-ruler mr-1"></i>VER (traducir)</div><p class="text-[0.78rem] text-gray-600 mt-1">Escribir el mismo modelo de roya del café en Keras y en PyTorch, y entender por qué convergen.</p></div>
                 <div class="card p-4 text-center"><div class="text-secondary font-bold text-sm"><i class="fas fa-bolt mr-1"></i>RECORDAR (acelerar)</div><p class="text-[0.78rem] text-gray-600 mt-1">Cargar el cafetal en la GPU T4 de Colab con precisión mixta y vigilar la VRAM como una bodega.</p></div>
-                <div class="card p-4 text-center"><div class="text-secondary font-bold text-sm"><i class="fas fa-truck-fast mr-1"></i>CREAR (desplegar)</div><p class="text-[0.78rem] text-gray-600 mt-1">Exportar a ONNX y correr el clasificador <em>offline</em> en una tablet en la finca, sin internet.</p></div>
+                <div class="card p-4 text-center"><div class="text-secondary font-bold text-sm"><i class="fas fa-truck-fast mr-1"></i>CREAR (desplegar)</div><p class="text-[0.78rem] text-gray-600 mt-1">Exportar el clasificador (LiteRT para la tablet, ONNX para el servidor) y correrlo <em>offline</em> en la finca, sin internet.</p></div>
             </div>
 
             <div class="card p-5 mt-5 bg-gradient-to-br from-[#FAF8FF] to-[#FCE7F1]">
@@ -300,16 +306,16 @@
             </div>
 
             <div class="callout mb-5" style="border-color:#3D008D; background:#F5F0FA">
-                <p class="text-[0.9rem] text-gray-700"><i class="fas fa-screwdriver-wrench text-primary mr-1"></i><strong>¿Por qué no programar la red a mano?</strong> Implementar la retropropagación y la diferenciación automática en NumPy es inviable. Un <strong>framework</strong> aporta <strong>autograd</strong>, capas listas, optimizadores, soporte de GPU y un ecosistema de despliegue. El módulo recorre los dos dominantes —<strong>TensorFlow/Keras</strong> y <strong>PyTorch</strong>— y la convergencia reciente que habilita <strong>Keras 3</strong> como puente multi-backend.</p>
+                <p class="text-[0.9rem] text-gray-700"><i class="fas fa-screwdriver-wrench text-primary mr-1"></i><strong>¿Por qué no programar la red a mano?</strong> Implementar la retropropagación y la diferenciación automática en NumPy es inviable. Un <strong>framework</strong> aporta <strong>autograd</strong>, capas listas, optimizadores, soporte de GPU y un ecosistema de despliegue. El módulo recorre los dos dominantes —<strong>TensorFlow/Keras</strong> y <strong>PyTorch</strong>— y la convergencia reciente que habilita <strong>Keras 3</strong> como puente entre motores (<em>multi-backend</em>).</p>
             </div>
 
             <!-- TensorFlow / Keras: 3 APIs -->
             <div class="card p-6 mb-5">
                 <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-door-open text-primary"></i>TensorFlow + Keras: las tres puertas para construir un modelo</h3>
-                <p class="text-[0.86rem] text-gray-600 mb-4"><strong>Keras</strong> es la interfaz de alto nivel de TensorFlow («para seres humanos, no para máquinas»). Ofrece <strong>tres APIs</strong> con creciente flexibilidad y creciente complejidad: se elige según la forma del modelo.</p>
+                <p class="text-[0.86rem] text-gray-600 mb-4"><strong>Keras</strong> es la interfaz de alto nivel de TensorFlow («para seres humanos, no para máquinas»). Ofrece <strong>tres API</strong> con creciente flexibilidad y creciente complejidad: se elige según la forma del modelo.</p>
                 <!-- SVG NUEVO: 3 APIs de Keras -->
                 <svg viewBox="0 0 660 200" class="w-full" role="img" aria-labelledby="kerasTitle kerasDesc">
-                    <title id="kerasTitle">Las tres APIs de Keras: Sequential, Funcional y Subclassing</title>
+                    <title id="kerasTitle">Las tres API de Keras: Sequential, Funcional y Subclassing</title>
                     <desc id="kerasDesc">De izquierda a derecha, la API Sequential apila capas en una sola línea recta; la API Funcional permite ramas que se bifurcan y se unen como un grafo dirigido; la API Subclassing es una caja de código con control total. La flexibilidad y la complejidad aumentan hacia la derecha.</desc>
                     <defs><marker id="arrKeras" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#94A3B8"/></marker></defs>
                     <!-- Sequential -->
@@ -366,6 +372,7 @@
                         </div>
                         <div class="codeblock"><span class="cm"># API Sequential — la línea de ensamblaje</span>
 modelo = keras.<span class="fn">Sequential</span>([
+    keras.<span class="fn">Input</span>(shape=(<span class="st">4</span>,)),               <span class="cm"># Keras 3: declarar la entrada</span>
     keras.layers.<span class="fn">Dense</span>(<span class="st">128</span>, activation=<span class="st">'relu'</span>),
     keras.layers.<span class="fn">Dropout</span>(<span class="st">0.3</span>),
     keras.layers.<span class="fn">Dense</span>(<span class="st">1</span>, activation=<span class="st">'sigmoid'</span>),
@@ -405,10 +412,10 @@ modelo.<span class="fn">compile</span>(optimizer=<span class="st">'adam'</span>,
                     </div>
                     <div class="space-y-3">
                         <div class="callout" style="border-color:#0E7490; background:#ECFEFF">
-                            <p class="text-[0.84rem] text-gray-700"><i class="fas fa-water mr-1 text-teal"></i><strong>El río Magdalena:</strong> un grafo estático (TF 1.x) era un canal de concreto fijo; el grafo dinámico de PyTorch es el río Magdalena — su cauce se adapta al terreno, se bifurca y crea meandros según el código que corre.</p>
+                            <p class="text-[0.84rem] text-gray-700"><i class="fas fa-water mr-1 text-teal"></i><strong>El río Magdalena:</strong> un grafo estático (TF 1.x) era un canal de concreto fijo; el grafo dinámico de PyTorch es el río Magdalena: la ruta la decide cada crecida, es decir, el grafo se rehace en cada pasada según el código que corre. Ejecución inmediata (<em>eager</em>) y <em>define-by-run</em> son la misma idea vista desde dos lados.</p>
                         </div>
                         <div class="callout" style="border-color:#B45309; background:#FFFBEB">
-                            <p class="text-[0.82rem] text-gray-700"><i class="fas fa-code-branch mr-1" style="color:#B45309"></i><strong>Control explícito vs. abstracción:</strong> en Keras, <span class="icode">model.fit()</span> encapsula todo el ciclo. En PyTorch el <strong>bucle de entrenamiento se escribe a mano</strong>, lo que da control fino sobre cada paso (clave para precisión mixta y acumulación de gradientes).</p>
+                            <p class="text-[0.82rem] text-gray-700"><i class="fas fa-code-branch mr-1" style="color:#B45309"></i><strong>Control explícito frente a abstracción:</strong> en Keras, <span class="icode">model.fit()</span> encapsula todo el ciclo. En PyTorch el <strong>bucle de entrenamiento se escribe a mano</strong>, lo que da control fino sobre cada paso (clave para precisión mixta y acumulación de gradientes).</p>
                         </div>
                     </div>
                 </div>
@@ -416,7 +423,7 @@ modelo.<span class="fn">compile</span>(optimizer=<span class="st">'adam'</span>,
 
             <!-- Tabla comparativa TF vs PyTorch -->
             <div class="card p-6 mb-5">
-                <h3 class="font-bold text-navy mb-3 flex items-center gap-2"><i class="fas fa-code-compare text-primary"></i>TensorFlow / Keras vs. PyTorch — ¿cuál elegir?</h3>
+                <h3 class="font-bold text-navy mb-3 flex items-center gap-2"><i class="fas fa-code-compare text-primary"></i>TensorFlow / Keras frente a PyTorch — ¿cuál elegir?</h3>
                 <div class="overflow-x-auto">
                     <table class="w-full text-[0.78rem] border-collapse">
                         <thead>
@@ -429,24 +436,24 @@ modelo.<span class="fn">compile</span>(optimizer=<span class="st">'adam'</span>,
                         <tbody class="text-gray-700">
                             <tr><td class="p-2 border border-gray-200 font-semibold">Filosofía</td><td class="p-2 border border-gray-200">Abstracción y producción</td><td class="p-2 border border-gray-200">Flexibilidad e investigación</td></tr>
                             <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Bucle de entrenamiento</td><td class="p-2 border border-gray-200"><span class="icode">model.fit()</span></td><td class="p-2 border border-gray-200">Manual (control total)</td></tr>
-                            <tr><td class="p-2 border border-gray-200 font-semibold">Producción empresarial</td><td class="p-2 border border-gray-200">TF Serving, LiteRT, TFX</td><td class="p-2 border border-gray-200">TorchServe, ONNX, torch.compile</td></tr>
-                            <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Despliegue móvil</td><td class="p-2 border border-gray-200">LiteRT (maduro)</td><td class="p-2 border border-gray-200">ExecuTorch (estable desde 2024)</td></tr>
+                            <tr><td class="p-2 border border-gray-200 font-semibold">Producción empresarial</td><td class="p-2 border border-gray-200">TF Serving, LiteRT, TFX</td><td class="p-2 border border-gray-200">ONNX Runtime + FastAPI, NVIDIA Triton, torch.compile (TorchServe está archivado desde 2025)</td></tr>
+                            <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Despliegue móvil</td><td class="p-2 border border-gray-200">LiteRT (maduro)</td><td class="p-2 border border-gray-200">ExecuTorch (estable desde 2025, versión 1.0)</td></tr>
                             <tr><td class="p-2 border border-gray-200 font-semibold">Soporte TPU</td><td class="p-2 border border-gray-200">Nativo y maduro</td><td class="p-2 border border-gray-200">Vía PyTorch/XLA</td></tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="callout mt-3" style="border-color:#5B1C9E; background:#FAF8FF">
-                    <p class="text-[0.86rem] text-gray-700"><i class="fas fa-bicycle mr-1" style="color:#5B1C9E"></i><strong>TransMilenio vs. bicicleta:</strong> TF/Keras es el sistema integrado y eficiente para llegar rápido por una ruta fija; PyTorch es la bicicleta — libertad total de ruta, pero exige más esfuerzo del conductor. Ninguno es «mejor»: depende del trayecto.</p>
+                    <p class="text-[0.86rem] text-gray-700"><i class="fas fa-bicycle mr-1" style="color:#5B1C9E"></i><strong>TransMilenio frente a bicicleta:</strong> TF/Keras es el sistema integrado y eficiente para llegar rápido por una ruta fija; PyTorch es la bicicleta — libertad total de ruta, pero exige más esfuerzo del conductor. Ninguno es «mejor»: depende del trayecto.</p>
                 </div>
             </div>
 
             <!-- Keras 3 puente -->
             <div class="card p-6">
-                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-bridge text-primary"></i>Keras 3: un código, tres motores (multi-backend)</h3>
-                <p class="text-[0.86rem] text-gray-600 mb-3">Lanzado a finales de 2023, <strong>Keras 3</strong> es una reescritura que convierte a Keras en un framework <strong>multi-backend</strong>: el <strong>mismo código</strong> de alto nivel corre sobre <strong>TensorFlow, PyTorch o JAX</strong> (y OpenVINO para inferencia) cambiando <strong>una sola variable de entorno</strong>.</p>
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-bridge text-primary"></i><span>Keras 3: un código, tres motores (<em>multi-backend</em>)</span></h3>
+                <p class="text-[0.86rem] text-gray-600 mb-3">Lanzado a finales de 2023, <strong>Keras 3</strong> es una reescritura que convierte a Keras en un <em>framework</em> compatible con <strong>varios motores</strong> (<em>multi-backend</em>): el <strong>mismo código</strong> de alto nivel corre sobre <strong>TensorFlow, PyTorch o JAX</strong> (y OpenVINO para inferencia) cambiando <strong>una sola variable de entorno</strong>.</p>
                 <!-- SVG: puente Keras 3 (nuevo) -->
                 <svg viewBox="0 0 600 150" class="w-full" role="img" aria-labelledby="keras3Title keras3Desc">
-                    <title id="keras3Title">Keras 3 como puente multi-backend</title>
+                    <title id="keras3Title">Keras 3 como puente entre motores (multi-backend)</title>
                     <desc id="keras3Desc">Una caja superior etiquetada como código único de Keras 3 se conecta hacia abajo con tres motores: TensorFlow, PyTorch y JAX, indicando que el mismo código se ejecuta sobre cualquiera de ellos.</desc>
                     <defs><marker id="arrK3" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker></defs>
                     <rect x="200" y="18" width="200" height="40" rx="10" fill="url(#mlopsGrad)"/>
@@ -488,13 +495,13 @@ os.environ[<span class="st">'KERAS_BACKEND'</span>] = <span class="st">'jax'</sp
             </div>
 
             <div class="callout mb-5" style="border-color:#ED1E79; background:#FFF1F7">
-                <p class="text-[0.9rem] text-gray-700"><i class="fas fa-bolt text-secondary mr-1"></i>Una red profunda son <strong>miles de millones de multiplicaciones de matrices</strong>. La <strong>CPU</strong> las hace de forma casi secuencial; la <strong>GPU</strong> las hace en paralelo masivo. Esa es la diferencia entre entrenar en <strong>semanas</strong> y entrenar en <strong>horas</strong>. Este capítulo democratiza el HPC: con Colab y Kaggle, cualquier estudiante con una cuenta de Google accede a una GPU.</p>
+                <p class="text-[0.9rem] text-gray-700"><i class="fas fa-bolt text-secondary mr-1"></i>Una red profunda son <strong>miles de millones de multiplicaciones de matrices</strong>. La <strong>CPU</strong> las hace con pocos núcleos; la <strong>GPU</strong>, en paralelo masivo. Con modelos grandes, la diferencia puede ser la que separa <strong>días</strong> de <strong>horas</strong>. Este capítulo democratiza el HPC: con Colab y Kaggle, cualquier estudiante con una cuenta de Google accede a una GPU.</p>
             </div>
 
             <!-- CPU vs GPU -->
             <div class="card p-6 mb-5">
-                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-microchip text-secondary"></i>CPU vs. GPU: pocos núcleos potentes vs. malla de núcleos simples</h3>
-                <p class="text-[0.86rem] text-gray-600 mb-3">La CPU tiene <strong>pocos núcleos</strong> muy rápidos y versátiles; la GPU tiene <strong>miles de núcleos</strong> simples que ejecutan la misma operación sobre muchos datos a la vez (SIMD). Para álgebra de tensores, gana la malla.</p>
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-microchip text-secondary"></i>CPU frente a GPU: pocos núcleos potentes frente a una malla de núcleos simples</h3>
+                <p class="text-[0.86rem] text-gray-600 mb-3">La CPU tiene <strong>pocos núcleos</strong> muy rápidos y versátiles; la GPU tiene <strong>miles de núcleos</strong> simples que ejecutan la misma operación sobre muchos datos a la vez (SIMT). Para álgebra de tensores, gana la malla.</p>
                 <!-- SVG NUEVO: CPU vs GPU -->
                 <svg viewBox="0 0 600 180" class="w-full" role="img" aria-labelledby="cpugpuTitle cpugpuDesc">
                     <title id="cpugpuTitle">Comparación de CPU y GPU por número de núcleos</title>
@@ -506,7 +513,7 @@ os.environ[<span class="st">'KERAS_BACKEND'</span>] = <span class="st">'jax'</sp
                         <rect x="78" y="54" width="64" height="42" rx="6"/><rect x="158" y="54" width="64" height="42" rx="6"/>
                         <rect x="78" y="104" width="64" height="42" rx="6"/><rect x="158" y="104" width="64" height="42" rx="6"/>
                     </g>
-                    <text x="150" y="172" text-anchor="middle" font-size="9.5" fill="#64748B" font-family="Montserrat">la panadería de un solo maestro</text>
+                    <text x="150" y="172" text-anchor="middle" font-size="9.5" fill="#64748B" font-family="Montserrat">despulpado a mano: pocas tareas complejas</text>
                     <!-- GPU -->
                     <text x="450" y="24" text-anchor="middle" font-size="13" font-weight="700" fill="#ED1E79" font-family="Montserrat">GPU · malla de núcleos simples</text>
                     <rect x="360" y="36" width="180" height="120" rx="10" fill="#FCE7F1" stroke="#ED1E79"/>
@@ -517,17 +524,17 @@ os.environ[<span class="st">'KERAS_BACKEND'</span>] = <span class="st">'jax'</sp
                         <rect x="372" y="108" width="14" height="14" rx="2"/><rect x="392" y="108" width="14" height="14" rx="2"/><rect x="412" y="108" width="14" height="14" rx="2"/><rect x="432" y="108" width="14" height="14" rx="2"/><rect x="452" y="108" width="14" height="14" rx="2"/><rect x="472" y="108" width="14" height="14" rx="2"/><rect x="492" y="108" width="14" height="14" rx="2"/><rect x="512" y="108" width="14" height="14" rx="2"/>
                         <rect x="372" y="128" width="14" height="14" rx="2"/><rect x="392" y="128" width="14" height="14" rx="2"/><rect x="412" y="128" width="14" height="14" rx="2"/><rect x="432" y="128" width="14" height="14" rx="2"/><rect x="452" y="128" width="14" height="14" rx="2"/><rect x="472" y="128" width="14" height="14" rx="2"/><rect x="492" y="128" width="14" height="14" rx="2"/><rect x="512" y="128" width="14" height="14" rx="2"/>
                     </g>
-                    <text x="450" y="172" text-anchor="middle" font-size="9.5" fill="#64748B" font-family="Montserrat">la despulpadora industrial</text>
+                    <text x="450" y="172" text-anchor="middle" font-size="9.5" fill="#64748B" font-family="Montserrat">despulpadora industrial: miles de tareas simples</text>
                 </svg>
                 <div class="callout mt-3" style="border-color:#0E7490; background:#ECFEFF">
-                    <p class="text-[0.84rem] text-gray-700"><i class="fas fa-mortar-pestle mr-1 text-teal"></i><strong>La despulpadora y la panadería:</strong> despulpar a mano (CPU) es preciso pero lento; la despulpadora industrial (GPU) procesa cientos de granos a la vez. La CPU es como un maestro panadero versátil; la GPU, como miles de operarios haciendo la misma tarea simple en paralelo.</p>
+                    <p class="text-[0.84rem] text-gray-700"><i class="fas fa-mortar-pestle mr-1 text-teal"></i><strong>La despulpadora industrial:</strong> la CPU es el trabajador manual, hábil y versátil, pero de grano en grano; la GPU es la despulpadora, menos versátil, pero procesa cientos de granos a la vez con miles de operaciones simples en paralelo.</p>
                 </div>
             </div>
 
             <!-- Tensor Cores + VRAM -->
             <div class="grid lg:grid-cols-2 gap-5 mb-5">
                 <div class="card p-6">
-                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-bolt-lightning text-secondary"></i>Núcleos CUDA vs. Tensor Cores</h3>
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-bolt-lightning text-secondary"></i>Núcleos CUDA frente a Tensor Cores</h3>
                     <p class="text-[0.86rem] text-gray-600 mb-3">Los <strong>Tensor Cores</strong> (desde Volta, 2017) son unidades especializadas en multiplicación-acumulación de matrices: un solo Tensor Core ejecuta una multiplicación \(4\times 4\) en una instrucción. En una A100, los CUDA dan 19,5 TFLOPS en FP32 y los Tensor Cores <strong>312 TFLOPS en FP16</strong> (≈16× más).</p>
                     <div class="eq text-center my-2 text-[0.86rem]">$$\text{Tensor Core: } C \mathrel{+}= A_{4\times4}\cdot B_{4\times4}\ \text{(1 instrucción)}$$</div>
                     <div class="callout mt-2" style="border-color:#15803D; background:#F0FDF4">
@@ -536,19 +543,22 @@ os.environ[<span class="st">'KERAS_BACKEND'</span>] = <span class="st">'jax'</sp
                 </div>
                 <div class="card p-6">
                     <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-warehouse text-secondary"></i>VRAM: el recurso más escaso</h3>
-                    <p class="text-[0.86rem] text-gray-600 mb-3">La VRAM almacena <strong>a la vez</strong> los pesos, los estados del optimizador, los gradientes, las activaciones y el lote. Los estados del optimizador (Adam) suelen ser el mayor consumidor.</p>
+                    <p class="text-[0.86rem] text-gray-600 mb-3">La VRAM almacena <strong>a la vez</strong> los pesos, los estados del optimizador, los gradientes, las activaciones y el lote. Qué domina depende del modelo: en modelos grandes con lotes pequeños, los estados del optimizador (Adam guarda dos momentos por parámetro); en CNN como ResNet-18 con lotes de imágenes, <strong>las activaciones</strong>. Por eso, el tamaño de lote y la precisión mixta son las primeras palancas frente al OOM.</p>
                     <div class="eq text-center my-2 text-[0.86rem]">$$\text{VRAM}_{\text{pesos}} \approx 2N\ \text{GB}\quad(N \text{ mil millones, FP16})$$</div>
-                    <!-- SVG NUEVO: distribución de VRAM -->
-                    <svg viewBox="0 0 340 60" class="w-full mt-1" role="img" aria-labelledby="vramTitle vramDesc">
-                        <title id="vramTitle">Distribución típica de la VRAM durante el entrenamiento</title>
-                        <desc id="vramDesc">Una barra apilada muestra que los estados del optimizador ocupan la mayor parte de la VRAM, seguidos por las activaciones, los gradientes, los pesos y el lote de entrada.</desc>
-                        <rect x="10" y="14" width="130" height="26" fill="#3D008D"/><text x="75" y="31" text-anchor="middle" font-size="9" fill="#fff" font-family="Montserrat">optimizador</text>
-                        <rect x="140" y="14" width="84" height="26" fill="#ED1E79"/><text x="182" y="31" text-anchor="middle" font-size="9" fill="#fff" font-family="Montserrat">activaciones</text>
-                        <rect x="224" y="14" width="50" height="26" fill="#0E7490"/><text x="249" y="31" text-anchor="middle" font-size="8" fill="#fff" font-family="Montserrat">grad.</text>
-                        <rect x="274" y="14" width="40" height="26" fill="#FDB913"/><text x="294" y="31" text-anchor="middle" font-size="8" fill="#92400E" font-family="Montserrat">pesos</text>
-                        <rect x="314" y="14" width="16" height="26" fill="#94A3B8"/>
-                        <text x="170" y="55" text-anchor="middle" font-size="8" fill="#64748B" font-family="Montserrat">VRAM total durante el entrenamiento →</text>
+                    <!-- SVG: dos casos calculados de VRAM (M3-D-11) -->
+                    <svg viewBox="0 0 340 86" class="w-full mt-1" role="img" aria-labelledby="vramTitle vramDesc">
+                        <title id="vramTitle">Qué domina la VRAM depende del modelo: dos casos calculados</title>
+                        <desc id="vramDesc">Dos barras apiladas. En una CNN ResNet-50 con lote 32, FP32 y Adam, las activaciones ocupan el 86,5 % de la VRAM, el optimizador el 6,4 % y los pesos y gradientes casi todo el resto. En un Transformer de 125 millones de parámetros con lote 1 y recomputación, los estados del modelo (pesos, gradientes y Adam) ocupan el 94,6 % y las activaciones el resto.</desc>
+                        <text x="10" y="11" font-size="8.5" font-weight="700" fill="#1E293B" font-family="Montserrat">CNN · ResNet-50, lote 32 (FP32, Adam)</text>
+                        <rect x="10" y="15" width="277" height="22" fill="#ED1E79"/><text x="148" y="30" text-anchor="middle" font-size="9" fill="#fff" font-family="Montserrat">activaciones 86,5 %</text>
+                        <rect x="287" y="15" width="20" height="22" fill="#3D008D"/>
+                        <rect x="307" y="15" width="21" height="22" fill="#0E7490"/>
+                        <rect x="328" y="15" width="2" height="22" fill="#94A3B8"/>
+                        <text x="10" y="54" font-size="8.5" font-weight="700" fill="#1E293B" font-family="Montserrat">Transformer de 125 M · lote 1, con recomputación</text>
+                        <rect x="10" y="58" width="303" height="22" fill="#001A4D"/><text x="161" y="73" text-anchor="middle" font-size="9" fill="#fff" font-family="Montserrat">pesos + gradientes + Adam 94,6 %</text>
+                        <rect x="313" y="58" width="17" height="22" fill="#ED1E79"/>
                     </svg>
+                    <p class="text-[0.72rem] text-gray-500 text-center mt-1">Rosa: activaciones · morado: Adam · verde azulado: pesos y gradientes · gris: lote · azul oscuro: pesos, gradientes y Adam juntos. Cálculo propio con PyTorch 2.12 (octubre de 2026); véanse Rajbhandari et al. (2020) y Korthikanti et al. (2022).</p>
                     <div class="callout mt-2" style="border-color:#DC2626; background:#FEF2F2">
                         <p class="text-[0.82rem] text-gray-700"><i class="fas fa-box-open mr-1 text-red-600"></i><strong>La bodega de la plaza:</strong> no importa cuántos camiones (datos) lleguen ni cuántos vendedores (núcleos) haya — si la bodega (VRAM) se llena, no entra más mercancía. Ese es el temido <strong>CUDA OOM</strong>.</p>
                     </div>
@@ -558,32 +568,32 @@ os.environ[<span class="st">'KERAS_BACKEND'</span>] = <span class="st">'jax'</sp
             <!-- Precisión mixta -->
             <div class="card p-6 mb-5">
                 <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-gauge-high text-secondary"></i>Precisión mixta (AMP): hacer más con menos</h3>
-                <p class="text-[0.86rem] text-gray-600 mb-4">Representar las <strong>activaciones</strong> en 16 bits en vez de 32 reduce la memoria de esos tensores a la mitad y acelera el cómputo al activar los Tensor Cores. Para estabilidad, AMP mantiene una copia de los <strong>pesos maestros en FP32</strong>.</p>
+                <p class="text-[0.86rem] text-gray-600 mb-4">Representar las <strong>activaciones</strong> en 16 bits en vez de 32 reduce la memoria de esos tensores a la mitad y acelera el cómputo al activar los Tensor Cores. Para estabilidad, AMP mantiene los <strong>pesos maestros en FP32</strong>, con sus gradientes y los estados de Adam: el ahorro total es menor que la mitad.</p>
                 <div class="grid md:grid-cols-2 gap-6 items-start">
                     <!-- SVG: VRAM FP32 vs FP16 (reutilizado de la Actividad) -->
                     <figure class="card p-4">
                         <svg viewBox="0 0 360 220" width="100%" role="img" aria-labelledby="fp16Title fp16Desc">
-                            <title id="fp16Title">VRAM y tiempo: FP32 vs FP16</title>
-                            <desc id="fp16Desc">Comparación de VRAM y tiempo por época entre precisión simple FP32 y precisión mixta FP16: la precisión mixta reduce la VRAM cerca de la mitad y el tiempo a cerca de dos tercios.</desc>
+                            <title id="fp16Title">VRAM y tiempo: FP32 frente a precisión mixta FP16</title>
+                            <desc id="fp16Desc">Comparación de VRAM y tiempo por época entre precisión simple FP32 y precisión mixta FP16: la precisión mixta reduce la VRAM total a cerca de dos tercios (ahorro menor que la mitad) y el tiempo a cerca de dos tercios.</desc>
                             <line x1="48" y1="30" x2="48" y2="178" stroke="#94A3B8" stroke-width="1.2"/>
                             <line x1="48" y1="178" x2="340" y2="178" stroke="#94A3B8" stroke-width="1.2"/>
-                            <rect x="80"  y="48"  width="40" height="130" fill="#001A4D"/><text x="100" y="42" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B" font-family="Montserrat">100%</text>
-                            <rect x="128" y="113" width="40" height="65"  fill="#ED1E79"/><text x="148" y="107" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B" font-family="Montserrat">≈50%</text>
+                            <rect x="80"  y="48"  width="40" height="130" fill="#001A4D"/><text x="100" y="42" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B" font-family="Montserrat">100 %</text>
+                            <rect x="128" y="90"  width="40" height="88"  fill="#ED1E79"/><text x="148" y="84" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B" font-family="Montserrat">≈68 %</text>
                             <text x="124" y="196" text-anchor="middle" font-size="10" font-weight="600" fill="#475569" font-family="Montserrat">VRAM</text>
-                            <rect x="220" y="48"  width="40" height="130" fill="#001A4D"/><text x="240" y="42" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B" font-family="Montserrat">100%</text>
-                            <rect x="268" y="92"  width="40" height="86"  fill="#ED1E79"/><text x="288" y="86" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B" font-family="Montserrat">≈65%</text>
+                            <rect x="220" y="48"  width="40" height="130" fill="#001A4D"/><text x="240" y="42" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B" font-family="Montserrat">100 %</text>
+                            <rect x="268" y="92"  width="40" height="86"  fill="#ED1E79"/><text x="288" y="86" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B" font-family="Montserrat">≈65 %</text>
                             <text x="264" y="196" text-anchor="middle" font-size="10" font-weight="600" fill="#475569" font-family="Montserrat">Tiempo / época</text>
                             <rect x="250" y="26" width="11" height="11" fill="#001A4D"/><text x="266" y="35" font-size="9" fill="#475569" font-family="Montserrat">FP32</text>
                             <rect x="302" y="26" width="11" height="11" fill="#ED1E79"/><text x="318" y="35" font-size="9" fill="#475569" font-family="Montserrat">FP16</text>
                         </svg>
-                        <figcaption class="text-center text-[0.76rem] text-gray-500 mt-1">Aceleración típica <strong>2–3×</strong> y hasta <strong>−50 % de memoria</strong> en activaciones (valores ilustrativos).</figcaption>
+                        <figcaption class="text-center text-[0.76rem] text-gray-500 mt-1">Hasta <strong>2–3×</strong> más rápido en GPU con Tensor Cores; las activaciones ocupan la mitad, pero el ahorro <strong>total</strong> es menor que la mitad (≈32 % en ResNet-18 con lote 32). Valores ilustrativos (Micikevicius et al., 2018).</figcaption>
                     </figure>
                     <div class="space-y-3">
                         <div class="callout" style="border-color:#3D008D; background:#FAF8FF">
-                            <p class="text-[0.84rem] text-gray-700"><i class="fas fa-circle-info text-primary mr-1"></i><strong>Matiz:</strong> el ahorro se da sobre todo en activaciones; el ahorro <em>total</em> es menor que la mitad porque AMP guarda los <strong>pesos maestros en FP32</strong> para el optimizador.</p>
+                            <p class="text-[0.84rem] text-gray-700"><i class="fas fa-circle-info text-primary mr-1"></i><strong>Matiz:</strong> el ahorro se da sobre todo en activaciones; el ahorro <em>total</em> es menor que la mitad porque AMP guarda los <strong>pesos maestros en FP32</strong>, con sus gradientes y los estados de Adam: del orden de un tercio en una CNN mediana con lote 32, y se acerca a la mitad solo cuando las activaciones dominan la memoria.</p>
                         </div>
                         <div class="callout" style="border-color:#B45309; background:#FFFBEB">
-                            <p class="text-[0.82rem] text-gray-700"><i class="fas fa-microchip mr-1" style="color:#B45309"></i><strong>FP16 vs bfloat16:</strong> en GPUs Ampere+ (L4/A100) suele preferirse <strong>bfloat16</strong> (sin <span class="icode">GradScaler</span>); en la <strong>T4</strong> se usa <strong>float16</strong> con escalado de pérdida.</p>
+                            <p class="text-[0.82rem] text-gray-700"><i class="fas fa-microchip mr-1" style="color:#B45309"></i><strong>FP16 frente a bfloat16:</strong> en GPU Ampere o posteriores (L4/A100) suele preferirse <strong>bfloat16</strong> (sin <span class="icode">GradScaler</span>); en la <strong>T4</strong> se usa <strong>float16</strong> con escalado de pérdida.</p>
                         </div>
                     </div>
                 </div>
@@ -595,12 +605,12 @@ os.environ[<span class="st">'KERAS_BACKEND'</span>] = <span class="st">'jax'</sp
                         <button class="code-copy" type="button" aria-label="Copiar código" title="Copiar"><i class="fas fa-copy"></i></button>
                     </div>
                     <div class="codeblock"><span class="cm"># Entrenamiento con precisión mixta (PyTorch AMP)</span>
-scaler = torch.amp.<span class="fn">GradScaler</span>()
+scaler = torch.amp.<span class="fn">GradScaler</span>(<span class="st">"cuda"</span>)
 <span class="kw">for</span> X, y <span class="kw">in</span> loader:
     optim.<span class="fn">zero_grad</span>()
     <span class="kw">with</span> torch.<span class="fn">autocast</span>(<span class="st">"cuda"</span>, dtype=torch.float16):   <span class="cm"># cómputo en FP16</span>
         perdida = <span class="fn">criterio</span>(<span class="fn">modelo</span>(X), y)
-    scaler.<span class="fn">scale</span>(perdida).<span class="fn">backward</span>()        <span class="cm"># escala para evitar underflow</span>
+    scaler.<span class="fn">scale</span>(perdida).<span class="fn">backward</span>()        <span class="cm"># escala la pérdida: evita el subdesbordamiento (underflow)</span>
     scaler.<span class="fn">step</span>(optim); scaler.<span class="fn">update</span>()</div>
                 </div>
             </div>
@@ -608,19 +618,19 @@ scaler = torch.amp.<span class="fn">GradScaler</span>()
             <!-- Multi-GPU + Colab vs Kaggle -->
             <div class="grid lg:grid-cols-2 gap-5">
                 <div class="card p-6">
-                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-server text-secondary"></i>Multi-GPU: DP, DDP y FSDP</h3>
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-server text-secondary"></i>Varias GPU: DP, DDP y FSDP</h3>
                     <p class="text-[0.86rem] text-gray-600 mb-3">Cuando una GPU no basta, se reparte el trabajo entre varias.</p>
                     <ul class="space-y-2 text-[0.84rem] text-gray-700">
                         <li class="flex gap-2"><span class="font-bold text-secondary">·</span><span><strong>DataParallel (DP):</strong> simple pero ineficiente — cuello de botella en la GPU-0.</span></li>
-                        <li class="flex gap-2"><span class="font-bold text-secondary">·</span><span><strong>DistributedDataParallel (DDP):</strong> un proceso por GPU, sincroniza con NCCL (≈3× más utilización). La opción recomendada.</span></li>
-                        <li class="flex gap-2"><span class="font-bold text-secondary">·</span><span><strong>FSDP (Fully Sharded):</strong> fragmenta pesos, gradientes y estados del optimizador entre GPUs — permite entrenar modelos que <em>no caben</em> en una sola.</span></li>
+                        <li class="flex gap-2"><span class="font-bold text-secondary">·</span><span><strong>DistributedDataParallel (DDP):</strong> un proceso por GPU, sincroniza con NCCL; más eficiente que DP, incluso en un solo nodo (Li et al., 2020). La opción recomendada.</span></li>
+                        <li class="flex gap-2"><span class="font-bold text-secondary">·</span><span><strong>FSDP (Fully Sharded):</strong> fragmenta pesos, gradientes y estados del optimizador entre las GPU — permite entrenar modelos que <em>no caben</em> en una sola (Zhao et al., 2023).</span></li>
                     </ul>
                     <div class="callout mt-3" style="border-color:#0E7490; background:#ECFEFF">
-                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-people-group mr-1 text-teal"></i>En TensorFlow, el equivalente es <span class="icode">tf.distribute.MirroredStrategy</span> (un dispositivo, varias réplicas).</p>
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-people-group mr-1 text-teal"></i>En TensorFlow, el equivalente es <span class="icode">tf.distribute.MirroredStrategy</span> (una máquina, varias GPU como réplicas).</p>
                     </div>
                 </div>
                 <div class="card p-6">
-                    <h3 class="font-bold text-navy mb-3 flex items-center gap-2"><i class="fas fa-cloud text-secondary"></i>Colab vs. Kaggle — GPU gratis en la nube</h3>
+                    <h3 class="font-bold text-navy mb-3 flex items-center gap-2"><i class="fas fa-cloud text-secondary"></i>Colab frente a Kaggle — GPU gratis en la nube</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full text-[0.78rem] border-collapse">
                             <thead>
@@ -631,15 +641,15 @@ scaler = torch.amp.<span class="fn">GradScaler</span>()
                                 </tr>
                             </thead>
                             <tbody class="text-gray-700">
-                                <tr><td class="p-2 border border-gray-200 font-semibold">GPU gratuita</td><td class="p-2 border border-gray-200">T4 (≈15 GB)</td><td class="p-2 border border-gray-200">T4 / P100</td></tr>
-                                <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Cuota</td><td class="p-2 border border-gray-200">Sin garantía; sesión ≈12 h</td><td class="p-2 border border-gray-200">≈30 h/semana garantizadas</td></tr>
-                                <tr><td class="p-2 border border-gray-200 font-semibold">Desconexión</td><td class="p-2 border border-gray-200">Inactividad ≈90 min</td><td class="p-2 border border-gray-200">Persistente por sesión</td></tr>
-                                <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Fuerte en</td><td class="p-2 border border-gray-200">Prototipado, Drive</td><td class="p-2 border border-gray-200">Datasets, competencias</td></tr>
+                                <tr><td class="p-2 border border-gray-200 font-semibold">GPU gratuita</td><td class="p-2 border border-gray-200">T4 (16 GB; ≈15 GB utilizables)</td><td class="p-2 border border-gray-200">T4 / P100</td></tr>
+                                <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Cuota</td><td class="p-2 border border-gray-200">Sin cuota publicada; sesión de hasta 12 h</td><td class="p-2 border border-gray-200">≈30 h/semana, visible en la cuenta (consulta: 2026-10-11)</td></tr>
+                                <tr><td class="p-2 border border-gray-200 font-semibold">Desconexión</td><td class="p-2 border border-gray-200">Por inactividad (límite no publicado)</td><td class="p-2 border border-gray-200">Persistente por sesión</td></tr>
+                                <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold">Fuerte en</td><td class="p-2 border border-gray-200">Prototipado, Drive</td><td class="p-2 border border-gray-200">Conjuntos de datos, competencias</td></tr>
                             </tbody>
                         </table>
                     </div>
                     <div class="callout mt-3" style="border-color:#15803D; background:#F0FDF4">
-                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-clock mr-1" style="color:#15803D"></i><strong>≈60 h/semana gratis:</strong> combinando Colab y Kaggle, un estudiante reúne cómputo más que suficiente para la Fase 3 — siempre con <em>checkpointing</em> para no perder progreso por desconexiones.</p>
+                        <p class="text-[0.82rem] text-gray-700"><i class="fas fa-clock mr-1" style="color:#15803D"></i><strong>Estrategia combinada:</strong> Kaggle, con su cuota semanal visible en la cuenta, para los entrenamientos largos, y Colab, con límites variables, para iterar. Con las dos se reúne cómputo suficiente para la Fase 3, siempre con <em>checkpointing</em> para no perder progreso por desconexiones.</p>
                     </div>
                 </div>
             </div>
@@ -747,11 +757,11 @@ loader = <span class="fn">DataLoader</span>(dataset, batch_size=<span class="st"
 
             <!-- Data Augmentation taxonomía -->
             <div class="card p-6 mb-5">
-                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-shuffle" style="color:#B45309"></i>Data Augmentation: entrenar en condiciones variadas</h3>
-                <p class="text-[0.86rem] text-gray-600 mb-3">Multiplicar artificialmente el dataset con transformaciones reduce el sobreajuste — <strong>solo si respetan la semántica</strong>. Una transformación que cambia la etiqueta real hace más daño que bien.</p>
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-shuffle" style="color:#B45309"></i><span>Aumento de datos (<em>data augmentation</em>): entrenar en condiciones variadas</span></h3>
+                <p class="text-[0.86rem] text-gray-600 mb-3">Multiplicar artificialmente el conjunto de datos con transformaciones reduce el sobreajuste — <strong>solo si respetan la semántica</strong>. Una transformación que cambia la etiqueta real hace más daño que bien.</p>
                 <!-- SVG NUEVO: taxonomía de augmentation -->
                 <svg viewBox="0 0 660 160" class="w-full" role="img" aria-labelledby="augTitle augDesc">
-                    <title id="augTitle">Taxonomía de la aumentación de datos</title>
+                    <title id="augTitle">Taxonomía del aumento de datos</title>
                     <desc id="augDesc">Tres familias de transformaciones parten de una imagen original: geométricas como volteo y rotación, fotométricas como cambios de color y brillo, y de mezcla como Mixup y CutMix. Un aviso advierte que deben respetar la semántica del problema.</desc>
                     <defs><marker id="arrAug" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker></defs>
                     <rect x="14" y="62" width="100" height="40" rx="9" fill="url(#mlopsGrad)"/>
@@ -779,7 +789,7 @@ loader = <span class="fn">DataLoader</span>(dataset, batch_size=<span class="st"
                     <text x="513" y="102" text-anchor="middle" font-size="8.5" fill="#7F1D1D" font-family="Montserrat">amarillo-naranja de la roya → señal perdida</text>
                 </svg>
                 <div class="callout mt-3" style="border-color:#15803D; background:#F0FDF4">
-                    <p class="text-[0.84rem] text-gray-700"><i class="fas fa-clipboard-list mr-1" style="color:#15803D"></i><strong>El director técnico:</strong> entrena al equipo bajo lluvia, sol y cancha mojada (variar condiciones) para que rinda en cualquier partido — pero <em>no</em> le cambia las reglas del juego. Aplicar ≥4 transformaciones y comparar el <em>accuracy</em> de validación con y sin aumento.</p>
+                    <p class="text-[0.84rem] text-gray-700"><i class="fas fa-clipboard-list mr-1" style="color:#15803D"></i><strong>El director técnico:</strong> entrena al equipo bajo lluvia, sol y cancha mojada (variar condiciones) para que rinda en cualquier partido — pero <em>no</em> le cambia las reglas del juego. Aplicar ≥ 4 transformaciones y comparar la exactitud de validación con y sin aumento.</p>
                 </div>
             </div>
 
@@ -800,8 +810,8 @@ loader = <span class="fn">DataLoader</span>(dataset, batch_size=<span class="st"
                             <tr><td class="p-2 border border-gray-200 font-semibold mono">.pth</td><td class="p-2 border border-gray-200">PyTorch</td><td class="p-2 border border-gray-200">Checkpoint nativo (state_dict)</td></tr>
                             <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold mono">.keras</td><td class="p-2 border border-gray-200">Keras 3</td><td class="p-2 border border-gray-200">Modelo completo Keras</td></tr>
                             <tr><td class="p-2 border border-gray-200 font-semibold mono">SavedModel</td><td class="p-2 border border-gray-200">TensorFlow</td><td class="p-2 border border-gray-200">TF Serving, producción</td></tr>
-                            <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold mono">.onnx</td><td class="p-2 border border-gray-200">Abierto / puente</td><td class="p-2 border border-gray-200">Interoperabilidad entre runtimes</td></tr>
-                            <tr><td class="p-2 border border-gray-200 font-semibold mono">.pt2</td><td class="p-2 border border-gray-200">PyTorch (torch.export)</td><td class="p-2 border border-gray-200">Grafo AOT sin dependencia de Python</td></tr>
+                            <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold mono">.onnx</td><td class="p-2 border border-gray-200">Abierto / pasaporte</td><td class="p-2 border border-gray-200">Interoperabilidad entre runtimes</td></tr>
+                            <tr><td class="p-2 border border-gray-200 font-semibold mono">.pt2</td><td class="p-2 border border-gray-200">PyTorch (torch.export)</td><td class="p-2 border border-gray-200">Grafo AOT; se carga con torch.export.load (sin Python, vía AOTInductor o ExecuTorch)</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -858,16 +868,17 @@ loader = <span class="fn">DataLoader</span>(dataset, batch_size=<span class="st"
                                 <span class="code-window-lang">Python · ONNX</span>
                                 <button class="code-copy" type="button" aria-label="Copiar código" title="Copiar"><i class="fas fa-copy"></i></button>
                             </div>
-                            <div class="codeblock"><span class="cm"># Exportar PyTorch → ONNX (pasaporte portable)</span>
-torch.onnx.<span class="fn">export</span>(
-    modelo, ejemplo_entrada,
-    <span class="st">"modelo.onnx"</span>,
-    input_names=[<span class="st">"img"</span>],
-    output_names=[<span class="st">"logits"</span>],
-    dynamic_axes={<span class="st">"img"</span>: {<span class="st">0</span>: <span class="st">"batch"</span>}})</div>
+                            <div class="codeblock"><span class="cm"># Exportar PyTorch → ONNX (pasaporte portable), un único archivo</span>
+modelo.<span class="fn">eval</span>()
+x = torch.<span class="fn">randn</span>(<span class="st">2</span>, <span class="st">3</span>, <span class="st">224</span>, <span class="st">224</span>)       <span class="cm"># lote 2: no fija el lote en 1</span>
+lote = torch.export.<span class="fn">Dim</span>(<span class="st">"lote"</span>)
+torch.onnx.<span class="fn">export</span>(modelo, (x,), <span class="st">"modelo.onnx"</span>,
+    input_names=[<span class="st">"img"</span>], output_names=[<span class="st">"logits"</span>],
+    dynamic_shapes=({<span class="st">0</span>: lote},),
+    external_data=<span class="kw">False</span>)   <span class="cm"># sin .onnx.data; dynamo=True es el predeterminado</span></div>
                         </div>
                         <div class="callout" style="border-color:#0E7490; background:#ECFEFF">
-                            <p class="text-[0.82rem] text-gray-700"><i class="fas fa-scale-balanced mr-1 text-teal"></i><strong>Despliegue responsable:</strong> en campo, un falso positivo/negativo afecta decisiones reales del agricultor. La ruta explicita transparencia y mitigaciones concretas.</p>
+                            <p class="text-[0.82rem] text-gray-700"><i class="fas fa-scale-balanced mr-1 text-teal"></i><strong>Despliegue responsable:</strong> en campo, un falso positivo o negativo afecta decisiones reales del caficultor. La ruta explicita transparencia y mitigaciones concretas.</p>
                         </div>
                     </div>
                 </div>
@@ -887,29 +898,30 @@ torch.onnx.<span class="fn">export</span>(
                     <h3 class="font-bold text-navy mb-3 text-sm uppercase tracking-wider">Especificaciones y cifras clave del módulo</h3>
                     <div class="space-y-2 text-[0.86rem]">
                         <div class="eq">Regla de VRAM \(\;\text{VRAM}_{\text{pesos}}\approx 2N\ \text{GB}\) (N mil millones, FP16)</div>
-                        <div class="eq">Aceleración con precisión mixta (AMP) \(\;\approx 2\text{–}3\times\)</div>
-                        <div class="eq">Memoria de activaciones FP16 \(\;\approx \tfrac{1}{2}\,\text{FP32}\)</div>
+                        <div class="eq">Aceleración con precisión mixta (AMP) \(\;\text{hasta } 2\text{–}3\times\) (GPU con Tensor Cores)</div>
+                        <div class="eq">Memoria de activaciones FP16 \(\;\approx \tfrac{1}{2}\,\text{FP32}\); ahorro total de VRAM menor que la mitad</div>
                         <div class="eq">Tiempo por época \(\;t \approx \max(t_{\text{CPU}},\,t_{\text{GPU}})\) con prefetch</div>
                         <div class="eq">Tensor Cores A100 \(\;312\ \text{TFLOPS (FP16)}\) ≈ 16× FP32</div>
                         <div class="eq">GPU gratuita de referencia: <strong>T4 · 16 GB</strong> (Colab/Kaggle)</div>
-                        <div class="eq">Cómputo gratis combinado \(\;\approx 60\ \text{h/semana}\) (Colab + Kaggle)</div>
-                        <div class="eq">Transfer learning ResNet-18 \(\;\approx 15\text{–}30\ \text{min}\) en T4</div>
+                        <div class="eq">Kaggle: ≈30 h/semana de GPU, visible en la cuenta (a octubre de 2026)</div>
+                        <div class="eq">Transferencia de aprendizaje con ResNet-18: viable en una T4 (el tiempo depende del conjunto y de las épocas)</div>
                         <div class="eq"><span class="icode">prefetch(AUTOTUNE)</span> → <strong>siempre al final</strong> del pipeline</div>
-                        <div class="eq">DDP \(\;\approx 3\times\) más utilización que DataParallel</div>
+                        <div class="eq">DDP: más eficiente que DataParallel, incluso en un solo nodo</div>
                     </div>
+                    <p class="text-[0.72rem] text-gray-500 mt-3">Fuentes de las cifras: NVIDIA (2020), para la A100; Micikevicius et al. (2018), para la precisión mixta; Li et al. (2020), para DDP; Google (s. f.) y Kaggle (s. f.), para las cuotas (consulta: 2026-10-11). Detalle en el material principal, Capítulos 3.2 y 3.3.</p>
                 </div>
                 <!-- glosario -->
                 <div class="card p-6">
                     <h3 class="font-bold text-navy mb-3 text-sm uppercase tracking-wider">Glosario relámpago (analogías)</h3>
                     <dl class="text-[0.83rem] space-y-2">
-                        <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">Grafo dinámico</dt><dd class="text-gray-600">el río Magdalena: su cauce se adapta al terreno.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">Grafo dinámico</dt><dd class="text-gray-600">el río Magdalena: la ruta la decide cada crecida.</dd></div>
                         <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">Prefetch</dt><dd class="text-gray-600">el mesero que adelanta el siguiente plato.</dd></div>
                         <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">VRAM</dt><dd class="text-gray-600">la bodega de la plaza de mercado: si se llena, OOM.</dd></div>
                         <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">GPU</dt><dd class="text-gray-600">la despulpadora industrial: miles en paralelo.</dd></div>
                         <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">ONNX</dt><dd class="text-gray-600">el pasaporte universal entre frameworks y hardware.</dd></div>
                         <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">num_workers</dt><dd class="text-gray-600">los meseros en paralelo que preparan los lotes.</dd></div>
                         <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">Precisión mixta</dt><dd class="text-gray-600">hacer más con menos: 16 bits donde se puede.</dd></div>
-                        <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">Data Augmentation</dt><dd class="text-gray-600">entrenar al equipo en condiciones variadas.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">Aumento de datos</dt><dd class="text-gray-600">entrenar al equipo en condiciones variadas.</dd></div>
                         <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">Cuantización</dt><dd class="text-gray-600">el equipaje de mano: lo esencial, más liviano.</dd></div>
                     </dl>
                 </div>
@@ -923,7 +935,7 @@ torch.onnx.<span class="fn">export</span>(
                     <i class="fas fa-book-open-reader text-gold text-2xl"></i>
                     <h2 class="text-xl md:text-2xl font-extrabold">Esta infografía resume el Módulo 3 completo</h2>
                 </div>
-                <p class="text-white/85 text-sm leading-relaxed max-w-3xl">El <strong>material principal de aprendizaje autónomo</strong> permite profundizar en cada tema y preparar los dos hitos evaluativos del módulo, que conforman la <strong>Fase 3 del Proyecto Centinela</strong>: la <strong>Guía de profundización 3</strong> (5 %) y la <strong>Actividad evaluativa · Fase 3</strong> (25 %) — la industrialización <em>MLOps</em> del sistema multimodal, del notebook al despliegue <em>offline</em> en campo.</p>
+                <p class="text-white/85 text-sm leading-relaxed max-w-3xl">El <strong>material principal de aprendizaje autónomo</strong> permite profundizar en cada tema y preparar los dos hitos evaluativos del módulo: la <strong>Guía de profundización 3</strong> (5 %) y la <strong>Fase 3 del Proyecto Centinela</strong> (25 %), la industrialización <em>MLOps</em> del sistema multimodal, del notebook al despliegue <em>offline</em> en campo. Al cierre se presenta el <strong>Cuestionario Final del curso</strong> (10 %).</p>
                 <div class="flex flex-wrap gap-2 mt-5 no-print">
                     <a href="03_Modulo_3_Implementacion_Deep_Learning.html" class="inline-flex items-center gap-2 bg-white text-primary text-sm font-bold px-4 py-2 rounded-full hover:opacity-90 transition"><i class="fas fa-graduation-cap"></i>Material principal</a>
                     <a href="31_Modulo_3_Actividad_Fase3_Centinela.html" class="inline-flex items-center gap-2 bg-white/15 border border-white/30 text-white text-sm font-bold px-4 py-2 rounded-full hover:bg-white/25 transition"><i class="fas fa-flask-vial"></i>Actividad · Centinela Fase 3</a>

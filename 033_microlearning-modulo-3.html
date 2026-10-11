@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="Microlearning del Módulo 3 — Implementación y Herramientas Profesionales del Deep Learning. 5 cápsulas de 4-5 minutos sobre los conceptos esenciales: frameworks (TF/Keras vs. PyTorch y Keras 3), pipelines de datos (tf.data y DataLoader), GPU y precisión mixta, Data Augmentation con criterio y exportación/despliegue (ONNX, LiteRT). Universidad Santo Tomás.">
-    <title>Microlearning · Módulo 3 — Implementación del Deep Learning · USTA</title>
+        content="Microlearning del Módulo 3 — Implementación y Herramientas Profesionales del Deep Learning. 5 cápsulas de 4–5 minutos sobre los conceptos esenciales: frameworks (TF/Keras frente a PyTorch y Keras 3), pipelines de datos (tf.data y DataLoader), GPU y precisión mixta, aumento de datos con criterio y exportación/despliegue (ONNX, LiteRT). Universidad Santo Tomás.">
+    <title>Microlearning · Módulo 3 — Implementación y Herramientas Profesionales · USTA</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -569,13 +569,16 @@
                         {checked && (
                             <span className={`text-sm font-bold ${ok ? 'text-green-600' : 'text-red-500'}`}>
                                 <i className={`fas ${ok ? 'fa-circle-check' : 'fa-circle-xmark'} mr-1`}></i>
-                                {ok ? '¡Correcto!' : 'Revisa la explicación abajo'}
+                                {ok ? '¡Correcto!' : 'Conviene revisar la explicación'}
                             </span>
                         )}
                     </div>
                     {checked && (
                         <div className="mt-3 text-[0.9rem] text-gray-700 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-4 border-l-4 border-gold animate-fade-in shadow-sm">
-                            <strong>Explicación: </strong>{opciones[correctIdx].justificacion}
+                            {!ok && sel !== null && opciones[sel] && (
+                                <p className="mb-2"><strong>Sobre la opción elegida:</strong>{' '}{opciones[sel].justificacion}</p>
+                            )}
+                            <strong>{ok ? 'Explicación:' : 'Respuesta correcta:'}</strong>{' '}{opciones[correctIdx].justificacion}
                         </div>
                     )}
                 </div>
@@ -615,7 +618,7 @@
             // Pasos del entrenamiento en cada cocina
             const pasosKeras = [
                 { t: 'model.compile(...)', sub: 'receta declarada', color: '#3D008D' },
-                { t: 'model.fit(X, y)', sub: 'el chef cocina todo', color: '#3D008D' },
+                { t: 'model.fit(X, y)', sub: 'la receta hace el resto', color: '#3D008D' },
             ];
             const pasosTorch = [
                 { t: 'optimizador.zero_grad()', sub: 'limpiar', color: '#0E7490' },
@@ -628,7 +631,7 @@
             return (
                 <div ref={revRef} className="visual-container reveal">
                     <h4 className="visual-title">
-                        <i className="fas fa-layer-group text-secondary mr-2"></i>Dos cocinas: <span style={{ color: '#3D008D' }}>model.fit</span> vs. bucle explícito
+                        <i className="fas fa-layer-group text-secondary mr-2"></i>Dos cocinas: <span style={{ color: '#3D008D' }}>model.fit</span> frente al bucle explícito
                     </h4>
                     <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
                         aria-labelledby="fwFigTitle fwFigDesc">
@@ -772,7 +775,7 @@
                     </div>
                     <p className="text-center text-xs text-gray-500 mt-3 italic leading-relaxed">
                         <strong>.prefetch(AUTOTUNE)</strong> va al final porque solapa la preparación en CPU del lote N+1 con el entrenamiento en GPU del lote N.
-                        Si la GPU espera datos, sufre <strong>GPU starvation</strong>: cómputo caro desperdiciado.
+                        Si la GPU espera datos, sufre <strong>hambruna de GPU</strong> (<em>GPU starvation</em>): cómputo caro desperdiciado.
                     </p>
                 </div>
             );
@@ -786,8 +789,9 @@
 
             // Capacidad total de VRAM ilustrativa (barra) y cuánto ocupa el modelo
             const totalH = 150, barX = 60, barW = 70, barTop = 40;
-            // En FP16 el modelo ocupa la mitad; queda más sitio para batch / activaciones
-            const ocupado = modo === 'fp32' ? 1.0 : 0.5;
+            // Con precisión mixta, las activaciones ocupan la mitad, pero los pesos maestros, sus gradientes y Adam
+            // siguen en FP32: el ahorro total es menor que la mitad (≈32 % en ResNet-18 con lote 32; M3-D-11)
+            const ocupado = modo === 'fp32' ? 1.0 : 0.68;
             const usadoH = totalH * ocupado;
 
             return (
@@ -797,8 +801,8 @@
                     </h4>
                     <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
                         aria-labelledby="vramFigTitle vramFigDesc">
-                        <title id="vramFigTitle">Precisión mixta: FP16 libera la mitad de la VRAM frente a FP32</title>
-                        <desc id="vramFigDesc">Comparación del consumo de VRAM entre FP32 y precisión mixta FP16. En FP32 el modelo y sus tensores llenan la memoria de video. En FP16 cada número ocupa la mitad de los bits, así que el modelo usa aproximadamente la mitad de la VRAM y queda espacio libre para un lote mayor o más activaciones, mientras los Tensor Cores aceleran el cómputo entre dos y tres veces.</desc>
+                        <title id="vramFigTitle">Precisión mixta: libera VRAM frente a FP32, pero menos de la mitad</title>
+                        <desc id="vramFigDesc">Comparación del consumo de VRAM entre FP32 y precisión mixta FP16. En FP32 el modelo y sus tensores llenan la memoria de video. Con precisión mixta, las activaciones se guardan en 16 bits y ocupan la mitad, pero los pesos maestros, sus gradientes y los estados de Adam siguen en FP32: el entrenamiento usa cerca de dos tercios de la VRAM y queda espacio libre para un lote mayor, mientras los Tensor Cores aceleran el cómputo hasta dos o tres veces.</desc>
                         <defs>
                             <linearGradient id="vramUsed" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0%" stopColor="#3D008D" />
@@ -811,7 +815,7 @@
                         <rect x={barX} y={barTop} width={barW} height={totalH} rx="6" fill="url(#vramUsed)" opacity="0.92" />
                         <text x={barX + barW / 2} y={barTop + totalH / 2} textAnchor="middle" fontSize="9.5" fill="white" fontWeight="700">modelo</text>
                         <text x={barX + barW / 2} y={barTop + totalH / 2 + 14} textAnchor="middle" fontSize="8" fill="#E9D5FF">32 bits/número</text>
-                        <text x={barX + barW / 2} y={barTop + totalH + 16} textAnchor="middle" fontSize="9" fill="#3D008D" fontWeight="700">≈100% lleno</text>
+                        <text x={barX + barW / 2} y={barTop + totalH + 16} textAnchor="middle" fontSize="9" fill="#3D008D" fontWeight="700">≈100 % lleno</text>
 
                         {/* Barra FP16 / precisión mixta */}
                         <text x={250 + 35} y={28} textAnchor="middle" fontSize="10" fill="#001A4D" fontWeight="bold">VRAM (FP16)</text>
@@ -827,13 +831,13 @@
                             </>
                         )}
                         <text x={250 + barW / 2} y={barTop + totalH + 16} textAnchor="middle" fontSize="9" fill="#15803D" fontWeight="700">
-                            {modo === 'fp16' ? '≈50% usado' : '—'}
+                            {modo === 'fp16' ? '≈68 % usado' : '—'}
                         </text>
 
                         {/* Tensor Cores */}
                         <rect x={150} y={185} width={210} height={40} rx="9" fill="#ECFEFF" stroke="#0E7490" strokeWidth="1.6" />
                         <text x={255} y={203} textAnchor="middle" fontSize="9.5" fill="#0E7490" fontWeight="bold">Tensor Cores (16 bits)</text>
-                        <text x={255} y={217} textAnchor="middle" fontSize="8.5" fill="#0E7490">≈2–3× más rápido · pesos maestros en FP32</text>
+                        <text x={255} y={217} textAnchor="middle" fontSize="8.5" fill="#0E7490">hasta 2–3× más rápido · pesos maestros en FP32</text>
                     </svg>
                     <div className="flex gap-2 mt-3 justify-center flex-wrap">
                         <button onClick={() => setModo('fp32')}
@@ -846,8 +850,9 @@
                         </button>
                     </div>
                     <p className="text-center text-xs text-gray-500 mt-3 italic leading-relaxed">
-                        La <strong>precisión mixta</strong> hace la mayoría de los cálculos en 16 bits sobre los <strong>Tensor Cores</strong> (que los núcleos CUDA no usan),
-                        manteniendo los <strong>pesos maestros en FP32</strong>: <strong>≈2–3× más rápido</strong> y <strong>≈50% menos memoria</strong>.
+                        La <strong>precisión mixta</strong> hace la mayoría de los cálculos en 16 bits sobre los <strong>Tensor Cores</strong>, unidades distintas de los
+                        núcleos CUDA de propósito general, y mantiene los <strong>pesos maestros en FP32</strong>: <strong>hasta 2–3× más rápido</strong> y menos memoria
+                        de activaciones; el ahorro <strong>total</strong> es menor que la mitad (≈32 % en ResNet-18 con lote 32).
                     </p>
                 </div>
             );
@@ -859,21 +864,21 @@
             const W = 360, H = 250;
             const cols = [
                 { x: 16, title: 'Geométricas', sub: 'cambian la geometría', color: '#0E7490', bg: '#ECFEFF', items: ['Flip horizontal', 'Rotation', 'ResizedCrop', 'Affine'] },
-                { x: 130, title: 'Fotométricas', sub: 'cambian los píxeles', color: '#B45309', bg: '#FFFBEB', items: ['ColorJitter', 'GaussianBlur', 'Normalize'] },
+                { x: 130, title: 'Fotométricas', sub: 'cambian los píxeles', color: '#B45309', bg: '#FFFBEB', items: ['ColorJitter', 'GaussianBlur', 'RandomAutocontrast'] },
                 { x: 244, title: 'Mezcla', sub: 'combinan 2 imágenes', color: '#ED1E79', bg: '#FFF1F7', items: ['Mixup', 'CutMix'] },
             ];
 
             return (
                 <div ref={revRef} className="visual-container reveal">
                     <h4 className="visual-title">
-                        <i className="fas fa-wand-magic-sparkles text-secondary mr-2"></i>Data Augmentation: tres familias
+                        <i className="fas fa-wand-magic-sparkles text-secondary mr-2"></i>Aumento de datos: tres familias
                     </h4>
                     <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
                         aria-labelledby="augFigTitle augFigDesc">
-                        <title id="augFigTitle">Data Augmentation: las tres familias geométrica, fotométrica y mezcla de muestras</title>
-                        <desc id="augFigDesc">Taxonomía de Data Augmentation en tres familias. Geométricas: Flip horizontal, Rotation, ResizedCrop y Affine, que cambian la estructura espacial. Fotométricas: ColorJitter, GaussianBlur y Normalize, que alteran los valores de píxel. Mezcla de muestras: Mixup y CutMix, que combinan dos imágenes y sus etiquetas. Todas se aplican solo al conjunto de entrenamiento.</desc>
+                        <title id="augFigTitle">Aumento de datos: las tres familias geométrica, fotométrica y mezcla de muestras</title>
+                        <desc id="augFigDesc">Taxonomía del aumento de datos en tres familias. Geométricas: Flip horizontal, Rotation, ResizedCrop y Affine, que cambian la estructura espacial. Fotométricas: ColorJitter, GaussianBlur y RandomAutocontrast, que alteran los valores de píxel. Mezcla de muestras: Mixup y CutMix, que combinan dos imágenes y sus etiquetas. Todas se aplican solo al conjunto de entrenamiento.</desc>
                         <rect x={120} y={16} width={120} height={34} rx="9" fill="#3D008D" />
-                        <text x={180} y={37} textAnchor="middle" fontSize="11" fill="#fff" fontWeight="bold">Data Augmentation</text>
+                        <text x={180} y={37} textAnchor="middle" fontSize="11" fill="#fff" fontWeight="bold">Aumento de datos</text>
                         {cols.map((col, ci) => (
                             <g key={ci}>
                                 <line x1={180} y1={50} x2={col.x + 50} y2={66} stroke="#94A3B8" strokeWidth="1.3" strokeDasharray="4 3" />
@@ -893,7 +898,7 @@
                         </text>
                     </svg>
                     <p className="text-center text-xs text-gray-500 mt-3 italic leading-relaxed">
-                        El aumento de datos crea variaciones realistas para regularizar y combatir el sobreajuste, pero <strong>solo en train</strong> (nunca en validación/test).
+                        El aumento de datos crea variaciones realistas para regularizar y combatir el sobreajuste, pero <strong>solo en entrenamiento</strong> (nunca en validación ni prueba).
                         La clave: <strong>respetar la semántica</strong> — una transformación que altera la información diagnóstica es contraproducente.
                     </p>
                 </div>
@@ -912,8 +917,8 @@
                     </h4>
                     <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
                         aria-labelledby="dpFigTitle dpFigDesc">
-                        <title id="dpFigTitle">Del notebook al cafetal: exportar a ONNX y desplegar en el borde y en la nube</title>
-                        <desc id="dpFigDesc">Flujo de exportación y despliegue. Un modelo entrenado en un notebook se guarda en su formato nativo, punto pth de PyTorch o punto keras, y se convierte a ONNX, un formato abierto que actúa como pasaporte interoperable. Desde ahí la rama visual se cuantiza y se despliega offline en una tablet con LiteRT o Edge, mientras la rama temporal se sirve por API REST en la nube.</desc>
+                        <title id="dpFigTitle">Del notebook al cafetal: LiteRT para la tablet y ONNX para la nube</title>
+                        <desc id="dpFigDesc">Flujo de exportación y despliegue. Un modelo entrenado en un notebook se guarda en su formato nativo, punto pth de PyTorch o punto keras. La rama visual se cuantiza a INT8 y se convierte a LiteRT, desde Keras/TF o con LiteRT Torch, para correr offline en una tablet. En paralelo, el modelo se exporta a ONNX, el pasaporte interoperable, y la rama temporal se sirve por API REST con ONNX Runtime en la nube. No existe un conversor oficial de ONNX a LiteRT.</desc>
                         <defs>
                             <linearGradient id="dpGrad" x1="0" y1="0" x2="1" y2="0">
                                 <stop offset="0%" stopColor="#3D008D" />
@@ -927,14 +932,15 @@
                         <rect x={20} y={100} width={86} height={48} rx="10" fill="url(#dpGrad)" />
                         <text x={63} y={120} textAnchor="middle" fontSize="10" fontWeight="700" fill="#fff">Notebook</text>
                         <text x={63} y={134} textAnchor="middle" fontSize="8" fill="#E9D5FF">.keras · .pth</text>
-                        {/* ONNX pasaporte */}
-                        <line x1={106} y1={124} x2={138} y2={124} stroke="#94A3B8" strokeWidth="1.6" markerEnd="url(#dpArr)" />
-                        <rect x={140} y={100} width={86} height={48} rx="10" fill="#001A4D" />
-                        <text x={183} y={120} textAnchor="middle" fontSize="10" fontWeight="700" fill="#fff">ONNX</text>
-                        <text x={183} y={134} textAnchor="middle" fontSize="8" fill="#CBD5E1">pasaporte abierto</text>
-                        {/* Destinos */}
-                        <line x1={226} y1={116} x2={260} y2={70} stroke="#94A3B8" strokeWidth="1.6" markerEnd="url(#dpArr)" />
-                        <line x1={226} y1={132} x2={260} y2={182} stroke="#94A3B8" strokeWidth="1.6" markerEnd="url(#dpArr)" />
+                        {/* Rama visual: cuantización y LiteRT (desde Keras/TF o con LiteRT Torch) */}
+                        <line x1={106} y1={108} x2={260} y2={70} stroke="#94A3B8" strokeWidth="1.6" markerEnd="url(#dpArr)" />
+                        <text x={165} y={72} textAnchor="middle" fontSize="8.5" fill="#15803D" fontWeight="700">cuantizar (INT8) → LiteRT</text>
+                        {/* ONNX pasaporte → nube */}
+                        <line x1={106} y1={140} x2={138} y2={150} stroke="#94A3B8" strokeWidth="1.6" markerEnd="url(#dpArr)" />
+                        <rect x={140} y={136} width={86} height={44} rx="10" fill="#001A4D" />
+                        <text x={183} y={155} textAnchor="middle" fontSize="10" fontWeight="700" fill="#fff">ONNX</text>
+                        <text x={183} y={169} textAnchor="middle" fontSize="8" fill="#CBD5E1">pasaporte abierto</text>
+                        <line x1={226} y1={162} x2={260} y2={178} stroke="#94A3B8" strokeWidth="1.6" markerEnd="url(#dpArr)" />
                         {/* Tablet LiteRT */}
                         <rect x={262} y={44} width={88} height={50} rx="9" fill="#ED1E79" />
                         <text x={306} y={64} textAnchor="middle" fontSize="10" fontWeight="700" fill="#fff">Tablet</text>
@@ -943,15 +949,14 @@
                         {/* Nube REST */}
                         <rect x={262} y={158} width={88} height={50} rx="9" fill="#0E7490" />
                         <text x={306} y={178} textAnchor="middle" fontSize="10" fontWeight="700" fill="#fff">Nube</text>
-                        <text x={306} y={192} textAnchor="middle" fontSize="8" fill="#CFFAFE">API REST</text>
-                        <text x={306} y={203} textAnchor="middle" fontSize="7.5" fill="#CFFAFE">rama temporal</text>
-                        {/* etiqueta cuantización */}
-                        <text x={183} y={170} textAnchor="middle" fontSize="8.5" fill="#15803D" fontWeight="700">cuantización offline (INT8)</text>
-                        <text x={183} y={184} textAnchor="middle" fontSize="8" fill="#64748B">reduce tamaño y latencia para el borde</text>
+                        <text x={306} y={192} textAnchor="middle" fontSize="8" fill="#CFFAFE">ONNX Runtime</text>
+                        <text x={306} y={203} textAnchor="middle" fontSize="7.5" fill="#CFFAFE">API REST · temporal</text>
+                        <text x={W / 2} y={232} textAnchor="middle" fontSize="7.5" fill="#64748B">sin conversor oficial ONNX → LiteRT: se parte de Keras/TF o de LiteRT Torch</text>
                     </svg>
                     <p className="text-center text-xs text-gray-500 mt-3 italic leading-relaxed">
-                        Se guarda en el formato nativo (<strong>state_dict/.keras</strong>), se exporta a <strong>ONNX</strong> (el “pasaporte” interoperable),
-                        y se lleva al borde con <strong>LiteRT/Edge</strong> tras cuantizar. <strong>torch.export</strong> es el sucesor de TorchScript.
+                        Se guarda en el formato nativo (<strong>state_dict/.keras</strong>); la rama visual se cuantiza y se convierte a <strong>LiteRT</strong> para la
+                        tablet, y el modelo se exporta a <strong>ONNX</strong> (el «pasaporte» interoperable) para servirlo con ONNX Runtime.{' '}
+                        <strong>torch.export</strong> es el sucesor de TorchScript.
                     </p>
                 </div>
             );
@@ -980,6 +985,29 @@
         ============================================================ */
         const VideoCard = ({ video }) => {
             const revRef = useReveal();
+            const lectura = video.tipo === 'lectura';
+            if (lectura) return (
+                <div ref={revRef} className="reveal my-5 rounded-2xl border-2 border-purple-100 bg-gradient-to-br from-purple-50/60 via-white to-pink-50/40 p-4 shadow-sm"
+                    style={{ backdropFilter: 'blur(8px)' }}>
+                    <div className="flex items-center gap-2 mb-2">
+                        <div className="flex-shrink-0 w-9 h-9 rounded-xl usta-gradient text-white flex items-center justify-center shadow-md">
+                            <i className="fas fa-book-open text-sm"></i>
+                        </div>
+                        <div>
+                            <span className="text-[0.7rem] uppercase tracking-wider font-bold text-primary block">Lectura recomendada</span>
+                            <span className="text-[0.65rem] text-gray-500 font-semibold">{video.canal}</span>
+                        </div>
+                    </div>
+                    <p className="text-[0.88rem] text-gray-700 font-semibold leading-snug mb-1">{video.titulo}</p>
+                    <p className="text-[0.78rem] text-gray-500 mb-3">{video.descripcion}</p>
+                    <a href={video.url} target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-sm font-bold px-4 py-2 rounded-full usta-gradient text-white transition-all shadow-md hover:shadow-lg">
+                        <i className="fas fa-book-open"></i>
+                        Abrir la lectura
+                        <i className="fas fa-arrow-up-right-from-square text-[0.65rem] opacity-70"></i>
+                    </a>
+                </div>
+            );
             return (
                 <div ref={revRef} className="reveal my-5 rounded-2xl border-2 border-red-100 bg-gradient-to-br from-red-50/60 via-white to-orange-50/40 p-4 shadow-sm"
                     style={{ backdropFilter: 'blur(8px)' }}>
@@ -1011,27 +1039,29 @@
         const capsules = [
             {
                 id: 1, num: '01', icon: 'fa-layer-group', badgeColor: 'primary',
-                title: 'Frameworks: dos cocinas para entrenar (TF/Keras vs. PyTorch)',
-                duracion: '~ 4 min',
+                title: 'Frameworks: dos cocinas para entrenar (TF/Keras frente a PyTorch)',
+                duracion: '≈ 4 min',
                 video: {
-                    titulo: 'TensorFlow vs PyTorch | ¿Cuál elegir?',
-                    canal: 'Dot CSV',
-                    url: 'https://www.youtube.com/watch?v=ANozTNDqyJ4',
-                    descripcion: 'Compara las dos grandes cocinas del Deep Learning: la API declarativa de Keras (model.fit) frente al control explícito del bucle de PyTorch, y cuándo conviene cada una.',
+                    tipo: 'lectura',
+                    titulo: 'Introducing Keras 3.0',
+                    canal: 'Keras Team (2023) · keras.io, en inglés',
+                    url: 'https://keras.io/keras_3/',
+                    descripcion: 'Presentación oficial de Keras 3: el mismo código de alto nivel corre sobre TensorFlow, JAX o PyTorch, y convive con bucles de entrenamiento escritos a mano.',
                 },
                 objetivo: 'Distinguir el estilo de alto nivel de TensorFlow/Keras (model.fit) del bucle de entrenamiento explícito de PyTorch, y entender por qué Keras 3 actúa como puente entre TF, PyTorch y JAX.',
                 analogia: {
                     tipo: 'tip',
-                    titulo: 'Analogía: el ajiaco de la abuela vs. el chef que controla cada paso',
+                    titulo: 'Analogía: la receta de la abuela frente a cocinar paso a paso',
                     contenido: (
                         <>
                             <p>
-                                Usar <strong>Keras</strong> es como pedir el <strong>ajiaco de la abuela</strong>: usted declara los
-                                ingredientes (capas, pérdida, optimizador) y dice <span className="inline-code">model.fit</span>; ella se
-                                encarga de todo el proceso entre bastidores. Cómodo y rápido para el caso estándar.
+                                Usar <strong>Keras</strong> es seguir la <strong>receta de la abuela</strong>: se declaran los
+                                ingredientes (capas, pérdida, optimizador) y basta con llamar a{' '}
+                                <span className="inline-code">model.fit</span>; la receta se encarga de todo el proceso entre bastidores.
+                                Cómodo y rápido para el caso estándar.
                             </p>
                             <p>
-                                Usar <strong>PyTorch</strong> es ser el <strong>chef</strong> que escribe el bucle a mano: limpiar la olla
+                                Usar <strong>PyTorch</strong> es <strong>cocinar paso a paso</strong>, con el bucle escrito a mano: limpiar la olla
                                 (<span className="inline-code">zero_grad</span>), cocinar (<span className="inline-code">forward</span>),
                                 probar y corregir (<span className="inline-code">backward</span>) y servir
                                 (<span className="inline-code">step</span>). Más trabajo, pero control total: ideal para precisión mixta,
@@ -1048,19 +1078,20 @@
                 contenidoExtra: (
                     <div>
                         <p>
-                            <strong>TensorFlow/Keras</strong> ofrece una API declarativa de alto nivel: se compila el modelo y
+                            <strong>TensorFlow/Keras</strong> ofrece una API declarativa de alto nivel: se compila el modelo y{' '}
                             <span className="inline-code">model.fit</span> resuelve todo el ciclo de entrenamiento. Es directo y
                             muy productivo, con un ecosistema fuerte en producción y despliegue móvil (TF Serving, LiteRT).
                         </p>
                         <p>
                             <strong>PyTorch</strong> deja el <strong>bucle de entrenamiento explícito</strong> en manos del programador.
-                            Esa transparencia (zero_grad → forward → backward → step) es la preferida en investigación —cerca del 80% de
-                            los papers recientes— y facilita técnicas finas como la precisión mixta o el gradient checkpointing.
+                            Esa transparencia (zero_grad → forward → backward → step) es la preferida en investigación —desde 2019,
+                            la mayoría de los artículos con código de las grandes conferencias usa PyTorch— y facilita técnicas finas como la
+                            precisión mixta o el recálculo de activaciones (<em>gradient checkpointing</em>).
                         </p>
                         <CodeWindow title="keras_vs_pytorch.py">{
 `# Keras: el bucle está oculto en model.fit
 model.compile(optimizer="adam", loss="bce")
-model.fit(X, y, epochs=50)        # el "chef" cocina todo
+model.fit(X, y, epochs=50)        # la receta hace el resto
 
 # PyTorch: el bucle es explícito
 for x, y in dataloader:
@@ -1071,7 +1102,7 @@ for x, y in dataloader:
     optimizador.step()            # actualizar pesos`
                         }</CodeWindow>
                         <p>
-                            <strong>Keras 3</strong> (finales de 2023) volvió a Keras <strong>agnóstico de backend</strong>: el mismo código
+                            <strong>Keras 3</strong> (finales de 2023) volvió a Keras <strong>agnóstico del motor</strong> (<em>backend</em>): el mismo código
                             corre sobre TensorFlow, PyTorch o JAX cambiando <span className="inline-code">os.environ['KERAS_BACKEND']</span>.
                             Se prototipa con la simplicidad de Keras y se despliega con el backend que más convenga, sin reescribir el modelo.
                         </p>
@@ -1081,24 +1112,24 @@ for x, y in dataloader:
                 mcq: {
                     pregunta: '¿Qué permite Keras 3 que no era posible antes?',
                     opciones: [
-                        { texto: 'Entrenar sin retropropagación, usando solo reglas de suma.', correcta: false, justificacion: 'Keras 3 sigue entrenando con retropropagación. No cambia el algoritmo de aprendizaje, sino el backend de cómputo.' },
-                        { texto: 'Ejecutar el mismo código sobre TensorFlow, PyTorch o JAX cambiando una variable de entorno.', correcta: true, justificacion: 'Keras 3 es agnóstico de backend: con os.environ["KERAS_BACKEND"] = "torch" / "tensorflow" / "jax" el mismo modelo corre sobre cualquiera de los tres, eliminando la falsa dicotomía entre frameworks.' },
-                        { texto: 'Eliminar por completo la necesidad de GPU al entrenar.', correcta: false, justificacion: 'El backend sigue usando la GPU cuando está disponible. Keras 3 no elimina el hardware de cómputo; abstrae el framework subyacente.' },
-                        { texto: 'Convertir automáticamente cualquier modelo a ONNX sin exportar.', correcta: false, justificacion: 'La exportación a ONNX es un paso aparte (torch.onnx.export o tf2onnx). Keras 3 resuelve la portabilidad de backend en entrenamiento, no la serialización para despliegue.' },
+                        { texto: 'Convertir automáticamente el modelo a TensorFlow para desplegarlo luego con LiteRT.', correcta: false, justificacion: 'Keras 3 no convierte modelos entre frameworks: el motor se elige antes de importar keras, y la conversión a LiteRT es un paso aparte.' },
+                        { texto: 'Entrenar sin GPU a la misma velocidad, porque compila el modelo para la CPU.', correcta: false, justificacion: 'El motor sigue usando la GPU cuando está disponible; Keras 3 abstrae el framework subyacente, no el hardware de cómputo.' },
+                        { texto: 'Exportar cualquier modelo a ONNX sin un paso de exportación explícito.', correcta: false, justificacion: 'La exportación a ONNX sigue siendo un paso explícito; Keras 3 resuelve la portabilidad del motor de entrenamiento, no la serialización para el despliegue.' },
+                        { texto: 'Correr el mismo código en TensorFlow, PyTorch o JAX con una variable de entorno.', correcta: true, justificacion: 'Keras 3 es agnóstico del motor: con os.environ["KERAS_BACKEND"] = "torch", "tensorflow" o "jax", el mismo modelo corre sobre cualquiera de los tres, sin reescribirlo.' },
                     ],
                 },
             },
             {
                 id: 2, num: '02', icon: 'fa-gauge-high', badgeColor: 'teal',
                 title: 'Pipelines de datos: que la GPU nunca espere',
-                duracion: '~ 5 min',
+                duracion: '≈ 5 min',
                 video: {
-                    titulo: 'Build TensorFlow input pipelines (tf.data)',
-                    canal: 'TensorFlow',
+                    titulo: 'Input Data Pipelines - TensorFlow Essentials #4',
+                    canal: 'James Briggs (en inglés)',
                     url: 'https://www.youtube.com/watch?v=f6XVfgJTbp4',
-                    descripcion: 'Muestra cómo construir un pipeline de entrada eficiente con tf.data: map, cache, shuffle, batch y prefetch, y por qué el orden de las operaciones es decisivo para alimentar a la GPU.',
+                    descripcion: 'Tutorial en inglés sobre la construcción de flujos de entrada con tf.data en TensorFlow, como complemento del orden map → cache → shuffle → batch → prefetch.',
                 },
-                objetivo: 'Comprender por qué un pipeline de datos eficiente (tf.data con prefetch/cache o DataLoader con num_workers/pin_memory) evita la GPU starvation, solapando la preparación en CPU con el entrenamiento en GPU.',
+                objetivo: 'Comprender por qué un pipeline de datos eficiente (tf.data con prefetch/cache o DataLoader con num_workers/pin_memory) evita la hambruna de GPU (GPU starvation), solapando la preparación en CPU con el entrenamiento en GPU.',
                 analogia: {
                     tipo: 'tip',
                     titulo: 'Analogía: el restaurante con cocina veloz y meseros lentos',
@@ -1107,12 +1138,12 @@ for x, y in dataloader:
                             <p>
                                 La <strong>GPU es una cocina carísima y rapidísima</strong>; la <strong>CPU son los meseros</strong> que
                                 preparan y traen cada bandeja de datos. Si los meseros traen un plato, esperan a que la cocina termine y
-                                solo entonces preparan el siguiente, la cocina pasa la mitad del tiempo <strong>ociosa</strong>: eso es la
-                                <strong> GPU starvation</strong>.
+                                solo entonces preparan el siguiente, la cocina pasa buena parte del tiempo <strong>ociosa</strong>: eso es la
+                                <strong> hambruna de GPU</strong> (<em>GPU starvation</em>).
                             </p>
                             <p>
                                 El <strong>prefetch</strong> es contratar meseros que preparan el lote N+1 <em>mientras</em> la cocina aún
-                                trabaja el lote N. El cuello de botella desaparece: la cocina no para nunca. En PyTorch ese rol lo cumplen los
+                                trabaja el lote N. El cuello de botella desaparece: la cocina no para nunca. En PyTorch ese rol lo cumplen los{' '}
                                 <span className="inline-code">num_workers</span> del DataLoader y <span className="inline-code">pin_memory</span>.
                             </p>
                         </>
@@ -1128,11 +1159,11 @@ for x, y in dataloader:
                         </p>
                         <p>
                             En <strong>tf.data</strong> el orden importa: <span className="inline-code">map(AUTOTUNE)</span> preprocesa en
-                            paralelo, <span className="inline-code">cache()</span> guarda el resultado, luego
-                            <span className="inline-code">shuffle</span> y <span className="inline-code">batch</span>, y
+                            paralelo, <span className="inline-code">cache()</span> guarda el resultado, luego{' '}
+                            <span className="inline-code">shuffle</span> y <span className="inline-code">batch</span>, y{' '}
                             <span className="inline-code">prefetch(AUTOTUNE)</span> va <strong>siempre al final</strong>.
-                            En PyTorch, el <span className="inline-code">DataLoader</span> consigue lo mismo con
-                            <span className="inline-code">num_workers</span> (procesos que cargan en paralelo) y
+                            En PyTorch, el <span className="inline-code">DataLoader</span> consigue lo mismo con{' '}
+                            <span className="inline-code">num_workers</span> (procesos que cargan en paralelo) y{' '}
                             <span className="inline-code">pin_memory=True</span> (transferencia más rápida a la GPU).
                         </p>
                         <CodeWindow title="pipeline.py">{
@@ -1150,26 +1181,27 @@ loader = DataLoader(dataset, batch_size=32, shuffle=True,
                 ),
                 formula: null,
                 mcq: {
-                    pregunta: '¿Por qué .prefetch(AUTOTUNE) se coloca como última operación del pipeline?',
+                    pregunta: 'Un DataLoader de PyTorch deja la GPU ociosa la mitad del tiempo, y en el monitor de la CPU solo un núcleo trabaja. ¿Qué ajuste ataca la causa?',
                     opciones: [
-                        { texto: 'Porque baraja los datos para que el modelo no memorice el orden.', correcta: false, justificacion: 'Barajar es tarea de shuffle(), no de prefetch. El prefetch no altera el orden ni el contenido: gestiona el momento en que los lotes están listos.' },
-                        { texto: 'Porque solapa la preparación en CPU del lote N+1 con el entrenamiento en GPU del lote N, eliminando los tiempos muertos.', correcta: true, justificacion: 'prefetch mantiene listos los siguientes lotes mientras la GPU procesa el actual. Al ir al final, asegura que toda la cadena de transformaciones esté precomputada y la GPU nunca espere datos (sin GPU starvation).' },
-                        { texto: 'Porque reduce la precisión de los datos a 16 bits para ahorrar memoria.', correcta: false, justificacion: 'Eso es la precisión mixta (FP16/BF16), un tema distinto. prefetch no cambia el tipo de dato; gestiona la temporización de la carga.' },
-                        { texto: 'Porque convierte el dataset al formato ONNX para desplegarlo.', correcta: false, justificacion: 'ONNX es un formato de exportación del modelo, no del pipeline de datos. prefetch no exporta nada: solo anticipa los lotes.' },
+                        { texto: 'Subir num_workers para que varios procesos preparen los lotes en paralelo.', correcta: true, justificacion: 'La CPU es el cuello de botella: un solo proceso prepara los lotes y la GPU espera («hambruna de GPU»). Con varios num_workers la carga se reparte entre núcleos y la GPU recibe lotes a tiempo; pin_memory y prefetch_factor ayudan después.' },
+                        { texto: 'Activar la precisión mixta para que la GPU calcule cada lote más rápido.', correcta: false, justificacion: 'La GPU ya está ociosa: hacerla más rápida solo alarga la espera. El problema está en la carga de datos, no en el cómputo.' },
+                        { texto: 'Aumentar la tasa de aprendizaje para que el modelo converja en menos épocas.', correcta: false, justificacion: 'La tasa de aprendizaje afecta la convergencia, no la velocidad con que llegan los lotes a la GPU.' },
+                        { texto: 'Poner shuffle=False para que la lectura sea secuencial y la carga sea más ágil.', correcta: false, justificacion: 'Desactivar el barajado empeora el entrenamiento y no reparte el trabajo de carga: el cuello de botella sigue siendo un solo proceso.' },
                     ],
                 },
             },
             {
                 id: 3, num: '03', icon: 'fa-microchip', badgeColor: 'secondary',
                 title: 'GPU y precisión mixta: hacer más con menos',
-                duracion: '~ 5 min',
+                duracion: '≈ 5 min',
                 video: {
-                    titulo: 'Mixed Precision Training',
-                    canal: 'PyTorch',
-                    url: 'https://www.youtube.com/watch?v=b1G_3Hzo1zg',
-                    descripcion: 'Explica cómo la precisión mixta usa FP16/BF16 sobre los Tensor Cores manteniendo pesos maestros en FP32, logrando entrenar más rápido y con menos memoria.',
+                    tipo: 'lectura',
+                    titulo: 'Automatic mixed precision examples',
+                    canal: 'PyTorch Foundation · documentación oficial, en inglés',
+                    url: 'https://docs.pytorch.org/docs/stable/notes/amp_examples.html',
+                    descripcion: 'Ejemplos oficiales de torch.autocast y torch.amp.GradScaler: el bucle típico, la acumulación y el recorte de gradientes con precisión mixta.',
                 },
-                objetivo: 'Entender la diferencia entre núcleos CUDA y Tensor Cores, qué son FP16/BF16, por qué la VRAM es el recurso escaso y cómo la precisión mixta acelera el entrenamiento ≈2–3× usando ≈50% menos memoria.',
+                objetivo: 'Entender la diferencia entre núcleos CUDA y Tensor Cores, qué son FP16/BF16, por qué la VRAM es el recurso escaso y cómo la precisión mixta acelera el entrenamiento hasta 2–3× y reduce sobre todo la memoria de las activaciones (el ahorro total es menor que la mitad).',
                 analogia: {
                     tipo: 'warn',
                     titulo: 'Analogía: la despulpadora veloz y la bodega que se llena',
@@ -1181,10 +1213,11 @@ loader = DataLoader(dataset, batch_size=32, shuffle=True,
                                 alcanzan. Pero solo trabajan a tope si les dan el café en el formato que esperan: <strong>16 bits</strong>.
                             </p>
                             <p>
-                                La <strong>VRAM es la bodega</strong> de la finca: no importa cuántos camiones de datos lleguen, si la bodega se
-                                llena, el proceso se detiene (CUDA out of memory). Guardar cada número en <strong>16 bits en vez de 32</strong>
-                                es empacar el café en la mitad del volumen: cabe el doble, y la despulpadora vuela. Los <strong>pesos maestros</strong>
-                                se conservan en FP32 (la copia "oficial" para no perder precisión al acumular).
+                                La <strong>VRAM es la bodega</strong> de la plaza de mercado: no importa cuántos camiones de datos lleguen, si la
+                                bodega se llena, el proceso se detiene (CUDA out of memory). Guardar las activaciones en <strong>16 bits en vez de
+                                32</strong> es empacar esa parte del café en la mitad del volumen, y la despulpadora vuela. Pero los{' '}
+                                <strong>pesos maestros</strong>, sus gradientes y los estados de Adam se conservan en FP32 (la copia «oficial» para
+                                no perder precisión al acumular): la bodega gana espacio, aunque no el doble.
                             </p>
                         </>
                     ),
@@ -1201,17 +1234,17 @@ loader = DataLoader(dataset, batch_size=32, shuffle=True,
                             La <strong>VRAM</strong> almacena a la vez pesos, estados del optimizador, gradientes, activaciones y el lote de entrada.
                             Es el recurso más escaso: cuando se agota, llega el temido CUDA OOM. La <strong>precisión mixta</strong> realiza la
                             mayoría de los cálculos en <strong>16 bits</strong> (FP16 o BF16) sobre los Tensor Cores, manteniendo los pesos maestros
-                            en FP32 por estabilidad. BF16 (preferido en Ampere+) iguala el rango de FP32 sin escalado; FP16 requiere
+                            en FP32 por estabilidad. BF16 (preferido en Ampere o posteriores) iguala el rango de FP32 sin escalado; FP16 requiere
                             <em> escalado de pérdida</em>.
                         </p>
                         <CodeWindow title="amp.py">{
 `# Precisión mixta automática (AMP) en PyTorch 2.x
-scaler = torch.cuda.amp.GradScaler()
+scaler = torch.amp.GradScaler("cuda")
 for x, y in dataloader:
     optimizador.zero_grad()
     with torch.autocast("cuda", dtype=torch.float16):   # 16 bits
         pred = modelo(x); loss = criterio(pred, y)
-    scaler.scale(loss).backward()   # escala la pérdida (solo FP16)
+    scaler.scale(loss).backward()   # escala la pérdida: evita el subdesbordamiento (FP16)
     scaler.step(optimizador); scaler.update()
 
 # Keras 3 — una sola línea
@@ -1221,26 +1254,26 @@ keras.mixed_precision.set_global_policy("mixed_float16")`
                 ),
                 formula: String.raw`$$\text{VRAM}_{\text{pesos}} \approx 2N\ \text{GB} \quad(N\ \text{mil millones de parámetros en FP16})$$`,
                 mcq: {
-                    pregunta: 'El entrenamiento con precisión mixta logra, principalmente…',
+                    pregunta: 'Una T4 (16 GB) no admite un lote de 64 imágenes en FP32. ¿Qué cambia en la memoria al activar la precisión mixta (AMP)?',
                     opciones: [
-                        { texto: 'Mayor exactitud final del modelo gracias a usar 64 bits en todos los cálculos.', correcta: false, justificacion: 'Es lo contrario: la precisión mixta reduce los bits (a 16) en la mayoría de los cálculos. No mejora la exactitud por usar más bits; su ganancia es de velocidad y memoria.' },
-                        { texto: '≈2–3× más rápido y ≈50% menos memoria, usando los Tensor Cores con FP16/BF16 y manteniendo pesos maestros en FP32.', correcta: true, justificacion: 'Al hacer el cómputo en 16 bits sobre los Tensor Cores, se acelera entre 2 y 3 veces y se libera cerca de la mitad de la VRAM, mientras los pesos maestros FP32 preservan la estabilidad. El escalado de pérdida solo es necesario con FP16.' },
-                        { texto: 'Eliminar la necesidad de un pipeline de datos eficiente.', correcta: false, justificacion: 'La precisión mixta acelera el cómputo, pero si los datos no llegan a tiempo la GPU igual se queda ociosa. El pipeline (prefetch) sigue siendo imprescindible.' },
-                        { texto: 'Convertir el modelo a INT8 para desplegarlo en el borde.', correcta: false, justificacion: 'Eso es la cuantización para despliegue, otra técnica. La precisión mixta es para acelerar el ENTRENAMIENTO usando 16 bits, no para empaquetar el modelo final.' },
+                        { texto: 'Todo el modelo pasa a 16 bits y la VRAM total ocupada baja justo a la mitad.', correcta: false, justificacion: 'AMP no pasa todo a 16 bits: los pesos maestros, sus gradientes y los estados de Adam siguen en FP32, así que el ahorro total es menor que la mitad.' },
+                        { texto: 'Nada en la memoria: AMP solo acelera el cálculo sin cambiar lo que ocupa la VRAM.', correcta: false, justificacion: 'Sí cambia: las activaciones, que suelen dominar la memoria en una CNN con lotes grandes, se guardan en 16 bits.' },
+                        { texto: 'Las activaciones ocupan cerca de la mitad; los pesos maestros siguen en FP32.', correcta: true, justificacion: 'Las activaciones se guardan en 16 bits y ocupan cerca de la mitad; los pesos maestros, sus gradientes y los estados de Adam siguen en FP32. El ahorro total es del orden de un tercio en una CNN mediana (≈32 % en ResNet-18 con lote 32), y además se activan los Tensor Cores (hasta 2–3× más rápido).' },
+                        { texto: 'El lote se reduce solo a 32 imágenes para que el entrenamiento quepa en la VRAM.', correcta: false, justificacion: 'AMP no toca el tamaño de lote; reducirlo es otra palanca, que decide el ingeniero.' },
                     ],
                 },
             },
             {
                 id: 4, num: '04', icon: 'fa-wand-magic-sparkles', badgeColor: 'gold',
-                title: 'Data Augmentation con criterio: ampliar sin engañar',
-                duracion: '~ 4 min',
+                title: 'Aumento de datos con criterio: ampliar sin engañar',
+                duracion: '≈ 4 min',
                 video: {
-                    titulo: 'Data Augmentation explicado',
-                    canal: 'Dot CSV',
+                    titulo: 'Data Augmentation explained',
+                    canal: 'deeplizard (en inglés)',
                     url: 'https://www.youtube.com/watch?v=rfM4DaLTkMs',
-                    descripcion: 'Explica cómo el aumento de datos genera variaciones realistas para regularizar el modelo, y por qué cada transformación debe respetar la semántica de la clase.',
+                    descripcion: 'Explicación en inglés del aumento de datos de imágenes y de por qué ayuda a reducir el sobreajuste.',
                 },
-                objetivo: 'Conocer las familias de Data Augmentation (geométricas, fotométricas y de mezcla como Mixup/CutMix), aplicarlas solo al conjunto de entrenamiento y elegirlas respetando la semántica del problema.',
+                objetivo: 'Conocer las familias de aumento de datos (data augmentation): geométricas, fotométricas y de mezcla como Mixup/CutMix; aplicarlas solo al conjunto de entrenamiento y elegirlas respetando la semántica del problema.',
                 analogia: {
                     tipo: 'warn',
                     titulo: 'Analogía: el director técnico que rota a sus jugadores… con criterio',
@@ -1253,7 +1286,7 @@ keras.mixed_precision.set_global_policy("mixed_float16")`
                             </p>
                             <p>
                                 Pero un buen DT <strong>no entrena lo imposible</strong>: no pone a jugar con el balón cuadrado. Una transformación
-                                que rompe la realidad de la clase —voltear una señal de tránsito, invertir una hoja de café de cabeza— le enseña al
+                                que rompe la realidad de la clase —voltear una señal de tránsito, teñir de verde una pústula de roya— le enseña al
                                 modelo cosas falsas. Y solo se entrena <strong>antes</strong> del partido (en train), nunca durante la evaluación.
                             </p>
                         </>
@@ -1263,71 +1296,79 @@ keras.mixed_precision.set_global_policy("mixed_float16")`
                 contenidoExtra: (
                     <div>
                         <p>
-                            El <strong>Data Augmentation</strong> genera, sobre la marcha, variaciones plausibles de cada imagen para que el
+                            El <strong>aumento de datos</strong> (<em>data augmentation</em>) genera, sobre la marcha, variaciones plausibles de cada imagen para que el
                             modelo aprenda invarianzas reales y combata el sobreajuste. Se agrupa en tres familias: las
                             <strong> geométricas</strong> (flip, rotation, crop, affine) que cambian la estructura espacial; las
-                            <strong> fotométricas</strong> (color jitter, blur, normalize) que alteran los valores de píxel; y las de
+                            <strong> fotométricas</strong> (color jitter, desenfoque, autocontraste) que alteran los valores de píxel; y las de
                             <strong> mezcla</strong> (<span className="inline-code">Mixup</span>, <span className="inline-code">CutMix</span>),
                             que combinan dos imágenes y sus etiquetas.
                         </p>
                         <p>
                             Dos reglas de oro: se aplica <strong>solo al conjunto de entrenamiento</strong> (jamás a validación/test, que deben
                             reflejar datos reales) y debe <strong>respetar la semántica</strong> de la clase. Una transformación que altera la
-                            información diagnóstica no ayuda: confunde al modelo con etiquetas que ya no corresponden a la imagen.
+                            información diagnóstica no ayuda: confunde al modelo con etiquetas que ya no corresponden a la imagen.{' '}
+                            <span className="inline-code">Normalize</span> no es un aumento: es un preprocesamiento que se aplica igual en
+                            entrenamiento, validación y prueba.
                         </p>
                         <CodeWindow title="transforms.py">{
-`# torchvision — augmentation SOLO en entrenamiento
-train_tfms = transforms.Compose([
-    transforms.RandomResizedCrop(224),
-    transforms.RandomHorizontalFlip(),     # válido para hojas
-    transforms.ColorJitter(0.2, 0.2, 0.2),
-    transforms.ToTensor(),
+`# torchvision.transforms.v2 — aumento SOLO en entrenamiento
+from torchvision.transforms import v2
+# mean, std: los de ImageNet si el modelo es preentrenado
+train_tfms = v2.Compose([
+    v2.RandomResizedCrop(224),
+    v2.RandomHorizontalFlip(),             # válido para hojas
+    v2.ColorJitter(0.2, 0.2, 0.2),         # suave: no altera el tono de la roya
+    v2.ToImage(), v2.ToDtype(torch.float32, scale=True),
+    v2.Normalize(mean, std),               # preprocesamiento, no aumento
 ])
-# Validación: SIN augmentation (datos reales)
-val_tfms = transforms.Compose([
-    transforms.Resize(256), transforms.CenterCrop(224),
-    transforms.ToTensor(),
+# Validación: SIN aumento, con el mismo preprocesamiento
+val_tfms = v2.Compose([
+    v2.Resize(256), v2.CenterCrop(224),
+    v2.ToImage(), v2.ToDtype(torch.float32, scale=True),
+    v2.Normalize(mean, std),
 ])`
                         }</CodeWindow>
                     </div>
                 ),
                 formula: null,
                 mcq: {
-                    pregunta: 'Para un modelo que detecta roya en hojas de café, ¿cuál augmentation sería CONTRAPRODUCENTE?',
+                    pregunta: 'Para un modelo que detecta roya en hojas de café, ¿qué aumento de datos sería contraproducente?',
                     opciones: [
-                        { texto: 'Un flip horizontal de la hoja.', correcta: false, justificacion: 'El flip horizontal es seguro: una hoja reflejada de izquierda a derecha sigue siendo una hoja realista y la roya se ve igual. No altera la información diagnóstica.' },
-                        { texto: 'Una rotación de 180° que pone la hoja de cabeza, invirtiendo la orientación hoja-tallo y alterando la información diagnóstica.', correcta: true, justificacion: 'Las hojas en una planta tienen una orientación natural (peciolo abajo). Voltearlas 180° produce imágenes irreales que el modelo nunca verá en campo y puede distorsionar pistas diagnósticas, enseñando al modelo un mundo falso.' },
-                        { texto: 'Un pequeño ajuste de brillo y contraste (ColorJitter suave).', correcta: false, justificacion: 'Variar levemente el brillo simula distintas condiciones de luz reales en el cafetal: es justo el tipo de invarianza que se quiere aprender. Es beneficioso.' },
-                        { texto: 'Un recorte aleatorio (RandomResizedCrop) que conserva la zona afectada.', correcta: false, justificacion: 'Un recorte que mantiene visible la región con roya genera variaciones realistas de encuadre, útiles para la robustez. Es beneficioso mientras no elimine la evidencia diagnóstica.' },
+                        { texto: 'Un volteo horizontal (RandomHorizontalFlip) de la hoja fotografiada en campo.', correcta: false, justificacion: 'El volteo horizontal es seguro: una hoja reflejada sigue siendo una hoja realista y las pústulas de roya se ven igual.' },
+                        { texto: 'Un ColorJitter de tono fuerte (hue=0.5) que vuelve verdes las pústulas.', correcta: true, justificacion: 'Altera el color, que es la señal diagnóstica: el modelo aprendería «roya» sin su rasgo distintivo, el tono amarillo-naranja de las pústulas.' },
+                        { texto: 'Un ajuste suave de brillo y contraste que simula la luz cambiante del cafetal.', correcta: false, justificacion: 'Variar levemente el brillo simula condiciones de luz reales en el cafetal: es justo la invarianza que se quiere aprender.' },
+                        { texto: 'Un recorte aleatorio (RandomResizedCrop) que conserva visible la zona afectada.', correcta: false, justificacion: 'Un recorte que mantiene visible la lesión genera variaciones realistas de encuadre, útiles para la robustez.' },
                     ],
                 },
             },
             {
                 id: 5, num: '05', icon: 'fa-rocket', badgeColor: 'primary',
                 title: 'Del notebook al cafetal: exportar y desplegar',
-                duracion: '~ 5 min',
+                duracion: '≈ 5 min',
                 video: {
-                    titulo: 'What is ONNX? Open Neural Network Exchange',
-                    canal: 'ONNX',
-                    url: 'https://www.youtube.com/watch?v=cK5AB_PVgUk',
-                    descripcion: 'Presenta ONNX como el formato abierto que permite mover un modelo entre frameworks y ejecutarlo en C++, móvil o navegador sin reescribirlo.',
+                    tipo: 'lectura',
+                    titulo: 'Introduction to ONNX',
+                    canal: 'ONNX Community · documentación oficial, en inglés',
+                    url: 'https://onnx.ai/onnx/intro/',
+                    descripcion: 'Introducción oficial a ONNX: qué es un grafo ONNX, sus operadores y cómo se ejecuta el modelo fuera del framework con que se entrenó.',
                 },
-                objetivo: 'Conocer la ruta de despliegue: guardado nativo (state_dict/.keras), exportación a ONNX como "pasaporte" interoperable, torch.export como sucesor de TorchScript, LiteRT/Edge y la cuantización offline para el borde.',
+                objetivo: 'Conocer la ruta de despliegue: guardado nativo (state_dict/.keras), exportación a ONNX como «pasaporte» interoperable en un único archivo, torch.export como sucesor de TorchScript, LiteRT para el borde y la cuantización a INT8.',
                 analogia: {
-                    tipo: 'ethics',
-                    titulo: 'Analogía: el puente y el pasaporte',
+                    tipo: 'tip',
+                    titulo: 'Analogía: la maqueta y el pasaporte',
                     contenido: (
                         <>
                             <p>
-                                Un modelo entrenado en un notebook es un experimento atrapado en su laboratorio. Para que cruce al mundo real
-                                necesita un <strong>puente</strong> y un <strong>pasaporte</strong>.
+                                Un modelo entrenado en un notebook es una <strong>maqueta</strong> en el laboratorio: funciona allí, pero
+                                todavía no sirve en la obra real. Para llegar a campo necesita un formato nativo y un{' '}
+                                <strong>pasaporte</strong>.
                             </p>
                             <ul>
-                                <li>El <strong>guardado nativo</strong> (<span className="inline-code">state_dict</span> en PyTorch,
+                                <li>El <strong>guardado nativo</strong> (<span className="inline-code">state_dict</span> en PyTorch,{' '}
                                     <span className="inline-code">.keras</span> en Keras) es la foto del modelo en su propio idioma.</li>
                                 <li><strong>ONNX</strong> es el <strong>pasaporte internacional</strong>: un formato abierto que cualquier
                                     país (framework, lenguaje C++, móvil) reconoce, sin reescribir el modelo.</li>
-                                <li><strong>LiteRT/Edge</strong> y la <strong>cuantización</strong> son la maleta liviana: empacar el modelo en
+                                <li><strong>LiteRT</strong> y la <strong>cuantización</strong> son el equipaje de mano: empacar el modelo en
                                     INT8 para que quepa y corra <strong>offline</strong> en una tablet en el cafetal, sin internet.</li>
                             </ul>
                         </>
@@ -1337,28 +1378,40 @@ val_tfms = transforms.Compose([
                 contenidoExtra: (
                     <div>
                         <p>
-                            Para guardar un modelo se prefiere su <strong>formato nativo</strong>: en PyTorch el
-                            <span className="inline-code">state_dict</span> (solo los pesos, no la clase), en Keras el archivo
-                            <span className="inline-code">.keras</span>. Pero un <span className="inline-code">.pth</span> y un
+                            Para guardar un modelo se prefiere su <strong>formato nativo</strong>: en PyTorch el{' '}
+                            <span className="inline-code">state_dict</span> (solo los pesos, no la clase), en Keras el archivo{' '}
+                            <span className="inline-code">.keras</span>. Pero un <span className="inline-code">.pth</span> y un{' '}
                             <span className="inline-code">.keras</span> son <strong>dos implementaciones equivalentes</strong>, no el mismo objeto:
                             para portabilidad real conviene un único framework y <strong>ONNX como pasaporte interoperable</strong>.
                         </p>
                         <p>
                             <strong>ONNX</strong> (Open Neural Network Exchange) es un formato abierto que permite entrenar en un framework y ejecutar
-                            en otro, o en C++/móvil, sin reescribir. En PyTorch, <span className="inline-code">torch.export</span> (recomendado desde
-                            2.5) es el <strong>sucesor de TorchScript</strong> (deprecado) y serializa el grafo sin dependencia de Python.
-                            Para el borde, <strong>LiteRT</strong> (antes TF Lite) y la <strong>cuantización offline</strong> (post-entrenamiento a INT8)
-                            reducen tamaño y latencia para correr en un Android de gama media sin conectividad.
+                            en otro, o en C++/móvil, sin reescribir. En PyTorch, <span className="inline-code">torch.export</span> (disponible desde
+                            PyTorch 2.1) es el <strong>sucesor de TorchScript</strong> (declarado obsoleto en la documentación de PyTorch 2.9): captura
+                            el grafo en un archivo <span className="inline-code">.pt2</span>, que se carga con{' '}
+                            <span className="inline-code">torch.export.load</span>; para correr sin Python hacen falta AOTInductor o ExecuTorch.
+                            Desde PyTorch 2.9 es, además, la base del exportador ONNX predeterminado: sin{' '}
+                            <span className="inline-code">external_data=False</span>, los pesos van a un archivo aparte{' '}
+                            <span className="inline-code">.onnx.data</span>. Para el borde, <strong>LiteRT</strong> (antes TF Lite) y la{' '}
+                            <strong>cuantización tras el entrenamiento</strong> a INT8 reducen tamaño y latencia para correr en un Android de
+                            gama media sin conectividad.
                         </p>
                         <CodeWindow title="exportar.py">{
-`# Exportar a ONNX por la ruta estable + verificar consistencia
+`# Exportar a ONNX en un único archivo + verificar consistencia
+# En Colab: !pip -q install onnx onnxscript onnxruntime
 modelo.eval()                              # modo evaluación
-torch.onnx.export(
-    modelo, X, "centinela.onnx",
+x = torch.randn(2, 3, 224, 224)            # lote 2: evita fijar el lote en 1
+lote = torch.export.Dim("lote")
+torch.onnx.export(modelo, (x,), "centinela.onnx",
     input_names=["entrada"], output_names=["salida"],
-    dynamic_axes={"entrada": {0: "batch"}})
+    dynamic_shapes=({0: lote},),
+    external_data=False)                   # sin .onnx.data; dynamo=True ya es el predeterminado
 
+assert not os.path.exists("centinela.onnx.data")
 sess = onnxruntime.InferenceSession("centinela.onnx")
+X = torch.randn(4, 3, 224, 224)            # otro tamaño de lote
+with torch.no_grad():
+    salida_torch = modelo(X).numpy()
 salida_onnx = sess.run(None, {"entrada": X.numpy()})[0]
 assert np.allclose(salida_torch, salida_onnx, atol=1e-4)`
                         }</CodeWindow>
@@ -1368,10 +1421,10 @@ assert np.allclose(salida_torch, salida_onnx, atol=1e-4)`
                 mcq: {
                     pregunta: '¿Qué es ONNX y para qué sirve en el despliegue?',
                     opciones: [
-                        { texto: 'Una técnica de entrenamiento que reemplaza a la retropropagación.', correcta: false, justificacion: 'ONNX no entrena modelos. Es un formato de serialización/intercambio que se usa después de entrenar, para mover y ejecutar el modelo en otros entornos.' },
-                        { texto: 'Un formato abierto e interoperable que permite entrenar en un framework y ejecutar en otro, en C++ o en móvil, sin reescribir el modelo.', correcta: true, justificacion: 'ONNX (Open Neural Network Exchange) actúa como "pasaporte": serializa el grafo del modelo en un estándar abierto que múltiples runtimes (onnxruntime, móvil, C++) reconocen, desacoplando el entrenamiento del despliegue.' },
-                        { texto: 'Una GPU especializada en inferencia de baja latencia.', correcta: false, justificacion: 'ONNX es software (un formato), no hardware. No es una GPU ni un acelerador; describe el modelo de forma portable.' },
-                        { texto: 'Un servicio en la nube que entrena modelos automáticamente.', correcta: false, justificacion: 'ONNX no es un servicio de entrenamiento gestionado. Es un formato estándar de intercambio de modelos ya entrenados.' },
+                        { texto: 'Un formato del ecosistema TensorFlow que solo puede ejecutarse con TF Serving.', correcta: false, justificacion: 'ONNX no pertenece a TensorFlow: es un estándar abierto (LF AI & Data) que ejecutan varios motores, como ONNX Runtime.' },
+                        { texto: 'Un servicio en la nube que entrena y despliega los modelos de forma automática.', correcta: false, justificacion: 'ONNX no es un servicio: es un formato de intercambio de modelos ya entrenados.' },
+                        { texto: 'Un formato abierto para ejecutar el modelo en otro motor, en C++ o en móvil.', correcta: true, justificacion: 'ONNX (Open Neural Network Exchange) actúa como «pasaporte»: serializa el grafo del modelo en un estándar abierto que varios motores (ONNX Runtime, móvil, C++) reconocen, sin reescribir el modelo.' },
+                        { texto: 'Una técnica de compresión que reduce los pesos a INT8 para correr en el borde.', correcta: false, justificacion: 'Eso es la cuantización, otra técnica; un modelo ONNX puede estar o no cuantizado.' },
                     ],
                 },
             },
@@ -1518,11 +1571,11 @@ assert np.allclose(salida_torch, salida_onnx, atol=1e-4)`
                         </div>
                     </div>
                     <h1 className="text-xl md:text-2xl font-extrabold">Microlearning · Módulo 3</h1>
-                    <p className="text-xs md:text-sm text-white/80 mt-0.5">5 cápsulas · ~ 23 min · Implementación y Herramientas Profesionales</p>
+                    <p className="text-xs md:text-sm text-white/80 mt-0.5">5 cápsulas · ≈ 23 min · Implementación y Herramientas Profesionales</p>
                     <div className="mt-4">
                         <div className="flex justify-between text-[0.7rem] font-semibold mb-1.5">
                             <span>{completedCount} / {total} cápsulas completadas</span>
-                            <span className="text-gold">{pct}%</span>
+                            <span className="text-gold">{pct} %</span>
                         </div>
                         <div className="flex gap-1.5">
                             {Array.from({ length: total }).map((_, i) => (
@@ -1624,7 +1677,7 @@ assert np.allclose(salida_torch, salida_onnx, atol=1e-4)`
                                 </div>
                             </div>
                             <h1 className="text-2xl md:text-3xl font-extrabold">¡Microlearning completado!</h1>
-                            <p className="text-sm text-white/80 mt-1">5 cápsulas · ~ 23 min · Implementación del Deep Learning</p>
+                            <p className="text-sm text-white/80 mt-1">5 cápsulas · ≈ 23 min · Implementación y Herramientas Profesionales</p>
                         </div>
                     </header>
                     <main className="max-w-3xl mx-auto px-4 md:px-6 py-10">
@@ -1637,7 +1690,7 @@ assert np.allclose(salida_torch, salida_onnx, atol=1e-4)`
                                     <h2 className="text-2xl md:text-3xl font-extrabold text-navy mt-4">¡Felicitaciones!</h2>
                                     <p className="text-gray-700 mt-2 leading-relaxed max-w-md mx-auto">
                                         Microlearning del Módulo 3 completado: las 5 cápsulas (frameworks, pipelines,
-                                        GPU y precisión mixta, Data Augmentation y <strong>exportación/despliegue</strong>)
+                                        GPU y precisión mixta, aumento de datos y <strong>exportación/despliegue</strong>)
                                         quedan repasadas, cubriendo la implementación profesional de extremo a extremo. Queda una
                                         base sólida para enfrentar el <strong>Proyecto Centinela · Fase 3</strong>.
                                     </p>
@@ -1645,12 +1698,12 @@ assert np.allclose(salida_torch, salida_onnx, atol=1e-4)`
                             ) : (
                                 <div className="mb-6">
                                     <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 text-primary text-4xl flex items-center justify-center mx-auto">
-                                        <span className="font-extrabold">{pct}%</span>
+                                        <span className="font-extrabold">{pct} %</span>
                                     </div>
-                                    <h2 className="text-2xl md:text-3xl font-extrabold text-navy mt-4">Progreso: {pct}%</h2>
+                                    <h2 className="text-2xl md:text-3xl font-extrabold text-navy mt-4">Progreso: {pct} %</h2>
                                     <p className="text-gray-700 mt-2 leading-relaxed max-w-md mx-auto">
-                                        Ha llegado al final del recorrido. Le recomendamos volver a las cápsulas
-                                        pendientes para reforzar los conceptos antes de la <strong>Fase 3</strong> del
+                                        El recorrido llegó al final. Conviene volver a las cápsulas pendientes para
+                                        reforzar los conceptos antes de la <strong>Fase 3</strong> del{' '}
                                         <strong>Proyecto Centinela</strong>.
                                     </p>
                                 </div>

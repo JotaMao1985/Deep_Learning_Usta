@@ -188,6 +188,12 @@
         /* MathJax (tex-svg) + Preflight de Tailwind (svg{display:block}) rompe la
            matematica inline: cada formula salta de linea. Se restaura el flujo inline. */
         mjx-container svg { display: inline-block; }
+
+        /* Los hijos de grid no se encogen por debajo de su contenido (min-width:auto):
+           se fuerza min-width:0 para que .eq y .codeblock desplacen dentro de la tarjeta (375 px). */
+        .grid > * { min-width: 0; }
+        /* A 375 px, la barra de la ventana de código pasa a dos líneas en vez de ocultar el botón «Copiar» */
+        .code-window-bar { flex-wrap: wrap; row-gap: .35rem; }
     </style>
 </head>
 
@@ -274,11 +280,11 @@
             <div class="grid md:grid-cols-2 gap-5">
                 <div class="card p-6">
                     <h3 class="font-bold text-primary mb-2">Propósito</h3>
-                    <p class="text-sm leading-relaxed text-slate-700">El ejercicio consiste en <strong>industrializar</strong> el sistema construido en las fases anteriores. En el rol de ingeniero de MLOps contratado por una entidad como <strong>AGROSAVIA</strong>, el estudiante construye un <em>pipeline</em> completo que aprovecha la GPU gratuita en la nube y prepara un despliegue que funcione <strong>offline en una tablet en campo</strong>, donde la conectividad es escasa. El escenario de referencia clasifica hojas de café (Sana vs. Roya), pero la lógica aplica al sistema propio del estudiante.</p>
+                    <p class="text-sm leading-relaxed text-slate-700">El ejercicio consiste en <strong>industrializar</strong> el sistema construido en las fases anteriores. En el rol de ingeniero de MLOps contratado por una entidad como <strong>AGROSAVIA</strong> (escenario hipotético), el estudiante construye un <em>pipeline</em> completo que aprovecha la GPU gratuita en la nube y prepara un despliegue que funcione <strong>offline en una tablet en campo</strong>, donde la conectividad es escasa. El escenario de referencia clasifica hojas de café (sana frente a roya), pero la lógica aplica al sistema propio del estudiante.</p>
                 </div>
                 <div class="card p-6">
                     <h3 class="font-bold text-primary mb-2">Competencias</h3>
-                    <p class="text-sm leading-relaxed text-slate-700 mb-4">Seleccionar y configurar el <em>framework</em> adecuado con criterios técnicos; implementar <em>pipelines</em> eficientes y <em>Data Augmentation</em> para maximizar el rendimiento de la GPU con recursos limitados, aplicando precisión mixta y <em>checkpointing</em>.</p>
+                    <p class="text-sm leading-relaxed text-slate-700 mb-4">Seleccionar y configurar el <em>framework</em> adecuado con criterios técnicos; implementar <em>pipelines</em> eficientes y aumento de datos (<em>data augmentation</em>) para maximizar el rendimiento de la GPU con recursos limitados, aplicando precisión mixta y <em>checkpointing</em>.</p>
                     <h3 class="font-bold text-primary mb-2">Resultados de aprendizaje (Módulo 3)</h3>
                     <ul class="text-sm text-slate-700 space-y-1.5 list-disc pl-5">
                         <li>Construye un <em>pipeline</em> optimizado con <em>prefetch</em>, <em>cache</em> y aumento, comparando <span class="icode">tf.data</span> y <span class="icode">DataLoader</span>.</li>
@@ -337,7 +343,7 @@
                 <div class="card p-5">
                     <div class="text-primary text-2xl mb-2"><i class="fas fa-recycle"></i></div>
                     <h3 class="font-bold text-navy mb-1">Se reutiliza el sistema de la Fase 2</h3>
-                    <p class="text-sm text-slate-600">No se cambia el problema ni las fuentes: se industrializa el modelo ya construido. El escenario de referencia usa <strong>RoCoLe</strong> (hojas de café, Sana vs. Roya).</p>
+                    <p class="text-sm text-slate-600">No se cambia el problema ni las fuentes: se industrializa el modelo ya construido. El escenario de referencia usa <strong>RoCoLe</strong> (hojas de café robusta; se trabaja sana frente a roya).</p>
                 </div>
                 <div class="card p-5">
                     <div class="text-secondary text-2xl mb-2"><i class="fas fa-folder-tree"></i></div>
@@ -351,7 +357,7 @@
                 </div>
             </div>
             <div class="callout callout-warn mt-5">
-                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i>El escenario de referencia <strong>AGROSAVIA</strong> exige que el modelo funcione <strong>offline en una tablet en campo</strong>, donde la conectividad es intermitente. Esa restricción guía todas las decisiones técnicas de la fase. Se mantiene la política del proyecto: <strong>datos no provenientes de Kaggle</strong>.</p>
+                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i>El escenario de referencia (una entidad como <strong>AGROSAVIA</strong>, hipotética) exige que el modelo funcione <strong>offline en una tablet en campo</strong>, donde la conectividad es intermitente. Esa restricción guía todas las decisiones técnicas de la fase. Se mantiene la política del proyecto: <strong>datos no provenientes de Kaggle</strong>.</p>
             </div>
         </section>
 
@@ -363,7 +369,7 @@
             <div class="flex gap-4 mb-8"><span class="step-num">1</span>
                 <div class="flex-1">
                     <h3 class="font-bold text-navy text-lg">Configuración del entorno GPU</h3>
-                    <p class="text-sm text-slate-600 mt-1">Creación de un cuaderno en Google Colab. Verificación de la GPU asignada con <span class="icode">torch.cuda.get_device_name()</span> y <span class="icode">nvidia-smi</span>, documentando el tipo, la VRAM y la cuota restante. Importación de TensorFlow/Keras y PyTorch en el mismo cuaderno, y organización de las imágenes en <span class="icode">train/val/test</span> por clases.</p>
+                    <p class="text-sm text-slate-600 mt-1">Creación de un cuaderno en Google Colab. Verificación de la GPU asignada con <span class="icode">torch.cuda.get_device_name()</span> y <span class="icode">nvidia-smi</span>, documentando el tipo, la VRAM y la cuota restante. Importación de TensorFlow/Keras y PyTorch en el mismo cuaderno (si la VRAM es limitada, conviene un cuaderno por <em>framework</em> o limitar la memoria de TensorFlow con <span class="icode">tf.config.experimental.set_memory_growth</span>; véase «Costo de VRAM» en el paso 6), y organización de las imágenes en <span class="icode">train/val/test</span> por clases.</p>
                 </div>
             </div>
 
@@ -427,14 +433,14 @@ loader = <span class="fn">DataLoader</span>(dataset, batch_size=32,        <span
                     prefetch_factor=2)</div>
             </div>
             <div class="callout callout-warn mt-3">
-                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i><strong>Buffer de <span class="icode">shuffle</span>.</strong> En <span class="icode">tf.data</span>, el tamaño del buffer de <span class="icode">.shuffle()</span> debe ser comparable al tamaño del dataset para un mezclado efectivo; un buffer pequeño solo baraja localmente. Si el dataset no cabe en memoria, conviene <strong>barajar a nivel de archivos</strong> (orden de los ficheros) antes de cargarlos.</p>
+                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i><strong>Búfer de barajado (<span class="icode">shuffle</span>).</strong> En <span class="icode">tf.data</span>, el tamaño del búfer de <span class="icode">.shuffle()</span> debe ser comparable al tamaño del conjunto de datos para un mezclado efectivo; un búfer pequeño solo baraja localmente. Si el conjunto de datos no cabe en memoria, conviene <strong>barajar a nivel de archivos</strong> (orden de los ficheros) antes de cargarlos.</p>
             </div>
 
             <!-- Paso 3 -->
             <div class="flex gap-4 mb-2 mt-8"><span class="step-num">3</span>
                 <div class="flex-1">
-                    <h3 class="font-bold text-navy text-lg">Data Augmentation</h3>
-                    <p class="text-sm text-slate-600 mt-1">Aplicación de al menos <strong>cuatro transformaciones</strong> (<span class="icode">RandomHorizontalFlip</span>, <span class="icode">ColorJitter</span>, <span class="icode">RandomRotation</span>, <span class="icode">RandomResizedCrop</span>), justificando cuáles convienen al problema y cuáles serían contraproducentes (por ejemplo, un <span class="icode">ColorJitter</span> excesivo que altere el tono amarillo-naranja característico de la roya y borre la señal diagnóstica). Como técnica avanzada se implementa <strong>Mixup</strong> o <strong>CutMix</strong>. Finalmente, se compara el <em>accuracy</em> de validación con y sin aumento tras diez épocas, mediante una comparación visual (grilla de 3×3) de imágenes originales frente a aumentadas.</p>
+                    <h3 class="font-bold text-navy text-lg">Aumento de datos (<em>data augmentation</em>)</h3>
+                    <p class="text-sm text-slate-600 mt-1">Aplicación de al menos <strong>cuatro transformaciones</strong> (<span class="icode">RandomHorizontalFlip</span>, <span class="icode">ColorJitter</span>, <span class="icode">RandomRotation</span>, <span class="icode">RandomResizedCrop</span>), justificando cuáles convienen al problema y cuáles serían contraproducentes (por ejemplo, un <span class="icode">ColorJitter</span> excesivo que altere el tono amarillo-naranja característico de la roya y borre la señal diagnóstica). Como técnica avanzada se implementa <strong>Mixup</strong> (Zhang et al., 2018) o <strong>CutMix</strong> (Yun et al., 2019). Finalmente, se compara la exactitud de validación con y sin aumento tras diez épocas, mediante una comparación visual (grilla de 3×3) de imágenes originales frente a aumentadas.</p>
                     <div class="callout callout-tip mt-3">
                         <p class="text-sm"><i class="fas fa-lightbulb text-emerald-600 mr-2"></i>El aumento de datos multiplica artificialmente el conjunto y reduce el sobreajuste, pero solo si las transformaciones <strong>respetan la semántica</strong> del problema: una transformación que cambia la etiqueta real hace más daño que bien.</p>
                     </div>
@@ -445,42 +451,42 @@ loader = <span class="fn">DataLoader</span>(dataset, batch_size=32,        <span
             <div class="flex gap-4 mb-2 mt-8"><span class="step-num">4</span>
                 <div class="flex-1">
                     <h3 class="font-bold text-navy text-lg">Entrenamiento acelerado con GPU</h3>
-                    <p class="text-sm text-slate-600 mt-1">Entrenamiento de un modelo <strong>ResNet-18</strong> preentrenado (<em>transfer learning</em>) con <strong>precisión mixta</strong>, monitoreando el consumo de VRAM antes y después de activar FP16 e implementando <em>checkpointing</em> cada cinco épocas.</p>
+                    <p class="text-sm text-slate-600 mt-1">Entrenamiento de un modelo <strong>ResNet-18</strong> preentrenado (transferencia de aprendizaje, <em>transfer learning</em>) con <strong>precisión mixta</strong>, monitoreando el consumo de VRAM antes y después de activar FP16 e implementando <em>checkpointing</em> cada cinco épocas.</p>
                 </div>
             </div>
             <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
                 <figure class="card p-5">
                     <svg viewBox="0 0 360 220" width="100%" role="img" aria-labelledby="fp16Title fp16Desc">
-                        <title id="fp16Title">VRAM y tiempo: FP32 vs FP16</title>
-                        <desc id="fp16Desc">Comparación de VRAM y tiempo por época entre precisión simple FP32 y precisión mixta FP16</desc>
+                        <title id="fp16Title">VRAM y tiempo: FP32 frente a precisión mixta FP16</title>
+                        <desc id="fp16Desc">Comparación ilustrativa de VRAM total y tiempo por época entre precisión simple FP32 y precisión mixta FP16: la VRAM total baja a cerca de dos tercios y el tiempo a cerca de dos tercios</desc>
                         <!-- ejes -->
                         <line x1="48" y1="30" x2="48" y2="178" stroke="#94A3B8" stroke-width="1.2"/>
                         <line x1="48" y1="178" x2="340" y2="178" stroke="#94A3B8" stroke-width="1.2"/>
                         <!-- grupo VRAM (etiquetas de valor en color de alto contraste; no se depende solo del color) -->
-                        <rect x="80"  y="48"  width="40" height="130" fill="#001A4D"/><text x="100" y="42" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B">100%</text>
-                        <rect x="128" y="113" width="40" height="65"  fill="#ED1E79"/><text x="148" y="107" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B">≈50%</text>
+                        <rect x="80"  y="48"  width="40" height="130" fill="#001A4D"/><text x="100" y="42" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B">100 %</text>
+                        <rect x="128" y="90"  width="40" height="88"  fill="#ED1E79"/><text x="148" y="84" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B">≈68 %</text>
                         <text x="124" y="196" text-anchor="middle" font-size="10" font-weight="600" fill="#475569">VRAM</text>
                         <!-- grupo tiempo -->
-                        <rect x="220" y="48"  width="40" height="130" fill="#001A4D"/><text x="240" y="42" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B">100%</text>
-                        <rect x="268" y="92"  width="40" height="86"  fill="#ED1E79"/><text x="288" y="86" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B">≈65%</text>
+                        <rect x="220" y="48"  width="40" height="130" fill="#001A4D"/><text x="240" y="42" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B">100 %</text>
+                        <rect x="268" y="92"  width="40" height="86"  fill="#ED1E79"/><text x="288" y="86" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B">≈65 %</text>
                         <text x="264" y="196" text-anchor="middle" font-size="10" font-weight="600" fill="#475569">Tiempo / época</text>
                         <!-- leyenda -->
                         <rect x="250" y="26" width="11" height="11" fill="#001A4D"/><text x="266" y="35" font-size="9" fill="#475569">FP32</text>
                         <rect x="302" y="26" width="11" height="11" fill="#ED1E79"/><text x="318" y="35" font-size="9" fill="#475569">FP16</text>
                     </svg>
-                    <figcaption>Figura 3. La precisión mixta (FP16) reduce el uso de VRAM a cerca de la mitad y acelera el entrenamiento al activar los Tensor Cores. Los valores son ilustrativos; cada estudiante reporta los suyos.</figcaption>
+                    <figcaption>Figura 3. La precisión mixta (FP16) reduce sobre todo la memoria de las activaciones y acelera el entrenamiento al activar los Tensor Cores. Como los pesos maestros, sus gradientes y los estados de Adam siguen en FP32, el ahorro total de VRAM es menor que la mitad: del orden de un tercio en una CNN mediana con lote 32 (≈32 % en ResNet-18). Los valores son ilustrativos; cada estudiante reporta los suyos.</figcaption>
                 </figure>
                 <div>
                     <p class="text-sm text-slate-700 mb-2">Al representar las <strong>activaciones</strong> con 16 bits en lugar de 32, la memoria de esos tensores se reduce a la mitad y el cómputo se acelera:</p>
                     <div class="eq mb-3">$$ \text{VRAM}_{16}^{\text{activaciones}} \approx \tfrac{1}{2}\,\text{VRAM}_{32}^{\text{activaciones}} \qquad \text{aceleración} = \dfrac{t_{32}}{t_{16}} $$</div>
                     <div class="callout callout-info mb-3">
-                        <p class="text-sm"><i class="fas fa-circle-info text-primary mr-2"></i><strong>Matiz importante.</strong> El ahorro de memoria se da sobre todo en las <strong>activaciones</strong>. El ahorro <strong>total</strong> es <em>menor</em> que la mitad porque la precisión mixta automática (AMP) mantiene una copia de los <strong>pesos maestros en FP32</strong> para la actualización del optimizador.</p>
+                        <p class="text-sm"><i class="fas fa-circle-info text-primary mr-2"></i><strong>Matiz importante.</strong> El ahorro de memoria se da sobre todo en las <strong>activaciones</strong>. El ahorro <strong>total</strong> es <em>menor</em> que la mitad porque la precisión mixta automática (AMP) mantiene los <strong>pesos maestros en FP32</strong>, con sus gradientes y los estados de Adam, para la actualización del optimizador: del orden de un tercio en una CNN mediana con lote 32 (≈32 % en ResNet-18 y ≈40 % en ResNet-50), y se acerca a la mitad solo cuando las activaciones dominan la memoria (Micikevicius et al., 2018).</p>
                     </div>
                     <div class="callout callout-tip mb-3">
-                        <p class="text-sm"><i class="fas fa-microchip text-emerald-600 mr-2"></i><strong>FP16 vs bfloat16.</strong> En GPUs Ampere o superiores (L4/A100) suele preferirse <strong>bfloat16</strong> (mayor rango, sin necesidad de <span class="icode">GradScaler</span>); en la <strong>T4</strong> se usa <strong>float16</strong> con escalado de pérdida.</p>
+                        <p class="text-sm"><i class="fas fa-microchip text-emerald-600 mr-2"></i><strong>FP16 frente a bfloat16.</strong> En GPU Ampere o superiores (L4/A100) suele preferirse <strong>bfloat16</strong> (mayor rango, sin necesidad de <span class="icode">GradScaler</span>); en la <strong>T4</strong> se usa <strong>float16</strong> con escalado de pérdida.</p>
                     </div>
                     <div class="callout callout-warn">
-                        <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i><strong>Desafío.</strong> Conviene comparar el tiempo por época con y sin precisión mixta y graficar las curvas de pérdida. Si aparece un error de memoria (<strong>CUDA OOM</strong>), se documenta la solución aplicada (reducir el tamaño de lote, <em>gradient checkpointing</em>, etc.).</p>
+                        <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i><strong>Desafío.</strong> Conviene comparar el tiempo por época con y sin precisión mixta y graficar las curvas de pérdida. Si aparece un error de memoria (<strong>CUDA OOM</strong>), se documenta la solución aplicada (reducir el tamaño de lote, <em>gradient checkpointing</em> o recálculo de activaciones, etc.).</p>
                     </div>
                 </div>
             </div>
@@ -492,12 +498,12 @@ loader = <span class="fn">DataLoader</span>(dataset, batch_size=32,        <span
                     <button class="code-copy" type="button" aria-label="Copiar código" title="Copiar"><i class="fas fa-copy"></i></button>
                 </div>
                 <div class="codeblock"><span class="cm"># Entrenamiento con precisión mixta (PyTorch AMP)</span>
-scaler = torch.amp.<span class="fn">GradScaler</span>()
+scaler = torch.amp.<span class="fn">GradScaler</span>(<span class="st">"cuda"</span>)
 <span class="kw">for</span> X, y <span class="kw">in</span> loader:
     optim.<span class="fn">zero_grad</span>()
     <span class="kw">with</span> torch.<span class="fn">autocast</span>(<span class="st">"cuda"</span>, dtype=torch.float16):   <span class="cm"># cómputo en FP16</span>
         perdida = <span class="fn">criterio</span>(<span class="fn">modelo</span>(X), y)
-    scaler.<span class="fn">scale</span>(perdida).<span class="fn">backward</span>()        <span class="cm"># escala para evitar underflow</span>
+    scaler.<span class="fn">scale</span>(perdida).<span class="fn">backward</span>()        <span class="cm"># escala la pérdida: evita el subdesbordamiento (underflow)</span>
     scaler.<span class="fn">step</span>(optim); scaler.<span class="fn">update</span>()</div>
             </div>
 
@@ -505,7 +511,7 @@ scaler = torch.amp.<span class="fn">GradScaler</span>()
             <div id="edge" class="flex gap-4 mb-2 mt-8"><span class="step-num">5</span>
                 <div class="flex-1">
                     <h3 class="font-bold text-navy text-lg">Optimización para el borde (Edge)</h3>
-                    <p class="text-sm text-slate-600 mt-1">Antes de llevar la <strong>rama visual</strong> a la tablet, se aplica al menos una técnica de compresión —<strong>cuantización</strong> (por ejemplo, post-entrenamiento a INT8, la vía más directa para LiteRT), <strong>poda</strong> de pesos de baja magnitud o <strong>destilación</strong> hacia un modelo más pequeño— y se mide el efecto. Esto es lo que hace viable ejecutar el modelo <strong>offline</strong> en un dispositivo de recursos limitados, y es el puente natural entre el entrenamiento en GPU y el despliegue con LiteRT.</p>
+                    <p class="text-sm text-slate-600 mt-1">Antes de llevar la <strong>rama visual</strong> a la tablet, se aplica al menos una técnica de compresión —<strong>cuantización</strong> (por ejemplo, cuantización tras el entrenamiento a INT8, la vía más directa para LiteRT), <strong>poda</strong> de pesos de baja magnitud o <strong>destilación</strong> hacia un modelo más pequeño— y se mide el efecto. Esto es lo que hace viable ejecutar el modelo <strong>offline</strong> en un dispositivo de recursos limitados, y es el paso natural entre el entrenamiento en GPU y el despliegue con LiteRT.</p>
                 </div>
             </div>
             <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
@@ -532,7 +538,7 @@ scaler = torch.amp.<span class="fn">GradScaler</span>()
                         <rect x="150" y="196" width="11" height="11" fill="#001A4D"/><text x="166" y="205" font-size="9" fill="#475569">Antes (FP32)</text>
                         <rect x="248" y="196" width="11" height="11" fill="#0E9F6E"/><text x="264" y="205" font-size="9" fill="#475569">Después (INT8)</text>
                     </svg>
-                    <figcaption>Figura 4. Efecto de la cuantización sobre la rama visual: el tamaño y la latencia caen con fuerza y la exactitud (<em>accuracy</em>) apenas baja. Los valores son ilustrativos; cada estudiante reporta los suyos.</figcaption>
+                    <figcaption>Figura 4. Efecto de la cuantización sobre la rama visual: el tamaño y la latencia caen con fuerza y la exactitud apenas baja. Los valores son ilustrativos; cada estudiante reporta los suyos.</figcaption>
                 </figure>
                 <div>
                     <p class="text-sm text-slate-700 mb-3">El entregable es una <strong>tabla comparativa antes/después</strong> con tres métricas mínimas:</p>
@@ -541,11 +547,11 @@ scaler = torch.amp.<span class="fn">GradScaler</span>()
                         <tbody>
                             <tr><td>Tamaño del modelo (MB)</td><td>—</td><td>—</td></tr>
                             <tr><td>Latencia de inferencia (ms/imagen)</td><td>—</td><td>—</td></tr>
-                            <tr><td>Exactitud (accuracy/F1 en test)</td><td>—</td><td>—</td></tr>
+                            <tr><td>Exactitud o F1 en prueba</td><td>—</td><td>—</td></tr>
                         </tbody>
                     </table>
                     <div class="callout callout-tip">
-                        <p class="text-sm"><i class="fas fa-scale-balanced text-emerald-600 mr-2"></i><strong>Trade-off.</strong> La clave está en justificar cuánta precisión se sacrifica a cambio de cuánto tamaño y latencia se ganan, y si el resultado es aceptable para el uso offline en campo.</p>
+                        <p class="text-sm"><i class="fas fa-scale-balanced text-emerald-600 mr-2"></i><strong>Compromiso (<em>trade-off</em>).</strong> La clave está en justificar cuánta exactitud se sacrifica a cambio de cuánto tamaño y latencia se ganan, y si el resultado es aceptable para el uso offline en campo.</p>
                     </div>
                 </div>
             </div>
@@ -554,14 +560,14 @@ scaler = torch.amp.<span class="fn">GradScaler</span>()
             <div class="flex gap-4 mb-2 mt-8"><span class="step-num">6</span>
                 <div class="flex-1">
                     <h3 class="font-bold text-navy text-lg">Guardado, exportación y ruta de despliegue</h3>
-                    <p class="text-sm text-slate-600 mt-1">Guardado del modelo en al menos dos formatos estándar, verificando que cada archivo se carga y produce <strong>predicciones consistentes</strong>. Conviene tener claro que <span class="icode">.pth</span> sale del modelo <strong>PyTorch</strong> y <span class="icode">.keras</span> del modelo <strong>Keras</strong>: son <strong>dos implementaciones equivalentes</strong>, no el mismo objeto serializado en dos archivos. La alternativa limpia es usar <strong>un solo framework</strong> y <strong>ONNX como puente portable</strong>. Después se documenta una <strong>ruta de despliegue</strong> para el escenario AGROSAVIA: la <strong>rama visual</strong> corre con <strong>LiteRT offline</strong> en la tablet y la <strong>rama temporal</strong> se sirve por <strong>API REST en la nube</strong>.</p>
+                    <p class="text-sm text-slate-600 mt-1">Guardado del modelo en al menos dos formatos estándar, verificando que cada archivo se carga y produce <strong>predicciones consistentes</strong>. Conviene tener claro que <span class="icode">.pth</span> sale del modelo <strong>PyTorch</strong> y <span class="icode">.keras</span> del modelo <strong>Keras</strong>: son <strong>dos implementaciones equivalentes</strong>, no el mismo objeto serializado en dos archivos. La alternativa limpia es usar <strong>un solo <em>framework</em></strong> y <strong>ONNX como pasaporte portable</strong>. Después se documenta una <strong>ruta de despliegue</strong> para el escenario de referencia: la <strong>rama visual</strong> corre con <strong>LiteRT offline</strong> en la tablet y la <strong>rama temporal</strong> se sirve por <strong>API REST en la nube</strong>.</p>
                 </div>
             </div>
             <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
                 <figure class="card p-5">
                     <svg viewBox="0 0 380 250" width="100%" role="img" aria-labelledby="deployTitle deployDesc">
                         <title id="deployTitle">Exportación y despliegue dual</title>
-                        <desc id="deployDesc">Dos implementaciones equivalentes (PyTorch y Keras) producen cada una su propio formato; ONNX actúa como puente portable hacia el despliegue en la nube y en una tablet offline</desc>
+                        <desc id="deployDesc">Dos implementaciones equivalentes (PyTorch y Keras) producen cada una su propio formato; ONNX actúa como pasaporte portable hacia el despliegue en la nube y en una tablet offline</desc>
                         <defs>
                             <marker id="arrowDep" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
                                 <path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/>
@@ -578,7 +584,7 @@ scaler = torch.amp.<span class="fn">GradScaler</span>()
                         <!-- formatos propios -->
                         <rect x="140" y="48"  width="104" height="34" rx="8" fill="#0F172A"/><text x="192" y="69" text-anchor="middle" font-size="10" fill="#fff">.pth</text>
                         <rect x="140" y="154" width="104" height="34" rx="8" fill="#0F172A"/><text x="192" y="175" text-anchor="middle" font-size="10" fill="#fff">.keras</text>
-                        <rect x="140" y="101" width="104" height="34" rx="8" fill="#3D008D"/><text x="192" y="122" text-anchor="middle" font-size="10" fill="#fff">ONNX (puente)</text>
+                        <rect x="140" y="101" width="104" height="34" rx="8" fill="#3D008D"/><text x="192" y="122" text-anchor="middle" font-size="10" fill="#fff">ONNX (pasaporte)</text>
                         <line x1="104" y1="66"  x2="136" y2="66"  stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
                         <line x1="104" y1="170" x2="136" y2="170" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
                         <line x1="104" y1="74"  x2="136" y2="112" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
@@ -593,14 +599,14 @@ scaler = torch.amp.<span class="fn">GradScaler</span>()
                         <line x1="244" y1="115" x2="284" y2="80"  stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
                         <line x1="244" y1="120" x2="284" y2="170" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
                     </svg>
-                    <figcaption>Figura 5. <span class="icode">.pth</span> y <span class="icode">.keras</span> provienen de <strong>dos implementaciones equivalentes</strong>, no del mismo objeto. ONNX es el puente portable. La rama visual se despliega offline con LiteRT y la temporal por API REST en la nube. (La conversión a LiteRT puede partir directamente del modelo Keras/TF, sin pasar necesariamente por ONNX.)</figcaption>
+                    <figcaption>Figura 5. <span class="icode">.pth</span> y <span class="icode">.keras</span> provienen de <strong>dos implementaciones equivalentes</strong>, no del mismo objeto. ONNX es el pasaporte portable. La rama visual se despliega offline con LiteRT y la temporal por API REST en la nube. (La conversión a LiteRT puede partir directamente del modelo Keras/TF, sin pasar necesariamente por ONNX.)</figcaption>
                 </figure>
                 <div>
                     <div class="callout callout-eth mb-4">
                         <p class="text-sm"><i class="fas fa-scale-balanced text-teal-600 mr-2"></i><strong>Despliegue responsable.</strong> La ruta de despliegue explicita los principios de <strong>Transparencia</strong> y <strong>Beneficio Social</strong> y propone mitigaciones concretas para los <strong>falsos positivos y negativos</strong> en producción: un sistema que se equivoca en campo afecta decisiones reales del agricultor.</p>
                     </div>
                     <div class="callout callout-warn mb-4">
-                        <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i><strong>Costo de VRAM.</strong> Cargar <strong>TensorFlow y PyTorch en el mismo runtime</strong> consume memoria de ambos y puede precipitar un CUDA OOM. Si solo se necesita exportar, conviene mantener un único framework activo y usar ONNX como puente.</p>
+                        <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i><strong>Costo de VRAM.</strong> Cargar <strong>TensorFlow y PyTorch en el mismo runtime</strong> consume memoria de ambos y puede precipitar un CUDA OOM. Si solo se necesita exportar, conviene mantener un único <em>framework</em> activo y usar ONNX como pasaporte.</p>
                     </div>
                     <p class="text-sm text-slate-700">La verificación de <strong>consistencia de predicciones</strong> entre formatos es imprescindible: un modelo que predice distinto tras exportarse no es desplegable. Esa comprobación cierra el ciclo de vida del proyecto.</p>
                 </div>
@@ -612,21 +618,29 @@ scaler = torch.amp.<span class="fn">GradScaler</span>()
                     <span class="code-window-lang">Python · PyTorch</span>
                     <button class="code-copy" type="button" aria-label="Copiar código" title="Copiar"><i class="fas fa-copy"></i></button>
                 </div>
-                <div class="codeblock"><span class="cm"># Exportación a ONNX — ruta estable y verificación de consistencia</span>
+                <div class="codeblock"><span class="cm"># Exportación a ONNX — ruta estable del curso (un único archivo .onnx) y verificación</span>
+<span class="cm"># En Colab: !pip -q install onnx onnxscript onnxruntime</span>
 modelo.<span class="fn">eval</span>()                                       <span class="cm"># 1 · modo evaluación antes de exportar</span>
-torch.onnx.<span class="fn">export</span>(                                  <span class="cm"># 2 · ruta estable</span>
-    modelo, X, <span class="st">"centinela.onnx"</span>,
+x = torch.<span class="fn">randn</span>(<span class="st">2</span>, <span class="st">3</span>, <span class="st">224</span>, <span class="st">224</span>)                 <span class="cm"># lote 2: evita fijar el lote en 1</span>
+lote = torch.export.<span class="fn">Dim</span>(<span class="st">"lote"</span>)
+torch.onnx.<span class="fn">export</span>(modelo, (x,), <span class="st">"centinela.onnx"</span>,    <span class="cm"># 2 · exportador basado en torch.export</span>
     input_names=[<span class="st">"entrada"</span>], output_names=[<span class="st">"salida"</span>],
-    dynamic_axes={<span class="st">"entrada"</span>: {<span class="st">0</span>: <span class="st">"lote"</span>}, <span class="st">"salida"</span>: {<span class="st">0</span>: <span class="st">"lote"</span>}})
-<span class="cm"># Opción: dynamo=True solo si tu versión de PyTorch lo soporta (no es la única vía).</span>
+    dynamic_shapes=({<span class="st">0</span>: lote},),                   <span class="cm"># tupla: no depende del nombre del argumento de forward()</span>
+    external_data=<span class="kw">False</span>)                             <span class="cm"># un solo archivo (&lt; 2 GB); dynamo=True ya es el predeterminado</span>
 
-<span class="cm"># 3 · verificación con onnxruntime</span>
+<span class="cm"># 3 · verificación: un solo archivo, modelo válido y mismas predicciones</span>
+<span class="kw">assert not</span> os.path.<span class="fn">exists</span>(<span class="st">"centinela.onnx.data"</span>)
+onnx.checker.<span class="fn">check_model</span>(<span class="st">"centinela.onnx"</span>)
 sess = onnxruntime.<span class="fn">InferenceSession</span>(<span class="st">"centinela.onnx"</span>)
-salida_onnx = sess.<span class="fn">run</span>(<span class="kw">None</span>, {<span class="st">"entrada"</span>: X.<span class="fn">numpy</span>()})[<span class="st">0</span>]
-<span class="kw">assert</span> np.<span class="fn">allclose</span>(salida_torch, salida_onnx, atol=<span class="st">1e-4</span>)</div>
+<span class="kw">for</span> n <span class="kw">in</span> (<span class="st">1</span>, <span class="st">4</span>):                                    <span class="cm"># lotes distintos del de ejemplo</span>
+    X = torch.<span class="fn">randn</span>(n, <span class="st">3</span>, <span class="st">224</span>, <span class="st">224</span>)
+    <span class="kw">with</span> torch.<span class="fn">no_grad</span>():
+        salida_torch = <span class="fn">modelo</span>(X).<span class="fn">numpy</span>()
+    salida_onnx = sess.<span class="fn">run</span>(<span class="kw">None</span>, {<span class="st">"entrada"</span>: X.<span class="fn">numpy</span>()})[<span class="st">0</span>]
+    <span class="kw">assert</span> np.<span class="fn">allclose</span>(salida_torch, salida_onnx, atol=<span class="st">1e-4</span>)</div>
             </div>
             <div class="callout callout-tip mt-3">
-                <p class="text-sm"><i class="fas fa-robot text-emerald-600 mr-2"></i><strong>Caso de auditoría a la IA.</strong> Si la herramienta propone <span class="icode">dynamo=True</span> como única vía y falla en una versión que no lo soporta, corregir hacia la ruta estable (<span class="icode">torch.onnx.export</span> con <span class="icode">input_names</span>/<span class="icode">output_names</span>/<span class="icode">dynamic_axes</span>) es un buen caso de auditoría documentada.</p>
+                <p class="text-sm"><i class="fas fa-robot text-emerald-600 mr-2"></i><strong>Caso de auditoría a la IA.</strong> Desde PyTorch 2.9, <span class="icode">dynamo=True</span> es el valor por defecto de <span class="icode">torch.onnx.export</span> y, sin <span class="icode">external_data=False</span>, escribe además <span class="icode">centinela.onnx.data</span> con los pesos. Si la herramienta afirma que <span class="icode">dynamo=True</span> es la única vía, propone el exportador heredado (<span class="icode">dynamo=False</span>, basado en TorchScript) como «ruta estable» o entrega el <span class="icode">.onnx</span> sin su <span class="icode">.onnx.data</span>, corregirlo y documentarlo es un buen caso de auditoría. El exportador heredado queda solo como plan B si en el entorno falta <span class="icode">onnxscript</span> y no hay red; al ejecutarse avisa de que ya no es el predeterminado.</p>
             </div>
         </section>
 
@@ -686,7 +700,7 @@ salida_onnx = sess.<span class="fn">run</span>(<span class="kw">None</span>, {<s
             <!-- ✅ Antes de entregar — checklist explícito y sin ambigüedad -->
             <div class="card p-6 mt-6 border-l-4" style="border-color:#0E9F6E">
                 <h3 class="font-bold text-primary mb-1 text-lg"><i class="fas fa-clipboard-check text-emerald-600 mr-2"></i>✅ Antes de entregar</h3>
-                <p class="text-sm text-slate-600 mb-4">Revisa que tu envío cumpla <strong>todos</strong> estos puntos. Sin todos los entregables la actividad puede quedar incompleta (Nivel Nulo = sin entrega).</p>
+                <p class="text-sm text-slate-600 mb-4">Antes de entregar, conviene verificar que el envío cumpla <strong>todos</strong> estos puntos. Sin todos los entregables la actividad puede quedar incompleta (Nivel Nulo = sin entrega).</p>
                 <ul class="space-y-3 text-sm text-slate-700">
                     <li class="flex gap-3">
                         <i class="fas fa-square-check text-emerald-500 mt-0.5"></i>
@@ -859,7 +873,7 @@ salida_onnx = sess.<span class="fn">run</span>(<span class="kw">None</span>, {<s
         <!-- ====================== AUTOEVALUACIÓN ====================== -->
         <section id="autoevaluacion" class="reveal">
             <h2 class="sec-title text-2xl md:text-3xl text-navy mb-3"><i class="fas fa-calculator text-secondary mr-2"></i>Calculadora de autoevaluación</h2>
-            <p class="text-slate-600 mb-4 max-w-3xl">Selecciona, con honestidad, el nivel que mejor describe tu entregable en cada criterio. La nota estimada se calcula <strong>en vivo</strong> con los pesos de la rúbrica oficial. Úsala para detectar qué mejorar antes de entregar.</p>
+            <p class="text-slate-600 mb-4 max-w-3xl">El ejercicio consiste en seleccionar, con honestidad, el nivel que mejor describe el entregable en cada criterio. La nota estimada se calcula <strong>en vivo</strong> con los pesos de la rúbrica oficial y orienta qué mejorar antes de entregar.</p>
 
             <div class="callout callout-warn mb-6">
                 <p class="text-sm"><i class="fas fa-circle-info text-amber-500 mr-2"></i><strong>Herramienta orientativa.</strong> Esta autoevaluación se basa en la rúbrica oficial, pero <strong>la calificación definitiva la asigna el docente</strong>; no reemplaza la sustentación ni la revisión del entregable.</p>
@@ -879,7 +893,7 @@ salida_onnx = sess.<span class="fn">run</span>(<span class="kw">None</span>, {<s
                         </div>
                         <div class="mt-3 flex flex-col items-center gap-2">
                             <span id="ae-banda" class="rounded-full px-4 py-1 text-sm font-bold">—</span>
-                            <span id="ae-estado" class="text-sm font-semibold" role="status" aria-live="polite">Selecciona un nivel en cada criterio</span>
+                            <span id="ae-estado" class="text-sm font-semibold" role="status" aria-live="polite">Falta seleccionar un nivel en cada criterio</span>
                         </div>
                         <button id="ae-reset" type="button" class="mt-5 w-full rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
                             <i class="fas fa-rotate-left mr-1.5"></i>Reiniciar
@@ -908,17 +922,22 @@ salida_onnx = sess.<span class="fn">run</span>(<span class="kw">None</span>, {<s
                 <table class="tbl" style="min-width:680px">
                     <thead><tr style="background:#3D008D"><th style="width:34%">Referencia (APA 7)</th><th>Aporte a la fase</th><th style="width:18%">Enlace</th></tr></thead>
                     <tbody>
-                        <tr><td>TensorFlow Authors. (2023). <em>Better performance with the tf.data API</em>.</td><td>Optimización del pipeline: <em>cache</em>, <em>prefetch</em> y paralelismo.</td><td><a href="https://www.tensorflow.org/guide/data_performance" target="_blank" rel="noopener" style="color:#ED1E79">tensorflow.org</a></td></tr>
-                        <tr><td>PyTorch Foundation. (2024). <em>Data Loading and Processing Tutorial</em>.</td><td>Construcción del <span class="icode">DataLoader</span> con <em>workers</em> y <em>pin_memory</em>.</td><td><a href="https://pytorch.org/tutorials/beginner/data_loading_tutorial.html" target="_blank" rel="noopener" style="color:#ED1E79">pytorch.org</a></td></tr>
-                        <tr><td>Micikevicius, P., et al. (2018). Mixed precision training. <em>ICLR</em>.</td><td>Fundamento de la precisión mixta (FP16) y el escalado de la pérdida.</td><td><a href="https://arxiv.org/abs/1710.03740" target="_blank" rel="noopener" style="color:#ED1E79">arXiv</a></td></tr>
-                        <tr><td>PyTorch Foundation. (2025). <em>torch.export documentation</em>.</td><td>Exportación del modelo a representaciones portables (ONNX/IR).</td><td><a href="https://docs.pytorch.org/docs/stable/export.html" target="_blank" rel="noopener" style="color:#ED1E79">docs.pytorch.org</a></td></tr>
-                        <tr><td>Google AI Edge. (2024). <em>LiteRT (antes TensorFlow Lite) overview</em>.</td><td>Ejecución del modelo offline en dispositivos móviles.</td><td><a href="https://ai.google.dev/edge/litert" target="_blank" rel="noopener" style="color:#ED1E79">ai.google.dev</a></td></tr>
-                        <tr><td>He, K., Zhang, X., Ren, S., &amp; Sun, J. (2016). Deep residual learning for image recognition. <em>CVPR</em>.</td><td>ResNet-18, el modelo entrenado con <em>transfer learning</em>.</td><td><a href="https://arxiv.org/abs/1512.03385" target="_blank" rel="noopener" style="color:#ED1E79">arXiv</a></td></tr>
-                        <tr><td>Parraga-Alava, J., et al. (2019). <em>RoCoLe: A robusta coffee leaf images dataset</em>. Mendeley Data.</td><td>Dataset del escenario de referencia (hojas de café).</td><td><a href="https://data.mendeley.com/datasets/c5yvn32dzg/2" target="_blank" rel="noopener" style="color:#ED1E79">Mendeley</a></td></tr>
+                        <tr><td>TensorFlow. (s. f.). <em>Better performance with the tf.data API</em>. https://www.tensorflow.org/guide/data_performance</td><td>Optimización del <em>pipeline</em>: <em>cache</em>, <em>prefetch</em> y paralelismo.</td><td><a href="https://www.tensorflow.org/guide/data_performance" target="_blank" rel="noopener" style="color:#ED1E79">tensorflow.org</a></td></tr>
+                        <tr><td>Murray, D. G., Šimša, J., Klimovic, A. y Indyk, I. (2021). tf.data: A machine learning data processing framework. <em>Proceedings of the VLDB Endowment</em>, <em>14</em>(12), 2945–2958. https://doi.org/10.14778/3476311.3476374</td><td>Diseño de <span class="icode">tf.data</span> y por qué el <em>prefetch</em> evita que la GPU espere.</td><td><a href="https://doi.org/10.14778/3476311.3476374" target="_blank" rel="noopener" style="color:#ED1E79">doi.org/10.14778/3476311.3476374</a></td></tr>
+                        <tr><td>PyTorch Foundation. (s. f.). <em>Writing custom datasets, DataLoaders and transforms</em>. https://pytorch.org/tutorials/beginner/data_loading_tutorial.html</td><td>Construcción del <span class="icode">DataLoader</span> con procesos de carga (<em>workers</em>) y <span class="icode">pin_memory</span>.</td><td><a href="https://pytorch.org/tutorials/beginner/data_loading_tutorial.html" target="_blank" rel="noopener" style="color:#ED1E79">pytorch.org</a></td></tr>
+                        <tr><td>Zhang, H., Cisse, M., Dauphin, Y. N. y Lopez-Paz, D. (2018). mixup: Beyond empirical risk minimization. En <em>6th International Conference on Learning Representations (ICLR 2018)</em>. https://arxiv.org/abs/1710.09412</td><td>Mixup: mezcla de dos imágenes y de sus etiquetas (paso 3).</td><td><a href="https://arxiv.org/abs/1710.09412" target="_blank" rel="noopener" style="color:#ED1E79">arXiv</a></td></tr>
+                        <tr><td>Yun, S., Han, D., Chun, S., Oh, S. J., Yoo, Y. y Choe, J. (2019). CutMix: Regularization strategy to train strong classifiers with localizable features. En <em>2019 IEEE/CVF International Conference on Computer Vision (ICCV)</em> (pp. 6022–6031). IEEE. https://doi.org/10.1109/ICCV.2019.00612</td><td>CutMix: recorte y pegado de regiones con etiquetas proporcionales al área (paso 3).</td><td><a href="https://doi.org/10.1109/ICCV.2019.00612" target="_blank" rel="noopener" style="color:#ED1E79">doi.org/10.1109/ICCV.2019.00612</a></td></tr>
+                        <tr><td>Micikevicius, P., Narang, S., Alben, J., Diamos, G., Elsen, E., Garcia, D., Ginsburg, B., Houston, M., Kuchaiev, O., Venkatesh, G. y Wu, H. (2018). Mixed precision training. En <em>6th International Conference on Learning Representations (ICLR 2018)</em>. https://arxiv.org/abs/1710.03740</td><td>Fundamento de la precisión mixta (FP16), los pesos maestros en FP32 y el escalado de la pérdida.</td><td><a href="https://arxiv.org/abs/1710.03740" target="_blank" rel="noopener" style="color:#ED1E79">arXiv</a></td></tr>
+                        <tr><td>Jacob, B., Kligys, S., Chen, B., Zhu, M., Tang, M., Howard, A., Adam, H. y Kalenichenko, D. (2018). Quantization and training of neural networks for efficient integer-arithmetic-only inference. En <em>2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition</em> (pp. 2704–2713). IEEE. https://doi.org/10.1109/CVPR.2018.00286</td><td>Cuantización a INT8 para la inferencia en el borde (paso 5).</td><td><a href="https://doi.org/10.1109/CVPR.2018.00286" target="_blank" rel="noopener" style="color:#ED1E79">doi.org/10.1109/CVPR.2018.00286</a></td></tr>
+                        <tr><td>PyTorch Foundation. (s. f.). <em>torch.export</em>. https://docs.pytorch.org/docs/stable/export.html</td><td>Captura del grafo con <span class="icode">torch.export</span>, base del exportador ONNX predeterminado desde PyTorch 2.9.</td><td><a href="https://docs.pytorch.org/docs/stable/export.html" target="_blank" rel="noopener" style="color:#ED1E79">docs.pytorch.org</a></td></tr>
+                        <tr><td>Google AI Edge. (s. f.). <em>LiteRT overview</em>. https://ai.google.dev/edge/litert</td><td>Ejecución del modelo <em>offline</em> en dispositivos móviles (LiteRT, antes TensorFlow Lite).</td><td><a href="https://ai.google.dev/edge/litert" target="_blank" rel="noopener" style="color:#ED1E79">ai.google.dev</a></td></tr>
+                        <tr><td>He, K., Zhang, X., Ren, S. y Sun, J. (2016). Deep residual learning for image recognition. En <em>Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)</em> (pp. 770–778). IEEE. https://doi.org/10.1109/CVPR.2016.90</td><td>ResNet-18, el modelo entrenado por transferencia de aprendizaje.</td><td><a href="https://doi.org/10.1109/CVPR.2016.90" target="_blank" rel="noopener" style="color:#ED1E79">doi.org/10.1109/CVPR.2016.90</a></td></tr>
+                        <tr><td>Parraga-Alava, J., Cusme, K., Loor, A. y Santander, E. (2019). <em>RoCoLe: A robusta coffee leaf images dataset</em> (Versión 2) [Conjunto de datos]. Mendeley Data. https://doi.org/10.17632/c5yvn32dzg.2</td><td>Conjunto de datos del escenario de referencia (hojas de café).</td><td><a href="https://doi.org/10.17632/c5yvn32dzg.2" target="_blank" rel="noopener" style="color:#ED1E79">Mendeley Data</a></td></tr>
                     </tbody>
                 </table>
             </div>
             <p class="text-xs text-slate-500 mt-3">Documentación oficial sugerida: <a href="https://www.tensorflow.org/guide/data_performance" target="_blank" rel="noopener" style="color:#ED1E79">tf.data · rendimiento</a> · <a href="https://docs.pytorch.org/docs/stable/notes/amp_examples.html" target="_blank" rel="noopener" style="color:#ED1E79">PyTorch · AMP</a> · <a href="https://onnxruntime.ai/" target="_blank" rel="noopener" style="color:#ED1E79">ONNX Runtime</a>.</p>
+            <p class="text-xs text-slate-500 mt-2">Material del curso: <a href="03_Modulo_3_Implementacion_Deep_Learning.html" style="color:#ED1E79">material principal del Módulo 3</a> · <a href="030_ruta-aprendizaje-modulo-3.html" style="color:#ED1E79">ruta de aprendizaje del Módulo 3</a> · <a href="https://colab.research.google.com/github/JotaMao1985/Deep_Learning_Usta/blob/main/notebooks/07-scaffold-centinela-fase3.ipynb" target="_blank" rel="noopener" style="color:#ED1E79">notebook de andamiaje de la Fase 3 (Colab)</a> · <a href="https://colab.research.google.com/github/JotaMao1985/Deep_Learning_Usta/blob/main/notebooks/06-lab-implementacion-modulo-3.ipynb" target="_blank" rel="noopener" style="color:#ED1E79">laboratorio de implementación del Módulo 3 (Colab)</a>.</p>
         </section>
 
         <!-- ====================== RELACIONADO ====================== -->
@@ -930,10 +949,10 @@ salida_onnx = sess.<span class="fn">run</span>(<span class="kw">None</span>, {<s
                         <p class="font-bold mb-1">Documento maestro</p>
                         <p class="text-white/85">Proyecto Integrador: Centinela — define las tres fases, la política de datos y la integridad de IA.</p>
                     </div>
-                    <div class="bg-white/10 rounded-xl p-4">
-                        <p class="font-bold mb-1">Fase anterior</p>
+                    <a href="21_Modulo_2_Actividad_Fase2_Centinela.html" class="bg-white/10 hover:bg-white/20 transition rounded-xl p-4 block">
+                        <p class="font-bold mb-1"><i class="fas fa-arrow-left mr-1 text-xs"></i> Fase anterior</p>
                         <p class="text-white/85">Fase 2 (Módulo 2): el sistema multimodal con CNN, RNN y fusión que aquí se industrializa.</p>
-                    </div>
+                    </a>
                     <div class="bg-white/10 rounded-xl p-4">
                         <p class="font-bold mb-1">Cierre del proyecto</p>
                         <p class="text-white/85">Esta es la última fase: el sistema queda entrenado, exportado y listo para desplegarse offline en campo.</p>
@@ -949,7 +968,7 @@ salida_onnx = sess.<span class="fn">run</span>(<span class="kw">None</span>, {<s
         <div class="max-w-6xl mx-auto px-5 md:px-8 py-8">
             <p class="font-bold text-white mb-1">Universidad Santo Tomás · Maestría en Ciencia de Datos</p>
             <p>Profundización I: Redes Neuronales — Deep Learning (EA-N-F-004) · Experto temático: Javier Mauricio Sierra</p>
-            <p class="text-white/55 mt-3 text-xs">Proyecto Centinela · Fase 3 — Implementación y Herramientas Profesionales. Material de aprendizaje autónomo. Metodología "Ingeniería de Trinchera": si una arquitectura no corre en Google Colab, no existe.</p>
+            <p class="text-white/55 mt-3 text-xs">Proyecto Centinela · Fase 3 — Implementación y Herramientas Profesionales. Material de aprendizaje autónomo. Metodología «Ingeniería de Trinchera»: si una arquitectura no corre en Google Colab, no existe.</p>
         </div>
     </footer>
 
@@ -1120,7 +1139,7 @@ salida_onnx = sess.<span class="fn">run</span>(<span class="kw">None</span>, {<s
                         '<span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">' + c.peso + ' %</span>' +
                     '</div>' +
                     '<select id="' + selId + '" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary" aria-describedby="ae-desc-' + i + '">' +
-                        '<option value="-1" selected>— Elige un nivel —</option>' + opciones +
+                        '<option value="-1" selected>— Nivel —</option>' + opciones +
                     '</select>' +
                     '<p id="ae-desc-' + i + '" class="text-sm text-slate-600 mt-3 leading-relaxed" aria-live="polite"></p>' +
                     '<p id="ae-feed-' + i + '" class="text-sm mt-2 leading-relaxed font-medium"></p>';
@@ -1161,7 +1180,7 @@ salida_onnx = sess.<span class="fn">run</span>(<span class="kw">None</span>, {<s
                     bandaEl.textContent = '—';
                     bandaEl.style.background = '#F1F5F9';
                     bandaEl.style.color = '#64748B';
-                    estadoEl.textContent = 'Selecciona un nivel en cada criterio';
+                    estadoEl.textContent = 'Falta seleccionar un nivel en cada criterio';
                     estadoEl.style.color = '#64748B';
                     return;
                 }
