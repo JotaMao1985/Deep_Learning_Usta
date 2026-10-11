@@ -25,9 +25,6 @@
     <!-- Font Awesome (iconografía de apoyo) -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
-    <!-- Plotly (gráficas interactivas: activaciones, descenso del gradiente, curvas de aprendizaje) -->
-    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
-
     <!-- MathJax 3 — JUSTIFICACIÓN: el material es matemáticamente denso ($...$ y $$...$$);
          MathJax renderiza LaTeX de forma nativa y accesible sin dependencias locales. -->
     <script>
@@ -169,19 +166,6 @@
             font-family: 'Fira Code', monospace;
         }
 
-        /* Contenedores de gráficas Plotly */
-        .chart-h-320 {
-            height: 320px;
-        }
-
-        .chart-h-360 {
-            height: 360px;
-        }
-
-        .chart-h-420 {
-            height: 420px;
-        }
-
         /* Tipografía de contenido */
         .prose-usta p {
             margin-bottom: 1rem;
@@ -189,7 +173,7 @@
         }
 
         .prose-usta h3 {
-            color: #ED1E79;
+            color: #BE185D;   /* magenta USTA oscurecido para texto: 5,6:1 sobre #F8FAFC (#ED1E79 daba 3,96:1) */
             font-weight: 600;
             font-size: 1.2rem;
             margin: 1.8rem 0 0.6rem;
@@ -217,6 +201,7 @@
         .prose-usta li {
             margin-bottom: 0.35rem;
             line-height: 1.65;
+            overflow-wrap: anywhere;   /* las URL largas de la bibliografía no desbordan a 375 px */
         }
 
         .prose-usta strong {
@@ -276,6 +261,18 @@
             cursor: pointer;
         }
 
+        /* Accesibilidad: foco visible también en los deslizadores y campos de las simulaciones (WCAG 2.4.7) */
+        .usta-range:focus-visible,
+        select:focus-visible,
+        input:focus-visible {
+            outline: 2px solid #ED1E79;
+            outline-offset: 3px;
+        }
+
+        .usta-range:disabled {
+            opacity: 0.45;
+        }
+
         .usta-range::-moz-range-thumb {
             width: 18px;
             height: 18px;
@@ -292,11 +289,251 @@
         mjx-container svg {
             display: inline-block;
         }
+
+        /* Contraste de texto ≥ 4,5:1 (WCAG 1.4.3): el magenta USTA (#ED1E79) se conserva en degradados,
+           bordes y rellenos; como color de texto se usa #BE185D. */
+        .text-secondary {
+            color: #BE185D !important;
+        }
+
+        /* Accesibilidad: quien pide menos movimiento en el sistema no recibe animaciones,
+           transiciones ni desplazamiento suave (WCAG 2.3.3). */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation: none !important;
+                transition: none !important;
+                scroll-behavior: auto !important;
+            }
+        }
     </style>
 </head>
 
 <body>
     <div id="root"></div>
+
+    <!-- ============================================================
+         MODELOS PUROS DE LAS SIMULACIONES DEL MÓDULO 3 (auditoría 2026-10, M3-D-04)
+         S-A «¿Qué llena la bodega?» (VRAM, Cap 3.2) y S-B «El mesero y el chef» (prefetch, Cap 3.3).
+         JavaScript plano, sin React ni DOM: lo usan las vistas (CalculadoraVRAM, LineaPrefetch) y el arnés
+         ?selftest=1, que comprueba los casos V1–V8 y P1–P3 de la ficha M3-C con tolerancia de ±0,5 %.
+         Unidades: bytes y milisegundos; 1 GB = 1e9 B (decimal), como en las fichas de prueba.
+    ============================================================ -->
+    <script>
+        (function () {
+            'use strict';
+            var IMG = 3 * 224 * 224 * 4;   // imagen de 224 × 224 × 3 en FP32: bytes por muestra
+
+            /* Activaciones guardadas para el paso hacia atrás, por muestra (224 × 224, train(), deduplicadas por
+               almacenamiento), medidas por M3-C con torch.autograd.graph.saved_tensors_hooks (PyTorch 2.12). */
+            var MODELOS = {
+                resnet50: { nombre: 'ResNet-50', tipo: 'cnn', P: 25557032, a32: 85.91e6, a16: 44.78e6, entrada: IMG },
+                resnet18: { nombre: 'ResNet-18', tipo: 'cnn', P: 11689512, a32: 22.18e6, a16: 12.15e6, entrada: IMG },
+                mobilenetv3l: { nombre: 'MobileNetV3-L', tipo: 'cnn', P: 5483032, a32: 44.11e6, a16: 23.31e6, entrada: IMG },
+                mlp: { nombre: 'MLP 784-256-128-10', tipo: 'mlp', P: 235146, a32: 1168 * 4, a16: null, entrada: 784 * 4 },
+                transformer125m: { nombre: 'Transformer 125M (L = 12, h = 768, a = 12, v = 50.257)', tipo: 'transformer', P: 124439808, L: 12, h: 768, a: 12, v: 50257 },
+                personalizado: { nombre: 'Personalizado', tipo: 'personalizado' }
+            };
+            /* Capacidad nominal (GB decimales) y reserva fija para el contexto CUDA (estimación). */
+            var GPUS = {
+                t4: { nombre: 'T4 de Colab (≈15 GB visibles)', cap: 15e9 },
+                p100: { nombre: 'P100 de Kaggle (16 GB)', cap: 16e9 },
+                l4: { nombre: 'L4 (24 GB)', cap: 24e9 },
+                a100_40: { nombre: 'A100 (40 GB)', cap: 40e9 },
+                a100_80: { nombre: 'A100 (80 GB)', cap: 80e9 }
+            };
+            var RESERVA = 0.5e9;
+            var OPT = { sgd: 0, momento: 4, adam: 8 };        // estados del optimizador en FP32, bytes por parámetro
+            var OPT_ZERO = { sgd: 4, momento: 8, adam: 12 };  // K de ZeRO: copia FP32 de los pesos + estados (Rajbhandari et al., 2020)
+
+            function modeloDe(c) {
+                var m = MODELOS[c.modelo];
+                if (m.tipo !== 'personalizado') return m;
+                var P = Math.max(0, +c.pMillones || 0) * 1e6;
+                var a = Math.max(0, +c.actMB || 0) * 1e6;
+                return { nombre: 'Personalizado', tipo: 'personalizado', P: P, a32: a, a16: null, entrada: IMG };
+            }
+
+            /* Estados del modelo. precision: 'fp32' | 'amp' (autocast de PyTorch) | 'zero' (contabilidad 2P + 2P + KP). */
+            function estados(P, precision, opt, inferencia) {
+                if (inferencia) return { pesos: (precision === 'fp32' ? 4 : 2) * P, gradientes: 0, optimizador: 0, cacheAmp: 0 };
+                if (precision === 'zero') return { pesos: 2 * P, gradientes: 2 * P, optimizador: OPT_ZERO[opt] * P, cacheAmp: 0 };
+                return { pesos: 4 * P, gradientes: 4 * P, optimizador: OPT[opt] * P, cacheAmp: precision === 'amp' ? 2 * P : 0 };
+            }
+
+            /* Activaciones. Transformer: Korthikanti et al. (2023), ec. 1 y §4.3 con t = p = 1, en 16 bits y con
+               los logits en FP32; atención eficiente → sin el término 5as/h; recomputación completa → 2sbh por capa.
+               En FP32 se duplican los términos de 16 bits (aproximación). CNN y MLP: b · a_muestra; sin medición en
+               16 bits se supone la mitad. */
+            function activaciones(m, c) {
+                var b = c.b;
+                if (m.tipo === 'transformer') {
+                    var s = c.s, h = m.h, sbh = s * b * h;
+                    var capa = c.recomputacion ? 2 * sbh : sbh * (34 + (c.eficiente ? 0 : 5 * m.a * s / h));
+                    var resto = sbh * 5, logits = sbh * 4 * m.v / h;
+                    if (c.precision === 'fp32') { capa *= 2; resto *= 2; }
+                    return m.L * capa + resto + logits;
+                }
+                var a = c.precision === 'fp32' ? m.a32 : (m.a16 != null ? m.a16 : m.a32 / 2);
+                return b * a;
+            }
+
+            function entrada(m, c) {
+                return m.tipo === 'transformer' ? c.b * c.s * 8 : c.b * m.entrada;   // fichas int64 o imagen FP32
+            }
+
+            /* c = { modelo, b, precision, opt, inferencia, s, eficiente, recomputacion, pMillones, actMB, gpu } */
+            function vram(c) {
+                var m = modeloDe(c);
+                var e = estados(m.P, c.precision, c.opt, c.inferencia);
+                var comp = {
+                    pesos: e.pesos, gradientes: e.gradientes, optimizador: e.optimizador, cacheAmp: e.cacheAmp,
+                    activaciones: activaciones(m, c), entrada: entrada(m, c)
+                };
+                var total = 0; for (var k in comp) total += comp[k];
+                var gpu = GPUS[c.gpu] || GPUS.t4;
+                var util = gpu.cap - RESERVA;
+                return {
+                    P: m.P, comp: comp, total: total,
+                    estados: e.pesos + e.gradientes + e.optimizador + e.cacheAmp,
+                    capacidad: gpu.cap, util: util, cabe: total <= util
+                };
+            }
+
+            /* Lote máximo = ⌊(capacidad − reserva − estados) / (activaciones + entrada por muestra)⌋ */
+            function loteMaximo(c) {
+                var r1 = vram(Object.assign({}, c, { b: 1 }));
+                var porMuestra = r1.comp.activaciones + r1.comp.entrada;
+                var libre = r1.util - r1.estados;
+                if (libre <= 0 || porMuestra <= 0) return libre <= 0 ? 0 : Infinity;
+                return Math.floor(libre / porMuestra);
+            }
+
+            /* Ahorro de la precisión mixta frente a FP32 con la misma configuración (en FP32 se compara con autocast). */
+            function ahorroAMP(c) {
+                var fp32 = vram(Object.assign({}, c, { precision: 'fp32' })).total;
+                var mixta = vram(Object.assign({}, c, { precision: c.precision === 'fp32' ? 'amp' : c.precision })).total;
+                return fp32 > 0 ? 1 - mixta / fp32 : 0;
+            }
+
+            /* S-B · eventos discretos y deterministas (idéntico a sims2.py de M3-C).
+               Lote k: empieza a prepararse en s_k = max(trabajador libre, g_{k−(B+W)}) y queda listo en r_k = s_k + tCPU.
+               En la GPU: g_k = max(e_{k−1}, r_k) y e_k = g_k + tCopia + tGPU.
+               B = 0 (sin precarga): el proceso principal prepara cada lote cuando la GPU lo pide (secuencial). */
+            function simularPrefetch(p) {
+                var N = p.N, tc = p.tCPU, tg = p.tGPU, W = p.B === 0 ? 1 : Math.max(1, p.W), B = p.B, tcp = p.tCopia || 0;
+                var prep = [], gpu = [], g = [], libre = [], ePrev = 0, k, w, i;
+                for (i = 0; i < W; i++) libre.push(0);
+                for (k = 0; k < N; k++) {
+                    var s;
+                    if (B === 0) { w = 0; s = ePrev; }
+                    else {
+                        w = 0; for (i = 1; i < W; i++) if (libre[i] < libre[w]) w = i;
+                        var j = k - (B + W);
+                        s = Math.max(libre[w], j >= 0 ? g[j] : 0);
+                    }
+                    var r = s + tc; libre[w] = r;
+                    prep.push({ k: k, w: w, ini: s, fin: r });
+                    var gk = Math.max(ePrev, r), ek = gk + tcp + tg;
+                    g.push(gk); gpu.push({ k: k, ini: gk, copia: tcp, fin: ek }); ePrev = ek;
+                }
+                var T = ePrev;
+                return { T: T, U: T > 0 ? N * tg / T : 0, prep: prep, gpu: gpu, W: W, secuencial: N * (tc + tcp + tg) };
+            }
+
+            /* ---------- Arnés de verificación (?selftest=1) ---------- */
+            function selftest() {
+                var GB = 1e9, MB = 1e6, casos = [];
+                var tol = 0.005;
+                function chk(id, desc, obtenido, esperado) {
+                    var ok = Math.abs(obtenido - esperado) <= tol * Math.abs(esperado);
+                    casos.push({ id: id, desc: desc, obtenido: obtenido, esperado: esperado, ok: ok });
+                }
+                var base = { modelo: 'resnet50', b: 32, precision: 'fp32', opt: 'adam', inferencia: false, gpu: 't4', s: 1024, eficiente: false, recomputacion: false };
+                function cfg(o) { return Object.assign({}, base, o); }
+                var v1 = vram(base);
+                chk('V1', 'ResNet-50 · pesos (MB)', v1.comp.pesos / MB, 102.2);
+                chk('V1', 'gradientes (MB)', v1.comp.gradientes / MB, 102.2);
+                chk('V1', 'Adam (MB)', v1.comp.optimizador / MB, 204.5);
+                chk('V1', 'activaciones (MB)', v1.comp.activaciones / MB, 2749.1);
+                chk('V1', 'entrada (MB)', v1.comp.entrada / MB, 19.3);
+                chk('V1', 'total (GB)', v1.total / GB, 3.177);
+                chk('V1', 'activaciones (%)', 100 * v1.comp.activaciones / v1.total, 86.5);
+                chk('V1', 'optimizador (%) [6,4 publicado; 6,43 sin redondear]', 100 * v1.comp.optimizador / v1.total, 6.43);
+                var v2 = vram(cfg({ precision: 'amp' }));
+                chk('V2', 'caché AMP (MB)', v2.comp.cacheAmp / MB, 51.1);
+                chk('V2', 'activaciones AMP (MB)', v2.comp.activaciones / MB, 1433.0);
+                chk('V2', 'total AMP (GB)', v2.total / GB, 1.912);
+                chk('V2', 'ahorro AMP (%)', 100 * ahorroAMP(cfg({ precision: 'amp' })), 39.8);
+                chk('V3', 'ResNet-18 FP32 (GB)', vram(cfg({ modelo: 'resnet18' })).total / GB, 0.916);
+                chk('V3', 'ResNet-18 AMP (GB)', vram(cfg({ modelo: 'resnet18', precision: 'amp' })).total / GB, 0.618);
+                chk('V3', 'ahorro (%)', 100 * ahorroAMP(cfg({ modelo: 'resnet18', precision: 'amp' })), 32.5);
+                var v4 = vram(cfg({ modelo: 'mlp', b: 64 }));
+                chk('V4', 'MLP · P', v4.P, 235146);
+                chk('V4', 'total (MB)', v4.total / MB, 4.26);
+                chk('V4', 'optimizador (%)', 100 * v4.comp.optimizador / v4.total, 44.1);
+                var tr = { modelo: 'transformer125m', s: 1024, b: 8, precision: 'zero' };
+                var v5 = vram(cfg(tr)), v5e = vram(cfg(Object.assign({}, tr, { eficiente: true })));
+                chk('V5', 'Transformer · estados 16P (GB)', v5.estados / GB, 1.991);
+                chk('V5', 'activaciones (GB)', v5.comp.activaciones / GB, 10.285);
+                chk('V5', 'total (GB)', v5.total / GB, 12.28);
+                chk('V5', 'total con atención eficiente (GB)', v5e.total / GB, 6.24);
+                var v6 = vram(cfg({ modelo: 'transformer125m', s: 512, b: 1, precision: 'zero', recomputacion: true }));
+                chk('V6', 'activaciones con recomputación (MB)', v6.comp.activaciones / MB, 114.3);
+                chk('V6', 'estados del modelo (%)', 100 * v6.estados / v6.total, 94.6);
+                chk('V6', 'Adam, 12P (%)', 100 * v6.comp.optimizador / v6.total, 70.9);
+                chk('V7', 'ZeRO 1,5B · 16P (GB)', vram(cfg({ modelo: 'personalizado', pMillones: 1500, actMB: 0, precision: 'zero' })).estados / GB, 24.0);
+                chk('V8', 'lote máx. T4 · ResNet-50 FP32', loteMaximo(base), 162);
+                chk('V8', 'lote máx. T4 · ResNet-50 AMP', loteMaximo(cfg({ precision: 'amp' })), 309);
+                chk('V8', 'lote máx. T4 · ResNet-18 FP32', loteMaximo(cfg({ modelo: 'resnet18' })), 628);
+                chk('V8', 'lote máx. T4 · ResNet-18 AMP', loteMaximo(cfg({ modelo: 'resnet18', precision: 'amp' })), 1120);
+                function pf(N, tc, tg, W, B) { return simularPrefetch({ N: N, tCPU: tc, tGPU: tg, W: W, B: B, tCopia: 0 }); }
+                var a = pf(10, 30, 50, 1, 0), bb = pf(10, 30, 50, 1, 1);
+                chk('P1', 'sin precarga · T (ms)', a.T, 800); chk('P1', 'sin precarga · U (%)', 100 * a.U, 62.5);
+                chk('P1', 'B = 1 · T (ms)', bb.T, 530); chk('P1', 'B = 1 · U (%)', 100 * bb.U, 94.3);
+                var c0 = pf(10, 80, 50, 1, 0), c1 = pf(10, 80, 50, 1, 1), c2 = pf(10, 80, 50, 2, 2);
+                chk('P2', 'sin precarga · T (ms)', c0.T, 1300); chk('P2', 'sin precarga · U (%)', 100 * c0.U, 38.5);
+                chk('P2', 'B = 1, W = 1 · T (ms)', c1.T, 850); chk('P2', 'B = 1, W = 1 · U (%)', 100 * c1.U, 58.8);
+                chk('P2', 'B = 2, W = 2 · T (ms)', c2.T, 580); chk('P2', 'B = 2, W = 2 · U (%)', 100 * c2.U, 86.2);
+                chk('P3', 'N = 3 · sin precarga (ms)', pf(3, 70, 70, 1, 0).T, 420);
+                chk('P3', 'N = 3 · B = 1 (ms)', pf(3, 70, 70, 1, 1).T, 280);
+                var d0 = pf(100, 70, 70, 1, 0), d1 = pf(100, 70, 70, 1, 1);
+                chk('P3', 'N = 100 · sin precarga (ms)', d0.T, 14000);
+                chk('P3', 'N = 100 · B = 1 (ms)', d1.T, 7070);
+                chk('P3', 'N = 100 · U (%)', 100 * d1.U, 99.0);
+                chk('P3', 'N = 100 · aceleración (×)', d0.T / d1.T, 1.98);
+                var fallas = casos.filter(function (x) { return !x.ok; }).length;
+                return { ok: fallas === 0, total: casos.length, fallas: fallas, casos: casos };
+            }
+
+            window.M3SIMS = {
+                MODELOS: MODELOS, GPUS: GPUS, RESERVA: RESERVA,
+                vram: vram, loteMaximo: loteMaximo, ahorroAMP: ahorroAMP, simularPrefetch: simularPrefetch
+            };
+            window.__m3sims = { selftest: selftest, resultado: null };
+
+            if (/[?&]selftest=1(&|$)/.test(location.search)) {
+                var r = selftest();
+                window.__m3sims.resultado = r;
+                if (console.table) console.table(r.casos);
+                console.info('M3 selftest S-A/S-B: ' + (r.ok ? 'PASA' : 'FALLA') + ' (' + (r.total - r.fallas) + '/' + r.total + ')');
+                var pintar = function () {
+                    var d = document.createElement('div');
+                    d.id = 'm3-selftest';
+                    d.setAttribute('role', 'status');
+                    d.style.cssText = 'position:fixed;right:12px;bottom:12px;z-index:300;max-width:420px;max-height:60vh;overflow:auto;background:#fff;border:2px solid ' + (r.ok ? '#15803D' : '#B91C1C') + ';border-radius:10px;padding:10px;font:12px/1.4 monospace;color:#0F172A;box-shadow:0 4px 20px rgba(0,0,0,.2)';
+                    var h = '<strong>Selftest S-A/S-B: ' + (r.ok ? 'PASA' : 'FALLA') + ' (' + (r.total - r.fallas) + '/' + r.total + ', ±0,5 %)</strong>';
+                    r.casos.forEach(function (x) {
+                        h += '<div style="color:' + (x.ok ? '#15803D' : '#B91C1C') + '">' + x.id + ' ' + x.desc + ': ' + (+x.obtenido.toFixed(4)) + ' / ' + x.esperado + (x.ok ? ' ✓' : ' ✗') + '</div>';
+                    });
+                    d.innerHTML = h;
+                    document.body.appendChild(d);
+                };
+                if (document.body) pintar(); else document.addEventListener('DOMContentLoaded', pintar);
+            }
+        })();
+    </script>
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
@@ -527,7 +764,7 @@
 
             return (
                 <div className="my-4 rounded-xl overflow-hidden border border-gray-700 bg-gray-900 text-gray-100 shadow-lg">
-                    <div className="bg-gray-800 px-4 py-2 text-xs font-mono text-gray-400 border-b border-gray-700 flex justify-between items-center">
+                    <div className="bg-gray-800 px-4 py-2 text-xs font-mono text-gray-400 border-b border-gray-700 flex flex-wrap gap-y-1 justify-between items-center">
                         <span><i className={`${meta.icon} mr-2`}></i>{meta.label}</span>
                         <span className="flex items-center gap-3">
                             <button onClick={() => setHidden(h => !h)} className="flex items-center gap-1 hover:text-white transition-colors" title={hidden ? 'Mostrar código' : 'Ocultar código'}>
@@ -585,8 +822,8 @@
         ============================================================ */
         const CalloutPro = ({ tema = 'eth', titulo, subtitulo, icon, children }) => {
             const temas = {
-                eth: { grad: 'linear-gradient(135deg,#0E7490 0%,#06B6D4 100%)', bg: 'rgba(8,145,178,0.06)', border: 'rgba(14,116,137,0.22)', icon: 'fa-scale-balanced' },
-                warn: { grad: 'linear-gradient(135deg,#B45309 0%,#F59E0B 100%)', bg: 'rgba(180,83,9,0.06)', border: 'rgba(180,83,9,0.22)', icon: 'fa-triangle-exclamation' },
+                eth: { grad: 'linear-gradient(135deg,#155E75 0%,#0E7490 100%)', bg: 'rgba(8,145,178,0.06)', border: 'rgba(14,116,137,0.22)', icon: 'fa-scale-balanced' },
+                warn: { grad: 'linear-gradient(135deg,#92400E 0%,#B45309 100%)', bg: 'rgba(180,83,9,0.06)', border: 'rgba(180,83,9,0.22)', icon: 'fa-triangle-exclamation' },
                 info: { grad: 'linear-gradient(135deg,#3D008D 0%,#ED1E79 100%)', bg: 'rgba(61,0,141,0.05)', border: 'rgba(61,0,141,0.18)', icon: 'fa-circle-info' },
             };
             const t = temas[tema] || temas.eth;
@@ -598,7 +835,7 @@
                         </span>
                         <div>
                             <div className="text-white font-bold text-base leading-tight">{titulo}</div>
-                            {subtitulo && <div className="text-white/80 text-xs">{subtitulo}</div>}
+                            {subtitulo && <div className="text-white text-xs">{subtitulo}</div>}
                         </div>
                     </div>
                     <div className="px-5 py-4 text-[0.95rem] text-gray-700 leading-relaxed" style={{ background: t.bg }}>
@@ -669,15 +906,15 @@
             useTypeset(contentRef, [active]);
             return (
                 <div className="my-5">
-                    <div className="flex flex-wrap gap-1 border-b border-gray-200">
+                    <div className="flex flex-wrap gap-1 border-b border-gray-200" role="tablist">
                         {tabs.map((t, i) => (
-                            <button key={i} onClick={() => setActive(i)}
-                                className={`px-4 py-2 text-sm font-semibold rounded-t-lg transition-colors ${active === i ? 'text-primary border-b-2 border-secondary bg-white' : 'text-gray-500 hover:text-primary'}`}>
+                            <button key={i} onClick={() => setActive(i)} role="tab" aria-selected={active === i}
+                                className={`px-4 py-2 text-sm font-semibold rounded-t-lg transition-colors ${active === i ? 'text-primary border-b-2 border-secondary bg-white' : 'text-gray-600 hover:text-primary'}`}>
                                 {t.label}
                             </button>
                         ))}
                     </div>
-                    <div ref={contentRef} className="p-4 bg-white border border-t-0 border-gray-200 rounded-b-lg animate-fade-in text-[0.95rem] text-gray-700">
+                    <div ref={contentRef} role="tabpanel" className="p-4 bg-white border border-t-0 border-gray-200 rounded-b-lg animate-fade-in text-[0.95rem] text-gray-700">
                         <div key={active}>{tabs[active].content}</div>
                     </div>
                 </div>
@@ -695,10 +932,10 @@
                 <div ref={ref} className="space-y-2 my-5">
                     {items.map((it, i) => (
                         <div key={i} className="border border-gray-200 rounded-xl overflow-hidden bg-white">
-                            <button onClick={() => setOpen(open === i ? null : i)}
+                            <button onClick={() => setOpen(open === i ? null : i)} aria-expanded={open === i}
                                 className="w-full flex justify-between items-center px-4 py-3 hover:bg-gray-50 text-left font-semibold text-navy transition-colors">
                                 <span>{it.titulo}</span>
-                                <i className={`fas fa-chevron-down transition-transform duration-300 text-secondary ${open === i ? 'rotate-180' : ''}`}></i>
+                                <i className={`fas fa-chevron-down transition-transform duration-300 text-secondary ${open === i ? 'rotate-180' : ''}`} aria-hidden="true"></i>
                             </button>
                             {open === i && (
                                 <div className="px-4 py-3 bg-gray-50 text-gray-700 text-[0.92rem] leading-relaxed animate-fade-in border-t border-gray-100">
@@ -758,7 +995,7 @@
                         <i className="fas fa-circle-question text-secondary mt-1"></i>
                         <span>{pregunta}</span>
                     </div>
-                    {multiple && <p className="text-xs text-gray-400 mb-2 ml-6">Selección múltiple</p>}
+                    {multiple && <p className="text-xs text-gray-500 mb-2 ml-6">Selección múltiple</p>}
                     <div className="space-y-2 mt-3">
                         {opciones.map((o, i) => {
                             const isSel = sel.includes(i);
@@ -769,14 +1006,15 @@
                                 else cls = 'border-gray-200 opacity-70';
                             } else if (isSel) cls = 'border-secondary bg-pink-50';
                             return (
-                                <button key={i} onClick={() => toggle(i)} disabled={checked}
+                                <button key={i} onClick={() => toggle(i)} disabled={checked} aria-pressed={isSel}
                                     className={`w-full text-left px-4 py-2.5 rounded-lg border text-[0.92rem] flex items-center gap-3 transition-all ${cls}`}>
-                                    <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${isSel ? 'usta-gradient text-white' : 'bg-gray-100 text-gray-500'}`}>
+                                    <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${isSel ? 'usta-gradient text-white' : 'bg-gray-100 text-gray-600'}`}>
                                         {String.fromCharCode(97 + i)}
                                     </span>
                                     <span className="flex-1 text-gray-700">{o.texto}</span>
-                                    {checked && o.correcta && <i className="fas fa-check text-green-600"></i>}
-                                    {checked && isSel && !o.correcta && <i className="fas fa-xmark text-red-500"></i>}
+                                    {checked && o.correcta && <i className="fas fa-check text-green-600" aria-hidden="true"></i>}
+                                    {checked && isSel && !o.correcta && <i className="fas fa-xmark text-red-500" aria-hidden="true"></i>}
+                                    {checked && <span className="sr-only">{o.correcta ? '(correcta)' : isSel ? '(incorrecta)' : ''}</span>}
                                 </button>
                             );
                         })}
@@ -850,7 +1088,7 @@
                         <div key={qi} className="mb-5">
                             <div className="font-semibold text-navy text-[0.95rem] mb-2">
                                 {qi + 1}. {q.pregunta}
-                                {q.multiple && <span className="ml-2 text-xs text-gray-400 font-normal">(selección múltiple)</span>}
+                                {q.multiple && <span className="ml-2 text-xs text-gray-500 font-normal">(selección múltiple)</span>}
                             </div>
                             <div className="space-y-1.5">
                                 {q.opciones.map((o, oi) => {
@@ -862,14 +1100,15 @@
                                         else cls = 'border-gray-200 opacity-70';
                                     } else if (sel) cls = 'border-secondary bg-pink-50';
                                     return (
-                                        <button key={oi} onClick={() => toggle(qi, oi, q.multiple)} disabled={enviado}
+                                        <button key={oi} onClick={() => toggle(qi, oi, q.multiple)} disabled={enviado} aria-pressed={sel}
                                             className={`w-full text-left px-3 py-2 rounded-lg border text-[0.9rem] flex items-center gap-2.5 transition-all ${cls}`}>
-                                            <span className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[0.7rem] font-bold ${sel ? 'usta-gradient text-white' : 'bg-gray-100 text-gray-500'}`}>
+                                            <span className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[0.7rem] font-bold ${sel ? 'usta-gradient text-white' : 'bg-gray-100 text-gray-600'}`}>
                                                 {String.fromCharCode(97 + oi)}
                                             </span>
                                             <span className="flex-1 text-gray-700">{o.texto}</span>
-                                            {enviado && o.correcta && <i className="fas fa-check text-green-600 text-xs"></i>}
-                                            {enviado && sel && !o.correcta && <i className="fas fa-xmark text-red-500 text-xs"></i>}
+                                            {enviado && o.correcta && <i className="fas fa-check text-green-600 text-xs" aria-hidden="true"></i>}
+                                            {enviado && sel && !o.correcta && <i className="fas fa-xmark text-red-500 text-xs" aria-hidden="true"></i>}
+                                            {enviado && <span className="sr-only">{o.correcta ? '(correcta)' : sel ? '(incorrecta)' : ''}</span>}
                                         </button>
                                     );
                                 })}
@@ -909,28 +1148,6 @@
                 </div>
             );
         };
-
-        /* ============================================================
-           GRÁFICA PLOTLY (hook + contenedor)
-        ============================================================ */
-        const usePlotly = (id, dataFn, layoutFn, deps = []) => {
-            useEffect(() => {
-                const el = document.getElementById(id);
-                if (el && window.Plotly) {
-                    window.Plotly.newPlot(id, dataFn(), layoutFn(), { responsive: true, displayModeBar: false });
-                }
-                return () => { if (window.Plotly) { try { window.Plotly.purge(id); } catch (e) { } } };
-            }, deps);
-        };
-
-        const ChartFrame = ({ id, height = 'chart-h-360', caption }) => (
-            <>
-                <div className="bg-white border border-gray-200 rounded-xl p-2 shadow-sm my-3">
-                    <div id={id} className={height} style={{ width: '100%' }}></div>
-                </div>
-                {caption && <p className="text-xs text-gray-500 italic text-center mb-4">{caption}</p>}
-            </>
-        );
 
         /* ============================================================
            TÉRMINO con definición emergente (tooltip por portal)
@@ -977,13 +1194,16 @@
                     setOpen(false);
                 };
                 // 'true' captura también el scroll del contenedor interno de la lección.
+                const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };   // WCAG 1.4.13: se descarta con Escape
                 window.addEventListener('scroll', reflow, true);
                 window.addEventListener('resize', reflow);
                 document.addEventListener('mousedown', onDoc);
+                document.addEventListener('keydown', onKey);
                 return () => {
                     window.removeEventListener('scroll', reflow, true);
                     window.removeEventListener('resize', reflow);
                     document.removeEventListener('mousedown', onDoc);
+                    document.removeEventListener('keydown', onKey);
                 };
             }, [open]);
 
@@ -991,8 +1211,8 @@
                 <span className="inline-block">
                     <button ref={btnRef} type="button" onClick={openNow} onMouseEnter={openNow} onMouseLeave={scheduleClose}
                         className="text-primary font-semibold cursor-help bg-primary/5 hover:bg-primary/10 rounded px-1 transition-colors"
-                        style={{ borderBottom: '1px dotted #3D008D' }} title="Ver definición rápida">
-                        {children}<i className="fas fa-circle-info text-[0.6em] align-super ml-0.5 text-secondary"></i>
+                        style={{ borderBottom: '1px dotted #3D008D' }} title="Ver definición rápida" aria-expanded={open}>
+                        {children}<i className="fas fa-circle-info text-[0.6em] align-super ml-0.5 text-secondary" aria-hidden="true"></i>
                     </button>
                     {open && pos && ReactDOM.createPortal(
                         <span ref={popRef} role="tooltip"
@@ -1007,6 +1227,47 @@
                 </span>
             );
         };
+
+        /* ============================================================
+           FIGURAS Y TABLAS: pie normalizado, coma decimal y aviso de desplazamiento (canon del M2)
+        ============================================================ */
+        /* Número con coma decimal y punto de miles para el texto visible (coma en prosa, leyendas, SVG y UI;
+           punto en código y LaTeX). */
+        const fmtDec = (v, d) => v.toFixed(d).replace('.', ',');
+        const fmtNum = (v, d = 0) => {
+            const [ent, dec] = Math.abs(v).toFixed(d).split('.');
+            const miles = ent.length > 3 ? ent.replace(/\B(?=(\d{3})+(?!\d))/g, '.') : ent;
+            return (v < 0 ? '−' : '') + miles + (dec ? ',' + dec : '');
+        };
+
+        /* Pie de figura normalizado: «Figura 3.c.n.» + descripción + fuente.
+           Numeración del M3: 3.c.n, con c = capítulo del módulo (3.1, 3.2, 3.3) y n = orden de aparición
+           dentro del capítulo (las simulaciones S-A y S-B ocupan el número de la figura que sustituyen). */
+        const PieFigura = ({ n, fuente = 'elaboración propia.', className = '', children }) => (
+            <p className={`text-xs text-gray-500 italic text-center ${className}`}>
+                <strong className="not-italic text-navy">Figura {n}.</strong> {children} <span className="not-italic">Fuente: {fuente}</span>
+            </p>
+        );
+
+        /* Pie de tabla con la misma convención: «Tabla 3.c.n.» */
+        const PieTabla = ({ n, fuente = 'elaboración propia.', className = '', children }) => (
+            <p className={`text-xs text-gray-500 italic text-center ${className}`}>
+                <strong className="not-italic text-navy">Tabla {n}.</strong> {children} <span className="not-italic">Fuente: {fuente}</span>
+            </p>
+        );
+
+        /* Aviso bajo los diagramas SVG anchos: por debajo de sm el diagrama conserva su ancho mínimo
+           (para que la letra siga legible) y se desplaza dentro de su marco. */
+        const AvisoDesplazar = () => (
+            <p className="sm:hidden text-[0.7rem] text-gray-500 text-center mt-1" aria-hidden="true">← desplazar para ver el diagrama completo →</p>
+        );
+
+        /* «Antes de interactuar»: pide una predicción falsable antes de usar cada simulación (canon del M1 y del M2). */
+        const AntesDeInteractuar = ({ children }) => (
+            <p className="rounded-lg px-4 py-2.5 my-3 text-[0.92rem] text-gray-700 border border-dashed" style={{ borderColor: 'rgba(61,0,141,0.35)', background: '#FCFAFF' }}>
+                <i className="fas fa-circle-question mr-2" style={{ color: '#3D008D' }} aria-hidden="true"></i><strong className="text-navy">Antes de interactuar:</strong> {children}
+            </p>
+        );
 
         /* ============================================================
            PORTADA + OBJETIVOS (Lección 0)
@@ -1157,7 +1418,8 @@
            Regla: dentro de <text> NO se usan delimitadores MathJax.
         ============================================================ */
         const KerasAPIsSVG = () => (
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                <div className="overflow-x-auto">
                 <svg viewBox="0 0 740 270" className="w-full" style={{ minWidth: 640 }} role="img"
                     aria-label="Las tres API de Keras ordenadas por complejidad creciente: Sequential (línea de ensamblaje), Funcional (diagrama de flujo) y Subclassing (taller artesanal).">
                     <title>De izquierda a derecha, las tres formas de construir modelos en Keras ganan flexibilidad y complejidad: Sequential apila capas en línea, la API Funcional permite ramificaciones, y Subclassing ofrece control total.</title>
@@ -1197,18 +1459,18 @@
                     <text x={370} y={198} textAnchor="middle" fontSize="10" fill="#15803D">Salida</text>
 
                     {/* 3. Subclassing */}
-                    <text x="610" y="34" textAnchor="middle" fontSize="13" fill="#ED1E79" fontWeight="bold">3 · Subclassing</text>
+                    <text x="610" y="34" textAnchor="middle" fontSize="13" fill="#BE185D" fontWeight="bold">3 · Subclassing</text>
                     <text x="610" y="50" textAnchor="middle" fontSize="10" fill="#64748B" fontStyle="italic">Taller artesanal</text>
                     <rect x={540} y={66} width={140} height={140} rx="8" fill="#FFF1F7" stroke="#ED1E79" strokeWidth="1.8" strokeDasharray="5 3" />
-                    <text x={610} y={92} textAnchor="middle" fontSize="11" fill="#ED1E79" fontWeight="bold">class(keras.Model)</text>
+                    <text x={610} y={92} textAnchor="middle" fontSize="11" fill="#BE185D" fontWeight="bold">class(keras.Model)</text>
                     <text x={610} y={120} textAnchor="middle" fontSize="10" fill="#475569">__init__: define capas</text>
                     <text x={610} y={142} textAnchor="middle" fontSize="10" fill="#475569">call(): lógica libre</text>
                     <text x={610} y={170} textAnchor="middle" fontSize="10" fill="#475569" fontStyle="italic">if / for / condicionales</text>
                     <text x={610} y={190} textAnchor="middle" fontSize="10" fill="#475569" fontStyle="italic">control total</text>
                 </svg>
-                <p className="text-xs text-gray-500 italic text-center mt-1">
-                    Figura 1. Las tres API de Keras ordenadas por complejidad creciente. Fuente: elaboración propia.
-                </p>
+                </div>
+                <AvisoDesplazar />
+                <PieFigura n="3.1.1" className="mt-1">Las tres API de Keras ordenadas por complejidad creciente.</PieFigura>
             </div>
         );
 
@@ -1216,51 +1478,46 @@
            DIAGRAMA SVG: Ecosistemas TF y PyTorch con Keras 3 como puente
         ============================================================ */
         const EcosistemasSVG = () => (
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
-                <svg viewBox="0 0 740 300" className="w-full" style={{ minWidth: 660 }} role="img"
-                    aria-label="Los ecosistemas de TensorFlow y de PyTorch con Keras 3 como puente multi-backend que ejecuta el mismo código sobre TensorFlow, PyTorch o JAX.">
-                    <title>Keras 3 actúa como puente: el mismo código de alto nivel se ejecuta sobre los motores TensorFlow, PyTorch o JAX, cada uno con su propio ecosistema de despliegue.</title>
+            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                <div className="overflow-x-auto">
+                <svg viewBox="0 0 740 312" className="w-full" style={{ minWidth: 660 }} role="img"
+                    aria-label="Keras 3 como puente multi-backend: el mismo código se ejecuta sobre TensorFlow, PyTorch o JAX, y sobre OpenVINO solo para inferencia. Bajo cada motor, su ecosistema: TF Serving, LiteRT, TF.js, TFX y TensorBoard para TensorFlow; Triton y FastAPI, torch.export con ONNX, torch.compile, ExecuTorch y Hugging Face para PyTorch; Flax, Optax y Orbax para JAX.">
+                    <title>Keras 3 actúa como puente: el mismo código de alto nivel se ejecuta sobre los motores TensorFlow, PyTorch o JAX, cada uno con su ecosistema en la columna que tiene debajo; OpenVINO, en recuadro discontinuo, sirve solo para inferencia.</title>
                     {/* Keras 3 puente en el centro superior */}
                     <rect x={250} y={20} width={240} height={48} rx="10" fill="#3D008D" />
                     <text x={370} y={42} textAnchor="middle" fontSize="14" fill="#fff" fontWeight="bold">Keras 3 — código único</text>
                     <text x={370} y={60} textAnchor="middle" fontSize="11" fill="#E9D5FF">os.environ['KERAS_BACKEND']</text>
 
-                    {/* Tres backends */}
+                    {/* Tres motores, cada uno sobre su propia columna de ecosistema (texto con contraste ≥ 4,5:1) */}
                     {[
-                        { x: 120, name: 'TensorFlow', color: '#FF6F00', bg: '#FFF7ED' },
-                        { x: 320, name: 'PyTorch', color: '#EE4C2C', bg: '#FEF2F2' },
-                        { x: 520, name: 'JAX', color: '#0E7490', bg: '#ECFEFF' },
+                        { cx: 135, name: 'TensorFlow', color: '#FF6F00', txt: '#C2410C', bg: '#FFF7ED', eco: 'Ecosistema TF', itemBg: '#FFF7ED', itemBorde: '#FDBA74', itemTxt: '#9A3412', items: ['TF Serving', 'LiteRT', 'TF.js', 'TFX', 'TensorBoard'] },
+                        { cx: 330, name: 'PyTorch', color: '#EE4C2C', txt: '#B91C1C', bg: '#FEF2F2', eco: 'Ecosistema PyTorch', itemBg: '#FEF2F2', itemBorde: '#FCA5A5', itemTxt: '#991B1B', items: ['Triton · FastAPI', 'torch.export + ONNX', 'torch.compile', 'ExecuTorch', 'Hugging Face'] },
+                        { cx: 525, name: 'JAX', color: '#0E7490', txt: '#0E7490', bg: '#ECFEFF', eco: 'Ecosistema JAX', itemBg: '#ECFEFF', itemBorde: '#67E8F9', itemTxt: '#155E75', items: ['Flax (redes)', 'Optax (optimización)', 'Orbax (puntos de control)'] },
                     ].map((b, i) => (
                         <g key={i}>
-                            <line x1={370} y1={68} x2={b.x + 50} y2={108} stroke="#94A3B8" strokeWidth="1.6" strokeDasharray="4 3" />
-                            <rect x={b.x} y={110} width={100} height={36} rx="7" fill={b.bg} stroke={b.color} strokeWidth="2" />
-                            <text x={b.x + 50} y={133} textAnchor="middle" fontSize="12" fill={b.color} fontWeight="bold">{b.name}</text>
+                            <line x1={370} y1={68} x2={b.cx} y2={108} stroke="#94A3B8" strokeWidth="1.6" strokeDasharray="4 3" />
+                            <rect x={b.cx - 50} y={110} width={100} height={36} rx="7" fill={b.bg} stroke={b.color} strokeWidth="2" />
+                            <text x={b.cx} y={133} textAnchor="middle" fontSize="12" fill={b.txt} fontWeight="bold">{b.name}</text>
+                            <line x1={b.cx} y1={146} x2={b.cx} y2={166} stroke={b.color} strokeWidth="1.4" strokeDasharray="4 3" />
+                            <text x={b.cx} y={180} textAnchor="middle" fontSize="12" fill={b.txt} fontWeight="bold">{b.eco}</text>
+                            {b.items.map((t, j) => (
+                                <g key={j}>
+                                    <rect x={b.cx - 90} y={196 + j * 20} width={180} height={16} rx="4" fill={b.itemBg} stroke={b.itemBorde} strokeWidth="1" />
+                                    <text x={b.cx} y={208 + j * 20} textAnchor="middle" fontSize="10" fill={b.itemTxt}>{t}</text>
+                                </g>
+                            ))}
                         </g>
                     ))}
 
-                    {/* Ecosistema TF */}
-                    <line x1={170} y1={146} x2={170} y2={168} stroke="#FF6F00" strokeWidth="1.4" strokeDasharray="4 3" />
-                    <text x={170} y={180} textAnchor="middle" fontSize="12" fill="#FF6F00" fontWeight="bold">Ecosistema TF</text>
-                    {['TF Serving', 'LiteRT', 'TF.js', 'TFX', 'TensorBoard'].map((t, i) => (
-                        <g key={`tf-${i}`}>
-                            <rect x={60} y={196 + i * 20} width={220} height={16} rx="4" fill="#FFF7ED" stroke="#FDBA74" strokeWidth="1" />
-                            <text x={170} y={208 + i * 20} textAnchor="middle" fontSize="10" fill="#9A3412">{t}</text>
-                        </g>
-                    ))}
-
-                    {/* Ecosistema PyTorch */}
-                    <line x1={385} y1={146} x2={548} y2={168} stroke="#EE4C2C" strokeWidth="1.4" strokeDasharray="4 3" />
-                    <text x={555} y={180} textAnchor="middle" fontSize="12" fill="#EE4C2C" fontWeight="bold">Ecosistema PyTorch</text>
-                    {['Triton · FastAPI', 'torch.export + ONNX', 'torch.compile', 'ExecuTorch', 'Hugging Face'].map((t, i) => (
-                        <g key={`pt-${i}`}>
-                            <rect x={445} y={196 + i * 20} width={220} height={16} rx="4" fill="#FEF2F2" stroke="#FCA5A5" strokeWidth="1" />
-                            <text x={555} y={208 + i * 20} textAnchor="middle" fontSize="10" fill="#991B1B">{t}</text>
-                        </g>
-                    ))}
+                    {/* Cuarto motor, solo para inferencia */}
+                    <line x1={370} y1={68} x2={671} y2={108} stroke="#94A3B8" strokeWidth="1.6" strokeDasharray="4 3" />
+                    <rect x={612} y={110} width={118} height={36} rx="7" fill="#F8FAFC" stroke="#64748B" strokeWidth="1.6" strokeDasharray="5 3" />
+                    <text x={671} y={126} textAnchor="middle" fontSize="12" fill="#334155" fontWeight="bold">OpenVINO</text>
+                    <text x={671} y={140} textAnchor="middle" fontSize="9.5" fill="#475569">(solo inferencia)</text>
                 </svg>
-                <p className="text-xs text-gray-500 italic text-center mt-1">
-                    Figura 2. Ecosistemas de TensorFlow y PyTorch con Keras 3 como puente multi-backend. Fuente: elaboración propia.
-                </p>
+                </div>
+                <AvisoDesplazar />
+                <PieFigura n="3.1.2" className="mt-1">Ecosistemas de TensorFlow, PyTorch y JAX con Keras 3 como puente multi-<em>backend</em>; OpenVINO se usa solo para inferencia.</PieFigura>
             </div>
         );
 
@@ -1546,7 +1803,7 @@ modelo = DetectorRoya()`} />
                         ciclista (el programador). Ninguno es «mejor»: depende de a dónde se vaya y de las condiciones del día.
                     </Box>
 
-                    <h4>Tabla comparativa (consulta: 2026-10-11)</h4>
+                    <h4>Comparativa entre ambos <em>frameworks</em></h4>
                     <div className="overflow-x-auto">
                         <table>
                             <thead><tr><th>Criterio</th><th>TensorFlow / Keras</th><th>PyTorch</th></tr></thead>
@@ -1565,6 +1822,7 @@ modelo = DetectorRoya()`} />
                             </tbody>
                         </table>
                     </div>
+                    <PieTabla n="3.1.1">Comparativa de TensorFlow/Keras y PyTorch (consulta: 2026-10-11).</PieTabla>
 
                     <EcosistemasSVG />
 
@@ -1729,7 +1987,8 @@ import keras
         ============================================================ */
         /* DIAGRAMA SVG: CPU vs GPU (pocos núcleos potentes vs miles pequeños) */
         const CPUvsGPUSVG = () => (
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                <div className="overflow-x-auto">
                 <svg viewBox="0 0 740 250" className="w-full" style={{ minWidth: 620 }} role="img"
                     aria-label="Comparación arquitectónica: la CPU tiene pocos núcleos grandes optimizados para tareas secuenciales; la GPU tiene miles de núcleos pequeños para paralelismo masivo.">
                     <title>La CPU dedica el silicio a pocos núcleos potentes (el despulpado a mano); la GPU lo reparte en una malla de muchos núcleos pequeños que ejecutan la misma operación sobre datos distintos (la despulpadora industrial).</title>
@@ -1756,9 +2015,9 @@ import keras
                     {/* operador */}
                     <text x="365" y="145" textAnchor="middle" fontSize="20" fill="#001A4D" fontWeight="bold">vs</text>
                 </svg>
-                <p className="text-xs text-gray-500 italic text-center mt-1">
-                    Figura 1. Comparación arquitectónica CPU vs GPU. La CPU optimiza tareas secuenciales; la GPU, el paralelismo masivo (SIMT). Adaptado de la arquitectura NVIDIA Ampere. Fuente: elaboración propia.
-                </p>
+                </div>
+                <AvisoDesplazar />
+                <PieFigura n="3.2.1" className="mt-1" fuente={<>elaboración propia, inspirada en la figura «The GPU devotes more transistors to data processing» de la <em>CUDA C++ Programming Guide</em> (NVIDIA, s. f.).</>}>Comparación arquitectónica CPU frente a GPU: la CPU optimiza tareas secuenciales; la GPU, el paralelismo masivo (SIMT).</PieFigura>
             </div>
         );
 
@@ -1772,7 +2031,8 @@ import keras
                 { t: 'GPU: núcleos CUDA + Tensor Cores', d: 'Hardware', color: '#15803D', bg: '#F0FDF4', txt: '#15803D' },
             ];
             return (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                    <div className="overflow-x-auto">
                     <svg viewBox="0 0 740 262" className="w-full" style={{ minWidth: 620 }} role="img"
                         aria-label="La pila de software CUDA en cinco capas: el código del estudiante llama a un framework, este despacha a las bibliotecas aceleradas cuDNN, NCCL y TensorRT, que corren sobre la plataforma CUDA, la cual gobierna los núcleos CUDA y Tensor Cores de la GPU.">
                         <title>Cada llamada de alto nivel desciende por la pila: modelo.fit() invoca al framework, el framework a cuDNN, cuDNN a CUDA y CUDA al hardware de la GPU.</title>
@@ -1788,49 +2048,11 @@ import keras
                         {[0, 1, 2, 3].map((i) => (
                             <line key={`fl-${i}`} x1={330} y1={64 + i * 46} x2={330} y2={74 + i * 46} stroke="#94A3B8" strokeWidth="1.6" markerEnd="url(#arrC)" />
                         ))}
-                        <text x={60} y={140} textAnchor="middle" fontSize="10" fill="#94A3B8" fontStyle="italic" transform="rotate(-90 60 140)">abstracción ↓</text>
+                        <text x={60} y={140} textAnchor="middle" fontSize="10" fill="#64748B" fontStyle="italic" transform="rotate(-90 60 140)">abstracción ↓</text>
                     </svg>
-                    <p className="text-xs text-gray-500 italic text-center mt-1">
-                        Figura 2. La pila de software CUDA: de modelo.fit() al hardware de la GPU. Fuente: elaboración propia.
-                    </p>
-                </div>
-            );
-        };
-
-        /* DIAGRAMA SVG: distribución típica de la VRAM durante el entrenamiento */
-        const VRAMSVG = () => {
-            const segs = [
-                { lbl: 'Estados del optimizador (Adam, ≈2× los pesos)', pct: 32, color: '#3D008D' },
-                { lbl: 'Activaciones intermedias', pct: 31, color: '#0E7490' },
-                { lbl: 'Gradientes (≈1× los pesos)', pct: 16, color: '#ED1E79' },
-                { lbl: 'Pesos del modelo', pct: 16, color: '#15803D' },
-                { lbl: 'Lote de entrada', pct: 5, color: '#B45309' },
-            ];
-            let acc = 0;
-            const x0 = 60, w = 620;
-            return (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
-                    <svg viewBox="0 0 740 200" className="w-full" style={{ minWidth: 620 }} role="img"
-                        aria-label="Distribución típica de la VRAM durante el entrenamiento: los estados del optimizador suelen ser el mayor consumidor, seguidos por activaciones, gradientes, pesos y el lote de entrada.">
-                        <title>La barra apilada reparte la memoria de video: los estados del optimizador Adam son el componente de mayor consumo, por delante de las activaciones, los gradientes, los pesos y el lote de datos.</title>
-                        <text x="370" y="34" textAnchor="middle" fontSize="13" fill="#001A4D" fontWeight="bold">¿En qué se gasta la VRAM durante el entrenamiento?</text>
-                        {segs.map((s, i) => {
-                            const segX = x0 + (acc / 100) * w;
-                            const segW = (s.pct / 100) * w;
-                            acc += s.pct;
-                            return (
-                                <g key={i}>
-                                    <rect x={segX} y={60} width={segW} height={48} fill={s.color} stroke="#fff" strokeWidth="1.5" />
-                                    <text x={segX + segW / 2} y={89} textAnchor="middle" fontSize="12" fill="#fff" fontWeight="bold">{s.pct}%</text>
-                                    <rect x={x0 + (i % 1) * 0} y={124 + i * 14} width={12} height={12} fill={s.color} />
-                                    <text x={x0 + 18} y={134 + i * 14} fontSize="11" fill="#475569">{s.lbl}</text>
-                                </g>
-                            );
-                        })}
-                    </svg>
-                    <p className="text-xs text-gray-500 italic text-center mt-1">
-                        Figura 3. Distribución típica de la VRAM durante el entrenamiento (porcentajes aproximados). Los estados del optimizador (Adam) suelen ser el mayor consumidor. Fuente: elaboración propia.
-                    </p>
+                    </div>
+                    <AvisoDesplazar />
+                    <PieFigura n="3.2.2" className="mt-1">La pila de software CUDA: de modelo.fit() al hardware de la GPU.</PieFigura>
                 </div>
             );
         };
@@ -1845,7 +2067,8 @@ import keras
                 { n: 'FP8 (E4M3)', bits: '8 bits', e: 4, m: 3, nota: 'Ada (L4), Hopper y Blackwell; E5M2 para gradientes' },
             ];
             return (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                    <div className="overflow-x-auto">
                     <svg viewBox="0 0 740 250" className="w-full" style={{ minWidth: 660 }} role="img"
                         aria-label="Anatomía de los formatos numéricos FP32, BF16, FP16 y FP8: cada fila muestra el bit de signo, los bits de exponente (que definen el rango) y los bits de mantisa (que definen la precisión). BF16 conserva los 8 bits de exponente de FP32, por eso no necesita escalado de pérdida; FP16 solo tiene 5 y sí lo requiere.">
                         <title>Comparación a escala de los campos de bits: signo, exponente y mantisa de FP32, BF16, FP16 y FP8. El exponente define el rango representable y la mantisa la precisión.</title>
@@ -1853,38 +2076,39 @@ import keras
                         {/* leyenda */}
                         <rect x={215} y={30} width={11} height={11} fill="#001A4D" /><text x={230} y={40} fontSize="10" fill="#475569">signo</text>
                         <rect x={285} y={30} width={11} height={11} fill="#0E7490" /><text x={300} y={40} fontSize="10" fill="#475569">exponente</text>
-                        <rect x={385} y={30} width={11} height={11} fill="#ED1E79" /><text x={400} y={40} fontSize="10" fill="#475569">mantisa</text>
+                        <rect x={385} y={30} width={11} height={11} fill="#BE185D" /><text x={400} y={40} fontSize="10" fill="#475569">mantisa</text>
                         {filas.map((f, i) => {
                             const y = 56 + i * 46;
                             const wE = f.e * B, wM = f.m * B;
                             return (
                                 <g key={i}>
                                     <text x={X0 - 10} y={y + 14} textAnchor="end" fontSize="11" fill="#001A4D" fontWeight="bold">{f.n}</text>
-                                    <text x={X0 - 10} y={y + 26} textAnchor="end" fontSize="9" fill="#94A3B8">{f.bits}</text>
+                                    <text x={X0 - 10} y={y + 26} textAnchor="end" fontSize="9" fill="#64748B">{f.bits}</text>
                                     <rect x={X0} y={y} width={B} height={22} fill="#001A4D" stroke="#fff" strokeWidth="1" />
                                     <rect x={X0 + B} y={y} width={wE} height={22} fill="#0E7490" stroke="#fff" strokeWidth="1" />
                                     <text x={X0 + B + wE / 2} y={y + 15} textAnchor="middle" fontSize="10" fill="#fff" fontWeight="bold">{f.e}</text>
-                                    <rect x={X0 + B + wE} y={y} width={wM} height={22} fill="#ED1E79" stroke="#fff" strokeWidth="1" />
+                                    <rect x={X0 + B + wE} y={y} width={wM} height={22} fill="#BE185D" stroke="#fff" strokeWidth="1" />
                                     <text x={X0 + B + wE + wM / 2} y={y + 15} textAnchor="middle" fontSize="10" fill="#fff" fontWeight="bold">{f.m}</text>
                                     <text x={X0 + B + wE + wM + 10} y={y + 15} fontSize="9.5" fill="#64748B" fontStyle="italic">{f.nota}</text>
                                 </g>
                             );
                         })}
-                        <text x="370" y="242" textAnchor="middle" fontSize="10" fill="#94A3B8" fontStyle="italic">BF16 recorta la mantisa pero conserva el rango de FP32; frente a BF16, FP16 gana precisión pero pierde rango.</text>
+                        <text x="370" y="242" textAnchor="middle" fontSize="10" fill="#64748B" fontStyle="italic">BF16 recorta la mantisa pero conserva el rango de FP32; frente a BF16, FP16 gana precisión pero pierde rango.</text>
                     </svg>
-                    <p className="text-xs text-gray-500 italic text-center mt-1">
-                        Figura 4. Anatomía de los formatos numéricos: el exponente define el rango y la mantisa la precisión. Fuente: elaboración propia.
-                    </p>
+                    </div>
+                    <AvisoDesplazar />
+                    <PieFigura n="3.2.4" className="mt-1">Anatomía de los formatos numéricos: el exponente define el rango y la mantisa la precisión.</PieFigura>
                 </div>
             );
         };
 
         /* DIAGRAMA SVG: flujo del entrenamiento con precisión mixta (AMP) */
         const AMPSVG = () => (
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
-                <svg viewBox="0 0 740 240" className="w-full" style={{ minWidth: 660 }} role="img"
-                    aria-label="Flujo del entrenamiento con precisión mixta: los pesos maestros se mantienen en FP32, mientras los pasos hacia adelante y hacia atrás usan FP16 o BF16 para aprovechar los Tensor Cores; con FP16 se aplica escalado de pérdida.">
-                    <title>El ciclo conserva pesos maestros en FP32 por estabilidad, ejecuta los pasos hacia adelante y hacia atrás en FP16 o BF16 sobre los Tensor Cores y, solo con FP16, escala la pérdida antes de retropropagar.</title>
+            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                <div className="overflow-x-auto">
+                <svg viewBox="0 0 740 292" className="w-full" style={{ minWidth: 660 }} role="img"
+                    aria-label="Flujo del entrenamiento con precisión mixta: los pesos maestros se mantienen en FP32; los pasos hacia adelante y hacia atrás usan FP16 o BF16 en los Tensor Cores; con FP16 se escala la pérdida. Tras el paso hacia atrás se comprueba si hay valores inf o NaN: si los hay, se omite el paso y la escala se divide entre 2; si no, se desescala, se actualizan los pesos en FP32 y la escala se duplica tras 2.000 pasos estables.">
+                    <title>El ciclo conserva pesos maestros en FP32, ejecuta los pasos hacia adelante y hacia atrás en FP16 o BF16 y, solo con FP16, escala la pérdida antes de retropropagar; GradScaler omite el paso y reduce la escala si aparece un desbordamiento (inf o NaN), y la aumenta tras una racha de pasos estables.</title>
                     <defs>
                         <marker id="arrA" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#001A4D" /></marker>
                     </defs>
@@ -1892,42 +2116,59 @@ import keras
                     <rect x={40} y={95} width={120} height={50} rx="8" fill="#F5F0FA" stroke="#3D008D" strokeWidth="2" />
                     <text x={100} y={116} textAnchor="middle" fontSize="12" fill="#3D008D" fontWeight="bold">Pesos maestros</text>
                     <text x={100} y="132" textAnchor="middle" fontSize="11" fill="#3D008D">FP32 (estable)</text>
-                    {/* Forward FP16 */}
-                    <line x1={160} y1={112} x2={202} y2={88} stroke="#001A4D" strokeWidth="1.6" markerEnd="url(#arrA)" />
-                    <text x={176} y={79} textAnchor="middle" fontSize="8.5" fill="#64748B" fontStyle="italic">copia a FP16</text>
-                    <rect x={205} y={50} width={130} height={44} rx="8" fill="#ECFEFF" stroke="#0E7490" strokeWidth="1.8" />
-                    <text x={270} y={70} textAnchor="middle" fontSize="11" fill="#0E7490" fontWeight="bold">Forward (FP16/BF16)</text>
-                    <text x={270} y={86} textAnchor="middle" fontSize="10" fill="#0E7490">Tensor Cores</text>
-                    {/* Loss scaling */}
-                    <line x1={335} y1={72} x2={380} y2={72} stroke="#001A4D" strokeWidth="1.6" markerEnd="url(#arrA)" />
-                    <rect x={385} y={50} width={130} height={44} rx="8" fill="#FFF1F7" stroke="#ED1E79" strokeWidth="1.8" />
-                    <text x={450} y={70} textAnchor="middle" fontSize="11" fill="#ED1E79" fontWeight="bold">Escalado de pérdida</text>
-                    <text x={450} y={86} textAnchor="middle" fontSize="10" fill="#ED1E79">solo FP16</text>
-                    <text x={450} y={112} textAnchor="middle" fontSize="8.5" fill="#9D174D">Sin escalar, los gradientes</text>
-                    <text x={450} y={124} textAnchor="middle" fontSize="8.5" fill="#9D174D">diminutos de FP16 se anulan (→ 0)</text>
-                    {/* Backward */}
-                    <line x1={515} y1={72} x2={560} y2={72} stroke="#001A4D" strokeWidth="1.6" markerEnd="url(#arrA)" />
-                    <rect x={565} y={50} width={130} height={44} rx="8" fill="#ECFEFF" stroke="#0E7490" strokeWidth="1.8" />
-                    <text x={630} y={70} textAnchor="middle" fontSize="11" fill="#0E7490" fontWeight="bold">Backward (FP16/BF16)</text>
-                    <text x={630} y={86} textAnchor="middle" fontSize="10" fill="#0E7490">gradientes</text>
-                    {/* Unscale + update FP32 */}
-                    <line x1={630} y1={94} x2={630} y2={150} stroke="#001A4D" strokeWidth="1.6" markerEnd="url(#arrA)" />
-                    <rect x={520} y={152} width={220} height={44} rx="8" fill="#DCFCE7" stroke="#15803D" strokeWidth="1.8" />
-                    <text x={630} y={172} textAnchor="middle" fontSize="11" fill="#15803D" fontWeight="bold">Desescalar + actualizar pesos</text>
-                    <text x={630} y={188} textAnchor="middle" fontSize="10" fill="#15803D">en FP32</text>
+                    {/* Paso hacia adelante en 16 bits */}
+                    <line x1={160} y1={112} x2={197} y2={90} stroke="#001A4D" strokeWidth="1.6" markerEnd="url(#arrA)" />
+                    <text x={150} y={70} textAnchor="middle" fontSize="9" fill="#64748B" fontStyle="italic">copia a FP16/BF16</text>
+                    <rect x={200} y={50} width={140} height={52} rx="8" fill="#ECFEFF" stroke="#0E7490" strokeWidth="1.8" />
+                    <text x={270} y={68} textAnchor="middle" fontSize="11" fill="#0E7490" fontWeight="bold">Paso hacia adelante</text>
+                    <text x={270} y={82} textAnchor="middle" fontSize="10" fill="#0E7490">FP16/BF16</text>
+                    <text x={270} y={95} textAnchor="middle" fontSize="9.5" fill="#0E7490">Tensor Cores</text>
+                    {/* Escalado de pérdida */}
+                    <line x1={340} y1={76} x2={374} y2={76} stroke="#001A4D" strokeWidth="1.6" markerEnd="url(#arrA)" />
+                    <rect x={380} y={50} width={140} height={52} rx="8" fill="#FFF1F7" stroke="#ED1E79" strokeWidth="1.8" />
+                    <text x={450} y={72} textAnchor="middle" fontSize="11" fill="#BE185D" fontWeight="bold">Escalado de pérdida</text>
+                    <text x={450} y={88} textAnchor="middle" fontSize="10" fill="#BE185D">solo FP16</text>
+                    <text x={450} y={115} textAnchor="middle" fontSize="9" fill="#9D174D">Sin escalar, los gradientes</text>
+                    <text x={450} y={126} textAnchor="middle" fontSize="9" fill="#9D174D">diminutos de FP16 se anulan (→ 0)</text>
+                    {/* Paso hacia atrás */}
+                    <line x1={520} y1={76} x2={554} y2={76} stroke="#001A4D" strokeWidth="1.6" markerEnd="url(#arrA)" />
+                    <rect x={560} y={50} width={140} height={52} rx="8" fill="#ECFEFF" stroke="#0E7490" strokeWidth="1.8" />
+                    <text x={630} y={68} textAnchor="middle" fontSize="11" fill="#0E7490" fontWeight="bold">Paso hacia atrás</text>
+                    <text x={630} y={82} textAnchor="middle" fontSize="9.5" fill="#0E7490">gradientes de las</text>
+                    <text x={630} y={95} textAnchor="middle" fontSize="9.5" fill="#0E7490">activaciones en 16 bits</text>
+                    {/* scaler.update(): ¿desbordamiento? */}
+                    <line x1={630} y1={102} x2={630} y2={128} stroke="#001A4D" strokeWidth="1.6" markerEnd="url(#arrA)" />
+                    <polygon points="630,134 680,160 630,186 580,160" fill="#FFFBEB" stroke="#B45309" strokeWidth="1.6" />
+                    <text x={630} y={164} textAnchor="middle" fontSize="10" fill="#92400E" fontWeight="bold">¿inf/NaN?</text>
+                    {/* Sí: se omite el paso */}
+                    <line x1={580} y1={160} x2={546} y2={160} stroke="#B91C1C" strokeWidth="1.6" markerEnd="url(#arrA)" />
+                    <text x={563} y={152} textAnchor="middle" fontSize="10" fill="#B91C1C" fontWeight="bold">Sí</text>
+                    <rect x={380} y={138} width={160} height={44} rx="8" fill="#FEF2F2" stroke="#B91C1C" strokeWidth="1.6" />
+                    <text x={460} y={156} textAnchor="middle" fontSize="10.5" fill="#B91C1C" fontWeight="bold">Se omite el paso</text>
+                    <text x={460} y={172} textAnchor="middle" fontSize="9" fill="#7F1D1D">y la escala se divide entre 2</text>
+                    <line x1={380} y1={160} x2={166} y2={141} stroke="#B91C1C" strokeWidth="1.4" strokeDasharray="4 3" markerEnd="url(#arrA)" />
+                    <text x={270} y={141} textAnchor="middle" fontSize="9" fill="#7F1D1D" fontStyle="italic">pesos sin cambio</text>
+                    {/* No: desescalar y actualizar */}
+                    <line x1={630} y1={186} x2={630} y2={202} stroke="#15803D" strokeWidth="1.6" markerEnd="url(#arrA)" />
+                    <text x={642} y={199} fontSize="10" fill="#15803D" fontWeight="bold">No</text>
+                    <rect x={510} y={208} width={220} height={52} rx="8" fill="#DCFCE7" stroke="#15803D" strokeWidth="1.8" />
+                    <text x={620} y={226} textAnchor="middle" fontSize="11" fill="#166534" fontWeight="bold">Desescalar + actualizar pesos</text>
+                    <text x={620} y={240} textAnchor="middle" fontSize="10" fill="#166534">en FP32</text>
+                    <text x={620} y={253} textAnchor="middle" fontSize="9" fill="#166534">escala ×2 tras 2.000 pasos estables</text>
                     {/* vuelta a pesos maestros */}
-                    <line x1={520} y1={174} x2={160} y2={145} stroke="#15803D" strokeWidth="1.6" strokeDasharray="5 3" markerEnd="url(#arrA)" />
-                    <text x={300} y={210} textAnchor="middle" fontSize="11" fill="#15803D" fontStyle="italic">El optimizador actualiza los pesos maestros FP32 — el ciclo se repite</text>
+                    <line x1={510} y1={234} x2={132} y2={150} stroke="#15803D" strokeWidth="1.6" strokeDasharray="5 3" markerEnd="url(#arrA)" />
+                    <text x={300} y={282} textAnchor="middle" fontSize="11" fill="#166534" fontStyle="italic">El optimizador actualiza los pesos maestros FP32 — el ciclo se repite</text>
                 </svg>
-                <p className="text-xs text-gray-500 italic text-center mt-1">
-                    Figura 5. Flujo del entrenamiento con precisión mixta (AMP). El escalado de pérdida solo es necesario con FP16. Fuente: elaboración propia.
-                </p>
+                </div>
+                <AvisoDesplazar />
+                <PieFigura n="3.2.5" className="mt-1" fuente="elaboración propia a partir de Micikevicius et al. (2018) y de la documentación de PyTorch AMP (PyTorch Foundation, s. f.).">Flujo del entrenamiento con precisión mixta (AMP). El escalado de pérdida solo es necesario con FP16; en ese caso, <span className="not-italic">GradScaler</span> ajusta la escala de forma dinámica: ante un inf o un NaN omite el paso y la divide entre 2, y la duplica tras 2.000 pasos estables.</PieFigura>
             </div>
         );
 
         /* DIAGRAMA SVG: estrategias multi-GPU (DP / DDP / FSDP) */
         const MultiGPUSVG = () => (
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                <div className="overflow-x-auto">
                 <svg viewBox="0 0 740 240" className="w-full" style={{ minWidth: 660 }} role="img"
                     aria-label="Estrategias multi-GPU: DataParallel centraliza gradientes en la GPU 0 creando un cuello de botella; DistributedDataParallel usa un proceso por GPU con sincronización equilibrada; Fully Sharded Data Parallel fragmenta pesos, gradientes y estados del optimizador entre todas las GPU.">
                     <title>DataParallel centraliza los gradientes en la GPU 0 (cuello de botella); DDP lanza un proceso por GPU y sincroniza de forma equilibrada con NCCL; FSDP reparte cada componente del modelo entre las GPU para entrenar modelos que no caben en una sola.</title>
@@ -1940,7 +2181,7 @@ import keras
                             {i > 0 && <line x1={70 + i * 50} y1={50} x2={75} y2={46} stroke="#B91C1C" strokeWidth="1.4" />}
                         </g>
                     ))}
-                    <text x={58} y={68} textAnchor="middle" fontSize="9" fill="#B91C1C">★</text>
+                    <text x={58} y={68} textAnchor="middle" fontSize="9" fill="#991B1B">★</text>
                     <text x="123" y="108" textAnchor="middle" fontSize="10" fill="#B91C1C" fontStyle="italic">Cuello de botella en G0</text>
 
                     {/* DDP */}
@@ -1959,21 +2200,21 @@ import keras
                     {[0, 1, 2].map((i) => (
                         <g key={`fsdp-${i}`}>
                             <rect x={547 + i * 50} y={50} width={40} height={34} rx="5" fill="#EDE9FE" stroke="#3D008D" strokeWidth="1.5" />
-                            <text x={567 + i * 50} y={66} textAnchor="middle" fontSize="8" fill="#3D008D">G{i}</text>
-                            <text x={567 + i * 50} y={78} textAnchor="middle" fontSize="7" fill="#7C3AED">1/3</text>
+                            <text x={567 + i * 50} y={65} textAnchor="middle" fontSize="9" fill="#3D008D">G{i}</text>
+                            <text x={567 + i * 50} y={78} textAnchor="middle" fontSize="9" fill="#6D28D9">1/3</text>
                         </g>
                     ))}
-                    <text x="617" y="108" textAnchor="middle" fontSize="10" fill="#3D008D" fontStyle="italic">pesos+grad+optim repartidos</text>
+                    <text x="617" y="108" textAnchor="middle" fontSize="10" fill="#3D008D" fontStyle="italic">pesos, gradientes y estados repartidos</text>
 
                     {/* leyenda inferior */}
                     <line x1={50} y1={130} x2={690} y2={130} stroke="#E2E8F0" strokeWidth="1" />
                     <text x={370} y={156} textAnchor="middle" fontSize="11" fill="#475569">La analogía de la <tspan fontWeight="bold" fill="#001A4D">minga</tspan>: cada GPU trabaja una porción de los datos y al final todas comparten sus gradientes.</text>
-                    <text x={370} y={178} textAnchor="middle" fontSize="10" fill="#94A3B8" fontStyle="italic">DP: simple pero ineficiente · DDP: un proceso por GPU, sin cuello de botella en G0 · FSDP: modelos que exceden la VRAM de una GPU</text>
+                    <text x={370} y={178} textAnchor="middle" fontSize="10" fill="#64748B" fontStyle="italic">DP: simple pero ineficiente · DDP: un proceso por GPU, sin cuello de botella en G0 · FSDP: modelos que exceden la VRAM de una GPU</text>
                     <text x={370} y={206} textAnchor="middle" fontSize="10" fill="#64748B">En TensorFlow, tf.distribute.MirroredStrategy() ofrece multi-GPU de un nodo de forma transparente.</text>
                 </svg>
-                <p className="text-xs text-gray-500 italic text-center mt-1">
-                    Figura 6. Estrategias de entrenamiento multi-GPU en PyTorch (DP, DDP, FSDP). Fuente: elaboración propia.
-                </p>
+                </div>
+                <AvisoDesplazar />
+                <PieFigura n="3.2.6" className="mt-1">Estrategias de entrenamiento multi-GPU en PyTorch (DP, DDP, FSDP).</PieFigura>
             </div>
         );
 
@@ -1987,12 +2228,13 @@ import keras
             const destino = (tipo, x, y) => tipo === 'kaggle'
                 ? (<g><rect x={x} y={y} width={170} height={40} rx="8" fill="#ECFEFF" stroke="#0E7490" strokeWidth="2" />
                     <text x={x + 85} y={y + 17} textAnchor="middle" fontSize="11.5" fill="#0E7490" fontWeight="bold">Kaggle</text>
-                    <text x={x + 85} y={y + 31} textAnchor="middle" fontSize="8.5" fill="#0E7490">P100 / 2×T4 · ≈30 h/semana</text></g>)
+                    <text x={x + 85} y={y + 31} textAnchor="middle" fontSize="9" fill="#0E7490">P100 / 2×T4 · ≈30 h/semana</text></g>)
                 : (<g><rect x={x} y={y} width={170} height={40} rx="8" fill="#F5F0FA" stroke="#3D008D" strokeWidth="2" />
                     <text x={x + 85} y={y + 17} textAnchor="middle" fontSize="11.5" fill="#3D008D" fontWeight="bold">Colab</text>
-                    <text x={x + 85} y={y + 31} textAnchor="middle" fontSize="8.5" fill="#3D008D">T4 · Drive · tiempo real</text></g>);
+                    <text x={x + 85} y={y + 31} textAnchor="middle" fontSize="9" fill="#3D008D">T4 · Drive · tiempo real</text></g>);
             return (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                    <div className="overflow-x-auto">
                     <svg viewBox="0 0 740 330" className="w-full" style={{ minWidth: 660 }} role="img"
                         aria-label="Diagrama de decisión entre Colab y Kaggle: la cuota semanal visible, los conjuntos de datos públicos de Kaggle y las necesidades de más de 13 GB de RAM apuntan a Kaggle; la colaboración en tiempo real y el prototipado apuntan a Colab; la estrategia combinada usa ambos.">
                         <title>Tres preguntas guían la elección de plataforma: duración y cuota, colaboración en tiempo real, y datos o memoria; cada respuesta afirmativa dirige a Kaggle o a Colab, y responder no a todo lleva al prototipado en Colab.</title>
@@ -2013,14 +2255,244 @@ import keras
                             );
                         })}
                         {destino('colab', 145, 260)}
-                        <text x={230} y={318} textAnchor="middle" fontSize="8.5" fill="#64748B" fontStyle="italic">prototipado y desarrollo del día a día</text>
+                        <text x={230} y={318} textAnchor="middle" fontSize="9" fill="#64748B" fontStyle="italic">prototipado y desarrollo del día a día</text>
                         <rect x={495} y={256} width={215} height={48} rx="8" fill="#F0FDF4" stroke="#15803D" strokeWidth="1.6" strokeDasharray="5 3" />
                         <text x={602} y={275} textAnchor="middle" fontSize="10" fill="#15803D" fontWeight="bold">Estrategia combinada</text>
                         <text x={602} y={291} textAnchor="middle" fontSize="8.5" fill="#15803D">Colab desarrolla + Kaggle entrena (≈30 h/semana)</text>
                     </svg>
-                    <p className="text-xs text-gray-500 italic text-center mt-1">
-                        Figura 7. Diagrama de decisión entre Colab y Kaggle según las necesidades del proyecto. Fuente: elaboración propia.
+                    </div>
+                    <AvisoDesplazar />
+                    <PieFigura n="3.2.7" className="mt-1">Diagrama de decisión entre Colab y Kaggle según las necesidades del proyecto.</PieFigura>
+                </div>
+            );
+        };
+
+        /* ============================================================
+           SIMULACIÓN S-A «¿Qué llena la bodega?» — calculadora de VRAM (auditoría 2026-10, M3-D-04)
+           Sustituye a la antigua figura de porcentajes fijos (M3-D-11). Vista React con SVG propio;
+           el modelo puro (window.M3SIMS) y el arnés ?selftest=1 viven en el <script> previo al de Babel.
+        ============================================================ */
+        const SA_COMP = [
+            { k: 'pesos', lbl: 'Pesos', color: '#15803D' },
+            { k: 'gradientes', lbl: 'Gradientes', color: '#BE185D' },
+            { k: 'optimizador', lbl: 'Estados del optimizador', color: '#3D008D' },
+            { k: 'cacheAmp', lbl: 'Caché de autocast (copia de 16 bits de los pesos)', color: '#7C3AED' },
+            { k: 'activaciones', lbl: 'Activaciones guardadas', color: '#0E7490' },
+            { k: 'entrada', lbl: 'Lote de entrada', color: '#B45309' },
+        ];
+        const SA_PRECISION = {
+            fp32: 'FP32',
+            amp: 'Precisión mixta (autocast de PyTorch)',
+            zero: 'Precisión mixta, contabilidad ZeRO (2 + 2 + K bytes por parámetro)',
+        };
+        const SA_OPT = { sgd: 'SGD', momento: 'SGD con momento', adam: 'Adam o AdamW' };
+        const fmtBytes = (x) => x >= 1e9 ? `${fmtNum(x / 1e9, 2)} GB` : x >= 1e6 ? `${fmtNum(x / 1e6, 1)} MB` : `${fmtNum(x / 1e3, 1)} kB`;
+        const fmtPct = (p) => `${fmtNum(p, 1)} %`;
+        const pasoEje = (max, opciones) => opciones.find(o => max / o <= 6) || opciones[opciones.length - 1];
+
+        const CalculadoraVRAM = () => {
+            const S = window.M3SIMS;
+            const [modelo, setModelo] = useState('resnet50');
+            const [bExp, setBExp] = useState(5);
+            const [precision, setPrecision] = useState('fp32');
+            const [opt, setOpt] = useState('adam');
+            const [gpu, setGpu] = useState('t4');
+            const [inferencia, setInferencia] = useState(false);
+            const [sExp, setSExp] = useState(10);
+            const [eficiente, setEficiente] = useState(false);
+            const [recomputacion, setRecomputacion] = useState(false);
+            const [pMillones, setPMillones] = useState(100);
+            const [actMB, setActMB] = useState(50);
+            if (!S) return null;
+
+            const b = 2 ** bExp, s = 2 ** sExp;
+            const esTr = modelo === 'transformer125m', esPers = modelo === 'personalizado';
+            const c = { modelo, b, precision, opt, gpu, inferencia, s, eficiente, recomputacion, pMillones, actMB };
+            const r = S.vram(c);
+            const bMax = S.loteMaximo(c);
+            const ahorro = S.ahorroAMP(c);
+            const gpuNombre = S.GPUS[gpu].nombre;
+
+            // Barra apilada en la misma escala que la capacidad de la GPU
+            const X0 = 16, W = 528;
+            const escala = Math.max(r.total, r.capacidad) * 1.04;
+            const px = (v) => (v / escala) * W;
+            let acc = 0;
+            const segs = SA_COMP.filter(t => r.comp[t.k] > 0).map(t => {
+                const x = X0 + px(acc); acc += r.comp[t.k];
+                return { ...t, x, w: px(r.comp[t.k]), v: r.comp[t.k], pct: r.total > 0 ? 100 * r.comp[t.k] / r.total : 0 };
+            });
+            const mayor = segs.reduce((m, t) => (!m || t.v > m.v ? t : m), null);
+            const xUtil = X0 + px(r.util), xCap = X0 + px(r.capacidad), xTot = X0 + px(r.total);
+            const paso = pasoEje(escala / 1e9, [0.5, 1, 2, 5, 10, 20, 50, 100]);
+            const marcas = [];
+            for (let g = 0; g * 1e9 <= escala; g += paso) marcas.push(g);
+            const resumen = `${S.MODELOS[modelo].tipo === 'personalizado' ? 'Modelo personalizado' : S.MODELOS[modelo].nombre.split(' (')[0]}, lote de ${b}${esTr ? ` y secuencias de ${fmtNum(s)} fichas` : ''}, ${inferencia ? 'solo inferencia' : SA_PRECISION[precision].replace(/^Precisión/, 'precisión') + ' y ' + SA_OPT[opt]}: ` +
+                `≈ ${fmtBytes(r.total)} de ${fmtNum(r.util / 1e9, 1)} GB útiles en la ${gpuNombre.split(' (')[0]}. ` +
+                (r.cabe ? 'Cabe.' : `CUDA out of memory: faltan ≈ ${fmtBytes(r.total - r.util)}.`) +
+                (mayor ? ` Componente mayor: ${mayor.lbl.toLowerCase()} (${fmtPct(mayor.pct)}).` : '');
+
+            const notaExtra = [
+                (modelo === 'mlp' || esPers) && precision !== 'fp32' && ' Sin medición en 16 bits para este modelo, se supone la mitad de las activaciones de FP32.',
+                inferencia && ' En modo de solo inferencia, las activaciones mostradas son una cota superior: no se guardan para el paso hacia atrás.',
+            ].filter(Boolean).join('');
+            const campo = 'w-full border border-gray-300 rounded-lg px-2 py-1.5 bg-white text-gray-800';
+            return (
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                    <p className="font-bold text-navy mb-3"><i className="fas fa-warehouse mr-2 text-primary" aria-hidden="true"></i>Simulación: ¿qué llena la bodega?</p>
+                    <div className="grid sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                        <div>
+                            <label htmlFor="sa-modelo" className="block font-semibold text-navy mb-1">Modelo</label>
+                            <select id="sa-modelo" value={modelo} onChange={e => setModelo(e.target.value)} className={campo}>
+                                {Object.entries(S.MODELOS).map(([k, m]) => <option key={k} value={k}>{m.nombre}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label htmlFor="sa-lote" className="block font-semibold text-navy mb-1">Tamaño del lote: <span className="font-mono">{b}</span></label>
+                            <input id="sa-lote" type="range" min="0" max="9" step="1" value={bExp} onChange={e => setBExp(+e.target.value)}
+                                className="usta-range" aria-valuetext={`lote de ${b} ${b === 1 ? 'muestra' : 'muestras'}`} />
+                        </div>
+                        <div>
+                            <label htmlFor="sa-precision" className="block font-semibold text-navy mb-1">Precisión</label>
+                            <select id="sa-precision" value={precision} onChange={e => setPrecision(e.target.value)} className={campo}>
+                                {Object.entries(SA_PRECISION).map(([k, t]) => <option key={k} value={k}>{t}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label htmlFor="sa-opt" className="block font-semibold text-navy mb-1">Optimizador</label>
+                            <select id="sa-opt" value={opt} onChange={e => setOpt(e.target.value)} className={campo} disabled={inferencia}>
+                                {Object.entries(SA_OPT).map(([k, t]) => <option key={k} value={k}>{t}</option>)}
+                            </select>
+                        </div>
+                        <div>
+                            <label htmlFor="sa-gpu" className="block font-semibold text-navy mb-1">GPU de referencia</label>
+                            <select id="sa-gpu" value={gpu} onChange={e => setGpu(e.target.value)} className={campo}>
+                                {Object.entries(S.GPUS).map(([k, g]) => <option key={k} value={k}>{g.nombre}</option>)}
+                            </select>
+                        </div>
+                        <div className="flex items-center sm:items-end sm:pb-1.5">
+                            <input id="sa-inferencia" type="checkbox" checked={inferencia} onChange={e => setInferencia(e.target.checked)} className="mr-2 h-4 w-4" />
+                            <label htmlFor="sa-inferencia" className="font-semibold text-navy">Solo inferencia (sin gradientes ni optimizador)</label>
+                        </div>
+                        {esTr && (
+                            <>
+                                <div>
+                                    <label htmlFor="sa-s" className="block font-semibold text-navy mb-1">Longitud de la secuencia: <span className="font-mono">{fmtNum(s)}</span> fichas</label>
+                                    <input id="sa-s" type="range" min="7" max="11" step="1" value={sExp} onChange={e => setSExp(+e.target.value)}
+                                        className="usta-range" aria-valuetext={`${s} fichas por secuencia`} />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <div className="flex items-center">
+                                        <input id="sa-eficiente" type="checkbox" checked={eficiente} onChange={e => setEficiente(e.target.checked)} className="mr-2 h-4 w-4" />
+                                        <label htmlFor="sa-eficiente" className="text-gray-800">Atención eficiente en memoria (FlashAttention)</label>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <input id="sa-recomp" type="checkbox" checked={recomputacion} onChange={e => setRecomputacion(e.target.checked)} className="mr-2 h-4 w-4" />
+                                        <label htmlFor="sa-recomp" className="text-gray-800">Recomputación completa de activaciones</label>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                        {esPers && (
+                            <>
+                                <div>
+                                    <label htmlFor="sa-p" className="block font-semibold text-navy mb-1">Parámetros (millones)</label>
+                                    <input id="sa-p" type="number" min="0.01" max="100000" step="any" value={pMillones} onChange={e => setPMillones(e.target.value)} className={campo} />
+                                </div>
+                                <div>
+                                    <label htmlFor="sa-act" className="block font-semibold text-navy mb-1">Activaciones por muestra en FP32 (MB)</label>
+                                    <input id="sa-act" type="number" min="0" max="100000" step="any" value={actMB} onChange={e => setActMB(e.target.value)} className={campo} />
+                                </div>
+                            </>
+                        )}
+                    </div>
+
+                    <div className="overflow-x-auto mt-4">
+                        <svg viewBox="0 0 560 112" className="w-full" style={{ minWidth: 480 }} role="img"
+                            aria-label={`Barra apilada de la VRAM estimada. ${resumen}`}>
+                            <defs>
+                                <pattern id="sa-rayado" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                                    <rect width="6" height="6" fill="#FEE2E2" /><line x1="0" y1="0" x2="0" y2="6" stroke="#B91C1C" strokeWidth="2" />
+                                </pattern>
+                            </defs>
+                            {/* reserva del contexto CUDA */}
+                            <rect x={xUtil} y={28} width={Math.max(0, xCap - xUtil)} height={40} fill="#E2E8F0" />
+                            {segs.map(t => (
+                                <rect key={t.k} x={t.x} y={30} width={Math.max(t.w, 0.5)} height={36} fill={t.color} stroke="#fff" strokeWidth="1" />
+                            ))}
+                            {!r.cabe && <rect x={xUtil} y={30} width={Math.max(0, xTot - xUtil)} height={36} fill="url(#sa-rayado)" opacity="0.85" />}
+                            {segs.filter(t => t.w >= 36).map(t => {
+                                // con CUDA OOM, el rótulo va en la parte que cabe (sin rayado), si hay sitio
+                                const x1 = r.cabe ? t.x + t.w : Math.min(t.x + t.w, xUtil);
+                                const xc = x1 - t.x >= 36 ? (t.x + x1) / 2 : t.x + t.w / 2;
+                                return <text key={`r-${t.k}`} x={xc} y={52} textAnchor="middle" fontSize="11" fill="#fff" fontWeight="bold" stroke={t.color} strokeWidth="3" paintOrder="stroke">{fmtPct(t.pct)}</text>;
+                            })}
+                            <line x1={xUtil} y1={20} x2={xUtil} y2={74} stroke="#B91C1C" strokeWidth="2" strokeDasharray="5 3" />
+                            <text x={xUtil} y={15} textAnchor={xUtil > 420 ? 'end' : 'middle'} fontSize="11" fill="#B91C1C" fontWeight="bold">capacidad útil: {fmtNum(r.util / 1e9, 1)} GB</text>
+                            <line x1={X0} y1={80} x2={X0 + W} y2={80} stroke="#64748B" strokeWidth="1" />
+                            {marcas.map(g => (
+                                <g key={g}>
+                                    <line x1={X0 + px(g * 1e9)} y1={80} x2={X0 + px(g * 1e9)} y2={84} stroke="#64748B" strokeWidth="1" />
+                                    <text x={X0 + px(g * 1e9)} y={97} textAnchor="middle" fontSize="10.5" fill="#475569">{fmtNum(g, paso < 1 ? 1 : 0)}</text>
+                                </g>
+                            ))}
+                            <text x={X0 + W} y={110} textAnchor="end" fontSize="10.5" fill="#475569">GB</text>
+                        </svg>
+                    </div>
+                    <AvisoDesplazar />
+
+                    <p className={`mt-3 rounded-lg px-3 py-2 text-sm font-semibold ${r.cabe ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`} aria-live="polite">
+                        <i className={`fas ${r.cabe ? 'fa-circle-check' : 'fa-triangle-exclamation'} mr-2`} aria-hidden="true"></i>{resumen}
                     </p>
+
+                    <div className="grid sm:grid-cols-2 gap-x-6 gap-y-1 mt-3 text-sm">
+                        {segs.map(t => (
+                            <div key={t.k} className="flex items-center gap-2">
+                                <span className="inline-block w-3 h-3 rounded-sm flex-shrink-0" style={{ background: t.color }} aria-hidden="true"></span>
+                                <span className="flex-1 text-gray-700">{t.lbl}</span>
+                                <span className="font-mono text-gray-800">{fmtBytes(t.v)}</span>
+                                <span className="font-mono text-gray-600 w-14 text-right">{fmtPct(t.pct)}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="grid sm:grid-cols-3 gap-2 mt-3 text-center text-sm">
+                        <div className="rounded-lg bg-bg border border-gray-200 px-2 py-2"><span className="block text-[0.7rem] uppercase tracking-wide text-gray-600">Total estimado</span><span className="font-mono font-bold text-navy">{fmtBytes(r.total)}</span></div>
+                        <div className="rounded-lg bg-bg border border-gray-200 px-2 py-2"><span className="block text-[0.7rem] uppercase tracking-wide text-gray-600">Lote máximo en esta GPU</span><span className="font-mono font-bold text-navy">{Number.isFinite(bMax) ? fmtNum(bMax) : '—'}</span></div>
+                        <div className="rounded-lg bg-bg border border-gray-200 px-2 py-2"><span className="block text-[0.7rem] uppercase tracking-wide text-gray-600">{precision === 'fp32' ? 'Ahorro si se activa autocast' : 'Ahorro frente a FP32'}</span><span className="font-mono font-bold text-navy">{fmtPct(100 * ahorro)}</span></div>
+                    </div>
+
+                    <p className="text-xs text-gray-600 mt-3">
+                        <strong>Estimación de primer orden; no incluye el espacio de trabajo de cuDNN ni la fragmentación.</strong> Se descuentan
+                        además 0,5 GB fijos para el contexto CUDA (también estimados). Las activaciones por muestra de las CNN se midieron con
+                        PyTorch 2.12 a 224 × 224; las del Transformer siguen la fórmula de Korthikanti et al. (2023), en 16 bits (en FP32 se
+                        duplican de forma aproximada).{notaExtra}
+                    </p>
+
+                    <details className="mt-3 text-sm text-gray-700">
+                        <summary className="cursor-pointer font-semibold text-navy">Verificación en Colab</summary>
+                        <p className="mt-2">
+                            La estimación se contrasta con el pico real de un paso completo de entrenamiento. La cifra medida suele ser algo
+                            mayor: incluye el espacio de trabajo de cuDNN y los tensores temporales; <span className="inline-code">torch.cuda.memory_reserved()</span>{' '}
+                            suma además la memoria que el asignador retiene (fragmentación).
+                        </p>
+                        <CodeBlock lang="python" title="Pico de VRAM medido en un paso de entrenamiento" code={`import torch
+
+torch.cuda.reset_peak_memory_stats()
+# ... un paso completo: forward, loss.backward() y optimizador.step() ...
+print(f"pico asignado: {torch.cuda.max_memory_allocated() / 1e9:.2f} GB")
+print(f"reservado:     {torch.cuda.memory_reserved() / 1e9:.2f} GB")`} />
+                    </details>
+
+                    <div className="mt-3 text-sm text-gray-700 space-y-1">
+                        <p><strong className="text-navy">Para observar:</strong> al llevar el lote de 8 a 64 se observa qué segmento crece y cuál permanece fijo; después se activa la precisión mixta.</p>
+                        <p><strong className="text-navy">Para explicar:</strong> ¿por qué el ahorro no llega al 50 %? Con el Transformer, lote 1 y recomputación, ¿qué cambia y por qué?</p>
+                    </div>
+                    <PieFigura n="3.2.3" className="mt-3" fuente="elaboración propia (simulación interactiva) a partir de Micikevicius et al. (2018), Rajbhandari et al. (2020) y Korthikanti et al. (2023); activaciones por muestra medidas con PyTorch 2.12.">
+                        Calculadora de VRAM «¿Qué llena la bodega?»: reparto estimado de la memoria de la GPU durante el entrenamiento. En una CNN
+                        con lote moderado dominan las activaciones; en el ajuste fino de un Transformer con lote 1 y recomputación, los estados del
+                        modelo (con Adam en precisión mixta, 16 bytes por parámetro).
+                    </PieFigura>
                 </div>
             );
         };
@@ -2109,7 +2581,11 @@ import keras
                         <span className="inline-code">CUDA out of memory</span> (OOM) es el administrador diciendo «no hay más espacio,
                         devuelvan el camión». La primera solución siempre es <strong>reducir el tamaño del lote</strong> (<em>batch size</em>).
                     </Box>
-                    <VRAMSVG />
+                    <AntesDeInteractuar>
+                        en un ResNet-50 con Adam y lote 32, ¿ocupan más VRAM los estados del optimizador o las activaciones? ¿Qué
+                        fracción de la memoria ahorrará la precisión mixta? Conviene anotar la predicción antes de mover los controles.
+                    </AntesDeInteractuar>
+                    <CalculadoraVRAM />
 
                     <h4>Precisión mixta: hacer más con menos</h4>
                     <p>
@@ -2180,7 +2656,7 @@ keras.mixed_precision.set_global_policy('mixed_float16')`} />
                         Ambos fragmentos activan la <strong>precisión mixta</strong>, pero con distinto nivel de control. En PyTorch,{' '}
                         <span className="inline-code">autocast</span> ejecuta cada operación en FP16 donde es seguro y{' '}
                         <span className="inline-code">GradScaler</span> escala la pérdida para que los gradientes diminutos no se anulen (es el
-                        ciclo de la <strong>Figura 5</strong>: escalar → retropropagar → desescalar → paso). Bajo{' '}
+                        ciclo de la <strong>Figura 3.2.5</strong>: escalar → retropropagar → desescalar → paso). Bajo{' '}
                         <span className="inline-code">autocast</span>, la pérdida se calcula sobre <em>logits</em> con{' '}
                         <span className="inline-code">BCEWithLogitsLoss</span>: <span className="inline-code">BCELoss</span> no es segura en
                         16 bits (véase la nota técnica del Capítulo 3.1). En Keras el escalado queda oculto: basta una línea,{' '}
@@ -2223,7 +2699,7 @@ for i, (entradas, etiquetas) in enumerate(dataloader):
                     </p>
                     <MultiGPUSVG />
 
-                    <p>La Tabla 1 sitúa la T4 gratuita frente a las GPU de estudio, investigación y centro de datos.</p>
+                    <p>La Tabla 3.2.1 sitúa la T4 gratuita frente a las GPU de estudio, investigación y centro de datos.</p>
                     <div className="overflow-x-auto">
                         <table>
                             <thead><tr><th>GPU</th><th>Arquitectura</th><th>TFLOPS FP16</th><th>VRAM</th><th>Uso típico</th></tr></thead>
@@ -2237,7 +2713,7 @@ for i, (entradas, etiquetas) in enumerate(dataloader):
                             </tbody>
                         </table>
                     </div>
-                    <p className="text-xs text-gray-500 italic text-center">Tabla 1. GPU para aprendizaje profundo (consulta: 2026-10-11); TFLOPS FP16 densos con acumulación FP32, sin dispersión estructurada (las GeForce duplican la cifra con acumulación FP16). Fuente: elaboración propia.</p>
+                    <PieTabla n="3.2.1">GPU para aprendizaje profundo (consulta: 2026-10-11); TFLOPS FP16 densos con acumulación FP32, sin dispersión estructurada (las GeForce duplican la cifra con acumulación FP16).</PieTabla>
 
                     {/* ============== 2.2 Colab y Kaggle ============== */}
                     <h3>2. Entornos en la nube: Google Colab y Kaggle</h3>
@@ -2262,7 +2738,7 @@ for i, (entradas, etiquetas) in enumerate(dataloader):
                             </tbody>
                         </table>
                     </div>
-                    <p className="text-xs text-gray-500 italic text-center">Tabla 2. Planes de Google Colab (consulta: 2026-10-11; véase la nota de vigencia). Fuente: elaboración propia.</p>
+                    <PieTabla n="3.2.2">Planes de Google Colab (consulta: 2026-10-11; véase la nota de vigencia).</PieTabla>
                     <Box type="warn" label="Cambios recientes (a octubre de 2026)">
                         Llegada de las GPU H100 y G4 (Blackwell) a los planes de pago; terminal disponible también en el nivel gratuito;
                         TPU v5e en lugar de la v2-8 en el nivel gratuito; asistencia de código con Gemini. <strong>Importante:</strong> BF16
@@ -2291,7 +2767,7 @@ for i, (entradas, etiquetas) in enumerate(dataloader):
                             </tbody>
                         </table>
                     </div>
-                    <p className="text-xs text-gray-500 italic text-center">Tabla 3. Comparativa Colab frente a Kaggle (consulta: 2026-10-11). Fuente: elaboración propia.</p>
+                    <PieTabla n="3.2.3">Comparativa Colab frente a Kaggle (consulta: 2026-10-11).</PieTabla>
                     <CalloutPro tema="info" titulo="Estrategia combinada: Kaggle con cuota visible + Colab variable" subtitulo="Colab para desarrollo · Kaggle para entrenamientos largos" icon="fa-layer-group">
                         Lo óptimo para un presupuesto limitado es usar ambas plataformas de forma complementaria: <strong>Colab</strong>,
                         para el desarrollo interactivo y el trabajo en equipo; <strong>Kaggle</strong>, para los entrenamientos largos y
@@ -2425,14 +2901,15 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
         const TfDataPipelineSVG = () => {
             const pasos = [
                 { n: '1', t: 'load', d: 'from_tensor_slices', color: '#3D008D' },
-                { n: '2', t: 'map', d: 'preprocesa en paralelo', color: '#0E7490' },
+                { n: '2', t: 'map', d: 'preproceso paralelo', color: '#0E7490' },
                 { n: '3', t: 'cache', d: 'evita releer disco', color: '#0E7490' },
                 { n: '4', t: 'shuffle', d: 'mezcla los datos', color: '#B45309' },
-                { n: '5', t: 'batch', d: 'agrupa en lotes', color: '#ED1E79' },
+                { n: '5', t: 'batch', d: 'agrupa en lotes', color: '#BE185D' },
                 { n: '6', t: 'prefetch', d: 'solapa CPU–GPU', color: '#15803D' },
             ];
             return (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                    <div className="overflow-x-auto">
                     <svg viewBox="0 0 740 166" className="w-full" style={{ minWidth: 700 }} role="img"
                         aria-label="Orden óptimo de un flujo de datos tf.data: load, map con AUTOTUNE, cache, shuffle, batch y prefetch con AUTOTUNE como última operación. El aumento de datos aleatorio, cuando se usa, se inserta después de cache para no congelar la aleatoriedad.">
                         <title>El flujo tf.data encadena seis transformaciones en orden: load, map (paralelo), cache, shuffle, batch y prefetch; este último siempre va al final para solapar la preparación de datos con el entrenamiento. El aumento aleatorio, si se aplica, se coloca tras cache.</title>
@@ -2444,7 +2921,7 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                                 <g key={i}>
                                     <rect x={x} y={54} width={104} height={50} rx="8" fill="#F8FAFC" stroke={p.color} strokeWidth="2" />
                                     <text x={x + 52} y={80} textAnchor="middle" fontSize="11" fill={p.color} fontWeight="bold">{p.t}</text>
-                                    <text x={x + 52} y={97} textAnchor="middle" fontSize="8.5" fill="#64748B">{p.d}</text>
+                                    <text x={x + 52} y={97} textAnchor="middle" fontSize="9" fill="#64748B">{p.d}</text>
                                     <circle cx={x + 16} cy={54} r="10" fill={p.color} stroke="#fff" strokeWidth="1.5" />
                                     <text x={x + 16} y={57.5} textAnchor="middle" fontSize="11" fill="#fff" fontWeight="bold">{p.n}</text>
                                     {i < pasos.length - 1 && <line x1={x + 104} y1={79} x2={x + 118} y2={79} stroke="#001A4D" strokeWidth="1.6" markerEnd="url(#arrT)" />}
@@ -2453,79 +2930,36 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                         })}
                         {/* Punto de inserción del aumento aleatorio, tras cache */}
                         <line x1={367} y1={104} x2={367} y2={121} stroke="#B45309" strokeWidth="1.4" strokeDasharray="4 3" />
-                        <rect x={291} y={121} width={152} height={28} rx="6" fill="#FFFBEB" stroke="#B45309" strokeWidth="1.2" strokeDasharray="4 3" />
-                        <text x={367} y={134} textAnchor="middle" fontSize="8.5" fill="#92400E" fontWeight="bold">Aumento aleatorio (opcional)</text>
-                        <text x={367} y={145} textAnchor="middle" fontSize="7.5" fill="#92400E">se inserta aquí, tras cache</text>
+                        <rect x={282} y={121} width={170} height={32} rx="6" fill="#FFFBEB" stroke="#B45309" strokeWidth="1.2" strokeDasharray="4 3" />
+                        <text x={367} y={134} textAnchor="middle" fontSize="9" fill="#92400E" fontWeight="bold">Aumento aleatorio (opcional)</text>
+                        <text x={367} y={147} textAnchor="middle" fontSize="9" fill="#92400E">se inserta aquí, tras cache</text>
                     </svg>
-                    <p className="text-xs text-gray-500 italic text-center mt-1">
-                        Figura 1. Secuencia de operaciones del flujo tf.data optimizado para entrenamiento en GPU. Fuente: elaboración propia.
-                    </p>
+                    </div>
+                    <AvisoDesplazar />
+                    <PieFigura n="3.3.1" className="mt-1">Secuencia de operaciones del flujo tf.data optimizado para entrenamiento en GPU.</PieFigura>
                 </div>
             );
         };
 
-        /* DIAGRAMA SVG: solapamiento prefetch CPU/GPU */
-        const PrefetchSVG = () => (
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
-                <svg viewBox="0 0 740 230" className="w-full" style={{ minWidth: 660 }} role="img"
-                    aria-label="Comparación del uso de CPU y GPU sin y con prefetch: sin prefetch la GPU queda ociosa esperando datos; con prefetch la CPU prepara el lote siguiente mientras la GPU entrena, eliminando tiempos muertos.">
-                    <title>Sin prefetch la GPU espera ociosa a que la CPU prepare cada lote; con prefetch ambos trabajos se solapan en el tiempo y la GPU entrena de forma continua.</title>
-                    {/* Sin prefetch */}
-                    <text x="40" y="30" fontSize="12" fill="#B91C1C" fontWeight="bold">Sin prefetch</text>
-                    <text x="40" y="52" fontSize="10" fill="#475569">CPU</text>
-                    <text x="40" y="76" fontSize="10" fill="#475569">GPU</text>
-                    {[0, 1, 2].map((i) => (
-                        <g key={`np-${i}`}>
-                            <rect x={90 + i * 140} y={42} width={70} height={16} fill="#FECACA" stroke="#B91C1C" strokeWidth="1" />
-                            <text x={125 + i * 140} y={54} textAnchor="middle" fontSize="8" fill="#7F1D1D">prep N{i}</text>
-                            <rect x={160 + i * 140} y={66} width={70} height={16} fill="#FCA5A5" stroke="#B91C1C" strokeWidth="1" />
-                            <text x={195 + i * 140} y={78} textAnchor="middle" fontSize="8" fill="#7F1D1D">train N{i}</text>
-                        </g>
-                    ))}
-                    <text x="370" y="104" textAnchor="middle" fontSize="9" fill="#B91C1C" fontStyle="italic">la GPU queda ociosa mientras la CPU prepara cada lote (huecos)</text>
-
-                    {/* Con prefetch */}
-                    <text x="40" y="140" fontSize="12" fill="#15803D" fontWeight="bold">Con prefetch</text>
-                    <text x="40" y="162" fontSize="10" fill="#475569">CPU</text>
-                    <text x="40" y="186" fontSize="10" fill="#475569">GPU</text>
-                    {[0, 1, 2, 3].map((i) => (
-                        <g key={`pc-${i}`}>
-                            <rect x={90 + i * 110} y={152} width={106} height={16} fill="#BBF7D0" stroke="#15803D" strokeWidth="1" />
-                            <text x={143 + i * 110} y={163} textAnchor="middle" fontSize="8" fill="#14532D">prep N{i + 1}</text>
-                        </g>
-                    ))}
-                    {[0, 1, 2, 3].map((i) => (
-                        <g key={`pg-${i}`}>
-                            <rect x={90 + i * 110} y={176} width={106} height={16} fill="#86EFAC" stroke="#15803D" strokeWidth="1" />
-                            <text x={143 + i * 110} y={187} textAnchor="middle" fontSize="8" fill="#14532D">train N{i}</text>
-                        </g>
-                    ))}
-                    <text x="370" y="214" textAnchor="middle" fontSize="9" fill="#15803D" fontStyle="italic">la CPU prepara el lote N+1 mientras la GPU entrena con el lote N: sin tiempos muertos</text>
-                </svg>
-                <p className="text-xs text-gray-500 italic text-center mt-1">
-                    Figura 2. Uso de CPU y GPU sin y con prefetch: el solapamiento elimina los tiempos de inactividad de la GPU. Fuente: elaboración propia.
-                </p>
-            </div>
-        );
-
         /* DIAGRAMA SVG: taxonomía de Data Augmentation */
         const AugmentationSVG = () => (
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                <div className="overflow-x-auto">
                 <svg viewBox="0 0 740 260" className="w-full" style={{ minWidth: 660 }} role="img"
-                    aria-label="Clasificación de las técnicas de aumento de datos en tres familias: geométricas (Flip, Rotation, ResizedCrop, Affine), fotométricas (ColorJitter, GaussianBlur, Normalize) y de mezcla entre muestras (Mixup, CutMix).">
+                    aria-label="Clasificación de las técnicas de aumento de datos en tres familias: geométricas (Flip, Rotation, ResizedCrop, Affine), fotométricas (ColorJitter, GaussianBlur, RandomErasing) y de mezcla entre muestras (Mixup, CutMix). Normalize queda fuera: es preprocesamiento, no aumento.">
                     <title>El aumento de datos se agrupa en tres familias: transformaciones geométricas que cambian la estructura espacial, fotométricas que alteran los valores de píxel, y de mezcla que combinan dos imágenes y sus etiquetas.</title>
                     <rect x={290} y={18} width={160} height={40} rx="9" fill="#3D008D" />
                     <text x={370} y={43} textAnchor="middle" fontSize="13" fill="#fff" fontWeight="bold">Aumento de datos</text>
                     {[
                         { x: 60, title: 'Geométricas', sub: 'cambian la geometría', color: '#0E7490', bg: '#ECFEFF', items: ['RandomHorizontalFlip', 'RandomRotation', 'RandomResizedCrop', 'RandomAffine'] },
-                        { x: 290, title: 'Fotométricas', sub: 'cambian los píxeles', color: '#B45309', bg: '#FFFBEB', items: ['ColorJitter', 'GaussianBlur', 'Normalize (no es aumento)'] },
-                        { x: 520, title: 'Mezcla de muestras', sub: 'combinan 2 imágenes', color: '#ED1E79', bg: '#FFF1F7', items: ['Mixup', 'CutMix'] },
+                        { x: 290, title: 'Fotométricas', sub: 'cambian los píxeles', color: '#B45309', bg: '#FFFBEB', items: ['ColorJitter', 'GaussianBlur', 'RandomErasing'] },
+                        { x: 520, title: 'Mezcla de muestras', sub: 'combinan 2 imágenes', color: '#BE185D', bg: '#FFF1F7', items: ['Mixup', 'CutMix'] },
                     ].map((col, ci) => (
                         <g key={ci}>
                             <line x1={370} y1={58} x2={col.x + 80} y2={84} stroke="#94A3B8" strokeWidth="1.4" strokeDasharray="4 3" />
                             <rect x={col.x} y={86} width={160} height={30} rx="7" fill={col.color} />
                             <text x={col.x + 80} y={101} textAnchor="middle" fontSize="11.5" fill="#fff" fontWeight="bold">{col.title}</text>
-                            <text x={col.x + 80} y={112} textAnchor="middle" fontSize="8" fill="#fff">{col.sub}</text>
+                            <text x={col.x + 80} y={112} textAnchor="middle" fontSize="9" fill="#fff">{col.sub}</text>
                             {col.items.map((it, ii) => (
                                 <g key={ii}>
                                     <rect x={col.x + 8} y={126 + ii * 28} width={144} height={22} rx="5" fill={col.bg} stroke={col.color} strokeWidth="1" />
@@ -2534,16 +2968,18 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                             ))}
                         </g>
                     ))}
+                    <text x={370} y={252} textAnchor="middle" fontSize="9.5" fill="#475569" fontStyle="italic">Normalize (media y desviación de ImageNet) es preprocesamiento obligatorio en entrenamiento, validación y prueba; no es aumento.</text>
                 </svg>
-                <p className="text-xs text-gray-500 italic text-center mt-1">
-                    Figura 3. Clasificación de las técnicas de aumento de datos: geométricas, fotométricas y de mezcla entre muestras. Fuente: elaboración propia.
-                </p>
+                </div>
+                <AvisoDesplazar />
+                <PieFigura n="3.3.3" className="mt-1">Clasificación de las técnicas de aumento de datos: geométricas, fotométricas y de mezcla entre muestras.</PieFigura>
             </div>
         );
 
         /* DIAGRAMA SVG: flujo de despliegue */
         const DespliegueSVG = () => (
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4 overflow-x-auto">
+            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                <div className="overflow-x-auto">
                 <svg viewBox="0 0 740 258" className="w-full" style={{ minWidth: 680 }} role="img"
                     aria-label="Flujo de despliegue: del modelo entrenado se exporta a un formato (state_dict, .keras, ONNX, torch.export) y se dirige a cuatro destinos: API REST, dispositivos de borde, navegador y nube.">
                     <title>Un modelo entrenado se exporta a un formato portable (state_dict, .keras, SavedModel, ONNX o torch.export) y desde ahí se despliega como API REST, en dispositivos de borde, en el navegador o en la nube.</title>
@@ -2556,8 +2992,8 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                     <line x1={150} y1={124} x2={195} y2={124} stroke="#001A4D" strokeWidth="1.6" markerEnd="url(#arrD)" />
                     <rect x={200} y={96} width={140} height={56} rx="9" fill="#ECFEFF" stroke="#0E7490" strokeWidth="2" />
                     <text x={270} y={116} textAnchor="middle" fontSize="11" fill="#0E7490" fontWeight="bold">Exportar formato</text>
-                    <text x={270} y={132} textAnchor="middle" fontSize="8.5" fill="#0E7490">.pth · .keras · ONNX</text>
-                    <text x={270} y={144} textAnchor="middle" fontSize="8.5" fill="#0E7490">SavedModel · .pt2</text>
+                    <text x={270} y={132} textAnchor="middle" fontSize="9" fill="#0E7490">.pth · .keras · ONNX</text>
+                    <text x={270} y={144} textAnchor="middle" fontSize="9" fill="#0E7490">SavedModel · .pt2</text>
                     {/* destinos */}
                     {[
                         { y: 30, t: 'API REST', d: 'FastAPI · ONNX Runtime · Triton · TF Serving' },
@@ -2569,15 +3005,172 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                             <line x1={340} y1={124} x2={430} y2={dst.y + 18} stroke="#94A3B8" strokeWidth="1.4" strokeDasharray="4 3" markerEnd="url(#arrD)" />
                             <rect x={432} y={dst.y} width={278} height={36} rx="8" fill="#DCFCE7" stroke="#15803D" strokeWidth="1.5" />
                             <text x={448} y={dst.y + 16} fontSize="11" fill="#15803D" fontWeight="bold">{dst.t}</text>
-                            <text x={448} y={dst.y + 29} fontSize="8.5" fill="#475569">{dst.d}</text>
+                            <text x={448} y={dst.y + 29} fontSize="9" fill="#475569">{dst.d}</text>
                         </g>
                     ))}
                 </svg>
-                <p className="text-xs text-gray-500 italic text-center mt-1">
-                    Figura 4. Flujo de despliegue de modelos: del entrenamiento a los destinos de producción. Fuente: elaboración propia.
-                </p>
+                </div>
+                <AvisoDesplazar />
+                <PieFigura n="3.3.4" className="mt-1">Flujo de despliegue de modelos: del entrenamiento a los destinos de producción.</PieFigura>
             </div>
         );
+
+        /* ============================================================
+           SIMULACIÓN S-B «El mesero y el chef» — línea de tiempo de la precarga (auditoría 2026-10, M3-D-04)
+           Sustituye a la antigua figura de escala inconsistente (M3-S-02). Gantt CPU (un carril por trabajador)
+           y GPU en la MISMA escala temporal; modelo de eventos discretos en window.M3SIMS.simularPrefetch.
+        ============================================================ */
+        const LineaPrefetch = () => {
+            const S = window.M3SIMS;
+            const [tCPU, setTCPU] = useState(80);
+            const [tGPU, setTGPU] = useState(50);
+            const [W, setW] = useState(1);
+            const [B, setB] = useState(0);
+            const [N, setN] = useState(10);
+            const [tCopia, setTCopia] = useState(0);
+            if (!S) return null;
+
+            const p = { N, tCPU, tGPU, W, B, tCopia };
+            const sim = S.simularPrefetch(p);
+            const sec = S.simularPrefetch({ ...p, W: 1, B: 0 });
+            const reg = S.simularPrefetch({ ...p, N: 100 });
+            const reg0 = S.simularPrefetch({ ...p, N: 100, W: 1, B: 0 });
+            const Wef = sim.W;
+            const tGPUtotal = tGPU + tCopia;
+            const cuelloCPU = tCPU / Wef > tGPUtotal;
+            const wNec = Math.max(1, Math.ceil(tCPU / tGPUtotal));
+            const plural = (n, a, b) => (n === 1 ? a : b);
+
+            // Diagrama de Gantt: misma escala para todos los carriles (el máximo es el caso sin precarga)
+            const XL = 116, WP = 504, ALTO = 22, SEP = 8, Y0 = 26;
+            const Tmax = Math.max(sec.T, sim.T);
+            const x = (t) => XL + (t / Tmax) * WP;
+            const carriles = Wef + 1;
+            const yGPU = Y0 + Wef * (ALTO + SEP);
+            const yEje = yGPU + ALTO + 10;
+            const altoSVG = yEje + 30;
+            const paso = pasoEje(Tmax, [20, 50, 100, 200, 250, 500, 1000, 2000]);
+            const marcas = [];
+            for (let t = 0; t <= Tmax + 1e-9; t += paso) marcas.push(t);
+            const huecos = [];
+            let fin = 0;
+            sim.gpu.forEach(g => { if (g.ini - fin > 1e-9) huecos.push({ ini: fin, fin: g.ini }); fin = g.fin; });
+
+            const diagnostico = B === 0
+                ? `Sin precarga: la GPU espera ${fmtNum(tCPU)} ms en cada lote mientras la CPU prepara el siguiente.`
+                : cuelloCPU
+                    ? `Cuello de botella: CPU. Con ${Wef} ${plural(Wef, 'trabajador', 'trabajadores')}, la preparación entrega un lote cada ${fmtNum(tCPU / Wef, Number.isInteger(tCPU / Wef) ? 0 : 1)} ms y la GPU lo consume en ${fmtNum(tGPUtotal)} ms: la precarga sola no basta; hacen falta al menos ${wNec} trabajadores.`
+                    : `Cuello de botella: GPU. La preparación (un lote cada ${fmtNum(tCPU / Wef, Number.isInteger(tCPU / Wef) ? 0 : 1)} ms) queda oculta tras el entrenamiento (${fmtNum(tGPUtotal)} ms por lote): la GPU solo espera en el llenado inicial.`;
+            const resumen = `Tiempo total: ${fmtNum(sim.T)} ms frente a ${fmtNum(sec.T)} ms sin precarga (${fmtNum(sec.T / sim.T, 2)}×). Utilización de la GPU: ${fmtPct(100 * sim.U)}. ${diagnostico}`;
+
+            const deslizador = (id, etiqueta, valor, set, min, max, step, texto, extra = {}) => (
+                <div>
+                    <label htmlFor={id} className="block font-semibold text-navy mb-1">{etiqueta}: <span className="font-mono">{valor}</span>{extra.unidad || ''}</label>
+                    <input id={id} type="range" min={min} max={max} step={step} value={valor} onChange={e => set(+e.target.value)}
+                        className="usta-range" aria-valuetext={texto} disabled={extra.disabled} />
+                    {extra.nota && <span className="block text-xs text-gray-600 mt-1">{extra.nota}</span>}
+                </div>
+            );
+
+            return (
+                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                    <p className="font-bold text-navy mb-3"><i className="fas fa-utensils mr-2 text-primary" aria-hidden="true"></i>Simulación: el mesero y el chef</p>
+                    <div className="grid sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                        {deslizador('sb-cpu', <>Preparar un lote en la CPU (t<sub>CPU</sub>)</>, tCPU, setTCPU, 10, 200, 10, `${tCPU} milisegundos por lote`, { unidad: ' ms' })}
+                        {deslizador('sb-gpu', <>Entrenar un lote en la GPU (t<sub>GPU</sub>)</>, tGPU, setTGPU, 10, 200, 10, `${tGPU} milisegundos por lote`, { unidad: ' ms' })}
+                        <div>
+                            <label htmlFor="sb-b" className="block font-semibold text-navy mb-1">Profundidad de la precarga (<em>prefetch</em>)</label>
+                            <select id="sb-b" value={B} onChange={e => setB(+e.target.value)} className="w-full border border-gray-300 rounded-lg px-2 py-1.5 bg-white text-gray-800">
+                                <option value={0}>0 (sin precarga)</option>
+                                <option value={1}>1 lote</option>
+                                <option value={2}>2 lotes</option>
+                                <option value={4}>4 lotes</option>
+                            </select>
+                        </div>
+                        {deslizador('sb-w', <>Trabajadores de carga (<span className="font-mono font-normal">num_workers</span>)</>, W, setW, 1, 8, 1, `${W} ${plural(W, 'trabajador', 'trabajadores')}`,
+                            { disabled: B === 0, nota: B === 0 ? 'Sin precarga, el proceso principal prepara cada lote cuando la GPU lo pide (en PyTorch, num_workers=0).' : 'Equivale a num_workers (DataLoader) o a num_parallel_calls (tf.data).' })}
+                        {deslizador('sb-n', 'Lotes en el diagrama', N, setN, 3, 20, 1, `${N} lotes`)}
+                        {deslizador('sb-copia', 'Tiempo de copia CPU → GPU por lote', tCopia, setTCopia, 0, 50, 5, `${tCopia} milisegundos de copia por lote`, { unidad: ' ms', nota: 'pin_memory=True la reduce (memoria fijada).' })}
+                    </div>
+
+                    <div className="overflow-x-auto mt-4">
+                        <svg viewBox={`0 0 640 ${altoSVG}`} className="w-full" style={{ minWidth: 520 }} role="img"
+                            aria-label={`Diagrama de Gantt con ${Wef} ${plural(Wef, 'carril', 'carriles')} de CPU y uno de GPU en la misma escala temporal. ${resumen}`}>
+                            <defs>
+                                <pattern id="sb-rayado" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                                    <rect width="6" height="6" fill="#FEE2E2" /><line x1="0" y1="0" x2="0" y2="6" stroke="#DC2626" strokeWidth="1.5" />
+                                </pattern>
+                            </defs>
+                            {Array.from({ length: Wef }).map((_, w) => (
+                                <text key={`l-${w}`} x={8} y={Y0 + w * (ALTO + SEP) + 15} fontSize="11" fill="#92400E" fontWeight="bold">CPU · mesero {w + 1}</text>
+                            ))}
+                            <text x={8} y={yGPU + 15} fontSize="11" fill="#166534" fontWeight="bold">GPU · chef</text>
+                            {sim.prep.map(e => {
+                                const y = Y0 + e.w * (ALTO + SEP), w = x(e.fin) - x(e.ini);
+                                return (
+                                    <g key={`p-${e.k}`}>
+                                        <rect x={x(e.ini)} y={y} width={w} height={ALTO} rx="3" fill="#FEF3C7" stroke="#B45309" strokeWidth="1" />
+                                        {w >= 16 && <text x={x(e.ini) + w / 2} y={y + 15} textAnchor="middle" fontSize="10" fill="#92400E">{e.k + 1}</text>}
+                                    </g>
+                                );
+                            })}
+                            {huecos.map((h, i) => (
+                                <g key={`h-${i}`}>
+                                    <rect x={x(h.ini)} y={yGPU} width={x(h.fin) - x(h.ini)} height={ALTO} fill="url(#sb-rayado)" />
+                                    {x(h.fin) - x(h.ini) >= 44 && <text x={(x(h.ini) + x(h.fin)) / 2} y={yGPU + 15} textAnchor="middle" fontSize="9.5" fill="#991B1B" fontStyle="italic">espera</text>}
+                                </g>
+                            ))}
+                            {sim.gpu.map(g => {
+                                const xc = x(g.ini), wc = x(g.ini + g.copia) - xc, xt = x(g.ini + g.copia), wt = x(g.fin) - xt;
+                                return (
+                                    <g key={`g-${g.k}`}>
+                                        {g.copia > 0 && <rect x={xc} y={yGPU} width={wc} height={ALTO} fill="#E0E7FF" stroke="#4338CA" strokeWidth="1" />}
+                                        <rect x={xt} y={yGPU} width={wt} height={ALTO} rx="3" fill="#DCFCE7" stroke="#15803D" strokeWidth="1" />
+                                        {wt >= 16 && <text x={xt + wt / 2} y={yGPU + 15} textAnchor="middle" fontSize="10" fill="#166534">{g.k + 1}</text>}
+                                    </g>
+                                );
+                            })}
+                            <line x1={x(sim.T)} y1={Y0 - 14} x2={x(sim.T)} y2={yEje} stroke="#3D008D" strokeWidth="1.5" strokeDasharray="4 3" />
+                            <text x={x(sim.T)} y={Y0 - 16} textAnchor={x(sim.T) > 560 ? 'end' : 'middle'} fontSize="10.5" fill="#3D008D" fontWeight="bold">T = {fmtNum(sim.T)} ms</text>
+                            <line x1={XL} y1={yEje} x2={XL + WP} y2={yEje} stroke="#64748B" strokeWidth="1" />
+                            {marcas.map(t => (
+                                <g key={`m-${t}`}>
+                                    <line x1={x(t)} y1={yEje} x2={x(t)} y2={yEje + 4} stroke="#64748B" strokeWidth="1" />
+                                    <text x={x(t)} y={yEje + 16} textAnchor="middle" fontSize="10" fill="#475569">{fmtNum(t)}</text>
+                                </g>
+                            ))}
+                            <text x={XL + WP} y={yEje + 28} textAnchor="end" fontSize="10" fill="#475569">tiempo (ms)</text>
+                        </svg>
+                    </div>
+                    <AvisoDesplazar />
+                    <p className="text-xs text-gray-600 mt-1">
+                        Los números dentro de las barras identifican cada lote. Rayado rojo: la GPU espera datos.{tCopia > 0 && ' En azul, la copia de cada lote a la GPU.'}
+                    </p>
+
+                    <p className={`mt-3 rounded-lg px-3 py-2 text-sm font-semibold border ${B > 0 && !cuelloCPU ? 'bg-green-50 text-green-800 border-green-200' : 'bg-amber-50 text-amber-900 border-amber-200'}`} aria-live="polite">
+                        {resumen}
+                    </p>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3 text-center text-sm">
+                        <div className="rounded-lg bg-bg border border-gray-200 px-2 py-2"><span className="block text-[0.7rem] uppercase tracking-wide text-gray-600">Tiempo total</span><span className="font-mono font-bold text-navy">{fmtNum(sim.T)} ms</span></div>
+                        <div className="rounded-lg bg-bg border border-gray-200 px-2 py-2"><span className="block text-[0.7rem] uppercase tracking-wide text-gray-600">Utilización GPU</span><span className="font-mono font-bold text-navy">{fmtPct(100 * sim.U)}</span></div>
+                        <div className="rounded-lg bg-bg border border-gray-200 px-2 py-2"><span className="block text-[0.7rem] uppercase tracking-wide text-gray-600">Aceleración</span><span className="font-mono font-bold text-navy">{fmtNum(sec.T / sim.T, 2)}×</span></div>
+                        <div className="rounded-lg bg-bg border border-gray-200 px-2 py-2"><span className="block text-[0.7rem] uppercase tracking-wide text-gray-600">Régimen (100 lotes)</span><span className="font-mono font-bold text-navy">{fmtPct(100 * reg.U)} · {fmtNum(reg0.T / reg.T, 2)}×</span></div>
+                    </div>
+
+                    <div className="mt-3 text-sm text-gray-700 space-y-1">
+                        <p><strong className="text-navy">Para observar:</strong> se activa la precarga con un trabajador y después se añade un segundo; se observa cuál de los dos cambios cierra los huecos.</p>
+                        <p><strong className="text-navy">Para explicar:</strong> ¿por qué la precarga oculta el menor de los dos tiempos, pero no el mayor? ¿Qué papel cumple <span className="inline-code">num_workers</span>?</p>
+                    </div>
+                    <PieFigura n="3.3.2" className="mt-3" fuente="elaboración propia (simulación de eventos discretos, determinista).">
+                        Línea de tiempo de la precarga «El mesero y el chef»: carriles de la CPU (uno por trabajador) y de la GPU en la misma
+                        escala temporal. La precarga oculta el tiempo de preparación cuando este es menor que el de entrenamiento; si la CPU es
+                        más lenta, hacen falta más trabajadores (<span className="not-italic">num_parallel_calls</span>,{' '}
+                        <span className="not-italic">num_workers</span>).
+                    </PieFigura>
+                </div>
+            );
+        };
 
         const Cap33Section = () => {
             const ref = useRef(null);
@@ -2644,7 +3237,11 @@ dataset = dataset.prefetch(tf.data.AUTOTUNE)`} />
                         <li><strong>cache():</strong> guarda el conjunto de datos tras la primera época; va después del preprocesamiento pero antes del aumento, para no cachear la aleatoriedad.</li>
                         <li><strong>prefetch():</strong> la más importante. Mientras la GPU entrena con el lote N, la CPU prepara el N+1. <strong>Siempre la última operación</strong>: reduce el tiempo de cada paso al <strong>máximo</strong>, no a la suma, entre preparar el lote y entrenar con él (TensorFlow, s. f.).</li>
                     </ul>
-                    <PrefetchSVG />
+                    <AntesDeInteractuar>
+                        si preparar un lote tarda 80 ms y entrenarlo 50 ms, ¿desaparecerán los huecos de la GPU al activar la precarga
+                        (<em>prefetch</em>)? Conviene anotar la predicción antes de mover los controles.
+                    </AntesDeInteractuar>
+                    <LineaPrefetch />
 
                     <h4>DataLoader: el flujo explícito de PyTorch</h4>
                     <p>
@@ -2696,7 +3293,7 @@ dataloader = DataLoader(
                             </tbody>
                         </table>
                     </div>
-                    <p className="text-xs text-gray-500 italic text-center">Tabla 1. Comparativa de los flujos tf.data y DataLoader. Fuente: elaboración propia.</p>
+                    <PieTabla n="3.3.1">Comparativa de los flujos tf.data y DataLoader.</PieTabla>
 
                     {/* ============== 3.2 Data Augmentation ============== */}
                     <h3>2. Estrategias de aumento de datos</h3>
@@ -2946,7 +3543,7 @@ resultado = programa_cargado.module()(torch.randn(4, 3, 224, 224))`} />
                             </tbody>
                         </table>
                     </div>
-                    <p className="text-xs text-gray-500 italic text-center">Tabla 2. Formatos de guardado y despliegue (consulta: 2026-10-11). Fuente: elaboración propia.</p>
+                    <PieTabla n="3.3.2">Formatos de guardado y despliegue (consulta: 2026-10-11).</PieTabla>
                     <Box type="eth" label="Despliegue responsable: confianza, privacidad y energía">
                         Llevar el modelo a la finca traslada sus errores a quien decide con él. Conviene fijar un{' '}
                         <strong>umbral de confianza</strong> por debajo del cual la aplicación pida otra foto o remita a un agrónomo, en
@@ -3118,7 +3715,7 @@ resultado = programa_cargado.module()(torch.randn(4, 3, 224, 224))`} />
                             { texto: 'Verdadero', correcta: false },
                             { texto: 'Falso', correcta: true },
                         ],
-                        justificacion: 'Falso: el formato .keras es agnóstico del backend; el mismo archivo se recarga con TensorFlow, PyTorch o JAX (Capítulo 3.3, Tabla 2).'
+                        justificacion: 'Falso: el formato .keras es agnóstico del backend; el mismo archivo se recarga con TensorFlow, PyTorch o JAX (Capítulo 3.3, Tabla 3.3.2).'
                     },
                     {
                         pregunta: 'Un equipo entrena un detector de roya con 3.000 fotos de hojas tomadas con celular. ¿Qué transformación de aumento sería contraproducente?',
@@ -3344,7 +3941,7 @@ resultado = programa_cargado.module()(torch.randn(4, 3, 224, 224))`} />
                 const saved = parseInt(localStorage.getItem(STORAGE_KEY), 10);
                 return Number.isInteger(saved) && saved >= 0 ? saved : 0;
             });
-            const [sidebarOpen, setSidebarOpen] = useState(true);
+            const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 1024);   // en móvil y tableta, el menú arranca cerrado
 
             const safeIndex = Math.min(activeLessonIndex, curriculum.length - 1);
             const activeLesson = curriculum[safeIndex];
@@ -3355,7 +3952,8 @@ resultado = programa_cargado.module()(torch.randn(4, 3, 224, 224))`} />
                 localStorage.setItem(STORAGE_KEY, String(safeIndex));
                 typesetMath();
                 const cont = document.getElementById('contenido-scroll');
-                if (cont) cont.scrollTo({ top: 0, behavior: 'smooth' });
+                const sinMovimiento = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                if (cont) cont.scrollTo({ top: 0, behavior: sinMovimiento ? 'auto' : 'smooth' });
             }, [safeIndex]);
 
             const irA = (idx) => {
@@ -3366,9 +3964,9 @@ resultado = programa_cargado.module()(torch.randn(4, 3, 224, 224))`} />
             return (
                 <div className="flex h-screen overflow-hidden relative">
                     <button onClick={() => setSidebarOpen(p => !p)}
-                        className="fixed top-4 left-4 z-50 p-2.5 rounded-full shadow-lg text-white transition-all hover:scale-110 usta-gradient"
-                        title={sidebarOpen ? 'Ocultar menú' : 'Mostrar menú'}>
-                        <i className={`fas ${sidebarOpen ? 'fa-times' : 'fa-bars'} text-sm`}></i>
+                        className="fixed top-4 left-4 z-50 p-2.5 rounded-full shadow-lg text-white transition-all motion-safe:hover:scale-110 usta-gradient"
+                        title={sidebarOpen ? 'Ocultar menú' : 'Mostrar menú'} aria-label={sidebarOpen ? 'Ocultar menú' : 'Mostrar menú'} aria-expanded={sidebarOpen}>
+                        <i className={`fas ${sidebarOpen ? 'fa-times' : 'fa-bars'} text-sm`} aria-hidden="true"></i>
                     </button>
 
                     {sidebarOpen && <div className="fixed inset-0 bg-black/20 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />}
@@ -3381,8 +3979,8 @@ resultado = programa_cargado.module()(torch.randn(4, 3, 224, 224))`} />
                         }}>
                         <div className="p-6 pt-16 border-b border-white/10">
                             <p className="text-[0.65rem] uppercase tracking-widest text-gold font-bold">Universidad Santo Tomás</p>
-                            <h1 className="text-white font-bold text-lg tracking-tight mt-1">Deep Learning · <span className="text-secondary">Módulo 3</span></h1>
-                            <p className="text-xs text-white/50 mt-1">Implementación y Herramientas Profesionales</p>
+                            <h1 className="text-white font-bold text-lg tracking-tight mt-1">Deep Learning · <span className="text-pink-300">Módulo 3</span></h1>
+                            <p className="text-xs text-white/70 mt-1">Implementación y Herramientas Profesionales</p>
                         </div>
 
                         <nav className="p-4 space-y-2 flex-1">
@@ -3395,7 +3993,7 @@ resultado = programa_cargado.module()(torch.randn(4, 3, 224, 224))`} />
                             ))}
                         </nav>
 
-                        <div className="p-4 text-[10px] text-white/40 border-t border-white/10">
+                        <div className="p-4 text-[10px] text-white/70 border-t border-white/10">
                             <p>Maestría en Ciencia de Datos · EA-N-F-004</p>
                             <p>TensorFlow · PyTorch · Keras 3 · 3 créditos</p>
                         </div>
@@ -3409,7 +4007,7 @@ resultado = programa_cargado.module()(torch.randn(4, 3, 224, 224))`} />
 
                         <div id="contenido-scroll" className="flex-1 overflow-y-auto p-6 lg:p-12">
                             <div className="max-w-4xl mx-auto w-full">
-                                <div className="mb-6 flex items-center justify-between flex-wrap gap-3">
+                                <div className="mb-6 flex items-center justify-between flex-wrap gap-3 pl-12 lg:pl-0">
                                     <span className="text-xs font-bold tracking-wider text-secondary uppercase">
                                         Lección {safeIndex + 1} de {curriculum.length} · {progreso} %
                                     </span>
@@ -3467,7 +4065,7 @@ resultado = programa_cargado.module()(torch.randn(4, 3, 224, 224))`} />
                                         <p className="text-xs mt-1 text-white/80 italic">Metodología «Ingeniería de Trinchera»: si una arquitectura no corre en Google Colab, no existe; y si no se puede desplegar, no sirve.</p>
                                         <p className="text-xs mt-2 text-white/70">Universidad Santo Tomás · Maestría en Ciencia de Datos</p>
                                         <p className="text-xs text-white/70">Profundización I: Redes Neuronales — Deep Learning (EA-N-F-004) · Experto temático: Javier Mauricio Sierra</p>
-                                        <p className="text-[10px] mt-2 text-white/50">Material de aprendizaje autónomo. Analogías contextualizadas al entorno colombiano.</p>
+                                        <p className="text-[10px] mt-2 text-white/70">Material de aprendizaje autónomo. Analogías contextualizadas al entorno colombiano.</p>
                                     </div>
                                 </footer>
                             </div>
