@@ -307,6 +307,8 @@
                 scroll-behavior: auto !important;
             }
         }
+        /* Citas APA (auditoría 2026-10): el título muestra la referencia completa */
+        .cita { cursor: help; }
     </style>
 </head>
 
@@ -1269,6 +1271,127 @@
             </p>
         );
 
+        // ===== Citas APA 7 (auditoría 2026-10) =====
+        // Datos generados con .claude/auditoria-2026-10/scripts/refs_js.py desde recursos/bibliografia-maestra.json.
+        // No editar a mano: regenerar el bloque REFS si cambia la bibliografía maestra.
+        const REFS = {
+            chollet2025deep: { a: 'Chollet y Watson', y: '2025', u: 'https://deeplearningwithpython.io/', r: [['Chollet, F. y Watson, M. (2025). ', 0], ['Deep learning with Python', 1], [' (3.ª ed.)', 0], ['. ', 0], ['Manning.', 0]] },
+            geron2025hands: { a: 'Géron', y: '2025', u: '', r: [['Géron, A. (2025). ', 0], ['Hands-on machine learning with Scikit-Learn and PyTorch: Concepts, tools, and techniques to build intelligent systems', 1], ['. ', 0], ['O\'Reilly Media.', 0]] },
+            stevens2020deep: { a: 'Stevens et al.', y: '2020', u: '', r: [['Stevens, E., Antiga, L. y Viehmann, T. (2020). ', 0], ['Deep learning with PyTorch', 1], ['. ', 0], ['Manning.', 0]] },
+            zhang2023dive: { a: 'A. Zhang et al.', y: '2023', u: 'https://d2l.ai/', r: [['Zhang, A., Lipton, Z. C., Li, M. y Smola, A. J. (2023). ', 0], ['Dive into deep learning', 1], ['. ', 0], ['Cambridge University Press.', 0]] },
+            guio2021marco: { a: 'Guío Español et al.', y: '2021', u: 'https://minciencias.gov.co/sites/default/files/marco-etico-ia-colombia-2021.pdf', r: [['Guío Español, A., Tamayo Uribe, E. y Gómez Ayerbe, P. (2021). ', 0], ['Marco ético para la inteligencia artificial en Colombia', 1], [' (Versión 1)', 0], ['. ', 0], ['Consejería Presidencial para Asuntos Económicos y Transformación Digital, Presidencia de la República de Colombia.', 0]] },
+            mitchell2019model: { a: 'Mitchell et al.', y: '2019', u: 'https://doi.org/10.1145/3287560.3287596', r: [['Mitchell, M., Wu, S., Zaldivar, A., Barnes, P., Vasserman, L., Hutchinson, B., Spitzer, E., Raji, I. D. y Gebru, T. (2019). ', 0], ['Model cards for model reporting. ', 0], ['En ', 0], ['Proceedings of the Conference on Fairness, Accountability, and Transparency', 1], [' (pp. 220–229)', 0], ['. ', 0], ['ACM.', 0]] },
+            conpes2025ia: { a: 'Consejo Nacional de Política Económica y Social', y: '2025', u: 'https://colaboracion.dnp.gov.co/CDT/Conpes/Econ%C3%B3micos/4144.pdf', r: [['Consejo Nacional de Política Económica y Social. (2025). ', 0], ['Política nacional de inteligencia artificial', 1], [' (Documento CONPES 4144)', 0], ['. ', 0], ['Departamento Nacional de Planeación.', 0]] },
+            abadi2016tensorflow: { a: 'Abadi et al.', y: '2016', u: 'https://www.usenix.org/conference/osdi16/technical-sessions/presentation/abadi', r: [['Abadi, M., Barham, P., Chen, J., Chen, Z., Davis, A., Dean, J., Devin, M., Ghemawat, S., Irving, G., Isard, M., Kudlur, M., Levenberg, J., Monga, R., Moore, S., Murray, D. G., Steiner, B., Tucker, P., Vasudevan, V., Warden, P., … Zheng, X. (2016). ', 0], ['TensorFlow: A system for large-scale machine learning. ', 0], ['En ', 0], ['12th USENIX Symposium on Operating Systems Design and Implementation (OSDI 16)', 1], [' (pp. 265–283)', 0], ['. ', 0], ['USENIX Association.', 0]] },
+            tensorflow_v221: { a: 'TensorFlow', y: '2026', u: 'https://github.com/tensorflow/tensorflow/releases/tag/v2.21.0', r: [['TensorFlow. (2026, 6 de marzo). ', 0], ['TensorFlow 2.21.0', 1], [' [Notas de versión]. ', 0], ['GitHub.', 0]] },
+            tensorflow_v220: { a: 'TensorFlow', y: '2025', u: 'https://github.com/tensorflow/tensorflow/releases/tag/v2.20.0', r: [['TensorFlow. (2025, 13 de agosto). ', 0], ['TensorFlow 2.20.0', 1], [' [Notas de versión]. ', 0], ['GitHub.', 0]] },
+            chollet2015keras: { a: 'Chollet', y: '2015', u: 'https://keras.io', r: [['Chollet, F. (2015). ', 0], ['Keras', 1], [' [Software].', 0]] },
+            keras3_intro: { a: 'Keras Team', y: '2023', u: 'https://keras.io/keras_3/', r: [['Keras Team. (2023). ', 0], ['Introducing Keras 3.0', 1], ['.', 0]] },
+            bradbury2018jax: { a: 'Bradbury et al.', y: '2018', u: 'https://github.com/jax-ml/jax', r: [['Bradbury, J., Frostig, R., Hawkins, P., Johnson, M. J., Katariya, Y., Leary, C., Maclaurin, D., Necula, G., Paszke, A., VanderPlas, J., Wanderman-Milne, S. y Zhang, Q. (2018). ', 0], ['JAX: Composable transformations of Python+NumPy programs', 1], [' (Versión 0.3.13)', 0], [' [Software].', 0]] },
+            google_litert: { a: 'Google AI Edge', y: 's. f.-b', u: 'https://developers.google.com/edge/litert', r: [['Google AI Edge. (s. f.-b). ', 0], ['LiteRT: High-performance on-device machine learning framework', 1], ['.', 0]] },
+            paszke2019pytorch: { a: 'Paszke et al.', y: '2019', u: 'https://arxiv.org/abs/1912.01703', r: [['Paszke, A., Gross, S., Massa, F., Lerer, A., Bradbury, J., Chanan, G., Killeen, T., Lin, Z., Gimelshein, N., Antiga, L., Desmaison, A., Köpf, A., Yang, E., DeVito, Z., Raison, M., Tejani, A., Chilamkurthy, S., Steiner, B., Fang, L., … Chintala, S. (2019). ', 0], ['PyTorch: An imperative style, high-performance deep learning library. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 32, pp. 8024–8035)', 0], ['. ', 0], ['Curran Associates.', 0]] },
+            he2019state: { a: 'H. He', y: '2019', u: 'https://thegradient.pub/state-of-ml-frameworks-2019-pytorch-dominates-research-tensorflow-dominates-industry/', r: [['He, H. (2019, 10 de octubre). ', 0], ['The state of machine learning frameworks in 2019. ', 0], ['The Gradient', 1], ['.', 0]] },
+            baydin2018automatic: { a: 'Baydin et al.', y: '2018', u: 'https://jmlr.org/papers/v18/17-468.html', r: [['Baydin, A. G., Pearlmutter, B. A., Radul, A. A. y Siskind, J. M. (2018). ', 0], ['Automatic differentiation in machine learning: A survey. ', 0], ['Journal of Machine Learning Research', 1], [', ', 0], ['18', 1], ['(153)', 0], [', 1–43', 0], ['.', 0]] },
+            torchtext_repo: { a: 'PyTorch Foundation', y: '2024b', u: 'https://github.com/pytorch/text', r: [['PyTorch Foundation. (2024b). ', 0], ['torchtext', 1], [' (Versión 0.18.0)', 0], [' [Software]. ', 0], ['GitHub.', 0]] },
+            wolf2020transformers: { a: 'Wolf et al.', y: '2020', u: 'https://doi.org/10.18653/v1/2020.emnlp-demos.6', r: [['Wolf, T., Debut, L., Sanh, V., Chaumond, J., Delangue, C., Moi, A., Cistac, P., Rault, T., Louf, R., Funtowicz, M., Davison, J., Shleifer, S., von Platen, P., Ma, C., Jernite, Y., Plu, J., Xu, C., Le Scao, T., Gugger, S., … Rush, A. (2020). ', 0], ['Transformers: State-of-the-art natural language processing. ', 0], ['En ', 0], ['Proceedings of the 2020 Conference on Empirical Methods in Natural Language Processing: System Demonstrations', 1], [' (pp. 38–45)', 0], ['. ', 0], ['Association for Computational Linguistics.', 0]] },
+            pytorch_export: { a: 'PyTorch Foundation', y: 's. f.-e', u: 'https://docs.pytorch.org/docs/stable/export.html', r: [['PyTorch Foundation. (s. f.-e). ', 0], ['torch.export', 1], ['.', 0]] },
+            pytorch_jit: { a: 'PyTorch Foundation', y: 's. f.-g', u: 'https://docs.pytorch.org/docs/2.10/jit.html', r: [['PyTorch Foundation. (s. f.-g). ', 0], ['TorchScript', 1], [' (Versión 2.10)', 0], ['.', 0]] },
+            pytorch_v210: { a: 'PyTorch Foundation', y: '2026', u: 'https://github.com/pytorch/pytorch/releases/tag/v2.10.0', r: [['PyTorch Foundation. (2026, 21 de enero). ', 0], ['PyTorch 2.10.0', 1], [' [Notas de versión]. ', 0], ['GitHub.', 0]] },
+            torchserve_repo: { a: 'PyTorch Foundation', y: '2024a', u: 'https://github.com/pytorch/serve', r: [['PyTorch Foundation. (2024a). ', 0], ['TorchServe', 1], [' (Versión 0.12.0)', 0], [' [Software]. ', 0], ['GitHub.', 0]] },
+            triton_server: { a: 'NVIDIA', y: 's. f.-e', u: 'https://github.com/triton-inference-server/server', r: [['NVIDIA. (s. f.-e). ', 0], ['Triton Inference Server', 1], [' [Software]. ', 0], ['GitHub.', 0]] },
+            ansel2024pytorch: { a: 'Ansel et al.', y: '2024', u: 'https://doi.org/10.1145/3620665.3640366', r: [['Ansel, J., Yang, E., He, H., Gimelshein, N., Jain, A., Voznesensky, M., Bao, B., Bell, P., Berard, D., Burovski, E., Chauhan, G., Chourdia, A., Constable, W., Desmaison, A., DeVito, Z., Ellison, E., Feng, W., Gong, J., Gschwind, M., … Chintala, S. (2024). ', 0], ['PyTorch 2: Faster machine learning through dynamic Python bytecode transformation and graph compilation. ', 0], ['En ', 0], ['Proceedings of the 29th ACM International Conference on Architectural Support for Programming Languages and Operating Systems, Volume 2', 1], [' (pp. 929–947)', 0], ['. ', 0], ['ACM.', 0]] },
+            pytorch2x: { a: 'PyTorch Foundation', y: 's. f.-d', u: 'https://pytorch.org/get-started/pytorch-2-x/', r: [['PyTorch Foundation. (s. f.-d). ', 0], ['PyTorch 2.x', 1], ['.', 0]] },
+            executorch_docs: { a: 'PyTorch Foundation', y: 's. f.-c', u: 'https://docs.pytorch.org/executorch/stable/index.html', r: [['PyTorch Foundation. (s. f.-c). ', 0], ['ExecuTorch documentation', 1], ['.', 0]] },
+            pytorch_amp: { a: 'PyTorch Foundation', y: 's. f.-b', u: 'https://docs.pytorch.org/docs/stable/notes/amp_examples.html', r: [['PyTorch Foundation. (s. f.-b). ', 0], ['Automatic mixed precision examples', 1], ['.', 0]] },
+            raina2009large: { a: 'Raina et al.', y: '2009', u: 'https://doi.org/10.1145/1553374.1553486', r: [['Raina, R., Madhavan, A. y Ng, A. Y. (2009). ', 0], ['Large-scale deep unsupervised learning using graphics processors. ', 0], ['En ', 0], ['Proceedings of the 26th Annual International Conference on Machine Learning', 1], [' (pp. 873–880)', 0], ['. ', 0], ['ACM.', 0]] },
+            nickolls2008scalable: { a: 'Nickolls et al.', y: '2008', u: 'https://doi.org/10.1145/1365490.1365500', r: [['Nickolls, J., Buck, I., Garland, M. y Skadron, K. (2008). ', 0], ['Scalable parallel programming with CUDA. ', 0], ['Queue', 1], [', ', 0], ['6', 1], ['(2)', 0], [', 40–53', 0], ['.', 0]] },
+            nvidia_cudatoolkit: { a: 'NVIDIA', y: 's. f.-a', u: 'https://developer.nvidia.com/cuda/toolkit', r: [['NVIDIA. (s. f.-a). ', 0], ['CUDA Toolkit', 1], ['.', 0]] },
+            nvidia2017volta: { a: 'NVIDIA', y: '2017', u: 'https://images.nvidia.com/content/volta-architecture/pdf/volta-architecture-whitepaper.pdf', r: [['NVIDIA. (2017). ', 0], ['NVIDIA Tesla V100 GPU architecture', 1], [' (WP-08608-001_v1.1)', 0], ['.', 0]] },
+            nvidia2020a100: { a: 'NVIDIA', y: '2020', u: 'https://images.nvidia.com/aem-dam/en-zz/Solutions/data-center/nvidia-ampere-architecture-whitepaper.pdf', r: [['NVIDIA. (2020). ', 0], ['NVIDIA A100 Tensor Core GPU architecture', 1], ['.', 0]] },
+            chetlur2014cudnn: { a: 'Chetlur et al.', y: '2014', u: 'https://doi.org/10.48550/arXiv.1410.0759', r: [['Chetlur, S., Woolley, C., Vandermersch, P., Cohen, J., Tran, J., Catanzaro, B. y Shelhamer, E. (2014). ', 0], ['cuDNN: Efficient primitives for deep learning', 1], [' [Preprint]. ', 0], ['arXiv.', 0]] },
+            nvidia_cudnn: { a: 'NVIDIA', y: 's. f.-b', u: 'https://developer.nvidia.com/cuda/cuda-x-libraries/cudnn', r: [['NVIDIA. (s. f.-b). ', 0], ['NVIDIA cuDNN', 1], ['.', 0]] },
+            rajbhandari2020zero: { a: 'Rajbhandari et al.', y: '2020', u: 'https://doi.org/10.1109/SC41405.2020.00024', r: [['Rajbhandari, S., Rasley, J., Ruwase, O. y He, Y. (2020). ', 0], ['ZeRO: Memory optimizations toward training trillion parameter models. ', 0], ['En ', 0], ['SC20: International Conference for High Performance Computing, Networking, Storage and Analysis', 1], [' (pp. 1–16)', 0], ['. ', 0], ['IEEE.', 0]] },
+            micikevicius2018mixed: { a: 'Micikevicius et al.', y: '2018', u: 'https://arxiv.org/abs/1710.03740', r: [['Micikevicius, P., Narang, S., Alben, J., Diamos, G., Elsen, E., Garcia, D., Ginsburg, B., Houston, M., Kuchaiev, O., Venkatesh, G. y Wu, H. (2018). ', 0], ['Mixed precision training. ', 0], ['En ', 0], ['6th International Conference on Learning Representations (ICLR 2018)', 1], ['.', 0]] },
+            korthikanti2022reducing: { a: 'Korthikanti et al.', y: '2023', u: 'https://proceedings.mlsys.org/paper_files/paper/2023/hash/80083951326cf5b35e5100260d64ed81-Abstract-mlsys2023.html', r: [['Korthikanti, V. A., Casper, J., Lym, S., McAfee, L., Andersch, M., Shoeybi, M. y Catanzaro, B. (2023). ', 0], ['Reducing activation recomputation in large transformer models. ', 0], ['En ', 0], ['Proceedings of Machine Learning and Systems', 1], [' (Vol. 5, pp. 341–353)', 0], ['.', 0]] },
+            nvidia_mixedprecision: { a: 'NVIDIA', y: 's. f.-d', u: 'https://docs.nvidia.com/deeplearning/performance/mixed-precision-training/index.html', r: [['NVIDIA. (s. f.-d). ', 0], ['Train with mixed precision', 1], ['.', 0]] },
+            kalamkar2019study: { a: 'Kalamkar et al.', y: '2019', u: 'https://doi.org/10.48550/arXiv.1905.12322', r: [['Kalamkar, D., Mudigere, D., Mellempudi, N., Das, D., Banerjee, K., Avancha, S., Vooturi, D. T., Jammalamadaka, N., Huang, J., Yuen, H., Yang, J., Park, J., Heinecke, A., Georganas, E., Srinivasan, S., Kundu, A., Smelyanskiy, M., Kaul, B. y Dubey, P. (2019). ', 0], ['A study of BFLOAT16 for deep learning training', 1], [' [Preprint]. ', 0], ['arXiv.', 0]] },
+            micikevicius2022fp8: { a: 'Micikevicius et al.', y: '2022', u: 'https://doi.org/10.48550/arXiv.2209.05433', r: [['Micikevicius, P., Stosic, D., Burgess, N., Cornea, M., Dubey, P., Grisenthwaite, R., Ha, S., Heinecke, A., Judd, P., Kamalu, J., Mellempudi, N., Oberman, S., Shoeybi, M., Siu, M. y Wu, H. (2022). ', 0], ['FP8 formats for deep learning', 1], [' [Preprint]. ', 0], ['arXiv.', 0]] },
+            nvidia_h100: { a: 'NVIDIA', y: 's. f.-c', u: 'https://www.nvidia.com/en-us/data-center/h100/', r: [['NVIDIA. (s. f.-c). ', 0], ['NVIDIA H100 GPU', 1], ['.', 0]] },
+            keras_mixedprecision: { a: 'Keras Team', y: 's. f.-a', u: 'https://keras.io/api/mixed_precision/', r: [['Keras Team. (s. f.-a). ', 0], ['Mixed precision', 1], ['.', 0]] },
+            chen2016training: { a: 'Chen et al.', y: '2016', u: 'https://doi.org/10.48550/arXiv.1604.06174', r: [['Chen, T., Xu, B., Zhang, C. y Guestrin, C. (2016). ', 0], ['Training deep nets with sublinear memory cost', 1], [' [Preprint]. ', 0], ['arXiv.', 0]] },
+            dao2022flashattention: { a: 'Dao et al.', y: '2022', u: 'https://doi.org/10.52202/068431-1189', r: [['Dao, T., Fu, D. Y., Ermon, S., Rudra, A. y Ré, C. (2022). ', 0], ['FlashAttention: Fast and memory-efficient exact attention with IO-awareness. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 35, pp. 16344–16359)', 0], ['.', 0]] },
+            dao2023flashattention2: { a: 'Dao', y: '2023', u: 'https://doi.org/10.48550/arXiv.2307.08691', r: [['Dao, T. (2023). ', 0], ['FlashAttention-2: Faster attention with better parallelism and work partitioning', 1], [' [Preprint]. ', 0], ['arXiv.', 0]] },
+            li2020pytorch: { a: 'Li et al.', y: '2020', u: 'https://doi.org/10.14778/3415478.3415530', r: [['Li, S., Zhao, Y., Varma, R., Salpekar, O., Noordhuis, P., Li, T., Paszke, A., Smith, J., Vaughan, B., Damania, P. y Chintala, S. (2020). ', 0], ['PyTorch distributed: Experiences on accelerating data parallel training. ', 0], ['Proceedings of the VLDB Endowment', 1], [', ', 0], ['13', 1], ['(12)', 0], [', 3005–3018', 0], ['.', 0]] },
+            zhao2023pytorch: { a: 'Zhao et al.', y: '2023', u: 'https://doi.org/10.14778/3611540.3611569', r: [['Zhao, Y., Gu, A., Varma, R., Luo, L., Huang, C.-C., Xu, M., Wright, L., Shojanazeri, H., Ott, M., Shleifer, S., Desmaison, A., Balioglu, C., Damania, P., Nguyen, B., Chauhan, G., Hao, Y., Mathews, A. y Li, S. (2023). ', 0], ['PyTorch FSDP: Experiences on scaling fully sharded data parallel. ', 0], ['Proceedings of the VLDB Endowment', 1], [', ', 0], ['16', 1], ['(12)', 0], [', 3848–3860', 0], ['.', 0]] },
+            google_colab: { a: 'Google', y: 's. f.-a', u: 'https://colab.research.google.com/', r: [['Google. (s. f.-a). ', 0], ['Google Colaboratory', 1], [' [Software].', 0]] },
+            google_colabfaq: { a: 'Google', y: 's. f.-b', u: 'https://research.google.com/colaboratory/faq.html', r: [['Google. (s. f.-b). ', 0], ['Google Colaboratory: Frequently asked questions', 1], ['.', 0]] },
+            kaggle_notebooks: { a: 'Kaggle', y: 's. f.', u: 'https://www.kaggle.com/code', r: [['Kaggle. (s. f.). ', 0], ['Kaggle Notebooks', 1], [' [Software].', 0]] },
+            aws_studiolab: { a: 'Amazon Web Services', y: 's. f.', u: 'https://docs.aws.amazon.com/sagemaker/latest/dg/studio-lab-overview.html', r: [['Amazon Web Services. (s. f.). ', 0], ['Amazon SageMaker Studio Lab components overview', 1], ['.', 0]] },
+            yosinski2014transferable: { a: 'Yosinski et al.', y: '2014', u: 'https://arxiv.org/abs/1411.1792', r: [['Yosinski, J., Clune, J., Bengio, Y. y Lipson, H. (2014). ', 0], ['How transferable are features in deep neural networks? ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 27, pp. 3320–3328)', 0], ['. ', 0], ['Curran Associates.', 0]] },
+            he2016deep: { a: 'K. He et al.', y: '2016', u: 'https://doi.org/10.1109/CVPR.2016.90', r: [['He, K., Zhang, X., Ren, S. y Sun, J. (2016). ', 0], ['Deep residual learning for image recognition. ', 0], ['En ', 0], ['Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)', 1], [' (pp. 770–778)', 0], ['. ', 0], ['IEEE.', 0]] },
+            howard2019searching: { a: 'Howard et al.', y: '2019', u: 'https://doi.org/10.1109/ICCV.2019.00140', r: [['Howard, A., Sandler, M., Chen, B., Wang, W., Chen, L.-C., Tan, M., Chu, G., Vasudevan, V., Zhu, Y., Pang, R., Adam, H. y Le, Q. (2019). ', 0], ['Searching for MobileNetV3. ', 0], ['En ', 0], ['2019 IEEE/CVF International Conference on Computer Vision (ICCV)', 1], [' (pp. 1314–1324)', 0], ['. ', 0], ['IEEE.', 0]] },
+            sanh2019distilbert: { a: 'Sanh et al.', y: '2019', u: 'https://doi.org/10.48550/arXiv.1910.01108', r: [['Sanh, V., Debut, L., Chaumond, J. y Wolf, T. (2019). ', 0], ['DistilBERT, a distilled version of BERT: Smaller, faster, cheaper and lighter', 1], [' [Preprint]. ', 0], ['arXiv.', 0]] },
+            pytorch_transferlearning: { a: 'PyTorch Foundation', y: 's. f.-h', u: 'https://docs.pytorch.org/tutorials/beginner/transfer_learning_tutorial.html', r: [['PyTorch Foundation. (s. f.-h). ', 0], ['Transfer learning for computer vision tutorial', 1], ['.', 0]] },
+            murray2021tfdata: { a: 'Murray et al.', y: '2021', u: 'https://doi.org/10.14778/3476311.3476374', r: [['Murray, D. G., Šimša, J., Klimovic, A. y Indyk, I. (2021). ', 0], ['tf.data: A machine learning data processing framework. ', 0], ['Proceedings of the VLDB Endowment', 1], [', ', 0], ['14', 1], ['(12)', 0], [', 2945–2958', 0], ['.', 0]] },
+            tensorflow_tfdata: { a: 'TensorFlow', y: 's. f.-a', u: 'https://www.tensorflow.org/guide/data_performance', r: [['TensorFlow. (s. f.-a). ', 0], ['Better performance with the tf.data API', 1], ['.', 0]] },
+            tf_dataguide: { a: 'TensorFlow', y: 's. f.-b', u: 'https://www.tensorflow.org/guide/data', r: [['TensorFlow. (s. f.-b). ', 0], ['tf.data: Build TensorFlow input pipelines', 1], ['.', 0]] },
+            pytorch_dataloading: { a: 'PyTorch Foundation', y: 's. f.-j', u: 'https://docs.pytorch.org/tutorials/beginner/data_loading_tutorial.html', r: [['PyTorch Foundation. (s. f.-j). ', 0], ['Writing custom datasets, DataLoaders and transforms', 1], ['.', 0]] },
+            shorten2019survey: { a: 'Shorten y Khoshgoftaar', y: '2019', u: 'https://doi.org/10.1186/s40537-019-0197-0', r: [['Shorten, C. y Khoshgoftaar, T. M. (2019). ', 0], ['A survey on image data augmentation for deep learning. ', 0], ['Journal of Big Data', 1], [', ', 0], ['6', 1], [', 60', 0], ['.', 0]] },
+            zhang2018mixup: { a: 'H. Zhang et al.', y: '2018', u: 'https://arxiv.org/abs/1710.09412', r: [['Zhang, H., Cisse, M., Dauphin, Y. N. y Lopez-Paz, D. (2018). ', 0], ['mixup: Beyond empirical risk minimization. ', 0], ['En ', 0], ['6th International Conference on Learning Representations (ICLR 2018)', 1], ['.', 0]] },
+            yun2019cutmix: { a: 'Yun et al.', y: '2019', u: 'https://doi.org/10.1109/ICCV.2019.00612', r: [['Yun, S., Han, D., Chun, S., Oh, S. J., Yoo, Y. y Choe, J. (2019). ', 0], ['CutMix: Regularization strategy to train strong classifiers with localizable features. ', 0], ['En ', 0], ['2019 IEEE/CVF International Conference on Computer Vision (ICCV)', 1], [' (pp. 6022–6031)', 0], ['. ', 0], ['IEEE.', 0]] },
+            torchvision_transforms: { a: 'PyTorch Foundation', y: 's. f.-i', u: 'https://docs.pytorch.org/vision/stable/transforms.html', r: [['PyTorch Foundation. (s. f.-i). ', 0], ['Transforming images, videos, boxes and more', 1], ['.', 0]] },
+            buslaev2020albumentations: { a: 'Buslaev et al.', y: '2020', u: 'https://doi.org/10.3390/info11020125', r: [['Buslaev, A., Iglovikov, V. I., Khvedchenya, E., Parinov, A., Druzhinin, M. y Kalinin, A. A. (2020). ', 0], ['Albumentations: Fast and flexible image augmentations. ', 0], ['Information', 1], [', ', 0], ['11', 1], ['(2)', 0], [', 125', 0], ['.', 0]] },
+            albumentationsx: { a: 'Albumentations Team', y: 's. f.', u: 'https://github.com/albumentations-team/AlbumentationsX', r: [['Albumentations Team. (s. f.). ', 0], ['AlbumentationsX', 1], [' [Software]. ', 0], ['GitHub.', 0]] },
+            albumentations_repo: { a: 'Albumentations Team', y: '2025', u: 'https://github.com/albumentations-team/albumentations', r: [['Albumentations Team. (2025). ', 0], ['Albumentations', 1], [' (Versión 2.0.8)', 0], [' [Software]. ', 0], ['GitHub.', 0]] },
+            wei2019eda: { a: 'Wei y Zou', y: '2019', u: 'https://doi.org/10.18653/v1/D19-1670', r: [['Wei, J. y Zou, K. (2019). ', 0], ['EDA: Easy data augmentation techniques for boosting performance on text classification tasks. ', 0], ['En ', 0], ['Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing and the 9th International Joint Conference on Natural Language Processing (EMNLP-IJCNLP)', 1], [' (pp. 6381–6387)', 0], ['. ', 0], ['Association for Computational Linguistics.', 0]] },
+            sennrich2016improving: { a: 'Sennrich et al.', y: '2016', u: 'https://doi.org/10.18653/v1/P16-1009', r: [['Sennrich, R., Haddow, B. y Birch, A. (2016). ', 0], ['Improving neural machine translation models with monolingual data. ', 0], ['En ', 0], ['Proceedings of the 54th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)', 1], [' (pp. 86–96)', 0], ['. ', 0], ['Association for Computational Linguistics.', 0]] },
+            pytorch_v26: { a: 'PyTorch Foundation', y: '2025a', u: 'https://github.com/pytorch/pytorch/releases/tag/v2.6.0', r: [['PyTorch Foundation. (2025a, 29 de enero). ', 0], ['PyTorch 2.6.0', 1], [' [Notas de versión]. ', 0], ['GitHub.', 0]] },
+            keras_saving: { a: 'Keras Team', y: 's. f.-b', u: 'https://keras.io/guides/serialization_and_saving/', r: [['Keras Team. (s. f.-b). ', 0], ['Save, serialize, and export models', 1], ['.', 0]] },
+            onnx_docs: { a: 'ONNX Community', y: 's. f.', u: 'https://onnx.ai/', r: [['ONNX Community. (s. f.). ', 0], ['ONNX: Open Neural Network Exchange', 1], ['.', 0]] },
+            onnxruntime_docs: { a: 'Microsoft', y: 's. f.', u: 'https://onnxruntime.ai/', r: [['Microsoft. (s. f.). ', 0], ['ONNX Runtime', 1], ['.', 0]] },
+            pytorch_onnx: { a: 'PyTorch Foundation', y: 's. f.-f', u: 'https://docs.pytorch.org/docs/stable/onnx.html', r: [['PyTorch Foundation. (s. f.-f). ', 0], ['torch.onnx', 1], ['.', 0]] },
+            pytorch_v29: { a: 'PyTorch Foundation', y: '2025b', u: 'https://github.com/pytorch/pytorch/releases/tag/v2.9.0', r: [['PyTorch Foundation. (2025b, 15 de octubre). ', 0], ['PyTorch 2.9.0', 1], [' [Notas de versión]. ', 0], ['GitHub.', 0]] },
+            pytorch_aotinductor: { a: 'PyTorch Foundation', y: 's. f.-a', u: 'https://docs.pytorch.org/docs/stable/torch.compiler_aot_inductor.html', r: [['PyTorch Foundation. (s. f.-a). ', 0], ['AOTInductor: Ahead-of-time compilation for torch.export-ed models', 1], ['.', 0]] },
+            sculley2015hidden: { a: 'Sculley et al.', y: '2015', u: 'https://papers.nips.cc/paper_files/paper/2015/hash/86df7dcfd896fcaf2674f757a2463eba-Abstract.html', r: [['Sculley, D., Holt, G., Golovin, D., Davydov, E., Phillips, T., Ebner, D., Chaudhary, V., Young, M., Crespo, J.-F. y Dennison, D. (2015). ', 0], ['Hidden technical debt in machine learning systems. ', 0], ['En ', 0], ['Advances in Neural Information Processing Systems', 1], [' (Vol. 28, pp. 2503–2511)', 0], ['.', 0]] },
+            litert_torch: { a: 'Google AI Edge', y: 's. f.-a', u: 'https://github.com/google-ai-edge/litert-torch', r: [['Google AI Edge. (s. f.-a). ', 0], ['LiteRT Torch', 1], [' [Software]. ', 0], ['GitHub.', 0]] },
+            jacob2018quantization: { a: 'Jacob et al.', y: '2018', u: 'https://doi.org/10.1109/CVPR.2018.00286', r: [['Jacob, B., Kligys, S., Chen, B., Zhu, M., Tang, M., Howard, A., Adam, H. y Kalenichenko, D. (2018). ', 0], ['Quantization and training of neural networks for efficient integer-arithmetic-only inference. ', 0], ['En ', 0], ['2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition', 1], [' (pp. 2704–2713)', 0], ['. ', 0], ['IEEE.', 0]] },
+            goodfellow2016deep: { a: 'Goodfellow et al.', y: '2016', u: 'https://www.deeplearningbook.org', r: [['Goodfellow, I., Bengio, Y. y Courville, A. (2016). ', 0], ['Deep learning', 1], ['. ', 0], ['MIT Press.', 0]] },
+        };
+        const refTexto = (k) => (REFS[k] ? REFS[k].r.map((s) => s[0]).join('') + (REFS[k].u ? ' ' + REFS[k].u : '') : k);
+        // <Cita k="a, b" /> → «(Autor, 2015; Otro, 2016)». n: forma narrativa «Autor (2015)».
+        // Localizador por clave con «@»: k="goodfellow2016deep@sec. 6.5, nielsen2015neural@cap. 2". p: localizador único (una sola clave).
+        const Cita = ({ k, n = false, p = '' }) => {
+            const ks = k.split(',').map((s) => s.trim()).filter(Boolean).map((s) => { const [c, loc] = s.split('@'); return { c: c.trim(), loc: (loc || '').trim() }; });
+            const grupos = [];
+            ks.forEach(({ c, loc }) => {
+                const R = REFS[c] || { a: c, y: '¿?' };
+                const y = R.y + (loc ? `, ${loc}` : '');
+                const g = grupos.find((gg) => gg.a === R.a);
+                if (g) g.ys.push(y); else grupos.push({ a: R.a, ys: [y] });
+            });
+            const loc = p ? `, ${p}` : '';
+            const titulo = ks.map(({ c }) => refTexto(c)).join('\n');
+            if (n) return <span className="cita" title={titulo}>{grupos.map((g) => `${g.a} (${g.ys.join(', ')}${loc})`).join('; ')}</span>;
+            return <span className="cita" title={titulo}>({grupos.map((g) => `${g.a}, ${g.ys.join(', ')}`).join('; ')}{loc})</span>;
+        };
+        // Lista «Referencias» de un capítulo (APA 7: orden alfabético, sangría francesa).
+        const Referencias = ({ claves, titulo = 'Referencias' }) => {
+            const ks = [...new Set(claves)].filter((k) => REFS[k]).sort((x, y) => refTexto(x).localeCompare(refTexto(y), 'es'));
+            return (
+                <section className="mt-10 pt-6 border-t border-gray-200" aria-label={titulo}>
+                    <h3 className="text-lg font-bold text-primary mb-3">{titulo}</h3>
+                    <ul className="refs-apa space-y-2 text-sm text-gray-700" style={{ listStyle: 'none', paddingLeft: 0 }}>
+                        {ks.map((k) => (
+                            <li key={k} id={`ref-${k}`} style={{ paddingLeft: '2em', textIndent: '-2em' }}>
+                                {REFS[k].r.map((s, i) => (s[1] ? <em key={i}>{s[0]}</em> : <React.Fragment key={i}>{s[0]}</React.Fragment>))}
+                                {REFS[k].u ? <>{' '}<a className="text-primary underline break-all" href={REFS[k].u} target="_blank" rel="noopener noreferrer">{REFS[k].u}</a></> : null}
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            );
+        };
+
         /* ============================================================
            PORTADA + OBJETIVOS (Lección 0)
         ============================================================ */
@@ -1278,7 +1401,8 @@
                     Este material es <strong>autónomo</strong>: permite avanzar a ritmo propio con los botones <em>Anterior / Siguiente</em>.
                     Cada capítulo combina teoría breve, una analogía local, un diagrama, código comentado y práctica.
                     El navegador <strong>recuerda la última lección</strong>, de modo que es posible pausar y retomar en cualquier momento.
-                    Se recomienda intentar las preguntas <em>antes</em> de ver la retroalimentación.
+                    Se recomienda intentar las preguntas <em>antes</em> de ver la retroalimentación. Textos de referencia del módulo:{' '}
+                    <Cita k="chollet2025deep" n />, <Cita k="geron2025hands" n />, <Cita k="stevens2020deep" n /> y <Cita k="zhang2023dive" n />.
                 </Box>
 
                 <h3>Identificación del espacio académico</h3>
@@ -1379,7 +1503,7 @@
                         <li><strong>Cómputo:</strong> solo GPU gratuitas (T4 en Colab, ≈30 h/semana en Kaggle). ¿Bastan? ¿Cómo aplicar precisión mixta y puntos de control (<em>checkpoints</em>) sin perder progreso por desconexiones?</li>
                         <li><strong>Datos:</strong> el conjunto de datos proviene de una sola región y de la estación seca. ¿Cómo generalizar a otras zonas y climas sin generar artefactos con el aumento de datos (<em>data augmentation</em>)?</li>
                         <li><strong>Despliegue:</strong> las fincas carecen de internet estable. El modelo debe correr <em>offline</em> en Android de gama media (cuantización, conversión a LiteRT/ExecuTorch).</li>
-                        <li><strong>Ética:</strong> si el modelo falla y un caficultor pierde su cosecha, ¿quién responde? ¿Qué umbrales de confianza o advertencias debe incluir la aplicación?</li>
+                        <li><strong>Ética:</strong> si el modelo falla y un caficultor pierde su cosecha, ¿quién responde? ¿Qué umbrales de confianza o advertencias debe incluir la aplicación? Orientan la respuesta el marco ético colombiano para la IA y la documentación de los límites de uso del modelo <Cita k="guio2021marco, mitchell2019model" />.</li>
                     </ul>
                 </Box>
 
@@ -1402,11 +1526,13 @@
                     ))}
                 </div>
                 <Box type="info" label="Contexto local — Colombia en expansión de IA">
-                    La política <strong>CONPES de IA</strong> (aprobada en febrero de 2025), el programa <strong>ColombIA Inteligente</strong>{' '}
+                    La política <strong>CONPES de IA</strong>, aprobada en febrero de 2025 <Cita k="conpes2025ia" />, el programa <strong>ColombIA Inteligente</strong>{' '}
                     de MinCiencias y el creciente ecosistema de empresas emergentes (<em>startups</em>) demandan profesionales que sepan llevar un modelo desde
                     la idea hasta un producto funcional. Las herramientas de estos capítulos desarrollan exactamente esas competencias; y, gracias
                     a Colab y Kaggle, están al alcance de cualquier estudiante con una cuenta de Google y conexión a internet.
                 </Box>
+
+                <Referencias claves={['chollet2025deep', 'geron2025hands', 'stevens2020deep', 'zhang2023dive', 'guio2021marco', 'mitchell2019model', 'conpes2025ia']} />
             </div>
         );
 
@@ -1556,7 +1682,7 @@
                     <p>
                         <strong>TensorFlow</strong> es un <em>framework</em> de código abierto del equipo de Google Brain, publicado en 2015. Su
                         nombre proviene de su operación fundamental: transformaciones matemáticas sobre <Termino def="Arreglos multidimensionales de datos numéricos que fluyen por un grafo computacional.">tensores</Termino> que
-                        fluyen por un grafo computacional. La versión de referencia del curso es la 2.21 (marzo de 2026), y TensorFlow
+                        fluyen por un grafo computacional <Cita k="abadi2016tensorflow" />. La versión de referencia del curso es la 2.21, publicada en marzo de 2026 <Cita k="tensorflow_v221" />, y TensorFlow
                         sigue siendo uno de los <em>frameworks</em> más usados en producción empresarial.
                     </p>
 
@@ -1579,10 +1705,10 @@
                     <h4>Keras: aprendizaje profundo para humanos</h4>
                     <p>
                         <strong>Keras</strong>, creado por François Chollet en 2015, resume su filosofía en un lema, «aprendizaje profundo
-                        para humanos», y en un principio de diseño: una API pensada «para seres humanos, no para máquinas» (documentación
-                        de Keras). Desde TensorFlow 2.x es la interfaz oficial de alto nivel (<span className="inline-code">tf.keras</span>).
+                        para humanos», y en un principio de diseño: una API pensada «para seres humanos, no para máquinas»{' '}
+                        <Cita k="chollet2015keras" />. Desde TensorFlow 2.x es la interfaz oficial de alto nivel (<span className="inline-code">tf.keras</span>).
                         A finales de 2023 se lanzó <strong>Keras 3</strong>, una reescritura completa que lo convirtió en un <em>framework</em>{' '}
-                        <strong>multi-<em>backend</em></strong>: el mismo código se ejecuta sobre TensorFlow, PyTorch, JAX u OpenVINO (este último solo
+                        <strong>multi-<em>backend</em></strong> <Cita k="keras3_intro" />: el mismo código se ejecuta sobre TensorFlow, PyTorch, JAX u OpenVINO (este último solo
                         para inferencia) cambiando una variable de entorno.
                     </p>
 
@@ -1669,7 +1795,7 @@ modelo = keras.Model(
                     <p>Una de las mayores fortalezas de TensorFlow es su ecosistema completo de despliegue:</p>
                     <ul>
                         <li><strong>TensorFlow Serving:</strong> sistema de alto rendimiento en C++ para servir modelos en producción, con control de versiones, pruebas A/B y API REST/gRPC. Estándar de facto en despliegues empresariales de gran escala.</li>
-                        <li><strong>LiteRT</strong> (antes TensorFlow Lite): optimiza modelos para móviles y borde (cuantización, reducción de tamaño). Permite ejecutar modelos de aprendizaje profundo en un Android de una zona rural del Cauca sin internet. Desde TensorFlow 2.20 (2025), <span className="inline-code">tf.lite</span> queda en desuso y el desarrollo continúa en LiteRT, un proyecto independiente con API nativas en Kotlin y C++.</li>
+                        <li><strong>LiteRT</strong> (antes TensorFlow Lite): optimiza modelos para móviles y borde (cuantización, reducción de tamaño). Permite ejecutar modelos de aprendizaje profundo en un Android de una zona rural del Cauca sin internet. Desde TensorFlow 2.20, <span className="inline-code">tf.lite</span> queda en desuso <Cita k="tensorflow_v220" /> y el desarrollo continúa en LiteRT, un proyecto independiente con API nativas en Kotlin y C++ <Cita k="google_litert" />.</li>
                         <li><strong>TensorFlow.js:</strong> ejecuta modelos en el navegador o en Node.js (IA del lado del cliente).</li>
                         <li><strong>TFX (TensorFlow Extended):</strong> flujos (<em>pipelines</em>) de aprendizaje automático de extremo a extremo, de la validación de datos al monitoreo en producción.</li>
                         <li><strong>TensorBoard:</strong> visualización de curvas de pérdida, histogramas de pesos, grafos y métricas durante el entrenamiento.</li>
@@ -1680,7 +1806,7 @@ modelo = keras.Model(
                     <p>
                         <strong>PyTorch</strong>, desarrollado por Facebook AI Research (FAIR, hoy Meta) y publicado en 2016, opera desde
                         2022 bajo la Linux Foundation. Domina la investigación académica: desde 2019 la mayoría de los artículos con código
-                        de las grandes conferencias usa PyTorch (He, 2019), y las implementaciones de referencia de GPT, LLaMA, Stable
+                        de las grandes conferencias usa PyTorch <Cita k="he2019state" />, y las implementaciones de referencia de GPT, LLaMA, Stable
                         Diffusion y los modelos de Hugging Face se escriben sobre él.
                     </p>
 
@@ -1725,7 +1851,7 @@ resultado = datos_sensor @ pesos.T   # Multiplicación matricial`} />
                     </Box>
                     <p>
                         En PyTorch el grafo se construye <strong>en tiempo real</strong>, operación por operación, a medida que el código se
-                        ejecuta. Esto permite usar las herramientas estándar de depuración de Python (<span className="inline-code">print()</span>,{' '}
+                        ejecuta <Cita k="paszke2019pytorch" />. Esto permite usar las herramientas estándar de depuración de Python (<span className="inline-code">print()</span>,{' '}
                         <span className="inline-code">pdb</span>, puntos de interrupción) para inspeccionar cualquier tensor intermedio. Esa inmediatez es la
                         razón principal de su adopción masiva en investigación. La ejecución inmediata (<em>eager</em>) de TensorFlow 2.x y
                         el <em>define-by-run</em> de PyTorch son la misma idea vista desde dos lados; TensorFlow puede volver a un grafo
@@ -1736,7 +1862,7 @@ resultado = datos_sensor @ pesos.T   # Multiplicación matricial`} />
                     <p>
                         Al operar sobre tensores con <span className="inline-code">requires_grad=True</span>, PyTorch registra cada operación en un
                         grafo dirigido acíclico (DAG). Al invocar <span className="inline-code">.backward()</span> sobre la pérdida, el motor recorre
-                        el grafo en orden inverso aplicando la regla de la cadena. Es la implementación práctica de la retropropagación del
+                        el grafo en orden inverso aplicando la regla de la cadena <Cita k="baydin2018automatic, paszke2019pytorch" />. Es la implementación práctica de la retropropagación del
                         Módulo 1 (Capítulo 1.4): el «secretario invisible» que anota cada operación en la bitácora y luego la lee al revés.
                     </p>
                     <CodeBlock lang="pytorch" title="Autograd en acción" code={`x = torch.tensor(2.0, requires_grad=True)
@@ -1786,12 +1912,12 @@ modelo = DetectorRoya()`} />
 
                     <h4>El ecosistema de PyTorch</h4>
                     <ul>
-                        <li><strong>TorchVision, TorchAudio, TorchText:</strong> visión, audio y PLN (procesamiento de lenguaje natural), con conjuntos de datos, transformaciones y modelos preentrenados (el desarrollo de TorchText se detuvo en 2024, con la versión 0.18, y su repositorio está archivado; para texto se usan hoy las bibliotecas <span className="inline-code">tokenizers</span> y <span className="inline-code">datasets</span> de Hugging Face).</li>
-                        <li><strong>Hugging Face Transformers:</strong> la biblioteca de modelos de lenguaje (BERT, GPT, LLaMA) más popular del mundo, construida primordialmente sobre PyTorch.</li>
-                        <li><strong>torch.export y ONNX:</strong> <span className="inline-code">torch.export</span> (introducido en PyTorch 2.1; base del exportador ONNX predeterminado desde la 2.9) es el sucesor de TorchScript (declarado obsoleto) y captura el modelo como un grafo de compilación anticipada (AOT, <em>ahead-of-time</em>); para ejecutarlo sin Python se compila con AOTInductor (C++) o se convierte con ExecuTorch (móvil). ONNX es el formato abierto de interoperabilidad.</li>
-                        <li><strong>TorchServe</strong> (AWS y Meta) fue el servidor de referencia para PyTorch; desde 2025 está archivado y sin parches de seguridad. Hoy se sirve con <strong>FastAPI + ONNX Runtime</strong> en servicios sencillos o con <strong>NVIDIA Triton Inference Server</strong> en producción multi-<em>framework</em>.</li>
-                        <li><strong>torch.compile()</strong> (PyTorch 2.x): con una línea, compila el modelo a código de máquina optimizado; en un banco de 163 modelos de código abierto resultó ≈21 % más rápido en FP32 y ≈51 % con precisión mixta en una A100 (PyTorch Foundation, s. f.; Ansel et al., 2024). En GPU de escritorio la ganancia suele ser menor.</li>
-                        <li><strong>ExecuTorch:</strong> entorno de ejecución (<em>runtime</em>) oficial para móviles y borde (sucesor de PyTorch Mobile); consume modelos de <span className="inline-code">torch.export</span> y soporta aceleradores Arm, Apple y Qualcomm.</li>
+                        <li><strong>TorchVision, TorchAudio, TorchText:</strong> visión, audio y PLN (procesamiento de lenguaje natural), con conjuntos de datos, transformaciones y modelos preentrenados. El desarrollo de TorchText se detuvo en 2024, con la versión 0.18, y su repositorio está archivado <Cita k="torchtext_repo" />; para texto se usan hoy las bibliotecas <span className="inline-code">tokenizers</span> y <span className="inline-code">datasets</span> de Hugging Face.</li>
+                        <li><strong>Hugging Face Transformers:</strong> la biblioteca de modelos de lenguaje (BERT, GPT, LLaMA) más popular del mundo, construida primordialmente sobre PyTorch <Cita k="wolf2020transformers" />.</li>
+                        <li><strong>torch.export y ONNX:</strong> <span className="inline-code">torch.export</span> (introducido en PyTorch 2.1; base del exportador ONNX predeterminado desde la 2.9) captura el modelo como un grafo de compilación anticipada (AOT, <em>ahead-of-time</em>) y es el sucesor de TorchScript, declarado obsoleto <Cita k="pytorch_export, pytorch_jit, pytorch_v210" />; para ejecutarlo sin Python se compila con AOTInductor (C++) o se convierte con ExecuTorch (móvil). ONNX es el formato abierto de interoperabilidad.</li>
+                        <li><strong>TorchServe</strong> (AWS y Meta) fue el servidor de referencia para PyTorch; desde 2025 está archivado y sin parches de seguridad <Cita k="torchserve_repo" />. Hoy se sirve con <strong>FastAPI + ONNX Runtime</strong> en servicios sencillos o con <strong>NVIDIA Triton Inference Server</strong> <Cita k="triton_server" /> en producción multi-<em>framework</em>.</li>
+                        <li><strong>torch.compile()</strong> (PyTorch 2.x): con una línea, compila el modelo a código de máquina optimizado; en un banco de 163 modelos de código abierto resultó ≈21 % más rápido en FP32 y ≈51 % con precisión mixta en una A100 <Cita k="ansel2024pytorch, pytorch2x" />. En GPU de escritorio la ganancia suele ser menor.</li>
+                        <li><strong>ExecuTorch:</strong> entorno de ejecución (<em>runtime</em>) oficial para móviles y borde (sucesor de PyTorch Mobile); consume modelos de <span className="inline-code">torch.export</span> y soporta aceleradores Arm, Apple y Qualcomm <Cita k="executorch_docs" />.</li>
                     </ul>
 
                     {/* ============== 1.3 Comparativa ============== */}
@@ -1813,7 +1939,7 @@ modelo = DetectorRoya()`} />
                                 <tr><td>API de alto nivel</td><td>Keras (integrada; multi-<em>backend</em> desde la v3)</td><td>torch.nn.Module + bucle explícito</td></tr>
                                 <tr><td>Curva de aprendizaje</td><td>Baja con Keras; media-alta con TF nativo</td><td>Media; exige escribir el bucle de entrenamiento</td></tr>
                                 <tr><td>Depuración</td><td>Mejorada en 2.x; limitada en modo grafo</td><td>Natural con herramientas de Python</td></tr>
-                                <tr><td>Investigación</td><td>Minoritario y en descenso</td><td>Mayoritario desde 2019 (He, 2019)</td></tr>
+                                <tr><td>Investigación</td><td>Minoritario y en descenso</td><td>Mayoritario desde 2019 <Cita k="he2019state" /></td></tr>
                                 <tr><td>Producción empresarial</td><td>Fuerte: TF Serving, LiteRT, TFX</td><td>Creciente: Triton, ONNX, torch.compile</td></tr>
                                 <tr><td>Despliegue móvil</td><td>LiteRT (maduro)</td><td>ExecuTorch (estable desde 2025)</td></tr>
                                 <tr><td>Soporte TPU</td><td>Nativo y maduro</td><td>Vía PyTorch/XLA</td></tr>
@@ -1898,8 +2024,8 @@ with torch.no_grad():
                     <h4>Keras 3: el puente entre mundos</h4>
                     <p>
                         Con Keras 3 (finales de 2023), Keras se volvió <strong>agnóstico del <em>backend</em></strong>: el mismo código corre sobre
-                        TensorFlow, PyTorch o JAX configurando una variable de entorno. Esto elimina la falsa dicotomía: se prototipa con la
-                        simplicidad de Keras, se depura con PyTorch y se despliega con TensorFlow o JAX, sin reescribir el modelo.
+                        TensorFlow, PyTorch o JAX <Cita k="bradbury2018jax" /> configurando una variable de entorno. Esto elimina la falsa dicotomía: se prototipa con la
+                        simplicidad de Keras, se depura con PyTorch y se despliega con TensorFlow o JAX, sin reescribir el modelo <Cita k="chollet2025deep" />.
                     </p>
                     <CodeBlock lang="python" title="Seleccionar backend en Keras 3" code={`import os
 os.environ['KERAS_BACKEND'] = 'torch'   # o 'tensorflow', 'jax'
@@ -1978,6 +2104,13 @@ import keras
                             justificacion: 'Desde 2019 la mayoría de los artículos con código de las grandes conferencias usa PyTorch, que domina también la IA generativa; TensorFlow/Keras conserva su fortaleza en producción y despliegue móvil (LiteRT). Keras 3 tiende un puente entre ambos mundos.'
                         },
                     ]} />
+
+                    <Referencias claves={[
+                        'abadi2016tensorflow', 'tensorflow_v221', 'chollet2015keras', 'keras3_intro', 'tensorflow_v220', 'google_litert',
+                        'he2019state', 'paszke2019pytorch', 'baydin2018automatic', 'torchtext_repo', 'wolf2020transformers',
+                        'pytorch_export', 'pytorch_jit', 'pytorch_v210', 'torchserve_repo', 'triton_server', 'ansel2024pytorch',
+                        'pytorch2x', 'executorch_docs', 'bradbury2018jax', 'chollet2025deep',
+                    ]} />
                 </div>
             );
         };
@@ -2017,7 +2150,7 @@ import keras
                 </svg>
                 </div>
                 <AvisoDesplazar />
-                <PieFigura n="3.2.1" className="mt-1" fuente={<>elaboración propia, inspirada en la figura «The GPU devotes more transistors to data processing» de la <em>CUDA C++ Programming Guide</em> (NVIDIA, s. f.).</>}>Comparación arquitectónica CPU frente a GPU: la CPU optimiza tareas secuenciales; la GPU, el paralelismo masivo (SIMT).</PieFigura>
+                <PieFigura n="3.2.1" className="mt-1" fuente={<>elaboración propia, inspirada en la figura «The GPU devotes more transistors to data processing» de la <em>CUDA C++ Programming Guide</em> de NVIDIA.</>}>Comparación arquitectónica CPU frente a GPU: la CPU optimiza tareas secuenciales; la GPU, el paralelismo masivo (SIMT).</PieFigura>
             </div>
         );
 
@@ -2103,7 +2236,7 @@ import keras
         };
 
         /* DIAGRAMA SVG: flujo del entrenamiento con precisión mixta (AMP) */
-        const AMPSVG = () => (
+        const AMPSVG = ({ fuente = 'elaboración propia.' }) => (
             <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
                 <div className="overflow-x-auto">
                 <svg viewBox="0 0 740 292" className="w-full" style={{ minWidth: 660 }} role="img"
@@ -2161,7 +2294,7 @@ import keras
                 </svg>
                 </div>
                 <AvisoDesplazar />
-                <PieFigura n="3.2.5" className="mt-1" fuente="elaboración propia a partir de Micikevicius et al. (2018) y de la documentación de PyTorch AMP (PyTorch Foundation, s. f.).">Flujo del entrenamiento con precisión mixta (AMP). El escalado de pérdida solo es necesario con FP16; en ese caso, <span className="not-italic">GradScaler</span> ajusta la escala de forma dinámica: ante un inf o un NaN omite el paso y la divide entre 2, y la duplica tras 2.000 pasos estables.</PieFigura>
+                <PieFigura n="3.2.5" className="mt-1" fuente={fuente}>Flujo del entrenamiento con precisión mixta (AMP). El escalado de pérdida solo es necesario con FP16; en ese caso, <span className="not-italic">GradScaler</span> ajusta la escala de forma dinámica: ante un inf o un NaN omite el paso y la divide entre 2, y la duplica tras 2.000 pasos estables.</PieFigura>
             </div>
         );
 
@@ -2290,7 +2423,7 @@ import keras
         const fmtPct = (p) => `${fmtNum(p, 1)} %`;
         const pasoEje = (max, opciones) => opciones.find(o => max / o <= 6) || opciones[opciones.length - 1];
 
-        const CalculadoraVRAM = () => {
+        const CalculadoraVRAM = ({ citaKorthikanti = null, fuente = 'elaboración propia (simulación interactiva); activaciones por muestra medidas con PyTorch 2.12.' }) => {
             const S = window.M3SIMS;
             const [modelo, setModelo] = useState('resnet50');
             const [bExp, setBExp] = useState(5);
@@ -2465,7 +2598,7 @@ import keras
                     <p className="text-xs text-gray-600 mt-3">
                         <strong>Estimación de primer orden; no incluye el espacio de trabajo de cuDNN ni la fragmentación.</strong> Se descuentan
                         además 0,5 GB fijos para el contexto CUDA (también estimados). Las activaciones por muestra de las CNN se midieron con
-                        PyTorch 2.12 a 224 × 224; las del Transformer siguen la fórmula de Korthikanti et al. (2023), en 16 bits (en FP32 se
+                        PyTorch 2.12 a 224 × 224; las del Transformer siguen la fórmula{citaKorthikanti ? <> de {citaKorthikanti}</> : null}, en 16 bits (en FP32 se
                         duplican de forma aproximada).{notaExtra}
                     </p>
 
@@ -2488,7 +2621,7 @@ print(f"reservado:     {torch.cuda.memory_reserved() / 1e9:.2f} GB")`} />
                         <p><strong className="text-navy">Para observar:</strong> al llevar el lote de 8 a 64 se observa qué segmento crece y cuál permanece fijo; después se activa la precisión mixta.</p>
                         <p><strong className="text-navy">Para explicar:</strong> ¿por qué el ahorro no llega al 50 %? Con el Transformer, lote 1 y recomputación, ¿qué cambia y por qué?</p>
                     </div>
-                    <PieFigura n="3.2.3" className="mt-3" fuente="elaboración propia (simulación interactiva) a partir de Micikevicius et al. (2018), Rajbhandari et al. (2020) y Korthikanti et al. (2023); activaciones por muestra medidas con PyTorch 2.12.">
+                    <PieFigura n="3.2.3" className="mt-3" fuente={fuente}>
                         Calculadora de VRAM «¿Qué llena la bodega?»: reparto estimado de la memoria de la GPU durante el entrenamiento. En una CNN
                         con lote moderado dominan las activaciones; en el ajuste fino de un Transformer con lote 1 y recomputación, los estados del
                         modelo (con Adam en precisión mixta, 16 bytes por parámetro).
@@ -2529,30 +2662,31 @@ print(f"reservado:     {torch.cuda.memory_reserved() / 1e9:.2f} GB")`} />
                     <p>
                         Una <strong>CPU</strong> tiene de unos pocos núcleos (portátil) a más de un centenar (servidor), optimizados para
                         tareas secuenciales complejas. Una <strong>GPU</strong> contiene <strong>miles de núcleos pequeños</strong> que
-                        realizan la misma operación sobre miles de datos a la vez: el paradigma <Termino def="Single Instruction, Multiple Threads: una misma instrucción se ejecuta en paralelo sobre muchos hilos con datos distintos.">SIMT</Termino>.
+                        realizan la misma operación sobre miles de datos a la vez: el paradigma <Termino def="Single Instruction, Multiple Threads: una misma instrucción se ejecuta en paralelo sobre muchos hilos con datos distintos.">SIMT</Termino> <Cita k="nickolls2008scalable" />.
                         Entrenar una red es multiplicar matrices enormes —miles de operaciones idénticas sobre datos distintos—, justo el
                         trabajo para el que está hecha la GPU.
                     </p>
                     <CPUvsGPUSVG />
                     <p>
                         Como orden de magnitud, entrenar una CNN en una GPU de consumo es varias veces más rápido que en CPU, y en modelos
-                        grandes la diferencia llega a uno o dos órdenes de magnitud (Raina et al., 2009).
+                        grandes la diferencia llega a uno o dos órdenes de magnitud <Cita k="raina2009large" />.
                     </p>
 
                     <h4>Núcleos CUDA frente a Tensor Cores</h4>
                     <p>
                         Los <strong>núcleos CUDA</strong> son procesadores de propósito general (una multiplicación-suma, FMA, por ciclo,
                         que cuenta como dos operaciones de punto flotante). Los <strong>Tensor Cores</strong> (desde la arquitectura Volta,
-                        2017) son unidades especializadas en multiplicación-acumulación de matrices (MMA): en Volta, cada Tensor Core
-                        ejecuta en cada ciclo de reloj una multiplicación-acumulación de matrices 4×4 (64 FMA). En una A100, los núcleos
+                        2017) son unidades especializadas en multiplicación-acumulación de matrices (MMA): en Volta <Cita k="nvidia2017volta" />, cada Tensor Core
+                        ejecuta en cada ciclo de reloj una multiplicación-acumulación de matrices 4×4 (64 FMA). Según <Cita k="nvidia2020a100" n />, en una A100 los núcleos
                         CUDA dan 19,5 TFLOPS (billones de operaciones de punto flotante por segundo) en FP32 y los Tensor Cores{' '}
                         <strong>312 TFLOPS en FP16</strong> (16× más para la matemática matricial que domina el aprendizaje profundo).
                     </p>
 
                     <h4>La pila de software: CUDA y cuDNN</h4>
                     <p>
-                        <strong>CUDA</strong> (2006) es la plataforma de computación paralela de NVIDIA. Sobre ella se construye
-                        <strong> cuDNN</strong>, con implementaciones optimizadas de convoluciones, normalización, activaciones y atención.
+                        <strong>CUDA</strong> (2006) es la plataforma de computación paralela de NVIDIA <Cita k="nickolls2008scalable, nvidia_cudatoolkit" />. Sobre ella se construye
+                        <strong> cuDNN</strong>, con implementaciones optimizadas de convoluciones, normalización, activaciones y atención{' '}
+                        <Cita k="chetlur2014cudnn, nvidia_cudnn" />.
                         Cuando se invoca <span className="inline-code">torch.nn.Conv2d</span> o <span className="inline-code">keras.layers.Conv2D</span>,
                         internamente se despacha a cuDNN. Otras bibliotecas: <strong>NCCL</strong> (comunicación multi-GPU) y
                         <strong> TensorRT</strong> (optimización de inferencia).
@@ -2573,7 +2707,7 @@ print(f"reservado:     {torch.cuda.memory_reserved() / 1e9:.2f} GB")`} />
                     <p>
                         y entrenar con Adam exige unas 8 veces esa cantidad solo para pesos, gradientes y estados del optimizador
                         (≈16 bytes por parámetro), más las activaciones, que crecen con el lote y suelen ser el mayor consumo en las
-                        CNN (Rajbhandari et al., 2020).
+                        CNN <Cita k="rajbhandari2020zero" />.
                     </p>
                     <Box type="danger" label="Analogía local — la bodega y el error CUDA OOM">
                         La VRAM es la <strong>bodega de una plaza de mercado</strong>. No importa cuántos camiones (datos) lleguen ni cuántos
@@ -2585,7 +2719,9 @@ print(f"reservado:     {torch.cuda.memory_reserved() / 1e9:.2f} GB")`} />
                         en un ResNet-50 con Adam y lote 32, ¿ocupan más VRAM los estados del optimizador o las activaciones? ¿Qué
                         fracción de la memoria ahorrará la precisión mixta? Conviene anotar la predicción antes de mover los controles.
                     </AntesDeInteractuar>
-                    <CalculadoraVRAM />
+                    <CalculadoraVRAM
+                        citaKorthikanti={<Cita k="korthikanti2022reducing" n />}
+                        fuente={<>elaboración propia (simulación interactiva) a partir de <Cita k="micikevicius2018mixed" n />, <Cita k="rajbhandari2020zero" n /> y <Cita k="korthikanti2022reducing" n />; activaciones por muestra medidas con PyTorch 2.12.</>} />
 
                     <h4>Precisión mixta: hacer más con menos</h4>
                     <p>
@@ -2594,19 +2730,19 @@ print(f"reservado:     {torch.cuda.memory_reserved() / 1e9:.2f} GB")`} />
                     </p>
                     <ul>
                         <li><strong>FP32</strong> (32 bits): precisión completa, para pesos maestros y la pérdida final.</li>
-                        <li><strong>BF16</strong> (16 bits, exponente de 8): preferido en Ampere+ (A100, H100); su rango iguala al de FP32, sin necesidad de escalado.</li>
-                        <li><strong>FP16</strong> (16 bits, exponente de 5): requiere <em>escalado de pérdida</em> para que los gradientes pequeños no se anulen por subdesbordamiento (<em>underflow</em>): el menor valor positivo de FP16 es ≈ 6·10⁻⁸; el escalado dinámico reduce el factor si aparece un desbordamiento (Micikevicius et al., 2018). Lo aceleran todas las GPU con Tensor Cores, incluida la T4.</li>
-                        <li><strong>FP8</strong> (8 bits): en Ada Lovelace (L4, RTX 4090), Hopper (H100) y Blackwell (B200), con E4M3 para pesos y activaciones y E5M2 para gradientes; la H100 alcanza ≈1.979 TFLOPS en FP8 (3.958 TFLOPS con dispersión estructurada).</li>
+                        <li><strong>BF16</strong> (16 bits, exponente de 8): preferido en Ampere+ (A100, H100); su rango iguala al de FP32, sin necesidad de escalado <Cita k="kalamkar2019study" />.</li>
+                        <li><strong>FP16</strong> (16 bits, exponente de 5): requiere <em>escalado de pérdida</em> para que los gradientes pequeños no se anulen por subdesbordamiento (<em>underflow</em>): el menor valor positivo de FP16 es ≈ 6·10⁻⁸; el escalado dinámico reduce el factor si aparece un desbordamiento <Cita k="micikevicius2018mixed" />. Lo aceleran todas las GPU con Tensor Cores, incluida la T4.</li>
+                        <li><strong>FP8</strong> (8 bits): en Ada Lovelace (L4, RTX 4090), Hopper (H100) y Blackwell (B200), con E4M3 para pesos y activaciones y E5M2 para gradientes <Cita k="micikevicius2022fp8" />; según <Cita k="nvidia_h100" n />, la H100 alcanza ≈1.979 TFLOPS en FP8 (3.958 TFLOPS con dispersión estructurada).</li>
                     </ul>
                     <FormatosNumericosSVG />
                     <p>
-                        Resultado: la precisión mixta acelera hasta <strong>2–3×</strong> en GPU con Tensor Cores y reduce sobre todo la
+                        Resultado: la precisión mixta acelera hasta <strong>2–3×</strong> en GPU con Tensor Cores <Cita k="nvidia_mixedprecision" /> y reduce sobre todo la
                         memoria de las <strong>activaciones</strong>, que se guardan en 16 bits. Los pesos maestros, sus gradientes y los
                         estados de Adam siguen en FP32, así que el ahorro total es <strong>menor que la mitad</strong>: del orden de un
                         tercio en una CNN mediana con lote 32 (≈32 % en ResNet-18 y ≈40 % en ResNet-50, medición propia con PyTorch 2.12),
-                        y se acerca a la mitad solo cuando las activaciones dominan la memoria (Micikevicius et al., 2018).
+                        y se acerca a la mitad solo cuando las activaciones dominan la memoria <Cita k="micikevicius2018mixed" />.
                     </p>
-                    <AMPSVG />
+                    <AMPSVG fuente={<>elaboración propia a partir de <Cita k="micikevicius2018mixed" n /> y de la documentación de PyTorch AMP <Cita k="pytorch_amp" />.</>} />
 
                     <h4>Uso práctico de GPU</h4>
                     <Tabs tabs={[
@@ -2654,13 +2790,13 @@ keras.mixed_precision.set_global_policy('mixed_float16')`} />
                     ]} />
                     <Box type="code" label="Lectura del código">
                         Ambos fragmentos activan la <strong>precisión mixta</strong>, pero con distinto nivel de control. En PyTorch,{' '}
-                        <span className="inline-code">autocast</span> ejecuta cada operación en FP16 donde es seguro y{' '}
+                        <span className="inline-code">autocast</span> ejecuta cada operación en FP16 donde es seguro <Cita k="pytorch_amp" /> y{' '}
                         <span className="inline-code">GradScaler</span> escala la pérdida para que los gradientes diminutos no se anulen (es el
                         ciclo de la <strong>Figura 3.2.5</strong>: escalar → retropropagar → desescalar → paso). Bajo{' '}
                         <span className="inline-code">autocast</span>, la pérdida se calcula sobre <em>logits</em> con{' '}
                         <span className="inline-code">BCEWithLogitsLoss</span>: <span className="inline-code">BCELoss</span> no es segura en
                         16 bits (véase la nota técnica del Capítulo 3.1). En Keras el escalado queda oculto: basta una línea,{' '}
-                        <span className="inline-code">set_global_policy('mixed_float16')</span>. La instrucción{' '}
+                        <span className="inline-code">set_global_policy('mixed_float16')</span> <Cita k="keras_mixedprecision" />. La instrucción{' '}
                         <span className="inline-code">set_memory_growth</span> es un asunto aparte: evita que TensorFlow reserve toda la VRAM al
                         arrancar; la memoria se asigna a medida que se necesita, de modo que otros procesos de la misma sesión puedan usar
                         la GPU.
@@ -2677,8 +2813,8 @@ for i, (entradas, etiquetas) in enumerate(dataloader):
         optimizador.step()
         optimizador.zero_grad()   # aquí zero_grad va tras el paso: se acumulan k lotes`} />
                     <ul>
-                        <li><strong>Recomputación de activaciones (<em>gradient checkpointing</em>):</strong> descarta activaciones intermedias y las recalcula en el paso hacia atrás; ahorra mucha memoria a costa de ≈ un paso hacia adelante extra por lote (Chen et al., 2016).</li>
-                        <li><strong>FlashAttention:</strong> reduce la memoria extra de la atención de O(N²) a O(N) y la acelera 2–4× (Dao et al., 2022); FlashAttention-2 la duplica de nuevo (Dao, 2023). En PyTorch se usa vía <span className="inline-code">F.scaled_dot_product_attention</span> en GPU Ampere o posteriores.</li>
+                        <li><strong>Recomputación de activaciones (<em>gradient checkpointing</em>):</strong> descarta activaciones intermedias y las recalcula en el paso hacia atrás; ahorra mucha memoria a costa de ≈ un paso hacia adelante extra por lote <Cita k="chen2016training" />.</li>
+                        <li><strong>FlashAttention:</strong> reduce la memoria extra de la atención de O(N²) a O(N) y la acelera 2–4× <Cita k="dao2022flashattention" />; FlashAttention-2 la duplica de nuevo <Cita k="dao2023flashattention2" />. En PyTorch se usa vía <span className="inline-code">F.scaled_dot_product_attention</span> en GPU Ampere o posteriores.</li>
                         <li><strong>torch.no_grad():</strong> envolver la validación evita construir el grafo de operaciones y guardar las activaciones para el paso hacia atrás.</li>
                     </ul>
 
@@ -2692,9 +2828,9 @@ for i, (entradas, etiquetas) in enumerate(dataloader):
                     <p>
                         <strong>DataParallel (DP)</strong> es simple pero ineficiente (cuello de botella en la GPU 0).
                         <strong> DistributedDataParallel (DDP)</strong> lanza un proceso por GPU y sincroniza con NCCL; es notablemente más
-                        eficiente que DP, incluso en un solo nodo, y es la opción recomendada (Li et al., 2020). <strong>FSDP</strong>{' '}
+                        eficiente que DP, incluso en un solo nodo, y es la opción recomendada <Cita k="li2020pytorch" />. <strong>FSDP</strong>{' '}
                         fragmenta parámetros, gradientes y estados del optimizador, lo que permite entrenar modelos que exceden la VRAM de
-                        una sola GPU (Zhao et al., 2023). En TensorFlow,{' '}
+                        una sola GPU <Cita k="zhao2023pytorch" />. En TensorFlow,{' '}
                         <span className="inline-code">tf.distribute.MirroredStrategy()</span> ofrece multi-GPU de un nodo de forma transparente.
                     </p>
                     <MultiGPUSVG />
@@ -2738,7 +2874,7 @@ for i, (entradas, etiquetas) in enumerate(dataloader):
                             </tbody>
                         </table>
                     </div>
-                    <PieTabla n="3.2.2">Planes de Google Colab (consulta: 2026-10-11; véase la nota de vigencia).</PieTabla>
+                    <PieTabla n="3.2.2" fuente={<>elaboración propia a partir de <Cita k="google_colab, google_colabfaq" n />.</>}>Planes de Google Colab (consulta: 2026-10-11; véase la nota de vigencia).</PieTabla>
                     <Box type="warn" label="Cambios recientes (a octubre de 2026)">
                         Llegada de las GPU H100 y G4 (Blackwell) a los planes de pago; terminal disponible también en el nivel gratuito;
                         TPU v5e en lugar de la v2-8 en el nivel gratuito; asistencia de código con Gemini. <strong>Importante:</strong> BF16
@@ -2767,7 +2903,7 @@ for i, (entradas, etiquetas) in enumerate(dataloader):
                             </tbody>
                         </table>
                     </div>
-                    <PieTabla n="3.2.3">Comparativa Colab frente a Kaggle (consulta: 2026-10-11).</PieTabla>
+                    <PieTabla n="3.2.3" fuente={<>elaboración propia a partir de <Cita k="google_colab, google_colabfaq" n /> y <Cita k="kaggle_notebooks" n />.</>}>Comparativa Colab frente a Kaggle (consulta: 2026-10-11).</PieTabla>
                     <CalloutPro tema="info" titulo="Estrategia combinada: Kaggle con cuota visible + Colab variable" subtitulo="Colab para desarrollo · Kaggle para entrenamientos largos" icon="fa-layer-group">
                         Lo óptimo para un presupuesto limitado es usar ambas plataformas de forma complementaria: <strong>Colab</strong>,
                         para el desarrollo interactivo y el trabajo en equipo; <strong>Kaggle</strong>, para los entrenamientos largos y
@@ -2806,7 +2942,7 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
 
                     <h4>Más allá de Colab y Kaggle</h4>
                     <p>
-                        <strong>Amazon SageMaker Studio Lab</strong> (GPU gratuita en sesiones limitadas, sin tarjeta), <strong>Lightning AI Studios</strong>{' '}
+                        <strong>Amazon SageMaker Studio Lab</strong>, con GPU gratuita en sesiones limitadas y sin tarjeta <Cita k="aws_studiolab" />; <strong>Lightning AI Studios</strong>{' '}
                         (créditos mensuales, interfaz tipo VS Code) y, para alquiler de alto rendimiento, <strong>Vast.ai, RunPod y Lambda</strong>{' '}
                         (A100 por horas, a menudo más baratas que en AWS, GCP o Azure; los precios cambian y conviene consultarlos en cada sitio).
                     </p>
@@ -2822,7 +2958,7 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                         <li><strong>GitHub Student Developer Pack:</strong> 200 USD en DigitalOcean, 100 USD en Azure, Copilot gratis y decenas de herramientas, previa verificación con el correo institucional (p. ej., @usantotomas.edu.co) o con un comprobante de matrícula.</li>
                         <li><strong>Azure para Estudiantes:</strong> 100 USD sin tarjeta de crédito; <strong>Google Cloud:</strong> 300 USD para nuevos usuarios.</li>
                         <li><strong>Supercomputadores universitarios:</strong> Guane-1 (UIS), Apolo (EAFIT) y BIOS (Manizales) abren convocatorias de cómputo para investigación; la red <strong>RENATA</strong> las conecta con redes académicas internacionales.</li>
-                        <li><strong>Transferencia de aprendizaje (<em>transfer learning</em>):</strong> la técnica de mayor impacto con recursos limitados. MobileNetV3 (5,4 M parámetros; Howard et al., 2019) y DistilBERT (66 M; conserva ≈97 % del desempeño de BERT con un 40 % menos de parámetros; Sanh et al., 2019) ofrecen buena parte de la exactitud de modelos mucho mayores a una fracción del costo; ajustar un ResNet-18 a 1.000 imágenes toma minutos en una T4.</li>
+                        <li><strong>Transferencia de aprendizaje (<em>transfer learning</em>):</strong> la técnica de mayor impacto con recursos limitados <Cita k="yosinski2014transferable" />. MobileNetV3, con 5,4 M de parámetros <Cita k="howard2019searching" />, y DistilBERT, con 66 M, que conserva ≈97 % del desempeño de BERT con un 40 % menos de parámetros <Cita k="sanh2019distilbert" />, ofrecen buena parte de la exactitud de modelos mucho mayores a una fracción del costo; ajustar un ResNet-18 <Cita k="he2016deep" /> a 1.000 imágenes toma minutos en una T4 <Cita k="pytorch_transferlearning" />.</li>
                     </ul>
 
                     <Box type="tip" label="Puntos clave del Capítulo 3.2">
@@ -2887,8 +3023,17 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                                 { texto: 'FullyShardedDataParallel (FSDP), aunque el modelo quepa en una sola GPU', correcta: false },
                                 { texto: 'Paralelismo de modelo manual, capa por capa', correcta: false },
                             ],
-                            justificacion: 'DDP lanza un proceso por GPU y sincroniza los gradientes con NCCL; es notablemente más eficiente que DP, que los centraliza en la GPU 0, incluso en un solo nodo (Li et al., 2020). FSDP se reserva para modelos que no caben en una sola GPU.'
+                            justificacion: <>DDP lanza un proceso por GPU y sincroniza los gradientes con NCCL; es notablemente más eficiente que DP, que los centraliza en la GPU 0, incluso en un solo nodo <Cita k="li2020pytorch" />. FSDP se reserva para modelos que no caben en una sola GPU.</>
                         },
+                    ]} />
+
+                    <Referencias claves={[
+                        'nickolls2008scalable', 'raina2009large', 'nvidia2017volta', 'nvidia2020a100', 'nvidia_cudatoolkit',
+                        'chetlur2014cudnn', 'nvidia_cudnn', 'rajbhandari2020zero', 'micikevicius2018mixed', 'korthikanti2022reducing',
+                        'kalamkar2019study', 'micikevicius2022fp8', 'nvidia_h100', 'nvidia_mixedprecision', 'pytorch_amp',
+                        'keras_mixedprecision', 'chen2016training', 'dao2022flashattention', 'dao2023flashattention2', 'li2020pytorch',
+                        'zhao2023pytorch', 'google_colab', 'google_colabfaq', 'kaggle_notebooks', 'aws_studiolab',
+                        'yosinski2014transferable', 'howard2019searching', 'sanh2019distilbert', 'he2016deep', 'pytorch_transferlearning',
                     ]} />
                 </div>
             );
@@ -3210,7 +3355,8 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                     <h4>tf.data: el flujo declarativo de TensorFlow</h4>
                     <p>
                         <span className="inline-code">tf.data</span> construye flujos de datos como cadenas de transformaciones; TensorFlow optimiza
-                        internamente el paralelismo CPU-GPU. El orden óptimo es: <strong>map → cache → shuffle → batch → prefetch</strong>.
+                        internamente el paralelismo CPU-GPU <Cita k="murray2021tfdata, tf_dataguide" />. El orden óptimo es: <strong>map → cache → shuffle → batch → prefetch</strong>{' '}
+                        <Cita k="tensorflow_tfdata" />.
                     </p>
                     <CodeBlock lang="python" title="Flujo óptimo con tf.data" code={`import tensorflow as tf
 
@@ -3235,7 +3381,7 @@ dataset = dataset.prefetch(tf.data.AUTOTUNE)`} />
                     <ul>
                         <li><strong>map() con num_parallel_calls:</strong> paraleliza el preprocesamiento; <span className="inline-code">AUTOTUNE</span> deja que TF elija el número de hilos.</li>
                         <li><strong>cache():</strong> guarda el conjunto de datos tras la primera época; va después del preprocesamiento pero antes del aumento, para no cachear la aleatoriedad.</li>
-                        <li><strong>prefetch():</strong> la más importante. Mientras la GPU entrena con el lote N, la CPU prepara el N+1. <strong>Siempre la última operación</strong>: reduce el tiempo de cada paso al <strong>máximo</strong>, no a la suma, entre preparar el lote y entrenar con él (TensorFlow, s. f.).</li>
+                        <li><strong>prefetch():</strong> la más importante. Mientras la GPU entrena con el lote N, la CPU prepara el N+1. <strong>Siempre la última operación</strong>: reduce el tiempo de cada paso al <strong>máximo</strong>, no a la suma, entre preparar el lote y entrenar con él <Cita k="tensorflow_tfdata" />.</li>
                     </ul>
                     <AntesDeInteractuar>
                         si preparar un lote tarda 80 ms y entrenarlo 50 ms, ¿desaparecerán los huecos de la GPU al activar la precarga
@@ -3245,7 +3391,7 @@ dataset = dataset.prefetch(tf.data.AUTOTUNE)`} />
 
                     <h4>DataLoader: el flujo explícito de PyTorch</h4>
                     <p>
-                        PyTorch usa dos abstracciones: <span className="inline-code">Dataset</span> (qué datos cargar y cómo) y{' '}
+                        PyTorch usa dos abstracciones <Cita k="pytorch_dataloading" />: <span className="inline-code">Dataset</span> (qué datos cargar y cómo) y{' '}
                         <span className="inline-code">DataLoader</span> (cómo entregarlos: en lotes, mezclados, con varios procesos). A
                         diferencia de tf.data (declarativo), el DataLoader ofrece <strong>control explícito</strong> de cada parámetro.
                     </p>
@@ -3304,7 +3450,7 @@ dataloader = DataLoader(
                         patrones esenciales y no memorización superficial.
                     </Box>
                     <p>
-                        Es una técnica de <strong>regularización</strong> que aplica transformaciones aleatorias a los datos de entrenamiento:
+                        Es una técnica de <strong>regularización</strong> <Cita k="shorten2019survey" /> que aplica transformaciones aleatorias a los datos de entrenamiento:
                         aumenta el tamaño efectivo del conjunto de datos, reduce el sobreajuste y mejora la generalización. <strong>Solo se aplica al
                         conjunto de entrenamiento</strong>, nunca a validación o prueba, y en tiempo de ejecución (<em>on-the-fly</em>), generando
                         variaciones distintas en cada época.
@@ -3314,7 +3460,7 @@ dataloader = DataLoader(
                     <ul>
                         <li><strong>Geométricas:</strong> <span className="inline-code">RandomHorizontalFlip</span> (útil en escenas naturales; contraindicado en texto o dígitos), <span className="inline-code">RandomRotation</span>, <span className="inline-code">RandomResizedCrop</span>, <span className="inline-code">RandomAffine</span>.</li>
                         <li><strong>Fotométricas:</strong> <span className="inline-code">ColorJitter</span> (brillo, contraste, saturación y tono, para simular sol o nublado), <span className="inline-code">GaussianBlur</span>, <span className="inline-code">Normalize</span> (con media/desviación de ImageNet; es preprocesamiento esencial, no un aumento en sí).</li>
-                        <li><strong>Mezcla entre muestras:</strong> <strong>Mixup</strong> interpola linealmente dos imágenes y sus etiquetas; <strong>CutMix</strong> recorta una región de una imagen y la pega en otra, ajustando las etiquetas por área. Mejoran calibración y robustez.</li>
+                        <li><strong>Mezcla entre muestras:</strong> <strong>Mixup</strong> interpola linealmente dos imágenes y sus etiquetas <Cita k="zhang2018mixup" />; <strong>CutMix</strong> recorta una región de una imagen y la pega en otra, ajustando las etiquetas por área <Cita k="yun2019cutmix" />. Mejoran calibración y robustez.</li>
                     </ul>
                     <Tabs tabs={[
                         {
@@ -3370,19 +3516,20 @@ modelo = keras.Sequential([
                         <span className="inline-code">False</span> y las omiten. Así no se transforma por error la validación o prueba.
                     </Box>
                     <Box type="warn" label="Aviso de licencia — AlbumentationsX">
-                        <strong>Albumentations</strong> (MIT) dejó de mantenerse en junio de 2025, y su desarrollo continúa en{' '}
+                        <strong>Albumentations</strong> (MIT), la biblioteca de <Cita k="buslaev2020albumentations" n />, dejó de mantenerse en junio de 2025{' '}
+                        <Cita k="albumentations_repo" />, y su desarrollo continúa en{' '}
                         <strong>AlbumentationsX</strong> (<span className="inline-code">pip install albumentationsx</span>), compatible con
-                        su API. AlbumentationsX se distribuye con licencia <strong>AGPL-3.0</strong> (<em>copyleft</em>: el código que la
+                        su API <Cita k="albumentationsx" />. AlbumentationsX se distribuye con licencia <strong>AGPL-3.0</strong> (<em>copyleft</em>: el código que la
                         incorpore, si se distribuye o se ofrece como servicio en red, debe publicarse con la misma licencia) o con licencia
                         comercial; conviene leer sus términos vigentes antes de usarla fuera del aula. El curso usa por defecto{' '}
                         <span className="inline-code">torchvision.transforms.v2</span> (BSD-3), que cubre todos los aumentos de este
-                        capítulo; Albumentations 2.0.8 (MIT) sigue funcionando, pero ya no recibe correcciones.
+                        capítulo <Cita k="torchvision_transforms" />; Albumentations 2.0.8 (MIT) sigue funcionando, pero ya no recibe correcciones.
                     </Box>
                     <h4>Aumento de datos de texto (PLN)</h4>
                     <ul>
                         <li><strong>Reemplazo de sinónimos:</strong> «el cultivo está enfermo» → «el cultivo está dañado».</li>
-                        <li><strong>Inserción / eliminación aleatoria:</strong> agregar o quitar palabras, simulando texto ruidoso.</li>
-                        <li><strong>Retrotraducción (<em>back-translation</em>):</strong> traducir al inglés y de vuelta al español genera paráfrasis naturales.</li>
+                        <li><strong>Inserción / eliminación aleatoria:</strong> agregar o quitar palabras, simulando texto ruidoso <Cita k="wei2019eda" />.</li>
+                        <li><strong>Retrotraducción (<em>back-translation</em>):</strong> traducir al inglés y de vuelta al español genera paráfrasis naturales <Cita k="sennrich2016improving" />.</li>
                     </ul>
                     <Box type="eth" label="Contexto local — opiniones políticas en redes sociales">
                         Para analizar el sentimiento de tuits sobre política, el aumento de texto puede imitar el registro coloquial del
@@ -3416,7 +3563,7 @@ modelo.load_state_dict(
 )
 modelo.eval()             # Cambiar a modo evaluación`} />
                     <Box type="danger" label="Nota de seguridad — weights_only=True">
-                        <span className="inline-code">weights_only=True</span> es <strong>el comportamiento por defecto desde PyTorch 2.6</strong> y recomendado desde
+                        <span className="inline-code">weights_only=True</span> es <strong>el comportamiento por defecto desde PyTorch 2.6</strong> <Cita k="pytorch_v26" /> y recomendado desde
                         2.4. Sin él, <span className="inline-code">torch.load()</span> usa Pickle, que permite ejecución de código arbitrario al
                         cargar archivos de fuentes no confiables. Con <span className="inline-code">weights_only=True</span> solo se deserializan
                         tensores y tipos primitivos. Guardar el <em>modelo completo</em> es más cómodo pero menos portable y hereda los riesgos de
@@ -3458,7 +3605,7 @@ capa_inferencia = keras.layers.TFSMLayer(
     'clasificador_cafe_savedmodel', call_endpoint='serving_default')`} />
                     <p>
                         El formato <strong>.keras</strong> (recomendado desde Keras 3) guarda arquitectura, pesos y configuración en un archivo
-                        agnóstico del <em>backend</em>; <strong>SavedModel</strong> almacena el grafo completo y la lógica de servicio, estándar para TF
+                        agnóstico del <em>backend</em> <Cita k="keras_saving" />; <strong>SavedModel</strong> almacena el grafo completo y la lógica de servicio, estándar para TF
                         Serving, LiteRT y TF.js.
                     </p>
 
@@ -3471,7 +3618,7 @@ capa_inferencia = keras.layers.TFSMLayer(
                     <p>
                         <strong>ONNX</strong> (Open Neural Network Exchange) es un formato abierto que permite entrenar en PyTorch y ejecutar
                         con ONNX Runtime en un servidor (Python, C++, C#, Java), en el navegador o en un acelerador especializado, sin
-                        reescribir código. Lo mantiene la LF AI &amp; Data Foundation (Linux Foundation) y lo soportan Microsoft, Meta, AWS y
+                        reescribir código <Cita k="onnx_docs" />. Lo mantiene la LF AI &amp; Data Foundation (Linux Foundation) y lo soportan Microsoft, Meta, AWS y
                         NVIDIA. En los dos ejemplos siguientes, <span className="inline-code">modelo</span> es ya la CNN que clasifica fotos de
                         hojas (no el <span className="inline-code">DetectorRoya</span> de cuatro entradas del Capítulo 3.1).
                     </p>
@@ -3486,19 +3633,21 @@ torch.onnx.export(modelo, (x,), 'detector_roya.onnx',
                   dynamic_shapes=({0: lote},),   # tupla: no depende del nombre del argumento de forward()
                   external_data=False)           # un solo archivo (< 2 GB); dynamo=True ya es el predeterminado`} />
                     <p>
-                        Con <span className="inline-code">external_data=False</span>, los pesos quedan dentro del mismo archivo; sin ese
+                        Desde PyTorch 2.9, <span className="inline-code">torch.onnx.export</span> usa por defecto el exportador basado en{' '}
+                        <span className="inline-code">torch.export</span> <Cita k="pytorch_v29" />. Con{' '}
+                        <span className="inline-code">external_data=False</span>, los pesos quedan dentro del mismo archivo; sin ese
                         argumento, el exportador escribe además <span className="inline-code">detector_roya.onnx.data</span>, y quien copie
-                        solo el <span className="inline-code">.onnx</span> pierde los pesos. Tras exportar conviene comprobar que no existe
+                        solo el <span className="inline-code">.onnx</span> pierde los pesos <Cita k="pytorch_onnx" />. Tras exportar conviene comprobar que no existe
                         ese segundo archivo, validar el modelo con <span className="inline-code">onnx.checker.check_model</span> y comparar
                         sus salidas con las de PyTorch en lotes de distinto tamaño. Una vez exportado, el modelo corre con{' '}
-                        <strong>ONNX Runtime</strong>, que optimiza la ejecución para el hardware disponible (CPU, GPU, aceleradores).
+                        <strong>ONNX Runtime</strong> <Cita k="onnxruntime_docs" />, que optimiza la ejecución para el hardware disponible (CPU, GPU, aceleradores).
                     </p>
 
                     <h4>torch.export: el sucesor de TorchScript</h4>
                     <p>
-                        <strong>TorchScript</strong> fue <strong>declarado obsoleto en la documentación de PyTorch 2.9</strong> (octubre de
-                        2025) y emite avisos en tiempo de ejecución desde la 2.10. Su sucesor, <span className="inline-code">torch.export</span>,
-                        captura el modelo como un grafo de compilación anticipada (<strong>AOT</strong>) de operadores ATen, base de ExecuTorch
+                        <strong>TorchScript</strong> fue <strong>declarado obsoleto en la documentación de PyTorch 2.9</strong>, de octubre de
+                        2025 <Cita k="pytorch_jit" />, y emite avisos en tiempo de ejecución desde la 2.10 <Cita k="pytorch_v210" />. Su sucesor, <span className="inline-code">torch.export</span>,
+                        captura el modelo como un grafo de compilación anticipada (<strong>AOT</strong>) de operadores ATen <Cita k="pytorch_export" />, base de ExecuTorch
                         y, vía el exportador ONNX, de ONNX Runtime; se integra con el compilador Dynamo y evita los problemas de compatibilidad
                         de TorchScript.
                     </p>
@@ -3518,16 +3667,21 @@ resultado = programa_cargado.module()(torch.randn(4, 3, 224, 224))`} />
                         grafo autocontenido; el archivo <span className="inline-code">.pt2</span> que produce se vuelve a cargar en otra máquina{' '}
                         <strong>sin el código fuente de la clase del modelo</strong>, aunque sí con PyTorch —a diferencia del{' '}
                         <span className="inline-code">state_dict</span>, que exige volver a declarar la arquitectura antes de cargar—. Es el
-                        punto de partida del despliegue sin Python: se compila con AOTInductor para C++ o se convierte con ExecuTorch para el
-                        móvil. Sin <span className="inline-code">dynamic_shapes</span>, el programa solo aceptaría el tamaño de lote del
+                        punto de partida del despliegue sin Python: se compila con AOTInductor para C++ <Cita k="pytorch_aotinductor" /> o se convierte con ExecuTorch para el
+                        móvil <Cita k="executorch_docs" />. Sin <span className="inline-code">dynamic_shapes</span>, el programa solo aceptaría el tamaño de lote del
                         ejemplo.
                     </Box>
 
                     <h4>Conceptos básicos de despliegue</h4>
+                    <p>
+                        Desplegar no es solo exportar un archivo: en un sistema real, el código del modelo es una fracción pequeña junto a
+                        la recolección y verificación de datos, la infraestructura de servicio y el monitoreo, y descuidar esas piezas
+                        acumula deuda técnica <Cita k="sculley2015hidden" />.
+                    </p>
                     <DespliegueSVG />
                     <ul>
-                        <li><strong>API REST:</strong> el modelo se encapsula en un servicio web (FastAPI con ONNX Runtime en servicios sencillos; NVIDIA Triton Inference Server o TF Serving en producción) que expone un punto de acceso (<em>endpoint</em>) HTTP; la aplicación envía una imagen y recibe la predicción en JSON.</li>
-                        <li><strong>Borde / móvil:</strong> el modelo se optimiza (cuantización, poda) y se convierte a LiteRT o ExecuTorch para correr en teléfonos o IoT <strong>sin internet</strong>.</li>
+                        <li><strong>API REST:</strong> el modelo se encapsula en un servicio web —FastAPI con ONNX Runtime en servicios sencillos; NVIDIA Triton Inference Server <Cita k="triton_server" /> o TF Serving en producción— que expone un punto de acceso (<em>endpoint</em>) HTTP; la aplicación envía una imagen y recibe la predicción en JSON.</li>
+                        <li><strong>Borde / móvil:</strong> el modelo se optimiza con cuantización <Cita k="jacob2018quantization" /> o poda y se convierte a LiteRT o ExecuTorch <Cita k="google_litert, executorch_docs" /> para correr en teléfonos o IoT <strong>sin internet</strong>.</li>
                         <li><strong>Navegador:</strong> TensorFlow.js ejecuta el modelo en el navegador, sin servidor de inferencia.</li>
                         <li><strong>Nube:</strong> Vertex AI, SageMaker o Azure ML sirven a escala con autoescalado, monitoreo y control de versiones.</li>
                     </ul>
@@ -3552,12 +3706,13 @@ resultado = programa_cargado.module()(torch.randn(4, 3, 224, 224))`} />
                         <strong>ubicación GPS</strong> en sus metadatos; si se envían a una API en la nube, identifican la finca y a su
                         dueño, y su tratamiento se rige por la Ley 1581 de 2012. La inferencia local con un modelo cuantizado evita enviar
                         cada imagen a un servidor y reduce la energía de cada predicción. El <em>Marco ético para la inteligencia
-                        artificial en Colombia</em> (Guío Español et al., 2021) ofrece principios para documentar estas decisiones.
+                        artificial en Colombia</em> <Cita k="guio2021marco" /> ofrece principios para documentar estas decisiones, y las tarjetas de modelo de{' '}
+                        <Cita k="mitchell2019model" n /> proponen un formato para hacerlo.
                     </Box>
                     <CalloutPro tema="info" titulo="Ruta completa del café: del cuaderno a la finca" subtitulo="PyTorch → LiteRT/ExecuTorch sin conexión + ONNX en la nube" icon="fa-route">
                         Una ruta práctica para el proyecto de detección de plagas: <strong>entrenar en PyTorch</strong> en Colab con
                         aumento de datos (el conjunto es pequeño) → convertir el modelo con <strong>LiteRT Torch</strong>{' '}
-                        (<span className="inline-code">litert-torch</span>) o con <strong>ExecuTorch</strong> para correr sin conexión en
+                        (<span className="inline-code">litert-torch</span>) o con <strong>ExecuTorch</strong> <Cita k="litert_torch, executorch_docs" /> para correr sin conexión en
                         una tablet Android en campo → y, en paralelo, exportar a <strong>ONNX</strong> para servirlo como{' '}
                         <strong>API REST</strong> (ONNX Runtime o Triton) en la nube, para el análisis centralizado del agrónomo. La regla
                         de oro se mantiene: <em>si no corre en Colab, no existe; y si no se puede desplegar, no sirve</em>.
@@ -3625,6 +3780,15 @@ resultado = programa_cargado.module()(torch.randn(4, 3, 224, 224))`} />
                             ],
                             justificacion: 'Sin weights_only=True, torch.load usa Pickle, que puede ejecutar código arbitrario al cargar archivos no confiables. Es el comportamiento por defecto desde PyTorch 2.6; la arquitectura sigue haciendo falta para cargar un state_dict.'
                         },
+                    ]} />
+
+                    <Referencias claves={[
+                        'murray2021tfdata', 'tf_dataguide', 'tensorflow_tfdata', 'pytorch_dataloading', 'shorten2019survey', 'zhang2018mixup',
+                        'yun2019cutmix', 'buslaev2020albumentations', 'albumentations_repo', 'albumentationsx', 'torchvision_transforms',
+                        'wei2019eda', 'sennrich2016improving', 'pytorch_v26', 'keras_saving', 'onnx_docs', 'pytorch_v29', 'pytorch_onnx',
+                        'onnxruntime_docs', 'pytorch_jit', 'pytorch_v210', 'pytorch_export', 'pytorch_aotinductor', 'executorch_docs',
+                        'sculley2015hidden', 'triton_server', 'jacob2018quantization', 'google_litert', 'guio2021marco', 'mitchell2019model',
+                        'litert_torch',
                     ]} />
                 </div>
             );
@@ -3785,7 +3949,7 @@ resultado = programa_cargado.module()(torch.randn(4, 3, 224, 224))`} />
                             { texto: 'Hasta 2–3× más velocidad y menos memoria de activaciones, con pesos maestros en FP32.', correcta: true },
                             { texto: 'La mitad exacta de la memoria total, porque todos los tensores pasan a 16 bits.', correcta: false },
                         ],
-                        justificacion: 'La precisión mixta acelera hasta 2–3× en GPU con Tensor Cores y reduce sobre todo la memoria de activaciones; los pesos maestros, sus gradientes y los estados de Adam siguen en FP32, así que el ahorro total es menor que la mitad (Micikevicius et al., 2018). La cuantización a INT8 es otra técnica, posterior al entrenamiento.'
+                        justificacion: <>La precisión mixta acelera hasta 2–3× en GPU con Tensor Cores y reduce sobre todo la memoria de activaciones; los pesos maestros, sus gradientes y los estados de Adam siguen en FP32, así que el ahorro total es menor que la mitad <Cita k="micikevicius2018mixed" />. La cuantización a INT8 es otra técnica, posterior al entrenamiento.</>
                     },
                 ]} />
 
@@ -3810,6 +3974,8 @@ resultado = programa_cargado.module()(torch.randn(4, 3, 224, 224))`} />
                     siguiente paso es completar la <strong>Fase 3 del Proyecto Centinela</strong> y el{' '}
                     <strong>Cuestionario Final del curso (10 %)</strong>.
                 </Box>
+
+                <Referencias claves={['micikevicius2018mixed']} />
             </div>
         );
 
@@ -3821,7 +3987,7 @@ resultado = programa_cargado.module()(torch.randn(4, 3, 224, 224))`} />
             ['PyTorch', 'Marco de trabajo creado por Facebook AI Research (hoy Meta) y alojado desde 2022 en la Linux Foundation, con grafos computacionales dinámicos. Mayoritario en la investigación desde 2019. Analogía: el río Magdalena, cuya ruta decide cada crecida.'],
             ['Keras 3', 'API multi-backend (TensorFlow, PyTorch, JAX) lanzada a finales de 2023. Permite escribir el código una vez y ejecutarlo en cualquier motor; el backend se elige con KERAS_BACKEND antes de importar Keras.'],
             ['GPU', 'Unidad de procesamiento gráfico: hardware con miles de núcleos paralelos optimizado para operaciones matriciales. Acelera el entrenamiento en uno o dos órdenes de magnitud según el modelo. Analogía: la despulpadora industrial de café.'],
-            ['CUDA', 'Plataforma de computación paralela de NVIDIA (2006) que permite ejecutar código en GPU. Base de todo el ecosistema de aprendizaje profundo acelerado.'],
+            ['CUDA', 'Plataforma de computación paralela que NVIDIA lanzó en 2006 y que permite ejecutar código en GPU. Base de todo el ecosistema de aprendizaje profundo acelerado.'],
             ['Tensor Core', 'Unidad de hardware especializada en multiplicación-acumulación de matrices (MMA). En la A100 rinde 16 veces más que los núcleos CUDA en FP16.'],
             ['VRAM', 'Memoria de video de la GPU; el recurso más limitante. Almacena pesos, gradientes, estados del optimizador y activaciones. Analogía: la bodega de la plaza de mercado.'],
             ['Precisión mixta automática (AMP, automatic mixed precision)', 'Calcula en FP16/BF16 y conserva los pesos maestros en FP32; acelera hasta 2–3× en GPU con Tensor Cores y ahorra sobre todo memoria de activaciones (el ahorro total es menor que la mitad).'],
@@ -3886,35 +4052,15 @@ resultado = programa_cargado.module()(torch.randn(4, 3, 224, 224))`} />
                     evaluación y como repaso antes del <strong>Cuestionario Final del curso</strong>.
                 </Box>
 
-                <h3>Referencias (APA)</h3>
-                <h4>Libros y recursos académicos</h4>
-                <ul>
-                    <li>Goodfellow, I., Bengio, Y., y Courville, A. (2016). <em>Deep Learning</em>. MIT Press. http://www.deeplearningbook.org</li>
-                    <li>Géron, A. (2022). <em>Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow</em> (3.ª ed.). O'Reilly Media.</li>
-                    <li>Stevens, E., Antiga, L., y Viehmann, T. (2020). <em>Deep Learning with PyTorch</em>. Manning Publications.</li>
-                    <li>Chollet, F. (2021). <em>Deep Learning with Python</em> (2.ª ed.). Manning Publications.</li>
-                </ul>
-                <h4>Documentación oficial y técnica</h4>
-                <ul>
-                    <li>TensorFlow Authors. (2023). <em>Better performance with the tf.data API</em>. https://www.tensorflow.org/guide/data_performance</li>
-                    <li>PyTorch Foundation. (2025). <em>torch.export documentation</em>. https://docs.pytorch.org/docs/stable/export.html</li>
-                    <li>Keras Team. (2023). <em>Introducing Keras 3.0</em>. https://keras.io/keras_3/</li>
-                    <li>NVIDIA Developer. (2025). <em>CUDA Deep Neural Network (cuDNN)</em>. https://developer.nvidia.com/cudnn</li>
-                </ul>
-                <h4>Documentos oficiales (contexto colombiano)</h4>
-                <ul>
-                    <li>Ministerio de Ciencia, Tecnología e Innovación. (2021). <em>Marco Ético para la Inteligencia Artificial en Colombia</em>. Gobierno de Colombia.</li>
-                    <li>CONPES. (2025). <em>Política Pública para el Desarrollo de la Inteligencia Artificial en Colombia</em>. Departamento Nacional de Planeación.</li>
-                </ul>
-                <h4>Recursos educativos y herramientas</h4>
-                <ul>
-                    <li>Smilkov, D., y Carter, S. (s.f.). <em>TensorFlow Playground</em>. Google. https://playground.tensorflow.org</li>
-                    <li>Buslaev, A., Iglovikov, V. I., Khvedchenya, E., Parinov, A., Druzhinin, M., y Kalinin, A. A. (2020). Albumentations: Fast and flexible image augmentations. <em>Information, 11</em>(2), 125.</li>
-                    <li>Parraga-Alava, J., Cusme, K., Loor, A., y Santander, E. (2019). <em>RoCoLe: A robusta coffee leaf images dataset</em> (v2). Mendeley Data.</li>
-                </ul>
+                <Referencias titulo="Bibliografía base" claves={['chollet2025deep', 'geron2025hands', 'stevens2020deep', 'zhang2023dive', 'goodfellow2016deep']} />
+                <p className="text-sm text-gray-700 mt-3">
+                    Las fuentes de cada herramienta y de cada cifra del módulo —documentación oficial, notas de versión y artículos sobre
+                    TensorFlow, Keras 3, PyTorch, CUDA, la precisión mixta, el entrenamiento distribuido, tf.data, el aumento de datos y
+                    los formatos de despliegue— figuran en la lista «Referencias» al final de cada capítulo.
+                </p>
                 <Box type="info" label="Material de consulta">
-                    El material de consulta <span className="inline-code">031_material-consulta-modulo-3.html</span> amplía esta
-                    bibliografía con referencias adicionales y enlaces de profundización.
+                    El <a className="text-primary underline" href="031_material-consulta-modulo-3.html" target="_blank" rel="noopener noreferrer">material
+                    de consulta del Módulo 3</a> amplía esta bibliografía con referencias adicionales y enlaces de profundización.
                 </Box>
             </div>
         );
