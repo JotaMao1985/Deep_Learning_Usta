@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paisaje del error</title>
+<script>if (window.self !== window.top) document.documentElement.classList.add('embedded');</script>
+<!--
+  ============================================================================
+  ANIMACIÓN 3D · PAISAJE DEL ERROR (3D-1, Módulo 1 · Cap 1.3)
+  Maestría en Ciencia de Datos — Universidad Santo Tomás · auditoría 2026-10
+  ----------------------------------------------------------------------------
+  Qué muestra: cuatro superficies de pérdida L(θ₁, θ₂) —cuenco convexo,
+  paisaje con mínimos locales, punto silla y el barranco de Rosenbrock— sobre
+  las que descienden a la vez el descenso del gradiente (GD), Momentum y Adam,
+  con su estela. El «altímetro» muestra la pérdida de cada uno en cada paso.
+  Clic en la superficie: elige el punto de partida.
+  Optimizadores con la convención de PyTorch (torch.optim.SGD con momentum y
+  torch.optim.Adam). Modelo y vista separados: el modelo es JS puro y se
+  verifica con ?selftest=1 (gradiente analítico = numérico, puntos de
+  referencia de torch.optim 2.12 con |Δ| < 10⁻⁹, Momentum con β = 0 = GD,
+  primer paso de Adam = η y desenlaces de cada superficie). Las 12
+  trayectorias por defecto coinciden con torch.optim (|Δ| ≤ 2,2·10⁻¹⁵ en 400
+  pasos).
+  Sin CDN: three.js r160 empaquetado en vendor/ (ver vendor/BUILD.md). Funciona
+  por file://, en GitHub Pages y dentro del iframe del módulo.
+  ============================================================================
+-->
+<style>
+  :root { --morado: #3D008D; --rosa: #ED1E79; --oro: #FDB913; --tinta: #1F2937; --gris: #6B7280; --fondo: #F8F7FC; --borde: #E5E1F0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #fff; color: var(--tinta); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.55; }
+  body { padding: 16px; }
+  html.embedded body { padding: 4px; }
+  .envoltura { max-width: 1020px; margin: 0 auto; }
+  h1 { font-size: 1.25rem; margin: 0 0 4px; color: var(--morado); }
+  .bajada { margin: 0 0 12px; color: #374151; font-size: .95rem; }
+  .antes { border-left: 4px solid var(--oro); background: #FFFBEB; padding: 8px 12px; border-radius: 6px; font-size: .92rem; margin: 0 0 12px; }
+  .pestanas { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+  .rejilla { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 14px; }
+  @media (max-width: 780px) { .rejilla { grid-template-columns: minmax(0, 1fr); } }
+  .lienzo { position: relative; width: 100%; aspect-ratio: 4 / 3; max-height: 580px; border: 1px solid var(--borde); border-radius: 12px; background: radial-gradient(circle at 50% 40%, #FFFFFF 0%, var(--fondo) 75%); overflow: hidden; touch-action: none; cursor: crosshair; }
+  .lienzo canvas { display: block; width: 100%; height: 100%; outline: none; }
+  .lienzo canvas:focus-visible { outline: 2px solid var(--rosa); outline-offset: -2px; }
+  .rotulo { position: absolute; transform: translate(-50%, -50%); font-size: .8rem; font-weight: 700; color: #8A6100; pointer-events: none; white-space: nowrap; text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff; }
+  .panel { border: 1px solid var(--borde); border-radius: 12px; padding: 12px; background: #fff; font-size: .9rem; }
+  .panel h2 { font-size: .95rem; margin: 0 0 6px; color: var(--morado); }
+  .grupo { margin-bottom: 10px; }
+  .botones { display: flex; flex-wrap: wrap; gap: 6px; }
+  button { font: inherit; font-size: .85rem; padding: 5px 10px; border-radius: 8px; border: 1px solid var(--borde); background: #fff; color: var(--tinta); cursor: pointer; }
+  button[aria-pressed="true"] { background: var(--morado); color: #fff; border-color: var(--morado); }
+  button.primario { background: var(--rosa); color: #fff; border-color: var(--rosa); }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--rosa); outline-offset: 2px; }
+  input[type=range] { width: 100%; accent-color: var(--rosa); }
+  label { display: flex; gap: 6px; align-items: center; margin: 3px 0; font-size: .86rem; }
+  .deslizador { font-size: .85rem; margin: 6px 0 2px; display: flex; justify-content: space-between; }
+  .deslizador b { color: var(--morado); font-variant-numeric: tabular-nums; }
+  .altimetro { background: var(--fondo); border-radius: 8px; padding: 8px; font-size: .84rem; font-variant-numeric: tabular-nums; }
+  .altimetro h3 { font-size: .85rem; margin: 0 0 6px; color: var(--morado); }
+  .fila-alt { display: grid; grid-template-columns: 78px minmax(0, 1fr) 74px; gap: 6px; align-items: center; margin: 4px 0; }
+  .barra { height: 10px; border-radius: 5px; background: #E5E7EB; overflow: hidden; }
+  .barra > span { display: block; height: 100%; border-radius: 5px; }
+  .valor { text-align: right; }
+  .leyenda { display: flex; flex-wrap: wrap; gap: 10px; font-size: .82rem; color: #374151; margin-top: 8px; }
+  .muestra { display: inline-block; width: 11px; height: 11px; border-radius: 50%; vertical-align: middle; margin-right: 4px; }
+  .explica { margin-top: 12px; font-size: .92rem; }
+  .explica p { margin: 6px 0; }
+  .aviso { display: none; padding: 10px; border-radius: 8px; background: #FEF2F2; color: #991B1B; font-size: .9rem; margin-bottom: 8px; }
+  #autotest { display: none; margin-top: 12px; font: 12px/1.5 ui-monospace, Menlo, monospace; background: #0F172A; color: #E2E8F0; padding: 10px; border-radius: 8px; white-space: pre-wrap; }
+  .pie { font-size: .8rem; color: var(--gris); margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="envoltura">
+  <h1>Paisaje del error</h1>
+  <p class="bajada">La altura de la superficie es la pérdida L(θ₁, θ₂) para cada par de parámetros. Tres excursionistas parten del mismo punto y bajan con reglas distintas: el descenso del gradiente (GD), Momentum y Adam. El altímetro muestra a qué altura va cada uno.</p>
+  <p class="antes"><strong>Antes de interactuar:</strong> en el paisaje «Mínimos locales», si los tres optimizadores parten del mismo punto, ¿llegarán al mismo valle? ¿Cuál tiene más posibilidades de salir de un valle poco profundo?</p>
+
+  <div class="pestanas" role="group" aria-label="Superficie de pérdida">
+    <button type="button" data-sup="convexo">Cuenco convexo</button>
+    <button type="button" data-sup="real">Mínimos locales</button>
+    <button type="button" data-sup="silla">Punto silla</button>
+    <button type="button" data-sup="rosenbrock">Barranco (Rosenbrock)</button>
+  </div>
+
+  <div class="rejilla">
+    <div>
+      <div class="aviso" id="aviso" role="alert"></div>
+      <div class="lienzo" id="lienzo" role="img" aria-label=""></div>
+      <div class="leyenda" aria-hidden="true">
+        <span><span class="muestra" style="background:#0E7490"></span>GD</span>
+        <span><span class="muestra" style="background:#FDB913"></span>Momentum</span>
+        <span><span class="muestra" style="background:#ED1E79"></span>Adam</span>
+        <span><span class="muestra" style="background:#fff;border:2px solid #8A6100;border-radius:2px"></span>Mínimo global</span>
+      </div>
+      <p class="pie">Figura interactiva. Elaboración propia; superficies sintéticas calculadas en el navegador. Clic en la superficie: nuevo punto de partida. Arrastrar para rotar, rueda o pellizco para acercar; con el lienzo enfocado, las flechas del teclado también rotan.</p>
+    </div>
+
+    <div class="panel">
+      <div class="grupo">
+        <h2>Descenso</h2>
+        <div class="botones">
+          <button type="button" class="primario" id="btn-bajar">▶ Descender</button>
+          <button type="button" id="btn-paso">Paso →</button>
+          <button type="button" id="btn-reiniciar">Reiniciar</button>
+        </div>
+      </div>
+      <div class="grupo">
+        <h2>Hiperparámetros</h2>
+        <div class="deslizador"><label for="eta" style="margin:0">η (GD y Momentum)</label><b id="eta-valor"></b></div>
+        <input type="range" id="eta" min="-100" max="100" value="0">
+        <div class="deslizador"><label for="beta" style="margin:0">β (Momentum)</label><b id="beta-valor"></b></div>
+        <input type="range" id="beta" min="0" max="99" value="90">
+        <div class="deslizador"><label for="eta-adam" style="margin:0">η (Adam)</label><b id="eta-adam-valor"></b></div>
+        <input type="range" id="eta-adam" min="-100" max="100" value="0">
+        <button type="button" id="btn-defecto" style="margin-top:6px">Valores de referencia</button>
+      </div>
+      <div class="grupo">
+        <h2>Mostrar</h2>
+        <label><input type="checkbox" data-opt="gd" checked> GD</label>
+        <label><input type="checkbox" data-opt="momentum" checked> Momentum</label>
+        <label><input type="checkbox" data-opt="adam" checked> Adam</label>
+      </div>
+      <div class="altimetro" id="altimetro" aria-live="polite"></div>
+      <div class="botones" style="margin-top:10px">
+        <button type="button" id="btn-arriba">Vista superior</button>
+        <button type="button" id="btn-3d">Vista 3D</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="explica">
+    <p id="descripcion" aria-live="polite"></p>
+    <p id="observar"></p>
+    <p><strong>Para pensar.</strong> Las tres reglas usan el mismo gradiente; lo que cambia es qué hacen con él. GD da un paso proporcional a la pendiente local; Momentum acumula la dirección de los pasos anteriores (inercia); Adam divide el paso de cada coordenada por la magnitud reciente de su gradiente. Ninguna gana en todos los paisajes: por eso conviene probar más de una y ajustar η.</p>
+  </div>
+  <div id="autotest" aria-live="polite"></div>
+</div>
+
+<!-- three.js r160 + OrbitControls empaquetados como script clásico (window.THREE). Ver vendor/BUILD.md. -->
+<script src="vendor/three-r160.iife.min.js"></script>
+<script>
+/* ===================================== MODELO (JS puro, sin DOM) ===================================== */
+const Modelo = (() => {
+  const g2 = (x, y, cx, cy, s) => Math.exp(-(((x - cx) ** 2) + ((y - cy) ** 2)) / (2 * s * s));
+  // Paisaje no convexo: el mismo del Cap 1.3 (valle global, mínimo local, valle poco profundo, ondulaciones y cuenco suave).
+  const G = [[-2.4, 2.2, 2.0, 1.5], [-1.5, -2.6, -1.4, 1.4], [-1.1, -1.2, 3.0, 1.2]];
+  const fReal = (x, y) => 2.6 + G.reduce((s, [a, cx, cy, sg]) => s + a * g2(x, y, cx, cy, sg), 0) + 0.45 * Math.sin(0.85 * x) * Math.cos(0.85 * y) + 0.015 * (x * x + y * y);
+  const gReal = (x, y) => {
+    let gx = 0.45 * 0.85 * Math.cos(0.85 * x) * Math.cos(0.85 * y) + 0.03 * x, gy = -0.45 * 0.85 * Math.sin(0.85 * x) * Math.sin(0.85 * y) + 0.03 * y;
+    for (const [a, cx, cy, sg] of G) { const e = a * g2(x, y, cx, cy, sg); gx += -e * (x - cx) / (sg * sg); gy += -e * (y - cy) / (sg * sg); }
+    return [gx, gy];
+  };
+  // Cada superficie: pérdida f, gradiente analítico g, dominio [x₀, x₁, y₀, y₁], punto de partida y valores de referencia.
+  const SUPERFICIES = {
+    convexo: { nombre: 'Cuenco convexo', f: (x, y) => 0.1 * (x * x + y * y), g: (x, y) => [0.2 * x, 0.2 * y], dom: [-6, 6, -6, 6], inicio: [-5, 4.5], eta: 1.2, etaAdam: 0.3, beta: 0.9, pasos: 120, minimos: [[0, 0]] },
+    real: { nombre: 'Mínimos locales', f: fReal, g: gReal, dom: [-6, 6, -6, 6], inicio: [-4.8, -4.6], eta: 0.6, etaAdam: 0.12, beta: 0.9, pasos: 200, minimos: null },
+    silla: { nombre: 'Punto silla', f: (x, y) => 0.15 * x * x - 0.15 * y * y + 0.01 * y ** 4, g: (x, y) => [0.3 * x, -0.3 * y + 0.04 * y ** 3], dom: [-6, 6, -4.5, 4.5], inicio: [-5.5, 0.001], eta: 0.5, etaAdam: 0.1, beta: 0.9, pasos: 150, minimos: [[0, Math.sqrt(7.5)], [0, -Math.sqrt(7.5)]] },
+    rosenbrock: { nombre: 'Barranco (Rosenbrock)', f: (x, y) => (1 - x) ** 2 + 100 * (y - x * x) ** 2, g: (x, y) => [-2 * (1 - x) - 400 * x * (y - x * x), 200 * (y - x * x)], dom: [-2, 2, -1, 3], inicio: [-1.2, 1], eta: 0.0015, etaAdam: 0.1, beta: 0.9, pasos: 400, log: true, minimos: [[1, 1]] },
+  };
+  // Mínimo global del paisaje no convexo por búsqueda en malla fina + refinamiento con GD.
+  (() => { const S = SUPERFICIES.real; let best = [0, 0], bf = Infinity; for (let x = -6; x <= 6; x += 0.05) for (let y = -6; y <= 6; y += 0.05) { const v = S.f(x, y); if (v < bf) { bf = v; best = [x, y]; } } for (let k = 0; k < 2000; k++) { const g = S.g(...best); best = [best[0] - 0.3 * g[0], best[1] - 0.3 * g[1]]; } S.minimos = [best]; })();
+  const OPTS = ['gd', 'momentum', 'adam'];
+  // Optimizadores con la convención de PyTorch: torch.optim.SGD (con y sin momentum, sin amortiguación) y torch.optim.Adam.
+  function trayectoria(sup, opt, x0, pasos, eta, beta = 0.9, b1 = 0.9, b2 = 0.999, eps = 1e-8) {
+    let p = x0.slice(); const tr = [p.slice()]; let v = [0, 0], m = [0, 0], s = [0, 0];
+    for (let t = 1; t <= pasos; t++) {
+      const g = sup.g(p[0], p[1]);
+      if (opt === 'gd') { p = [p[0] - eta * g[0], p[1] - eta * g[1]]; }
+      else if (opt === 'momentum') { v = t === 1 ? g.slice() : [beta * v[0] + g[0], beta * v[1] + g[1]]; p = [p[0] - eta * v[0], p[1] - eta * v[1]]; }
+      else {
+        m = [b1 * m[0] + (1 - b1) * g[0], b1 * m[1] + (1 - b1) * g[1]]; s = [b2 * s[0] + (1 - b2) * g[0] * g[0], b2 * s[1] + (1 - b2) * g[1] * g[1]];
+        const bc1 = 1 - b1 ** t, bc2 = 1 - b2 ** t; const paso = eta / bc1;
+        p = [0, 1].map((i) => p[i] - paso * m[i] / (Math.sqrt(s[i]) / Math.sqrt(bc2) + eps));
+      }
+      tr.push(p.slice());
+      if (!isFinite(p[0]) || !isFinite(p[1]) || Math.abs(p[0]) > 1e6 || Math.abs(p[1]) > 1e6) break;
+    }
+    return tr;
+  }
+  function autotest() {
+    const r = []; let sem = 7; const rnd = () => { sem = (sem * 16807) % 2147483647; return sem / 2147483647; };
+    // 1) Gradiente analítico = diferencias centradas.
+    for (const [k, S] of Object.entries(SUPERFICIES)) {
+      let mx = 0; const [x0, x1, y0, y1] = S.dom;
+      for (let i = 0; i < 25; i++) {
+        const x = x0 + (x1 - x0) * rnd(), y = y0 + (y1 - y0) * rnd(), h = 1e-6, g = S.g(x, y);
+        const nx = (S.f(x + h, y) - S.f(x - h, y)) / (2 * h), ny = (S.f(x, y + h) - S.f(x, y - h)) / (2 * h);
+        mx = Math.max(mx, Math.abs(nx - g[0]) / Math.max(1e-6, Math.abs(nx) + Math.abs(g[0])), Math.abs(ny - g[1]) / Math.max(1e-6, Math.abs(ny) + Math.abs(g[1])));
+      }
+      r.push({ prueba: `${S.nombre}: gradiente analítico = numérico`, ok: mx < 1e-6, valor: mx.toExponential(2) });
+    }
+    // 2) Referencia externa: puntos de torch.optim (PyTorch 2.12, float64) en Rosenbrock desde (−1,2; 1).
+    const REF = {
+      gd: [[10, -1.0080770111941242, 1.0234672663648456], [100, -0.8936949812816631, 0.8067578082271757], [400, -0.32353487262827146, 0.1107705348388895]],
+      momentum: [[10, -0.7847543027084367, 0.3208074680187287], [100, 0.8007740590920477, 0.6431554898933153], [400, 0.9783165151950672, 0.9570152696636879]],
+      adam: [[10, -1.0989041046967079, 1.0192858816261177], [100, -0.7273876164863721, 0.5336835682636942], [400, 0.7710462709899866, 0.5937205294156163]],
+    };
+    const R = SUPERFICIES.rosenbrock;
+    for (const o of OPTS) {
+      const tr = trayectoria(R, o, [-1.2, 1], 400, o === 'adam' ? 0.1 : 0.0015, 0.9); let mx = 0;
+      for (const [k, x, y] of REF[o]) mx = Math.max(mx, Math.abs(tr[k][0] - x), Math.abs(tr[k][1] - y));
+      r.push({ prueba: `${o} = torch.optim en Rosenbrock (pasos 10, 100 y 400)`, ok: mx < 1e-9, valor: mx.toExponential(2) });
+    }
+    // 3) Momentum con β = 0 es exactamente GD; 4) el primer paso de Adam mide η en cada coordenada.
+    const S = SUPERFICIES.real; const a = trayectoria(S, 'gd', S.inicio, 100, 0.6), b = trayectoria(S, 'momentum', S.inicio, 100, 0.6, 0);
+    r.push({ prueba: 'Momentum con β = 0 = GD (100 pasos)', ok: a.every((p, i) => p[0] === b[i][0] && p[1] === b[i][1]), valor: true });
+    const ad = trayectoria(S, 'adam', [1, -3], 1, 0.05); const d = [Math.abs(ad[1][0] - 1), Math.abs(ad[1][1] + 3)];
+    r.push({ prueba: 'Adam: el primer paso mide η en cada coordenada', ok: Math.abs(d[0] / 0.05 - 1) < 1e-5 && Math.abs(d[1] / 0.05 - 1) < 1e-5, valor: d.map((v) => v.toFixed(6)).join(', ') });
+    // 5) Desenlaces con los valores de referencia.
+    const fin = (k, o) => { const T = SUPERFICIES[k]; const tr = trayectoria(T, o, T.inicio, T.pasos, o === 'adam' ? T.etaAdam : T.eta, T.beta); return tr[tr.length - 1]; };
+    r.push({ prueba: 'cuenco convexo: los tres llegan al mínimo (|θ| < 0,01)', ok: OPTS.every((o) => Math.hypot(...fin('convexo', o)) < 0.01), valor: OPTS.map((o) => Math.hypot(...fin('convexo', o)).toExponential(1)).join(', ') });
+    const gm = SUPERFICIES.real.minimos[0]; const dg = (o) => Math.hypot(fin('real', o)[0] - gm[0], fin('real', o)[1] - gm[1]);
+    r.push({ prueba: 'mínimos locales: GD y Adam quedan en un mínimo local; Momentum llega al valle global', ok: dg('gd') > 2 && dg('adam') > 2 && dg('momentum') < 0.5, valor: OPTS.map((o) => dg(o).toFixed(2)).join(', ') });
+    const Ss = SUPERFICIES.silla; const quieto = trayectoria(Ss, 'gd', [-5.5, 0], 300, 0.5);
+    r.push({ prueba: 'silla: desde y = 0 exacto, GD queda en el punto silla (gradiente y = 0)', ok: quieto.every((p) => p[1] === 0) && Math.abs(quieto[300][0]) < 1e-9, valor: quieto[300].map((v) => v.toExponential(1)).join(', ') });
+    const escape = (o) => trayectoria(Ss, o, Ss.inicio, 300, o === 'adam' ? Ss.etaAdam : Ss.eta, Ss.beta).findIndex((p) => Math.abs(p[1]) > 1);
+    r.push({ prueba: 'silla: Adam escapa antes que Momentum, y Momentum antes que GD', ok: escape('adam') < escape('momentum') && escape('momentum') < escape('gd'), valor: OPTS.map(escape).join(', ') });
+    const fR = (o) => R.f(...fin('rosenbrock', o));
+    r.push({ prueba: 'Rosenbrock: Momentum llega a L < 0,01 en 400 pasos; GD no', ok: fR('momentum') < 0.01 && fR('gd') > 0.1, valor: OPTS.map((o) => fR(o).toExponential(2)).join(', ') });
+    return { pasa: r.every((x) => x.ok), resultados: r };
+  }
+  return { SUPERFICIES, OPTS, trayectoria, autotest };
+})();
+
+/* ===================================== ESTADO ===================================== */
+const fmt = (v, d = 2) => (Math.abs(v) >= 1e4 ? v.toExponential(1) : v.toFixed(d)).replace('.', ',').replace('-', '−');
+const reducirMov = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const COLORES = { gd: 0x0E7490, momentum: 0xFDB913, adam: 0xED1E79 };
+const NOMBRES = { gd: 'GD', momentum: 'Momentum', adam: 'Adam' };
+const estado = { sup: 'real', inicio: null, eta: 0, etaAdam: 0, beta: 0.9, paso: 0, tray: null, ver: { gd: true, momentum: true, adam: true }, animando: false, visible: true };
+const $ = (id) => document.getElementById(id);
+const S = () => Modelo.SUPERFICIES[estado.sup];
+const valorEta = () => S().eta * 10 ** estado.eta, valorEtaAdam = () => S().etaAdam * 10 ** estado.etaAdam;
+function calcular() {
+  const s = S(); const x0 = estado.inicio || s.inicio; const n = s.pasos;
+  estado.tray = { gd: Modelo.trayectoria(s, 'gd', x0, n, valorEta()), momentum: Modelo.trayectoria(s, 'momentum', x0, n, valorEta(), estado.beta), adam: Modelo.trayectoria(s, 'adam', x0, n, valorEtaAdam()) };
+  estado.paso = 0;
+}
+const enPaso = (o) => { const tr = estado.tray[o]; return tr[Math.min(estado.paso, tr.length - 1)]; };
+const fuera = (p) => { const [x0, x1, y0, y1] = S().dom, mx = (x1 - x0) * 0.25, my = (y1 - y0) * 0.25; return !isFinite(p[0]) || !isFinite(p[1]) || p[0] < x0 - mx || p[0] > x1 + mx || p[1] < y0 - my || p[1] > y1 + my; };
+
+function hayWebGL() { try { const c = document.createElement('canvas'); return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl'))); } catch (e) { return false; } }
+
+/* ===================================== VISTA (three.js) ===================================== */
+const PALETA = [[0x2A, 0x0A, 0x5E], [0x3D, 0x00, 0x8D], [0x93, 0x33, 0xEA], [0xED, 0x1E, 0x79], [0xFD, 0xB9, 0x13]];
+function colorAltura(h) { const f = Math.min(3.999, Math.max(0, h) * 4); const k = Math.floor(f), w = f - k; return [0, 1, 2].map((i) => (PALETA[k][i] + (PALETA[k + 1][i] - PALETA[k][i]) * w) / 255); }
+
+const Vista = (() => {
+  if (!window.THREE || !hayWebGL()) return null;
+  const T = window.THREE; const cont = $('lienzo');
+  const renderer = new T.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.domElement.tabIndex = 0;
+  renderer.domElement.setAttribute('aria-label', 'Vista 3D; las flechas del teclado rotan la cámara; un clic sobre la superficie elige el punto de partida');
+  cont.appendChild(renderer.domElement);
+  const escena = new T.Scene();
+  const camara = new T.PerspectiveCamera(38, 4 / 3, 0.1, 100);
+  const controles = new T.OrbitControls(camara, renderer.domElement);
+  controles.enablePan = false; controles.minDistance = 3; controles.maxDistance = 18; controles.maxPolarAngle = Math.PI * 0.49;
+  escena.add(new T.AmbientLight(0xffffff, 0.75));
+  const luz = new T.DirectionalLight(0xffffff, 0.9); luz.position.set(3, 7, 4); escena.add(luz);
+  const ANCHO = 6, ALTO = 2.4;
+  let mapa = null; // transformación modelo → escena de la superficie actual
+  const superficie = new T.Mesh(new T.BufferGeometry(), new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.65, metalness: 0, side: T.DoubleSide, polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1 }));
+  const malla = new T.LineSegments(new T.BufferGeometry(), new T.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.16 }));
+  escena.add(superficie); escena.add(malla);
+  const bolas = {}, estelas = {};
+  for (const o of Modelo.OPTS) {
+    bolas[o] = new T.Mesh(new T.SphereGeometry(0.13, 18, 12), new T.MeshStandardMaterial({ color: COLORES[o], roughness: 0.35, emissive: COLORES[o], emissiveIntensity: 0.2 }));
+    // Estela como tubo fino: las líneas WebGL miden siempre 1 px y se pierden sobre la superficie.
+    estelas[o] = new T.Mesh(new T.BufferGeometry(), new T.MeshBasicMaterial({ color: COLORES[o] }));
+    escena.add(bolas[o]); escena.add(estelas[o]);
+  }
+  const marcasMin = new T.Group(); escena.add(marcasMin);
+  const rotulos = [];
+  function prepararSuperficie() {
+    const s = S(); const [x0, x1, y0, y1] = s.dom; const k = ANCHO / (x1 - x0); const N = 140;
+    // Altura visible: lineal en L, o logarítmica en Rosenbrock (L abarca de 0 a ≈ 2.500).
+    let fmin = Infinity, fmax = -Infinity; for (let i = 0; i <= 60; i++) for (let j = 0; j <= 60; j++) { const v = s.f(x0 + (x1 - x0) * i / 60, y0 + (y1 - y0) * j / 60); fmin = Math.min(fmin, v); fmax = Math.max(fmax, v); }
+    const h = s.log ? (v) => ALTO * (Math.log1p(v - fmin) / Math.log1p(fmax - fmin)) : (v) => ALTO * (v - fmin) / (fmax - fmin);
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    mapa = { pos: (x, y) => new T.Vector3((x - cx) * k, h(s.f(x, y)), -(y - cy) * k), h, k, cx, cy };
+    const pos = [], colores = [], idx = [];
+    for (let j = 0; j <= N; j++) for (let i = 0; i <= N; i++) {
+      const x = x0 + (x1 - x0) * i / N, y = y0 + (y1 - y0) * j / N; const p = mapa.pos(x, y); pos.push(p.x, p.y, p.z);
+      const c = colorAltura(p.y / ALTO); colores.push(...c);
+    }
+    for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) { const a = j * (N + 1) + i, b = a + 1, c = a + N + 1, d = c + 1; idx.push(a, c, b, b, c, d); }
+    const geo = new T.BufferGeometry(); geo.setAttribute('position', new T.Float32BufferAttribute(pos, 3)); geo.setAttribute('color', new T.Float32BufferAttribute(colores, 3)); geo.setIndex(idx); geo.computeVertexNormals();
+    superficie.geometry.dispose(); superficie.geometry = geo;
+    // Malla de referencia cada 10 celdas.
+    const lm = []; const M = 14;
+    for (let a = 0; a <= M; a++) for (let b = 0; b < N; b++) {
+      const u = a / M, t0 = b / N, t1 = (b + 1) / N;
+      lm.push(mapa.pos(x0 + (x1 - x0) * u, y0 + (y1 - y0) * t0), mapa.pos(x0 + (x1 - x0) * u, y0 + (y1 - y0) * t1));
+      lm.push(mapa.pos(x0 + (x1 - x0) * t0, y0 + (y1 - y0) * u), mapa.pos(x0 + (x1 - x0) * t1, y0 + (y1 - y0) * u));
+    }
+    lm.forEach((p) => { p.y += 0.004; }); malla.geometry.dispose(); malla.geometry = new T.BufferGeometry().setFromPoints(lm);
+    while (marcasMin.children.length) { const c = marcasMin.children.pop(); c.geometry.dispose(); c.material.dispose(); }
+    rotulos.forEach((r) => r.d.remove()); rotulos.length = 0;
+    for (const m of s.minimos) {
+      const p = mapa.pos(m[0], m[1]); const o = new T.Mesh(new T.OctahedronGeometry(0.11), new T.MeshStandardMaterial({ color: 0xffffff, emissive: 0x8A6100, emissiveIntensity: 0.4 }));
+      o.position.set(p.x, p.y + 0.16, p.z); marcasMin.add(o);
+      const d = document.createElement('div'); d.className = 'rotulo'; d.setAttribute('aria-hidden', 'true'); d.textContent = 'mínimo global'; cont.appendChild(d); rotulos.push({ d, p: [p.x, p.y + 0.45, p.z] });
+    }
+  }
+  function actualizar() {
+    for (const o of Modelo.OPTS) {
+      const tr = estado.tray[o]; const n = Math.min(estado.paso, tr.length - 1); const pts = [];
+      let ultimo = null;
+      for (let i = 0; i <= n; i++) { if (fuera(tr[i])) break; const p = mapa.pos(tr[i][0], tr[i][1]); p.y += 0.05; pts.push(p); ultimo = p; }
+      estelas[o].geometry.dispose();
+      estelas[o].geometry = pts.length > 1 ? new T.TubeGeometry(new T.CatmullRomCurve3(pts, false, 'centripetal'), Math.min(600, pts.length * 3), 0.03, 6, false) : new T.BufferGeometry();
+      if (ultimo) bolas[o].position.set(ultimo.x, ultimo.y + 0.06, ultimo.z);
+      bolas[o].visible = estelas[o].visible = estado.ver[o];
+    }
+    dibujar();
+  }
+  function vista(arriba) { if (arriba) camara.position.set(0, 12.5, 0.01); else camara.position.set(6.6, 6.9, 7.8); controles.target.set(0, ALTO * 0.25, 0); controles.update(); dibujar(); }
+  function tam() { const w = cont.clientWidth, h = cont.clientHeight; renderer.setSize(w, h, false); camara.aspect = w / Math.max(1, h); camara.updateProjectionMatrix(); dibujar(); }
+  const v3 = new T.Vector3();
+  function dibujar() {
+    renderer.render(escena, camara);
+    const w = cont.clientWidth, h = cont.clientHeight;
+    rotulos.forEach(({ d, p }) => { const q = v3.set(p[0], p[1], p[2]).project(camara); d.style.left = ((q.x + 1) / 2 * w) + 'px'; d.style.top = ((1 - q.y) / 2 * h) + 'px'; d.style.display = q.z < 1 ? '' : 'none'; });
+  }
+  // Clic sin arrastre sobre la superficie: nuevo punto de partida (se invierte la transformación modelo → escena).
+  const ray = new T.Raycaster(), ptr = new T.Vector2(); let abajo = null;
+  renderer.domElement.addEventListener('pointerdown', (e) => { abajo = [e.clientX, e.clientY]; });
+  renderer.domElement.addEventListener('pointerup', (e) => {
+    if (!abajo || Math.hypot(e.clientX - abajo[0], e.clientY - abajo[1]) > 5) { abajo = null; return; } abajo = null;
+    const r = renderer.domElement.getBoundingClientRect(); ptr.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    ray.setFromCamera(ptr, camara); const hit = ray.intersectObject(superficie)[0]; if (!hit) return;
+    elegirInicio([hit.point.x / mapa.k + mapa.cx, -hit.point.z / mapa.k + mapa.cy]);
+  });
+  controles.addEventListener('change', dibujar);
+  renderer.domElement.addEventListener('keydown', (e) => {
+    const paso = 0.12; const off = camara.position.clone().sub(controles.target); const sph = new T.Spherical().setFromVector3(off);
+    if (e.key === 'ArrowLeft') sph.theta -= paso; else if (e.key === 'ArrowRight') sph.theta += paso;
+    else if (e.key === 'ArrowUp') sph.phi = Math.max(0.05, sph.phi - paso); else if (e.key === 'ArrowDown') sph.phi = Math.min(Math.PI * 0.49, sph.phi + paso); else return;
+    e.preventDefault(); camara.position.copy(controles.target).add(new T.Vector3().setFromSpherical(sph)); controles.update(); dibujar();
+  });
+  if ('ResizeObserver' in window) new ResizeObserver(tam).observe(cont); else window.addEventListener('resize', tam);
+  tam(); vista(false);
+  return { prepararSuperficie, actualizar, vista };
+})();
+
+/* ===================== Respaldo sin WebGL: mapa de curvas de nivel (canvas 2D) ===================== */
+const Plano2D = (() => {
+  if (Vista) return null;
+  const aviso = $('aviso'); aviso.style.display = 'block';
+  aviso.textContent = (window.THREE ? 'Este navegador no ofrece WebGL' : 'No se pudo cargar la biblioteca 3D (vendor/three-r160.iife.min.js)') +
+    ': se muestra el paisaje visto desde arriba (color = altura) con las mismas trayectorias. El altímetro y los controles funcionan igual.';
+  const cont = $('lienzo'); const cv = document.createElement('canvas'); cont.appendChild(cv); const ctx = cv.getContext('2d');
+  let fondo = null;
+  function preparar() {
+    const w = cv.width = cont.clientWidth * 2, h = cv.height = cont.clientHeight * 2; const s = S(); const [x0, x1, y0, y1] = s.dom;
+    const img = ctx.createImageData(w, h); let fmin = Infinity, fmax = -Infinity; const vals = new Float64Array(w * h);
+    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) { const v = s.f(x0 + (x1 - x0) * i / w, y1 - (y1 - y0) * j / h); vals[j * w + i] = s.log ? Math.log1p(v) : v; }
+    vals.forEach((v) => { fmin = Math.min(fmin, v); fmax = Math.max(fmax, v); });
+    vals.forEach((v, k) => { const c = colorAltura((v - fmin) / (fmax - fmin)); img.data[4 * k] = c[0] * 255; img.data[4 * k + 1] = c[1] * 255; img.data[4 * k + 2] = c[2] * 255; img.data[4 * k + 3] = 255; });
+    fondo = img;
+  }
+  function actualizar() {
+    if (!fondo || fondo.width !== cv.width) preparar(); ctx.putImageData(fondo, 0, 0);
+    const s = S(); const [x0, x1, y0, y1] = s.dom; const X = (x) => (x - x0) / (x1 - x0) * cv.width, Y = (y) => (y1 - y) / (y1 - y0) * cv.height;
+    for (const o of Modelo.OPTS) {
+      if (!estado.ver[o]) continue; const tr = estado.tray[o]; ctx.strokeStyle = '#' + COLORES[o].toString(16).padStart(6, '0'); ctx.lineWidth = 4; ctx.beginPath();
+      for (let i = 0; i <= Math.min(estado.paso, tr.length - 1); i++) { if (fuera(tr[i])) break; if (i === 0) ctx.moveTo(X(tr[i][0]), Y(tr[i][1])); else ctx.lineTo(X(tr[i][0]), Y(tr[i][1])); } ctx.stroke();
+    }
+  }
+  return { preparar: () => { fondo = null; }, actualizar };
+})();
+
+/* ===================================== CONTROLADOR ===================================== */
+const OBSERVAR = {
+  convexo: 'En un cuenco convexo cualquier punto de partida lleva al mismo fondo: los tres optimizadores llegan al mínimo. Con β alto, Momentum puede pasarse de largo y oscilar antes de asentarse.',
+  real: 'Desde la esquina inferior, GD y Adam quedan atrapados en un mínimo local; Momentum, por su inercia, cruza la loma y llega al valle global. Con un clic en otro punto de partida, el desenlace cambia: en un paisaje no convexo, el resultado depende de dónde se empieza.',
+  silla: 'El punto de partida está casi sobre la cresta de una silla (θ₂ = 0,001): en la dirección de escape, el gradiente es diminuto. GD llega rápido al centro y se estanca muchos pasos antes de escapar; Momentum acumula velocidad y escapa antes; Adam, que divide cada paso por la magnitud reciente del gradiente, escapa primero.',
+  rosenbrock: 'La función de Rosenbrock tiene un valle curvo, estrecho y casi plano en el fondo; el mínimo está en (1, 1). GD se arrastra por el fondo del valle; Momentum gana velocidad a lo largo de él; Adam adapta el paso de cada coordenada. Aquí la altura se dibuja en escala logarítmica.',
+};
+function altimetro() {
+  const s = S(); const fs = Modelo.OPTS.map((o) => { const p = enPaso(o); return fuera(p) ? null : s.f(p[0], p[1]); });
+  const f0 = s.f(...(estado.inicio || s.inicio)); const fmin = s.f(...s.minimos[0]);
+  const filas = Modelo.OPTS.map((o, i) => {
+    if (!estado.ver[o]) return '';
+    const v = fs[i]; const frac = v === null ? 1 : Math.max(0.02, Math.min(1, (v - fmin) / Math.max(1e-12, f0 - fmin)));
+    const col = '#' + COLORES[o].toString(16).padStart(6, '0');
+    return `<div class="fila-alt"><span>${NOMBRES[o]}</span><span class="barra"><span style="width:${(frac * 100).toFixed(1)}%;background:${col}"></span></span><span class="valor">${v === null ? 'diverge' : fmt(v, 4)}</span></div>`;
+  }).join('');
+  $('altimetro').innerHTML = `<h3>Altímetro: pérdida L(θ) · paso ${estado.paso} de ${s.pasos}</h3>${filas}<div style="margin-top:4px;color:#6B7280">Mínimo global: L = ${fmt(fmin, 4)}</div>`;
+  return fs;
+}
+function pintar() {
+  const fs = altimetro();
+  if (Vista) Vista.actualizar(); else Plano2D.actualizar();
+  $('observar').innerHTML = `<strong>Qué conviene observar.</strong> ${OBSERVAR[estado.sup]}`;
+  const s = S();
+  $('descripcion').textContent = estado.paso === 0
+    ? `${s.nombre}: los tres optimizadores parten de (${fmt((estado.inicio || s.inicio)[0])}; ${fmt((estado.inicio || s.inicio)[1], 3)}) con L = ${fmt(s.f(...(estado.inicio || s.inicio)), 4)}.`
+    : `Paso ${estado.paso}: ` + Modelo.OPTS.filter((o) => estado.ver[o]).map((o, i) => `${NOMBRES[o]} en L = ${fs[Modelo.OPTS.indexOf(o)] === null ? 'divergió' : fmt(fs[Modelo.OPTS.indexOf(o)], 3)}`).join('; ') + '.';
+  $('eta-valor').textContent = fmt(valorEta(), valorEta() < 0.01 ? 5 : 3); $('eta-adam-valor').textContent = fmt(valorEtaAdam(), 3); $('beta-valor').textContent = fmt(estado.beta, 2);
+}
+function reconstruir(nuevaSup) {
+  parar(); calcular();
+  if (nuevaSup) { if (Vista) Vista.prepararSuperficie(); else Plano2D.preparar(); }
+  document.querySelectorAll('[data-sup]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.sup === estado.sup));
+  $('lienzo').setAttribute('aria-label', `Superficie de pérdida «${S().nombre}» en tres dimensiones, con las trayectorias de GD, Momentum y Adam desde el mismo punto de partida.`);
+  pintar(); avisarAltura();
+}
+function elegirInicio(p) { const [x0, x1, y0, y1] = S().dom; estado.inicio = [Math.min(x1, Math.max(x0, p[0])), Math.min(y1, Math.max(y0, p[1]))]; reconstruir(false); }
+function valoresReferencia() { estado.eta = 0; estado.etaAdam = 0; estado.beta = S().beta; $('eta').value = 0; $('eta-adam').value = 0; $('beta').value = Math.round(estado.beta * 100); }
+let ultimo = 0, acum = 0;
+function parar() { estado.animando = false; $('btn-bajar').textContent = '▶ Descender'; }
+function cuadro(t) {
+  if (!estado.animando) return;
+  if (!estado.visible) { ultimo = t; requestAnimationFrame(cuadro); return; }
+  const dt = ultimo ? Math.min(0.1, Math.max(0, (t - ultimo) / 1000)) : 0; ultimo = t; acum += dt * Math.max(25, S().pasos / 8);
+  if (acum >= 1) { const k = Math.floor(acum); acum -= k; estado.paso = Math.min(S().pasos, estado.paso + k); pintar(); }
+  if (estado.paso >= S().pasos) { parar(); return; }
+  requestAnimationFrame(cuadro);
+}
+$('btn-bajar').addEventListener('click', () => {
+  if (estado.animando) { parar(); return; }
+  if (estado.paso >= S().pasos) estado.paso = 0;
+  if (reducirMov) { estado.paso = S().pasos; pintar(); return; }
+  estado.animando = true; ultimo = 0; acum = 0; $('btn-bajar').textContent = '❚❚ Pausa'; requestAnimationFrame(cuadro);
+});
+$('btn-paso').addEventListener('click', () => { parar(); estado.paso = Math.min(S().pasos, estado.paso + 1); pintar(); });
+$('btn-reiniciar').addEventListener('click', () => { parar(); estado.paso = 0; pintar(); });
+document.querySelectorAll('[data-sup]').forEach((b) => b.addEventListener('click', () => { estado.sup = b.dataset.sup; estado.inicio = null; valoresReferencia(); reconstruir(true); }));
+$('eta').addEventListener('input', (e) => { estado.eta = e.target.value / 100; reconstruir(false); });
+$('eta-adam').addEventListener('input', (e) => { estado.etaAdam = e.target.value / 100; reconstruir(false); });
+$('beta').addEventListener('input', (e) => { estado.beta = e.target.value / 100; reconstruir(false); });
+$('btn-defecto').addEventListener('click', () => { valoresReferencia(); estado.inicio = null; reconstruir(false); });
+document.querySelectorAll('[data-opt]').forEach((c) => c.addEventListener('change', () => { estado.ver[c.dataset.opt] = c.checked; pintar(); }));
+$('btn-arriba').addEventListener('click', () => Vista && Vista.vista(true));
+$('btn-3d').addEventListener('click', () => Vista && Vista.vista(false));
+if ('IntersectionObserver' in window) new IntersectionObserver((es) => { estado.visible = es[0].isIntersecting; }).observe($('lienzo'));
+
+/* Auto-altura cuando se embebe (protocolo del curso: {type:'embed-tool-height', id, height}). */
+let tAltura;
+function avisarAltura() {
+  if (window.self === window.top) return;
+  clearTimeout(tAltura);
+  tAltura = setTimeout(() => { try { parent.postMessage({ type: 'embed-tool-height', id: 'paisaje-error-3d-frame', height: Math.ceil(document.documentElement.getBoundingClientRect().height) }, '*'); } catch (e) { } }, 90);
+}
+window.addEventListener('load', avisarAltura); window.addEventListener('resize', avisarAltura);
+
+valoresReferencia(); reconstruir(true);
+
+/* Gancho de verificación y autotest (?selftest=1). */
+window.__paisaje3d = { Modelo, estado, webgl: !!Vista, autotest: Modelo.autotest, irA: (k) => { estado.paso = k; pintar(); }, superficie: (k) => { estado.sup = k; estado.inicio = null; valoresReferencia(); reconstruir(true); } };
+if (new URLSearchParams(location.search).get('selftest') === '1') {
+  const R = Modelo.autotest(); const caja = $('autotest'); caja.style.display = 'block';
+  caja.textContent = (R.pasa ? 'AUTOTEST: PASA' : 'AUTOTEST: FALLA') + '\n' + R.resultados.map((r) => `${r.ok ? '✓' : '✗'} ${r.prueba} → ${r.valor}`).join('\n');
+  console.log(caja.textContent); window.__paisaje3d.resultadoAutotest = R; avisarAltura();
+}
+</script>
+<!-- Botón «Portal» al abrir la herramienta sola; dentro del iframe del módulo no actúa (auditoría 2026-10, D-09). -->
+<script defer src="portal-nav.js"></script>
+</body>
+</html>

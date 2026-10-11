@@ -28,4 +28,4 @@ y lo hacen sin CDN.
 
 **Licencia:** MIT, en `LICENSE-three.txt`.
 
-**Usado por:** `capa-oculta-3d.html` (3D-2, Módulo 1 · Cap 1.2) y `convolucion-volumetrica-3d.html` (3D-3, Módulo 2 · Cap 2.1). Lo usarán también 3D-1 y 3D-4.
+**Usado por:** `paisaje-error-3d.html` (3D-1, Módulo 1 · Cap 1.3), `capa-oculta-3d.html` (3D-2, Módulo 1 · Cap 1.2), `convolucion-volumetrica-3d.html` (3D-3, Módulo 2 · Cap 2.1) y `variedad-difusion-3d.html` (3D-4, Módulo 2 · Cap 2.3).

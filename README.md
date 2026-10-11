@@ -45,6 +45,7 @@ Exploradores autónomos (HTML + JS/SVG o three.js empaquetado en `vendor/`, sin 
 | Archivo | Módulo / Capítulo | Descripción |
 |---|---|---|
 | `capa-oculta-3d.html` | M1 · Cap 1.2 | Animación 3D (three.js): una red 2-3-1 entrenada en el navegador deforma el plano de entrada hasta la capa oculta, donde la frontera curva queda sobre el plano de la neurona de salida. `?selftest=1` |
+| `paisaje-error-3d.html` | M1 · Cap 1.3 | Animación 3D (three.js): GD, Momentum y Adam descienden a la vez sobre cuatro superficies de pérdida (convexa, mínimos locales, silla, Rosenbrock), con altímetro y punto de partida a elección. `?selftest=1` (trayectorias = `torch.optim`) |
 | `convolucion-volumetrica-3d.html` | M2 · Cap 2.1 | Animación 3D (three.js): filtro K×K×C_in que atraviesa la profundidad de la entrada, N mapas apilados en la salida y contador de parámetros (448 en el caso del texto); segunda vista con el crecimiento del campo receptivo. `?selftest=1` (convolución = im2col = `torch.nn.functional.conv2d`) |
 | `cnn-anatomia-interactiva.html` | M2 · Cap 2.1 | Animación paso a paso del pipeline de una CNN (entrada → convolución → ReLU → pooling → clasificación) |
 | `vit-anatomia-interactiva.html` | M2 · Cap 2.1 | Explorador ViT vs. CNN (anatomía del ViT, campo receptivo local vs. global, bloque encoder) |
