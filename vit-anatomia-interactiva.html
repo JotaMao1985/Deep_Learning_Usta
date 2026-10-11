@@ -122,6 +122,16 @@
     75% { transform: translate(0, 20px); }
   }
   
+  /* Pantallas estrechas (incluido el iframe del Módulo 2 a 375 px): los diagramas conservan la escala 1:1
+     y se desplazan en horizontal, como las figuras del núcleo; las tarjetas reducen su relleno. */
+  .aviso-desplazar { display: none; }
+  @media (max-width: 640px) {
+    .card, .card-cnn, .card-vit { padding: 0.75rem !important; min-width: 0; }
+    .svg-desplazable { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .svg-desplazable > svg { min-width: 400px; }
+    .aviso-desplazar { display: block; margin-top: 0.25rem; font-size: 0.75rem; color: #64748B; text-align: center; }
+  }
+
   .rf-cell:focus-visible, .tab-btn:focus-visible { outline: 2px solid #ED1E79; outline-offset: 2px; }
 
   /* Movimiento reducido: sin animaciones infinitas ni transiciones */
@@ -439,7 +449,7 @@ img,video{max-width:100%;height:auto}
           </div>
           <p class="text-xs text-gray-600 mb-4">Procesamiento jerárquico: local → global</p>
           
-          <svg id="cnn-svg" viewBox="0 0 400 500" class="w-full">
+          <div class="svg-desplazable"><svg id="cnn-svg" viewBox="0 0 400 500" class="w-full">
             <!-- Input Image -->
             <g id="cnn-input">
               <rect x="150" y="10" width="100" height="100" fill="#1f2937" stroke="#4b5563" stroke-width="1"/>
@@ -498,7 +508,8 @@ img,video{max-width:100%;height:auto}
                 <path d="M0,0 L0,6 L8,3 z" fill="#fb923c"/>
               </marker>
             </defs>
-          </svg>
+          </svg></div>
+          <p class="aviso-desplazar" aria-hidden="true">← desplazar para ver el diagrama completo →</p>
         </div>
         
         <!-- ViT Column -->
@@ -509,7 +520,7 @@ img,video{max-width:100%;height:auto}
           </div>
           <p class="text-xs text-gray-600 mb-4">Atención global desde el inicio</p>
           
-          <svg id="vit-svg" viewBox="0 0 400 500" class="w-full">
+          <div class="svg-desplazable"><svg id="vit-svg" viewBox="0 0 400 500" class="w-full">
             <!-- Input Image -->
             <g id="vit-input">
               <rect x="150" y="10" width="100" height="100" fill="#1f2937" stroke="#4b5563" stroke-width="1"/>
@@ -600,7 +611,8 @@ img,video{max-width:100%;height:auto}
                 <path d="M0,0 L0,6 L8,3 z" fill="#60a5fa"/>
               </marker>
             </defs>
-          </svg>
+          </svg></div>
+          <p class="aviso-desplazar" aria-hidden="true">← desplazar para ver el diagrama completo →</p>
         </div>
       </div>
       
@@ -867,7 +879,7 @@ img,video{max-width:100%;height:auto}
         
         <!-- Diagram -->
         <div class="card rounded-xl p-6">
-          <svg viewBox="0 0 400 550" class="w-full" role="img" aria-label="Bloque encoder del ViT con pre-normalización: LayerNorm, autoatención multicabeza y suma residual; luego LayerNorm, MLP y suma residual.">
+          <div class="svg-desplazable"><svg viewBox="0 0 400 550" class="w-full" role="img" aria-label="Bloque encoder del ViT con pre-normalización: LayerNorm, autoatención multicabeza y suma residual; luego LayerNorm, MLP y suma residual.">
             <!-- Entrada z_(l-1) -->
             <rect x="130" y="10" width="140" height="35" fill="#1f2937" stroke="#60a5fa" stroke-width="2" rx="4"/>
             <text x="200" y="32" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="bold">Entrada z<tspan baseline-shift="sub" font-size="8">ℓ−1</tspan></text>
@@ -947,7 +959,8 @@ img,video{max-width:100%;height:auto}
                 <path d="M0,0 L0,6 L8,3 z" fill="#60a5fa"/>
               </marker>
             </defs>
-          </svg>
+          </svg></div>
+          <p class="aviso-desplazar" aria-hidden="true">← desplazar para ver el diagrama completo →</p>
         </div>
         
         <!-- Explanation -->
