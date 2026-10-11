@@ -45,10 +45,12 @@ Exploradores autónomos (HTML + JS/SVG o three.js empaquetado en `vendor/`, sin 
 | Archivo | Módulo / Capítulo | Descripción |
 |---|---|---|
 | `capa-oculta-3d.html` | M1 · Cap 1.2 | Animación 3D (three.js): una red 2-3-1 entrenada en el navegador deforma el plano de entrada hasta la capa oculta, donde la frontera curva queda sobre el plano de la neurona de salida. `?selftest=1` |
+| `convolucion-volumetrica-3d.html` | M2 · Cap 2.1 | Animación 3D (three.js): filtro K×K×C_in que atraviesa la profundidad de la entrada, N mapas apilados en la salida y contador de parámetros (448 en el caso del texto); segunda vista con el crecimiento del campo receptivo. `?selftest=1` (convolución = im2col = `torch.nn.functional.conv2d`) |
 | `cnn-anatomia-interactiva.html` | M2 · Cap 2.1 | Animación paso a paso del pipeline de una CNN (entrada → convolución → ReLU → pooling → clasificación) |
 | `vit-anatomia-interactiva.html` | M2 · Cap 2.1 | Explorador ViT vs. CNN (anatomía del ViT, campo receptivo local vs. global, bloque encoder) |
 | `lstm-forward-interactivo.html` | M2 · Cap 2.2 | El paso hacia adelante de una LSTM escalar, paso a paso, con sustitución numérica exacta. `?selftest=1` (paridad con `lstm-forward-referencia.py`) |
 | `rnn-lstm-gru-interactivo.html` | M2 · Cap 2.2 | Explorador RNN·LSTM·GRU: misma secuencia en las 3 celdas, compuertas en vivo, desvanecimiento del gradiente y cuadro comparativo |
+| `variedad-difusion-3d.html` | M2 · Cap 2.3 §1 y §5 | Animación 3D (three.js): hipótesis de la variedad (rollo suizo que se desenrolla) y proceso de difusión sobre una espiral (calendarios lineal y coseno; inverso DDIM con el eliminador de ruido ideal). `?vista=variedad\|difusion`, `?selftest=1` |
 | `atencion-transformer-interactiva.html` | M2 · Cap 2.3 §6 | Autoatención en vivo sobre la palabra «vaina»: pesos QKV, matriz de atención y generación autorregresiva con temperatura |
 | `ae-vae-gan-transformer-interactivo.html` | M2 · Cap 2.3 | Comparador AE·VAE·GAN·Transformer: diagramas, fichas técnicas y laboratorios 2-D/secuencias con entrenamiento real (retropropagación + Adam) en el navegador |
 

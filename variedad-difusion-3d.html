@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Variedad y difusión</title>
+<script>if (window.self !== window.top) document.documentElement.classList.add('embedded');</script>
+<!--
+  ============================================================================
+  ANIMACIÓN 3D · VARIEDAD Y DIFUSIÓN (3D-4, Módulo 2 · Cap 2.3, §1 y §5)
+  Maestría en Ciencia de Datos — Universidad Santo Tomás · auditoría 2026-10
+  ----------------------------------------------------------------------------
+  Dos vistas (?vista=variedad | difusion):
+  (a) Variedad: una hoja de dos coordenadas (u, v) enrollada en 3D (el «rollo
+      suizo»). Al desenrollarla, la distancia en línea recta entre dos puntos
+      de vueltas vecinas pasa a coincidir con la distancia a lo largo de la
+      variedad; en el rollo, la recta atraviesa espacio vacío.
+  (b) Difusión: proceso directo q(x_t | x_0) = N(√ᾱ_t·x_0, (1 − ᾱ_t)I) sobre
+      una espiral 3D, con calendario lineal (Ho et al., 2020) o coseno (Nichol
+      y Dhariwal, 2021), y proceso inverso determinista (DDIM; Song et al.,
+      2021) que parte de ruido nuevo. El inverso usa el eliminador de ruido
+      ideal E[x_0 | x_t], calculado en forma cerrada sobre los datos de ejemplo
+      (lo que aprendería una red perfecta), no una red entrenada.
+  Modelo y vista separados: el modelo es JS puro y se verifica con ?selftest=1
+  (longitud conservada al desenrollar, ᾱ_t = Π(1 − β_s), media y varianza de
+  q(x_t | x_0) frente a la cadena de Markov paso a paso, inverso que termina
+  sobre la espiral). Los calendarios coinciden con un cálculo en PyTorch 2.12
+  (error relativo < 2·10⁻¹⁵).
+  Sin CDN: three.js r160 empaquetado en vendor/ (ver vendor/BUILD.md). Funciona
+  por file://, en GitHub Pages y dentro del iframe del módulo.
+  ============================================================================
+-->
+<style>
+  :root { --morado: #3D008D; --rosa: #ED1E79; --oro: #FDB913; --tinta: #1F2937; --gris: #6B7280; --fondo: #F8F7FC; --borde: #E5E1F0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #fff; color: var(--tinta); font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.55; }
+  body { padding: 16px; }
+  html.embedded body { padding: 4px; }
+  .envoltura { max-width: 1020px; margin: 0 auto; }
+  h1 { font-size: 1.25rem; margin: 0 0 4px; color: var(--morado); }
+  .bajada { margin: 0 0 12px; color: #374151; font-size: .95rem; }
+  .antes { border-left: 4px solid var(--oro); background: #FFFBEB; padding: 8px 12px; border-radius: 6px; font-size: .92rem; margin: 0 0 12px; }
+  .pestanas { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+  .rejilla { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 14px; }
+  @media (max-width: 780px) { .rejilla { grid-template-columns: minmax(0, 1fr); } }
+  .lienzo { position: relative; width: 100%; aspect-ratio: 4 / 3; max-height: 580px; border: 1px solid var(--borde); border-radius: 12px; background: radial-gradient(circle at 50% 40%, #FFFFFF 0%, var(--fondo) 75%); overflow: hidden; touch-action: none; }
+  .lienzo canvas { display: block; width: 100%; height: 100%; outline: none; }
+  .lienzo canvas:focus-visible { outline: 2px solid var(--rosa); outline-offset: -2px; }
+  .rotulo { position: absolute; transform: translate(-50%, -50%); font-size: .82rem; font-weight: 700; color: var(--morado); pointer-events: none; white-space: nowrap; text-shadow: 0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff; }
+  .rotulo.par { color: #111827; font-size: .95rem; }
+  .panel { border: 1px solid var(--borde); border-radius: 12px; padding: 12px; background: #fff; font-size: .9rem; }
+  .panel h2 { font-size: .95rem; margin: 0 0 6px; color: var(--morado); }
+  .grupo { margin-bottom: 10px; }
+  .fila { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+  .botones { display: flex; flex-wrap: wrap; gap: 6px; }
+  button { font: inherit; font-size: .85rem; padding: 5px 10px; border-radius: 8px; border: 1px solid var(--borde); background: #fff; color: var(--tinta); cursor: pointer; }
+  button[aria-pressed="true"] { background: var(--morado); color: #fff; border-color: var(--morado); }
+  button.primario { background: var(--rosa); color: #fff; border-color: var(--rosa); }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--rosa); outline-offset: 2px; }
+  input[type=range] { width: 100%; accent-color: var(--rosa); }
+  label { display: flex; gap: 6px; align-items: center; margin: 3px 0; font-size: .86rem; }
+  .lectura { font-variant-numeric: tabular-nums; background: var(--fondo); border-radius: 8px; padding: 8px; font-size: .86rem; }
+  .lectura b { color: var(--morado); }
+  .grafica { width: 100%; height: 120px; display: block; margin-top: 8px; border: 1px solid var(--borde); border-radius: 8px; background: #fff; }
+  .leyenda { display: flex; flex-wrap: wrap; gap: 10px; font-size: .82rem; color: #374151; margin-top: 8px; }
+  .muestra { display: inline-block; width: 11px; height: 11px; border-radius: 50%; vertical-align: middle; margin-right: 4px; }
+  .degradado { display: inline-block; width: 46px; height: 10px; border-radius: 5px; vertical-align: middle; margin-right: 4px; background: linear-gradient(90deg, #3D008D, #ED1E79, #FDB913); }
+  .explica { margin-top: 12px; font-size: .92rem; }
+  .explica p { margin: 6px 0; }
+  .aviso { display: none; padding: 10px; border-radius: 8px; background: #FEF2F2; color: #991B1B; font-size: .9rem; margin-bottom: 8px; }
+  #autotest { display: none; margin-top: 12px; font: 12px/1.5 ui-monospace, Menlo, monospace; background: #0F172A; color: #E2E8F0; padding: 10px; border-radius: 8px; white-space: pre-wrap; }
+  .pie { font-size: .8rem; color: var(--gris); margin-top: 8px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="envoltura">
+  <h1 id="titulo">Variedad y difusión</h1>
+  <p class="bajada" id="bajada-variedad">Cada punto de la nube tiene solo dos coordenadas propias (u, v): vive sobre una hoja enrollada en el espacio de tres dimensiones. El deslizador desenrolla la hoja sin estirarla.</p>
+  <p class="bajada" id="bajada-difusion" hidden>El proceso directo añade ruido gaussiano a una espiral hasta convertirla en una nube N(0, I); el proceso inverso parte de ruido nuevo y lo limpia paso a paso hasta volver a la espiral.</p>
+  <p class="antes" id="antes-variedad"><strong>Antes de interactuar:</strong> los puntos A y B están muy cerca en el espacio 3D. ¿Son parecidos para un modelo que aprendió la hoja? ¿Qué debería pasar con su distancia al desenrollarla?</p>
+  <p class="antes" id="antes-difusion" hidden><strong>Antes de interactuar:</strong> si a la espiral se le añade un poco de ruido gaussiano en cada uno de 1.000 pasos, ¿qué forma tendrá la nube al final? ¿Qué tendría que aprender una red para recorrer el camino al revés?</p>
+
+  <div class="pestanas" role="group" aria-label="Vista">
+    <button type="button" id="tab-variedad" aria-pressed="true">Hipótesis de la variedad</button>
+    <button type="button" id="tab-difusion" aria-pressed="false">Proceso de difusión</button>
+  </div>
+
+  <div class="rejilla">
+    <div>
+      <div class="aviso" id="aviso" role="alert"></div>
+      <div class="lienzo" id="lienzo" role="img" aria-label=""></div>
+      <div class="leyenda" id="leyenda-variedad" aria-hidden="true">
+        <span><span class="degradado"></span>Coordenada u sobre la hoja</span>
+        <span><span class="muestra" style="background:#0E7490"></span>Camino sobre la variedad (A → B)</span>
+        <span><span class="muestra" style="background:#6B7280"></span>Recta en el espacio 3D</span>
+      </div>
+      <div class="leyenda" id="leyenda-difusion" aria-hidden="true" hidden>
+        <span><span class="degradado"></span>Datos x₀ (posición sobre la espiral)</span>
+        <span><span class="muestra" style="background:#ED1E79"></span>Muestras generadas (proceso inverso)</span>
+        <span><span class="muestra" style="background:#9CA3AF"></span>Esfera de radio 2 (ruido N(0, I))</span>
+      </div>
+      <p class="pie">Figura interactiva. Elaboración propia; datos sintéticos con semilla fija. Arrastrar para rotar, rueda o pellizco para acercar; con el lienzo enfocado, las flechas del teclado también rotan.</p>
+    </div>
+
+    <div class="panel">
+      <div id="panel-variedad">
+        <div class="grupo">
+          <h2><label for="desenrollar" style="display:inline;margin:0;font-size:inherit">Desenrollar la hoja</label></h2>
+          <input type="range" id="desenrollar" min="0" max="100" value="0">
+          <div class="botones" style="margin-top:6px"><button type="button" class="primario" id="btn-desenrollar">▶ Desenrollar</button></div>
+        </div>
+        <div class="grupo">
+          <h2>Mostrar</h2>
+          <label><input type="checkbox" id="ver-camino" checked> Camino sobre la variedad (A → B)</label>
+          <label><input type="checkbox" id="ver-recta" checked> Recta en el espacio 3D</label>
+        </div>
+        <div class="lectura" id="lectura-variedad" aria-live="polite"></div>
+      </div>
+
+      <div id="panel-difusion" hidden>
+        <div class="grupo">
+          <h2>Calendario de ruido β<sub>t</sub></h2>
+          <div class="botones" role="group" aria-label="Calendario de ruido">
+            <button type="button" data-cal="lineal">Lineal</button>
+            <button type="button" data-cal="coseno">Coseno</button>
+          </div>
+        </div>
+        <div class="grupo">
+          <h2><label for="paso-t" style="display:inline;margin:0;font-size:inherit">Paso t</label></h2>
+          <input type="range" id="paso-t" min="0" max="1000" value="0">
+          <div class="botones" style="margin-top:6px">
+            <button type="button" class="primario" id="btn-directo">▶ Proceso directo</button>
+            <button type="button" id="btn-inverso">▶ Proceso inverso (generar)</button>
+          </div>
+          <label style="margin-top:6px"><input type="checkbox" id="ver-datos" checked> Datos originales de referencia</label>
+        </div>
+        <div class="lectura" id="lectura-difusion" aria-live="polite"></div>
+        <canvas class="grafica" id="grafica" aria-label="Fracción de señal ᾱ_t frente al paso t para los dos calendarios" role="img"></canvas>
+      </div>
+      <div class="botones" style="margin-top:10px">
+        <button type="button" id="btn-frente">Vista frontal</button>
+        <button type="button" id="btn-3d">Vista 3D</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="explica">
+    <p id="descripcion" aria-live="polite"></p>
+    <div id="explica-variedad">
+      <p><strong>Qué conviene observar.</strong> En el rollo (desenrollado = 0), la recta entre A y B cruza espacio vacío: su punto medio no corresponde a ningún punto de la hoja. Al desenrollar, la hoja se vuelve un plano y la distancia en línea recta pasa a coincidir con la distancia a lo largo de la variedad.</p>
+      <p><strong>Para pensar.</strong> Interpolar en el espacio de los datos (la recta) produce mezclas que no existen; en imágenes, dos fotos superpuestas como fantasmas. Interpolar en el espacio latente (la hoja desenrollada) recorre datos plausibles. Por eso los modelos generativos aprenden un espacio latente: es la hoja desenrollada.</p>
+    </div>
+    <div id="explica-difusion" hidden>
+      <p><strong>Qué conviene observar.</strong> En el proceso directo, cada punto se desplaza de x₀ hacia el ruido siguiendo x<sub>t</sub> = √ᾱ<sub>t</sub>·x₀ + √(1 − ᾱ<sub>t</sub>)·ε. Con el calendario lineal (Ho et al., 2020) la señal cae deprisa en la primera mitad; el coseno (Nichol y Dhariwal, 2021) la conserva más tiempo y la destruye de forma más pareja. En t = 1.000 ya no queda información de la espiral.</p>
+      <p><strong>Proceso inverso.</strong> Parte de ruido nuevo y aplica 60 pasos deterministas (DDIM; Song et al., 2021). En lugar de una red entrenada, se usa el eliminador de ruido ideal E[x₀ | x<sub>t</sub>], calculado en forma cerrada sobre 300 puntos de ejemplo: es lo que aprendería una red perfecta con esos datos.</p>
+      <p><strong>Para pensar.</strong> Con un conjunto finito de ejemplos, ese óptimo solo devuelve puntos muy cercanos a los ejemplos: en el límite, los memoriza. Que las redes reales generen datos nuevos depende de que no reproduzcan exactamente ese óptimo, un tema de investigación activo.</p>
+    </div>
+  </div>
+  <div id="autotest" aria-live="polite"></div>
+</div>
+
+<!-- three.js r160 + OrbitControls empaquetados como script clásico (window.THREE). Ver vendor/BUILD.md. -->
+<script src="vendor/three-r160.iife.min.js"></script>
+<script>
+/* ===================================== MODELO (JS puro, sin DOM) ===================================== */
+const Modelo = (() => {
+  function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  // Normal estándar por Box-Muller con un generador con semilla.
+  function normal(rnd) { let u = 0; while (u === 0) u = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rnd()); }
+
+  /* ---------------- (a) Variedad: rollo suizo que se desenrolla ---------------- */
+  // Curva directriz: espiral de Arquímedes r = t, t ∈ [1,5π; 4,5π] (el «swiss roll» clásico), escalada por ESC.
+  const T0 = 1.5 * Math.PI, T1 = 4.5 * Math.PI, ESC = 0.2, ALTO = 3, M = 600;
+  const espiral = (t) => [ESC * t * Math.cos(t), ESC * t * Math.sin(t)];
+  // Muestras de la curva: posiciones, longitudes de cada tramo y ángulos (desenvueltos) de cada tramo.
+  const CURVA = (() => {
+    const p = []; for (let k = 0; k <= M; k++) p.push(espiral(T0 + (T1 - T0) * k / M));
+    const dl = [0], ang = [0]; let prev = null;
+    for (let k = 1; k <= M; k++) {
+      const dx = p[k][0] - p[k - 1][0], dz = p[k][1] - p[k - 1][1]; dl.push(Math.hypot(dx, dz));
+      let a = Math.atan2(dz, dx); if (prev !== null) { while (a - prev > Math.PI) a -= 2 * Math.PI; while (a - prev < -Math.PI) a += 2 * Math.PI; } ang.push(a); prev = a;
+    }
+    const c = [0, 0]; let L = 0; for (let k = 1; k <= M; k++) { L += dl[k]; c[0] += dl[k] * (p[k][0] + p[k - 1][0]) / 2; c[1] += dl[k] * (p[k][1] + p[k - 1][1]) / 2; }
+    return { p, dl, ang, L, centro: [c[0] / L, c[1] / L] };
+  })();
+  // Curva con el enrollamiento atenuado: s = 0 → espiral original; s = 1 → segmento recto de la misma longitud.
+  // Cada tramo conserva su longitud (desenrollar no estira la hoja) y su ángulo se interpola hacia el del tramo central.
+  function curvaDesenrollada(s) {
+    const { dl, ang, centro } = CURVA; const ref = ang[M >> 1]; const q = [[0, 0]];
+    for (let k = 1; k <= M; k++) { const a = (1 - s) * ang[k] + s * ref; q.push([q[k - 1][0] + dl[k] * Math.cos(a), q[k - 1][1] + dl[k] * Math.sin(a)]); }
+    const c = [0, 0]; let L = 0; for (let k = 1; k <= M; k++) { L += dl[k]; c[0] += dl[k] * (q[k][0] + q[k - 1][0]) / 2; c[1] += dl[k] * (q[k][1] + q[k - 1][1]) / 2; }
+    const dx = (1 - s) * centro[0] - c[0] / L, dz = (1 - s) * centro[1] - c[1] / L;
+    return q.map(([x, z]) => [x + dx, z + dz]);
+  }
+  // Punto (u, v) de la hoja latente → posición 3D [x, y, z] sobre la curva q.
+  function enHoja(q, u, v) {
+    const f = u * M; const k = Math.min(M - 1, Math.floor(f)); const w = f - k;
+    return [q[k][0] + w * (q[k + 1][0] - q[k][0]), (v - 0.5) * ALTO, q[k][1] + w * (q[k + 1][1] - q[k][1])];
+  }
+  // Longitud de arco entre u₁ y u₂ (sobre la variedad), por suma de tramos.
+  function geodesica(u1, u2, v1 = 0.5, v2 = 0.5) {
+    const a = Math.min(u1, u2) * M, b = Math.max(u1, u2) * M; let L = 0;
+    for (let k = 1; k <= M; k++) { const lo = Math.max(a, k - 1), hi = Math.min(b, k); if (hi > lo) L += CURVA.dl[k] * (hi - lo); }
+    return Math.hypot(L, (v2 - v1) * ALTO);
+  }
+  // Distancia de un punto a la hoja (la hoja es un cilindro sobre la curva q: basta medir en el plano xz si |y| ≤ ALTO/2).
+  function distanciaAHoja(q, p) { let d = Infinity; for (let k = 0; k <= M; k++) d = Math.min(d, Math.hypot(p[0] - q[k][0], p[2] - q[k][1])); return Math.hypot(d, Math.max(0, Math.abs(p[1]) - ALTO / 2)); }
+  const uDeT = (t) => (t - T0) / (T1 - T0);
+  // Par de ejemplo: el mismo ángulo en dos vueltas consecutivas (t = 2π y t = 4π): cerca en 3D, lejos sobre la variedad.
+  const PAR = { a: [uDeT(2 * Math.PI), 0.5], b: [uDeT(4 * Math.PI), 0.5] };
+  function hoja(n, semilla) { const r = mulberry32(semilla); return Array.from({ length: n }, () => [r(), r()]); }
+
+  /* ---------------- (b) Difusión ---------------- */
+  const T = 1000;
+  // Calendario lineal de Ho et al. (2020): β de 10⁻⁴ a 0,02. Coseno de Nichol y Dhariwal (2021): ᾱ_t = f(t)/f(0).
+  function calendario(tipo) {
+    const beta = new Float64Array(T + 1), abar = new Float64Array(T + 1); abar[0] = 1;
+    if (tipo === 'coseno') {
+      const s = 0.008, f = (t) => Math.cos(((t / T) + s) / (1 + s) * Math.PI / 2) ** 2;
+      for (let t = 1; t <= T; t++) { beta[t] = Math.min(0.999, 1 - f(t) / f(t - 1)); abar[t] = abar[t - 1] * (1 - beta[t]); }
+    } else {
+      for (let t = 1; t <= T; t++) { beta[t] = 1e-4 + (0.02 - 1e-4) * (t - 1) / (T - 1); abar[t] = abar[t - 1] * (1 - beta[t]); }
+    }
+    return { tipo, beta, abar };
+  }
+  // Datos x₀: una espiral 3D (hélice) con poco ruido, centrada y de escala ≈ 1.
+  function datosEspiral(n, semilla) {
+    const r = mulberry32(semilla);
+    return Array.from({ length: n }, (_, i) => { const u = (i + r()) / n; const f = 4 * Math.PI * u, ra = 1.1; return { u, x: [ra * Math.cos(f) + 0.03 * normal(r), 2.4 * (u - 0.5) + 0.03 * normal(r), ra * Math.sin(f) + 0.03 * normal(r)] }; });
+  }
+  const ruidos = (n, semilla) => { const r = mulberry32(semilla); return Array.from({ length: n }, () => [normal(r), normal(r), normal(r)]); };
+  // Proceso directo en un salto: x_t = √ᾱ_t·x₀ + √(1−ᾱ_t)·ε (con ε fijo por punto, la trayectoria es continua en t).
+  function directo(x0, eps, ab) { const a = Math.sqrt(ab), b = Math.sqrt(1 - ab); return [a * x0[0] + b * eps[0], a * x0[1] + b * eps[1], a * x0[2] + b * eps[2]]; }
+  // Eliminador de ruido ideal sobre un conjunto finito de datos: E[x₀ | x_t] = Σ w_i y_i,
+  // w_i ∝ exp(−‖x_t − √ᾱ y_i‖² / (2(1−ᾱ))). Es lo que aprendería una red perfecta con esos datos.
+  function denoiserIdeal(xt, ab, ys) {
+    const a = Math.sqrt(ab), v2 = 2 * (1 - ab); let mx = -Infinity; const lw = new Float64Array(ys.length);
+    for (let i = 0; i < ys.length; i++) { const y = ys[i]; const d0 = xt[0] - a * y[0], d1 = xt[1] - a * y[1], d2 = xt[2] - a * y[2]; lw[i] = -(d0 * d0 + d1 * d1 + d2 * d2) / v2; if (lw[i] > mx) mx = lw[i]; }
+    let Z = 0; const m = [0, 0, 0];
+    for (let i = 0; i < ys.length; i++) { const w = Math.exp(lw[i] - mx); Z += w; m[0] += w * ys[i][0]; m[1] += w * ys[i][1]; m[2] += w * ys[i][2]; }
+    return [m[0] / Z, m[1] / Z, m[2] / Z];
+  }
+  // Proceso inverso determinista (DDIM, η = 0; Song et al., 2021) con el eliminador ideal: de ruido nuevo a datos.
+  // Devuelve la trayectoria completa [paso][muestra] y los t de cada paso (de T a 0).
+  function inverso(cal, ys, n, semilla, pasos = 60) {
+    const ts = []; for (let k = 0; k <= pasos; k++) ts.push(Math.round(T * (1 - k / pasos)));
+    let x = ruidos(n, semilla); const tray = [x.map((p) => p.slice())];
+    for (let k = 0; k < pasos; k++) {
+      const ab = cal.abar[ts[k]], abp = cal.abar[ts[k + 1]];
+      x = x.map((xt) => {
+        const x0 = denoiserIdeal(xt, ab, ys); const sa = Math.sqrt(ab), sb = Math.sqrt(1 - ab);
+        const e = [(xt[0] - sa * x0[0]) / sb, (xt[1] - sa * x0[1]) / sb, (xt[2] - sa * x0[2]) / sb];
+        const pa = Math.sqrt(abp), pb = Math.sqrt(1 - abp);
+        return [pa * x0[0] + pb * e[0], pa * x0[1] + pb * e[1], pa * x0[2] + pb * e[2]];
+      });
+      tray.push(x.map((p) => p.slice()));
+    }
+    return { ts, tray };
+  }
+
+  function autotest() {
+    const r = [];
+    // (a) Variedad
+    const q0 = curvaDesenrollada(0), q1 = curvaDesenrollada(1);
+    let maxDif = 0; for (let k = 0; k <= M; k++) maxDif = Math.max(maxDif, Math.hypot(q0[k][0] - CURVA.p[k][0], q0[k][1] - CURVA.p[k][1]));
+    r.push({ prueba: 'variedad: con s = 0 la hoja coincide con el rollo original', ok: maxDif < 1e-9, valor: maxDif });
+    const largo = (q) => { let L = 0; for (let k = 1; k <= M; k++) L += Math.hypot(q[k][0] - q[k - 1][0], q[k][1] - q[k - 1][1]); return L; };
+    const dL = Math.max(...[0.25, 0.5, 0.75, 1].map((s) => Math.abs(largo(curvaDesenrollada(s)) - CURVA.L) / CURVA.L));
+    r.push({ prueba: 'variedad: desenrollar conserva la longitud de la hoja', ok: dL < 1e-12, valor: dL });
+    let dev = 0; const [ax, az] = q1[0], [bx, bz] = q1[M]; const nx = bx - ax, nz = bz - az, nn = Math.hypot(nx, nz);
+    for (const [x, z] of q1) dev = Math.max(dev, Math.abs((x - ax) * nz - (z - az) * nx) / nn);
+    r.push({ prueba: 'variedad: con s = 1 la hoja queda plana (desviación de la recta)', ok: dev < 1e-9, valor: dev });
+    const A0 = enHoja(q0, ...PAR.a), B0 = enHoja(q0, ...PAR.b), A1 = enHoja(q1, ...PAR.a), B1 = enHoja(q1, ...PAR.b);
+    const euc0 = Math.hypot(A0[0] - B0[0], A0[1] - B0[1], A0[2] - B0[2]), geo = geodesica(PAR.a[0], PAR.b[0]), euc1 = Math.hypot(A1[0] - B1[0], A1[1] - B1[1], A1[2] - B1[2]);
+    r.push({ prueba: 'variedad: par de ejemplo cerca en 3D y lejos sobre la variedad (geodésica / recta > 5)', ok: geo / euc0 > 5, valor: +(geo / euc0).toFixed(2) });
+    r.push({ prueba: 'variedad: desenrollada, la distancia en línea recta = geodésica', ok: Math.abs(euc1 - geo) / geo < 1e-3, valor: Math.abs(euc1 - geo) / geo });
+    // (b) Difusión
+    for (const tipo of ['lineal', 'coseno']) {
+      const cal = calendario(tipo); let ok = true, mono = true; let logs = 0;
+      for (let t = 1; t <= T; t++) { logs += Math.log(1 - cal.beta[t]); if (Math.abs(Math.exp(logs) - cal.abar[t]) > 1e-12 * Math.max(1, cal.abar[t]) + 1e-15) ok = false; if (cal.abar[t] >= cal.abar[t - 1]) mono = false; if (!(cal.beta[t] > 0 && cal.beta[t] <= 0.999)) ok = false; }
+      r.push({ prueba: `${tipo}: ᾱ_t = Π(1 − β_s), decreciente y 0 < β ≤ 0,999`, ok: ok && mono, valor: ok && mono });
+      r.push({ prueba: `${tipo}: ᾱ_T ≈ 0 (x_T es casi ruido puro)`, ok: cal.abar[T] < 1e-3, valor: cal.abar[T] });
+      // Momentos de q(x_t | x₀) en un salto frente a la cadena de Markov paso a paso, con x₀ = 1,5.
+      const n = 20000, x0 = 1.5; const rnd = mulberry32(tipo === 'lineal' ? 11 : 12);
+      for (const t of [50, 300, 700]) {
+        let m1 = 0, v1 = 0, m2 = 0, v2 = 0; const xsSalto = [], xsCad = [];
+        for (let i = 0; i < n; i++) { xsSalto.push(Math.sqrt(cal.abar[t]) * x0 + Math.sqrt(1 - cal.abar[t]) * normal(rnd)); let x = x0; for (let s = 1; s <= t; s++) x = Math.sqrt(1 - cal.beta[s]) * x + Math.sqrt(cal.beta[s]) * normal(rnd); xsCad.push(x); }
+        xsSalto.forEach((x) => { m1 += x; }); m1 /= n; xsSalto.forEach((x) => { v1 += (x - m1) ** 2; }); v1 /= n - 1;
+        xsCad.forEach((x) => { m2 += x; }); m2 /= n; xsCad.forEach((x) => { v2 += (x - m2) ** 2; }); v2 /= n - 1;
+        const mu = Math.sqrt(cal.abar[t]) * x0, va = 1 - cal.abar[t]; const se = Math.sqrt(va / n), sv = va * Math.sqrt(2 / (n - 1));
+        const okM = Math.abs(m1 - mu) < 4 * se && Math.abs(m2 - mu) < 4 * se, okV = Math.abs(v1 - va) < 4 * sv && Math.abs(v2 - va) < 4 * sv;
+        r.push({ prueba: `${tipo} · t = ${t}: media y varianza de un salto y de la cadena = √ᾱ_t·x₀ y 1 − ᾱ_t (4 e. e.)`, ok: okM && okV, valor: `μ=${mu.toFixed(3)} (${m1.toFixed(3)}, ${m2.toFixed(3)}); σ²=${va.toFixed(3)} (${v1.toFixed(3)}, ${v2.toFixed(3)})` });
+      }
+    }
+    // Proceso inverso con el eliminador ideal: las muestras nuevas terminan sobre los datos.
+    const datos = datosEspiral(300, 5).map((d) => d.x); const cal = calendario('lineal'); const { tray } = inverso(cal, datos, 200, 77, 60);
+    // Distancia de cada muestra final a la hélice sin ruido (la «variedad» de los datos).
+    const helice = Array.from({ length: 4001 }, (_, i) => { const u = i / 4000, f = 4 * Math.PI * u; return [1.1 * Math.cos(f), 2.4 * (u - 0.5), 1.1 * Math.sin(f)]; });
+    const fin = tray[tray.length - 1]; let cerca = 0, peor = 0;
+    for (const x of fin) { let dm = Infinity; for (const y of helice) dm = Math.min(dm, Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2])); peor = Math.max(peor, dm); if (dm < 0.1) cerca++; }
+    r.push({ prueba: 'inverso (DDIM + eliminador ideal): ≥ 98 % de las muestras termina sobre la espiral (distancia < 0,1)', ok: cerca / fin.length >= 0.98, valor: `${cerca / fin.length} (peor ${peor.toFixed(3)})` });
+    let m = [0, 0, 0], v = 0; const ini = tray[0]; ini.forEach((x) => { m[0] += x[0] / ini.length; m[1] += x[1] / ini.length; m[2] += x[2] / ini.length; });
+    ini.forEach((x) => { v += ((x[0] - m[0]) ** 2 + (x[1] - m[1]) ** 2 + (x[2] - m[2]) ** 2) / (3 * (ini.length - 1)); });
+    r.push({ prueba: 'inverso: el punto de partida es ruido N(0, I) (varianza ≈ 1)', ok: Math.abs(v - 1) < 0.25, valor: +v.toFixed(3) });
+    return { pasa: r.every((x) => x.ok), resultados: r };
+  }
+  return { curvaDesenrollada, enHoja, geodesica, distanciaAHoja, PAR, hoja, calendario, datosEspiral, ruidos, directo, inverso, T, autotest };
+})();
+
+/* ===================================== ESTADO ===================================== */
+const fmt = (v, d = 2) => v.toFixed(d).replace('.', ',').replace('-', '−');
+const reducirMov = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const params = new URLSearchParams(location.search);
+const VISTA0 = params.get('vista') === 'difusion' ? 'difusion' : 'variedad';
+const ID_IFRAME = VISTA0 === 'difusion' ? 'difusion-3d-frame' : 'variedad-3d-frame';
+const HOJA = Modelo.hoja(1800, 2026);
+const DATOS = Modelo.datosEspiral(600, 5), EPS = Modelo.ruidos(600, 9), REF = DATOS.filter((_, i) => i % 2 === 0).map((d) => d.x);
+const CAL = { lineal: Modelo.calendario('lineal'), coseno: Modelo.calendario('coseno') };
+const estado = { modo: VISTA0, s: 0, cal: 'lineal', t: 0, fase: 'directo', gen: null, semillaGen: 1, animando: null, visible: true };
+const $ = (id) => document.getElementById(id);
+// Degradado USTA: morado → rosa → oro.
+function degradado(u) {
+  const c = [[0x3D, 0x00, 0x8D], [0xED, 0x1E, 0x79], [0xFD, 0xB9, 0x13]]; const f = Math.min(1.999, Math.max(0, u) * 2); const k = Math.floor(f), w = f - k;
+  return [0, 1, 2].map((i) => (c[k][i] + (c[k + 1][i] - c[k][i]) * w) / 255);
+}
+// Posición de la fase inversa para un t dado (interpola entre los pasos guardados de la trayectoria).
+function muestrasInverso(t) {
+  const { ts, tray } = estado.gen; const k = Math.max(0, Math.min(ts.length - 2, Math.floor((Modelo.T - t) / Modelo.T * (ts.length - 1))));
+  const w = Math.min(1, Math.max(0, (ts[k] - t) / Math.max(1, ts[k] - ts[k + 1])));
+  return tray[k].map((a, i) => { const b = tray[k + 1][i]; return [a[0] + w * (b[0] - a[0]), a[1] + w * (b[1] - a[1]), a[2] + w * (b[2] - a[2])]; });
+}
+
+function hayWebGL() { try { const c = document.createElement('canvas'); return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl'))); } catch (e) { return false; } }
+
+/* ===================================== VISTA (three.js) ===================================== */
+const Vista = (() => {
+  if (!window.THREE || !hayWebGL()) return null;
+  const T = window.THREE; const cont = $('lienzo');
+  const renderer = new T.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.domElement.tabIndex = 0;
+  renderer.domElement.setAttribute('aria-label', 'Vista 3D; las flechas del teclado rotan la cámara');
+  cont.appendChild(renderer.domElement);
+  const escena = new T.Scene();
+  const camara = new T.PerspectiveCamera(38, 4 / 3, 0.1, 200);
+  const controles = new T.OrbitControls(camara, renderer.domElement);
+  controles.enablePan = false; controles.minDistance = 2; controles.maxDistance = 30;
+  escena.add(new T.AmbientLight(0xffffff, 0.8));
+  const luz = new T.DirectionalLight(0xffffff, 0.85); luz.position.set(4, 8, 6); escena.add(luz);
+  const col = new T.Color(), m4 = new T.Matrix4(), v3 = new T.Vector3();
+  const rotulos = [];
+  function rotulo(texto, clase) { const d = document.createElement('div'); d.className = 'rotulo' + (clase ? ' ' + clase : ''); d.setAttribute('aria-hidden', 'true'); d.textContent = texto; cont.appendChild(d); const r = { d, p: [0, 0, 0], grupo: null }; rotulos.push(r); return r; }
+
+  /* ---------- (a) Variedad ---------- */
+  const gV = new T.Group(); escena.add(gV);
+  const bolas = new T.InstancedMesh(new T.SphereGeometry(0.045, 10, 8), new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.55 }), HOJA.length);
+  HOJA.forEach(([u], i) => { const c = degradado(u); col.setRGB(c[0], c[1], c[2]); bolas.setColorAt(i, col); });
+  bolas.instanceColor.needsUpdate = true; gV.add(bolas);
+  const marca = (color) => new T.Mesh(new T.SphereGeometry(0.13, 18, 12), new T.MeshStandardMaterial({ color, roughness: 0.4 }));
+  const mA = marca(0x111827), mB = marca(0x111827); gV.add(mA); gV.add(mB);
+  // Camino y recta como tubos finos (las líneas WebGL miden siempre 1 px y casi no se ven sobre la nube).
+  const camino = new T.Mesh(new T.BufferGeometry(), new T.MeshBasicMaterial({ color: 0x0E7490 })), recta = new T.Mesh(new T.BufferGeometry(), new T.MeshBasicMaterial({ color: 0x4B5563 }));
+  gV.add(camino); gV.add(recta);
+  const tubo = (malla, curva, tramos, radio) => { malla.geometry.dispose(); malla.geometry = new T.TubeGeometry(curva, tramos, radio, 6, false); };
+  const rA = rotulo('A', 'par'), rB = rotulo('B', 'par'); rA.grupo = rB.grupo = 'variedad';
+  function actualizarVariedad(s) {
+    const q = Modelo.curvaDesenrollada(s);
+    HOJA.forEach(([u, v], i) => { const p = Modelo.enHoja(q, u, v); m4.makeTranslation(p[0], p[1], p[2]); bolas.setMatrixAt(i, m4); });
+    bolas.instanceMatrix.needsUpdate = true;
+    const A = Modelo.enHoja(q, ...Modelo.PAR.a), B = Modelo.enHoja(q, ...Modelo.PAR.b);
+    mA.position.set(...A); mB.position.set(...B);
+    const pts = []; for (let k = 0; k <= 120; k++) { const u = Modelo.PAR.a[0] + (Modelo.PAR.b[0] - Modelo.PAR.a[0]) * k / 120; pts.push(Modelo.enHoja(q, u, 0.5)); }
+    // Escala del grupo: la hoja desenrollada mide ≈ 18 unidades; se reduce para que quepa sin mover la cámara.
+    let ext = 0; for (let k = 0; k < q.length; k += 10) ext = Math.max(ext, Math.hypot(q[k][0], q[k][1])); const esc = Math.min(1, 3.2 / ext); gV.scale.setScalar(esc);
+    const V3 = (p) => new T.Vector3(p[0], p[1], p[2]);
+    tubo(camino, new T.CatmullRomCurve3(pts.map(V3)), 160, 0.035 / esc); tubo(recta, new T.LineCurve3(V3(A), V3(B)), 1, 0.03 / esc);
+    mA.scale.setScalar(1 / esc); mB.scale.setScalar(1 / esc);
+    camino.visible = $('ver-camino').checked; recta.visible = $('ver-recta').checked;
+    rA.p = [A[0] * esc, A[1] * esc + 0.3, A[2] * esc]; rB.p = [B[0] * esc, B[1] * esc + 0.3, B[2] * esc];
+    dibujar();
+    return { q, A, B };
+  }
+
+  /* ---------- (b) Difusión ---------- */
+  const gD = new T.Group(); escena.add(gD);
+  const geoD = new T.SphereGeometry(0.04, 10, 8);
+  const nubeDatos = new T.InstancedMesh(geoD, new T.MeshStandardMaterial({ color: 0xffffff, roughness: 0.55 }), DATOS.length);
+  DATOS.forEach((d, i) => { const c = degradado(d.u); col.setRGB(c[0], c[1], c[2]); nubeDatos.setColorAt(i, col); });
+  nubeDatos.instanceColor.needsUpdate = true; gD.add(nubeDatos);
+  const nubeRef = new T.InstancedMesh(new T.SphereGeometry(0.025, 8, 6), new T.MeshBasicMaterial({ color: 0x9CA3AF, transparent: true, opacity: 0.45 }), REF.length);
+  REF.forEach((x, i) => { m4.makeTranslation(x[0], x[1], x[2]); nubeRef.setMatrixAt(i, m4); }); gD.add(nubeRef);
+  const nubeGen = new T.InstancedMesh(geoD, new T.MeshStandardMaterial({ color: 0xED1E79, roughness: 0.5 }), 400); gD.add(nubeGen);
+  const esfera = new T.LineSegments(new T.WireframeGeometry(new T.SphereGeometry(2, 18, 12)), new T.LineBasicMaterial({ color: 0x9CA3AF, transparent: true, opacity: 0.18 })); gD.add(esfera);
+  const rEsf = rotulo('N(0, I)'); rEsf.grupo = 'difusion'; rEsf.p = [0, 2.35, 0];
+  function actualizarDifusion() {
+    const ab = CAL[estado.cal].abar[estado.t];
+    const inv = estado.fase === 'inverso' && estado.gen;
+    nubeDatos.visible = !inv; nubeGen.visible = !!inv; nubeRef.visible = $('ver-datos').checked && (inv || estado.t > 0);
+    if (inv) { const xs = muestrasInverso(estado.t); xs.forEach((p, i) => { m4.makeTranslation(p[0], p[1], p[2]); nubeGen.setMatrixAt(i, m4); }); nubeGen.count = xs.length; nubeGen.instanceMatrix.needsUpdate = true; }
+    else { DATOS.forEach((d, i) => { const p = Modelo.directo(d.x, EPS[i], ab); m4.makeTranslation(p[0], p[1], p[2]); nubeDatos.setMatrixAt(i, m4); }); nubeDatos.instanceMatrix.needsUpdate = true; }
+    dibujar();
+  }
+
+  /* ---------- Cámara y dibujo ---------- */
+  function vista(frontal) {
+    if (estado.modo === 'variedad') camara.position.set(frontal ? 0 : 6.2, frontal ? 11.5 : 6.4, frontal ? 0.01 : 8.0);
+    else camara.position.set(frontal ? 0 : 5.6, frontal ? 0.4 : 4.0, frontal ? 8.6 : 6.4);
+    controles.target.set(0, 0, 0); controles.update(); dibujar();
+  }
+  function modo(m) { gV.visible = m === 'variedad'; gD.visible = m === 'difusion'; dibujar(); }
+  function tam() { const w = cont.clientWidth, h = cont.clientHeight; renderer.setSize(w, h, false); camara.aspect = w / Math.max(1, h); camara.updateProjectionMatrix(); dibujar(); }
+  function dibujar() {
+    renderer.render(escena, camara);
+    const w = cont.clientWidth, h = cont.clientHeight;
+    rotulos.forEach((r) => {
+      if (r.grupo !== estado.modo) { r.d.style.display = 'none'; return; }
+      const q = v3.set(r.p[0], r.p[1], r.p[2]).project(camara); r.d.style.left = ((q.x + 1) / 2 * w) + 'px'; r.d.style.top = ((1 - q.y) / 2 * h) + 'px'; r.d.style.display = q.z < 1 ? '' : 'none';
+    });
+  }
+  controles.addEventListener('change', dibujar);
+  renderer.domElement.addEventListener('keydown', (e) => {
+    const paso = 0.12; const off = camara.position.clone().sub(controles.target); const sph = new T.Spherical().setFromVector3(off);
+    if (e.key === 'ArrowLeft') sph.theta -= paso; else if (e.key === 'ArrowRight') sph.theta += paso;
+    else if (e.key === 'ArrowUp') sph.phi = Math.max(0.05, sph.phi - paso); else if (e.key === 'ArrowDown') sph.phi = Math.min(Math.PI - 0.05, sph.phi + paso); else return;
+    e.preventDefault(); camara.position.copy(controles.target).add(new T.Vector3().setFromSpherical(sph)); controles.update(); dibujar();
+  });
+  if ('ResizeObserver' in window) new ResizeObserver(tam).observe(cont); else window.addEventListener('resize', tam);
+  tam();
+  return { actualizarVariedad, actualizarDifusion, vista, modo };
+})();
+
+/* ===================== Respaldo sin WebGL: proyección plana (canvas 2D) ===================== */
+const Plano2D = (() => {
+  if (Vista) return null;
+  const aviso = $('aviso'); aviso.style.display = 'block';
+  aviso.textContent = (window.THREE ? 'Este navegador no ofrece WebGL' : 'No se pudo cargar la biblioteca 3D (vendor/three-r160.iife.min.js)') +
+    ': se muestra una proyección plana (vista superior para la variedad, frontal para la difusión). Los controles y lecturas funcionan igual.';
+  const cont = $('lienzo'); const cv = document.createElement('canvas'); cont.appendChild(cv); const ctx = cv.getContext('2d');
+  const rgb = (c) => `rgb(${c.map((x) => Math.round(x * 255)).join(',')})`;
+  function puntos(lista, escala, color) {
+    const w = cv.width = cont.clientWidth * 2, h = cv.height = cont.clientHeight * 2; ctx.clearRect(0, 0, w, h);
+    const k = Math.min(w, h) / (2 * escala);
+    lista.forEach(([x, y, c]) => { ctx.fillStyle = color || rgb(c); ctx.beginPath(); ctx.arc(w / 2 + x * k, h / 2 - y * k, 4, 0, 2 * Math.PI); ctx.fill(); });
+    return { w, h, k };
+  }
+  function variedad(s) {
+    const q = Modelo.curvaDesenrollada(s); let ext = 0; q.forEach(([x, z]) => { ext = Math.max(ext, Math.abs(x), Math.abs(z)); });
+    const { w, h, k } = puntos(HOJA.map(([u, v]) => { const p = Modelo.enHoja(q, u, v); return [p[0], -p[2], degradado(u)]; }), ext * 1.1);
+    const A = Modelo.enHoja(q, ...Modelo.PAR.a), B = Modelo.enHoja(q, ...Modelo.PAR.b);
+    ctx.strokeStyle = '#6B7280'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(w / 2 + A[0] * k, h / 2 + A[2] * k); ctx.lineTo(w / 2 + B[0] * k, h / 2 + B[2] * k); ctx.stroke();
+  }
+  function difusion() {
+    const inv = estado.fase === 'inverso' && estado.gen; const ab = CAL[estado.cal].abar[estado.t];
+    if (inv) puntos(muestrasInverso(estado.t).map((p) => [p[0], p[1]]), 3, '#ED1E79');
+    else puntos(DATOS.map((d, i) => { const p = Modelo.directo(d.x, EPS[i], ab); return [p[0], p[1], degradado(d.u)]; }), 3);
+  }
+  return { variedad, difusion };
+})();
+
+/* ===================================== CONTROLADOR ===================================== */
+function pintarVariedad() {
+  const s = estado.s; $('desenrollar').value = Math.round(s * 100);
+  let geo;
+  if (Vista) geo = Vista.actualizarVariedad(s); else { Plano2D.variedad(s); const q = Modelo.curvaDesenrollada(s); geo = { q, A: Modelo.enHoja(q, ...Modelo.PAR.a), B: Modelo.enHoja(q, ...Modelo.PAR.b) }; }
+  const { q, A, B } = geo; const recta = Math.hypot(A[0] - B[0], A[1] - B[1], A[2] - B[2]); const geod = Modelo.geodesica(Modelo.PAR.a[0], Modelo.PAR.b[0]);
+  const medio = [(A[0] + B[0]) / 2, (A[1] + B[1]) / 2, (A[2] + B[2]) / 2]; const dm = Modelo.distanciaAHoja(q, medio);
+  $('lectura-variedad').innerHTML = `Desenrollado: <b>${fmt(s * 100, 0)} %</b><br>Distancia A–B en línea recta: <b>${fmt(recta)}</b><br>Distancia A–B sobre la variedad: <b>${fmt(geod)}</b><br>Punto medio de la recta: a <b>${fmt(dm)}</b> de la hoja`;
+  $('descripcion').textContent = s < 0.03
+    ? `Hoja enrollada: A y B están a ${fmt(recta)} en línea recta, pero a ${fmt(geod)} si se camina sobre la hoja. El punto medio de la recta cae fuera de la hoja.`
+    : s > 0.97 ? `Hoja desenrollada: la distancia en línea recta (${fmt(recta)}) coincide con la distancia sobre la variedad (${fmt(geod)}).`
+    : `Desenrollando (${fmt(s * 100, 0)} %): la hoja conserva su longitud; la recta entre A y B se acerca al camino sobre la variedad.`;
+}
+function pintarDifusion() {
+  const C = CAL[estado.cal], t = estado.t, ab = C.abar[t];
+  $('paso-t').value = t;
+  const inv = estado.fase === 'inverso' && estado.gen;
+  $('lectura-difusion').innerHTML = `${inv ? 'Proceso inverso' : 'Proceso directo'} · t = <b>${t.toLocaleString('es-CO')}</b><br>β<sub>t</sub> = <b>${t ? fmt(C.beta[t], 5) : '—'}</b> · ᾱ<sub>t</sub> = <b>${fmt(ab, 4)}</b><br>Señal √ᾱ<sub>t</sub> = <b>${fmt(Math.sqrt(ab), 3)}</b> · ruido √(1 − ᾱ<sub>t</sub>) = <b>${fmt(Math.sqrt(1 - ab), 3)}</b>`;
+  if (Vista) Vista.actualizarDifusion(); else Plano2D.difusion();
+  grafica();
+  $('descripcion').textContent = inv
+    ? (t > 950 ? 'Inicio del proceso inverso: 400 muestras de ruido N(0, I), sin relación con la espiral.' : t > 30 ? `Proceso inverso en t = ${t}: cada paso estima x₀ y avanza hacia un nivel de ruido menor; la espiral reaparece.` : 'Fin del proceso inverso: las muestras generadas quedan sobre la espiral.')
+    : (t === 0 ? 'Datos originales x₀: una espiral en tres dimensiones.' : t < 1000 ? `Proceso directo en t = ${t}: queda una fracción ${fmt(Math.sqrt(ab), 2)} de la señal; el resto es ruido.` : 'Fin del proceso directo: la nube es ruido gaussiano; no queda información de la espiral.');
+}
+function grafica() {
+  const cv = $('grafica'); const w = cv.width = cv.clientWidth * 2, h = cv.height = cv.clientHeight * 2; const ctx = cv.getContext('2d'); ctx.clearRect(0, 0, w, h);
+  const m = 16, X = (t) => m + (w - 2 * m) * t / Modelo.T, Y = (v) => h - m - (h - 2 * m) * v;
+  ctx.font = '20px system-ui, sans-serif'; ctx.fillStyle = '#6B7280'; ctx.fillText('ᾱ_t', m + 4, m + 12); ctx.fillText('t', w - m - 10, h - m - 6);
+  for (const [tipo, color] of [['lineal', '#3D008D'], ['coseno', '#ED1E79']]) {
+    ctx.strokeStyle = color; ctx.lineWidth = tipo === estado.cal ? 4 : 2; ctx.globalAlpha = tipo === estado.cal ? 1 : 0.45; ctx.beginPath();
+    for (let t = 0; t <= Modelo.T; t += 5) { const y = Y(CAL[tipo].abar[t]); if (t === 0) ctx.moveTo(X(t), y); else ctx.lineTo(X(t), y); } ctx.stroke();
+    ctx.fillStyle = color; ctx.fillText(tipo === 'lineal' ? 'lineal' : 'coseno', tipo === 'lineal' ? X(180) : X(560), tipo === 'lineal' ? Y(0.25) : Y(0.72));
+  }
+  ctx.globalAlpha = 1; ctx.strokeStyle = '#B8860B'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(X(estado.t), m); ctx.lineTo(X(estado.t), h - m); ctx.stroke();
+}
+function pintar() { if (estado.modo === 'variedad') pintarVariedad(); else pintarDifusion(); }
+
+/* Animaciones (desenrollar, proceso directo, proceso inverso). Con movimiento reducido saltan al estado final. */
+let ultimo = 0;
+function parar() { estado.animando = null; $('btn-desenrollar').textContent = '▶ Desenrollar'; $('btn-directo').textContent = '▶ Proceso directo'; $('btn-inverso').textContent = '▶ Proceso inverso (generar)'; }
+function cuadro(tiempo) {
+  if (!estado.animando) return;
+  if (!estado.visible) { ultimo = tiempo; requestAnimationFrame(cuadro); return; }
+  const dt = ultimo ? Math.min(0.05, Math.max(0, (tiempo - ultimo) / 1000)) : 0; ultimo = tiempo;
+  if (estado.animando === 'desenrollar') { estado.s = Math.min(1, estado.s + dt / 3.5); if (estado.s >= 1) parar(); }
+  else if (estado.animando === 'directo') { estado.t = Math.min(Modelo.T, Math.round(estado.t + dt * 260)); if (estado.t >= Modelo.T) parar(); }
+  else if (estado.animando === 'inverso') { estado.t = Math.max(0, Math.round(estado.t - dt * 260)); if (estado.t <= 0) parar(); }
+  pintar(); if (estado.animando) requestAnimationFrame(cuadro);
+}
+function animar(tipo, boton, texto) {
+  if (estado.animando === tipo) { parar(); return; }
+  parar(); estado.animando = tipo; ultimo = 0; $(boton).textContent = texto; requestAnimationFrame(cuadro);
+}
+$('btn-desenrollar').addEventListener('click', () => {
+  if (estado.s >= 1) estado.s = 0;
+  if (reducirMov) { estado.s = 1; pintar(); return; }
+  animar('desenrollar', 'btn-desenrollar', '❚❚ Pausa');
+});
+$('desenrollar').addEventListener('input', (e) => { parar(); estado.s = e.target.value / 100; pintar(); });
+['ver-camino', 'ver-recta'].forEach((id) => $(id).addEventListener('change', pintar));
+$('btn-directo').addEventListener('click', () => {
+  if (estado.fase !== 'directo' || estado.t >= Modelo.T) { estado.fase = 'directo'; estado.t = 0; }
+  if (reducirMov) { estado.t = Modelo.T; pintar(); return; }
+  animar('directo', 'btn-directo', '❚❚ Pausa');
+});
+$('btn-inverso').addEventListener('click', () => {
+  if (estado.animando === 'inverso') { parar(); return; }
+  if (estado.fase !== 'inverso' || estado.t <= 0) {
+    // Cada clic genera desde ruido nuevo: 400 muestras, 60 pasos DDIM con el eliminador ideal sobre 300 puntos de referencia.
+    estado.gen = Modelo.inverso(CAL[estado.cal], REF, 400, 1000 + estado.semillaGen++, 60); estado.fase = 'inverso'; estado.t = Modelo.T;
+  }
+  if (reducirMov) { estado.t = 0; pintar(); return; }
+  pintar(); animar('inverso', 'btn-inverso', '❚❚ Pausa');
+});
+$('paso-t').addEventListener('input', (e) => { parar(); estado.t = +e.target.value; if (estado.fase === 'inverso' && !estado.gen) estado.fase = 'directo'; pintar(); });
+document.querySelectorAll('[data-cal]').forEach((b) => b.addEventListener('click', () => {
+  parar(); estado.cal = b.dataset.cal; estado.fase = 'directo'; estado.gen = null; marcar(); pintar();
+}));
+$('ver-datos').addEventListener('change', pintar);
+function marcar() { document.querySelectorAll('[data-cal]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.cal === estado.cal)); }
+$('btn-frente').addEventListener('click', () => Vista && Vista.vista(true));
+$('btn-3d').addEventListener('click', () => Vista && Vista.vista(false));
+function cambiarModo(m) {
+  parar(); estado.modo = m;
+  $('tab-variedad').setAttribute('aria-pressed', m === 'variedad'); $('tab-difusion').setAttribute('aria-pressed', m === 'difusion');
+  ['panel', 'leyenda', 'explica', 'bajada', 'antes'].forEach((p) => { $(`${p}-variedad`).hidden = m !== 'variedad'; $(`${p}-difusion`).hidden = m !== 'difusion'; });
+  $('lienzo').setAttribute('aria-label', m === 'variedad'
+    ? 'Nube de puntos sobre una hoja enrollada en espiral que se desenrolla hasta quedar plana; dos puntos A y B de vueltas vecinas, unidos por una recta y por el camino sobre la hoja.'
+    : 'Nube de puntos con forma de espiral que el proceso directo convierte en ruido gaussiano; el proceso inverso parte de ruido y regresa a la espiral.');
+  if (Vista) { Vista.modo(m); Vista.vista(false); }
+  pintar(); avisarAltura();
+}
+$('tab-variedad').addEventListener('click', () => cambiarModo('variedad'));
+$('tab-difusion').addEventListener('click', () => cambiarModo('difusion'));
+if ('IntersectionObserver' in window) new IntersectionObserver((es) => { estado.visible = es[0].isIntersecting; }).observe($('lienzo'));
+
+/* Auto-altura cuando se embebe (protocolo del curso: {type:'embed-tool-height', id, height}).
+   El id del iframe depende de la vista con que se embebe (?vista=variedad → variedad-3d-frame; ?vista=difusion → difusion-3d-frame). */
+let tAltura;
+function avisarAltura() {
+  if (window.self === window.top) return;
+  clearTimeout(tAltura);
+  tAltura = setTimeout(() => { try { parent.postMessage({ type: 'embed-tool-height', id: ID_IFRAME, height: Math.ceil(document.documentElement.getBoundingClientRect().height) }, '*'); } catch (e) { } }, 90);
+}
+window.addEventListener('load', avisarAltura); window.addEventListener('resize', avisarAltura);
+
+marcar(); cambiarModo(VISTA0);
+
+/* Gancho de verificación y autotest (?selftest=1). */
+window.__vardif = { Modelo, estado, webgl: !!Vista, autotest: Modelo.autotest, pintar, modo: cambiarModo };
+if (params.get('selftest') === '1') {
+  const R = Modelo.autotest(); const caja = $('autotest'); caja.style.display = 'block';
+  caja.textContent = (R.pasa ? 'AUTOTEST: PASA' : 'AUTOTEST: FALLA') + '\n' + R.resultados.map((r) => `${r.ok ? '✓' : '✗'} ${r.prueba} → ${r.valor}`).join('\n');
+  console.log(caja.textContent); window.__vardif.resultadoAutotest = R; avisarAltura();
+}
+</script>
+<!-- Botón «Portal» al abrir la herramienta sola; dentro del iframe del módulo no actúa (auditoría 2026-10, D-09). -->
+<script defer src="portal-nav.js"></script>
+</body>
+</html>
