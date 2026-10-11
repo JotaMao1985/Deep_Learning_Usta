@@ -1083,6 +1083,7 @@
             conpes2025ia: { a: 'Consejo Nacional de Política Económica y Social', y: '2025', u: 'https://colaboracion.dnp.gov.co/CDT/Conpes/Econ%C3%B3micos/4144.pdf', r: [['Consejo Nacional de Política Económica y Social. (2025). ', 0], ['Política nacional de inteligencia artificial', 1], [' (Documento CONPES 4144)', 0], ['. ', 0], ['Departamento Nacional de Planeación.', 0]] },
             chollet2025deep: { a: 'Chollet y Watson', y: '2025', u: 'https://deeplearningwithpython.io/', r: [['Chollet, F. y Watson, M. (2025). ', 0], ['Deep learning with Python', 1], [' (3.ª ed.)', 0], ['. ', 0], ['Manning.', 0]] },
             geron2025hands: { a: 'Géron', y: '2025', u: '', r: [['Géron, A. (2025). ', 0], ['Hands-on machine learning with Scikit-Learn and PyTorch: Concepts, tools, and techniques to build intelligent systems', 1], ['. ', 0], ['O\'Reilly Media.', 0]] },
+            nichol2021improved: { a: 'Nichol y Dhariwal', y: '2021', u: 'https://proceedings.mlr.press/v139/nichol21a.html', r: [['Nichol, A. Q. y Dhariwal, P. (2021). ', 0], ['Improved denoising diffusion probabilistic models. ', 0], ['En ', 0], ['Proceedings of the 38th International Conference on Machine Learning', 1], [' (Vol. 139, pp. 8162–8171)', 0], ['. ', 0], ['PMLR.', 0]] },
         };
         const refTexto = (k) => (REFS[k] ? REFS[k].r.map((s) => s[0]).join('') + (REFS[k].u ? ' ' + REFS[k].u : '') : k);
         // <Cita k="a, b" /> → «(Autor, 2015; Otro, 2016)». n: forma narrativa «Autor (2015)».
@@ -1356,7 +1357,7 @@
         const Cap21Section = () => {
             const ref = useRef(null);
             useTypeset(ref, []);
-            useEmbedHeight(['cnn-anatomia-frame', 'vit-anatomia-frame']);
+            useEmbedHeight(['cnn-anatomia-frame', 'vit-anatomia-frame', 'convolucion-3d-frame']);
             return (
                 <div ref={ref} className="prose-usta">
                     <SectionHeader title="Capítulo 2.1 — Redes convolucionales (CNN) y Vision Transformers" icon={Icons.Grid} />
@@ -1524,6 +1525,23 @@
                     </p>
 
                     <MultiChannelConvSVG />
+
+                    <h4>La misma idea, en tres dimensiones</h4>
+                    <p>
+                        La animación siguiente recorre la capa paso a paso: el filtro atraviesa toda la profundidad de la entrada, escribe
+                        un número por posición y los mapas de los N filtros se apilan en el volumen de salida. El contador de parámetros
+                        y el botón «Caso del texto» reproducen la cuenta de 448; la segunda vista muestra cómo crece el campo receptivo
+                        al apilar capas 3 × 3.
+                    </p>
+                    <AntesDeInteractuar>si la capa pasa de 4 a 16 filtros, ¿cambia el tamaño de cada mapa de salida o solo la profundidad del volumen? ¿Y si se cambia el <em>stride</em> de 1 a 2?</AntesDeInteractuar>
+                    <div className="my-4">
+                        <iframe id="convolucion-3d-frame" src="convolucion-volumetrica-3d.html" title="Animación 3D: convolución volumétrica y campo receptivo"
+                            className="w-full rounded-lg" style={{ display: 'block', width: '100%', height: 1150, border: 0 }} loading="lazy"></iframe>
+                    </div>
+                    <PieFigura n="2.1.4" className="-mt-2 mb-4" fuente="elaboración propia (animación interactiva; valores enteros de juguete con semilla fija).">
+                        Convolución volumétrica: cada filtro K × K × C<sub>in</sub> produce un mapa; N filtros dan un volumen de salida de
+                        profundidad N. La convolución de la animación coincide con la de PyTorch (<code>torch.nn.functional.conv2d</code>).
+                    </PieFigura>
 
                     <CodeBlock title="CNN: cómo cambian las dimensiones" lang="pytorch" code={`import torch
 import torch.nn as nn
@@ -3076,7 +3094,7 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                     </svg>
                     </div>
                     <AvisoDesplazar />
-                    <PieFigura n="2.3.8" className="mt-2" fuente="elaboración propia; pesos calculados con el modelo de juguete de la herramienta interactiva de esta sección (en él, K y V coinciden), redondeados para que cada fila sume 1.">
+                    <PieFigura n="2.3.9" className="mt-2" fuente="elaboración propia; pesos calculados con el modelo de juguete de la herramienta interactiva de esta sección (en él, K y V coinciden), redondeados para que cada fila sume 1.">
                         Autoatención: cada token (fila) consulta a todos los tokens (columnas) y obtiene un peso softmax(Q·Kᵀ/√d<sub>k</sub>);
                         la mezcla ponderada de los valores (V) produce una representación sensible al contexto, c<sub>1</sub>…c<sub>3</sub>. Aquí
                         «vaina» dirige el 65 % de su atención hacia «pásame», ganando el sentido de <em>objeto físico</em>.
@@ -3088,7 +3106,7 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
         const Cap23Section = () => {
             const ref = useRef(null);
             useTypeset(ref, []);
-            useEmbedHeight(['atencion-frame', 'generativos-frame']);
+            useEmbedHeight(['atencion-frame', 'generativos-frame', 'variedad-3d-frame', 'difusion-3d-frame']);
             return (
                 <div ref={ref} className="prose-usta">
                     <SectionHeader title="Capítulo 2.3 — Modelos generativos y espacios latentes" icon={Icons.Sparkles} />
@@ -3134,13 +3152,16 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                         espacio de datos real.
                     </p>
 
-                    <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
-                        <img src="images/modulo-2/manifold-hipotesis.webp" width="1216" height="832" alt="Ilustración generada con IA: miles de puntos luminosos, de cian a magenta, dispuestos sobre una superficie curva en forma de tubo, sobre fondo negro; evoca datos concentrados en una superficie de baja dimensión dentro de un espacio tridimensional." className="w-full h-auto rounded-lg" loading="lazy" />
-                        <PieFigura n="2.3.1" className="mt-2" fuente="imagen generada con IA (Flux.1 schnell, 2026), ilustrativa; no representa datos reales.">
-                            Hipótesis de la variedad (<em>manifold</em>): los datos reales (puntos) no llenan todo el espacio, sino que se
-                            concentran sobre una superficie curva de dimensión mucho menor incrustada en él.
-                        </PieFigura>
+                    <AntesDeInteractuar>los puntos A y B de la animación están muy cerca en el espacio de tres dimensiones. ¿Son parecidos para un modelo que aprendió la hoja? ¿Qué pasa con su distancia al desenrollarla?</AntesDeInteractuar>
+                    <div className="my-4">
+                        <iframe id="variedad-3d-frame" src="variedad-difusion-3d.html?vista=variedad" title="Animación 3D: hipótesis de la variedad (rollo suizo que se desenrolla)"
+                            className="w-full rounded-lg" style={{ display: 'block', width: '100%', height: 1150, border: 0 }} loading="lazy"></iframe>
                     </div>
+                    <PieFigura n="2.3.1" className="-mt-2 mb-4" fuente="elaboración propia (animación interactiva; datos sintéticos con semilla fija).">
+                        Hipótesis de la variedad (<em>manifold</em>): la nube parece ocupar un volumen, pero cada punto tiene solo dos
+                        coordenadas propias sobre una hoja enrollada. Desenrollada, la distancia en línea recta entre A y B coincide con la
+                        distancia a lo largo de la variedad; en el rollo, la recta atraviesa espacio vacío.
+                    </PieFigura>
 
                     <ul>
                         <li><strong>Muestreo:</strong> para generar un dato, se toma un vector aleatorio {String.raw`\(z\)`} (ruido) y se pasa por una red profunda que aplica transformaciones no lineales sucesivas hasta convertir el ruido simple en una estructura compleja (imagen, audio).</li>
@@ -3498,6 +3519,18 @@ print(paso(torch.randn(64, 784)))   # (loss_D, loss_G) de un minilote`} />
                             Una vez entrenada, la generación parte de ruido puro {String.raw`\(x_T \sim \mathcal{N}(0, I)\)`} y aplica el proceso inverso {String.raw`\(T\)`} veces.</li>
                     </ul>
 
+                    <AntesDeInteractuar>si a la espiral de la animación se le añade un poco de ruido gaussiano en cada uno de 1.000 pasos, ¿qué forma tendrá la nube al final? ¿Qué calendario de ruido conserva la forma durante más pasos?</AntesDeInteractuar>
+                    <div className="my-4">
+                        <iframe id="difusion-3d-frame" src="variedad-difusion-3d.html?vista=difusion" title="Animación 3D: proceso de difusión directo e inverso sobre una espiral"
+                            className="w-full rounded-lg" style={{ display: 'block', width: '100%', height: 1250, border: 0 }} loading="lazy"></iframe>
+                    </div>
+                    <PieFigura n="2.3.8" className="-mt-2 mb-4" fuente="elaboración propia (animación interactiva; datos sintéticos con semilla fija).">
+                        Proceso de difusión sobre una espiral 3D: el directo sigue {String.raw`\(q(x_t \mid x_0)\)`} con calendario
+                        lineal <Cita k="ho2020denoising" /> o coseno <Cita k="nichol2021improved" />; el inverso parte de ruido nuevo
+                        y aplica pasos deterministas (DDIM) <Cita k="song2021denoising" /> con el eliminador de ruido ideal calculado
+                        sobre los datos de ejemplo, no con una red entrenada.
+                    </PieFigura>
+
                     <Box type="tip" label="Analogía local — la limpieza del río Bogotá">
                         Un río cristalino de páramo es la imagen original {String.raw`\(x_0\)`}. A medida que atraviesa la sabana
                         recibe vertimientos paso a paso —sedimento aquí, residuos allá— hasta volverse una mezcla turbia
@@ -3780,7 +3813,7 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                     <Referencias claves={[
                         'goodfellow2016deep', 'bengio2013representation', 'hinton2006reducing', 'vincent2008extracting', 'kingma2014auto',
                         'kingma2019introduction', 'goodfellow2014generative', 'radford2016unsupervised', 'arjovsky2017wasserstein',
-                        'gulrajani2017improved', 'dhariwal2021diffusion', 'ho2020denoising', 'sohldickstein2015deep',
+                        'gulrajani2017improved', 'dhariwal2021diffusion', 'ho2020denoising', 'nichol2021improved', 'sohldickstein2015deep',
                         'ramesh2022hierarchical', 'rombach2022high', 'ramesh2021zero', 'song2021denoising', 'ho2022classifier',
                         'song2021score', 'lipman2023flow', 'liu2022flow', 'esser2024scaling', 'peebles2023scalable',
                         'song2023consistency', 'vaswani2017attention', 'devlin2019bert', 'shaw2018self', 'su2024roformer',
