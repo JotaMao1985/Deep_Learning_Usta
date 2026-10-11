@@ -328,12 +328,16 @@
             var IMG = 3 * 224 * 224 * 4;   // imagen de 224 × 224 × 3 en FP32: bytes por muestra
 
             /* Activaciones guardadas para el paso hacia atrás, por muestra (224 × 224, train(), deduplicadas por
-               almacenamiento), medidas por M3-C con torch.autograd.graph.saved_tensors_hooks (PyTorch 2.12). */
+               almacenamiento), medidas por M3-C con torch.autograd.graph.saved_tensors_hooks (PyTorch 2.12).
+               medidaConEntrada: la medición incluye el tensor de entrada, porque la primera capa lo guarda
+               (MLP: 1.168 = 784 + 256 + 128). En FP32 es el MISMO tensor que el término «entrada», así que
+               activaciones() lo descuenta para no contarlo dos veces (auditoría M3-E8). Con autocast, la primera
+               capa guarda una copia en 16 bits (otro almacenamiento) y la entrada FP32 sigue viva: no se descuenta. */
             var MODELOS = {
-                resnet50: { nombre: 'ResNet-50', tipo: 'cnn', P: 25557032, a32: 85.91e6, a16: 44.78e6, entrada: IMG },
-                resnet18: { nombre: 'ResNet-18', tipo: 'cnn', P: 11689512, a32: 22.18e6, a16: 12.15e6, entrada: IMG },
-                mobilenetv3l: { nombre: 'MobileNetV3-L', tipo: 'cnn', P: 5483032, a32: 44.11e6, a16: 23.31e6, entrada: IMG },
-                mlp: { nombre: 'MLP 784-256-128-10', tipo: 'mlp', P: 235146, a32: 1168 * 4, a16: null, entrada: 784 * 4 },
+                resnet50: { nombre: 'ResNet-50', tipo: 'cnn', P: 25557032, a32: 85.91e6, a16: 44.78e6, entrada: IMG, medidaConEntrada: true },
+                resnet18: { nombre: 'ResNet-18', tipo: 'cnn', P: 11689512, a32: 22.18e6, a16: 12.15e6, entrada: IMG, medidaConEntrada: true },
+                mobilenetv3l: { nombre: 'MobileNetV3-L', tipo: 'cnn', P: 5483032, a32: 44.11e6, a16: 23.31e6, entrada: IMG, medidaConEntrada: true },
+                mlp: { nombre: 'MLP 784-256-128-10', tipo: 'mlp', P: 235146, a32: 1168 * 4, a16: null, entrada: 784 * 4, medidaConEntrada: true },
                 transformer125m: { nombre: 'Transformer 125M (L = 12, h = 768, a = 12, v = 50.257)', tipo: 'transformer', P: 124439808, L: 12, h: 768, a: 12, v: 50257 },
                 personalizado: { nombre: 'Personalizado', tipo: 'personalizado' }
             };
@@ -367,7 +371,8 @@
             /* Activaciones. Transformer: Korthikanti et al. (2023), ec. 1 y §4.3 con t = p = 1, en 16 bits y con
                los logits en FP32; atención eficiente → sin el término 5as/h; recomputación completa → 2sbh por capa.
                En FP32 se duplican los términos de 16 bits (aproximación). CNN y MLP: b · a_muestra; sin medición en
-               16 bits se supone la mitad. */
+               16 bits se supone la mitad. En FP32, a_muestra excluye la entrada si la medición la incluía (véase
+               MODELOS); el valor del modelo personalizado se toma tal cual, sin la entrada. */
             function activaciones(m, c) {
                 var b = c.b;
                 if (m.tipo === 'transformer') {
@@ -377,7 +382,7 @@
                     if (c.precision === 'fp32') { capa *= 2; resto *= 2; }
                     return m.L * capa + resto + logits;
                 }
-                var a = c.precision === 'fp32' ? m.a32 : (m.a16 != null ? m.a16 : m.a32 / 2);
+                var a = c.precision === 'fp32' ? (m.medidaConEntrada ? m.a32 - m.entrada : m.a32) : (m.a16 != null ? m.a16 : m.a32 / 2);
                 return b * a;
             }
 
@@ -458,23 +463,24 @@
                 chk('V1', 'ResNet-50 · pesos (MB)', v1.comp.pesos / MB, 102.2);
                 chk('V1', 'gradientes (MB)', v1.comp.gradientes / MB, 102.2);
                 chk('V1', 'Adam (MB)', v1.comp.optimizador / MB, 204.5);
-                chk('V1', 'activaciones (MB)', v1.comp.activaciones / MB, 2749.1);
+                chk('V1', 'activaciones sin la entrada (MB)', v1.comp.activaciones / MB, 2729.9);
                 chk('V1', 'entrada (MB)', v1.comp.entrada / MB, 19.3);
-                chk('V1', 'total (GB)', v1.total / GB, 3.177);
-                chk('V1', 'activaciones (%)', 100 * v1.comp.activaciones / v1.total, 86.5);
-                chk('V1', 'optimizador (%) [6,4 publicado; 6,43 sin redondear]', 100 * v1.comp.optimizador / v1.total, 6.43);
+                chk('V1', 'activaciones + entrada = 32 × medida (MB) [entrada contada una vez]', (v1.comp.activaciones + v1.comp.entrada) / MB, 2749.1);
+                chk('V1', 'total (GB)', v1.total / GB, 3.158);
+                chk('V1', 'activaciones (%)', 100 * v1.comp.activaciones / v1.total, 86.4);
+                chk('V1', 'optimizador (%)', 100 * v1.comp.optimizador / v1.total, 6.47);
                 var v2 = vram(cfg({ precision: 'amp' }));
                 chk('V2', 'caché AMP (MB)', v2.comp.cacheAmp / MB, 51.1);
                 chk('V2', 'activaciones AMP (MB)', v2.comp.activaciones / MB, 1433.0);
                 chk('V2', 'total AMP (GB)', v2.total / GB, 1.912);
-                chk('V2', 'ahorro AMP (%)', 100 * ahorroAMP(cfg({ precision: 'amp' })), 39.8);
-                chk('V3', 'ResNet-18 FP32 (GB)', vram(cfg({ modelo: 'resnet18' })).total / GB, 0.916);
+                chk('V2', 'ahorro AMP (%)', 100 * ahorroAMP(cfg({ precision: 'amp' })), 39.45);
+                chk('V3', 'ResNet-18 FP32 (GB)', vram(cfg({ modelo: 'resnet18' })).total / GB, 0.897);
                 chk('V3', 'ResNet-18 AMP (GB)', vram(cfg({ modelo: 'resnet18', precision: 'amp' })).total / GB, 0.618);
-                chk('V3', 'ahorro (%)', 100 * ahorroAMP(cfg({ modelo: 'resnet18', precision: 'amp' })), 32.5);
+                chk('V3', 'ahorro (%)', 100 * ahorroAMP(cfg({ modelo: 'resnet18', precision: 'amp' })), 31.0);
                 var v4 = vram(cfg({ modelo: 'mlp', b: 64 }));
                 chk('V4', 'MLP · P', v4.P, 235146);
-                chk('V4', 'total (MB)', v4.total / MB, 4.26);
-                chk('V4', 'optimizador (%)', 100 * v4.comp.optimizador / v4.total, 44.1);
+                chk('V4', 'total (MB)', v4.total / MB, 4.061);
+                chk('V4', 'optimizador (%)', 100 * v4.comp.optimizador / v4.total, 46.3);
                 var tr = { modelo: 'transformer125m', s: 1024, b: 8, precision: 'zero' };
                 var v5 = vram(cfg(tr)), v5e = vram(cfg(Object.assign({}, tr, { eficiente: true })));
                 chk('V5', 'Transformer · estados 16P (GB)', v5.estados / GB, 1.991);
@@ -486,9 +492,9 @@
                 chk('V6', 'estados del modelo (%)', 100 * v6.estados / v6.total, 94.6);
                 chk('V6', 'Adam, 12P (%)', 100 * v6.comp.optimizador / v6.total, 70.9);
                 chk('V7', 'ZeRO 1,5B · 16P (GB)', vram(cfg({ modelo: 'personalizado', pMillones: 1500, actMB: 0, precision: 'zero' })).estados / GB, 24.0);
-                chk('V8', 'lote máx. T4 · ResNet-50 FP32', loteMaximo(base), 162);
+                chk('V8', 'lote máx. T4 · ResNet-50 FP32', loteMaximo(base), 164);
                 chk('V8', 'lote máx. T4 · ResNet-50 AMP', loteMaximo(cfg({ precision: 'amp' })), 309);
-                chk('V8', 'lote máx. T4 · ResNet-18 FP32', loteMaximo(cfg({ modelo: 'resnet18' })), 628);
+                chk('V8', 'lote máx. T4 · ResNet-18 FP32', loteMaximo(cfg({ modelo: 'resnet18' })), 645);
                 chk('V8', 'lote máx. T4 · ResNet-18 AMP', loteMaximo(cfg({ modelo: 'resnet18', precision: 'amp' })), 1120);
                 function pf(N, tc, tg, W, B) { return simularPrefetch({ N: N, tCPU: tc, tGPU: tg, W: W, B: B, tCopia: 0 }); }
                 var a = pf(10, 30, 50, 1, 0), bb = pf(10, 30, 50, 1, 1);
@@ -1028,7 +1034,7 @@
                             : <button onClick={() => { setChecked(false); setSel([]); }}
                                 className="text-sm font-bold px-4 py-1.5 rounded-full border border-primary text-primary hover:bg-primary/5">Reintentar</button>}
                         {checked && (
-                            <span className={`text-sm font-bold ${acierto ? 'text-green-600' : 'text-red-500'}`}>
+                            <span className={`text-sm font-bold ${acierto ? 'text-green-700' : 'text-red-700'}`}>
                                 <i className={`fas ${acierto ? 'fa-circle-check' : 'fa-circle-xmark'} mr-1`}></i>
                                 {acierto ? '¡Correcto!' : 'Respuesta incorrecta: véase la explicación'}
                             </span>
@@ -2533,7 +2539,7 @@ import keras
                                     <input id="sa-p" type="number" min="0.01" max="100000" step="any" value={pMillones} onChange={e => setPMillones(e.target.value)} className={campo} />
                                 </div>
                                 <div>
-                                    <label htmlFor="sa-act" className="block font-semibold text-navy mb-1">Activaciones por muestra en FP32 (MB)</label>
+                                    <label htmlFor="sa-act" className="block font-semibold text-navy mb-1">Activaciones por muestra en FP32, sin la entrada (MB)</label>
                                     <input id="sa-act" type="number" min="0" max="100000" step="any" value={actMB} onChange={e => setActMB(e.target.value)} className={campo} />
                                 </div>
                             </>
@@ -2598,7 +2604,8 @@ import keras
                     <p className="text-xs text-gray-600 mt-3">
                         <strong>Estimación de primer orden; no incluye el espacio de trabajo de cuDNN ni la fragmentación.</strong> Se descuentan
                         además 0,5 GB fijos para el contexto CUDA (también estimados). Las activaciones por muestra de las CNN se midieron con
-                        PyTorch 2.12 a 224 × 224; las del Transformer siguen la fórmula{citaKorthikanti ? <> de {citaKorthikanti}</> : null}, en 16 bits (en FP32 se
+                        PyTorch 2.12 a 224 × 224; en FP32 se les descuenta la imagen de entrada, que la primera capa guarda y que ya
+                        figura como «Lote de entrada», para no contarla dos veces. Las del Transformer siguen la fórmula{citaKorthikanti ? <> de {citaKorthikanti}</> : null}, en 16 bits (en FP32 se
                         duplican de forma aproximada).{notaExtra}
                     </p>
 
@@ -2739,7 +2746,7 @@ print(f"reservado:     {torch.cuda.memory_reserved() / 1e9:.2f} GB")`} />
                         Resultado: la precisión mixta acelera hasta <strong>2–3×</strong> en GPU con Tensor Cores <Cita k="nvidia_mixedprecision" /> y reduce sobre todo la
                         memoria de las <strong>activaciones</strong>, que se guardan en 16 bits. Los pesos maestros, sus gradientes y los
                         estados de Adam siguen en FP32, así que el ahorro total es <strong>menor que la mitad</strong>: del orden de un
-                        tercio en una CNN mediana con lote 32 (≈32 % en ResNet-18 y ≈40 % en ResNet-50, medición propia con PyTorch 2.12),
+                        tercio en una CNN mediana con lote 32 (≈31 % en ResNet-18 y ≈39 % en ResNet-50, medición propia con PyTorch 2.12),
                         y se acerca a la mitad solo cuando las activaciones dominan la memoria <Cita k="micikevicius2018mixed" />.
                     </p>
                     <AMPSVG fuente={<>elaboración propia a partir de <Cita k="micikevicius2018mixed" n /> y de la documentación de PyTorch AMP <Cita k="pytorch_amp" />.</>} />
@@ -3003,7 +3010,7 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                                 { texto: 'Las activaciones guardadas para el paso hacia atrás.', correcta: true },
                                 { texto: 'Los gradientes de los pesos, que dejan de calcularse en FP32.', correcta: false },
                             ],
-                            justificacion: 'La precisión mixta acelera hasta 2–3× en GPU con Tensor Cores y ahorra sobre todo memoria de activaciones, que se guardan en 16 bits; los pesos maestros, sus gradientes y los estados de Adam siguen en FP32, así que el ahorro total es menor que la mitad (≈40 % en ResNet-50 con lote 32).'
+                            justificacion: 'La precisión mixta acelera hasta 2–3× en GPU con Tensor Cores y ahorra sobre todo memoria de activaciones, que se guardan en 16 bits; los pesos maestros, sus gradientes y los estados de Adam siguen en FP32, así que el ahorro total es menor que la mitad (≈39 % en ResNet-50 con lote 32).'
                         },
                         {
                             pregunta: '¿Qué plataforma muestra una cuota semanal de GPU conocida de antemano?',
@@ -3091,13 +3098,13 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
             <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
                 <div className="overflow-x-auto">
                 <svg viewBox="0 0 740 260" className="w-full" style={{ minWidth: 660 }} role="img"
-                    aria-label="Clasificación de las técnicas de aumento de datos en tres familias: geométricas (Flip, Rotation, ResizedCrop, Affine), fotométricas (ColorJitter, GaussianBlur, RandomErasing) y de mezcla entre muestras (Mixup, CutMix). Normalize queda fuera: es preprocesamiento, no aumento.">
+                    aria-label="Clasificación de las técnicas de aumento de datos en tres familias: geométricas (Flip, Rotation, ResizedCrop, Affine), fotométricas (ColorJitter, GaussianBlur, RandomAutocontrast) y de mezcla entre muestras (Mixup, CutMix). Normalize queda fuera: es preprocesamiento, no aumento.">
                     <title>El aumento de datos se agrupa en tres familias: transformaciones geométricas que cambian la estructura espacial, fotométricas que alteran los valores de píxel, y de mezcla que combinan dos imágenes y sus etiquetas.</title>
                     <rect x={290} y={18} width={160} height={40} rx="9" fill="#3D008D" />
                     <text x={370} y={43} textAnchor="middle" fontSize="13" fill="#fff" fontWeight="bold">Aumento de datos</text>
                     {[
                         { x: 60, title: 'Geométricas', sub: 'cambian la geometría', color: '#0E7490', bg: '#ECFEFF', items: ['RandomHorizontalFlip', 'RandomRotation', 'RandomResizedCrop', 'RandomAffine'] },
-                        { x: 290, title: 'Fotométricas', sub: 'cambian los píxeles', color: '#B45309', bg: '#FFFBEB', items: ['ColorJitter', 'GaussianBlur', 'RandomErasing'] },
+                        { x: 290, title: 'Fotométricas', sub: 'cambian los píxeles', color: '#B45309', bg: '#FFFBEB', items: ['ColorJitter', 'GaussianBlur', 'RandomAutocontrast'] },
                         { x: 520, title: 'Mezcla de muestras', sub: 'combinan 2 imágenes', color: '#BE185D', bg: '#FFF1F7', items: ['Mixup', 'CutMix'] },
                     ].map((col, ci) => (
                         <g key={ci}>

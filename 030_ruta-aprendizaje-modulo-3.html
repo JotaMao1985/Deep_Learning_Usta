@@ -627,7 +627,7 @@
                             <p>
                                 Tener los datos, la matemática y la receta no basta: hace falta una <strong>cocina</strong>. Los
                                 <strong> datos</strong> son los ingredientes, la <strong>matemática</strong> es la receta, pero sin un
-                                <strong> framework</strong> no se prepara ningún plato. El framework es esa cocina —ollas, fogón, un espacio
+                                <strong>{' '}<em>framework</em></strong> no se prepara ningún plato. El <em>framework</em> es esa cocina —ollas, fogón, un espacio
                                 organizado— que calcula los gradientes, mueve los tensores a la GPU y abstrae la complejidad para que el
                                 ingeniero se concentre en el diseño del modelo.
                             </p>
@@ -738,7 +738,7 @@
                             { texto: 'Pasa todo el modelo a FP16, incluidos los pesos maestros, y por eso libera la mitad exacta.', correcta: false,
                               justificacion: 'Si los pesos maestros pasaran a FP16, las actualizaciones pequeñas se perderían; AMP los conserva en FP32.' },
                             { texto: 'Calcula en FP16/BF16, pero guarda pesos maestros, gradientes y estados de Adam en FP32.', correcta: true,
-                              justificacion: 'El ahorro se da sobre todo en las activaciones, que se guardan en 16 bits; como los pesos maestros, sus gradientes y los estados de Adam siguen en FP32, el ahorro total es menor que la mitad (≈32 % en ResNet-18 con lote 32). A cambio, activa los Tensor Cores y acelera hasta 2–3×.' },
+                              justificacion: 'El ahorro se da sobre todo en las activaciones, que se guardan en 16 bits; como los pesos maestros, sus gradientes y los estados de Adam siguen en FP32, el ahorro total es menor que la mitad (≈31 % en ResNet-18 con lote 32). A cambio, activa los Tensor Cores y acelera hasta 2–3×.' },
                             { texto: 'Pasa a FP16 solo los pesos del modelo; las activaciones siguen en FP32 por estabilidad.', correcta: false,
                               justificacion: 'Es al revés: las activaciones van en 16 bits y los pesos maestros se quedan en FP32.' },
                             { texto: 'Reduce automáticamente el tamaño de lote para que el modelo quepa en la VRAM disponible.', correcta: false,
@@ -795,7 +795,7 @@
                             <Box type="warn" label="El restaurante de La Candelaria (hambruna de GPU)">
                                 <p>
                                     El <strong>chef</strong> (la GPU) es rapidísimo, pero la cocina depende de un solo <strong>mesero</strong>{' '}
-                                    (el pipeline): si el mesero no trae los ingredientes a tiempo, el chef queda esperando ocioso. Esa es la
+                                    (el <em>pipeline</em>): si el mesero no trae los ingredientes a tiempo, el chef queda esperando ocioso. Esa es la
                                     <strong> «hambruna de GPU»</strong>. Se resuelve con varios meseros en paralelo
                                     (<span className="inline-code">num_workers</span>) y preparando el siguiente plato mientras se cocina el actual
                                     (<span className="inline-code">prefetch</span>).
@@ -803,9 +803,9 @@
                             </Box>
                             <Box type="info" label="El pasaporte universal (ONNX)">
                                 <p>
-                                    Un modelo entrenado en un framework es como un ciudadano sin pasaporte: no puede cruzar fronteras.
+                                    Un modelo entrenado en un <em>framework</em> es como un ciudadano sin pasaporte: no puede cruzar fronteras.
                                     <strong> ONNX</strong> es el <strong>pasaporte universal</strong> que permite llevar el modelo de un motor a
-                                    otro y desplegarlo en runtimes portables (ONNX Runtime), verificando que las predicciones siguen siendo
+                                    otro y desplegarlo en <em>runtimes</em> portables (ONNX Runtime), verificando que las predicciones siguen siendo
                                     consistentes (<span className="inline-code">np.allclose</span>).
                                 </p>
                             </Box>
@@ -1230,7 +1230,7 @@
                 numEscenas: 12,
                 conceptos: ['LSTM y GRU para trayectorias temporales (notas, asistencia, intensidad horaria)', 'Transformers en español (BETO, RoBERTa-BNE, mBERT) sobre observaciones del docente', 'Autoencoders y VAE para detección de anomalías con eventos escasos', 'CNN-OCR para digitalizar boletines de papel escaneados', 'Fusión tardía: concatenación de vectores en una red densa de decisión', 'Edge AI: cuantización (INT8), pruning estructurado y knowledge distillation a DistilBETO', 'Equidad algorítmica y profecía autocumplida (fairness, equalized odds, paridad demográfica)', 'Aprendizaje federado con infraestructura colombiana (RENATA, Guane-1, Apolo, BIOS)'],
                 textoDestacado: [
-                    'La deserción escolar no tiene una sola señal: por eso necesitamos un enfoque multimodal que combine cuatro arquitecturas especializadas',
+                    'La deserción escolar no tiene una sola señal: por eso se necesita un enfoque multimodal que combine cuatro arquitecturas especializadas',
                     'La IA educativa más sofisticada no es la más precisa, sino la que llega a la mano del orientador rural sin estigmatizar',
                     'Un pipeline que cabe en trescientos megabytes y corre offline en el equipo del rector, preservando soberanía educativa',
                 ],
@@ -1248,7 +1248,7 @@
             { t: 'CUDA',                 d: 'Plataforma de computación paralela de NVIDIA (2006) que permite ejecutar código en GPU. Base de todo el ecosistema de aprendizaje profundo acelerado.' },
             { t: 'Tensor Core',          d: 'Unidad de hardware especializada en multiplicación-acumulación de matrices (MMA). En la A100, hasta 16× más rendimiento en FP16 que los núcleos CUDA en FP32.' },
             { t: 'VRAM',                 d: 'Memoria de video de la GPU; el recurso más limitante. Almacena pesos, gradientes, estados del optimizador y activaciones. Analogía: la bodega de la plaza de mercado.' },
-            { t: 'Precisión mixta (AMP)', d: 'Técnica que calcula en FP16/BF16 y conserva en FP32 los pesos maestros, sus gradientes y los estados del optimizador: acelera hasta 2–3× en GPU con Tensor Cores y reduce sobre todo la memoria de las activaciones; el ahorro total es menor que la mitad (≈32 % en ResNet-18 con lote 32).' },
+            { t: 'Precisión mixta (AMP)', d: 'Técnica que calcula en FP16/BF16 y conserva en FP32 los pesos maestros, sus gradientes y los estados del optimizador: acelera hasta 2–3× en GPU con Tensor Cores y reduce sobre todo la memoria de las activaciones; el ahorro total es menor que la mitad (≈31 % en ResNet-18 con lote 32).' },
             { t: 'CUDA OOM',             d: 'Error «out of memory» que aparece cuando el modelo, los lotes y las activaciones exceden la VRAM disponible. Se mitiga reduciendo el tamaño de lote, con precisión mixta o con recálculo de activaciones (gradient checkpointing).' },
             { t: 'DataLoader (PyTorch)', d: 'Clase que gestiona la carga paralela de datos con num_workers, pin_memory y prefetch_factor para maximizar la utilización de la GPU.' },
             { t: 'tf.data (TensorFlow)', d: 'API declarativa para construir flujos de datos eficientes con operaciones encadenadas (map, cache, shuffle, batch, prefetch).' },
@@ -1780,15 +1780,15 @@
                     </div>
                     <div>
                         <h2 className="text-2xl font-extrabold text-navy">Videos del módulo</h2>
-                        <p className="text-sm text-gray-600">Dos piezas audiovisuales: el <strong>Video de Profundización</strong> de la sección, «De Colab al Cafetal» (frameworks, GPU, pipelines y despliegue), y el <strong>video capstone</strong> de la Guía 3, «Alertas Tempranas contra la Deserción», que integra las arquitecturas de los Módulos 1 y 2 sobre el caso de deserción escolar rural.</p>
+                        <p className="text-sm text-gray-600">Dos piezas audiovisuales: el <strong>Video de Profundización</strong> de la sección, «De Colab al Cafetal» (<em>frameworks</em>, GPU, <em>pipelines</em> y despliegue), y el <strong>video capstone</strong> de la Guía 3, «Alertas Tempranas contra la Deserción», que integra las arquitecturas de los Módulos 1 y 2 sobre el caso de deserción escolar rural.</p>
                     </div>
                 </div>
                 <Box type="info" label="Nota de alineación curricular">
                     El <strong>video de profundización de la Sección 3</strong> es «De Colab al Cafetal»: cubre el contenido evaluable de la sección
-                    (frameworks TF/PyTorch/Keras 3, GPU y Colab/Kaggle, pipelines y despliegue), en línea con los <strong>Capítulos 1–3</strong> y con la
+                    (<em>frameworks</em> TF/PyTorch/Keras 3, GPU y Colab/Kaggle, <em>pipelines</em> y despliegue), en línea con los <strong>Capítulos 1–3</strong> y con la
                     <strong> Fase 3</strong> del Proyecto Centinela. El video «Alertas Tempranas contra la Deserción» es el <strong>capstone de la Guía 3</strong> (foro):
                     reintegra las arquitecturas de los Módulos 1 y 2 (LSTM, Transformers como BETO, Autoencoders y CNN-OCR) en un caso multimodal de
-                    <strong> deserción escolar rural</strong>, aplicando los conceptos de despliegue de la sección (Edge AI, cuantización, pipelines operativos
+                    <strong> deserción escolar rural</strong>, aplicando los conceptos de despliegue de la sección (Edge AI, cuantización, <em>pipelines</em> operativos
                     y soberanía digital).
                 </Box>
                 <div className="grid md:grid-cols-1 gap-5 mt-4">
@@ -1935,9 +1935,9 @@
                             <i className="fas fa-clipboard-question text-secondary"></i>Lo que sigue: el Cuestionario Final del curso (10 %)
                         </h3>
                         <p className="text-gray-700 mt-2 leading-relaxed">
-                            Con el Módulo 3 se completa la formación: <strong>Frameworks (TensorFlow / PyTorch / Keras 3)</strong>,
-                            <strong> cómputo de alto rendimiento con GPU</strong> y <strong>pipelines de datos y despliegue</strong>.
-                            La <strong>Fase 3 del Proyecto Centinela</strong> industrializó el sistema (pipeline, precisión mixta, exportación
+                            Con el Módulo 3 se completa la formación: <strong><em>frameworks</em> (TensorFlow / PyTorch / Keras 3)</strong>,
+                            <strong> cómputo de alto rendimiento con GPU</strong> y <strong><em>pipelines</em> de datos y despliegue</strong>.
+                            La <strong>Fase 3 del Proyecto Centinela</strong> industrializó el sistema (<em>pipeline</em>, precisión mixta, exportación
                             ONNX y despliegue sin conexión en campo). El último paso evaluativo es el <strong>Cuestionario Final del curso (10 %)</strong>:
                             antes de presentarlo conviene repasar el glosario y los recursos de los tres módulos.
                         </p>

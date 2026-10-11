@@ -268,7 +268,7 @@
                 </div>
                 <div class="card p-5 ring-2 ring-secondary">
                     <div class="text-xs font-bold uppercase tracking-wider text-secondary mb-1">Fase 3 · Módulo 3 · <em>aquí</em></div>
-                    <div class="font-bold text-navy mb-1"><i class="fas fa-microchip text-secondary mr-1.5"></i>Pipeline y despliegue</div>
+                    <div class="font-bold text-navy mb-1"><i class="fas fa-microchip text-secondary mr-1.5"></i><em>Pipeline</em> y despliegue</div>
                     <p class="text-sm text-slate-600">Industrialización con GPU, precisión mixta y despliegue <em>offline</em> en campo.</p>
                 </div>
             </div>
@@ -317,7 +317,7 @@
                     <text x="67"  y="96" text-anchor="middle" font-size="10" fill="#64748B">train · val · test</text>
                     <line x1="122" y1="83" x2="160" y2="83" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowFlow)"/>
                     <rect x="165" y="50" width="160" height="66" rx="11" fill="url(#mlopsGrad)"/>
-                    <text x="245" y="78" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Pipeline</text>
+                    <text x="245" y="78" text-anchor="middle" font-size="12" font-weight="700" font-style="italic" fill="#fff">Pipeline</text>
                     <text x="245" y="96" text-anchor="middle" font-size="9.5" fill="#E9D5FF">cache · prefetch · aumento</text>
                     <line x1="325" y1="83" x2="363" y2="83" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowFlow)"/>
                     <rect x="368" y="50" width="130" height="66" rx="11" fill="#0E7490"/>
@@ -347,7 +347,7 @@
                 </div>
                 <div class="card p-5">
                     <div class="text-secondary text-2xl mb-2"><i class="fas fa-folder-tree"></i></div>
-                    <h3 class="font-bold text-navy mb-1">Organización para el pipeline</h3>
+                    <h3 class="font-bold text-navy mb-1">Organización para el <em>pipeline</em></h3>
                     <p class="text-sm text-slate-600">Las muestras se ordenan en carpetas <span class="icode">train / val / test</span> con estructura de clases, de modo que el <em>pipeline</em> las consuma de forma reproducible.</p>
                 </div>
                 <div class="card p-5">
@@ -376,8 +376,8 @@
             <!-- Paso 2 + figura prefetch -->
             <div class="flex gap-4 mb-2"><span class="step-num">2</span>
                 <div class="flex-1">
-                    <h3 class="font-bold text-navy text-lg">Construcción del pipeline de datos</h3>
-                    <p class="text-sm text-slate-600 mt-1">Implementación del <strong>mismo</strong> pipeline en ambos <em>frameworks</em> y comparación del tiempo de carga por época. La clave es solapar la preparación de datos en la CPU con el cómputo en la GPU mediante <em>prefetch</em>, de modo que la GPU no se quede esperando.</p>
+                    <h3 class="font-bold text-navy text-lg">Construcción del <em>pipeline</em> de datos</h3>
+                    <p class="text-sm text-slate-600 mt-1">Implementación del <strong>mismo</strong> <em>pipeline</em> en ambos <em>frameworks</em> y comparación del tiempo de carga por época. La clave es solapar la preparación de datos en la CPU con el cómputo en la GPU mediante <em>prefetch</em>, de modo que la GPU no se quede esperando.</p>
                 </div>
             </div>
             <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
@@ -433,7 +433,7 @@ loader = <span class="fn">DataLoader</span>(dataset, batch_size=32,        <span
                     prefetch_factor=2)</div>
             </div>
             <div class="callout callout-warn mt-3">
-                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i><strong>Búfer de barajado (<span class="icode">shuffle</span>).</strong> En <span class="icode">tf.data</span>, el tamaño del búfer de <span class="icode">.shuffle()</span> debe ser comparable al tamaño del conjunto de datos para un mezclado efectivo; un búfer pequeño solo baraja localmente. Si el conjunto de datos no cabe en memoria, conviene <strong>barajar a nivel de archivos</strong> (orden de los ficheros) antes de cargarlos.</p>
+                <p class="text-sm"><i class="fas fa-triangle-exclamation text-amber-500 mr-2"></i><strong>Búfer de barajado (<span class="icode">shuffle</span>).</strong> En <span class="icode">tf.data</span>, el tamaño del búfer de <span class="icode">.shuffle()</span> debe ser comparable al tamaño del conjunto de datos para un mezclado efectivo; un búfer pequeño solo baraja localmente. Si el conjunto de datos no cabe en memoria, conviene <strong>barajar por archivos</strong> (orden de los ficheros) antes de cargarlos.</p>
             </div>
 
             <!-- Paso 3 -->
@@ -464,7 +464,7 @@ loader = <span class="fn">DataLoader</span>(dataset, batch_size=32,        <span
                         <line x1="48" y1="178" x2="340" y2="178" stroke="#94A3B8" stroke-width="1.2"/>
                         <!-- grupo VRAM (etiquetas de valor en color de alto contraste; no se depende solo del color) -->
                         <rect x="80"  y="48"  width="40" height="130" fill="#001A4D"/><text x="100" y="42" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B">100 %</text>
-                        <rect x="128" y="90"  width="40" height="88"  fill="#ED1E79"/><text x="148" y="84" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B">≈68 %</text>
+                        <rect x="128" y="88"  width="40" height="90"  fill="#ED1E79"/><text x="148" y="82" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B">≈69 %</text>
                         <text x="124" y="196" text-anchor="middle" font-size="10" font-weight="600" fill="#475569">VRAM</text>
                         <!-- grupo tiempo -->
                         <rect x="220" y="48"  width="40" height="130" fill="#001A4D"/><text x="240" y="42" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B">100 %</text>
@@ -474,13 +474,13 @@ loader = <span class="fn">DataLoader</span>(dataset, batch_size=32,        <span
                         <rect x="250" y="26" width="11" height="11" fill="#001A4D"/><text x="266" y="35" font-size="9" fill="#475569">FP32</text>
                         <rect x="302" y="26" width="11" height="11" fill="#ED1E79"/><text x="318" y="35" font-size="9" fill="#475569">FP16</text>
                     </svg>
-                    <figcaption>Figura 3. La precisión mixta (FP16) reduce sobre todo la memoria de las activaciones y acelera el entrenamiento al activar los Tensor Cores. Como los pesos maestros, sus gradientes y los estados de Adam siguen en FP32, el ahorro total de VRAM es menor que la mitad: del orden de un tercio en una CNN mediana con lote 32 (≈32 % en ResNet-18). Los valores son ilustrativos; cada estudiante reporta los suyos.</figcaption>
+                    <figcaption>Figura 3. La precisión mixta (FP16) reduce sobre todo la memoria de las activaciones y acelera el entrenamiento al activar los Tensor Cores. Como los pesos maestros, sus gradientes y los estados de Adam siguen en FP32, el ahorro total de VRAM es menor que la mitad: del orden de un tercio en una CNN mediana con lote 32 (≈31 % en ResNet-18). Los valores son ilustrativos; cada estudiante reporta los suyos.</figcaption>
                 </figure>
                 <div>
                     <p class="text-sm text-slate-700 mb-2">Al representar las <strong>activaciones</strong> con 16 bits en lugar de 32, la memoria de esos tensores se reduce a la mitad y el cómputo se acelera:</p>
                     <div class="eq mb-3">$$ \text{VRAM}_{16}^{\text{activaciones}} \approx \tfrac{1}{2}\,\text{VRAM}_{32}^{\text{activaciones}} \qquad \text{aceleración} = \dfrac{t_{32}}{t_{16}} $$</div>
                     <div class="callout callout-info mb-3">
-                        <p class="text-sm"><i class="fas fa-circle-info text-primary mr-2"></i><strong>Matiz importante.</strong> El ahorro de memoria se da sobre todo en las <strong>activaciones</strong>. El ahorro <strong>total</strong> es <em>menor</em> que la mitad porque la precisión mixta automática (AMP) mantiene los <strong>pesos maestros en FP32</strong>, con sus gradientes y los estados de Adam, para la actualización del optimizador: del orden de un tercio en una CNN mediana con lote 32 (≈32 % en ResNet-18 y ≈40 % en ResNet-50), y se acerca a la mitad solo cuando las activaciones dominan la memoria (Micikevicius et al., 2018).</p>
+                        <p class="text-sm"><i class="fas fa-circle-info text-primary mr-2"></i><strong>Matiz importante.</strong> El ahorro de memoria se da sobre todo en las <strong>activaciones</strong>. El ahorro <strong>total</strong> es <em>menor</em> que la mitad porque la precisión mixta automática (AMP) mantiene los <strong>pesos maestros en FP32</strong>, con sus gradientes y los estados de Adam, para la actualización del optimizador: del orden de un tercio en una CNN mediana con lote 32 (≈31 % en ResNet-18 y ≈39 % en ResNet-50), y se acerca a la mitad solo cuando las activaciones dominan la memoria (Micikevicius et al., 2018).</p>
                     </div>
                     <div class="callout callout-tip mb-3">
                         <p class="text-sm"><i class="fas fa-microchip text-emerald-600 mr-2"></i><strong>FP16 frente a bfloat16.</strong> En GPU Ampere o superiores (L4/A100) suele preferirse <strong>bfloat16</strong> (mayor rango, sin necesidad de <span class="icode">GradScaler</span>); en la <strong>T4</strong> se usa <strong>float16</strong> con escalado de pérdida.</p>
@@ -657,12 +657,12 @@ sess = onnxruntime.<span class="fn">InferenceSession</span>(<span class="st">"ce
                 <div class="card p-5">
                     <div class="text-secondary text-2xl mb-2"><i class="fas fa-comments"></i></div>
                     <h3 class="font-bold text-navy mb-1">Sustentación oral</h3>
-                    <p class="text-sm text-slate-600">Sesión sincrónica breve donde el estudiante defiende sus decisiones de <em>framework</em>, pipeline, optimización y despliegue. Verifica autoría y comprensión real.</p>
+                    <p class="text-sm text-slate-600">Sesión sincrónica breve donde el estudiante defiende sus decisiones de <em>framework</em>, <em>pipeline</em>, optimización y despliegue. Verifica autoría y comprensión real.</p>
                 </div>
                 <div class="card p-5">
                     <div class="text-teal-600 text-2xl mb-2"><i class="fas fa-bug-slash"></i></div>
                     <h3 class="font-bold text-navy mb-1">Auditoría a la IA</h3>
-                    <p class="text-sm text-slate-600">Documentación y corrección de al menos un caso en que la IA falló (por ejemplo, un pipeline sin <span class="icode">prefetch</span>, una API de exportación inexistente o un manejo incorrecto de la VRAM).</p>
+                    <p class="text-sm text-slate-600">Documentación y corrección de al menos un caso en que la IA falló (por ejemplo, un <em>pipeline</em> sin <span class="icode">prefetch</span>, una API de exportación inexistente o un manejo incorrecto de la VRAM).</p>
                 </div>
             </div>
         </section>
@@ -676,7 +676,7 @@ sess = onnxruntime.<span class="fn">InferenceSession</span>(<span class="st">"ce
                     <ul class="text-sm text-slate-700 space-y-2">
                         <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Notebook</strong> ejecutado en Colab con todas las salidas visibles.</li>
                         <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Archivos del modelo</strong> exportado (.pth, .keras, .onnx).</li>
-                        <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Informe técnico de despliegue</strong> (PDF, máx. 4 páginas): comparativa de pipelines, rendimiento GPU, <strong>tabla de optimización Edge</strong> (tamaño/latencia/precisión antes y después) y ruta de despliegue con su justificación de ingeniería.</li>
+                        <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Informe técnico de despliegue</strong> (PDF, máx. 4 páginas): comparativa de <em>pipelines</em>, rendimiento GPU, <strong>tabla de optimización Edge</strong> (tamaño/latencia/precisión antes y después) y ruta de despliegue con su justificación de ingeniería.</li>
                         <li><i class="fas fa-square-check text-emerald-500 mr-2"></i><strong>Bitácora de IA</strong> diligenciada.</li>
                     </ul>
                     <p class="text-xs text-slate-500 mt-4">Repositorio en GitHub o carpeta comprimida: <span class="icode">Apellido_Nombre_Centinela_Fase3.zip</span>. La sustentación se agenda aparte.</p>
@@ -704,7 +704,7 @@ sess = onnxruntime.<span class="fn">InferenceSession</span>(<span class="st">"ce
                 <ul class="space-y-3 text-sm text-slate-700">
                     <li class="flex gap-3">
                         <i class="fas fa-square-check text-emerald-500 mt-0.5"></i>
-                        <span><strong>Notebook ejecutado en Colab</strong> con <strong>todas las salidas visibles</strong> (pipeline en ambos <em>frameworks</em>, entrenamiento en GPU, optimización Edge y verificación de exportación).</span>
+                        <span><strong>Notebook ejecutado en Colab</strong> con <strong>todas las salidas visibles</strong> (<em>pipeline</em> en ambos <em>frameworks</em>, entrenamiento en GPU, optimización Edge y verificación de exportación).</span>
                     </li>
                     <li class="flex gap-3">
                         <i class="fas fa-square-check text-emerald-500 mt-0.5"></i>
@@ -712,7 +712,7 @@ sess = onnxruntime.<span class="fn">InferenceSession</span>(<span class="st">"ce
                     </li>
                     <li class="flex gap-3">
                         <i class="fas fa-square-check text-emerald-500 mt-0.5"></i>
-                        <span><strong>Informe técnico de despliegue</strong> en <strong>PDF</strong> (máx. 4 páginas): comparativa de pipelines, rendimiento GPU, <strong>tabla de optimización Edge</strong> (tamaño/latencia/precisión antes y después) y ruta de despliegue con su justificación.</span>
+                        <span><strong>Informe técnico de despliegue</strong> en <strong>PDF</strong> (máx. 4 páginas): comparativa de <em>pipelines</em>, rendimiento GPU, <strong>tabla de optimización Edge</strong> (tamaño/latencia/precisión antes y después) y ruta de despliegue con su justificación.</span>
                     </li>
                     <li class="flex gap-3">
                         <i class="fas fa-square-check text-emerald-500 mt-0.5"></i>

@@ -790,8 +790,8 @@
             // Capacidad total de VRAM ilustrativa (barra) y cuánto ocupa el modelo
             const totalH = 150, barX = 60, barW = 70, barTop = 40;
             // Con precisión mixta, las activaciones ocupan la mitad, pero los pesos maestros, sus gradientes y Adam
-            // siguen en FP32: el ahorro total es menor que la mitad (≈32 % en ResNet-18 con lote 32; M3-D-11)
-            const ocupado = modo === 'fp32' ? 1.0 : 0.68;
+            // siguen en FP32: el ahorro total es menor que la mitad (≈31 % en ResNet-18 con lote 32; M3-D-11)
+            const ocupado = modo === 'fp32' ? 1.0 : 0.69;
             const usadoH = totalH * ocupado;
 
             return (
@@ -831,7 +831,7 @@
                             </>
                         )}
                         <text x={250 + barW / 2} y={barTop + totalH + 16} textAnchor="middle" fontSize="9" fill="#15803D" fontWeight="700">
-                            {modo === 'fp16' ? '≈68 % usado' : '—'}
+                            {modo === 'fp16' ? '≈69 % usado' : '—'}
                         </text>
 
                         {/* Tensor Cores */}
@@ -852,7 +852,7 @@
                     <p className="text-center text-xs text-gray-500 mt-3 italic leading-relaxed">
                         La <strong>precisión mixta</strong> hace la mayoría de los cálculos en 16 bits sobre los <strong>Tensor Cores</strong>, unidades distintas de los
                         núcleos CUDA de propósito general, y mantiene los <strong>pesos maestros en FP32</strong>: <strong>hasta 2–3× más rápido</strong> y menos memoria
-                        de activaciones; el ahorro <strong>total</strong> es menor que la mitad (≈32 % en ResNet-18 con lote 32).
+                        de activaciones; el ahorro <strong>total</strong> es menor que la mitad (≈31 % en ResNet-18 con lote 32).
                     </p>
                 </div>
             );
@@ -1154,7 +1154,7 @@ for x, y in dataloader:
                     <div>
                         <p>
                             Una GPU ociosa es dinero quemado. Si los datos no llegan a tiempo, el cómputo más caro del entrenamiento
-                            se desperdicia. Por eso el <strong>pipeline de datos</strong> es tan importante como la arquitectura: su trabajo
+                            se desperdicia. Por eso el <strong><em>pipeline</em> de datos</strong> es tan importante como la arquitectura: su trabajo
                             es <strong>solapar</strong> la preparación de datos en CPU con el cálculo en GPU.
                         </p>
                         <p>
@@ -1258,7 +1258,7 @@ keras.mixed_precision.set_global_policy("mixed_float16")`
                     opciones: [
                         { texto: 'Todo el modelo pasa a 16 bits y la VRAM total ocupada baja justo a la mitad.', correcta: false, justificacion: 'AMP no pasa todo a 16 bits: los pesos maestros, sus gradientes y los estados de Adam siguen en FP32, así que el ahorro total es menor que la mitad.' },
                         { texto: 'Nada en la memoria: AMP solo acelera el cálculo sin cambiar lo que ocupa la VRAM.', correcta: false, justificacion: 'Sí cambia: las activaciones, que suelen dominar la memoria en una CNN con lotes grandes, se guardan en 16 bits.' },
-                        { texto: 'Las activaciones ocupan cerca de la mitad; los pesos maestros siguen en FP32.', correcta: true, justificacion: 'Las activaciones se guardan en 16 bits y ocupan cerca de la mitad; los pesos maestros, sus gradientes y los estados de Adam siguen en FP32. El ahorro total es del orden de un tercio en una CNN mediana (≈32 % en ResNet-18 con lote 32), y además se activan los Tensor Cores (hasta 2–3× más rápido).' },
+                        { texto: 'Las activaciones ocupan cerca de la mitad; los pesos maestros siguen en FP32.', correcta: true, justificacion: 'Las activaciones se guardan en 16 bits y ocupan cerca de la mitad; los pesos maestros, sus gradientes y los estados de Adam siguen en FP32. El ahorro total es del orden de un tercio en una CNN mediana (≈31 % en ResNet-18 con lote 32), y además se activan los Tensor Cores (hasta 2–3× más rápido).' },
                         { texto: 'El lote se reduce solo a 32 imágenes para que el entrenamiento quepa en la VRAM.', correcta: false, justificacion: 'AMP no toca el tamaño de lote; reducirlo es otra palanca, que decide el ingeniero.' },
                     ],
                 },
@@ -1367,7 +1367,7 @@ val_tfms = v2.Compose([
                                 <li>El <strong>guardado nativo</strong> (<span className="inline-code">state_dict</span> en PyTorch,{' '}
                                     <span className="inline-code">.keras</span> en Keras) es la foto del modelo en su propio idioma.</li>
                                 <li><strong>ONNX</strong> es el <strong>pasaporte internacional</strong>: un formato abierto que cualquier
-                                    país (framework, lenguaje C++, móvil) reconoce, sin reescribir el modelo.</li>
+                                    país (<em>framework</em>, lenguaje C++, móvil) reconoce, sin reescribir el modelo.</li>
                                 <li><strong>LiteRT</strong> y la <strong>cuantización</strong> son el equipaje de mano: empacar el modelo en
                                     INT8 para que quepa y corra <strong>offline</strong> en una tablet en el cafetal, sin internet.</li>
                             </ul>
@@ -1382,10 +1382,10 @@ val_tfms = v2.Compose([
                             <span className="inline-code">state_dict</span> (solo los pesos, no la clase), en Keras el archivo{' '}
                             <span className="inline-code">.keras</span>. Pero un <span className="inline-code">.pth</span> y un{' '}
                             <span className="inline-code">.keras</span> son <strong>dos implementaciones equivalentes</strong>, no el mismo objeto:
-                            para portabilidad real conviene un único framework y <strong>ONNX como pasaporte interoperable</strong>.
+                            para portabilidad real conviene un único <em>framework</em> y <strong>ONNX como pasaporte interoperable</strong>.
                         </p>
                         <p>
-                            <strong>ONNX</strong> (Open Neural Network Exchange) es un formato abierto que permite entrenar en un framework y ejecutar
+                            <strong>ONNX</strong> (Open Neural Network Exchange) es un formato abierto que permite entrenar en un <em>framework</em> y ejecutar
                             en otro, o en C++/móvil, sin reescribir. En PyTorch, <span className="inline-code">torch.export</span> (disponible desde
                             PyTorch 2.1) es el <strong>sucesor de TorchScript</strong> (declarado obsoleto en la documentación de PyTorch 2.9): captura
                             el grafo en un archivo <span className="inline-code">.pt2</span>, que se carga con{' '}
@@ -1689,7 +1689,7 @@ assert np.allclose(salida_torch, salida_onnx, atol=1e-4)`
                                     </div>
                                     <h2 className="text-2xl md:text-3xl font-extrabold text-navy mt-4">¡Felicitaciones!</h2>
                                     <p className="text-gray-700 mt-2 leading-relaxed max-w-md mx-auto">
-                                        Microlearning del Módulo 3 completado: las 5 cápsulas (frameworks, pipelines,
+                                        Microlearning del Módulo 3 completado: las 5 cápsulas (<em>frameworks</em>, <em>pipelines</em>,
                                         GPU y precisión mixta, aumento de datos y <strong>exportación/despliegue</strong>)
                                         quedan repasadas, cubriendo la implementación profesional de extremo a extremo. Queda una
                                         base sólida para enfrentar el <strong>Proyecto Centinela · Fase 3</strong>.

@@ -195,7 +195,7 @@
                     <div class="text-xs text-white/75 mt-0.5">de la nota final (Guía 3: 5 %; Fase 3: 25 %); el Cuestionario Final del curso (10 %) va aparte</div>
                 </div>
                 <div class="bg-white/10 border border-white/15 rounded-xl px-4 py-3">
-                    <div class="text-2xl md:text-3xl font-extrabold text-gold">≈30</div>
+                    <div class="text-2xl md:text-3xl font-extrabold text-gold">42</div>
                     <div class="text-xs text-white/75 mt-0.5">términos clave del módulo</div>
                 </div>
             </div>
@@ -247,7 +247,7 @@
                     <text x="67"  y="88" text-anchor="middle" font-size="10" fill="#64748B" font-family="Montserrat">train · val · test</text>
                     <line x1="122" y1="75" x2="160" y2="75" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowFlow)"/>
                     <rect x="165" y="42" width="160" height="66" rx="11" fill="url(#mlopsGrad)"/>
-                    <text x="245" y="70" text-anchor="middle" font-size="12" font-weight="700" fill="#fff" font-family="Montserrat">Pipeline</text>
+                    <text x="245" y="70" text-anchor="middle" font-size="12" font-weight="700" font-style="italic" fill="#fff" font-family="Montserrat">Pipeline</text>
                     <text x="245" y="88" text-anchor="middle" font-size="9.5" fill="#E9D5FF" font-family="Montserrat">cache · prefetch · aumento</text>
                     <line x1="325" y1="75" x2="363" y2="75" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowFlow)"/>
                     <rect x="368" y="42" width="130" height="66" rx="11" fill="#0E7490"/>
@@ -548,9 +548,9 @@ os.environ[<span class="st">'KERAS_BACKEND'</span>] = <span class="st">'jax'</sp
                     <!-- SVG: dos casos calculados de VRAM (M3-D-11) -->
                     <svg viewBox="0 0 340 86" class="w-full mt-1" role="img" aria-labelledby="vramTitle vramDesc">
                         <title id="vramTitle">Qué domina la VRAM depende del modelo: dos casos calculados</title>
-                        <desc id="vramDesc">Dos barras apiladas. En una CNN ResNet-50 con lote 32, FP32 y Adam, las activaciones ocupan el 86,5 % de la VRAM, el optimizador el 6,4 % y los pesos y gradientes casi todo el resto. En un Transformer de 125 millones de parámetros con lote 1 y recomputación, los estados del modelo (pesos, gradientes y Adam) ocupan el 94,6 % y las activaciones el resto.</desc>
+                        <desc id="vramDesc">Dos barras apiladas. En una CNN ResNet-50 con lote 32, FP32 y Adam, las activaciones ocupan el 86,4 % de la VRAM, el optimizador el 6,5 % y los pesos y gradientes casi todo el resto. En un Transformer de 125 millones de parámetros con lote 1 y recomputación, los estados del modelo (pesos, gradientes y Adam) ocupan el 94,6 % y las activaciones el resto.</desc>
                         <text x="10" y="11" font-size="8.5" font-weight="700" fill="#1E293B" font-family="Montserrat">CNN · ResNet-50, lote 32 (FP32, Adam)</text>
-                        <rect x="10" y="15" width="277" height="22" fill="#ED1E79"/><text x="148" y="30" text-anchor="middle" font-size="9" fill="#fff" font-family="Montserrat">activaciones 86,5 %</text>
+                        <rect x="10" y="15" width="277" height="22" fill="#ED1E79"/><text x="148" y="30" text-anchor="middle" font-size="9" fill="#fff" font-family="Montserrat">activaciones 86,4 %</text>
                         <rect x="287" y="15" width="20" height="22" fill="#3D008D"/>
                         <rect x="307" y="15" width="21" height="22" fill="#0E7490"/>
                         <rect x="328" y="15" width="2" height="22" fill="#94A3B8"/>
@@ -578,7 +578,7 @@ os.environ[<span class="st">'KERAS_BACKEND'</span>] = <span class="st">'jax'</sp
                             <line x1="48" y1="30" x2="48" y2="178" stroke="#94A3B8" stroke-width="1.2"/>
                             <line x1="48" y1="178" x2="340" y2="178" stroke="#94A3B8" stroke-width="1.2"/>
                             <rect x="80"  y="48"  width="40" height="130" fill="#001A4D"/><text x="100" y="42" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B" font-family="Montserrat">100 %</text>
-                            <rect x="128" y="90"  width="40" height="88"  fill="#ED1E79"/><text x="148" y="84" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B" font-family="Montserrat">≈68 %</text>
+                            <rect x="128" y="88"  width="40" height="90"  fill="#ED1E79"/><text x="148" y="82" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B" font-family="Montserrat">≈69 %</text>
                             <text x="124" y="196" text-anchor="middle" font-size="10" font-weight="600" fill="#475569" font-family="Montserrat">VRAM</text>
                             <rect x="220" y="48"  width="40" height="130" fill="#001A4D"/><text x="240" y="42" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B" font-family="Montserrat">100 %</text>
                             <rect x="268" y="92"  width="40" height="86"  fill="#ED1E79"/><text x="288" y="86" text-anchor="middle" font-size="9.5" font-weight="700" fill="#1E293B" font-family="Montserrat">≈65 %</text>
@@ -586,7 +586,7 @@ os.environ[<span class="st">'KERAS_BACKEND'</span>] = <span class="st">'jax'</sp
                             <rect x="250" y="26" width="11" height="11" fill="#001A4D"/><text x="266" y="35" font-size="9" fill="#475569" font-family="Montserrat">FP32</text>
                             <rect x="302" y="26" width="11" height="11" fill="#ED1E79"/><text x="318" y="35" font-size="9" fill="#475569" font-family="Montserrat">FP16</text>
                         </svg>
-                        <figcaption class="text-center text-[0.76rem] text-gray-500 mt-1">Hasta <strong>2–3×</strong> más rápido en GPU con Tensor Cores; las activaciones ocupan la mitad, pero el ahorro <strong>total</strong> es menor que la mitad (≈32 % en ResNet-18 con lote 32). Valores ilustrativos (Micikevicius et al., 2018).</figcaption>
+                        <figcaption class="text-center text-[0.76rem] text-gray-500 mt-1">Hasta <strong>2–3×</strong> más rápido en GPU con Tensor Cores; las activaciones ocupan la mitad, pero el ahorro <strong>total</strong> es menor que la mitad (≈31 % en ResNet-18 con lote 32). Valores ilustrativos (Micikevicius et al., 2018).</figcaption>
                     </figure>
                     <div class="space-y-3">
                         <div class="callout" style="border-color:#3D008D; background:#FAF8FF">
@@ -671,7 +671,7 @@ scaler = torch.amp.<span class="fn">GradScaler</span>(<span class="st">"cuda"</s
 
             <!-- Pipeline tf.data orden -->
             <div class="card p-6 mb-5">
-                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-list-ol" style="color:#B45309"></i>El orden del pipeline <span class="icode">tf.data</span> importa</h3>
+                <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-list-ol" style="color:#B45309"></i>El orden del <em>pipeline</em> <span class="icode">tf.data</span> importa</h3>
                 <p class="text-[0.86rem] text-gray-600 mb-3">El orden de las operaciones cambia la eficiencia. La regla práctica: <strong>map → cache → shuffle → batch → prefetch</strong>, con <span class="icode">prefetch(AUTOTUNE)</span> <strong>siempre al final</strong>.</p>
                 <!-- SVG NUEVO: orden tf.data -->
                 <svg viewBox="0 0 660 90" class="w-full" role="img" aria-labelledby="tfdataTitle tfdataDesc">
@@ -795,7 +795,7 @@ loader = <span class="fn">DataLoader</span>(dataset, batch_size=<span class="st"
 
             <!-- Guardado / exportación -->
             <div class="card p-6 mb-5">
-                <h3 class="font-bold text-navy mb-3 flex items-center gap-2"><i class="fas fa-floppy-disk" style="color:#B45309"></i>Guardado y exportación: cada framework, su formato</h3>
+                <h3 class="font-bold text-navy mb-3 flex items-center gap-2"><i class="fas fa-floppy-disk" style="color:#B45309"></i>Guardado y exportación: cada <em>framework</em>, su formato</h3>
                 <p class="text-[0.86rem] text-gray-600 mb-3"><span class="icode">.pth</span> sale de PyTorch y <span class="icode">.keras</span> de Keras: son <strong>dos implementaciones equivalentes</strong>, no el mismo objeto en dos archivos. <strong>ONNX</strong> es el formato abierto que las hace portables entre runtimes.</p>
                 <div class="overflow-x-auto">
                     <table class="w-full text-[0.78rem] border-collapse">
@@ -807,7 +807,7 @@ loader = <span class="fn">DataLoader</span>(dataset, batch_size=<span class="st"
                             </tr>
                         </thead>
                         <tbody class="text-gray-700">
-                            <tr><td class="p-2 border border-gray-200 font-semibold mono">.pth</td><td class="p-2 border border-gray-200">PyTorch</td><td class="p-2 border border-gray-200">Checkpoint nativo (state_dict)</td></tr>
+                            <tr><td class="p-2 border border-gray-200 font-semibold mono">.pth</td><td class="p-2 border border-gray-200">PyTorch</td><td class="p-2 border border-gray-200"><em>Checkpoint</em> nativo (state_dict)</td></tr>
                             <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold mono">.keras</td><td class="p-2 border border-gray-200">Keras 3</td><td class="p-2 border border-gray-200">Modelo completo Keras</td></tr>
                             <tr><td class="p-2 border border-gray-200 font-semibold mono">SavedModel</td><td class="p-2 border border-gray-200">TensorFlow</td><td class="p-2 border border-gray-200">TF Serving, producción</td></tr>
                             <tr class="bg-gray-50"><td class="p-2 border border-gray-200 font-semibold mono">.onnx</td><td class="p-2 border border-gray-200">Abierto / pasaporte</td><td class="p-2 border border-gray-200">Interoperabilidad entre runtimes</td></tr>
@@ -816,7 +816,7 @@ loader = <span class="fn">DataLoader</span>(dataset, batch_size=<span class="st"
                     </table>
                 </div>
                 <div class="callout mt-3" style="border-color:#3D008D; background:#FAF8FF">
-                    <p class="text-[0.84rem] text-gray-700"><i class="fas fa-passport mr-1 text-primary"></i><strong>ONNX, el pasaporte universal:</strong> con él un modelo cruza fronteras de framework y de hardware. Pero siempre hay que <strong>verificar la consistencia de predicciones</strong> tras exportar: un modelo que predice distinto no es desplegable.</p>
+                    <p class="text-[0.84rem] text-gray-700"><i class="fas fa-passport mr-1 text-primary"></i><strong>ONNX, el pasaporte universal:</strong> con él un modelo cruza fronteras de <em>framework</em> y de hardware. Pero siempre hay que <strong>verificar la consistencia de predicciones</strong> tras exportar: un modelo que predice distinto no es desplegable.</p>
                 </div>
             </div>
 
@@ -905,7 +905,7 @@ torch.onnx.<span class="fn">export</span>(modelo, (x,), <span class="st">"modelo
                         <div class="eq">GPU gratuita de referencia: <strong>T4 · 16 GB</strong> (Colab/Kaggle)</div>
                         <div class="eq">Kaggle: ≈30 h/semana de GPU, visible en la cuenta (a octubre de 2026)</div>
                         <div class="eq">Transferencia de aprendizaje con ResNet-18: viable en una T4 (el tiempo depende del conjunto y de las épocas)</div>
-                        <div class="eq"><span class="icode">prefetch(AUTOTUNE)</span> → <strong>siempre al final</strong> del pipeline</div>
+                        <div class="eq"><span class="icode">prefetch(AUTOTUNE)</span> → <strong>siempre al final</strong> del <em>pipeline</em></div>
                         <div class="eq">DDP: más eficiente que DataParallel, incluso en un solo nodo</div>
                     </div>
                     <p class="text-[0.72rem] text-gray-500 mt-3">Fuentes de las cifras: NVIDIA (2020), para la A100; Micikevicius et al. (2018), para la precisión mixta; Li et al. (2020), para DDP; Google (s. f.) y Kaggle (s. f.), para las cuotas (consulta: 2026-10-11). Detalle en el material principal, Capítulos 3.2 y 3.3.</p>
@@ -918,7 +918,7 @@ torch.onnx.<span class="fn">export</span>(modelo, (x,), <span class="st">"modelo
                         <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">Prefetch</dt><dd class="text-gray-600">el mesero que adelanta el siguiente plato.</dd></div>
                         <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">VRAM</dt><dd class="text-gray-600">la bodega de la plaza de mercado: si se llena, OOM.</dd></div>
                         <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">GPU</dt><dd class="text-gray-600">la despulpadora industrial: miles en paralelo.</dd></div>
-                        <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">ONNX</dt><dd class="text-gray-600">el pasaporte universal entre frameworks y hardware.</dd></div>
+                        <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">ONNX</dt><dd class="text-gray-600">el pasaporte universal entre <em>frameworks</em> y hardware.</dd></div>
                         <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">num_workers</dt><dd class="text-gray-600">los meseros en paralelo que preparan los lotes.</dd></div>
                         <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">Precisión mixta</dt><dd class="text-gray-600">hacer más con menos: 16 bits donde se puede.</dd></div>
                         <div class="flex gap-2"><dt class="font-bold text-primary w-32 flex-shrink-0">Aumento de datos</dt><dd class="text-gray-600">entrenar al equipo en condiciones variadas.</dd></div>
