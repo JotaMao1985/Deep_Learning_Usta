@@ -345,6 +345,8 @@
         /* MathJax (tex-svg) + Preflight de Tailwind (svg{display:block}) rompe la
            matematica inline: cada formula salta de linea. Se restaura el flujo inline. */
         mjx-container svg { display: inline-block; }
+        /* Un término en cursiva dentro de un texto ya en cursiva pasa a redonda (convención tipográfica) */
+        .italic em, em em { font-style: normal; }
     </style>
 </head>
 
@@ -1104,7 +1106,7 @@
             return (
                 <div ref={revRef} className="visual-container reveal">
                     <h4 className="visual-title">
-                        <i className="fas fa-diagram-project text-secondary mr-2"></i>Grafo computacional: forward vs backward
+                        <i className="fas fa-diagram-project text-secondary mr-2"></i>Grafo computacional: <em>forward</em> frente a <em>backward</em>
                     </h4>
                     <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" style={{ minWidth: 280 }} role="img"
                         aria-label="Grafo computacional con los nodos producto x·w, suma del sesgo, activación, predicción y pérdida. En la fase forward el flujo avanza de izquierda a derecha para calcular la predicción; en la fase backward el gradiente regresa de derecha a izquierda aplicando la regla de la cadena.">
@@ -1455,7 +1457,7 @@
                     url: 'https://www.youtube.com/watch?v=aircAruvnKk',
                     descripcion: 'Al final del video se comenta por qué ReLU desplazó a la sigmoide: entrena con más facilidad en redes profundas. El desvanecimiento del gradiente, que explica esa ventaja, se desarrolla en esta cápsula.',
                 },
-                objetivo: 'Entender por qué ReLU reemplazó a la sigmoide y a tanh en las capas ocultas, al mitigar el desvanecimiento del gradiente (vanishing gradient).',
+                objetivo: <>Entender por qué ReLU reemplazó a la sigmoide y a tanh en las capas ocultas, al mitigar el desvanecimiento del gradiente (<em>vanishing gradient</em>).</>,
                 analogia: {
                     tipo: 'tip',
                     titulo: 'Analogía: el interruptor',
@@ -1625,7 +1627,7 @@
                     url: 'https://www.youtube.com/watch?v=Q81RR3yKn30',
                     descripcion: 'Explica la regularización L2 (ridge): penalizar los pesos grandes reduce el sobreajuste de un modelo que se ajusta demasiado a sus datos de entrenamiento. Complementa la parada temprana que se practica en esta cápsula con las curvas de aprendizaje.',
                 },
-                objetivo: 'Reconocer el sobreajuste en las curvas de aprendizaje, aplicar la parada temprana (early stopping) y relacionarla con la regularización L2 como otra estrategia contra el sobreajuste.',
+                objetivo: <>Reconocer el sobreajuste en las curvas de aprendizaje, aplicar la parada temprana (<em>early stopping</em>) y relacionarla con la regularización L2 como otra estrategia contra el sobreajuste.</>,
                 analogia: {
                     tipo: 'warn',
                     titulo: 'Analogía: el estudiante y el ICFES',

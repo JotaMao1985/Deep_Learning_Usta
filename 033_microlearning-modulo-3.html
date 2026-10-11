@@ -358,6 +358,8 @@
         /* MathJax (tex-svg) + Preflight de Tailwind (svg{display:block}) rompe la
            matematica inline: cada formula salta de linea. Se restaura el flujo inline. */
         mjx-container svg { display: inline-block; }
+        /* Un término en cursiva dentro de un texto ya en cursiva pasa a redonda (convención tipográfica) */
+        .italic em, em em { font-style: normal; }
     </style>
 </head>
 
@@ -1049,7 +1051,7 @@
         const capsules = [
             {
                 id: 1, num: '01', icon: 'fa-layer-group', badgeColor: 'primary',
-                title: 'Frameworks: dos cocinas para entrenar (TF/Keras frente a PyTorch)',
+                title: <><em>Frameworks</em>: dos cocinas para entrenar (TF/Keras frente a PyTorch)</>,
                 duracion: '≈ 4 min',
                 video: {
                     titulo: 'What is PyTorch? (Machine/Deep Learning)',
@@ -1114,7 +1116,7 @@ for x, y in dataloader:
                         <p>
                             <strong>Keras 3</strong> (finales de 2023) volvió a Keras <strong>agnóstico del motor</strong> (<em>backend</em>): el mismo código
                             corre sobre TensorFlow, PyTorch o JAX cambiando <span className="inline-code">os.environ['KERAS_BACKEND']</span>.
-                            Se prototipa con la simplicidad de Keras y se despliega con el backend que más convenga, sin reescribir el modelo.
+                            Se prototipa con la simplicidad de Keras y se despliega con el <em>backend</em> que más convenga, sin reescribir el modelo.
                         </p>
                     </div>
                 ),
@@ -1122,8 +1124,8 @@ for x, y in dataloader:
                 mcq: {
                     pregunta: '¿Qué permite Keras 3 que no era posible antes?',
                     opciones: [
-                        { texto: 'Convertir automáticamente el modelo a TensorFlow para desplegarlo luego con LiteRT.', correcta: false, justificacion: 'Keras 3 no convierte modelos entre frameworks: el motor se elige antes de importar keras, y la conversión a LiteRT es un paso aparte.' },
-                        { texto: 'Entrenar sin GPU a la misma velocidad, porque compila el modelo para la CPU.', correcta: false, justificacion: 'El motor sigue usando la GPU cuando está disponible; Keras 3 abstrae el framework subyacente, no el hardware de cómputo.' },
+                        { texto: 'Convertir automáticamente el modelo a TensorFlow para desplegarlo luego con LiteRT.', correcta: false, justificacion: <>Keras 3 no convierte modelos entre <em>frameworks</em>: el motor se elige antes de importar keras, y la conversión a LiteRT es un paso aparte.</> },
+                        { texto: 'Entrenar sin GPU a la misma velocidad, porque compila el modelo para la CPU.', correcta: false, justificacion: <>El motor sigue usando la GPU cuando está disponible; Keras 3 abstrae el <em>framework</em> subyacente, no el hardware de cómputo.</> },
                         { texto: 'Exportar cualquier modelo a ONNX sin un paso de exportación explícito.', correcta: false, justificacion: 'La exportación a ONNX sigue siendo un paso explícito; Keras 3 resuelve la portabilidad del motor de entrenamiento, no la serialización para el despliegue.' },
                         { texto: 'Correr el mismo código en TensorFlow, PyTorch o JAX con una variable de entorno.', correcta: true, justificacion: 'Keras 3 es agnóstico del motor: con os.environ["KERAS_BACKEND"] = "torch", "tensorflow" o "jax", el mismo modelo corre sobre cualquiera de los tres, sin reescribirlo.' },
                     ],
@@ -1131,7 +1133,7 @@ for x, y in dataloader:
             },
             {
                 id: 2, num: '02', icon: 'fa-gauge-high', badgeColor: 'teal',
-                title: 'Pipelines de datos: que la GPU nunca espere',
+                title: <><em>Pipelines</em> de datos: que la GPU nunca espere</>,
                 duracion: '≈ 5 min',
                 video: {
                     titulo: 'Input Data Pipelines - TensorFlow Essentials #4',
@@ -1139,7 +1141,7 @@ for x, y in dataloader:
                     url: 'https://www.youtube.com/watch?v=f6XVfgJTbp4',
                     descripcion: 'Tutorial en inglés sobre la construcción de flujos de entrada con tf.data en TensorFlow, como complemento del orden map → cache → shuffle → batch → prefetch.',
                 },
-                objetivo: 'Comprender por qué un pipeline de datos eficiente (tf.data con prefetch/cache o DataLoader con num_workers/pin_memory) evita la hambruna de GPU (GPU starvation), solapando la preparación en CPU con el entrenamiento en GPU.',
+                objetivo: <>Comprender por qué un <em>pipeline</em> de datos eficiente (tf.data con prefetch/cache o DataLoader con num_workers/pin_memory) evita la hambruna de GPU (<em>GPU starvation</em>), solapando la preparación en CPU con el entrenamiento en GPU.</>,
                 analogia: {
                     tipo: 'tip',
                     titulo: 'Analogía: el restaurante con cocina veloz y meseros lentos',
@@ -1283,7 +1285,7 @@ keras.mixed_precision.set_global_policy("mixed_float16")`
                     url: 'https://www.youtube.com/watch?v=rfM4DaLTkMs',
                     descripcion: 'Explicación en inglés del aumento de datos de imágenes y de por qué ayuda a reducir el sobreajuste.',
                 },
-                objetivo: 'Conocer las familias de aumento de datos (data augmentation): geométricas, fotométricas y de mezcla como Mixup/CutMix; aplicarlas solo al conjunto de entrenamiento y elegirlas respetando la semántica del problema.',
+                objetivo: <>Conocer las familias de aumento de datos (<em>data augmentation</em>): geométricas, fotométricas y de mezcla como Mixup/CutMix; aplicarlas solo al conjunto de entrenamiento y elegirlas respetando la semántica del problema.</>,
                 analogia: {
                     tipo: 'warn',
                     titulo: 'Analogía: el director técnico que rota a sus jugadores… con criterio',
@@ -1379,7 +1381,7 @@ val_tfms = v2.Compose([
                                 <li><strong>ONNX</strong> es el <strong>pasaporte internacional</strong>: un formato abierto que cualquier
                                     país (<em>framework</em>, lenguaje C++, móvil) reconoce, sin reescribir el modelo.</li>
                                 <li><strong>LiteRT</strong> y la <strong>cuantización</strong> son el equipaje de mano: empacar el modelo en
-                                    INT8 para que quepa y corra <strong>offline</strong> en una tablet en el cafetal, sin internet.</li>
+                                    INT8 para que quepa y corra <strong><em>offline</em></strong> en una tablet en el cafetal, sin internet.</li>
                             </ul>
                         </>
                     ),

@@ -184,6 +184,8 @@
         mjx-container svg { display: inline-block; }
         /* Los ítems de grid no se encogen por debajo de su contenido sin esto: desbordaban a 375 px (auditoría M2-E8). */
         .grid > * { min-width: 0; }
+        /* Un término en cursiva dentro de un texto ya en cursiva pasa a redonda (convención tipográfica) */
+        .italic em, em em { font-style: normal; }
     </style>
 </head>
 
@@ -273,6 +275,9 @@
             if (p.act2Entregada)  pct += 10;
             return Math.min(100, Math.round(pct));
         };
+
+        // Pinta en cursiva los tramos marcados *así* en cadenas de datos (glosario, explicaciones del MCQ); para ordenar o buscar se usa s.replace(/\*/g, '').
+        const conCursivas = (s) => typeof s === 'string' ? s.split(/\*([^*]+)\*/).map((p, i) => i % 2 ? <em key={i}>{p}</em> : p) : s;
 
         /* ============================================================
            SUBCOMPONENTES UI
@@ -403,10 +408,10 @@
                         return (
                             <div className="mt-3 text-[0.9rem] text-gray-700 bg-bg rounded-lg p-3 border-l-4 animate-fade-in" style={{ borderColor: '#FDB913' }}>
                                 {errores.length > 0 && (
-                                    <p className="mb-2"><strong>Sobre la opción elegida:</strong>{' '}{errores.join(' ')}</p>
+                                    <p className="mb-2"><strong>Sobre la opción elegida:</strong>{' '}{conCursivas(errores.join(' '))}</p>
                                 )}
                                 {justifs.length > 0 && (
-                                    <p><strong>{acierto ? 'Explicación:' : 'Respuesta correcta:'}</strong>{' '}{justifs.join(' ')}</p>
+                                    <p><strong>{acierto ? 'Explicación:' : 'Respuesta correcta:'}</strong>{' '}{conCursivas(justifs.join(' '))}</p>
                                 )}
                             </div>
                         );
@@ -612,7 +617,7 @@
                 duracion: '~ 45 min lectura',
                 ra: [
                     'Explicar por qué un MLP fracasa en visión (explosión de parámetros, pérdida de estructura espacial, falta de invarianza a la traslación) y cómo la CNN lo resuelve con conexiones locales y pesos compartidos.',
-                    'Operar la convolución y sus hiperparámetros (kernel, stride, padding) y calcular el tamaño de salida con la fórmula \\(O = \\lfloor (W - K + 2P)/S \\rfloor + 1\\).',
+                    <>Operar la convolución y sus hiperparámetros (kernel, <em>stride</em>, <em>padding</em>) y calcular el tamaño de salida con la fórmula {'\\(O = \\lfloor (W - K + 2P)/S \\rfloor + 1\\)'}.</>,
                     'Reconocer la evolución de arquitecturas (LeNet-5, AlexNet, VGG, GoogLeNet/Inception, ResNet) y el rol de las conexiones de salto frente al problema de degradación (más capas → mayor error de entrenamiento).',
                     'Contrastar CNN y Vision Transformer (sesgo inductivo, hambre de datos, campo receptivo) y decidir cuál conviene según datos y cómputo.',
                     'Aplicar el aprendizaje por transferencia: distinguir la extracción de características (congelar la base) del ajuste fino (descongelar capas con una tasa de aprendizaje baja) y las técnicas de IA en el borde (cuantización, poda y destilación).',
@@ -780,7 +785,7 @@
                     'Describir el autocodificador (codificador–cuello de botella–decodificador) y sus usos: eliminación de ruido, compresión y detección de anomalías por error de reconstrucción.',
                     'Explicar el VAE: mapeo a una distribución (\\(\\mu, \\sigma\\)) que dota al espacio latente de continuidad y permite generar e interpolar.',
                     'Formalizar la GAN como juego minimax \\(\\min_G \\max_D V(D,G)\\), reconocer el colapso de modos y sus variantes (DCGAN, WGAN).',
-                    'Comparar GAN, VAE y modelos de difusión, y comprender la autoatención del Transformer con los vectores Query, Key y Value.',
+                    <>Comparar GAN, VAE y modelos de difusión, y comprender la autoatención del Transformer con los vectores <em>Query</em>, <em>Key</em> y <em>Value</em>.</>,
                 ],
                 analogia: {
                     titulo: 'Analogías locales: la piquería vallenata, TransMilenio y el ajiaco santafereño',
@@ -843,8 +848,8 @@
                             { texto: 'Para que los pesos de atención de cada fila sumen 1.', correcta: false,
                               justificacion: 'De eso se encarga la softmax, con o sin escalado.' },
                             { texto: 'Para evitar que la softmax se sature cuando \\(d_k\\) es grande.', correcta: true,
-                              justificacion: 'Con vectores de dimensión \\(d_k\\), los productos punto crecen en magnitud; sin escalar, la softmax concentra casi todo el peso en un token y sus gradientes se vuelven casi nulos (Vaswani et al., 2017).' },
-                            { texto: 'Para indicar la posición de cada token en la secuencia.', correcta: false,
+                              justificacion: 'Con vectores de dimensión \\(d_k\\), los productos punto crecen en magnitud; sin escalar, la softmax concentra casi todo el peso en un *token* y sus gradientes se vuelven casi nulos (Vaswani et al., 2017).' },
+                            { texto: <>Para indicar la posición de cada <em>token</em> en la secuencia.</>, correcta: false,
                               justificacion: 'La posición la aporta la codificación posicional, que se suma a los vectores de entrada antes de la atención.' },
                             { texto: 'Para reducir el número de parámetros de las matrices \\(Q\\), \\(K\\) y \\(V\\).', correcta: false,
                               justificacion: 'Dividir los puntajes por una constante no cambia el tamaño de las matrices de proyección ni su número de parámetros.' },
@@ -888,7 +893,7 @@
                 entregables: [
                     { titulo: 'Notebook ejecutable (.ipynb)', detalle: 'Con las ramas A (visión), B (secuencias) y C (fusión), documentado y reproducible de principio a fin.' },
                     { titulo: 'Informe técnico único (PDF, máx. 8 páginas)', detalle: 'Metodología, resultados, ablación (solo-imagen / solo-serie / fusionado) y limitaciones declaradas, para las tres ramas.' },
-                    { titulo: 'Visualizaciones estáticas comentadas', detalle: 'Gráficas legibles y comentadas para audiencia no técnica; dashboard interactivo opcional (bonus).' },
+                    { titulo: 'Visualizaciones estáticas comentadas', detalle: <>Gráficas legibles y comentadas para audiencia no técnica; <em>dashboard</em> interactivo opcional (bonus).</> },
                     { titulo: 'Pesos entrenados (.pth o .keras)', detalle: 'Los pesos de los modelos entrenados de cada rama (el state_dict de PyTorch, o .keras / .weights.h5 si se usa Keras 3), listos para reproducir la evaluación.' },
                     { titulo: 'Bitácora de IA', detalle: 'Registro de qué se pidió a la IA y qué se Aceptó / Modificó / Rechazó, con el motivo.' },
                     { titulo: 'Empaque final', detalle: 'Todo en Apellido_Nombre_Centinela_Fase2.zip.' },
@@ -900,9 +905,9 @@
                     'Rama A · Definición del problema y análisis exploratorio de imágenes: elegir el dominio (plagas en café, fauna, patologías médicas o vegetación satelital) y el conjunto de datos (≥ 500 imágenes, ≥ 3 clases), y documentar distribución, calidad y balance.',
                     'Rama A · Arquitectura y aprendizaje por transferencia: comparar ≥ 2 modelos preentrenados (ResNet50, VGG16, EfficientNet); justificar extracción de características frente a ajuste fino; aplicar aumento de datos, partición 70/15/15 y parada anticipada; evaluar con matriz de confusión, F1 por clase y Grad-CAM.',
                     'Rama B · Análisis exploratorio y preprocesamiento de la serie: elegir el dominio (clima/agro, finanzas o logística, ≥ 1.000 observaciones), visualizar tendencia y estacionalidad (ACF/PACF), normalizar y crear secuencias con ventana deslizante respetando el orden temporal (70/15/15).',
-                    'Rama B · Arquitecturas recurrentes: implementar obligatoriamente LSTM y GRU (1–2 capas con dropout) más una RNN simple de contraste; mantener hiperparámetros comparables; evaluar con RMSE, MAE y MAPE y graficar predicciones frente a valores reales.',
+                    <>Rama B · Arquitecturas recurrentes: implementar obligatoriamente LSTM y GRU (1–2 capas con <em>dropout</em>) más una RNN simple de contraste; mantener hiperparámetros comparables; evaluar con RMSE, MAE y MAPE y graficar predicciones frente a valores reales.</>,
                     'Rama B · Desvanecimiento del gradiente: documentar evidencia empírica (traza de normas de gradiente o diferencia de desempeño RNN frente a LSTM/GRU en dependencias largas) y justificar cuándo usar GRU (eficiencia) o LSTM (memoria muy larga o conteo).',
-                    'Rama C · Fusión multimodal: definir la clave de alineación (entidad/fecha/id), concatenar los vectores de representación (embeddings) de A y B en una cabeza densa de decisión y hacer un estudio de ablación (solo imagen / solo serie / fusionado), declarando limitaciones y evitando la fuga de datos.',
+                    <>Rama C · Fusión multimodal: definir la clave de alineación (entidad/fecha/id), concatenar los vectores de representación (<em>embeddings</em>) de A y B en una cabeza densa de decisión y hacer un estudio de ablación (solo imagen / solo serie / fusionado), declarando limitaciones y evitando la fuga de datos.</>,
                     'Uso responsable de IA y comunicación: completar la Bitácora de IA (qué se pidió, aceptó, modificó o rechazó), la Auditoría a la IA (un fallo real detectado y corregido) y el informe en lenguaje no técnico, y preparar la sustentación oral.',
                 ],
                 rubrica: [
@@ -1055,7 +1060,7 @@
             const ENTREGABLES = [
                 'Notebook ejecutable (.ipynb) con ramas A, B y fusión C, documentado.',
                 'Informe técnico en PDF (metodología, resultados, ablación y limitaciones).',
-                'Visualizaciones estáticas comentadas (dashboard interactivo opcional/bonus).',
+                <>Visualizaciones estáticas comentadas (<em>dashboard</em> interactivo opcional/bonus).</>,
                 'Pesos entrenados (.pth, o .keras si se usa Keras 3).',
                 'Bitácora de IA (Aceptada / Modificada / Rechazada + motivo).',
                 'Empaque Apellido_Nombre_Centinela_Fase2.zip.',
@@ -1191,7 +1196,7 @@
                 titulo: 'De la teoría al campo: arquitecturas especializadas (de CNN a Transformers) para desafíos colombianos',
                 duracion: '~ 5 min 13 s (12 escenas)',
                 numEscenas: 12,
-                conceptos: ['CNN: filtro (kernel), paso (stride), relleno (padding) y jerarquía de características', 'LSTM vs. GRU y el compromiso precisión ↔ latencia ↔ cómputo', 'Autocodificadores / VAE para detección de anomalías', 'Transformers y autoatención', 'Aprendizaje por transferencia (extracción de características vs. ajuste fino)', 'IA en el borde: cuantización, poda y destilación del conocimiento', 'Ética, sesgo y conjuntos de datos representativos del territorio'],
+                conceptos: [<>CNN: filtro (kernel), paso (<em>stride</em>), relleno (<em>padding</em>) y jerarquía de características</>, 'LSTM vs. GRU y el compromiso precisión ↔ latencia ↔ cómputo', 'Autocodificadores / VAE para detección de anomalías', 'Transformers y autoatención', 'Aprendizaje por transferencia (extracción de características vs. ajuste fino)', 'IA en el borde: cuantización, poda y destilación del conocimiento', 'Ética, sesgo y conjuntos de datos representativos del territorio'],
                 textoDestacado: [
                     'Las CNN son los ojos del Deep Learning: bordes ▸ texturas ▸ formas',
                     'La mejor red neuronal no es la más precisa, sino la que realmente puedan usar el agricultor, el biólogo del Humboldt o el agente bancario',
@@ -1204,41 +1209,41 @@
 
         /* Glosario (literales del cap 2-1, 2-2 y 2-3) */
         const glossary = [
-            { t: 'AlexNet',             d: 'Arquitectura CNN que ganó ImageNet en 2012 bajando el error top-5 de ~26 % a 15,3 %. Pionera en usar ReLU, dos GPU en paralelo y dropout sobre sus 60 millones de parámetros.' },
-            { t: 'Atención (attention)', d: 'Mecanismo que asigna pesos a cada parte de la entrada para procesar el contexto globalmente, rompiendo la necesidad de procesar los datos en orden secuencial. Analogía: el examen con apuntes abiertos.' },
-            { t: 'Autoatención (self-attention)', d: 'Variante de la atención donde cada token relaciona su importancia con todos los demás dentro de la misma secuencia. Es la clave para desambiguar palabras polisémicas como «vaina».' },
-            { t: 'Autocodificador (AE, autoencoder)', d: 'Red de aprendizaje no supervisado que comprime la entrada a un código latente (cuello de botella) y la reconstruye. Útil para eliminar ruido, comprimir y detectar anomalías. Analogía: TransMilenio.' },
+            { t: 'AlexNet',             d: 'Arquitectura CNN que ganó ImageNet en 2012 bajando el error top-5 de ~26 % a 15,3 %. Pionera en usar ReLU, dos GPU en paralelo y *dropout* sobre sus 60 millones de parámetros.' },
+            { t: 'Atención (*attention*)', d: 'Mecanismo que asigna pesos a cada parte de la entrada para procesar el contexto globalmente, rompiendo la necesidad de procesar los datos en orden secuencial. Analogía: el examen con apuntes abiertos.' },
+            { t: 'Autoatención (*self-attention*)', d: 'Variante de la atención donde cada *token* relaciona su importancia con todos los demás dentro de la misma secuencia. Es la clave para desambiguar palabras polisémicas como «vaina».' },
+            { t: 'Autocodificador (AE, *autoencoder*)', d: 'Red de aprendizaje no supervisado que comprime la entrada a un código latente (cuello de botella) y la reconstruye. Útil para eliminar ruido, comprimir y detectar anomalías. Analogía: TransMilenio.' },
             { t: 'BPTT (retropropagación a través del tiempo)', d: 'Algoritmo de entrenamiento de las RNN que «desenrolla» la red a través de los pasos de tiempo; computacionalmente costoso y propenso al desvanecimiento del gradiente.' },
-            { t: 'Cuello de botella (bottleneck)', d: 'Capa central del autocodificador, de menor dimensión, que fuerza a la red a comprimir la información conservando solo lo esencial. Analogía: el bus articulado de TransMilenio.' },
+            { t: 'Cuello de botella (*bottleneck*)', d: 'Capa central del autocodificador, de menor dimensión, que fuerza a la red a comprimir la información conservando solo lo esencial. Analogía: el bus articulado de TransMilenio.' },
             { t: 'CNN (red neuronal convolucional)', d: 'Red diseñada para datos con estructura de rejilla (imágenes). Usa conexiones locales y pesos compartidos inspirados en la corteza visual para extraer características jerárquicamente.' },
-            { t: 'Compuerta (gate)',     d: 'Estructura sigmoide dentro de las celdas LSTM/GRU que regula el flujo de información como una válvula, con valores entre 0 (cerrada) y 1 (abierta).' },
+            { t: 'Compuerta (*gate*)',     d: 'Estructura sigmoide dentro de las celdas LSTM/GRU que regula el flujo de información como una válvula, con valores entre 0 (cerrada) y 1 (abierta).' },
             { t: 'Convolución',          d: 'Operación de deslizar un filtro (kernel) sobre la imagen para producir un mapa de características; \\(S(i,j) = \\sum_m \\sum_n I(i+m, j+n)\\,K(m,n)\\).' },
             { t: 'DCGAN',                d: 'GAN profunda convolucional: reemplaza capas densas por convolucionales y transpuestas con buenas prácticas de estabilización. Una de las primeras en producir imágenes nítidas de forma reproducible.' },
             { t: 'Difusión (modelos de)', d: 'Modelos que añaden ruido a una imagen y aprenden a revertir ese proceso paso a paso. Sustentan DALL·E 2, Stable Diffusion y buena parte de los generadores actuales de imagen (el DALL·E original de 2021 era un Transformer autorregresivo); su muestreo exige decenas a cientos de pasos.' },
-            { t: 'Computación en el borde (edge computing)', d: 'Procesar los datos localmente en el dispositivo (celular, dron) en lugar de la nube. Crucial en zonas de Colombia con conectividad intermitente.' },
-            { t: 'Embedding (vector de representación)', d: 'Representación de un concepto (palabra, imagen) como un vector en un espacio continuo donde la distancia geométrica refleja similitud semántica.' },
+            { t: 'Computación en el borde (*edge computing*)', d: 'Procesar los datos localmente en el dispositivo (celular, dron) en lugar de la nube. Crucial en zonas de Colombia con conectividad intermitente.' },
+            { t: '*Embedding* (vector de representación)', d: 'Representación de un concepto (palabra, imagen) como un vector en un espacio continuo donde la distancia geométrica refleja similitud semántica.' },
             { t: 'Equilibrio de Nash',   d: 'Estado de un juego en que ningún jugador mejora cambiando unilateralmente su estrategia. En una GAN se alcanza cuando \\(D(x)=1/2\\) y explica la fragilidad del entrenamiento.' },
             { t: 'Espacio latente',      d: 'Espacio vectorial comprimido donde se mapean las características fundamentales de los datos; navegarlo permite manipular conceptos de alto nivel. Analogía: el ajiaco santafereño (VAE).' },
-            { t: 'Estado de la celda (cell state)', d: 'Componente central de la LSTM: una «cinta transportadora» con interacciones lineales (sumas) que mitiga el desvanecimiento del gradiente; el gradiente la cruza casi intacto mientras la compuerta de olvido esté abierta.' },
-            { t: 'Ajuste fino (fine-tuning)', d: 'Estrategia de aprendizaje por transferencia que descongela y reentrena las últimas capas con una tasa de aprendizaje baja. Apropiada cuando el conjunto de datos es grande o muy distinto de ImageNet.' },
-            { t: 'Extracción de características (feature extraction)', d: 'Estrategia de aprendizaje por transferencia que congela los pesos de la red preentrenada y solo entrena un clasificador final nuevo. Apropiada con conjuntos de datos pequeños y similares a ImageNet.' },
+            { t: 'Estado de la celda (*cell state*)', d: 'Componente central de la LSTM: una «cinta transportadora» con interacciones lineales (sumas) que mitiga el desvanecimiento del gradiente; el gradiente la cruza casi intacto mientras la compuerta de olvido esté abierta.' },
+            { t: 'Ajuste fino (*fine-tuning*)', d: 'Estrategia de aprendizaje por transferencia que descongela y reentrena las últimas capas con una tasa de aprendizaje baja. Apropiada cuando el conjunto de datos es grande o muy distinto de ImageNet.' },
+            { t: 'Extracción de características (*feature extraction*)', d: 'Estrategia de aprendizaje por transferencia que congela los pesos de la red preentrenada y solo entrena un clasificador final nuevo. Apropiada con conjuntos de datos pequeños y similares a ImageNet.' },
             { t: 'GAN',                  d: 'Red generativa antagónica (Goodfellow et al., 2014): un generador y un discriminador compiten en un juego minimax. Analogía: la piquería vallenata.' },
             { t: 'GRU (gated recurrent unit)', d: 'Arquitectura recurrente simplificada (2014): fusiona estado de celda y oculto y combina olvido y entrada en una compuerta de actualización. Con menos parámetros por unidad, cada paso cuesta menos cómputo que en la LSTM.' },
             { t: 'ImageNet',             d: 'Base de datos con más de 14 millones de imágenes anotadas; base de la mayoría de modelos preentrenados usados en el aprendizaje por transferencia.' },
-            { t: 'Invarianza a la traslación', d: 'Capacidad de reconocer un objeto sin importar su posición en la imagen. Los pesos compartidos dan equivarianza (el mapa se desplaza con el objeto); el pooling aporta una invarianza aproximada y local a pequeñas traslaciones.' },
+            { t: 'Invarianza a la traslación', d: 'Capacidad de reconocer un objeto sin importar su posición en la imagen. Los pesos compartidos dan equivarianza (el mapa se desplaza con el objeto); el *pooling* aporta una invarianza aproximada y local a pequeñas traslaciones.' },
             { t: 'Juego minimax',        d: 'Formulación que gobierna el entrenamiento de la GAN: \\(\\min_G \\max_D V(D,G)\\). Es de suma cero y su solución es un equilibrio de Nash.' },
-            { t: 'Destilación del conocimiento (knowledge distillation)', d: 'Entrenar un modelo pequeño («estudiante») para imitar las salidas suaves de uno grande («maestro»), logrando un modelo ligero con desempeño cercano. Analogía: el guardaparques novato que aprende del rastreador veterano.' },
+            { t: 'Destilación del conocimiento (*knowledge distillation*)', d: 'Entrenar un modelo pequeño («estudiante») para imitar las salidas suaves de uno grande («maestro»), logrando un modelo ligero con desempeño cercano. Analogía: el guardaparques novato que aprende del rastreador veterano.' },
             { t: 'LSTM (long short-term memory)', d: 'Arquitectura recurrente (1997) con celda de memoria y tres compuertas sigmoides (olvido, entrada y salida) que aprende dependencias a largo plazo; la compuerta de olvido, hoy estándar, la añadieron Gers et al. (2000).' },
-            { t: 'Colapso de modos (mode collapse)', d: 'Patología de la GAN en que el generador repite unas pocas muestras que engañan al discriminador, ignorando la diversidad de los datos.' },
-            { t: 'Relleno (padding)',    d: 'Píxeles (usualmente ceros) añadidos al borde de la imagen antes de la convolución para conservar dimensiones y no perder información de los bordes.' },
-            { t: 'Pooling (submuestreo)', d: 'Submuestreo que reduce el tamaño espacial (p. ej., el max pooling toma el máximo de cada región), aportando invarianza aproximada a pequeñas traslaciones.' },
-            { t: 'Poda (pruning)',       d: 'Eliminar pesos o neuronas con contribución cercana a cero, generando una red dispersa más ligera. Analogía: el guardaparques que despeja una trocha (retira la maleza improductiva).' },
-            { t: 'Query, Key, Value',    d: 'Los tres vectores del cálculo de atención del Transformer: una «consulta» se compara con las «claves» para recuperar el «valor» semántico relevante.' },
+            { t: 'Colapso de modos (*mode collapse*)', d: 'Patología de la GAN en que el generador repite unas pocas muestras que engañan al discriminador, ignorando la diversidad de los datos.' },
+            { t: 'Relleno (*padding*)',    d: 'Píxeles (usualmente ceros) añadidos al borde de la imagen antes de la convolución para conservar dimensiones y no perder información de los bordes.' },
+            { t: '*Pooling* (submuestreo)', d: 'Submuestreo que reduce el tamaño espacial (p. ej., el *max pooling* toma el máximo de cada región), aportando invarianza aproximada a pequeñas traslaciones.' },
+            { t: 'Poda (*pruning*)',       d: 'Eliminar pesos o neuronas con contribución cercana a cero, generando una red dispersa más ligera. Analogía: el guardaparques que despeja una trocha (retira la maleza improductiva).' },
+            { t: '*Query*, *Key*, *Value*',    d: 'Los tres vectores del cálculo de atención del Transformer: una «consulta» se compara con las «claves» para recuperar el «valor» semántico relevante.' },
             { t: 'Cuantización',         d: 'Reducir la precisión de los pesos (p. ej., de FP32 a INT8): el modelo es ≈ 4 veces más pequeño y, en hardware con aritmética entera de 8 bits, más rápido. Viable en dispositivos de borde modestos (Raspberry Pi, Jetson).' },
-            { t: 'ResNet',               d: 'Red residual (2015) con conexiones de salto que aprenden \\(\\mathcal{F}(x)+x\\) y resuelven el problema de degradación, permitiendo entrenar cientos de capas. Uno de los backbones de referencia del aprendizaje por transferencia.' },
+            { t: 'ResNet',               d: 'Red residual (2015) con conexiones de salto que aprenden \\(\\mathcal{F}(x)+x\\) y resuelven el problema de degradación, permitiendo entrenar cientos de capas. Uno de los *backbones* de referencia del aprendizaje por transferencia.' },
             { t: 'RNN (red neuronal recurrente)', d: 'Red para datos secuenciales con bucles de retroalimentación que mantienen un estado interno (memoria) de las entradas previas.' },
-            { t: 'Paso (stride)',        d: 'Cuántos píxeles salta el filtro en cada paso; un paso mayor que 1 reduce el tamaño de la salida (submuestreo).' },
-            { t: 'Aprendizaje por transferencia (transfer learning)', d: 'Reutilizar un modelo entrenado en una tarea general (ImageNet) para una tarea nueva con menos datos (p. ej., plagas del café colombiano).' },
+            { t: 'Paso (*stride*)',        d: 'Cuántos píxeles salta el filtro en cada paso; un paso mayor que 1 reduce el tamaño de la salida (submuestreo).' },
+            { t: 'Aprendizaje por transferencia (*transfer learning*)', d: 'Reutilizar un modelo entrenado en una tarea general (ImageNet) para una tarea nueva con menos datos (p. ej., plagas del café colombiano).' },
             { t: 'Transformer',          d: 'Arquitectura (2017, «Attention is all you need») basada enteramente en atención, con procesamiento en paralelo; base de la IA generativa moderna.' },
             { t: 'VAE (autocodificador variacional)', d: 'Autocodificador que mapea la entrada a una distribución (\\(\\mu, \\sigma\\)) en lugar de un punto, dotando al espacio latente de continuidad para generar e interpolar. Analogía: el ajiaco santafereño.' },
             { t: 'VGG',                  d: 'CNN uniforme que usa solo filtros de \\(3\\times3\\); muy efectiva pero pesada (VGG-16 ≈ 138 millones de parámetros).' },
@@ -1281,7 +1286,7 @@
                 eventos: [
                     { fecha: COHORTE_ANIO + '-06-17', hora: '19:30 – 21:00', tipo: 'Encuentro 1', tipoColor: '#3D008D', titulo: 'CNN y Vision Transformers', desc: 'Fundamentos biológicos, convolución, hiperparámetros (filtro, paso y relleno), evolución LeNet→ResNet y comparativa CNN vs. ViT.', link: TEAMS_URL, linkLabel: 'Teams sincrónico' },
                     { fecha: COHORTE_ANIO + '-06-18', hora: '19:30 – 21:00', tipo: 'Encuentro 2', tipoColor: '#3D008D', titulo: 'Modelos secuenciales y atención', desc: 'RNN, BPTT y desvanecimiento del gradiente; LSTM y GRU; cuello de botella del codificador-decodificador y mecanismo de atención de Bahdanau.', link: TEAMS_URL, linkLabel: 'Teams sincrónico' },
-                    { fecha: 'Toda la semana', tipo: 'Asincrónico', tipoColor: '#FDB913', titulo: 'Video de Profundización — De CNN a Transformers', desc: 'Recurso audiovisual de 12 escenas (≈ 5 min): arquitecturas especializadas para café, biodiversidad, clima y banca, con Transfer Learning y Edge AI.' },
+                    { fecha: 'Toda la semana', tipo: 'Asincrónico', tipoColor: '#FDB913', titulo: 'Video de Profundización — De CNN a Transformers', desc: 'Recurso audiovisual de 12 escenas (≈ 5 min): arquitecturas especializadas para café, biodiversidad, clima y banca, con aprendizaje por transferencia y Edge AI.' },
                 ],
             },
             semana2: {
@@ -1772,8 +1777,8 @@
             // Agrupar por letra inicial
             const grouped = useMemo(() => {
                 const map = {};
-                [...glossary].sort((a, b) => a.t.localeCompare(b.t, 'es')).forEach(g => {
-                    const letter = g.t.normalize('NFD')[0].toUpperCase();
+                [...glossary].sort((a, b) => a.t.replace(/\*/g, '').localeCompare(b.t.replace(/\*/g, ''), 'es')).forEach(g => {
+                    const letter = g.t.replace(/\*/g, '').normalize('NFD')[0].toUpperCase();
                     (map[letter] = map[letter] || []).push(g);
                 });
                 return Object.keys(map).sort().reduce((acc, k) => (acc[k] = map[k], acc), {});
@@ -1786,9 +1791,9 @@
                         {terms.map((g, i) => (
                             <div key={i} className="border-l-2 border-primary/30 pl-3">
                                 <h4 className="font-bold text-navy text-[0.95rem]">
-                                    {g.t}
+                                    {conCursivas(g.t)}
                                 </h4>
-                                <p className="text-[0.85rem] text-gray-600 leading-relaxed">{g.d}</p>
+                                <p className="text-[0.85rem] text-gray-600 leading-relaxed">{conCursivas(g.d)}</p>
                             </div>
                         ))}
                     </div>

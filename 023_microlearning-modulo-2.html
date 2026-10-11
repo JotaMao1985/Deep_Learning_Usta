@@ -328,6 +328,8 @@
         /* MathJax (tex-svg) + Preflight de Tailwind (svg{display:block}) rompe la
            matematica inline: cada formula salta de linea. Se restaura el flujo inline. */
         mjx-container svg { display: inline-block; }
+        /* Un término en cursiva dentro de un texto ya en cursiva pasa a redonda (convención tipográfica) */
+        .italic em, em em { font-style: normal; }
     </style>
 </head>
 
@@ -1278,7 +1280,7 @@
                         { texto: 'un proceso fijo que añade ruido y una red que aprende a quitarlo paso a paso.', correcta: false, justificacion: 'Eso describe un modelo de difusión, no una GAN. La difusión revierte un proceso conocido de adición de ruido.' },
                         { texto: 'un juego entre un generador que crea y un discriminador que juzga.', correcta: true, justificacion: 'El generador G busca engañar al discriminador D, y D busca no dejarse engañar. En el equilibrio teórico, D queda reducido a «lanzar una moneda» (D(x) = 1/2). Este juego produce nitidez, pero es inestable (colapso de modos).' },
                         { texto: 'la codificación de la entrada en una distribución latente y su decodificación.', correcta: false, justificacion: 'Eso describe un VAE, que optimiza la cota ELBO con una regularización KL. No hay juego adversario.' },
-                        { texto: 'una red que predice cada píxel a partir de los anteriores, uno a la vez.', correcta: false, justificacion: 'Eso describe un modelo autorregresivo (como el DALL·E original, que generaba la imagen como una secuencia de tokens). La GAN genera la imagen completa en una sola pasada del generador.' },
+                        { texto: 'una red que predice cada píxel a partir de los anteriores, uno a la vez.', correcta: false, justificacion: <>Eso describe un modelo autorregresivo (como el DALL·E original, que generaba la imagen como una secuencia de <em>tokens</em>). La GAN genera la imagen completa en una sola pasada del generador.</> },
                     ],
                 },
             },
@@ -1292,7 +1294,7 @@
                     url: 'https://www.youtube.com/watch?v=5T-iXNNiwIs',
                     descripcion: 'Explica cómo se reutiliza una red ya entrenada y se ajustan sus capas (ajuste fino) para una tarea nueva, en lugar de entrenar desde cero.',
                 },
-                objetivo: 'Saber cuándo congelar la red base (extracción de características) y cuándo descongelar capas para reentrenarlas (ajuste fino, en inglés fine-tuning), según el tamaño y la similitud de los datos.',
+                objetivo: <>Saber cuándo congelar la red base (extracción de características) y cuándo descongelar capas para reentrenarlas (ajuste fino, en inglés <em>fine-tuning</em>), según el tamaño y la similitud de los datos.</>,
                 analogia: {
                     tipo: 'tip',
                     titulo: 'Analogía: el experto que ya sabe lo básico',

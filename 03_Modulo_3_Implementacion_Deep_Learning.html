@@ -309,6 +309,8 @@
         }
         /* Citas APA (auditoría 2026-10): el título muestra la referencia completa */
         .cita { cursor: help; }
+        /* Un término en cursiva dentro de un texto ya en cursiva pasa a redonda (convención tipográfica) */
+        .italic em, em em { font-style: normal; }
     </style>
 </head>
 
@@ -2085,7 +2087,7 @@ import keras
                     <h3>Comprobación de la comprensión</h3>
                     <Quiz titulo="Minicuestionario · Capítulo 3.1" preguntas={[
                         {
-                            pregunta: 'TensorFlow 2.x adoptó por defecto la ejecución inmediata (eager). ¿Qué la distingue del paradigma de grafos estáticos de TF 1.x?',
+                            pregunta: <>TensorFlow 2.x adoptó por defecto la ejecución inmediata (<em>eager</em>). ¿Qué la distingue del paradigma de grafos estáticos de TF 1.x?</>,
                             opciones: [
                                 { texto: 'Convierte automáticamente cada función en un grafo optimizado antes de ejecutarla.', correcta: false },
                                 { texto: 'Acumula las operaciones y las ejecuta todas juntas al llamar a model.fit().', correcta: false },
@@ -2097,12 +2099,12 @@ import keras
                         {
                             pregunta: '¿Qué afirmación describe correctamente a Keras 3?',
                             opciones: [
-                                { texto: 'Es multi-backend: el mismo código corre sobre TensorFlow, PyTorch o JAX.', correcta: true },
+                                { texto: <>Es multi-<em>backend</em>: el mismo código corre sobre TensorFlow, PyTorch o JAX.</>, correcta: true },
                                 { texto: 'Es una capa de TensorFlow que traduce los modelos de PyTorch a grafos estáticos.', correcta: false },
                                 { texto: 'Sustituye a PyTorch en investigación porque compila cada modelo con XLA.', correcta: false },
-                                { texto: 'Solo sirve para inferencia: el entrenamiento se hace en el framework nativo.', correcta: false },
+                                { texto: <>Solo sirve para inferencia: el entrenamiento se hace en el <em>framework</em> nativo.</>, correcta: false },
                             ],
-                            justificacion: 'Keras 3 (finales de 2023) es agnóstico del backend: la variable de entorno KERAS_BACKEND, fijada antes de importar Keras, selecciona el motor de ejecución, y con él se entrena y se infiere.'
+                            justificacion: <>Keras 3 (finales de 2023) es agnóstico del <em>backend</em>: la variable de entorno KERAS_BACKEND, fijada antes de importar Keras, selecciona el motor de ejecución, y con él se entrena y se infiere.</>
                         },
                         {
                             pregunta: 'En PyTorch, ¿cuál es la función del parámetro requires_grad=True de un tensor?',
@@ -2115,7 +2117,7 @@ import keras
                             justificacion: 'requires_grad=True activa el rastreo del grafo dinámico; al llamar a .backward(), Autograd recorre el grafo en orden inverso aplicando la regla de la cadena. Mover el tensor es tarea de .to(device).'
                         },
                         {
-                            pregunta: '¿Cuál de estas asociaciones entre framework y fortaleza es la más exacta?',
+                            pregunta: <>¿Cuál de estas asociaciones entre <em>framework</em> y fortaleza es la más exacta?</>,
                             opciones: [
                                 { texto: 'PyTorch lidera el despliegue móvil maduro y TensorFlow, la investigación académica.', correcta: false },
                                 { texto: 'TensorFlow/Keras destaca en producción y móvil; PyTorch, en investigación e IA generativa.', correcta: true },
@@ -3772,7 +3774,7 @@ resultado = programa_cargado.module()(torch.randn(4, 3, 224, 224))`} />
                                 { texto: 'Mantiene vivos los procesos de carga entre épocas para no tener que reiniciarlos.', correcta: false },
                                 { texto: 'Fija los pesos del modelo para que el optimizador no los modifique durante el ajuste.', correcta: false },
                             ],
-                            justificacion: 'La memoria fijada (page-locked) no puede paginarse al disco, lo que permite copias DMA directas y asíncronas de la CPU a la GPU; conviene combinarla con .to(device, non_blocking=True). Mantener vivos los procesos de carga es tarea de persistent_workers.'
+                            justificacion: <>La memoria fijada (<em>page-locked</em>) no puede paginarse al disco, lo que permite copias DMA directas y asíncronas de la CPU a la GPU; conviene combinarla con .to(device, non_blocking=True). Mantener vivos los procesos de carga es tarea de persistent_workers.</>
                         },
                         {
                             pregunta: 'Un modelo lee el número de lote impreso en los sacos de café. ¿Qué transformación de aumento sería contraproducente?',
@@ -3800,7 +3802,7 @@ resultado = programa_cargado.module()(torch.randn(4, 3, 224, 224))`} />
                                 { texto: 'Acelera la carga porque omite los metadatos guardados en el archivo.', correcta: false },
                                 { texto: 'Permite cargar el modelo sin declarar antes la clase de su arquitectura.', correcta: false },
                                 { texto: 'Evita ejecutar código arbitrario: solo deserializa tensores y tipos primitivos.', correcta: true },
-                                { texto: 'Convierte el archivo .pth en un formato portable entre frameworks.', correcta: false },
+                                { texto: <>Convierte el archivo .pth en un formato portable entre <em>frameworks</em>.</>, correcta: false },
                             ],
                             justificacion: 'Sin weights_only=True, torch.load usa Pickle, que puede ejecutar código arbitrario al cargar archivos no confiables. Es el comportamiento por defecto desde PyTorch 2.6; la arquitectura sigue haciendo falta para cargar un state_dict.'
                         },
@@ -3898,12 +3900,12 @@ resultado = programa_cargado.module()(torch.randn(4, 3, 224, 224))`} />
                         justificacion: 'prefetch() solapa la preparación del lote siguiente con el entrenamiento del actual, así que debe actuar sobre lotes ya terminados: al final de la cadena. cache() va antes del aumento aleatorio, map() se ejecuta en la CPU y shuffle() mezcla ejemplos antes de batch().'
                     },
                     {
-                        pregunta: 'Un modelo construido solo con capas de Keras y guardado en formato .keras con el backend PyTorch solo puede volver a cargarse si se mantiene PyTorch como backend. (Verdadero/Falso)',
+                        pregunta: <>Un modelo construido solo con capas de Keras y guardado en formato .keras con el <em>backend</em> PyTorch solo puede volver a cargarse si se mantiene PyTorch como <em>backend</em>. (Verdadero/Falso)</>,
                         opciones: [
                             { texto: 'Verdadero', correcta: false },
                             { texto: 'Falso', correcta: true },
                         ],
-                        justificacion: 'Falso: el formato .keras es agnóstico del backend; el mismo archivo se recarga con TensorFlow, PyTorch o JAX (Capítulo 3.3, Tabla 3.3.2).'
+                        justificacion: <>Falso: el formato .keras es agnóstico del <em>backend</em>; el mismo archivo se recarga con TensorFlow, PyTorch o JAX (Capítulo 3.3, Tabla 3.3.2).</>
                     },
                     {
                         pregunta: 'Un equipo entrena un detector de roya con 3.000 fotos de hojas tomadas con celular. ¿Qué transformación de aumento sería contraproducente?',
@@ -3941,7 +3943,7 @@ resultado = programa_cargado.module()(torch.randn(4, 3, 224, 224))`} />
                             { texto: 'Solo el state_dict del modelo: Adam recupera sus medias móviles en la primera iteración.', correcta: false },
                             { texto: 'El modelo exportado a ONNX, que conserva los pesos y el estado del optimizador.', correcta: false },
                             { texto: 'Un SavedModel, porque almacena el grafo y la lógica de servicio del modelo.', correcta: false },
-                            { texto: 'Un checkpoint con los state_dict del modelo y del optimizador, la época y la pérdida.', correcta: true },
+                            { texto: <>Un <em>checkpoint</em> con los state_dict del modelo y del optimizador, la época y la pérdida.</>, correcta: true },
                         ],
                         justificacion: 'Para reanudar exactamente hacen falta los state_dict del modelo y del optimizador (con las medias móviles de Adam del Módulo 1), la época y la pérdida. ONNX y SavedModel sirven para desplegar, no para continuar el entrenamiento.'
                     },
@@ -4006,49 +4008,51 @@ resultado = programa_cargado.module()(torch.randn(4, 3, 224, 224))`} />
         /* ============================================================
            GLOSARIO DEL MÓDULO 3 (frameworks, cómputo, pipelines y despliegue)
         ============================================================ */
+        const conCursivas = (s) => typeof s === 'string' ? s.split(/\*([^*]+)\*/).map((p, i) => i % 2 ? <em key={i}>{p}</em> : p) : s;
+
         const GLOSARIO_M3 = [
             ['TensorFlow', 'Marco de trabajo de código abierto de Google para aprendizaje profundo. Incluye Keras como API de alto nivel y un ecosistema de despliegue (TF Serving, LiteRT, TF.js). Analogía: la notaría digital, con ejecución inmediata.'],
             ['PyTorch', 'Marco de trabajo creado por Facebook AI Research (hoy Meta) y alojado desde 2022 en la Linux Foundation, con grafos computacionales dinámicos. Mayoritario en la investigación desde 2019. Analogía: el río Magdalena, cuya ruta decide cada crecida.'],
-            ['Keras 3', 'API multi-backend (TensorFlow, PyTorch, JAX) lanzada a finales de 2023. Permite escribir el código una vez y ejecutarlo en cualquier motor; el backend se elige con KERAS_BACKEND antes de importar Keras.'],
+            ['Keras 3', <>API multi-<em>backend</em> (TensorFlow, PyTorch, JAX) lanzada a finales de 2023. Permite escribir el código una vez y ejecutarlo en cualquier motor; el <em>backend</em> se elige con KERAS_BACKEND antes de importar Keras.</>],
             ['GPU', 'Unidad de procesamiento gráfico: hardware con miles de núcleos paralelos optimizado para operaciones matriciales. Acelera el entrenamiento en uno o dos órdenes de magnitud según el modelo. Analogía: la despulpadora industrial de café.'],
             ['CUDA', 'Plataforma de computación paralela que NVIDIA lanzó en 2006 y que permite ejecutar código en GPU. Base de todo el ecosistema de aprendizaje profundo acelerado.'],
             ['Tensor Core', 'Unidad de hardware especializada en multiplicación-acumulación de matrices (MMA). En la A100 rinde 16 veces más que los núcleos CUDA en FP16.'],
             ['VRAM', 'Memoria de video de la GPU; el recurso más limitante. Almacena pesos, gradientes, estados del optimizador y activaciones. Analogía: la bodega de la plaza de mercado.'],
-            ['Precisión mixta automática (AMP, automatic mixed precision)', 'Calcula en FP16/BF16 y conserva los pesos maestros en FP32; acelera hasta 2–3× en GPU con Tensor Cores y ahorra sobre todo memoria de activaciones (el ahorro total es menor que la mitad).'],
+            ['Precisión mixta automática (AMP, *automatic mixed precision*)', 'Calcula en FP16/BF16 y conserva los pesos maestros en FP32; acelera hasta 2–3× en GPU con Tensor Cores y ahorra sobre todo memoria de activaciones (el ahorro total es menor que la mitad).'],
             ['DataLoader (PyTorch)', 'Clase que gestiona la carga paralela de datos con num_workers, pin_memory y prefetch_factor para aprovechar al máximo la GPU.'],
             ['tf.data (TensorFlow)', 'API declarativa para construir flujos de datos eficientes con operaciones encadenadas (map, cache, shuffle, batch, prefetch).'],
-            ['Precarga (prefetch)', 'Superpone la preparación del siguiente lote (CPU) con el entrenamiento del lote actual (GPU). Analogía: preparar el siguiente plato mientras el actual se cocina.'],
-            ['pin_memory', 'Parámetro del DataLoader que asigna los tensores en memoria fijada (page-locked) de la CPU, lo que permite copias DMA asíncronas más rápidas a la GPU.'],
+            ['Precarga (*prefetch*)', 'Superpone la preparación del siguiente lote (CPU) con el entrenamiento del lote actual (GPU). Analogía: preparar el siguiente plato mientras el actual se cocina.'],
+            ['pin_memory', <>Parámetro del DataLoader que asigna los tensores en memoria fijada (<em>page-locked</em>) de la CPU, lo que permite copias DMA asíncronas más rápidas a la GPU.</>],
             ['num_workers', 'Número de procesos de carga del DataLoader que preparan datos en paralelo en segundo plano. Analogía: varios meseros que trabajan en paralelo.'],
-            ['Aumento de datos (data augmentation)', 'Técnica de regularización que aplica transformaciones aleatorias (volteo, rotación, color) a los datos de entrenamiento, nunca a los de validación. Analogía: entrenar a la Selección Colombia en condiciones variadas.'],
+            ['Aumento de datos (*data augmentation*)', 'Técnica de regularización que aplica transformaciones aleatorias (volteo, rotación, color) a los datos de entrenamiento, nunca a los de validación. Analogía: entrenar a la Selección Colombia en condiciones variadas.'],
             ['Mixup / CutMix', 'Técnicas de aumento que mezclan dos muestras: Mixup interpola imágenes y etiquetas; CutMix recorta una región y la pega en otra, ajustando las etiquetas por área.'],
-            ['AlbumentationsX', 'Biblioteca de aumento de imágenes basada en OpenCV, sucesora de Albumentations (MIT). Licencia AGPL-3.0 (copyleft, también para servicios en red) o comercial.'],
-            ['Hambruna de GPU (GPU starvation)', 'La GPU permanece ociosa esperando datos porque el flujo de datos no la alimenta a tiempo. Se mitiga con prefetch, num_workers y cache.'],
+            ['AlbumentationsX', <>Biblioteca de aumento de imágenes basada en OpenCV, sucesora de Albumentations (MIT). Licencia AGPL-3.0 (<em>copyleft</em>, también para servicios en red) o comercial.</>],
+            ['Hambruna de GPU (*GPU starvation*)', 'La GPU permanece ociosa esperando datos porque el flujo de datos no la alimenta a tiempo. Se mitiga con prefetch, num_workers y cache.'],
             ['ONNX', 'Open Neural Network Exchange: formato abierto para modelos, mantenido por la LF AI & Data Foundation (Linux Foundation). Desde PyTorch 2.9 se exporta con el exportador basado en torch.export. Analogía: el pasaporte del modelo.'],
             ['torch.export', 'Sucesor de TorchScript. Captura el modelo como un grafo AOT de operadores ATen (.pt2); introducido en PyTorch 2.1, es la base del exportador ONNX (predeterminado desde la 2.9), de AOTInductor y de ExecuTorch.'],
-            ['Transferencia de aprendizaje (transfer learning)', 'Reutilizar un modelo preentrenado (ResNet-18, MobileNetV3) para una tarea nueva con menos datos y cómputo; clave en entornos con recursos limitados.'],
+            ['Transferencia de aprendizaje (*transfer learning*)', 'Reutilizar un modelo preentrenado (ResNet-18, MobileNetV3) para una tarea nueva con menos datos y cómputo; clave en entornos con recursos limitados.'],
             ['Cuantización', 'Reducir la precisión de los pesos (p. ej., de FP32 a INT8): el modelo queda unas 4 veces más pequeño y, en hardware con aritmética entera de 8 bits, más rápido, con cierta pérdida de exactitud; clave para el borde.'],
             ['LiteRT', 'Sucesor de TensorFlow Lite. Proyecto independiente para inferencia optimizada en móviles y borde, con API nativas en Kotlin y C++.'],
-            ['ExecuTorch', 'Entorno de ejecución (runtime) oficial de PyTorch para móviles y borde (sucesor de PyTorch Mobile). Ejecuta programas de torch.export convertidos a .pte; soporta Arm, Apple y Qualcomm.'],
+            ['ExecuTorch', <>Entorno de ejecución (<em>runtime</em>) oficial de PyTorch para móviles y borde (sucesor de PyTorch Mobile). Ejecuta programas de torch.export convertidos a .pte; soporta Arm, Apple y Qualcomm.</>],
             ['SavedModel', 'Formato nativo de TensorFlow para despliegue. Almacena el grafo, los pesos y la lógica de servicio. Estándar para TF Serving, LiteRT y TF.js.'],
-            ['Punto de control (checkpoint)', 'Guardado periódico del estado del modelo, del optimizador, de la época y de la pérdida; permite reanudar un entrenamiento interrumpido (esencial en Colab). No confundir con la recomputación de activaciones.'],
+            ['Punto de control (*checkpoint*)', 'Guardado periódico del estado del modelo, del optimizador, de la época y de la pérdida; permite reanudar un entrenamiento interrumpido (esencial en Colab). No confundir con la recomputación de activaciones.'],
             ['FSDP', 'Fully Sharded Data Parallel: estrategia multi-GPU que fragmenta pesos, gradientes y estados del optimizador, para entrenar modelos que exceden la VRAM de una GPU.'],
             ['Google Colab', 'Entorno de cuadernos Jupyter en la nube de Google con acceso gratuito a GPU T4, con límites variables y no publicados. Planes Pro (≈10 USD/mes) y Pro+ (≈50 USD/mes), a octubre de 2026, con GPU más potentes.'],
             ['Kaggle Notebooks', 'Plataforma de ciencia de datos con GPU gratuitas (P100 o 2 × T4) y una cuota semanal visible en la cuenta (≈30 h a octubre de 2026). Integra conjuntos de datos y competiciones.'],
             ['torch.compile', 'Compila el modelo (vía Dynamo) para acelerarlo dentro de Python; no produce un archivo desplegable.'],
             ['TorchScript', 'Antiguo formato de serialización de PyTorch (torch.jit), declarado obsoleto en PyTorch 2.9; su sucesor es torch.export.'],
-            ['Ejecución inmediata (eager)', 'Cada operación se ejecuta y devuelve su resultado en el acto; es el modo predeterminado de TensorFlow 2.x y de PyTorch (define-by-run). Analogía: la notaría digital.'],
+            ['Ejecución inmediata (*eager*)', <>Cada operación se ejecuta y devuelve su resultado en el acto; es el modo predeterminado de TensorFlow 2.x y de PyTorch (<em>define-by-run</em>). Analogía: la notaría digital.</>],
             ['Grafo estático y grafo dinámico', 'El grafo estático se define completo antes de ejecutarse (TensorFlow 1.x, tf.function); el dinámico se construye operación por operación mientras el código corre (PyTorch), lo que permite usar if y for de Python.'],
             ['Autograd', 'Motor de diferenciación automática de PyTorch: registra las operaciones sobre tensores con requires_grad=True y, al llamar a .backward(), aplica la regla de la cadena en orden inverso. Analogía: el secretario invisible del Módulo 1.'],
-            ['SIMT', 'Single Instruction, Multiple Threads: una misma instrucción se ejecuta en paralelo sobre muchos hilos con datos distintos; es el modelo de ejecución de la GPU.'],
+            ['SIMT', <><em>Single Instruction, Multiple Threads</em>: una misma instrucción se ejecuta en paralelo sobre muchos hilos con datos distintos; es el modelo de ejecución de la GPU.</>],
             ['DDP (DistributedDataParallel)', 'Estrategia multi-GPU recomendada en PyTorch: un proceso por GPU que sincroniza los gradientes con NCCL. Analogía: la minga.'],
-            ['Recomputación de activaciones (gradient checkpointing)', 'Guarda solo algunas activaciones y recalcula las demás en el paso hacia atrás; ahorra VRAM a cambio de cómputo (no confundir con el punto de control del entrenamiento).'],
+            ['Recomputación de activaciones (*gradient checkpointing*)', 'Guarda solo algunas activaciones y recalcula las demás en el paso hacia atrás; ahorra VRAM a cambio de cómputo (no confundir con el punto de control del entrenamiento).'],
             ['Acumulación de gradientes', 'Suma los gradientes de k lotes pequeños antes de actualizar los pesos; simula un lote k veces mayor sin memoria adicional.'],
             ['Escalado de pérdida', 'Multiplica la pérdida antes de backward para que los gradientes pequeños no se anulen por subdesbordamiento en FP16; GradScaler ajusta el factor de forma dinámica. Innecesario con BF16.'],
             ['state_dict', 'Diccionario con los parámetros y búferes de un modelo (o con el estado de un optimizador); para cargarlo hay que declarar antes la arquitectura.'],
             ['weights_only', 'Argumento de torch.load (True por defecto desde PyTorch 2.6) que solo deserializa tensores y tipos primitivos, lo que evita ejecutar código arbitrario al cargar archivos ajenos.'],
-            ['API REST', 'Servicio web que expone el modelo en un punto de acceso (endpoint) HTTP y devuelve la predicción en JSON; en el curso, FastAPI con ONNX Runtime.'],
-            ['Computación en el borde (edge computing)', 'Ejecutar el modelo en el propio dispositivo (teléfono, tablet, sensor) en lugar de en un servidor; funciona sin internet y no envía los datos fuera. Requiere modelos compactos o cuantizados.'],
+            ['API REST', <>Servicio web que expone el modelo en un punto de acceso (<em>endpoint</em>) HTTP y devuelve la predicción en JSON; en el curso, FastAPI con ONNX Runtime.</>],
+            ['Computación en el borde (*edge computing*)', 'Ejecutar el modelo en el propio dispositivo (teléfono, tablet, sensor) en lugar de en un servidor; funciona sin internet y no envía los datos fuera. Requiere modelos compactos o cuantizados.'],
         ];
 
         const GlosarioSection = () => (
@@ -4063,9 +4067,9 @@ resultado = programa_cargado.module()(torch.randn(4, 3, 224, 224))`} />
                 </Box>
 
                 <div className="grid md:grid-cols-2 gap-2">
-                    {[...GLOSARIO_M3].sort((a, b) => a[0].localeCompare(b[0], 'es')).map(([t, d], i) => (
+                    {[...GLOSARIO_M3].sort((a, b) => a[0].replace(/\*/g, '').localeCompare(b[0].replace(/\*/g, ''), 'es')).map(([t, d], i) => (
                         <div key={i} className="border border-gray-200 rounded-lg p-3 bg-white">
-                            <span className="font-bold text-primary text-sm">{t}</span>
+                            <span className="font-bold text-primary text-sm">{conCursivas(t)}</span>
                             <p className="text-xs text-gray-600 mt-0.5" style={{ margin: '2px 0 0' }}>{d}</p>
                         </div>
                     ))}

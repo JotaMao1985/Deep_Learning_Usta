@@ -295,6 +295,8 @@
         }
         /* Citas APA (auditoría 2026-10): el título muestra la referencia completa */
         .cita { cursor: help; }
+        /* Un término en cursiva dentro de un texto ya en cursiva pasa a redonda (convención tipográfica) */
+        .italic em, em em { font-style: normal; }
     </style>
 </head>
 
@@ -897,6 +899,8 @@
         ============================================================ */
         /* Número con coma decimal para el texto visible (regla B: coma en prosa, leyendas, SVG y UI; punto en código y LaTeX). */
         const fmtDec = (v, d) => v.toFixed(d).replace('.', ',');
+        // Pinta en cursiva los tramos marcados *así* en cadenas de datos (glosario); para ordenar o buscar se usa s.replace(/\*/g, '').
+        const conCursivas = (s) => typeof s === 'string' ? s.split(/\*([^*]+)\*/).map((p, i) => i % 2 ? <em key={i}>{p}</em> : p) : s;
 
         /* Pie de figura normalizado (canon del M1): «Figura c.n.» + descripción + fuente.
            Numeración por capítulo del módulo, como en el M1: c = orden del capítulo dentro del módulo
@@ -1500,15 +1504,15 @@
                     <h4>Hiperparámetros que controlan la dimensión</h4>
                     <Accordion items={[
                         {
-                            titulo: 'Stride (zancada): cuánto se desplaza el filtro',
+                            titulo: <><em>Stride</em> (zancada): cuánto se desplaza el filtro</>,
                             contenido: <span>Con <em>stride</em> = 1 el filtro se mueve píxel a píxel y preserva resolución (mayor costo). Con <em>stride</em> ≥ 2 salta píxeles y reduce la dimensión espacial (<em>downsampling</em>), aprendiendo los parámetros de la reducción.</span>
                         },
                         {
-                            titulo: 'Padding (relleno): proteger los bordes',
+                            titulo: <><em>Padding</em> (relleno): proteger los bordes</>,
                             contenido: <span>Aplicar convoluciones encoge la imagen y descuida los bordes. El <em>zero-padding</em> agrega ceros alrededor de la entrada. El <strong>valid padding</strong> no rellena ({String.raw`\(P=0\)`}); el <strong>same padding</strong> rellena para conservar el tamaño con {String.raw`\(P=\tfrac{K-1}{2}\)`}, clave en ResNet para mantener las dimensiones espaciales y permitir la suma residual {String.raw`\(F(x)+x\)`} dentro del bloque.</span>
                         },
                         {
-                            titulo: 'Pooling (submuestreo): invarianza y reducción',
+                            titulo: <><em>Pooling</em> (submuestreo): invarianza y reducción</>,
                             contenido: <span><strong><em>Max pooling</em></strong> toma el máximo de cada región (p. ej., 2×2): si un rasgo se detectó allí, lo conserva y descarta su ubicación exacta, dando invarianza a pequeñas traslaciones. El <strong><em>average pooling</em></strong> promedia; su variante <em>global average pooling</em> reduce todo el mapa a un vector antes de clasificar, eliminando capas densas masivas. Resulta contraintuitivo que <em>descartar</em> información mejore el modelo: al recortar la resolución, el <em>pooling</em> reduce los parámetros de las capas siguientes y, con ello, el sobreajuste, y suele favorecer la generalización.</span>
                         },
                     ]} />
@@ -1782,7 +1786,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                             )
                         },
                         {
-                            label: 'Ajuste fino (fine-tuning)',
+                            label: <>Ajuste fino (<em>fine-tuning</em>)</>,
                             content: (
                                 <div>
                                     <p className="!mt-0"><strong>Cuándo:</strong> conjunto de datos grande o muy distinto (imágenes médicas, satelitales, espectrales).</p>
@@ -1837,11 +1841,11 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     </p>
                     <Accordion items={[
                         {
-                            titulo: 'Poda (pruning): eliminar conexiones inútiles',
+                            titulo: <>Poda (<em>pruning</em>): eliminar conexiones inútiles</>,
                             contenido: <span>Elimina pesos o neuronas con contribución cercana a cero, generando una red dispersa (<em>sparse</em>). Comparte el espíritu de la regularización L1 —favorecer modelos dispersos—, aunque difiere en el modo: L1 induce la dispersión <em>durante</em> el entrenamiento penalizando los pesos, mientras la poda retira pesos ya entrenados según su magnitud <Cita k="han2015learning" />. Si una conexión apenas aporta, retirarla aligera sin sacrificar exactitud. <em>Analogía local:</em> como el guardaparques que despeja una trocha —retira la maleza improductiva para que el sendero, la información útil, quede transitable—.</span>
                         },
                         {
-                            titulo: 'Destilación del conocimiento (knowledge distillation)',
+                            titulo: <>Destilación del conocimiento (<em>knowledge distillation</em>)</>,
                             contenido: <span>Entrena un modelo pequeño («estudiante») para imitar las salidas de uno grande y preciso («maestro»). En vez de aprender solo de etiquetas duras, absorbe las probabilidades suaves del maestro, capturando matices <Cita k="hinton2015distilling" />. <em>Analogía local:</em> es el guardaparques novato («estudiante») que, observando al rastreador veterano («maestro»), aprende a reconocer un jaguar por su huella sin revisar millones de fotos de fototrampa.</span>
                         },
                         {
@@ -1888,7 +1892,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                                 { texto: '224', correcta: false },
                                 { texto: '112', correcta: false },
                             ],
-                            justificacion: 'Con la fórmula O = ⌊(W − K + 2P)/S⌋ + 1 = ⌊(224 − 3 + 0)/1⌋ + 1 = 222. El valor 224 exigiría relleno P = 1, y 112, stride 2.'
+                            justificacion: <>Con la fórmula O = ⌊(W − K + 2P)/S⌋ + 1 = ⌊(224 − 3 + 0)/1⌋ + 1 = 222. El valor 224 exigiría relleno P = 1, y 112, <em>stride</em> 2.</>
                         },
                         {
                             pregunta: '¿Qué aporta la conexión de salto de ResNet?',
@@ -2331,7 +2335,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <p>
                         Una «bolsa de palabras» que ignora el orden pierde el significado pragmático. «No <strong>dar papaya</strong>»
                         no habla de fruta sino de evitar riesgos; «<strong>hacer una vaca</strong>» es una colecta, no un bovino. El
-                        modelo debe procesar <Termino def="Token: unidad mínima en que se segmenta el texto (palabra, subpalabra o carácter) antes de pasar por la red."><em>token</em></Termino> a{' '}
+                        modelo debe procesar <Termino def={<><em>Token</em>: unidad mínima en que se segmenta el texto (palabra, subpalabra o carácter) antes de pasar por la red.</>}><em>token</em></Termino> a{' '}
                         <em>token</em> manteniendo un «estado mental» que evolucione con la oración.
                     </p>
                     <div className="overflow-x-auto my-4">
@@ -2402,7 +2406,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                         Es la imagen especular del desvanecimiento: con {String.raw`\(\lVert W_{hh}\rVert < 1\)`} la señal se
                         diluye y con {String.raw`\(\lVert W_{hh}\rVert > 1\)`} puede amplificarse sin control; esa es la condición necesaria de la explosión <Cita k="pascanu2013difficulty" />.
                     </p>
-                    <Box type="warn" label="Remedio estándar — recorte de gradiente (gradient clipping)">
+                    <Box type="warn" label={<>Remedio estándar — recorte de gradiente (<em>gradient clipping</em>)</>}>
                         El <strong>recorte de gradiente</strong> <Cita k="pascanu2013difficulty" /> acota la norma del gradiente a un umbral {String.raw`\(\tau\)`} antes de cada actualización: si
                         {String.raw` \(\lVert g\rVert > \tau\)`}, se reescala
                         {String.raw` \(g \leftarrow \tau\, g/\lVert g\rVert\)`}, conservando la <em>dirección</em> del gradiente
@@ -2619,9 +2623,9 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                         <strong> secuencia a secuencia</strong> (seq2seq), con dos redes recurrentes acopladas:
                     </p>
                     <Pipeline steps={[
-                        { num: '1', title: 'Codificador (encoder)', desc: 'Una RNN (LSTM/GRU) lee toda la entrada y la comprime en un solo vector de contexto c.' },
+                        { num: '1', title: <>Codificador (<em>encoder</em>)</>, desc: 'Una RNN (LSTM/GRU) lee toda la entrada y la comprime en un solo vector de contexto c.' },
                         { num: '2', title: 'Vector de contexto c', desc: 'Resumen de tamaño fijo de todo el mensaje: \\(c = h_T\\).' },
-                        { num: '3', title: 'Decodificador (decoder)', desc: 'Otra RNN se inicializa con c y genera la salida token por token.' },
+                        { num: '3', title: <>Decodificador (<em>decoder</em>)</>, desc: <>Otra RNN se inicializa con c y genera la salida <em>token</em> por <em>token</em>.</> },
                     ]} />
                     <Eq>{String.raw`$$ c = h_T = \mathrm{Codificador}(x_1, x_2, \ldots, x_T) \qquad P(y_t \mid y_1,\ldots,y_{t-1},\, c) = g(s_t,\, y_{t-1},\, c) $$`}</Eq>
                     <p>
@@ -3151,7 +3155,7 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                         { num: 1, title: 'AE / VAE', desc: 'Comprimir y reconstruir; espacio latente (continuo en el VAE)' },
                         { num: 2, title: 'GAN', desc: 'Juego adversario: generador contra discriminador' },
                         { num: 3, title: 'Difusión', desc: 'Añadir ruido y aprender a revertirlo paso a paso' },
-                        { num: 4, title: 'Transformer', desc: 'Atención y generación autorregresiva token a token' },
+                        { num: 4, title: 'Transformer', desc: <>Atención y generación autorregresiva <em>token</em> a <em>token</em></> },
                     ]} />
 
                     <Box type="tip" label="Analogía local — la piquería vallenata">
@@ -3206,7 +3210,7 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                     {/* ============== 2. Autoencoders ============== */}
                     <h3>2. Autocodificadores (AE): compresión y reconstrucción</h3>
                     <p>
-                        Un <Termino def="Autocodificador (autoencoder): red de aprendizaje no supervisado que comprime la entrada y la reconstruye, forzando a quedarse con lo esencial.">autocodificador</Termino> aprende
+                        Un <Termino def={<>Autocodificador (<em>autoencoder</em>): red de aprendizaje no supervisado que comprime la entrada y la reconstruye, forzando a quedarse con lo esencial.</>}>autocodificador</Termino> aprende
                         representaciones eficientes de forma no supervisada <Cita k="hinton2006reducing" />. Su arquitectura tiene una simetría de «reloj de arena»:
                         un <strong>codificador</strong> (<em>encoder</em>) reduce progresivamente la dimensión de la entrada, un <strong>cuello de
                         botella</strong> (la capa más estrecha) aloja el código latente {String.raw`\(z\)`}, y un
@@ -3479,7 +3483,7 @@ print(paso(torch.randn(64, 784)))   # (loss_D, loss_G) de un minilote`} />
 
                     <Accordion items={[
                         {
-                            titulo: 'Colapso de modos (mode collapse)',
+                            titulo: <>Colapso de modos (<em>mode collapse</em>)</>,
                             contenido: <span>El generador descubre que un puñado de muestras engaña sistemáticamente a {String.raw`\(D\)`} y se «atrinchera» produciéndolas, ignorando la diversidad real. Es el verseador que, en lugar de improvisar, repite siempre su única estrofa ganadora: técnicamente válida, pero estéril. El modelo deja de cubrir todos los «modos» de la distribución.</span>
                         },
                         {
@@ -3679,11 +3683,11 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
 
                     <Accordion items={[
                         {
-                            titulo: 'Codificación posicional (positional encoding)',
+                            titulo: <>Codificación posicional (<em>positional encoding</em>)</>,
                             contenido: <span>Como el Transformer ve todo a la vez, no sabe el orden de las palabras. Se suma a cada <em>embedding</em> una señal de senos y cosenos que codifica su <strong>posición absoluta</strong>; por su forma periódica, además facilita que el modelo infiera distancias relativas <Cita k="vaswani2017attention" />. Es como numerar las baldosas de la foto de fototrampa (Capítulo 2.1): sin ese número, la autoatención ve las mismas piezas sin saber en qué orden van. Muchos modelos actuales codifican directamente la posición relativa <Cita k="shaw2018self" />, p. ej., con rotaciones, como RoPE <Cita k="su2024roformer" />.</span>
                         },
                         {
-                            titulo: 'Atención multicabeza (multi-head attention)',
+                            titulo: <>Atención multicabeza (<em>multi-head attention</em>)</>,
                             contenido: <span>El modelo no mira la frase de una sola forma: tiene varias cabezas de atención independientes. Cada cabeza <strong>puede</strong> especializarse en un tipo de relación —sintáctica (quién hizo qué), de tono (queja o halago) o temporal—, aunque esa división no está garantizada ni es siempre interpretable. Esto le da una comprensión «polifónica» del lenguaje.</span>
                         },
                     ]} />
@@ -3827,9 +3831,9 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                         {
                             pregunta: 'En un Transformer generativo, ¿para qué sirve la máscara causal?',
                             opciones: [
-                                { texto: 'Para indicar el orden de los tokens sumando senos y cosenos a cada embedding.', correcta: false },
-                                { texto: 'Para que cada token atienda solo a los anteriores y la predicción en t no use el futuro.', correcta: true },
-                                { texto: 'Para descartar del vocabulario los tokens poco frecuentes antes de aplicar la softmax final.', correcta: false },
+                                { texto: <>Para indicar el orden de los <em>tokens</em> sumando senos y cosenos a cada <em>embedding</em>.</>, correcta: false },
+                                { texto: <>Para que cada <em>token</em> atienda solo a los anteriores y la predicción en t no use el futuro.</>, correcta: true },
+                                { texto: <>Para descartar del vocabulario los <em>tokens</em> poco frecuentes antes de aplicar la softmax final.</>, correcta: false },
                             ],
                             justificacion: 'Durante la generación autorregresiva, la máscara anula la atención hacia posiciones futuras: cada predicción depende solo de lo ya escrito. Sumar senos y cosenos es la codificación posicional, y el vocabulario se fija antes del entrenamiento.'
                         },
@@ -3913,20 +3917,20 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                         opciones: [
                             { texto: 'Aplanamiento previo de la imagen en un vector antes de la primera capa.', correcta: false },
                             { texto: 'Conectividad local: cada neurona solo mira una pequeña región de la entrada.', correcta: true },
-                            { texto: 'Aplicar dropout a los mapas de características durante el entrenamiento.', correcta: false },
+                            { texto: <>Aplicar <em>dropout</em> a los mapas de características durante el entrenamiento.</>, correcta: false },
                             { texto: 'Pesos compartidos: el mismo filtro se aplica en toda la imagen.', correcta: true },
                         ],
-                        justificacion: 'La convolución se sustenta en conectividad local y compartición de pesos: un mismo detector reutilizado en toda la imagen aprovecha que una característica útil en una zona suele serlo en otra. El aplanamiento es lo que hace el MLP, y el dropout regulariza, pero no reduce el número de parámetros.'
+                        justificacion: <>La convolución se sustenta en conectividad local y compartición de pesos: un mismo detector reutilizado en toda la imagen aprovecha que una característica útil en una zona suele serlo en otra. El aplanamiento es lo que hace el MLP, y el <em>dropout</em> regulariza, pero no reduce el número de parámetros.</>
                     },
                     {
-                        pregunta: 'Función principal de una capa de max pooling de 2×2:',
+                        pregunta: <>Función principal de una capa de <em>max pooling</em> de 2×2:</>,
                         opciones: [
                             { texto: 'Aumentar el número de canales del mapa de características para detectar más patrones.', correcta: false },
                             { texto: 'Introducir la no linealidad que falta en la convolución, como lo haría una ReLU.', correcta: false },
                             { texto: 'Aprender un filtro de 2×2 cuyos pesos resumen cada ventana del mapa en un único valor.', correcta: false },
                             { texto: 'Reducir la dimensión espacial y tolerar pequeñas traslaciones, sin pesos que aprender.', correcta: true },
                         ],
-                        justificacion: 'El max pooling conserva la activación más fuerte de cada ventana y descarta su ubicación exacta: reduce el tamaño y otorga una invarianza local aproximada, sin pesos que entrenar. Los canales los fija el número de filtros, y la no linealidad, la ReLU.'
+                        justificacion: <>El <em>max pooling</em> conserva la activación más fuerte de cada ventana y descarta su ubicación exacta: reduce el tamaño y otorga una invarianza local aproximada, sin pesos que entrenar. Los canales los fija el número de filtros, y la no linealidad, la ReLU.</>
                     },
                     {
                         pregunta: 'Si se barajan los parches de una imagen antes de un ViT sin codificación posicional, ¿qué ocurre con las salidas de la autoatención?',
@@ -3942,11 +3946,11 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                         pregunta: 'Una GAN cuyo discriminador gana muy pronto y una RNN simple con secuencias largas comparten un síntoma. ¿Cuál?',
                         opciones: [
                             { texto: 'Ambas sufren colapso de modos: terminan repitiendo la misma salida para cualquier entrada.', correcta: false },
-                            { texto: 'Ambas presentan explosión del gradiente, que se corrige aplicando dropout a las capas ocultas.', correcta: false },
+                            { texto: <>Ambas presentan explosión del gradiente, que se corrige aplicando <em>dropout</em> a las capas ocultas.</>, correcta: false },
                             { texto: 'El generador, o los primeros pasos de la RNN, recibe gradientes casi nulos y deja de aprender.', correcta: true },
                             { texto: 'Ambas sobreajustan, porque memorizan el conjunto de entrenamiento en lugar de generalizar.', correcta: false },
                         ],
-                        justificacion: 'Si D rechaza las muestras con total confianza, log(1 − D(G(z))) se satura y G recibe gradientes casi nulos (por eso se usa la pérdida no saturante); en la RNN, el producto de jacobianas desvanece el gradiente de los pasos lejanos. El colapso de modos es otro fallo, propio de las GAN, y la explosión del gradiente se corrige con recorte, no con dropout.'
+                        justificacion: <>Si D rechaza las muestras con total confianza, log(1 − D(G(z))) se satura y G recibe gradientes casi nulos (por eso se usa la pérdida no saturante); en la RNN, el producto de jacobianas desvanece el gradiente de los pasos lejanos. El colapso de modos es otro fallo, propio de las GAN, y la explosión del gradiente se corrige con recorte, no con <em>dropout</em>.</>
                     },
                     {
                         pregunta: '¿Qué innovación de la celda LSTM protege el flujo del gradiente a largo plazo?',
@@ -4012,7 +4016,7 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                     {
                         pregunta: 'En la atención del Transformer, ¿qué papel cumplen los vectores de consulta, clave y valor (Q, K y V)?',
                         opciones: [
-                            { texto: 'Son tres copias idénticas del mismo embedding, sin ninguna función distinta entre sí.', correcta: false },
+                            { texto: <>Son tres copias idénticas del mismo <em>embedding</em>, sin ninguna función distinta entre sí.</>, correcta: false },
                             { texto: 'Codifican únicamente la posición de cada palabra dentro de la secuencia de entrada.', correcta: false },
                             { texto: 'La consulta (Q) se compara con las claves (K) para ponderar y recuperar los valores (V).', correcta: true },
                             { texto: 'Q y K se aprenden durante el entrenamiento, pero V es la entrada sin proyectar que se copia tal cual.', correcta: false },
@@ -4064,46 +4068,46 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
         const GLOSARIO_M2 = [
             ['Convolución', 'Operación que desliza un filtro (kernel) sobre la imagen para detectar patrones locales (bordes, texturas) y producir un mapa de características.'],
             ['Filtro (kernel)', 'Pequeña matriz de pesos aprendibles que se desliza sobre la entrada; la red ajusta sus valores para detectar características visuales específicas.'],
-            ['Stride (zancada)', 'Número de píxeles que el filtro salta en cada paso. Un stride mayor que 1 reduce la dimensión espacial de la salida (submuestreo).'],
-            ['Padding (relleno)', 'Píxeles (usualmente ceros) añadidos alrededor de la entrada para conservar las dimensiones tras la convolución y no perder información del borde.'],
-            ['Pooling (agrupación)', 'Submuestreo que reduce el tamaño espacial. El max pooling toma el máximo de cada región y aporta, sin parámetros, una invarianza aproximada a pequeñas traslaciones.'],
+            ['*Stride* (zancada)', 'Número de píxeles que el filtro salta en cada paso. Un *stride* mayor que 1 reduce la dimensión espacial de la salida (submuestreo).'],
+            ['*Padding* (relleno)', 'Píxeles (usualmente ceros) añadidos alrededor de la entrada para conservar las dimensiones tras la convolución y no perder información del borde.'],
+            ['*Pooling* (agrupación)', 'Submuestreo que reduce el tamaño espacial. El *max pooling* toma el máximo de cada región y aporta, sin parámetros, una invarianza aproximada a pequeñas traslaciones.'],
             ['Mapa de características', 'Salida de una convolución; indica dónde y con qué intensidad aparece una característica detectada por el filtro en la entrada.'],
-            ['Invarianza a la traslación', 'Capacidad de reconocer un objeto sin importar su posición en la imagen. Los pesos compartidos hacen la detección equivariante (el mapa se desplaza con el objeto) y el pooling la vuelve aproximadamente invariante a desplazamientos pequeños.'],
+            ['Invarianza a la traslación', 'Capacidad de reconocer un objeto sin importar su posición en la imagen. Los pesos compartidos hacen la detección equivariante (el mapa se desplaza con el objeto) y el *pooling* la vuelve aproximadamente invariante a desplazamientos pequeños.'],
             ['Campo receptivo', 'Región de la entrada que influye en una neurona. Local en las CNN (crece con la profundidad) y global desde la primera capa en los ViT.'],
-            ['ResNet', 'Red residual con conexiones de salto (skip connections) que permiten entrenar redes muy profundas sin degradación; una de las redes troncales (backbones) de referencia.'],
-            ['Vision Transformer (ViT)', 'Arquitectura que trocea la imagen en parches, los proyecta a embeddings y aplica autoatención global; necesita datos masivos o preentrenamiento por su débil sesgo inductivo.'],
+            ['ResNet', 'Red residual con conexiones de salto (*skip connections*) que permiten entrenar redes muy profundas sin degradación; una de las redes troncales (*backbones*) de referencia.'],
+            ['Vision Transformer (ViT)', 'Arquitectura que trocea la imagen en parches, los proyecta a *embeddings* y aplica autoatención global; necesita datos masivos o preentrenamiento por su débil sesgo inductivo.'],
             ['Sesgo inductivo', 'Supuestos incorporados de fábrica en una arquitectura (localidad y equivarianza en la CNN); el ViT casi carece de él y debe aprenderlo de los datos.'],
-            ['Aprendizaje por transferencia (transfer learning)', 'Reutilizar el conocimiento de un modelo preentrenado en un conjunto de datos masivo (ImageNet) para una tarea nueva con menos datos.'],
-            ['Ajuste fino (fine-tuning)', 'Estrategia de aprendizaje por transferencia que descongela y reentrena algunas capas finales con una tasa de aprendizaje baja para adaptarlas a la nueva tarea.'],
+            ['Aprendizaje por transferencia (*transfer learning*)', 'Reutilizar el conocimiento de un modelo preentrenado en un conjunto de datos masivo (ImageNet) para una tarea nueva con menos datos.'],
+            ['Ajuste fino (*fine-tuning*)', 'Estrategia de aprendizaje por transferencia que descongela y reentrena algunas capas finales con una tasa de aprendizaje baja para adaptarlas a la nueva tarea.'],
             ['Cuantización', 'Reducir la precisión de los pesos (p. ej., de FP32 a INT8) para obtener un modelo unas 4 veces más pequeño y, en hardware con aritmética entera, más rápido, con cierta pérdida de exactitud.'],
-            ['Computación en el borde (edge computing)', 'Procesar los datos localmente en el dispositivo (dron, cámara trampa) en lugar de enviarlos a la nube; clave en zonas de baja conectividad.'],
+            ['Computación en el borde (*edge computing*)', 'Procesar los datos localmente en el dispositivo (dron, cámara trampa) en lugar de enviarlos a la nube; clave en zonas de baja conectividad.'],
             ['RNN', 'Red neuronal recurrente: procesa datos secuenciales manteniendo un estado oculto (memoria) que evoluciona en cada paso de tiempo.'],
-            ['BPTT (backpropagation through time)', 'Retropropagación a través del tiempo: entrenamiento de las RNN que «desenrolla» la red en el tiempo y suma los gradientes de cada paso.'],
+            ['BPTT (*backpropagation through time*)', 'Retropropagación a través del tiempo: entrenamiento de las RNN que «desenrolla» la red en el tiempo y suma los gradientes de cada paso.'],
             ['Desvanecimiento del gradiente', 'Dilución exponencial de la señal de error en dependencias largas, por multiplicar muchos jacobianos acotados; talón de Aquiles de las RNN simples.'],
             ['Estado oculto', 'Vector que resume la información procesada hasta el paso actual; la «memoria de trabajo» de una red recurrente.'],
             ['LSTM', 'Long Short-Term Memory: celda con tres compuertas y un estado de celda aditivo que preserva dependencias a largo plazo y mitiga el desvanecimiento del gradiente.'],
             ['Estado de la celda', 'La «cinta transportadora» de la LSTM: memoria de largo plazo que se actualiza con sumas; el gradiente la cruza casi intacto mientras la compuerta de olvido esté abierta.'],
-            ['Compuerta (gate)', 'Capa sigmoide dentro de LSTM/GRU que regula el flujo de información: cercana a 0 bloquea el flujo y cercana a 1 lo deja pasar.'],
+            ['Compuerta (*gate*)', 'Capa sigmoide dentro de LSTM/GRU que regula el flujo de información: cercana a 0 bloquea el flujo y cercana a 1 lo deja pasar.'],
             ['GRU', 'Gated Recurrent Unit: versión simplificada de la LSTM (2 compuertas, 1 estado), más ligera; rinde de forma comparable en muchas tareas y conviene cuando importan la latencia y la memoria.'],
-            ['Codificador-decodificador (seq2seq)', 'Esquema de dos redes recurrentes: el codificador comprime la entrada en un vector de contexto y el decodificador genera la salida token por token.'],
+            ['Codificador-decodificador (seq2seq)', 'Esquema de dos redes recurrentes: el codificador comprime la entrada en un vector de contexto y el decodificador genera la salida *token* por *token*.'],
             ['Vector de contexto', 'Resumen de tamaño fijo producido por el codificador; en secuencias largas se satura, lo que motivó el mecanismo de atención.'],
             ['Atención', 'Mecanismo que pondera dinámicamente todas las posiciones de la entrada en cada paso, recuperando selectivamente la información relevante.'],
             ['Autoatención', 'Variante en la que cada elemento de una secuencia se relaciona con todos los demás dentro de la misma secuencia; corazón del Transformer.'],
-            ['Consulta, clave y valor (Q, K, V)', 'Tríada de vectores de la atención (query, key, value): la consulta se compara con las claves para ponderar y recuperar los valores relevantes.'],
-            ['Transformer', 'Arquitectura basada enteramente en atención que procesa secuencias en paralelo (en entrenamiento; la generación autorregresiva es token a token); base de la IA generativa moderna (BERT, GPT).'],
-            ['Codificación posicional (positional encoding)', 'Señal fija (senos y cosenos) o aprendida (ViT, GPT) que se suma a cada embedding para indicar su posición, ya que la atención por sí sola es ciega al orden.'],
-            ['Embedding', 'Representación de un concepto (palabra, parche, usuario) como vector continuo donde la distancia geométrica refleja la similitud semántica.'],
-            ['Autocodificador (autoencoder, AE)', 'Red no supervisada que comprime la entrada a un código latente y la reconstruye, forzada por un cuello de botella a quedarse con lo esencial.'],
+            ['Consulta, clave y valor (Q, K, V)', 'Tríada de vectores de la atención (*query*, *key*, *value*): la consulta se compara con las claves para ponderar y recuperar los valores relevantes.'],
+            ['Transformer', 'Arquitectura basada enteramente en atención que procesa secuencias en paralelo (en entrenamiento; la generación autorregresiva es *token* a *token*); base de la IA generativa moderna (BERT, GPT).'],
+            ['Codificación posicional (*positional encoding*)', 'Señal fija (senos y cosenos) o aprendida (ViT, GPT) que se suma a cada *embedding* para indicar su posición, ya que la atención por sí sola es ciega al orden.'],
+            ['*Embedding*', 'Representación de un concepto (palabra, parche, usuario) como vector continuo donde la distancia geométrica refleja la similitud semántica.'],
+            ['Autocodificador (*autoencoder*, AE)', 'Red no supervisada que comprime la entrada a un código latente y la reconstruye, forzada por un cuello de botella a quedarse con lo esencial.'],
             ['Cuello de botella', 'Capa central de menor dimensión del AE; impide aprender la identidad y obliga a comprimir, descartando ruido y redundancia.'],
             ['Espacio latente', 'Espacio vectorial comprimido donde se mapean las características esenciales; navegarlo permite manipular conceptos de alto nivel.'],
-            ['Variedad (manifold)', 'Superficie de baja dimensión inmersa en un espacio mayor. La hipótesis de la variedad sostiene que los datos reales (imágenes, audio) se concentran en una; el espacio latente busca capturarla.'],
-            ['VAE', 'Autocodificador variacional (variational autoencoder): mapea la entrada a una distribución (media μ y desviación σ) en lugar de un punto, logrando un espacio latente continuo y navegable.'],
-            ['GAN', 'Red generativa antagónica (generative adversarial network): un generador y un discriminador compiten en un juego minimax; el generador acaba modelando la distribución real.'],
+            ['Variedad (*manifold*)', 'Superficie de baja dimensión inmersa en un espacio mayor. La hipótesis de la variedad sostiene que los datos reales (imágenes, audio) se concentran en una; el espacio latente busca capturarla.'],
+            ['VAE', 'Autocodificador variacional (*variational autoencoder*): mapea la entrada a una distribución (media μ y desviación σ) en lugar de un punto, logrando un espacio latente continuo y navegable.'],
+            ['GAN', 'Red generativa antagónica (*generative adversarial network*): un generador y un discriminador compiten en un juego minimax; el generador acaba modelando la distribución real.'],
             ['Generador / discriminador', 'Las dos redes de una GAN: el generador crea muestras sintéticas y el discriminador intenta distinguirlas de las reales.'],
-            ['Colapso de modos (mode collapse)', 'Patología de las GAN: el generador se atrinchera en unas pocas muestras que engañan al discriminador y pierde diversidad.'],
+            ['Colapso de modos (*mode collapse*)', 'Patología de las GAN: el generador se atrinchera en unas pocas muestras que engañan al discriminador y pierde diversidad.'],
             ['Modelos de difusión', 'Familia generativa que añade ruido a un dato y aprende a revertir ese proceso paso a paso; sustenta DALL·E 2, Stable Diffusion y buena parte de los generadores actuales de imagen.'],
-            ['Procesos directo e inverso (forward / reverse)', 'En difusión, el proceso directo destruye el dato añadiendo ruido gaussiano; el inverso, aprendido, lo reconstruye quitando el ruido paso a paso.'],
-            ['ELBO (evidence lower bound)', 'Cota inferior de la evidencia log p(x); el VAE la maximiza equilibrando la reconstrucción y la regularización KL.'],
+            ['Procesos directo e inverso (*forward* / *reverse*)', 'En difusión, el proceso directo destruye el dato añadiendo ruido gaussiano; el inverso, aprendido, lo reconstruye quitando el ruido paso a paso.'],
+            ['ELBO (*evidence lower bound*)', 'Cota inferior de la evidencia log p(x); el VAE la maximiza equilibrando la reconstrucción y la regularización KL.'],
             ['Divergencia KL', 'Divergencia de Kullback-Leibler: mide cuánto difiere una distribución de otra de referencia; nunca es negativa y vale cero solo si son idénticas.'],
             ['Truco de reparametrización', 'Escribir z = μ + σ ⊙ ε, con ε ∼ 𝒩(0, I), para que el muestreo del VAE sea derivable respecto a μ y σ.'],
             ['Juego minimax (función de valor)', 'Formulación de la GAN: el discriminador maximiza y el generador minimiza una misma función de valor V(D, G).'],
@@ -4112,11 +4116,11 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
             ['DCGAN', 'Deep Convolutional GAN: GAN con capas convolucionales y transpuestas y buenas prácticas de estabilización; base práctica de la generación de imágenes con GAN.'],
             ['WGAN (distancia de Wasserstein)', 'GAN que aproxima la distancia de Wasserstein y da gradientes útiles aunque las distribuciones apenas se solapen; la WGAN-GP sustituye el recorte de pesos por una penalización del gradiente.'],
             ['Calendario de ruido (βₜ)', 'Secuencia de varianzas que fija cuánto ruido se inyecta en cada paso del proceso directo de un modelo de difusión.'],
-            ['Máscara causal', 'Impide que un token atienda a posiciones futuras durante la generación autorregresiva.'],
-            ['Generación autorregresiva', 'Producir una secuencia un token a la vez, condicionando cada predicción en todo lo ya generado.'],
-            ['Token', 'Unidad mínima en que se segmenta la entrada (palabra, subpalabra o carácter; en el ViT, un parche) antes de pasar por la red.'],
-            ['Atención multicabeza (multi-head attention)', 'Varias cabezas de atención en paralelo, cada una con sus propias proyecciones Q, K y V; pueden especializarse en relaciones distintas.'],
-            ['Autocodificador de eliminación de ruido (DAE)', 'Autocodificador (denoising autoencoder) que recibe una entrada corrompida y aprende a reconstruir la versión limpia; capta la estructura robusta de los datos.'],
+            ['Máscara causal', 'Impide que un *token* atienda a posiciones futuras durante la generación autorregresiva.'],
+            ['Generación autorregresiva', 'Producir una secuencia un *token* a la vez, condicionando cada predicción en todo lo ya generado.'],
+            ['*Token*', 'Unidad mínima en que se segmenta la entrada (palabra, subpalabra o carácter; en el ViT, un parche) antes de pasar por la red.'],
+            ['Atención multicabeza (*multi-head attention*)', 'Varias cabezas de atención en paralelo, cada una con sus propias proyecciones Q, K y V; pueden especializarse en relaciones distintas.'],
+            ['Autocodificador de eliminación de ruido (DAE)', 'Autocodificador (*denoising autoencoder*) que recibe una entrada corrompida y aprende a reconstruir la versión limpia; capta la estructura robusta de los datos.'],
             ['Convolución separable en profundidad', 'Factoriza la convolución en un filtrado por canal y una mezcla 1×1; reduce las operaciones y es la base de MobileNet.'],
         ];
 
@@ -4132,10 +4136,10 @@ print(A.shape)        # torch.Size([4, 4])  -> quién atiende a quién
                 </Box>
 
                 <div className="grid md:grid-cols-2 gap-2">
-                    {[...GLOSARIO_M2].sort((a, b) => a[0].localeCompare(b[0], 'es')).map(([t, d], i) => (
+                    {[...GLOSARIO_M2].sort((a, b) => a[0].replace(/\*/g, '').localeCompare(b[0].replace(/\*/g, ''), 'es')).map(([t, d], i) => (
                         <div key={i} className="border border-gray-200 rounded-lg p-3 bg-white">
-                            <span className="font-bold text-primary text-sm">{t}</span>
-                            <p className="text-xs text-gray-600 mt-0.5" style={{ margin: '2px 0 0' }}>{d}</p>
+                            <span className="font-bold text-primary text-sm">{conCursivas(t)}</span>
+                            <p className="text-xs text-gray-600 mt-0.5" style={{ margin: '2px 0 0' }}>{conCursivas(d)}</p>
                         </div>
                     ))}
                 </div>

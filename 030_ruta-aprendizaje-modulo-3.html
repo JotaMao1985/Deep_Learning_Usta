@@ -187,6 +187,8 @@
            se fuerza min-width:0 y se permite partir nombres largos (p. ej., Apellido_Nombre_Centinela_Fase3.zip). */
         .grid > * { min-width: 0; }
         .usta-card li, .usta-card p { overflow-wrap: anywhere; }
+        /* Un término en cursiva dentro de un texto ya en cursiva pasa a redonda (convención tipográfica) */
+        .italic em, em em { font-style: normal; }
     </style>
 </head>
 
@@ -280,6 +282,10 @@
         /* ============================================================
            SUBCOMPONENTES UI
         ============================================================ */
+
+        /* conCursivas — pinta *término* como <em>término</em> en cadenas que también se ordenan o se unen como texto */
+        const conCursivas = (s) => typeof s === 'string' ? s.split(/\*([^*]+)\*/).map((p, i) => i % 2 ? <em key={i}>{p}</em> : p) : s;
+        const sinAsteriscos = (s) => s.replace(/\*/g, '');
 
         /* Box — callout (info / tip / warn / danger / eth) */
         const Box = ({ type = 'info', label, children }) => {
@@ -406,10 +412,10 @@
                         return (
                             <div className="mt-3 text-[0.9rem] text-gray-700 bg-bg rounded-lg p-3 border-l-4 animate-fade-in" style={{ borderColor: '#FDB913' }}>
                                 {errores.length > 0 && (
-                                    <p className="mb-2"><strong>Sobre la opción elegida:</strong>{' '}{errores.join(' ')}</p>
+                                    <p className="mb-2"><strong>Sobre la opción elegida:</strong>{' '}{conCursivas(errores.join(' '))}</p>
                                 )}
                                 {justifs.length > 0 && (
-                                    <p><strong>{acierto ? 'Explicación:' : 'Respuesta correcta:'}</strong>{' '}{justifs.join(' ')}</p>
+                                    <p><strong>{acierto ? 'Explicación:' : 'Respuesta correcta:'}</strong>{' '}{conCursivas(justifs.join(' '))}</p>
                                 )}
                             </div>
                         );
@@ -614,14 +620,14 @@
                 badgeColor: 'primary',
                 duracion: '≈45 min lectura',
                 ra: [
-                    'Justificar por qué un framework es indispensable: diferenciación automática (autograd), aceleración en GPU y abstracción de la complejidad, frente a programar el descenso del gradiente «a mano».',
-                    'Contrastar TensorFlow/Keras (ecosistema de despliegue maduro, ejecución eager) con PyTorch (grafos dinámicos, dominio en investigación) y comprender el papel de Keras 3 como API compatible con varios motores (multi-backend).',
-                    'Seleccionar y justificar con criterios técnicos el framework adecuado según el caso de uso (producción y borde frente a investigación y prototipado rápido).',
-                    'Reconocer la convergencia actual de los ecosistemas y el papel de ONNX como formato pasaporte interoperable entre frameworks.',
+                    <>Justificar por qué un <em>framework</em> es indispensable: diferenciación automática (autograd), aceleración en GPU y abstracción de la complejidad, frente a programar el descenso del gradiente «a mano».</>,
+                    <>Contrastar TensorFlow/Keras (ecosistema de despliegue maduro, ejecución inmediata o <em>eager</em>) con PyTorch (grafos dinámicos, dominio en investigación) y comprender el papel de Keras 3 como API compatible con varios motores (multi-<em>backend</em>).</>,
+                    <>Seleccionar y justificar con criterios técnicos el <em>framework</em> adecuado según el caso de uso (producción y borde frente a investigación y prototipado rápido).</>,
+                    <>Reconocer la convergencia actual de los ecosistemas y el papel de ONNX como formato pasaporte interoperable entre <em>frameworks</em>.</>,
                     'Distinguir API de alto nivel (Keras) de API de bajo nivel y mapear las equivalencias mínimas entre TensorFlow y PyTorch.',
                 ],
                 analogia: {
-                    titulo: 'Analogía local: la cocina (el framework como infraestructura)',
+                    titulo: <>Analogía local: la cocina (el <em>framework</em> como infraestructura)</>,
                     contenido: (
                         <div>
                             <p>
@@ -646,12 +652,12 @@
                 },
                 mcq: [
                     {
-                        pregunta: '¿Cuál es la justificación técnica central para usar un framework de Deep Learning en lugar de programar el entrenamiento «a mano»?',
+                        pregunta: <>¿Cuál es la justificación técnica central para usar un <em>framework</em> de aprendizaje profundo en lugar de programar el entrenamiento «a mano»?</>,
                         opciones: [
                             { texto: 'Genera de forma automática las gráficas de pérdida y las métricas de cada época de entrenamiento.', correcta: false,
-                              justificacion: 'Graficar es una comodidad de herramientas como TensorBoard; no es lo que hace indispensable al framework.' },
+                              justificacion: 'Graficar es una comodidad de herramientas como TensorBoard; no es lo que hace indispensable al *framework*.' },
                             { texto: 'Ajusta por sí solo los hiperparámetros, como la tasa de aprendizaje y el tamaño de lote.', correcta: false,
-                              justificacion: 'Los hiperparámetros los elige el ingeniero (o una búsqueda explícita); el framework no los fija por sí mismo.' },
+                              justificacion: 'Los hiperparámetros los elige el ingeniero (o una búsqueda explícita); el *framework* no los fija por sí mismo.' },
                             { texto: 'Calcula los gradientes (autograd), ejecuta en GPU y oculta el detalle de bajo nivel.', correcta: true,
                               justificacion: 'El autograd obtiene los gradientes de la retropropagación sin derivar a mano; la integración con CUDA lleva el cómputo a la GPU, y las API de alto nivel (Keras) ocultan el detalle para que el ingeniero se concentre en el diseño del modelo.' },
                             { texto: 'Compila el modelo a código de máquina y, con ello, deja de ser necesaria una GPU.', correcta: false,
@@ -698,7 +704,7 @@
                     'Explicar por qué la GPU acelera el entrenamiento (miles de núcleos paralelos, Tensor Cores) frente a la CPU: en operaciones matriciales es varias veces más rápida y, en modelos grandes, uno o dos órdenes de magnitud.',
                     'Comprender la VRAM como el recurso más limitante (pesos, gradientes, estados del optimizador y activaciones) y diagnosticar el error CUDA out of memory (OOM).',
                     'Aplicar precisión mixta (AMP): calcular en FP16/BF16 y conservar en FP32 los pesos maestros, con aceleraciones de hasta 2–3× en GPU con Tensor Cores y un ahorro de memoria menor que la mitad, concentrado en las activaciones.',
-                    'Implementar checkpointing para reanudar entrenamientos interrumpidos, esencial frente a los límites de cuota de Google Colab y Kaggle.',
+                    <>Implementar puntos de control (<em>checkpointing</em>) para reanudar entrenamientos interrumpidos, esencial frente a los límites de cuota de Google Colab y Kaggle.</>,
                     'Operar plataformas gratuitas en la nube (Colab T4, Kaggle P100 o 2×T4) gestionando la cuota de cómputo, y reconocer las estrategias con varias GPU (DDP, FSDP).',
                 ],
                 analogia: {
@@ -753,22 +759,22 @@
                             { texto: 'Activar la precisión mixta para reducir la memoria de las activaciones.', correcta: false,
                               justificacion: 'Sí es válida: las activaciones en 16 bits ocupan la mitad que en FP32.' },
                             { texto: 'Aumentar el tamaño de lote para «llenar mejor» la VRAM disponible.', correcta: true,
-                              justificacion: 'El OOM ocurre porque se excede la VRAM; un lote mayor agrava el desbordamiento. Las vías correctas son reducir el lote, usar precisión mixta o recalcular activaciones (gradient checkpointing).' },
-                            { texto: 'Recalcular activaciones (gradient checkpointing) en lugar de guardarlas todas.', correcta: false,
+                              justificacion: 'El OOM ocurre porque se excede la VRAM; un lote mayor agrava el desbordamiento. Las vías correctas son reducir el lote, usar precisión mixta o recalcular activaciones (*gradient checkpointing*).' },
+                            { texto: <>Recalcular activaciones (<em>gradient checkpointing</em>) en lugar de guardarlas todas.</>, correcta: false,
                               justificacion: 'Sí es válida: cambia memoria por cómputo, porque guarda solo algunas activaciones y recalcula el resto en el paso hacia atrás.' },
                         ],
                     },
                     {
-                        pregunta: '¿Por qué el checkpointing es especialmente importante al entrenar en Google Colab o Kaggle?',
+                        pregunta: '¿Por qué guardar puntos de control es especialmente importante al entrenar en Google Colab o Kaggle?',
                         opciones: [
-                            { texto: 'Las sesiones se cortan y tienen cuota; el checkpoint guarda pesos, optimizador y época.', correcta: true,
-                              justificacion: 'Colab y Kaggle imponen límites de sesión y de cuota de GPU; si la sesión se cae, sin checkpoint se pierde el trabajo. Guardar el estado (pesos, optimizador, época) permite reanudar donde quedó.' },
+                            { texto: 'Las sesiones se cortan y tienen cuota; el punto de control guarda pesos, optimizador y época.', correcta: true,
+                              justificacion: 'Colab y Kaggle imponen límites de sesión y de cuota de GPU; si la sesión se cae, sin punto de control se pierde el trabajo. Guardar el estado (pesos, optimizador, época) permite reanudar donde quedó.' },
                             { texto: 'Guardar el modelo en cada época reduce el sobreajuste, porque congela los mejores pesos hallados.', correcta: false,
-                              justificacion: 'Guardar no regulariza: conservar el mejor modelo según la validación es otra decisión (parada temprana), no un efecto del checkpoint.' },
-                            { texto: 'Colab exige un checkpoint guardado para asignar una GPU en la siguiente sesión.', correcta: false,
-                              justificacion: 'La asignación de GPU depende de la disponibilidad y de la cuota, no de que exista un checkpoint.' },
+                              justificacion: 'Guardar no regulariza: conservar el mejor modelo según la validación es otra decisión (parada temprana), no un efecto del punto de control.' },
+                            { texto: 'Colab exige un punto de control guardado para asignar una GPU en la siguiente sesión.', correcta: false,
+                              justificacion: 'La asignación de GPU depende de la disponibilidad y de la cuota, no de que exista un punto de control.' },
                             { texto: 'Libera la VRAM que ocupan las activaciones mientras avanza el entrenamiento.', correcta: false,
-                              justificacion: 'Eso describe el gradient checkpointing (recálculo de activaciones), una técnica distinta del guardado periódico del estado.' },
+                              justificacion: 'Eso describe el *gradient checkpointing* (recálculo de activaciones), una técnica distinta del guardado periódico del estado.' },
                         ],
                     },
                 ],
@@ -782,11 +788,11 @@
                 badgeColor: 'gold',
                 duracion: '≈50 min lectura',
                 ra: [
-                    'Diagnosticar la «GPU starvation» (hambruna de GPU): la GPU queda ociosa porque el pipeline de datos no la alimenta a tiempo.',
-                    'Construir pipelines eficientes con tf.data (map, cache, shuffle, batch, prefetch) y DataLoader (num_workers, pin_memory, prefetch_factor).',
-                    'Aplicar aumento de datos (data augmentation), incluidos Mixup y CutMix, como regularización para maximizar el rendimiento con datos limitados (por defecto con torchvision.transforms.v2).',
+                    <>Diagnosticar la hambruna de GPU (<em>GPU starvation</em>): la GPU queda ociosa porque el flujo de datos no la alimenta a tiempo.</>,
+                    'Construir flujos de datos eficientes con tf.data (map, cache, shuffle, batch, prefetch) y DataLoader (num_workers, pin_memory, prefetch_factor).',
+                    <>Aplicar aumento de datos (<em>data augmentation</em>), incluidos Mixup y CutMix, como regularización para maximizar el rendimiento con datos limitados (por defecto con torchvision.transforms.v2).</>,
                     'Exportar el modelo a formatos estándar (SavedModel/.keras, .pth y ONNX en un único archivo con el exportador basado en torch.export) y verificar la consistencia de las predicciones.',
-                    'Diseñar una ruta de despliegue offline en campo: cuantización a INT8, LiteRT/ExecuTorch para borde y API REST en la nube, con criterios de despliegue responsable.',
+                    'Diseñar una ruta de despliegue sin conexión en campo: cuantización a INT8, LiteRT/ExecuTorch para borde y API REST en la nube, con criterios de despliegue responsable.',
                 ],
                 analogia: {
                     titulo: 'Analogías locales: el restaurante de La Candelaria y el pasaporte universal',
@@ -872,11 +878,11 @@
                 horas: 8,
                 desglose: 'Inmersión en el material base · Profundización conceptual y caso rural · Reflexión escrita en el foro (6–8 h de trabajo académico)',
                 entregable: 'Foro — Escrito reflexivo argumentado sobre arquitecturas multimodales para predecir la deserción escolar en colegios públicos rurales, con postura propia, referencias en APA 7 y consideraciones éticas de equidad algorítmica.',
-                caso: 'La deserción escolar en zonas rurales de Colombia: tensión estructural entre la promesa de la IA para identificar estudiantes en riesgo y las limitaciones operativas, éticas y sociales de desplegar sistemas predictivos en contextos de alta vulnerabilidad. Según DANE y el MEN, la deserción intraanual en la ruralidad dispersa supera el 5 % y la no culminación de media supera el 40 % en Vaupés y Guainía. El estudiante analiza un sistema multimodal (LSTM para trayectorias, Transformers tipo BETO para texto pedagógico, Autoencoders para anomalías y CNN-OCR para boletines escaneados) y su despliegue Edge con vigilancia ética.',
+                caso: 'La deserción escolar en zonas rurales de Colombia: tensión estructural entre la promesa de la IA para identificar estudiantes en riesgo y las limitaciones operativas, éticas y sociales de desplegar sistemas predictivos en contextos de alta vulnerabilidad. Según DANE y el MEN, la deserción intraanual en la ruralidad dispersa supera el 5 % y la no culminación de media supera el 40 % en Vaupés y Guainía. El estudiante analiza un sistema multimodal (LSTM para trayectorias, Transformers tipo BETO para texto pedagógico, autocodificadores para anomalías y CNN-OCR para boletines escaneados) y su despliegue en el borde con vigilancia ética.',
                 pasos: [
                     'Inmersión en el material base: ver de forma activa el video capstone de esta Guía 3 («Alertas Tempranas contra la Deserción») y tomar notas sobre las diferencias arquitectónicas entre CNN, RNN, LSTM, GRU, autocodificadores y Transformers y su papel en un sistema multimodal de alerta temprana.',
                     'Profundización conceptual y caso rural: estudiar la fusión multimodal tardía (cada rama produce un vector de representación que una capa densa combina) y la destilación del conocimiento (material del Módulo 2), la cuantización, la poda y el despliegue en el borde (Capítulo 3.3), la infraestructura nacional de cómputo (RENATA, Guane-1, Apolo, BIOS; Capítulo 3.2) y, en el video capstone, el aprendizaje federado y la destilación a DistilBETO.',
-                    'Reflexión escrita en el foro: redactar un escrito argumentado con postura propia sobre la viabilidad y los riesgos del sistema, que incorpore criterios de equidad algorítmica (fairness through unawareness, equalized odds, paridad demográfica), el riesgo de profecía autocumplida y al menos dos referencias en APA 7.',
+                    <>Reflexión escrita en el foro: redactar un escrito argumentado con postura propia sobre la viabilidad y los riesgos del sistema, que incorpore criterios de equidad algorítmica (<em>fairness through unawareness</em>, <em>equalized odds</em>, paridad demográfica), el riesgo de profecía autocumplida y al menos dos referencias en APA 7.</>,
                 ],
                 /* Rúbrica canónica de la Guía 3 (docx 1875_Guia_Profundizacion_S3_v2 = guia-3.md): 5 criterios, 30/25/20/15/10 */
                 rubrica: [
@@ -893,23 +899,23 @@
                 titulo: 'Proyecto Centinela · Fase 3 — De Colab al Cafetal: Pipeline, GPU y Despliegue',
                 peso: 25,
                 horas: 40,
-                desglose: 'Pipeline + Augmentation · Entrenamiento GPU con precisión mixta y checkpointing · Optimización Edge y exportación · Ruta de despliegue offline',
+                desglose: 'Pipeline + Augmentation · Entrenamiento GPU con precisión mixta y puntos de control · Optimización Edge y exportación · Ruta de despliegue sin conexión',
                 entregable: 'Notebook ejecutado en Colab (.ipynb con salidas visibles) + archivos del modelo exportado (.pth, .keras, .onnx) + informe técnico de despliegue (PDF, máx. 4 páginas) + Bitácora de IA, en un .zip. Calificación por rúbrica oficial (6 criterios que suman 100 %).',
                 /* Checklist de entrega cristalino (solo Fase 3) — sin ambigüedad para el estudiante */
                 entregables: [
-                    { titulo: 'Notebook ejecutado en Colab (.ipynb)', detalle: 'Con todas las salidas visibles: pipeline, entrenamiento en GPU, optimización Edge y exportación, reproducible de principio a fin.' },
+                    { titulo: 'Notebook ejecutado en Colab (.ipynb)', detalle: 'Con todas las salidas visibles: flujo de datos, entrenamiento en GPU, optimización para el borde y exportación, reproducible de principio a fin.' },
                     { titulo: 'Archivos del modelo exportado', detalle: 'En al menos dos formatos estándar verificados: .pth (PyTorch), .keras (Keras) y .onnx (pasaporte portable).' },
-                    { titulo: 'Informe técnico de despliegue (PDF, máx. 4 páginas)', detalle: 'Comparativa de pipelines, rendimiento GPU, tabla de optimización Edge (tamaño/latencia/precisión antes y después) y ruta de despliegue con su justificación de ingeniería.' },
+                    { titulo: 'Informe técnico de despliegue (PDF, máx. 4 páginas)', detalle: 'Comparativa de flujos de datos, rendimiento GPU, tabla de optimización para el borde (tamaño/latencia/precisión antes y después) y ruta de despliegue con su justificación de ingeniería.' },
                     { titulo: 'Bitácora de IA', detalle: 'Registro de qué se pidió a la IA y qué se Aceptó / Modificó / Rechazó, con el motivo.' },
                     { titulo: 'Empaque final', detalle: 'Todo en Apellido_Nombre_Centinela_Fase3.zip (o repositorio en GitHub).' },
                 ],
                 /* Nota de entrega (solo Fase 3) */
                 entregaNota: 'La sustentación oral se agenda aparte (no va dentro del .zip ni del repositorio). Nivel Nulo (0,0) = sin entrega del producto.',
-                caso: 'Cierre del ciclo de vida del Proyecto Centinela: en el rol de ingeniero de MLOps contratado por una entidad como AGROSAVIA (escenario hipotético), el estudiante industrializa el sistema de las fases anteriores. Construye un pipeline eficiente que aprovecha la GPU gratuita en la nube, entrena con precisión mixta y checkpointing, y prepara un despliegue que funcione offline en una tablet en campo. El escenario de referencia clasifica hojas de café (sana frente a roya), pero la lógica aplica al sistema propio del estudiante.',
+                caso: 'Cierre del ciclo de vida del Proyecto Centinela: en el rol de ingeniero de MLOps contratado por una entidad como AGROSAVIA (escenario hipotético), el estudiante industrializa el sistema de las fases anteriores. Construye un flujo de datos eficiente que aprovecha la GPU gratuita en la nube, entrena con precisión mixta y puntos de control, y prepara un despliegue que funcione sin conexión en una tablet en campo. El escenario de referencia clasifica hojas de café (sana frente a roya), pero la lógica aplica al sistema propio del estudiante.',
                 pasos: [
-                    'Selección y configuración del framework: elegir TF/Keras 3 o PyTorch con criterios técnicos (producción y borde frente a investigación) y justificar la decisión para un cliente sin conexión en campo.',
-                    'Pipeline de datos eficiente: construir el pipeline con tf.data o DataLoader (prefetch/cache, num_workers, pin_memory) y aplicar aumento de datos; documentar la comparativa de rendimiento y evitar la hambruna de GPU.',
-                    'Entrenamiento acelerado en GPU: entrenar un modelo preentrenado (transferencia de aprendizaje) con precisión mixta (FP16/BF16) y checkpointing; reportar el ahorro de VRAM y el tiempo por época, y resolver cualquier CUDA OOM con evidencia.',
+                    <>Selección y configuración del <em>framework</em>: elegir TF/Keras 3 o PyTorch con criterios técnicos (producción y borde frente a investigación) y justificar la decisión para un cliente sin conexión en campo.</>,
+                    'Flujo de datos eficiente: construir el flujo con tf.data o DataLoader (prefetch/cache, num_workers, pin_memory) y aplicar aumento de datos; documentar la comparativa de rendimiento y evitar la hambruna de GPU.',
+                    'Entrenamiento acelerado en GPU: entrenar un modelo preentrenado (transferencia de aprendizaje) con precisión mixta (FP16/BF16) y puntos de control; reportar el ahorro de VRAM y el tiempo por época, y resolver cualquier CUDA OOM con evidencia.',
                     'Optimización para el borde: aplicar al menos una técnica de compresión (cuantización a INT8, poda o destilación) y medir el efecto con una tabla antes/después de tamaño, latencia y exactitud, discutiendo el compromiso.',
                     'Exportación y verificación: exportar el modelo en formatos estándar (.pth, .keras y ONNX en un único archivo, con external_data=False) y verificar la consistencia de las predicciones con np.allclose (atol=1e-4).',
                     'Ruta de despliegue sin conexión: documentar la ruta dual (rama visual con LiteRT en la tablet + rama temporal por API REST en la nube), justificar las decisiones de ingeniería y explicitar los principios de Transparencia y Beneficio Social con mitigaciones de falsos positivos y negativos.',
@@ -1077,7 +1083,7 @@
             const ENTREGABLES = [
                 'Notebook ejecutado en Colab (.ipynb) con todas las salidas visibles.',
                 'Archivos del modelo exportado (.pth, .keras, .onnx) verificados.',
-                'Informe técnico de despliegue en PDF (máx. 4 páginas): pipelines, rendimiento GPU, tabla de optimización Edge y ruta de despliegue.',
+                'Informe técnico de despliegue en PDF (máx. 4 páginas): flujos de datos, rendimiento GPU, tabla de optimización para el borde y ruta de despliegue.',
                 'Bitácora de IA (Aceptada / Modificada / Rechazada + motivo).',
                 'Empaque Apellido_Nombre_Centinela_Fase3.zip (o repositorio en GitHub).',
             ];
@@ -1212,11 +1218,11 @@
                 titulo: 'De Colab al Cafetal: Implementación Profesional de Deep Learning (Frameworks, GPU, Pipelines y Despliegue Móvil) para el Contexto Cafetero Colombiano',
                 duracion: '≈5 min 33 s (12 escenas)',
                 numEscenas: 12,
-                conceptos: ['TensorFlow 2.x + Keras: API Sequential, Funcional y Subclassing; ecosistema de producción (Serving, TFX, LiteRT)', 'PyTorch: tensores (CPU/GPU), define-by-run, Autograd y torch.nn', 'Elección de framework según el destino; Keras 3 (un código, tres backends: TF, PyTorch, JAX)', 'GPU: núcleos CUDA y Tensor Cores, pila CUDA/cuDNN, VRAM y error «out of memory»', 'Cómputo gratuito bien usado: Colab y Kaggle, precisión mixta (FP16/bfloat16), acumulación de gradientes y checkpoints', 'Pipelines eficientes: tf.data (map→cache→shuffle→batch→prefetch) y DataLoader (num_workers, pin_memory)', 'Data Augmentation para robustez en campo (rotación, brillo, recorte, volteo)', 'Del entrenamiento al dispositivo: guardado (.keras/SavedModel/state_dict), exportación (Keras/TF → LiteRT · PyTorch → ExecuTorch o LiteRT Torch · ONNX → ONNX Runtime), cuantización INT8', 'Despliegue responsable: umbrales de confianza, humano en el bucle y monitoreo de deriva'],
+                conceptos: ['TensorFlow 2.x + Keras: API Sequential, Funcional y Subclassing; ecosistema de producción (Serving, TFX, LiteRT)', <>PyTorch: tensores (CPU/GPU), <em>define-by-run</em>, Autograd y torch.nn</>, <>Elección de <em>framework</em> según el destino; Keras 3 (un código, tres motores: TF, PyTorch, JAX)</>, 'GPU: núcleos CUDA y Tensor Cores, pila CUDA/cuDNN, VRAM y error «out of memory»', 'Cómputo gratuito bien usado: Colab y Kaggle, precisión mixta (FP16/bfloat16), acumulación de gradientes y puntos de control', 'Flujos de datos eficientes: tf.data (map→cache→shuffle→batch→prefetch) y DataLoader (num_workers, pin_memory)', 'Aumento de datos para robustez en campo (rotación, brillo, recorte, volteo)', 'Del entrenamiento al dispositivo: guardado (.keras/SavedModel/state_dict), exportación (Keras/TF → LiteRT · PyTorch → ExecuTorch o LiteRT Torch · ONNX → ONNX Runtime), cuantización INT8', 'Despliegue responsable: umbrales de confianza, humano en el bucle y monitoreo de deriva'],
                 textoDestacado: [
-                    'Del notebook al celular, sin internet: el framework se elige por el destino del modelo',
-                    'La regla de oro de los pipelines: que la GPU nunca espere al disco',
-                    'La IA más valiosa no es la que gana un benchmark, sino la que corre en la mano del técnico, sin señal, y respeta las consecuencias de equivocarse',
+                    <>Del notebook al celular, sin internet: el <em>framework</em> se elige por el destino del modelo</>,
+                    <>La regla de oro de los <em>pipelines</em>: que la GPU nunca espere al disco</>,
+                    <>La IA más valiosa no es la que gana un <em>benchmark</em>, sino la que corre en la mano del técnico, sin señal, y respeta las consecuencias de equivocarse</>,
                 ],
                 url: null,
                 linkMd: 'modulos/modulo-3-implementacion/videos/video-profundizacion-m3.md',
@@ -1228,11 +1234,11 @@
                 titulo: 'Alertas Tempranas contra la Deserción: Arquitecturas Multimodales de Deep Learning (LSTM, Transformers y Autoencoders) para la predicción de deserción escolar en colegios públicos rurales de Colombia',
                 duracion: '≈5 min 42 s (12 escenas)',
                 numEscenas: 12,
-                conceptos: ['LSTM y GRU para trayectorias temporales (notas, asistencia, intensidad horaria)', 'Transformers en español (BETO, RoBERTa-BNE, mBERT) sobre observaciones del docente', 'Autoencoders y VAE para detección de anomalías con eventos escasos', 'CNN-OCR para digitalizar boletines de papel escaneados', 'Fusión tardía: concatenación de vectores en una red densa de decisión', 'Edge AI: cuantización (INT8), pruning estructurado y knowledge distillation a DistilBETO', 'Equidad algorítmica y profecía autocumplida (fairness, equalized odds, paridad demográfica)', 'Aprendizaje federado con infraestructura colombiana (RENATA, Guane-1, Apolo, BIOS)'],
+                conceptos: ['LSTM y GRU para trayectorias temporales (notas, asistencia, intensidad horaria)', 'Transformers en español (BETO, RoBERTa-BNE, mBERT) sobre observaciones del docente', 'Autocodificadores y VAE para detección de anomalías con eventos escasos', 'CNN-OCR para digitalizar boletines de papel escaneados', 'Fusión tardía: concatenación de vectores en una red densa de decisión', 'Edge AI: cuantización (INT8), poda estructurada y destilación del conocimiento a DistilBETO', <>Equidad algorítmica y profecía autocumplida (<em>fairness</em>, <em>equalized odds</em>, paridad demográfica)</>, 'Aprendizaje federado con infraestructura colombiana (RENATA, Guane-1, Apolo, BIOS)'],
                 textoDestacado: [
                     'La deserción escolar no tiene una sola señal: por eso se necesita un enfoque multimodal que combine cuatro arquitecturas especializadas',
                     'La IA educativa más sofisticada no es la más precisa, sino la que llega a la mano del orientador rural sin estigmatizar',
-                    'Un pipeline que cabe en trescientos megabytes y corre offline en el equipo del rector, preservando soberanía educativa',
+                    <>Un <em>pipeline</em> que cabe en trescientos megabytes y corre <em>offline</em> en el equipo del rector, preservando soberanía educativa</>,
                 ],
                 url: null,
                 linkMd: 'modulos/modulo-3-implementacion/videos/video-capstone-guia3-desercion.md',
@@ -1241,32 +1247,32 @@
 
         /* Glosario (literales del cap 3-1, 3-2 y 3-3 del Módulo 3) */
         const glossary = [
-            { t: 'TensorFlow',           d: 'Framework de código abierto de Google para aprendizaje profundo. Incluye Keras como API de alto nivel y un ecosistema de despliegue (TF Serving, LiteRT, TF.js). Analogía: la notaría digital, con ejecución inmediata (eager) desde TF 2.x.' },
-            { t: 'PyTorch',              d: 'Framework creado por Facebook AI Research (hoy Meta) y gobernado desde 2022 por la PyTorch Foundation (Linux Foundation), con grafos computacionales dinámicos. Desde 2019 es mayoritario en los artículos con código de las grandes conferencias. Analogía: el río Magdalena, cuya ruta decide cada crecida.' },
-            { t: 'Keras 3',              d: 'API compatible con varios motores (multi-backend: TensorFlow, PyTorch, JAX) lanzada a finales de 2023. Permite escribir el código una vez y ejecutarlo en cualquier motor.' },
+            { t: 'TensorFlow',           d: <><em>Framework</em> de código abierto de Google para aprendizaje profundo. Incluye Keras como API de alto nivel y un ecosistema de despliegue (TF Serving, LiteRT, TF.js). Analogía: la notaría digital, con ejecución inmediata (<em>eager</em>) desde TF 2.x.</> },
+            { t: 'PyTorch',              d: <><em>Framework</em> creado por Facebook AI Research (hoy Meta) y gobernado desde 2022 por la PyTorch Foundation (Linux Foundation), con grafos computacionales dinámicos. Desde 2019 es mayoritario en los artículos con código de las grandes conferencias. Analogía: el río Magdalena, cuya ruta decide cada crecida.</> },
+            { t: 'Keras 3',              d: <>API compatible con varios motores (multi-<em>backend</em>: TensorFlow, PyTorch, JAX) lanzada a finales de 2023. Permite escribir el código una vez y ejecutarlo en cualquier motor.</> },
             { t: 'GPU',                  d: 'Unidad de procesamiento gráfico: hardware con miles de núcleos paralelos optimizado para operaciones matriciales; en modelos grandes acelera uno o dos órdenes de magnitud respecto a la CPU. Analogía: la despulpadora industrial de café.' },
             { t: 'CUDA',                 d: 'Plataforma de computación paralela de NVIDIA (2006) que permite ejecutar código en GPU. Base de todo el ecosistema de aprendizaje profundo acelerado.' },
             { t: 'Tensor Core',          d: 'Unidad de hardware especializada en multiplicación-acumulación de matrices (MMA). En la A100, hasta 16× más rendimiento en FP16 que los núcleos CUDA en FP32.' },
             { t: 'VRAM',                 d: 'Memoria de video de la GPU; el recurso más limitante. Almacena pesos, gradientes, estados del optimizador y activaciones. Analogía: la bodega de la plaza de mercado.' },
             { t: 'Precisión mixta (AMP)', d: 'Técnica que calcula en FP16/BF16 y conserva en FP32 los pesos maestros, sus gradientes y los estados del optimizador: acelera hasta 2–3× en GPU con Tensor Cores y reduce sobre todo la memoria de las activaciones; el ahorro total es menor que la mitad (≈31 % en ResNet-18 con lote 32).' },
-            { t: 'CUDA OOM',             d: 'Error «out of memory» que aparece cuando el modelo, los lotes y las activaciones exceden la VRAM disponible. Se mitiga reduciendo el tamaño de lote, con precisión mixta o con recálculo de activaciones (gradient checkpointing).' },
+            { t: 'CUDA OOM',             d: <>Error «out of memory» que aparece cuando el modelo, los lotes y las activaciones exceden la VRAM disponible. Se mitiga reduciendo el tamaño de lote, con precisión mixta o con recálculo de activaciones (<em>gradient checkpointing</em>).</> },
             { t: 'DataLoader (PyTorch)', d: 'Clase que gestiona la carga paralela de datos con num_workers, pin_memory y prefetch_factor para maximizar la utilización de la GPU.' },
             { t: 'tf.data (TensorFlow)', d: 'API declarativa para construir flujos de datos eficientes con operaciones encadenadas (map, cache, shuffle, batch, prefetch).' },
-            { t: 'Prefetch',             d: 'Técnica que superpone la preparación del siguiente lote (CPU) con el entrenamiento del lote actual (GPU). Analogía: preparar el siguiente plato mientras el actual se cocina.' },
-            { t: 'pin_memory',           d: 'Parámetro del DataLoader que asigna los tensores en memoria fijada (page-locked) de la CPU, lo que permite transferencias asíncronas más rápidas a la GPU.' },
+            { t: 'Precarga (*prefetch*)', d: 'Técnica que superpone la preparación del siguiente lote (CPU) con el entrenamiento del lote actual (GPU). Analogía: preparar el siguiente plato mientras el actual se cocina.' },
+            { t: 'pin_memory',           d: <>Parámetro del DataLoader que asigna los tensores en memoria fijada (<em>page-locked</em>) de la CPU, lo que permite transferencias asíncronas más rápidas a la GPU.</> },
             { t: 'num_workers',          d: 'Número de subprocesos del DataLoader que cargan datos en paralelo en segundo plano. Analogía: meseros trabajando en paralelo.' },
-            { t: 'Aumento de datos (data augmentation)', d: 'Técnica de regularización que aplica transformaciones aleatorias (volteo, rotación, color) a los datos de entrenamiento. Analogía: entrenar a la Selección en condiciones variadas.' },
+            { t: 'Aumento de datos (*data augmentation*)', d: 'Técnica de regularización que aplica transformaciones aleatorias (volteo, rotación, color) a los datos de entrenamiento. Analogía: entrenar a la Selección en condiciones variadas.' },
             { t: 'Mixup / CutMix',       d: 'Técnicas de aumento que mezclan dos muestras: Mixup interpola imágenes y etiquetas; CutMix recorta una región y la pega en otra, ajustando las etiquetas por área.' },
-            { t: 'AlbumentationsX',      d: 'Biblioteca de aumento de imágenes, sucesora de Albumentations (MIT, archivada; la 2.0.8 funciona, pero ya no recibe correcciones). Se distribuye con licencia AGPL-3.0 (copyleft: el código que la incorpore, si se distribuye o se ofrece como servicio en red, debe publicarse con la misma licencia) o comercial; conviene leer sus términos vigentes antes de usarla fuera del aula. El curso usa por defecto torchvision.transforms.v2 (BSD-3).' },
-            { t: 'Hambruna de GPU (GPU starvation)', d: 'La GPU permanece ociosa esperando datos porque el flujo de datos no la alimenta a tiempo. Se mitiga con prefetch, num_workers y cache. Analogía: el restaurante de La Candelaria.' },
+            { t: 'AlbumentationsX',      d: <>Biblioteca de aumento de imágenes, sucesora de Albumentations (MIT, archivada; la 2.0.8 funciona, pero ya no recibe correcciones). Se distribuye con licencia AGPL-3.0 (<em>copyleft</em>: el código que la incorpore, si se distribuye o se ofrece como servicio en red, debe publicarse con la misma licencia) o comercial; conviene leer sus términos vigentes antes de usarla fuera del aula. El curso usa por defecto torchvision.transforms.v2 (BSD-3).</> },
+            { t: 'Hambruna de GPU (*GPU starvation*)', d: 'La GPU permanece ociosa esperando datos porque el flujo de datos no la alimenta a tiempo. Se mitiga con prefetch, num_workers y cache. Analogía: el restaurante de La Candelaria.' },
             { t: 'ONNX',                 d: 'Open Neural Network Exchange: formato abierto para modelos, mantenido por LF AI & Data (Linux Foundation). Desde PyTorch 2.9, torch.onnx.export usa por defecto el exportador basado en torch.export; con external_data=False se obtiene un único archivo .onnx. Analogía: el pasaporte universal del modelo.' },
             { t: 'torch.export',         d: 'Sucesor de TorchScript (declarado obsoleto en la documentación de PyTorch 2.9). Captura el modelo como un grafo AOT (ATen) que se guarda en .pt2 y se carga con torch.export.load; para C++ hace falta AOTInductor y para móviles, ExecuTorch.' },
-            { t: 'Transferencia de aprendizaje (transfer learning)', d: 'Reutilizar un modelo preentrenado (ResNet-18, MobileNetV3) para una tarea nueva con menos datos y cómputo; clave en entornos con recursos limitados.' },
+            { t: 'Transferencia de aprendizaje (*transfer learning*)', d: 'Reutilizar un modelo preentrenado (ResNet-18, MobileNetV3) para una tarea nueva con menos datos y cómputo; clave en entornos con recursos limitados.' },
             { t: 'Cuantización',         d: 'Reducir la precisión de los pesos (p. ej., de FP32 a INT8) para obtener un modelo ≈4× más pequeño y, en CPU móvil, típicamente 2–3× más rápido, con cierta pérdida de exactitud; clave para el borde.' },
             { t: 'LiteRT',               d: 'Sucesor de TensorFlow Lite. Proyecto independiente para inferencia optimizada en móviles y borde, con API nativas en Kotlin y C++.' },
             { t: 'ExecuTorch',           d: 'Entorno de ejecución oficial de PyTorch para móviles y borde (sucesor de PyTorch Mobile; versión 1.0 en octubre de 2025). Consume modelos de torch.export. Soporta Arm, Apple y Qualcomm.' },
             { t: 'SavedModel',           d: 'Formato nativo de TensorFlow para despliegue. Almacena el grafo, los pesos y la lógica de servicio. Estándar para TF Serving, LiteRT y TF.js.' },
-            { t: 'Checkpoint',           d: 'Guardado periódico del estado del modelo, el optimizador, la época y la pérdida; permite reanudar un entrenamiento interrumpido (esencial en Colab).' },
+            { t: 'Punto de control (*checkpoint*)', d: 'Guardado periódico del estado del modelo, el optimizador, la época y la pérdida; permite reanudar un entrenamiento interrumpido (esencial en Colab).' },
             { t: 'FSDP',                 d: 'Fully Sharded Data Parallel: estrategia con varias GPU que fragmenta pesos, gradientes y estados del optimizador, para entrenar modelos que exceden la VRAM de una GPU (Zhao et al., 2023).' },
             { t: 'DDP',                  d: 'Distributed Data Parallel: estrategia con varias GPU que replica el modelo en cada dispositivo, procesa porciones distintas de datos y sincroniza los gradientes (Li et al., 2020). Analogía: la minga.' },
             { t: 'Google Colab',         d: 'Entorno de cuadernos Jupyter en la nube de Google con acceso gratuito a GPU T4, con sesiones de hasta 12 h y límites variables y no publicados. Los planes de pago (Pro y Pro+) dan GPU más potentes; precios y cuotas cambian (consulta: 2026-10-11, FAQ de Colab).' },
@@ -1307,16 +1313,16 @@
         /* Cronograma (síntesis de los hitos y encuentros del Módulo 3) */
         const cronograma = {
             semana1: {
-                titulo: 'Semana 1 — Frameworks y Video de Profundización',
+                titulo: <>Semana 1 — <em>Frameworks</em> y Video de Profundización</>,
                 eventos: [
-                    { fecha: COHORTE_ANIO + '-06-25', hora: '19:30 – 21:00', tipo: 'Encuentro 1', tipoColor: '#3D008D', titulo: 'Frameworks de Deep Learning', desc: 'Por qué un framework (autograd, GPU, abstracción); TensorFlow/Keras 3 frente a PyTorch; criterios de selección y ONNX como pasaporte interoperable entre ecosistemas.', link: TEAMS_URL, linkLabel: 'Teams sincrónico' },
-                    { fecha: 'Toda la semana', tipo: 'Asincrónico', tipoColor: '#FDB913', titulo: 'Video de Profundización — De Colab al Cafetal', desc: 'Recurso audiovisual de 12 escenas (≈ 5 min 33 s): frameworks (TensorFlow/PyTorch/Keras 3), GPU y cómputo en la nube (Colab/Kaggle, precisión mixta), flujos de datos (tf.data/DataLoader) y despliegue sin conexión (ONNX/LiteRT, cuantización INT8).' },
+                    { fecha: COHORTE_ANIO + '-06-25', hora: '19:30 – 21:00', tipo: 'Encuentro 1', tipoColor: '#3D008D', titulo: 'Frameworks de Deep Learning', desc: <>Por qué un <em>framework</em> (autograd, GPU, abstracción); TensorFlow/Keras 3 frente a PyTorch; criterios de selección y ONNX como pasaporte interoperable entre ecosistemas.</>, link: TEAMS_URL, linkLabel: 'Teams sincrónico' },
+                    { fecha: 'Toda la semana', tipo: 'Asincrónico', tipoColor: '#FDB913', titulo: 'Video de Profundización — De Colab al Cafetal', desc: <>Recurso audiovisual de 12 escenas (≈ 5 min 33 s): <em>frameworks</em> (TensorFlow/PyTorch/Keras 3), GPU y cómputo en la nube (Colab/Kaggle, precisión mixta), flujos de datos (tf.data/DataLoader) y despliegue sin conexión (ONNX/LiteRT, cuantización INT8).</> },
                 ],
             },
             semana2: {
                 titulo: 'Semana 2 — Cómputo de alto rendimiento, despliegue y entregas',
                 eventos: [
-                    { fecha: COHORTE_ANIO + '-07-01', hora: '19:30 – 21:00', tipo: 'Encuentro 2', tipoColor: '#3D008D', titulo: 'Computación de alto rendimiento (GPU)', desc: 'GPU frente a CPU y Tensor Cores; VRAM y CUDA OOM; precisión mixta (AMP) y checkpointing; Google Colab y Kaggle; estrategias con varias GPU (DDP/FSDP).', link: TEAMS_URL, linkLabel: 'Teams sincrónico' },
+                    { fecha: COHORTE_ANIO + '-07-01', hora: '19:30 – 21:00', tipo: 'Encuentro 2', tipoColor: '#3D008D', titulo: 'Computación de alto rendimiento (GPU)', desc: 'GPU frente a CPU y Tensor Cores; VRAM y CUDA OOM; precisión mixta (AMP) y puntos de control; Google Colab y Kaggle; estrategias con varias GPU (DDP/FSDP).', link: TEAMS_URL, linkLabel: 'Teams sincrónico' },
                     { fecha: COHORTE_ANIO + '-07-02', hora: '19:30 – 21:00', tipo: 'Encuentro 3', tipoColor: '#3D008D', titulo: 'Pipelines de datos y despliegue', desc: 'Hambruna de GPU; tf.data y DataLoader (prefetch/cache, num_workers); aumento de datos; exportación a ONNX y LiteRT, y ruta de despliegue sin conexión en campo.', link: TEAMS_URL, linkLabel: 'Teams sincrónico' },
                     { fecha: 'Fecha en el campus virtual', tipo: 'Guía 3', tipoColor: '#15803D', titulo: 'Momento 1: Guía de Profundización 3 (5 %)', desc: 'Escrito reflexivo en el foro sobre arquitecturas multimodales para la deserción escolar rural, con criterios de equidad algorítmica y APA 7 (6–8 h). Apoyo: video capstone «Alertas Tempranas contra la Deserción» (≈ 5 min 42 s).', link: 'https://campus.usta.edu.co', linkLabel: 'Campus virtual' },
                     { fecha: 'Fecha en el campus virtual', hora: '23:59', tipo: 'Fase 3', tipoColor: '#BE185D', titulo: 'Momento 2: Proyecto Centinela · Fase 3 (25 %)', desc: '«De Colab al Cafetal»: flujo de datos + GPU con precisión mixta + optimización para el borde + exportación ONNX + despliegue sin conexión, con Bitácora y Auditoría de IA.', link: 'https://campus.usta.edu.co', linkLabel: 'Campus virtual' },
@@ -1811,8 +1817,8 @@
             // Agrupar por letra inicial
             const grouped = useMemo(() => {
                 const map = {};
-                [...glossary].sort((a, b) => a.t.localeCompare(b.t, 'es')).forEach(g => {
-                    const letter = g.t.normalize('NFD')[0].toUpperCase();
+                [...glossary].sort((a, b) => sinAsteriscos(a.t).localeCompare(sinAsteriscos(b.t), 'es')).forEach(g => {
+                    const letter = sinAsteriscos(g.t).normalize('NFD')[0].toUpperCase();
                     (map[letter] = map[letter] || []).push(g);
                 });
                 return Object.keys(map).sort().reduce((acc, k) => (acc[k] = map[k], acc), {});
@@ -1824,7 +1830,7 @@
                     <div className="space-y-3">
                         {terms.map((g, i) => (
                             <div key={i} className="border-l-2 border-primary/30 pl-3">
-                                <h4 className="font-bold text-navy text-[0.95rem]">{g.t}</h4>
+                                <h4 className="font-bold text-navy text-[0.95rem]">{conCursivas(g.t)}</h4>
                                 <p className="text-[0.85rem] text-gray-600 leading-relaxed">{g.d}</p>
                             </div>
                         ))}

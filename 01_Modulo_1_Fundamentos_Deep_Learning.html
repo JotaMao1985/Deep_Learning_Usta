@@ -319,6 +319,8 @@
         }
         /* Citas APA (auditoría 2026-10): el título muestra la referencia completa */
         .cita { cursor: help; }
+        /* Un término en cursiva dentro de un texto ya en cursiva pasa a redonda (convención tipográfica) */
+        .italic em, em em { font-style: normal; }
     </style>
 </head>
 
@@ -1180,8 +1182,8 @@
                         { n: 'RA2', t: 'Explica la arquitectura del MLP y el Teorema de Aproximación Universal, justificando el rol de las funciones de activación.' },
                         { n: 'RA3', t: 'Formula las funciones de costo (MSE, BCE) y el descenso del gradiente, analizando el efecto de la tasa de aprendizaje y los optimizadores.' },
                         { n: 'RA4', t: 'Aplica el algoritmo de retropropagación relacionándolo con la regla de la cadena y el autograd de PyTorch.' },
-                        { n: 'RA5', t: 'Diagnostica el sobreajuste y aplica técnicas de regularización (L1, L2, Dropout, BatchNorm) para mejorar la generalización.' },
-                        { n: 'RA6', t: 'Evalúa modelos de clasificación con métricas apropiadas (matriz de confusión, recall, exactitud) y argumenta implicaciones éticas en Colombia.' },
+                        { n: 'RA5', t: <>Diagnostica el sobreajuste y aplica técnicas de regularización (L1, L2, <em>dropout</em>, BatchNorm) para mejorar la generalización.</> },
+                        { n: 'RA6', t: <>Evalúa modelos de clasificación con métricas apropiadas (matriz de confusión, <em>recall</em>, exactitud) y argumenta implicaciones éticas en Colombia.</> },
                     ].map((r, i) => (
                         <div key={i} className="usta-card p-4 flex gap-3">
                             <span className="flex-shrink-0 h-8 px-2 inline-flex items-center rounded-lg usta-gradient text-white font-bold text-sm">{r.n}</span>
@@ -1633,7 +1635,7 @@ def caracteristicas_manuales(imagen):
                 <MCQ
                     pregunta="¿Qué tres factores convergieron para provocar el renacimiento del Deep Learning hacia 2012?"
                     opciones={[
-                        { texto: 'Datos masivos, GPU y mejoras algorítmicas (ReLU y dropout).', correcta: true, justificacion: 'Datos masivos (ImageNet), cómputo paralelo (GPU) y mejores algoritmos (ReLU, dropout) se combinaron en el hito de AlexNet (2012). BatchNorm llegaría después, en 2015.' },
+                        { texto: <>Datos masivos, GPU y mejoras algorítmicas (ReLU y <em>dropout</em>).</>, correcta: true, justificacion: <>Datos masivos (ImageNet), cómputo paralelo (GPU) y mejores algoritmos (ReLU, <em>dropout</em>) se combinaron en el hito de AlexNet (2012). BatchNorm llegaría después, en 2015.</> },
                         { texto: 'Internet, los teléfonos inteligentes y las redes sociales.', correcta: false },
                         { texto: 'La invención del perceptrón y la regla de Hebb.', correcta: false },
                         { texto: 'La computación cuántica y blockchain.', correcta: false },
@@ -1679,7 +1681,7 @@ def caracteristicas_manuales(imagen):
                     {
                         pregunta: '¿Qué algoritmo de 1986 permitió entrenar las capas ocultas y reactivó el campo?',
                         opciones: [
-                            { texto: 'La retropropagación (backpropagation).', correcta: true },
+                            { texto: <>La retropropagación (<em>backpropagation</em>).</>, correcta: true },
                             { texto: 'El descenso de gradiente cuántico.', correcta: false },
                             { texto: 'La regresión logística.', correcta: false },
                         ],
@@ -2765,7 +2767,7 @@ modelo = nn.Sequential(
                                     </div>
                                     <input type="range" min="0" max="0.2" step="0.005" value={lambda} onChange={e => setLambda(+e.target.value)} className="usta-range" aria-label="Fuerza de regularización L2 (lambda)" />
                                     <div className="flex justify-between text-xs font-semibold text-gray-600 mb-1 mt-3">
-                                        <span className="flex items-center gap-2">Dropout (capas ocultas) <span className="text-[0.55rem] font-bold text-white px-1.5 py-0.5 rounded-full" style={{ background: '#15803D' }}>NUEVO · Cap 5</span></span>
+                                        <span className="flex items-center gap-2"><em>Dropout</em> (capas ocultas) <span className="text-[0.55rem] font-bold text-white px-1.5 py-0.5 rounded-full" style={{ background: '#15803D' }}>NUEVO · Cap 5</span></span>
                                         <span className="text-primary">{Math.round(dropout * 100)} %</span>
                                     </div>
                                     <input type="range" min="0" max="0.9" step="0.05" value={dropout} onChange={e => setDropout(+e.target.value)} className="usta-range" aria-label="Probabilidad de dropout" />
@@ -4100,7 +4102,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                 <MCQ
                     pregunta="¿Qué combina el optimizador Adam para ser tan robusto?"
                     opciones={[
-                        { texto: 'Momentum (inercia) más una tasa de aprendizaje adaptada a cada parámetro.', correcta: true, justificacion: 'Adam une el primer momento (momentum) y el segundo momento (paso adaptativo, al estilo RMSProp); por eso suele ser el punto de partida habitual.' },
+                        { texto: <><em>Momentum</em> (inercia) más una tasa de aprendizaje adaptada a cada parámetro.</>, correcta: true, justificacion: <>Adam une el primer momento (<em>momentum</em>) y el segundo momento (paso adaptativo, al estilo RMSProp); por eso suele ser el punto de partida habitual.</> },
                         { texto: 'Elimina por completo la tasa de aprendizaje.', correcta: false },
                         { texto: 'Procesa todos los datos a la vez, como el descenso por lote completo.', correcta: false },
                         { texto: 'Cambia automáticamente la función de pérdida a MSE.', correcta: false },
@@ -4126,7 +4128,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                         justificacion: 'MSE es la opción estándar para valores continuos; si hay atípicos que son ruido, conviene MAE o Huber. BCE y CCE son para clasificación.'
                     },
                     {
-                        pregunta: 'El momentum en un optimizador sirve para…',
+                        pregunta: <>El <em>momentum</em> en un optimizador sirve para…</>,
                         opciones: [
                             { texto: 'acumular inercia de gradientes previos y suavizar el zigzagueo del SGD.', correcta: true },
                             { texto: 'aumentar el número de épocas automáticamente.', correcta: false },
@@ -4150,7 +4152,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                             { texto: 'una sola neurona lineal + MSE.', correcta: false },
                             { texto: 'Sigmoide + MSE.', correcta: false },
                         ],
-                        justificacion: 'Softmax convierte los logits en probabilidades que suman 1, y la CCE penaliza la probabilidad dada a la clase verdadera. La BCE es solo el caso de 2 clases.'
+                        justificacion: <>Softmax convierte los <em>logits</em> en probabilidades que suman 1, y la CCE penaliza la probabilidad dada a la clase verdadera. La BCE es solo el caso de 2 clases.</>
                     },
                 ]} />
 
@@ -4992,7 +4994,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                         </div>
                     },
                     {
-                        label: 'Dropout', content: <div>
+                        label: <em>Dropout</em>, content: <div>
                             <p>En cada iteración de entrenamiento <strong>apaga al azar</strong> una fracción {String.raw`\(p\)`} de las neuronas (típicamente entre el 20 % y el 50 %). Es como ir rotando, en cada sesión, a quién se le pide <strong>ausentarse del grupo de estudio</strong> —incluida la «estrella»—: nadie puede depender de una sola neurona, así que todos aprenden a resolver. Eso <strong>rompe la coadaptación</strong> <Cita k="hinton2012improving, srivastava2014dropout" />.</p>
                             <p>Visto de otro modo: como cada paso entrena una <strong>subred distinta</strong> (con diferentes neuronas activas), es casi como entrenar y promediar un <strong>enorme conjunto de redes</strong> que comparten pesos. De ahí surgen representaciones <strong>redundantes y distribuidas</strong>, que generalizan mejor.</p>
                             <p className="!mb-0">En <strong>inferencia</strong> el <em>dropout</em> se <strong>apaga</strong>: participan todas las neuronas y la predicción es <strong>determinista</strong>. Para que la magnitud esperada de las activaciones coincida en ambas fases, PyTorch (<span className="inline-code">nn.Dropout</span>) y el laboratorio de este módulo usan el <strong><em>dropout</em> invertido</strong>: <em>durante el entrenamiento</em> dividen por {String.raw`\(1-p\)`} las activaciones de las neuronas que siguen activas, de modo que al predecir no hay que reescalar nada. (El artículo original hacía lo contrario: multiplicaba por la probabilidad de retención {String.raw`\(1-p\)`} al predecir.)</p>
@@ -5167,8 +5169,8 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                     </table>
                 </div>
                 <Accordion items={[
-                    { titulo: 'Grid Search (búsqueda en cuadrícula)', contenido: <span>Evalúa sistemáticamente todas las combinaciones de una rejilla —p. ej. tasa de aprendizaje {`{0,01; 0,001; 0,0001}`} cruzada con λ {`{0; 1e-4; 1e-3}`}—. Exhaustiva pero costosa: su costo crece con el <strong>producto</strong> de las opciones.</span> },
-                    { titulo: 'Random Search (búsqueda aleatoria)', contenido: <span>Prueba combinaciones al azar dentro de rangos razonables. Suele ser más eficiente: si solo unos pocos hiperparámetros importan, prueba muchos más valores distintos de cada uno que una rejilla del mismo costo <Cita k="bergstra2012random" />.</span> },
+                    { titulo: <><em>Grid Search</em> (búsqueda en cuadrícula)</>, contenido: <span>Evalúa sistemáticamente todas las combinaciones de una rejilla —p. ej. tasa de aprendizaje {`{0,01; 0,001; 0,0001}`} cruzada con λ {`{0; 1e-4; 1e-3}`}—. Exhaustiva pero costosa: su costo crece con el <strong>producto</strong> de las opciones.</span> },
+                    { titulo: <><em>Random Search</em> (búsqueda aleatoria)</>, contenido: <span>Prueba combinaciones al azar dentro de rangos razonables. Suele ser más eficiente: si solo unos pocos hiperparámetros importan, prueba muchos más valores distintos de cada uno que una rejilla del mismo costo <Cita k="bergstra2012random" />.</span> },
                 ]} />
 
                 <h3>Matriz de confusión y métricas</h3>
@@ -5301,7 +5303,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                     pregunta="Un modelo de crédito no usa la etnia como variable, pero rechaza al doble de solicitantes de una región donde se concentra cierto grupo étnico. Esto es…"
                     opciones={[
                         { texto: 'imposible: si no usa la etnia, no puede discriminar.', correcta: false },
-                        { texto: 'impacto dispar: variables sustitutas (proxy), como la región, codifican el atributo protegido y reproducen el sesgo.', correcta: true, justificacion: 'Quitar el atributo no basta («fairness through unawareness»): otras variables correlacionadas actúan como sustitutas y el impacto sigue siendo desigual.' },
+                        { texto: <>impacto dispar: variables sustitutas (<em>proxy</em>), como la región, codifican el atributo protegido y reproducen el sesgo.</>, correcta: true, justificacion: <>Quitar el atributo no basta (<em>«fairness through unawareness»</em>): otras variables correlacionadas actúan como sustitutas y el impacto sigue siendo desigual.</> },
                         { texto: 'un buen modelo, porque su exactitud global es alta.', correcta: false },
                     ]} />
 
@@ -5310,7 +5312,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                     opciones={[
                         { texto: 'Sobreajuste: el modelo memorizó el ruido de sus datos de entrenamiento y por eso falla con cualquier dato nuevo.', correcta: false },
                         { texto: 'Subajuste: el modelo es demasiado simple y no captó los patrones del problema en ninguna de las dos ciudades.', correcta: false },
-                        { texto: 'Cambio de distribución (dataset shift): los datos de Cúcuta difieren de los de Medellín, donde se validó el modelo.', correcta: true, justificacion: <>El sobreajuste es la brecha entre entrenamiento y validación dentro de una misma población; aquí la validación en Medellín fue buena (98 %) y lo que cambió fue la población. Es un cambio de distribución (dataset shift): el remedio no es más regularización, sino validar con datos de la región de destino y recoger datos representativos de ella <Cita k="morenotorres2012unifying, quinonerocandela2009dataset" />.</> },
+                        { texto: <>Cambio de distribución (<em>dataset shift</em>): los datos de Cúcuta difieren de los de Medellín, donde se validó el modelo.</>, correcta: true, justificacion: <>El sobreajuste es la brecha entre entrenamiento y validación dentro de una misma población; aquí la validación en Medellín fue buena (98 %) y lo que cambió fue la población. Es un cambio de distribución (<em>dataset shift</em>): el remedio no es más regularización, sino validar con datos de la región de destino y recoger datos representativos de ella <Cita k="morenotorres2012unifying, quinonerocandela2009dataset" />.</> },
                         { texto: 'Fuga de datos: información del conjunto de prueba se filtró al entrenamiento e infló el 98 % inicial.', correcta: false },
                     ]} />
 
@@ -5345,19 +5347,19 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                         justificacion: 'PyTorch acumula gradientes; sin limpiarlos se corrompe la dirección del descenso.'
                     },
                     {
-                        pregunta: 'El dropout combate el sobreajuste porque…',
+                        pregunta: <>El <em>dropout</em> combate el sobreajuste porque…</>,
                         opciones: [
                             { texto: 'reduce de forma permanente el número de parámetros de la red.', correcta: false },
                             { texto: 'también apaga neuronas al predecir, lo que vuelve más prudente cada predicción.', correcta: false },
                             { texto: 'apaga neuronas al azar al entrenar y rompe la coadaptación, forzando representaciones redundantes.', correcta: true },
                         ],
-                        justificacion: 'Al no poder depender de una «neurona estrella», la red aprende rasgos distribuidos y generaliza mejor. Al predecir (modelo.eval()) el dropout se apaga.'
+                        justificacion: <>Al no poder depender de una «neurona estrella», la red aprende rasgos distribuidos y generaliza mejor. Al predecir (modelo.eval()) el <em>dropout</em> se apaga.</>
                     },
                     {
                         pregunta: 'En salud pública con clases desbalanceadas (dengue), usar solo la exactitud es engañoso; conviene optimizar…',
                         opciones: [
                             { texto: 'la precisión, para no generar falsas alarmas.', correcta: false },
-                            { texto: 'la sensibilidad (recall), para detectar a los enfermos graves.', correcta: true },
+                            { texto: <>la sensibilidad (<em>recall</em>), para detectar a los enfermos graves.</>, correcta: true },
                             { texto: 'la pérdida de entrenamiento, hasta llevarla a cero.', correcta: false },
                         ],
                         justificacion: 'Una sensibilidad alta minimiza los falsos negativos, que en salud pueden ser fatales; la precisión importa, pero aquí el error más costoso es el caso grave sin alerta.'
@@ -5369,7 +5371,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                             { texto: 'el hiperparámetro se aprende con retropropagación, igual que los pesos.', correcta: false },
                             { texto: 'el parámetro lo aprende el modelo (pesos); el hiperparámetro lo fija el ingeniero antes de entrenar (tasa de aprendizaje, λ).', correcta: true },
                         ],
-                        justificacion: 'Los pesos se optimizan automáticamente; los hiperparámetros se buscan con Grid/Random Search.'
+                        justificacion: <>Los pesos se optimizan automáticamente; los hiperparámetros se buscan con <em>Grid/Random Search</em>.</>
                     },
                     {
                         pregunta: <>Entre los principios que recomienda el Marco ético para la IA en Colombia <Cita k="guio2021marco" /> se encuentran…</>,
@@ -5437,52 +5439,54 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
         /* ============================================================
            LECCIÓN FINAL — EVALUACIÓN, GLOSARIO Y RECURSOS
         ============================================================ */
+        // Ayudante: pinta en cursiva los tramos *entre asteriscos* (los datos siguen siendo cadenas para ordenar).
+        const conCursivas = (s) => typeof s === 'string' ? s.split(/\*([^*]+)\*/).map((p, i) => i % 2 ? <em key={i}>{p}</em> : p) : s;
         const GLOSARIO = [
-            ['Adam', 'Optimizador que combina el momentum (primer momento del gradiente) con un paso adaptativo por parámetro (segundo momento), con corrección de sesgo. Su variante AdamW desacopla el decaimiento de pesos.'],
-            ['Atributo protegido', 'Característica (sexo, etnia, edad, origen…) sobre la que es injusto o ilegal discriminar. Quitarla del modelo no basta: otras variables pueden actuar como sustitutas (proxy).'],
+            ['Adam', 'Optimizador que combina el *momentum* (primer momento del gradiente) con un paso adaptativo por parámetro (segundo momento), con corrección de sesgo. Su variante AdamW desacopla el decaimiento de pesos.'],
+            ['Atributo protegido', 'Característica (sexo, etnia, edad, origen…) sobre la que es injusto o ilegal discriminar. Quitarla del modelo no basta: otras variables pueden actuar como sustitutas (*proxy*).'],
             ['AUC (área bajo la curva ROC)', 'Resume la curva ROC en un número entre 0,5 (azar) y 1 (clasificador perfecto). No depende del umbral; con clases muy desbalanceadas conviene complementarla con la curva precisión–sensibilidad.'],
             ['Autograd', 'Diferenciación automática de PyTorch: registra las operaciones de los tensores con requires_grad=True y, al llamar backward(), calcula todos los gradientes con la regla de la cadena.'],
-            ['Cambio de distribución (dataset shift)', 'Diferencia entre la población con la que se entrenó y validó el modelo y aquella donde se usa. Se corrige validando y recogiendo datos de la población de destino, no con más regularización.'],
+            ['Cambio de distribución (*dataset shift*)', 'Diferencia entre la población con la que se entrenó y validó el modelo y aquella donde se usa. Se corrige validando y recogiendo datos de la población de destino, no con más regularización.'],
             ['Capa oculta', 'Capas entre la entrada y la salida que extraen características y aprenden representaciones abstractas.'],
             ['Curva de aprendizaje', 'Gráfico del error de entrenamiento y de validación a lo largo de las épocas; su forma diagnostica el sobreajuste o el subajuste.'],
             ['Descenso del gradiente', 'Algoritmo iterativo que minimiza la pérdida ajustando los pesos en dirección opuesta a la pendiente.'],
             ['Desplazamiento de covariables interno', 'Cambio en la distribución de las entradas de cada capa durante el entrenamiento, conforme se actualizan los pesos de las capas previas. Ioffe y Szegedy (2015) propusieron BatchNorm para mitigarlo; hoy se considera una explicación parcial de por qué funciona.'],
             ['Desvanecimiento del gradiente', 'El gradiente se vuelve diminuto al retropropagarse por muchas capas (p. ej., con sigmoide, cuya derivada no supera 0,25) y las primeras capas apenas aprenden. ReLU lo mitiga. Su gemelo opuesto es la explosión del gradiente, que se controla con el recorte de gradiente.'],
-            ['Dropout', 'Apaga neuronas al azar durante el entrenamiento para evitar el sobreajuste y la coadaptación. En inferencia se desactiva (model.eval()).'],
+            ['*Dropout*', 'Apaga neuronas al azar durante el entrenamiento para evitar el sobreajuste y la coadaptación. En inferencia se desactiva (model.eval()).'],
             ['Entropía cruzada (BCE y CCE)', 'Pérdida de clasificación que penaliza con −log la probabilidad asignada a la clase verdadera. La BCE es el caso binario; la CCE, el multiclase (con Softmax).'],
-            ['Época (epoch)', 'Un ciclo completo en el que la red ha visto una vez todos los datos de entrenamiento.'],
-            ['Exactitud (accuracy)', 'Fracción de predicciones correctas sobre el total: (VP + VN) / total. Resulta engañosa con clases desbalanceadas.'],
+            ['Época (*epoch*)', 'Un ciclo completo en el que la red ha visto una vez todos los datos de entrenamiento.'],
+            ['Exactitud (*accuracy*)', 'Fracción de predicciones correctas sobre el total: (VP + VN) / total. Resulta engañosa con clases desbalanceadas.'],
             ['F1', 'Media armónica de la precisión y la sensibilidad; solo es alta si ambas lo son.'],
-            ['Fuga de datos (data leakage)', 'Filtración al entrenamiento de información que no estará disponible al predecir (estadísticas del conjunto de prueba, variables que son consecuencia del objetivo). Infla el desempeño de forma ficticia.'],
+            ['Fuga de datos (*data leakage*)', 'Filtración al entrenamiento de información que no estará disponible al predecir (estadísticas del conjunto de prueba, variables que son consecuencia del objetivo). Infla el desempeño de forma ficticia.'],
             ['Función de activación', 'Función (ReLU, sigmoide…) que introduce la no linealidad: el «interruptor» que decide cuánto dispara la neurona.'],
             ['Función de pérdida (o de costo)', 'Cuantifica la diferencia entre la predicción y el valor real: el «altímetro». P. ej., MSE o BCE.'],
             ['Grafo computacional', 'Representación de un cálculo como nodos (operaciones elementales) unidos por aristas; permite propagar valores hacia adelante y gradientes hacia atrás.'],
-            ['Grid / Random Search', 'Métodos para probar combinaciones de hiperparámetros, en rejilla o al azar, y quedarse con la mejor según la validación.'],
+            ['*Grid* / *Random Search*', 'Métodos para probar combinaciones de hiperparámetros, en rejilla o al azar, y quedarse con la mejor según la validación.'],
             ['Hiperparámetro', 'Configuración externa (p. ej., la tasa de aprendizaje o λ) que se fija antes de entrenar.'],
             ['Igualdad de oportunidad', 'Criterio de equidad: la sensibilidad (acierto en los casos positivos) debe ser parecida entre subgrupos. La paridad demográfica, que exige la misma tasa de decisiones positivas, puede ser incompatible con ella.'],
             ['Impacto dispar', 'Perjuicio desproporcionado de una decisión sobre un grupo, aunque el atributo protegido no se use de forma explícita; se mide comparando tasas de selección entre subgrupos.'],
             ['K-Fold (validación cruzada)', 'Divide los datos en K partes y rota el pliegue de validación, de modo que cada ejemplo valida una vez; da una estimación más estable y menos dependiente de un único corte.'],
             ['L1 (Lasso)', 'Regularización que lleva a cero los pesos irrelevantes (modelos dispersos).'],
             ['L2 (Ridge)', 'Regularización que penaliza el cuadrado de los pesos y los encoge sin anularlos; también se llama decaimiento de pesos (weight_decay).'],
-            ['Lote (batch)', 'Subconjunto de ejemplos (p. ej., 32 o 64) que la red procesa junto antes de cada actualización de pesos.'],
+            ['Lote (*batch*)', 'Subconjunto de ejemplos (p. ej., 32 o 64) que la red procesa junto antes de cada actualización de pesos.'],
             ['Matriz de confusión', 'Tabla que cruza las clases reales con las predichas (VP, FP, FN, VN); de ella salen la exactitud, la precisión y la sensibilidad.'],
-            ['Momentum', 'Acumula inercia de los gradientes previos para suavizar el zigzagueo del SGD.'],
+            ['*Momentum*', 'Acumula inercia de los gradientes previos para suavizar el zigzagueo del SGD.'],
             ['MSE (error cuadrático medio)', 'Pérdida de regresión: promedio de los errores al cuadrado. Penaliza con fuerza los errores grandes.'],
             ['Normalización por lotes (BatchNorm)', 'Estandariza las activaciones de cada capa con la media y la varianza del lote (estadísticas acumuladas en inferencia) y luego aplica γ y β aprendibles; estabiliza y acelera el entrenamiento.'],
-            ['Parada temprana (early stopping)', 'Detener el entrenamiento en el mínimo del error de validación y conservar esos pesos.'],
+            ['Parada temprana (*early stopping*)', 'Detener el entrenamiento en el mínimo del error de validación y conservar esos pesos.'],
             ['Parámetro', 'Valor interno (peso o sesgo) que el modelo aprende por sí solo.'],
             ['Perceptrón', 'Neurona de Rosenblatt (1958) con activación de escalón y salida binaria; la primera que aprende sus pesos a partir de ejemplos. Solo traza fronteras lineales.'],
             ['Precisión', 'De las predicciones positivas, fracción que lo era de verdad: VP / (VP + FP). No debe confundirse con la exactitud.'],
             ['Regla de la cadena', 'La derivada de una composición de funciones es el producto de las derivadas locales; es el fundamento de la retropropagación.'],
             ['Regularización', 'Técnicas que previenen el sobreajuste penalizando la complejidad del modelo.'],
             ['ReLU', 'Activación f(x) = máx(0, x); eficiente y mitiga el desvanecimiento del gradiente.'],
-            ['Retropropagación (backpropagation)', 'Calcula el gradiente del error respecto a cada peso, distribuyendo la «responsabilidad» desde la salida hacia atrás con la regla de la cadena.'],
-            ['Sensibilidad (recall)', 'De los casos positivos reales, fracción que el modelo detecta: VP / (VP + FN). Bajar el umbral de decisión la aumenta a costa de la precisión.'],
+            ['Retropropagación (*backpropagation*)', 'Calcula el gradiente del error respecto a cada peso, distribuyendo la «responsabilidad» desde la salida hacia atrás con la regla de la cadena.'],
+            ['Sensibilidad (*recall*)', 'De los casos positivos reales, fracción que el modelo detecta: VP / (VP + FN). Bajar el umbral de decisión la aumenta a costa de la precisión.'],
             ['SGD', 'Descenso del gradiente estocástico: actualiza con minilotes en vez de con todo el conjunto de datos.'],
             ['Sigmoide', 'Activación σ(z) = 1 / (1 + e^(−z)) con rango (0, 1); se usa en la salida binaria. Su derivada máxima es 0,25.'],
-            ['Sobreajuste (overfitting)', 'El modelo memoriza el ruido del entrenamiento y pierde capacidad de generalizar.'],
-            ['Softmax', 'Convierte un vector de logits en probabilidades que suman 1; se usa en la salida de la clasificación multiclase.'],
-            ['Subajuste (underfitting)', 'El modelo es demasiado simple: falla ya en el entrenamiento y también con datos nuevos (exceso de sesgo).'],
+            ['Sobreajuste (*overfitting*)', 'El modelo memoriza el ruido del entrenamiento y pierde capacidad de generalizar.'],
+            ['Softmax', 'Convierte un vector de *logits* en probabilidades que suman 1; se usa en la salida de la clasificación multiclase.'],
+            ['Subajuste (*underfitting*)', 'El modelo es demasiado simple: falla ya en el entrenamiento y también con datos nuevos (exceso de sesgo).'],
             ['Tasa de aprendizaje (η)', 'Hiperparámetro que define el tamaño del paso. Muy alta diverge; muy baja converge lento.'],
             ['Teorema de aproximación universal', 'Con una capa oculta, una activación no polinómica y suficientes neuronas, existe una red que aproxima cualquier función continua sobre un dominio acotado. Garantiza la existencia, no la aprendibilidad.'],
         ];
@@ -5540,10 +5544,10 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                         opciones: [
                             { texto: 'Porque en 1986 todavía no se conocían funciones de activación no lineales como la sigmoide.', correcta: false },
                             { texto: 'Porque AlexNet introdujo la normalización por lotes, que eliminó el desvanecimiento del gradiente.', correcta: false },
-                            { texto: 'Porque en 2012 convergieron datos masivos etiquetados (ImageNet), cómputo en GPU y mejoras como ReLU y dropout.', correcta: true },
+                            { texto: <>Porque en 2012 convergieron datos masivos etiquetados (ImageNet), cómputo en GPU y mejoras como ReLU y <em>dropout</em>.</>, correcta: true },
                             { texto: 'Porque AlexNet fue la primera red con varias capas ocultas entrenada por retropropagación.', correcta: false },
                         ],
-                        justificacion: 'La retropropagación existía desde 1986, pero faltaban datos y cómputo. En 2012 convergieron ImageNet, las GPU y mejores algoritmos (ReLU, dropout). BatchNorm llegó en 2015, y las redes de LeCun ya tenían varias capas en los años noventa.'
+                        justificacion: <>La retropropagación existía desde 1986, pero faltaban datos y cómputo. En 2012 convergieron ImageNet, las GPU y mejores algoritmos (ReLU, <em>dropout</em>). BatchNorm llegó en 2015, y las redes de LeCun ya tenían varias capas en los años noventa.</>
                     },
                     {
                         pregunta: 'Un perceptrón simple no puede separar hojas «con roya» agrupadas en el centro de un plano y rodeadas de hojas sanas. (Verdadero/Falso)',
@@ -5608,8 +5612,8 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                     {
                         pregunta: 'Un modelo validado con datos de Medellín (98 % de exactitud en validación) cae a 55 % al usarse en Cúcuta. ¿Qué diagnóstico y qué remedio corresponden?',
                         opciones: [
-                            { texto: 'Sobreajuste: basta con subir λ o el dropout y reentrenar con los mismos datos de Medellín.', correcta: false },
-                            { texto: 'Cambio de distribución (dataset shift): validar con datos de Cúcuta y recoger datos representativos de esa población.', correcta: true },
+                            { texto: <>Sobreajuste: basta con subir λ o el <em>dropout</em> y reentrenar con los mismos datos de Medellín.</>, correcta: false },
+                            { texto: <>Cambio de distribución (<em>dataset shift</em>): validar con datos de Cúcuta y recoger datos representativos de esa población.</>, correcta: true },
                             { texto: 'Subajuste: conviene añadir capas ocultas y entrenar durante más épocas.', correcta: false },
                             { texto: 'Fuga de datos: hay que repetir el escalado usando solo el conjunto de entrenamiento.', correcta: false },
                         ],
@@ -5629,10 +5633,10 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
 
                 <h3>Glosario del Módulo 1</h3>
                 <div className="grid md:grid-cols-2 gap-2">
-                    {[...GLOSARIO].sort((a, b) => a[0].localeCompare(b[0], 'es')).map(([t, d], i) => (
+                    {[...GLOSARIO].sort((a, b) => a[0].replace(/\*/g, '').localeCompare(b[0].replace(/\*/g, ''), 'es')).map(([t, d], i) => (
                         <div key={i} className="border border-gray-200 rounded-lg p-3 bg-white">
-                            <span className="font-bold text-primary text-sm">{t}</span>
-                            <p className="text-xs text-gray-600 mt-0.5" style={{ margin: '2px 0 0' }}>{d}</p>
+                            <span className="font-bold text-primary text-sm">{conCursivas(t)}</span>
+                            <p className="text-xs text-gray-600 mt-0.5" style={{ margin: '2px 0 0' }}>{conCursivas(d)}</p>
                         </div>
                     ))}
                 </div>

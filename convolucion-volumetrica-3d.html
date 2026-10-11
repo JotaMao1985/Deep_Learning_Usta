@@ -492,7 +492,7 @@ function lecturaCampo() {
 function describir() {
   if (estado.modo === 'campo') {
     const r = Modelo.campoReceptivo(Array.from({ length: estado.L }, () => ({ K: 3, S: estado.RS }))).r;
-    return `${estado.L} capa${estado.L > 1 ? 's' : ''} 3×3 con stride ${estado.RS}: la neurona de la capa superior depende de una región de ${r}×${r} píxeles de la entrada.`;
+    return `${estado.L} capa${estado.L > 1 ? 's' : ''} 3×3 con <em>stride</em> ${estado.RS}: la neurona de la capa superior depende de una región de ${r}×${r} píxeles de la entrada.`;
   }
   const D = estado.D; const { n, oi, oj } = posicionDe(estado.paso, D.O);
   return `El filtro ${n + 1} (${estado.K}×${estado.K}×${estado.C}) está en la fila ${oi + 1}, columna ${oj + 1}: multiplica los ${estado.C} canal${estado.C > 1 ? 'es' : ''} a la vez y escribe un solo número en el mapa ${n + 1} de la salida.`;
@@ -500,7 +500,7 @@ function describir() {
 function pintar() {
   if (estado.modo === 'capa') { lecturaCapa(estado.D); if (Vista) Vista.actualizarCapa(estado.D, estado.paso); else Plano2D.capa(estado.D, estado.paso); }
   else { lecturaCampo(); if (Plano2D) Plano2D.campo(); }
-  $('descripcion').textContent = describir();
+  $('descripcion').innerHTML = describir();   // textos fijos de este archivo (con <em>); solo interpola números del estado
   $('lienzo').setAttribute('aria-label', estado.modo === 'capa'
     ? `Entrada de ${W}×${W}×${estado.C}, filtro de ${estado.K}×${estado.K}×${estado.C} y volumen de salida de ${estado.D.O}×${estado.D.O}×${estado.N}.`
     : 'Pila de capas convolucionales; en cada capa se resalta la región de la que depende una neurona de la capa superior.');

@@ -280,7 +280,7 @@
             <div class="grid md:grid-cols-2 gap-5">
                 <div class="card p-6">
                     <h3 class="font-bold text-primary mb-2">Propósito</h3>
-                    <p class="text-sm leading-relaxed text-slate-700">El ejercicio consiste en transformar la línea base de la Fase 1 en un <strong>sistema multimodal especializado</strong>: una rama de visión por computador que aprende de imágenes mediante <strong>Transfer Learning</strong>, una rama recurrente que captura dependencias temporales en una serie, y un mecanismo de <strong>fusión</strong> que integra ambas para producir la alerta. El estudiante justifica cada decisión arquitectónica con criterios técnicos y comunica los resultados a un cliente no especializado.</p>
+                    <p class="text-sm leading-relaxed text-slate-700">El ejercicio consiste en transformar la línea base de la Fase 1 en un <strong>sistema multimodal especializado</strong>: una rama de visión por computador que aprende de imágenes mediante <strong>aprendizaje por transferencia</strong> (<em>transfer learning</em>), una rama recurrente que captura dependencias temporales en una serie, y un mecanismo de <strong>fusión</strong> que integra ambas para producir la alerta. El estudiante justifica cada decisión arquitectónica con criterios técnicos y comunica los resultados a un cliente no especializado.</p>
                 </div>
                 <div class="card p-6">
                     <h3 class="font-bold text-primary mb-2">Competencia troncal</h3>
@@ -610,7 +610,7 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
                     <figure class="card p-5">
                         <svg viewBox="0 0 360 210" width="100%" role="img" aria-labelledby="fusionTitle fusionDesc">
                             <title id="fusionTitle">Fusión multimodal</title>
-                            <desc id="fusionDesc">Dos embeddings se concatenan y pasan por una cabeza densa que produce la predicción</desc>
+                            <desc id="fusionDesc">Dos representaciones vectoriales se concatenan y pasan por una cabeza densa que produce la predicción</desc>
                             <defs>
                                 <marker id="arrowC" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
                                     <path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/>
@@ -1081,7 +1081,7 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
             var ENTREGABLES = [
                 'Notebook ejecutable (.ipynb) con las ramas A, B y la fusión C, documentado.',
                 'Informe técnico único (PDF, máx. 8 páginas) con metodología, resultados, ablación y limitaciones de las tres ramas.',
-                'Visualizaciones estáticas comentadas para el cliente (dashboard interactivo opcional/bonus).',
+                'Visualizaciones estáticas comentadas para el cliente (<em>dashboard</em> interactivo opcional/bonus).',
                 'Pesos de los modelos entrenados (.pth, o .keras si se usa Keras 3).',
                 'Bitácora de IA diligenciada.'
             ];

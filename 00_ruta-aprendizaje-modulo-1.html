@@ -187,6 +187,8 @@
            (p. ej. Apellido_Nombre_Centinela_Fase1.zip) se parten en lugar de ensanchar la página. */
         .grid > * { min-width: 0; }
         .usta-card { overflow-wrap: break-word; }
+        /* Un término en cursiva dentro de un texto ya en cursiva pasa a redonda (convención tipográfica) */
+        .italic em, em em { font-style: normal; }
     </style>
 </head>
 
@@ -346,6 +348,9 @@
             );
         };
 
+        /* Ayudante: pinta en cursiva los tramos *entre asteriscos* (los datos siguen siendo cadenas). */
+        const conCursivas = (s) => typeof s === 'string' ? s.split(/\*([^*]+)\*/).map((p, i) => i % 2 ? <em key={i}>{p}</em> : p) : s;
+
         /* MCQ — opción múltiple con retroalimentación */
         const MCQ = ({ pregunta, opciones, multiple = false }) => {
             const [sel, setSel] = useState([]);
@@ -408,10 +413,10 @@
                         return (
                             <div className="mt-3 text-[0.9rem] text-gray-700 bg-bg rounded-lg p-3 border-l-4 animate-fade-in" style={{ borderColor: '#FDB913' }}>
                                 {errores.length > 0 && (
-                                    <p className="mb-2"><strong>Sobre la opción elegida:</strong>{' '}{errores.join(' ')}</p>
+                                    <p className="mb-2"><strong>Sobre la opción elegida:</strong>{' '}{conCursivas(errores.join(' '))}</p>
                                 )}
                                 {justifs.length > 0 && (
-                                    <p><strong>{acierto ? 'Explicación:' : 'Respuesta correcta:'}</strong>{' '}{justifs.join(' ')}</p>
+                                    <p><strong>{acierto ? 'Explicación:' : 'Respuesta correcta:'}</strong>{' '}{conCursivas(justifs.join(' '))}</p>
                                 )}
                             </div>
                         );
@@ -745,7 +750,7 @@
                     'Cuantificar el error con funciones de pérdida: MSE para regresión y BCE para clasificación.',
                     'Aplicar el descenso del gradiente y sus variantes (lote completo, minilotes, SGD).',
                     'Seleccionar la tasa de aprendizaje y entender su impacto en la convergencia.',
-                    'Identificar el rol del momentum y de optimizadores adaptativos (Adam, RMSProp).',
+                    <>Identificar el rol del <em>momentum</em> y de optimizadores adaptativos (Adam, RMSProp).</>,
                 ],
                 analogia: {
                     titulo: 'Analogía andina: el excursionista en el Páramo de Letras',
@@ -797,7 +802,7 @@
             {
                 id: 4,
                 num: '04',
-                title: 'Retropropagación (backpropagation)',
+                title: <>Retropropagación (<em>backpropagation</em>)</>,
                 icon: 'fa-diagram-project',
                 tag: 'tema/backpropagation',
                 tema: 'Tema: retropropagación',
@@ -860,7 +865,7 @@
                               justificacion: 'PyTorch acumula gradientes por defecto; sin limpiarlos, se corrompería la dirección de descenso (se sumarían derivadas de iteraciones pasadas).' },
                             { texto: 'Para liberar la memoria de la GPU que ocupó el lote anterior.', correcta: false,
                               justificacion: 'No libera memoria: los gradientes siguen almacenados, solo que con valor cero.' },
-                            { texto: 'Para ejecutar el paso hacia adelante (forward) con el nuevo lote.', correcta: false,
+                            { texto: <>Para ejecutar el paso hacia adelante (<em>forward</em>) con el nuevo lote.</>, correcta: false,
                               justificacion: 'El paso hacia adelante se ejecuta al llamar al modelo; zero_grad() solo limpia gradientes.' },
                         ],
                     },
@@ -876,9 +881,9 @@
                 badgeColor: 'secondary',
                 duracion: '≈ 40 min de lectura',
                 ra: [
-                    'Identificar el sobreajuste (overfitting) y distinguirlo del subajuste.',
-                    'Aplicar técnicas de regularización: L1, L2, dropout y parada temprana.',
-                    'Comprender y aplicar Batch Normalization entre capas.',
+                    <>Identificar el sobreajuste (<em>overfitting</em>) y distinguirlo del subajuste.</>,
+                    <>Aplicar técnicas de regularización: L1, L2, <em>dropout</em> y parada temprana.</>,
+                    <>Comprender y aplicar la normalización por lotes (<em>Batch Normalization</em>) entre capas.</>,
                     'Evaluar modelos con matriz de confusión y elegir métricas éticamente alineadas.',
                     'Reconocer las implicaciones éticas del despliegue de modelos en contextos colombianos.',
                 ],
@@ -893,17 +898,17 @@
                                     se busca emular al Estudiante B (generalización), no al A (memorización).
                                 </p>
                             </Box>
-                            <Box type="tip" label="El grupo de estudio y el dropout">
+                            <Box type="tip" label={<>El grupo de estudio y el <em>dropout</em></>}>
                                 <p>
                                     Es como ir rotando, en cada sesión, a quién se le pide ausentarse del grupo de estudio —incluida
-                                    la «estrella»—: nadie puede depender de una sola persona. <strong>El dropout apaga neuronas al azar
+                                    la «estrella»—: nadie puede depender de una sola persona. <strong>El <em>dropout</em> apaga neuronas al azar
                                     en cada iteración</strong>, de modo que ninguna se vuelve imprescindible y todas aprenden a contribuir.
                                 </p>
                             </Box>
-                            <Box type="info" label="La estandarización y la Batch Normalization">
+                            <Box type="info" label="La estandarización y la normalización por lotes">
                                 <p>
                                     Como al estandarizar columnas en escalas muy distintas (estatura en metros, peso en kilos,
-                                    ingresos en miles): se resta la media y se divide por la desviación. <strong>Batch Norm lo hace
+                                    ingresos en miles): se resta la media y se divide por la desviación. <strong>La normalización por lotes lo hace
                                     entre capas y lote a lote</strong>, lo que estabiliza el entrenamiento y admite tasas de aprendizaje
                                     más altas.
                                 </p>
@@ -920,19 +925,19 @@
                             { texto: 'Sobreajuste clásico: memorizó el ruido del conjunto de entrenamiento.', correcta: false,
                               justificacion: 'Es un pariente del sobreajuste, pero la brecha no es entre entrenamiento y prueba de una misma población, sino entre poblaciones distintas.' },
                             { texto: 'Cambio de distribución: Cúcuta difiere de los datos de Medellín.', correcta: true,
-                              justificacion: 'El modelo aprendió rasgos propios de Medellín que no se transfieren: falta de representatividad o cambio de distribución (dataset shift) entre poblaciones.' },
+                              justificacion: 'El modelo aprendió rasgos propios de Medellín que no se transfieren: falta de representatividad o cambio de distribución (*dataset shift*) entre poblaciones.' },
                             { texto: 'Generalización correcta: es normal que el desempeño varíe por ciudad.', correcta: false,
                               justificacion: 'Una caída de 43 puntos no es una variación normal: indica que los datos de entrenamiento no representan la población de despliegue.' },
                         ],
                     },
                     {
-                        pregunta: '¿Por qué el dropout ayuda contra el sobreajuste? (dos respuestas correctas)',
+                        pregunta: <>¿Por qué el <em>dropout</em> ayuda contra el sobreajuste? (dos respuestas correctas)</>,
                         multiple: true,
                         opciones: [
                             { texto: 'Al apagar neuronas al azar, ninguna se vuelve «neurona estrella».', correcta: true,
                               justificacion: 'Rompe la co-adaptación frágil entre neuronas y obliga a la red a aprender patrones distribuidos.' },
                             { texto: 'Duplica las imágenes del conjunto de datos con pequeñas variaciones.', correcta: false,
-                              justificacion: 'Eso es aumento de datos (data augmentation), una técnica distinta.' },
+                              justificacion: 'Eso es aumento de datos (*data augmentation*), una técnica distinta.' },
                             { texto: 'Obliga a aprender representaciones redundantes y distribuidas.', correcta: true,
                               justificacion: 'Si una neurona falta, otras pueden compensar: la red se vuelve robusta.' },
                             { texto: 'Elimina para siempre las neuronas que tienen pesos negativos.', correcta: false,
@@ -992,7 +997,7 @@
                 entregable: 'Notebook (.ipynb) + Informe técnico-ético en PDF (máx. 4 págs.) + Bitácora de IA + Propuesta de Datos, todo en un .zip (Apellido_Nombre_Centinela_Fase1.zip) o repositorio GitHub.',
                 /* Checklist de entrega cristalino (solo Fase 1) — sin ambigüedad para el estudiante */
                 entregables: [
-                    { titulo: 'Notebook (.ipynb)', detalle: 'Clase MLP + bucle de entrenamiento explícito + curvas de pérdida (train vs. val) + matriz de confusión. Debe correr de principio a fin sin editar.' },
+                    { titulo: 'Notebook (.ipynb)', detalle: 'Clase MLP + bucle de entrenamiento explícito + curvas de pérdida (entrenamiento frente a validación) + matriz de confusión. Debe correr de principio a fin sin editar.' },
                     { titulo: 'Informe técnico-ético (PDF)', detalle: 'Máximo 4 páginas, con citas APA y la auditoría ética ligada a falsos positivos/negativos.' },
                     { titulo: 'Bitácora de IA', detalle: 'Registro de qué se pidió a la IA y qué se Aceptó / Modificó / Rechazó, con el motivo.' },
                     { titulo: 'Propuesta de Datos aprobada', detalle: 'Problema, cliente, dos modalidades, fuentes reales no-Kaggle con licencia y la modalidad que se aplana a tabla.' },
@@ -1006,7 +1011,7 @@
                     'Preparar el entorno y realizar el EDA del conjunto tabular: revisar clases, escalas, faltantes y la partición en entrenamiento, validación y prueba.',
                     'Diseñar el MLP con ≥ 2 capas ocultas, con salida en logit (nn.Linear(..., 1) sin sigmoide dentro del modelo), y justificar las funciones de activación.',
                     'Configurar el entrenamiento con BCEWithLogitsLoss (estable; evita la doble sigmoide), el optimizador y la tasa de aprendizaje; escribir el bucle de entrenamiento explícito (zero_grad → forward → pérdida → backward → step).',
-                    'Entrenar 50 épocas, graficar la pérdida de entrenamiento frente a la de validación, inducir el sobreajuste a propósito y corregirlo con Dropout o con el ajuste de la tasa de aprendizaje.',
+                    <>Entrenar 50 épocas, graficar la pérdida de entrenamiento frente a la de validación, inducir el sobreajuste a propósito y corregirlo con <em>dropout</em> o con el ajuste de la tasa de aprendizaje.</>,
                     'Evaluar (con modelo.eval()) mediante la matriz de confusión y las métricas; analizar falsos positivos y negativos (en alerta temprana los falsos negativos suelen ser los más costosos) y realizar la auditoría ética con el Marco ético para la IA en Colombia.',
                     'Documentar la Bitácora de IA (qué se pidió, aceptó y rechazó) y la Auditoría a la IA (un fallo de la IA detectado y corregido); preparar la sustentación oral.',
                 ],
@@ -1294,7 +1299,7 @@
                 autoria: 'Pieza audiovisual propia del curso · guion de Javier Mauricio Sierra',
                 duracion: null,
                 numEscenas: 12,
-                conceptos: ['Entrenar ≠ aprender: una pérdida baja no garantiza generalización', 'Sobreajuste y sesgo geográfico de los datos', 'Falsos negativos y sensibilidad (recall)', 'Validación cruzada por grupos (ciudades excluidas)', 'Curvas de aprendizaje', 'Marco ético para la IA en Colombia', 'Transferencia de aprendizaje y regularización'],
+                conceptos: ['Entrenar ≠ aprender: una pérdida baja no garantiza generalización', 'Sobreajuste y sesgo geográfico de los datos', <>Falsos negativos y sensibilidad (<em>recall</em>)</>, 'Validación cruzada por grupos (ciudades excluidas)', 'Curvas de aprendizaje', 'Marco ético para la IA en Colombia', 'Transferencia de aprendizaje y regularización'],
                 textoDestacado: [
                     'Entrenar ≠ aprender',
                     'Falso negativo: paciente grave clasificado como «bajo riesgo»',
@@ -1336,31 +1341,31 @@
             { t: 'Capa oculta',         d: 'Capas entre la entrada y la salida que extraen características y aprenden representaciones abstractas. Analogía: los «analistas técnicos» del ministerio.' },
             { t: 'Curva de aprendizaje', d: 'Gráfico del error a lo largo del entrenamiento; vital para diagnosticar su salud.' },
             { t: 'Descenso del gradiente', d: 'Algoritmo de optimización iterativo que minimiza la pérdida ajustando los pesos en dirección opuesta a la pendiente. Analogía: el excursionista que tantea la pendiente en el Páramo de Letras.' },
-            { t: 'Desvanecimiento del gradiente (vanishing gradient)', d: 'Fenómeno en el que los gradientes se vuelven extremadamente pequeños en las capas tempranas y frenan el aprendizaje.' },
-            { t: 'Dropout',             d: 'Regularización que «apaga» neuronas al azar durante el entrenamiento para evitar el sobreajuste. Analogía: el grupo de estudio que rota a quién se ausenta, incluida la «estrella».' },
-            { t: 'Época (epoch)',       d: 'Un ciclo completo en el que la red ha visto todos los datos una vez.' },
+            { t: 'Desvanecimiento del gradiente (*vanishing gradient*)', d: 'Fenómeno en el que los gradientes se vuelven extremadamente pequeños en las capas tempranas y frenan el aprendizaje.' },
+            { t: '*Dropout*',           d: 'Regularización que «apaga» neuronas al azar durante el entrenamiento para evitar el sobreajuste. Analogía: el grupo de estudio que rota a quién se ausenta, incluida la «estrella».' },
+            { t: 'Época (*epoch*)',     d: 'Un ciclo completo en el que la red ha visto todos los datos una vez.' },
             { t: 'Función de activación', d: 'Función (ReLU, sigmoide) que introduce no linealidad y permite aprender patrones complejos. Es el «interruptor» que decide si la neurona dispara.' },
-            { t: 'Función de pérdida (loss)', d: 'Cuantifica la diferencia entre la predicción y el valor real. Analogía: el altímetro del excursionista. Ejemplos: entropía cruzada, MSE.' },
+            { t: 'Función de pérdida (*loss*)', d: 'Cuantifica la diferencia entre la predicción y el valor real. Analogía: el altímetro del excursionista. Ejemplos: entropía cruzada, MSE.' },
             { t: 'Gamma (γ) y beta (β)', d: 'Parámetros aprendibles de la normalización por lotes que permiten ajustar o «deshacer» la normalización.' },
             { t: 'Gradiente',           d: 'Vector de derivadas parciales que indica la dirección de máximo aumento de la función de pérdida. El descenso va en la dirección opuesta.' },
-            { t: 'Grid / Random Search', d: 'Métodos para probar combinaciones de hiperparámetros (p. ej., una rejilla de tasa de aprendizaje × λ) y hallar la mejor.' },
-            { t: 'Hiperparámetro',      d: 'Configuración externa (tasa de aprendizaje, dropout) que no se aprende: se define antes de entrenar.' },
+            { t: '*Grid* / *Random Search*', d: 'Métodos para probar combinaciones de hiperparámetros (p. ej., una rejilla de tasa de aprendizaje × λ) y hallar la mejor.' },
+            { t: 'Hiperparámetro',      d: 'Configuración externa (tasa de aprendizaje, *dropout*) que no se aprende: se define antes de entrenar.' },
             { t: 'K-Fold',              d: 'Validación cruzada que divide los datos en K partes; cada parte actúa una vez como validación.' },
             { t: 'L1 (Lasso)',          d: 'Regularización de «selección tajante»: lleva a cero los pesos de las características irrelevantes.' },
             { t: 'L2 (Ridge)',          d: 'Regularización que «reparte la importancia»: reduce la influencia excesiva de cualquier característica (pesos bajos, pero no cero).' },
-            { t: 'Lote (batch)',        d: 'Subconjunto pequeño de datos (p. ej., 32 o 64 ejemplos) que la red procesa a la vez.' },
-            { t: 'Matriz de confusión', d: 'Tabla 2×2 (VP, FP, FN, VN) que desglosa los errores de un clasificador binario. Es la base de la sensibilidad (recall), la precisión y el F1.' },
+            { t: 'Lote (*batch*)',      d: 'Subconjunto pequeño de datos (p. ej., 32 o 64 ejemplos) que la red procesa a la vez.' },
+            { t: 'Matriz de confusión', d: 'Tabla 2×2 (VP, FP, FN, VN) que desglosa los errores de un clasificador binario. Es la base de la sensibilidad (*recall*), la precisión y el F1.' },
             { t: 'Media y varianza',    d: 'El promedio (centro) y la dispersión (ancho) de los datos. La normalización por lotes los usa para estandarizar.' },
-            { t: 'Momentum',            d: 'Técnica de optimización que acumula la inercia de los gradientes previos para suavizar el zigzagueo del SGD.' },
-            { t: 'Normalización por lotes (Batch Normalization)', d: 'Estandariza las activaciones de cada capa durante el entrenamiento, lote a lote. Analogía: estandarizar columnas (z-score), pero entre capas.' },
-            { t: 'Parada temprana (early stopping)', d: 'Detener el entrenamiento en la época en que la pérdida de validación alcanza su mínimo, para evitar la memorización.' },
+            { t: '*Momentum*',          d: 'Técnica de optimización que acumula la inercia de los gradientes previos para suavizar el zigzagueo del SGD.' },
+            { t: 'Normalización por lotes (*Batch Normalization*)', d: 'Estandariza las activaciones de cada capa durante el entrenamiento, lote a lote. Analogía: estandarizar columnas (puntuación z), pero entre capas.' },
+            { t: 'Parada temprana (*early stopping*)', d: 'Detener el entrenamiento en la época en que la pérdida de validación alcanza su mínimo, para evitar la memorización.' },
             { t: 'Parámetro',           d: 'Valor interno (peso w, sesgo b) que el modelo aprende por sí solo durante el entrenamiento.' },
-            { t: 'Paso hacia adelante (forward pass)', d: 'Propagación hacia adelante: los datos atraviesan la red desde la entrada hasta la salida y generan una predicción.' },
-            { t: 'Regularización',      d: 'Técnicas que previenen el sobreajuste penalizando la complejidad (L1, L2, dropout, parada temprana).' },
+            { t: 'Paso hacia adelante (*forward pass*)', d: 'Propagación hacia adelante: los datos atraviesan la red desde la entrada hasta la salida y generan una predicción.' },
+            { t: 'Regularización',      d: 'Técnicas que previenen el sobreajuste penalizando la complejidad (L1, L2, *dropout*, parada temprana).' },
             { t: 'ReLU',                d: 'Activación f(x) = max(0, x); eficiente y mitiga el desvanecimiento del gradiente. Deja pasar lo positivo y anula lo negativo.' },
-            { t: 'Retropropagación (backpropagation)', d: 'Algoritmo que calcula el gradiente del error respecto a cada peso, distribuyendo la «responsabilidad» desde la salida hacia atrás. Analogía: la cadena de mando que lee la bitácora al revés.' },
+            { t: 'Retropropagación (*backpropagation*)', d: 'Algoritmo que calcula el gradiente del error respecto a cada peso, distribuyendo la «responsabilidad» desde la salida hacia atrás. Analogía: la cadena de mando que lee la bitácora al revés.' },
             { t: 'SGD (descenso del gradiente estocástico)', d: 'Variante estocástica que actualiza los pesos con minilotes; sus trayectorias en zigzag ayudan a escapar de mínimos locales.' },
-            { t: 'Sobreajuste (overfitting)', d: 'El modelo memoriza el ruido del entrenamiento y pierde capacidad de generalizar. Analogía: memorizar el cuadernillo viejo del ICFES.' },
+            { t: 'Sobreajuste (*overfitting*)', d: 'El modelo memoriza el ruido del entrenamiento y pierde capacidad de generalizar. Analogía: memorizar el cuadernillo viejo del ICFES.' },
             { t: 'Tasa de aprendizaje (η)', d: 'Hiperparámetro que determina el tamaño del paso en cada iteración. Si es muy alta, diverge; si es muy baja, converge lentamente.' },
             { t: 'Teorema de Aproximación Universal', d: 'Una red con al menos una capa oculta y suficientes neuronas aproxima cualquier función continua (en un dominio acotado). Analogía: recrear los Andes sumando piezas de Lego.' },
             { t: 'Validación cruzada',  d: 'Evaluar el modelo con múltiples divisiones de los datos (K-Fold, GroupKFold) para evitar el sesgo de una sola partición afortunada.' },
@@ -1397,16 +1402,16 @@
                 titulo: 'Semana 1 — Del perceptrón al MLP',
                 eventos: [
                     { fecha: COHORTE_ANIO + '-06-03', hora: '19:30 – 21:00', tipo: 'Encuentro 1', tipoColor: '#3D008D', titulo: 'Introducción y contexto histórico del Deep Learning', desc: 'McCulloch-Pitts, perceptrón de Rosenblatt, inviernos de la IA y renacimiento moderno.', link: TEAMS_URL, linkLabel: 'Teams sincrónico' },
-                    { fecha: COHORTE_ANIO + '-06-04', hora: '19:30 – 21:00', tipo: 'Encuentro 2', tipoColor: '#3D008D', titulo: 'El perceptrón multicapa (MLP)', desc: 'Teorema de aproximación universal, funciones de activación (ReLU, sigmoide, softmax) y arquitectura prealimentada (feedforward).', link: TEAMS_URL, linkLabel: 'Teams sincrónico' },
-                    { fecha: 'Toda la semana', tipo: 'Asincrónico', tipoColor: '#FDB913', titulo: 'Videoconferencia asincrónica 1 — Descenso del gradiente', desc: 'Grabación disponible toda la semana. Cubre la intuición del gradiente, la tasa de aprendizaje y el momentum.' },
+                    { fecha: COHORTE_ANIO + '-06-04', hora: '19:30 – 21:00', tipo: 'Encuentro 2', tipoColor: '#3D008D', titulo: 'El perceptrón multicapa (MLP)', desc: <>Teorema de aproximación universal, funciones de activación (ReLU, sigmoide, softmax) y arquitectura prealimentada (<em>feedforward</em>).</>, link: TEAMS_URL, linkLabel: 'Teams sincrónico' },
+                    { fecha: 'Toda la semana', tipo: 'Asincrónico', tipoColor: '#FDB913', titulo: 'Videoconferencia asincrónica 1 — Descenso del gradiente', desc: <>Grabación disponible toda la semana. Cubre la intuición del gradiente, la tasa de aprendizaje y el <em>momentum</em>.</> },
                 ],
             },
             semana2: {
                 titulo: 'Semana 2 — Optimización, retropropagación y entrega',
                 eventos: [
                     { fecha: COHORTE_ANIO + '-06-10', hora: '19:30 – 21:00', tipo: 'Encuentro 3', tipoColor: '#3D008D', titulo: 'Matemática del error y optimización', desc: 'Funciones de pérdida (MSE, BCE), descenso del gradiente y tasa de aprendizaje.', link: TEAMS_URL, linkLabel: 'Teams sincrónico' },
-                    { fecha: COHORTE_ANIO + '-06-11', hora: '19:30 – 21:00', tipo: 'Encuentro 4', tipoColor: '#3D008D', titulo: 'Retropropagación (backpropagation)', desc: 'Regla de la cadena, grafos computacionales y autograd en PyTorch.', link: TEAMS_URL, linkLabel: 'Teams sincrónico' },
-                    { fecha: 'Toda la semana', tipo: 'Asincrónico', tipoColor: '#FDB913', titulo: 'Videoconferencia asincrónica 2 — El proceso de entrenamiento', desc: 'Grabación sobre regularización, dropout, normalización por lotes, evaluación y ética en salud.' },
+                    { fecha: COHORTE_ANIO + '-06-11', hora: '19:30 – 21:00', tipo: 'Encuentro 4', tipoColor: '#3D008D', titulo: <>Retropropagación (<em>backpropagation</em>)</>, desc: 'Regla de la cadena, grafos computacionales y autograd en PyTorch.', link: TEAMS_URL, linkLabel: 'Teams sincrónico' },
+                    { fecha: 'Toda la semana', tipo: 'Asincrónico', tipoColor: '#FDB913', titulo: 'Videoconferencia asincrónica 2 — El proceso de entrenamiento', desc: <>Grabación sobre regularización, <em>dropout</em>, normalización por lotes, evaluación y ética en salud.</> },
                     { fecha: COHORTE_ANIO + '-06-12', tipo: 'Foro', tipoColor: '#15803D', titulo: 'Momento 1: foro de reflexión (Guía 1)', desc: 'Publicación en el foro del campus virtual, después del Encuentro 3 y de la videoconferencia asincrónica 2: el caso del dengue exige la tasa de aprendizaje, el sobreajuste y la ética.', link: 'https://campus.usta.edu.co', linkLabel: 'Campus virtual' },
                     { fecha: COHORTE_ANIO + '-06-15', hora: '23:59', tipo: 'Entrega', tipoColor: '#BE185D', titulo: 'Momento 2: 1.ª entrega', desc: 'Notebook + informe técnico-ético de la Fase 1 del Proyecto Centinela.', link: 'https://campus.usta.edu.co', linkLabel: 'Campus virtual' },
                 ],
@@ -1906,7 +1911,7 @@
             const grouped = useMemo(() => {
                 const map = {};
                 glossary.forEach(g => {
-                    const letter = g.t.normalize('NFD')[0].toUpperCase();
+                    const letter = g.t.replace(/\*/g, '').normalize('NFD')[0].toUpperCase();
                     (map[letter] = map[letter] || []).push(g);
                 });
                 return Object.keys(map).sort().reduce((acc, k) => (acc[k] = map[k], acc), {});
@@ -1919,9 +1924,9 @@
                         {terms.map((g, i) => (
                             <div key={i} className="border-l-2 border-primary/30 pl-3">
                                 <h4 className="font-bold text-navy text-[0.95rem]">
-                                    <span className="inline-code mr-1.5">{g.t}</span>
+                                    <span className="inline-code mr-1.5">{conCursivas(g.t)}</span>
                                 </h4>
-                                <p className="text-[0.85rem] text-gray-600 leading-relaxed">{g.d}</p>
+                                <p className="text-[0.85rem] text-gray-600 leading-relaxed">{conCursivas(g.d)}</p>
                             </div>
                         ))}
                     </div>
