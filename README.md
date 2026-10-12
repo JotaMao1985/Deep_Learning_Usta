@@ -16,7 +16,7 @@ El portal `index.html` es un punto de entrada multi-módulo (selector Módulo 1 
 | `00_ruta-aprendizaje-modulo-1.html` | Ruta de aprendizaje (mapa navegable) |
 | `011_material-consulta-modulo-1.html` | Material de consulta |
 | `012_infografia-contenidos-modulo-1.html` | Infografía de contenidos |
-| `013_microlearning-modulo-1.html` | Microlearning |
+| `013_microlearning-modulo-1.html` | *Microlearning* |
 
 ## Módulo 2 — Arquitecturas Especializadas de Deep Learning
 
@@ -26,7 +26,7 @@ El portal `index.html` es un punto de entrada multi-módulo (selector Módulo 1 
 | `020_ruta-aprendizaje-modulo-2.html` | Ruta de aprendizaje (mapa navegable) |
 | `021_material-consulta-modulo-2.html` | Material de consulta |
 | `022_infografia-contenidos-modulo-2.html` | Infografía de contenidos |
-| `023_microlearning-modulo-2.html` | Microlearning |
+| `023_microlearning-modulo-2.html` | *Microlearning* |
 
 ## Módulo 3 — Implementación y Herramientas Profesionales
 
@@ -36,7 +36,7 @@ El portal `index.html` es un punto de entrada multi-módulo (selector Módulo 1 
 | `030_ruta-aprendizaje-modulo-3.html` | Ruta de aprendizaje (mapa navegable) |
 | `031_material-consulta-modulo-3.html` | Material de consulta |
 | `032_infografia-contenidos-modulo-3.html` | Infografía de contenidos |
-| `033_microlearning-modulo-3.html` | Microlearning |
+| `033_microlearning-modulo-3.html` | *Microlearning* |
 
 ## Herramientas interactivas embebidas
 
