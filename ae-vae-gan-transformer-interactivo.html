@@ -92,6 +92,9 @@
   /* Diagramas SVG */
   svg.diagrama{width:100%;height:auto;display:block;background:var(--lienzo);
     border-radius:12px;border:1px solid var(--borde);}
+  /* En pantallas angostas el diagrama conserva un ancho legible y se desplaza en horizontal */
+  .dg-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  @media(max-width:600px){ .dg-wrap svg.diagrama{min-width:560px;} }
   .dg-node{fill:#fff;stroke:#94A3B8;stroke-width:1.6;cursor:help;}
   .dg-node.hot{stroke-width:2.2;}
   .dg-flow{stroke:#94A3B8;stroke-width:2;fill:none;}
@@ -134,9 +137,9 @@
   .lab{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;}
   .lab .lienzo-col{flex:1 1 460px;min-width:320px;}
   .lab .ctrl-col{flex:1 1 280px;min-width:260px;display:flex;flex-direction:column;gap:12px;}
-  canvas.mundo{width:100%;height:auto;display:block;background:var(--lienzo);
+  canvas.mundo{width:100%;height:auto;aspect-ratio:520/380;display:block;background:var(--lienzo);
     border-radius:12px;border:1px solid var(--borde);}
-  canvas.curva{width:100%;height:auto;display:block;background:#fff;
+  canvas.curva{width:100%;height:140px;display:block;background:#fff;
     border-radius:10px;border:1px solid var(--borde);margin-top:8px;}
   .leyenda{display:flex;flex-wrap:wrap;gap:12px;font-size:.75rem;color:var(--tinta-suave);
     margin-top:6px;}
@@ -290,7 +293,7 @@
       Se entrena minimizando el error de reconstrucción; el gradiente (línea roja punteada)
       fluye de la pérdida hacia atrás por toda la red.
     </p>
-    <svg class="diagrama" id="dg-ae" viewBox="0 0 680 210" role="img"
+    <div class="dg-wrap"><svg class="diagrama" id="dg-ae" viewBox="0 0 680 210" role="img"
          aria-label="Diagrama del autoencoder: x pasa por el codificador al latente z, el decodificador produce la reconstrucción y la pérdida compara ambas.">
       <defs>
         <marker id="arrA" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
@@ -340,7 +343,7 @@
       <path class="dg-grad" d="M480,132 C400,185 180,185 110,152" marker-end="url(#arrR)"
             data-tip="Retropropagación: ∂ℒ/∂θ actualiza decodificador y codificador en cada paso de descenso del gradiente."/>
       <text class="dg-sub" x="300" y="196" text-anchor="middle" fill="#B91C1C">∇ retropropagación</text>
-    </svg>
+    </svg></div>
   </div>
 
   <div class="panel acc-ae">
@@ -443,7 +446,7 @@
       gradiente atraviese el muestreo, y el término KL empuja el latente hacia el prior
       <span class="formula">𝒩(0, 1)</span> — por eso después se puede <b>generar</b> muestreando el prior.
     </p>
-    <svg class="diagrama" id="dg-vae" viewBox="0 0 680 250" role="img"
+    <div class="dg-wrap"><svg class="diagrama" id="dg-vae" viewBox="0 0 680 250" role="img"
          aria-label="Diagrama del VAE: el codificador produce mu y sigma, se muestrea z con ruido epsilon, el decodificador reconstruye y la pérdida suma reconstrucción y divergencia KL.">
       <defs>
         <marker id="arrB" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
@@ -510,7 +513,7 @@
       <!-- gradiente -->
       <path class="dg-grad" d="M440,205 C250,205 130,195 108,172" marker-end="url(#arrR2)"
             data-tip="El gradiente cruza el muestreo gracias a la reparametrización y llega hasta el codificador."/>
-    </svg>
+    </svg></div>
   </div>
 
   <div class="panel acc-vae">
@@ -613,7 +616,7 @@
       <span class="formula">D</span> intenta distinguir lo real de lo falso. Cada red recibe el
       gradiente de <b>su propia</b> pérdida: D aprende a detectar, G aprende a engañar.
     </p>
-    <svg class="diagrama" id="dg-gan" viewBox="0 0 680 250" role="img"
+    <div class="dg-wrap"><svg class="diagrama" id="dg-gan" viewBox="0 0 680 250" role="img"
          aria-label="Diagrama de la GAN: el ruido z entra al generador G que produce datos falsos; datos reales y falsos entran al discriminador D que estima la probabilidad de real; las pérdidas adversariales actualizan G y D.">
       <defs>
         <marker id="arrC" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
@@ -674,7 +677,7 @@
       <path class="dg-grad" d="M552,210 C420,246 200,240 150,222" marker-end="url(#arrR3)"
             data-tip="Gradiente de ℒ_G: atraviesa a D (sin actualizarlo) y llega hasta G."/>
       <text class="dg-sub" x="360" y="243" text-anchor="middle" fill="#B91C1C">∇ hacia G (D congelado)</text>
-    </svg>
+    </svg></div>
   </div>
 
   <div class="panel acc-gan">
@@ -785,7 +788,7 @@
       <span class="formula">p(x_t | x_&lt;t)</span> y genera <b><em>token</em> a <em>token</em></b> (autorregresivo),
       entrenado por máxima verosimilitud con entropía cruzada.
     </p>
-    <svg class="diagrama" id="dg-trf" viewBox="0 0 680 240" role="img"
+    <div class="dg-wrap"><svg class="diagrama" id="dg-trf" viewBox="0 0 680 240" role="img"
          aria-label="Diagrama del Transformer: los tokens con codificación posicional producen Q, K y V; la atención softmax de Q por K transpuesta pondera los valores; la salida se compara con el objetivo mediante entropía cruzada.">
       <defs>
         <marker id="arrD" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
@@ -847,7 +850,7 @@
       <path class="dg-grad" d="M544,152 C420,228 220,232 168,216" marker-end="url(#arrR4)"
             data-tip="La retropropagación llega a W_Q, W_K, W_V y a los embeddings. El entrenamiento es PARALELO en toda la secuencia (teacher forcing)."/>
       <text class="dg-sub" x="360" y="234" text-anchor="middle" fill="#B91C1C">∇ retropropagación (paralela en toda la secuencia)</text>
-    </svg>
+    </svg></div>
   </div>
 
   <div class="panel acc-trf">
@@ -1072,11 +1075,30 @@ function genData(kind,n){ return kind==="circles" ? genCircles(n) : genMoons(n);
    Los datos viven en [−2.4, 2.4] × [−1.85, 1.85]; el canvas mide 520×380. */
 function makeView(canvas){
   const XR=2.4, YR=1.85;
+  if(!canvas._logico) canvas._logico={w:canvas.width,h:canvas.height};   // 520×380: coordenadas de dibujo
+  const L=canvas._logico;
   return {
-    x:v=>(v+XR)/(2*XR)*canvas.width,
-    y:v=>(1-(v+YR)/(2*YR))*canvas.height,
+    x:v=>(v+XR)/(2*XR)*L.w,
+    y:v=>(1-(v+YR)/(2*YR))*L.h,
     XR, YR
   };
+}
+
+/** Nitidez: el búfer del lienzo sigue a su tamaño en pantalla × devicePixelRatio y una transformación
+    conserva las coordenadas lógicas de dibujo (520×380). Sin esto, el navegador estira el bitmap y lo difumina. */
+function lienzoNitido(canvas){
+  if(!canvas._logico) canvas._logico={w:canvas.width,h:canvas.height};
+  const L=canvas._logico, dpr=Math.min(window.devicePixelRatio||1,3);
+  const cw=canvas.clientWidth||L.w, ch=canvas.clientHeight||L.h;
+  const bw=Math.round(cw*dpr), bh=Math.round(ch*dpr);
+  if(canvas.width!==bw||canvas.height!==bh){ canvas.width=bw; canvas.height=bh; }
+  const ctx=canvas.getContext("2d"); ctx.setTransform(bw/L.w,0,0,bh/L.h,0,0);
+  return ctx;
+}
+/** Redibuja cuando cambia el tamaño en pantalla (p. ej., al abrir una pestaña o girar el teléfono). */
+function alCambiarTamano(elems,fn){
+  if(!window.ResizeObserver) return;
+  const ro=new ResizeObserver(()=>fn()); elems.forEach(e=>{ if(e) ro.observe(e); });
 }
 function drawDot(ctx,view,p,color,r){
   ctx.beginPath();
@@ -1084,29 +1106,81 @@ function drawDot(ctx,view,p,color,r){
   ctx.fillStyle=color; ctx.fill();
 }
 
-/** Curva de pérdida minimalista: una o dos series en un canvas pequeño. */
-function drawLossCurve(canvas,series,colors,labels){
-  const ctx=canvas.getContext("2d");
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.fillStyle="#fff"; ctx.fillRect(0,0,canvas.width,canvas.height);
+/** Curva de pérdida: una o dos series con eje de pérdida rotulado, eje de pasos reales, leyenda y valor final.
+    Se dibuja en px CSS a la resolución de la pantalla. `pasos` = paso de entrenamiento de cada punto. */
+function pasoRedondo(rango,n){
+  const bruto=rango/n, p=Math.pow(10,Math.floor(Math.log10(bruto))), r=bruto/p;
+  return (r<=1?1:r<=2?2:r<=2.5?2.5:r<=5?5:10)*p;
+}
+function decimalesDe(paso){ let d=0; while(d<6&&Math.abs(Math.round(paso*10**d)-paso*10**d)>1e-6) d++; return d; }
+function fmtPerdida(v){ return fmtDec(v, v>0?Math.min(6,Math.max(2,1-Math.floor(Math.log10(v)))):2); }   // ≥ 2 cifras significativas
+function drawLossCurve(canvas,series,colors,labels,pasos){
+  const dpr=Math.min(window.devicePixelRatio||1,3);
+  const W=Math.max(220,Math.round(canvas.clientWidth||520)), H=Math.round(canvas.clientHeight||140);
+  const bw=Math.round(W*dpr), bh=Math.round(H*dpr);
+  if(canvas.width!==bw||canvas.height!==bh){ canvas.width=bw; canvas.height=bh; }
+  const ctx=canvas.getContext("2d"); ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H); ctx.fillStyle="#fff"; ctx.fillRect(0,0,W,H);
+  const FUENTE="11px 'Segoe UI',system-ui,sans-serif", FUERTE="600 11px 'Segoe UI',system-ui,sans-serif";
+  const TINTA="#1E293B", TENUE="#64748B", REJILLA="#EEF0F4", BASE="#CBD5E1";
+  ctx.font=FUENTE; ctx.textBaseline="middle";
+  // leyenda: muestra de línea con el color de la serie + nombre en tinta
+  let lx=10;
+  labels.forEach((t,i)=>{
+    ctx.strokeStyle=colors[i]; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(lx,11); ctx.lineTo(lx+14,11); ctx.stroke();
+    ctx.fillStyle="#475569"; ctx.textAlign="left"; ctx.fillText(t,lx+19,11);
+    lx+=19+ctx.measureText(t).width+16;
+  });
   let lo=Infinity,hi=-Infinity;
-  for(const s of series) for(const v of s){ if(v<lo)lo=v; if(v>hi)hi=v; }
+  for(const s of series) for(const v of s){ if(isFinite(v)){ if(v<lo)lo=v; if(v>hi)hi=v; } }
   if(!isFinite(lo)||series[0].length<2){
-    ctx.fillStyle="#94A3B8"; ctx.font="11px system-ui";
-    ctx.fillText("curva de pérdida (aparece al entrenar)",10,20); return;
+    ctx.fillStyle="#94A3B8"; ctx.textAlign="center";
+    ctx.fillText("La curva de pérdida aparece al entrenar",W/2,H/2+8); return;
   }
-  if(hi-lo<1e-9) hi=lo+1e-9;
+  const n0=series[0].length, xs=(pasos&&pasos.length===n0)?pasos:series[0].map((_,i)=>i+1);
+  const pasoY=pasoRedondo(Math.max(hi-lo,0.02),3), decY=decimalesDe(pasoY);
+  const y0=Math.max(0,Math.floor(lo/pasoY+1e-9)*pasoY), y1=Math.max(y0+pasoY,Math.ceil(hi/pasoY-1e-9)*pasoY);
+  const marcasY=[]; for(let t=y0;t<=y1+pasoY*1e-6;t+=pasoY) marcasY.push(t);
+  const etqY=marcasY.map(t=>fmtDec(t,decY));
+  const finales=series.map((s,i)=>({v:s[s.length-1],c:colors[i]}));
+  const padL=Math.ceil(Math.max(...etqY.map(t=>ctx.measureText(t).width)))+10;
+  ctx.font=FUERTE;
+  const padR=Math.ceil(Math.max(...finales.map(f=>ctx.measureText(fmtPerdida(f.v)).width)))+16;
+  ctx.font=FUENTE;
+  const padT=26, padB=32, pw=W-padL-padR, ph=H-padT-padB;
+  const xa=xs[0], xb=Math.max(xs[xs.length-1],xa+1);
+  const X=e=>padL+pw*(e-xa)/(xb-xa), Y=v=>padT+ph*(1-(v-y0)/(y1-y0));
+  const nitido=v=>(Math.round(v*dpr)+(Math.round(dpr)%2?0.5:0))/dpr;
+  // rejilla horizontal y marcas del eje de pérdida
+  ctx.lineWidth=1; ctx.textAlign="right";
+  marcasY.forEach((t,k)=>{
+    const yy=nitido(Y(t)); ctx.strokeStyle=k===0?BASE:REJILLA;
+    ctx.beginPath(); ctx.moveTo(padL,yy); ctx.lineTo(padL+pw,yy); ctx.stroke();
+    ctx.fillStyle=TENUE; ctx.fillText(etqY[k],padL-6,Y(t));
+  });
+  // marcas del eje de pasos (valores reales del contador de pasos)
+  const pasoX=Math.max(1,Math.ceil(pasoRedondo(xb-xa,pw>300?4:3)));
+  ctx.textAlign="center";
+  for(let t=Math.ceil(xa/pasoX)*pasoX;t<=xb+1e-9;t+=pasoX){
+    const xx=X(t); ctx.strokeStyle=BASE; ctx.beginPath(); ctx.moveTo(nitido(xx),padT+ph); ctx.lineTo(nitido(xx),padT+ph+4); ctx.stroke();
+    ctx.fillStyle=TENUE; ctx.fillText(t.toLocaleString("es-CO"),xx,padT+ph+12);
+  }
+  ctx.fillText("paso de entrenamiento",padL+pw/2,H-7);
+  // series (2 px) y punto final con anillo blanco
   series.forEach((s,si)=>{
     ctx.beginPath();
-    s.forEach((v,i)=>{
-      const px=i/(s.length-1)*(canvas.width-12)+6;
-      const py=canvas.height-8-(v-lo)/(hi-lo)*(canvas.height-20);
-      i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
-    });
-    ctx.strokeStyle=colors[si]; ctx.lineWidth=1.6; ctx.stroke();
+    s.forEach((v,i)=>{ const px=X(xs[i]),py=Y(v); i===0?ctx.moveTo(px,py):ctx.lineTo(px,py); });
+    ctx.strokeStyle=colors[si]; ctx.lineWidth=2; ctx.lineJoin="round"; ctx.lineCap="round"; ctx.stroke();
   });
-  ctx.fillStyle="#64748B"; ctx.font="10px system-ui";
-  labels.forEach((t,i)=>{ ctx.fillStyle=colors[i]; ctx.fillText("— "+t, 8+i*120, 12); });
+  finales.forEach(f=>{ f.y=Y(f.v); f.yEtq=f.y;
+    ctx.beginPath(); ctx.arc(X(xb),f.y,5,0,2*Math.PI); ctx.fillStyle="#fff"; ctx.fill();
+    ctx.beginPath(); ctx.arc(X(xb),f.y,3.5,0,2*Math.PI); ctx.fillStyle=f.c; ctx.fill(); });
+  if(finales.length===2&&Math.abs(finales[0].y-finales[1].y)<13){   // etiquetas que se pisan: se separan lo justo y conservan su orden
+    const m=(finales[0].y+finales[1].y)/2, [arr,aba]=finales[0].v>=finales[1].v?finales:[finales[1],finales[0]];
+    arr.yEtq=m-6.5; aba.yEtq=m+6.5;
+  }
+  ctx.font=FUERTE; ctx.fillStyle=TINTA; ctx.textAlign="left";
+  finales.forEach(f=>ctx.fillText(fmtPerdida(f.v),X(xb)+9,f.yEtq));
 }
 
 /** Guarda un valor en un historial acotado (para las curvas de pérdida). */
@@ -1253,13 +1327,13 @@ function setAutoState(demo,on){
   const canvas=document.getElementById("ae-canvas"), ctx=canvas.getContext("2d");
   const view=makeView(canvas), curva=document.getElementById("ae-curva");
   const N=220, LR=0.01, BATCH=32;
-  let enc,dec,data,steps,hist,anim=null;
+  let enc,dec,data,steps,hist,anim=null,pasosHist=[];
 
   function reset(){
     enc=new MLP([2,16,1]);          // codificador: 2-D → latente 1-D
     dec=new MLP([1,16,2]);          // decodificador: latente 1-D → 2-D
     data=genData(document.getElementById("ae-data").value,N);
-    steps=0; hist=[]; anim=null;
+    steps=0; hist=[]; pasosHist=[]; anim=null;
     document.getElementById("ae-z").textContent="—";
     updateRead(NaN); redraw();
   }
@@ -1284,7 +1358,7 @@ function setAutoState(demo,on){
 
   function trainMany(k){
     let L=0; for(let i=0;i<k;i++) L=trainStep();
-    pushHist(hist,L,300); updateRead(L);
+    pushHist(hist,L,300); pushHist(pasosHist,steps,300); updateRead(L);
   }
   function updateRead(L){
     document.getElementById("ae-steps").textContent=steps;
@@ -1301,7 +1375,7 @@ function setAutoState(demo,on){
   }
 
   function redraw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+    lienzoNitido(canvas); ctx.clearRect(0,0,canvas._logico.w,canvas._logico.h);
     // pares x → x̂ (uno de cada tres, para no saturar el lienzo)
     ctx.strokeStyle="#CBD5E1"; ctx.lineWidth=1;
     const recs=[];
@@ -1329,9 +1403,10 @@ function setAutoState(demo,on){
       drawDot(ctx,view,[px,py],"#3D008D",6);
       drawDot(ctx,view,x,"#1E3A8A",4.5); drawDot(ctx,view,xr,"#ED1E79",4.5);
     }
-    drawLossCurve(curva,[hist],["#ED1E79"],["ECM"]);
+    drawLossCurve(curva,[hist],["#ED1E79"],["ECM"],pasosHist);
   }
 
+  alCambiarTamano([canvas,curva],()=>redraw());
   demos.ae={
     auto:false,
     get busy(){ return this.auto||!!anim; },
@@ -1368,7 +1443,7 @@ function setAutoState(demo,on){
   const canvas=document.getElementById("vae-canvas"), ctx=canvas.getContext("2d");
   const view=makeView(canvas), curva=document.getElementById("vae-curva");
   const N=220, LR=0.008, BATCH=32, NSAMP=120;
-  let enc,dec,data,steps,histR,histK,zBank;
+  let enc,dec,data,steps,histR,histK,zBank,pasosHist=[];
 
   function resampleBank(){ zBank=Array.from({length:NSAMP},()=>gauss()); }
 
@@ -1376,7 +1451,7 @@ function setAutoState(demo,on){
     enc=new MLP([2,16,2]);          // salidas: [μ, log σ²]
     dec=new MLP([1,16,2]);
     data=genData(document.getElementById("vae-data").value,N);
-    steps=0; histR=[]; histK=[];
+    steps=0; histR=[]; histK=[]; pasosHist=[];
     resampleBank(); updateRead(NaN,NaN); redraw();
   }
 
@@ -1409,7 +1484,7 @@ function setAutoState(demo,on){
   }
   function trainMany(k){
     let r=0,K=0; for(let i=0;i<k;i++)[r,K]=trainStep();
-    pushHist(histR,r,300); pushHist(histK,K,300); updateRead(r,K);
+    pushHist(histR,r,300); pushHist(histK,K,300); pushHist(pasosHist,steps,300); updateRead(r,K);
   }
   function updateRead(r,K){
     document.getElementById("vae-steps").textContent=steps;
@@ -1418,7 +1493,7 @@ function setAutoState(demo,on){
   }
 
   function redraw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+    lienzoNitido(canvas); ctx.clearRect(0,0,canvas._logico.w,canvas._logico.h);
     // barrido del latente por el prior: g(z) para z ∈ [−2.5, 2.5]
     ctx.beginPath();
     for(let i=0;i<=80;i++){
@@ -1431,9 +1506,10 @@ function setAutoState(demo,on){
     for(const p of data) drawDot(ctx,view,p,"rgba(30,58,138,.75)",3);
     // muestras generadas desde el prior (banco fijo → se ve la mejora, sin parpadeo)
     for(const z of zBank) drawDot(ctx,view,dec.forward([z]),"rgba(237,30,121,.8)",2.8);
-    drawLossCurve(curva,[histR,histK],["#ED1E79","#B45309"],["reconstrucción","KL"]);
+    drawLossCurve(curva,[histR,histK],["#ED1E79","#B45309"],["reconstrucción","KL"],pasosHist);
   }
 
+  alCambiarTamano([canvas,curva],()=>redraw());
   demos.vae={
     auto:false,
     get busy(){ return this.auto; },
@@ -1470,14 +1546,14 @@ function setAutoState(demo,on){
   const view=makeView(canvas), curva=document.getElementById("gan-curva");
   const N=220, LRD=0.005, LRG=0.002, KD=2, BATCH=24, NSHOW=140;
   const GRID=56;                                   // resolución del mapa de D
-  let G,D,data,steps,histD,histG,zShow,heat=null,heatAge=99,anim=null;
+  let G,D,data,steps,histD,histG,zShow,heat=null,heatAge=99,anim=null,pasosHist=[];
 
   function reset(){
     G=new MLP([2,16,16,2]); D=new MLP([2,16,16,1]);
     data=genData(document.getElementById("gan-data").value,N);
     // banco FIJO de ruido para visualizar: así se aprecia el transporte z→G(z)
     zShow=Array.from({length:NSHOW},()=>[gauss(),gauss()]);
-    steps=0; histD=[]; histG=[]; heatAge=99; anim=null;
+    steps=0; histD=[]; histG=[]; pasosHist=[]; heatAge=99; anim=null;
     updateRead(NaN,NaN,NaN,NaN); redraw();
   }
 
@@ -1521,7 +1597,7 @@ function setAutoState(demo,on){
     let a=0,b=0,f=0,r=0;
     for(let i=0;i<k;i++)[a,b,f,r]=trainStep();
     if(!isFinite(a)||!isFinite(b)){ reset(); return; }  // red desbordada → reinicio limpio
-    pushHist(histD,a,300); pushHist(histG,b,300);
+    pushHist(histD,a,300); pushHist(histG,b,300); pushHist(pasosHist,steps,300);
     heatAge=99; updateRead(a,b,f,r);
   }
   function updateRead(a,b,f,r){
@@ -1553,9 +1629,9 @@ function setAutoState(demo,on){
 
   function redraw(){
     if(heatAge>8){ buildHeat(); heatAge=0; } else heatAge++;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+    lienzoNitido(canvas); ctx.clearRect(0,0,canvas._logico.w,canvas._logico.h);
     ctx.imageSmoothingEnabled=true;
-    ctx.drawImage(heat,0,0,canvas.width,canvas.height);
+    ctx.drawImage(heat,0,0,canvas._logico.w,canvas._logico.h);
     // datos reales
     for(const p of data) drawDot(ctx,view,p,"rgba(30,58,138,.8)",3);
     // muestras del generador (o su animación ruido → datos)
@@ -1569,9 +1645,10 @@ function setAutoState(demo,on){
     }else{
       for(const z of zShow) drawDot(ctx,view,G.forward(z),"rgba(237,30,121,.85)",2.8);
     }
-    drawLossCurve(curva,[histD,histG],["#2563EB","#ED1E79"],["pérdida D","pérdida G"]);
+    drawLossCurve(curva,[histD,histG],["#2563EB","#ED1E79"],["pérdida D","pérdida G"],pasosHist);
   }
 
+  alCambiarTamano([canvas,curva],()=>redraw());
   demos.gan={
     auto:false,
     get busy(){ return this.auto||!!anim; },
@@ -1609,7 +1686,7 @@ function setAutoState(demo,on){
   const L=6, V=4, DIM=12, TOKS=["A","B","C","D"];
   const LR=0.05, BATCH=8;
   const COLS=["#2563EB","#8B5CF6","#ED1E79","#0D9488"]; // color por letra
-  let Q,K,mQ,vQ,mK,vK,tAdam,steps,hist,seq,alpha,anim=null;
+  let Q,K,mQ,vQ,mK,vK,tAdam,steps,hist,seq,alpha,anim=null,pasosHist=[];
   const curva=document.getElementById("trf-curva");
 
   /* --- inicialización de parámetros (Q y K: L×DIM) --- */
@@ -1618,7 +1695,7 @@ function setAutoState(demo,on){
     Q=init(); K=init();
     mQ=init().map(r=>r.fill(0)); vQ=init().map(r=>r.fill(0));
     mK=init().map(r=>r.fill(0)); vK=init().map(r=>r.fill(0));
-    tAdam=0; steps=0; hist=[]; anim=null;
+    tAdam=0; steps=0; hist=[]; pasosHist=[]; anim=null;
     newSeq(); updateAll(NaN);
   }
   function task(){ return document.getElementById("trf-task").value; }
@@ -1688,7 +1765,7 @@ function setAutoState(demo,on){
   }
   function trainMany(k){
     let Lo=0; for(let i=0;i<k;i++)Lo=trainStep();
-    pushHist(hist,Lo,300); forwardDisplay(); updateAll(Lo);
+    pushHist(hist,Lo,300); pushHist(pasosHist,steps,300); forwardDisplay(); updateAll(Lo);
   }
 
   /* --- render: fichas de tokens + mapa de atención --- */
@@ -1749,9 +1826,10 @@ function setAutoState(demo,on){
   function updateAll(Lo){
     document.getElementById("trf-steps").textContent=steps;
     document.getElementById("trf-loss").textContent=isFinite(Lo)?fmtDec(Lo,4):"—";
-    drawLossCurve(curva,[hist],["#0D9488"],["entropía cruzada"]);
+    drawLossCurve(curva,[hist],["#0D9488"],["entropía cruzada"],pasosHist);
   }
 
+  alCambiarTamano([curva],()=>drawLossCurve(curva,[hist],["#0D9488"],["entropía cruzada"],pasosHist));
   demos.trf={
     auto:false,
     get busy(){ return this.auto||!!anim; },
