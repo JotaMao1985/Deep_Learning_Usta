@@ -2115,8 +2115,12 @@ modelo = nn.Sequential(
             const corriendoRef = useRef(false); // espejo de `corriendo` para el bucle
             const epocaRef = useRef(0);
             const lrRef = useRef(lr);
-            const curvaCanvasRef = useRef(null);  // sparkline de la pérdida (Cap 3+)
+            const curvaCanvasRef = useRef(null);  // curva de la pérdida (Cap 3+)
             const lossHistRef = useRef([]);        // historial de pérdida por época
+            const epocasHistRef = useRef({ tr: [], va: [] });  // época de cada punto de las curvas (eje X)
+            const curvaSelRef = useRef(null);      // punto señalado en la curva: { x } con el puntero o { i } con el teclado
+            const curvaTipRef = useRef(null);      // globo con los valores de la época señalada
+            const curvaAvisoRef = useRef(null);    // lectura para lectores de pantalla (navegación con teclado)
             const optimRef = useRef('sgd');        // espejo de `optim` para el bucle (Cap 3+)
             const linternaRef = useRef({ prog: 0, raf: null, gradNorm: null });  // estado del "modo linterna" (Cap 4)
             const lambdaRef = useRef(0), dropoutRef = useRef(0);   // espejos de λ y dropout para el bucle (Cap 5)
@@ -2127,6 +2131,7 @@ modelo = nn.Sequential(
             const DOM = 3.5;     // dominio del mundo: [-DOM, DOM] en X e Y
             const RES = 56;      // resolución del mapa de calor (RES×RES predicciones)
             const LIENZO = 380;  // lado del canvas en px
+            const ALTO_CURVA = 180;  // alto de la curva de pérdida en px CSS (el ancho sigue al contenedor)
 
             // ===== Activaciones y sus derivadas (en función de la salida activada `a`) =====
             const sigmoide = (z) => 1 / (1 + Math.exp(-z));
@@ -2501,37 +2506,144 @@ modelo = nn.Sequential(
                 linternaRef.current.raf = requestAnimationFrame(pasoLinterna);
             };
 
-            // ===== Sparkline de la pérdida a lo largo de las épocas (visible en Cap 3+) =====
+            // ===== Curva de la pérdida a lo largo de las épocas (visible en Cap 3+) =====
+            // Se dibuja a la resolución real de la pantalla y al ancho del contenedor, para que el texto no se vea borroso.
+            const pasoRedondo = (rango, n) => {   // paso «redondo» (1; 2; 2,5 o 5 × 10ᵏ) para unas n marcas
+                const bruto = rango / n, p = Math.pow(10, Math.floor(Math.log10(bruto))), r = bruto / p;
+                return (r <= 1 ? 1 : r <= 2 ? 2 : r <= 2.5 ? 2.5 : r <= 5 ? 5 : 10) * p;
+            };
+            const decimalesDe = (paso) => { let d = 0; while (d < 6 && Math.abs(Math.round(paso * 10 ** d) - paso * 10 ** d) > 1e-6) d++; return d; };
+            const fmtPerdida = (v, dMin) => fmtDec(v, v > 0 ? Math.min(6, Math.max(dMin, 1 - Math.floor(Math.log10(v)))) : dMin);   // al menos dos cifras significativas (0,00039, no 0,000)
             const pintarCurva = () => {
                 const cv = curvaCanvasRef.current; if (!cv) return;
-                const ctx = cv.getContext('2d'), Wd = cv.width, Hd = cv.height;
+                const dpr = Math.min(window.devicePixelRatio || 1, 3);
+                const Wd = Math.max(220, Math.round(cv.clientWidth || 360)), Hd = ALTO_CURVA;
+                const bw = Math.round(Wd * dpr), bh = Math.round(Hd * dpr);
+                if (cv.width !== bw || cv.height !== bh) { cv.width = bw; cv.height = bh; }
+                const ctx = cv.getContext('2d');
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
                 ctx.clearRect(0, 0, Wd, Hd);
+                const nitido = v => (Math.round(v * dpr) + (Math.round(dpr) % 2 ? 0.5 : 0)) / dpr;   // líneas de 1 px sin difuminar
+                const TINTA = '#1E293B', TENUE = '#64748B', REJILLA = '#EEF0F4', BASE = '#CBD5E1';
+                const COL_TR = '#3D008D', COL_VA = '#ED1E79';   // entrenamiento (morado) y validación (rosa), como en las figuras del Cap 5
+                const tip = curvaTipRef.current;
                 const h = lossHistRef.current, hv = (chapter >= 5 ? valHistRef.current : []);
-                const padL = 36, padT = 8, padR = 8, padB = 16;
-                const plotW = Wd - padL - padR, plotH = Hd - padT - padB;
-                ctx.strokeStyle = '#E2E8F0'; ctx.lineWidth = 1;
-                ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, padT + plotH); ctx.lineTo(padL + plotW, padT + plotH); ctx.stroke();
-                ctx.fillStyle = '#64748B'; ctx.font = '9px Montserrat'; ctx.textBaseline = 'middle';
-                if (h.length < 2) { ctx.textAlign = 'center'; ctx.fillText('La curva aparece al pulsar «Entrenar»', Wd / 2, Hd / 2); return; }
+                const eh = epocasHistRef.current.tr.length === h.length ? epocasHistRef.current.tr : h.map((_, i) => i + 1);
+                const ev = epocasHistRef.current.va.length === hv.length ? epocasHistRef.current.va : hv.map((_, i) => i + 1);
+                ctx.font = '500 11px Montserrat, sans-serif'; ctx.textBaseline = 'middle';
+                if (h.length < 2) {
+                    if (tip) tip.style.display = 'none';
+                    ctx.fillStyle = TENUE; ctx.textAlign = 'center';
+                    ctx.fillText('La curva aparece al pulsar «Entrenar»', Wd / 2, Hd / 2);
+                    return;
+                }
+                // Escala Y: entre dos valores «redondos» que abarcan ambas curvas
                 let lo = Infinity, hi = -Infinity;
                 for (const v of h) { if (v < lo) lo = v; if (v > hi) hi = v; }
                 for (const v of hv) { if (v < lo) lo = v; if (v > hi) hi = v; }
-                if (hi - lo < 1e-9) hi = lo + 1e-9;
-                const Y = v => padT + plotH * (1 - (v - lo) / (hi - lo));
-                const traza = (arr, color) => {
-                    const n = arr.length; if (n < 2) return;
-                    ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.beginPath();
-                    for (let i = 0; i < n; i++) { const x = padL + plotW * (i / (n - 1)), y = Y(arr[i]); if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); }
+                const pasoY = pasoRedondo(Math.max(hi - lo, 0.02), 4), decY = decimalesDe(pasoY);
+                const y0 = Math.max(0, Math.floor(lo / pasoY + 1e-9) * pasoY), y1 = Math.max(y0 + pasoY, Math.ceil(hi / pasoY - 1e-9) * pasoY);
+                const marcasY = []; for (let t = y0; t <= y1 + pasoY * 1e-6; t += pasoY) marcasY.push(t);
+                const etqY = marcasY.map(t => fmtDec(t, decY));
+                // Márgenes medidos con el texto real
+                const finTr = h[h.length - 1], finVa = hv.length ? hv[hv.length - 1] : null;
+                const padL = Math.ceil(Math.max(...etqY.map(s => ctx.measureText(s).width))) + 10;
+                ctx.font = '600 11px Montserrat, sans-serif';
+                const padR = Math.ceil(Math.max(ctx.measureText(fmtPerdida(finTr, 3)).width, finVa === null ? 0 : ctx.measureText(fmtPerdida(finVa, 3)).width)) + 16;
+                ctx.font = '500 11px Montserrat, sans-serif';
+                const padT = 22, padB = 36;
+                const plotW = Wd - padL - padR, plotH = Hd - padT - padB;
+                const xMax = Math.max(eh[eh.length - 1], ev.length ? ev[ev.length - 1] : 0, 1);
+                const X = e => padL + plotW * (e / xMax);
+                const Y = v => padT + plotH * (1 - (v - y0) / (y1 - y0));
+                // Rejilla horizontal, marcas del eje Y y título del eje
+                ctx.lineWidth = 1; ctx.textAlign = 'right';
+                marcasY.forEach((t, k) => {
+                    const yy = nitido(Y(t));
+                    ctx.strokeStyle = k === 0 ? BASE : REJILLA;
+                    ctx.beginPath(); ctx.moveTo(padL, yy); ctx.lineTo(padL + plotW, yy); ctx.stroke();
+                    ctx.fillStyle = TENUE; ctx.fillText(etqY[k], padL - 6, Y(t));
+                });
+                ctx.textAlign = 'left'; ctx.fillText('Pérdida (BCE)', padL, 9);
+                // Marcas del eje X (épocas) y título del eje
+                const pasoX = Math.max(1, Math.ceil(pasoRedondo(xMax, plotW > 300 ? 5 : 3)));
+                ctx.textAlign = 'center';
+                for (let t = 0; t <= xMax + 1e-9; t += pasoX) {
+                    const xx = X(t);
+                    ctx.strokeStyle = BASE; ctx.beginPath(); ctx.moveTo(nitido(xx), padT + plotH); ctx.lineTo(nitido(xx), padT + plotH + 4); ctx.stroke();
+                    ctx.fillText(t.toLocaleString('es-CO'), xx, padT + plotH + 13);
+                }
+                ctx.fillText('Época', padL + plotW / 2, Hd - 7);
+                // Curvas (2 px, uniones redondeadas)
+                const traza = (ys, es, color) => {
+                    if (ys.length < 2) return;
+                    ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ys.forEach((v, i) => { const xx = X(es[i]), yy = Y(v); if (i === 0) ctx.moveTo(xx, yy); else ctx.lineTo(xx, yy); });
                     ctx.stroke();
                 };
-                ctx.textAlign = 'right';
-                ctx.fillText(fmtDec(hi, 2), padL - 4, padT);
-                ctx.fillText(fmtDec(lo, 2), padL - 4, padT + plotH);
-                traza(h, '#3D008D');                          // entrenamiento (morado), como en las figuras del Cap 5
-                if (hv.length >= 2) traza(hv, '#ED1E79');      // validación (rosa) — la «U»
-                ctx.fillStyle = '#64748B'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-                ctx.fillText(hv.length >= 2 ? 'BCE — morado: entrenamiento · rosa: validación (la «U»)' : 'Pérdida (BCE) vs. época', padL + plotW / 2, Hd - 3);
+                const punto = (xx, yy, color, hueco) => {   // marcador de 8 px con anillo blanco de 2 px
+                    ctx.beginPath(); ctx.arc(xx, yy, 6, 0, 2 * Math.PI); ctx.fillStyle = '#FFFFFF'; ctx.fill();
+                    ctx.beginPath(); ctx.arc(xx, yy, 4, 0, 2 * Math.PI);
+                    if (hueco) { ctx.fillStyle = '#FFFFFF'; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = color; ctx.stroke(); }
+                    else { ctx.fillStyle = color; ctx.fill(); }
+                };
+                traza(h, eh, COL_TR);
+                if (hv.length >= 2) traza(hv, ev, COL_VA);
+                // Cap 5: cuando la validación ya repuntó, un anillo (explicado en la leyenda) marca el fondo de la «U»
+                if (hv.length >= 5) {
+                    let mi = 0; for (let i = 1; i < hv.length; i++) if (hv[i] < hv[mi]) mi = i;
+                    if (mi < hv.length - 1 && finVa > hv[mi] * 1.03) punto(X(ev[mi]), Y(hv[mi]), COL_VA, true);
+                }
+                // Valor actual al final de cada curva; si las dos etiquetas se pisan, se separan lo justo y conservan su orden
+                const finales = [{ x: X(eh[eh.length - 1]), y: Y(finTr), v: finTr, c: COL_TR }];
+                if (hv.length >= 2) finales.push({ x: X(ev[ev.length - 1]), y: Y(finVa), v: finVa, c: COL_VA });
+                finales.forEach(f => { punto(f.x, f.y, f.c, false); f.yEtq = f.y; });
+                if (finales.length === 2 && Math.abs(finales[0].y - finales[1].y) < 13) {
+                    const medio = (finales[0].y + finales[1].y) / 2, [arriba, abajo] = finales[0].v >= finales[1].v ? finales : [finales[1], finales[0]];
+                    const ajuste = Math.min(0, padT + plotH - (medio + 6.5)) + Math.max(0, padT - (medio - 6.5));   // sin salirse del área del gráfico
+                    arriba.yEtq = medio - 6.5 + ajuste; abajo.yEtq = medio + 6.5 + ajuste;
+                }
+                ctx.font = '600 11px Montserrat, sans-serif'; ctx.fillStyle = TINTA; ctx.textAlign = 'left';
+                finales.forEach(f => ctx.fillText(fmtPerdida(f.v, 3), f.x + 9, f.yEtq));
+                ctx.font = '500 11px Montserrat, sans-serif';
+                // Lectura de una época: línea vertical + globo con todas las curvas (puntero o teclado)
+                const sel = curvaSelRef.current;
+                if (!sel || !tip) { if (tip) tip.style.display = 'none'; return; }
+                let i = 0;
+                if (sel.i != null) i = sel.i = Math.min(Math.max(sel.i, 0), h.length - 1);
+                else { const eObj = (sel.x - padL) / plotW * xMax; let mejor = Infinity; eh.forEach((e, k) => { const d = Math.abs(e - eObj); if (d < mejor) { mejor = d; i = k; } }); }
+                const ep = eh[i], xx = X(ep), j = ev.indexOf(ep);
+                const filas = [{ v: h[i], c: COL_TR, n: hv.length ? 'entrenamiento' : 'pérdida (BCE)' }];
+                if (j >= 0) filas.push({ v: hv[j], c: COL_VA, n: 'validación' });
+                ctx.strokeStyle = '#94A3B8'; ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.moveTo(nitido(xx), padT); ctx.lineTo(nitido(xx), padT + plotH); ctx.stroke();
+                filas.forEach(f => punto(xx, Y(f.v), f.c, false));
+                const nodo = (tag, css, txt) => { const el = document.createElement(tag); if (css) el.style.cssText = css; if (txt != null) el.textContent = txt; return el; };
+                tip.replaceChildren(nodo('div', 'font-weight:600;color:#64748B;margin-bottom:2px', `Época ${ep.toLocaleString('es-CO')}`),
+                    ...filas.map(f => { const r = nodo('div', 'display:flex;align-items:center;gap:6px;white-space:nowrap'); r.append(nodo('span', `display:inline-block;width:12px;border-top:2px solid ${f.c}`), nodo('strong', 'color:#1E293B;font-variant-numeric:tabular-nums', fmtPerdida(f.v, 4)), nodo('span', 'color:#64748B', f.n)); return r; }));
+                tip.style.display = 'block';
+                const anchoTip = tip.offsetWidth;
+                tip.style.left = `${xx + 10 + anchoTip > Wd ? Math.max(0, xx - 10 - anchoTip) : xx + 10}px`;
+                tip.style.top = `${padT}px`;
+                if (sel.i != null && curvaAvisoRef.current) {
+                    const aviso = `Época ${ep.toLocaleString('es-CO')}: ` + filas.map(f => `${f.n} ${fmtPerdida(f.v, 4)}`).join('; ');
+                    if (curvaAvisoRef.current.textContent !== aviso) curvaAvisoRef.current.textContent = aviso;
+                }
             };
+            // Recorrido de la curva con el teclado: ← → (Mayús: de 10 en 10), Inicio y Fin
+            const teclaCurva = (e) => {
+                const n = lossHistRef.current.length; if (n < 2) return;
+                const actual = curvaSelRef.current && curvaSelRef.current.i != null ? curvaSelRef.current.i : n;
+                const salto = e.shiftKey ? 10 : 1;
+                const nuevo = { ArrowLeft: actual - salto, ArrowRight: actual + salto, Home: 0, End: n - 1 }[e.key];
+                if (nuevo === undefined) return;
+                e.preventDefault();
+                curvaSelRef.current = { i: Math.min(Math.max(nuevo, 0), n - 1) };
+                pintarCurva();
+            };
+            const apuntarCurva = (e) => { const r = e.currentTarget.getBoundingClientRect(); curvaSelRef.current = { x: e.clientX - r.left }; pintarCurva(); };
+            const soltarCurva = () => { curvaSelRef.current = null; pintarCurva(); };
 
             // ===== Bucle de entrenamiento animado =====
             const bucle = () => {
@@ -2540,8 +2652,8 @@ modelo = nn.Sequential(
                 for (let e = 0; e < 3; e++) { entrenarEpoca(red, datosRef.current, lrRef.current, optimRef.current, 0.9, lambdaRef.current, dropoutRef.current, classWRef.current); epocaRef.current++; }
                 pintar();
                 const { perdida, acc } = evaluar(red, datosRef.current);
-                if (isFinite(perdida)) lossHistRef.current.push(perdida);
-                if (valRef.current.length) { const ve = evaluar(red, valRef.current); if (isFinite(ve.perdida)) valHistRef.current.push(ve.perdida); }
+                if (isFinite(perdida)) { lossHistRef.current.push(perdida); epocasHistRef.current.tr.push(epocaRef.current); }
+                if (valRef.current.length) { const ve = evaluar(red, valRef.current); if (isFinite(ve.perdida)) { valHistRef.current.push(ve.perdida); epocasHistRef.current.va.push(epocaRef.current); } }
                 setMetricas({ epoca: epocaRef.current, perdida, acc });
                 pintarCurva();
                 if (corriendoRef.current) animRef.current = requestAnimationFrame(bucle);
@@ -2559,7 +2671,7 @@ modelo = nn.Sequential(
                 detener();
                 redRef.current = crearRed();
                 epocaRef.current = 0;
-                lossHistRef.current = []; valHistRef.current = [];
+                lossHistRef.current = []; valHistRef.current = []; epocasHistRef.current = { tr: [], va: [] }; curvaSelRef.current = null;
                 if (datosRef.current.length) setMetricas({ epoca: 0, ...evaluar(redRef.current, datosRef.current) });
                 if (chapter === 4 && datosRef.current.length) { linternaRef.current.gradNorm = normasGradiente(redRef.current, datosRef.current); setGradLin(linternaRef.current.gradNorm.slice()); }
                 pintar(); pintarCurva();
@@ -2595,6 +2707,15 @@ modelo = nn.Sequential(
             }, [chapter]);
             // Limpieza al desmontar
             useEffect(() => () => { corriendoRef.current = false; if (animRef.current) cancelAnimationFrame(animRef.current); }, []);
+            // La curva de pérdida se redibuja al cambiar el ancho de su columna (y con la nitidez de la pantalla)
+            useEffect(() => {
+                const cv = curvaCanvasRef.current; if (!cv) return;
+                pintarCurva();
+                if (!window.ResizeObserver) return;
+                const ro = new ResizeObserver(() => pintarCurva());
+                ro.observe(cv);
+                return () => ro.disconnect();
+            }, [chapter]);
             // Arnés de verificación (no altera el uso normal): expone estado + un paso síncrono para preview_eval
             useEffect(() => {
                 window.__nnlab = {
@@ -2605,8 +2726,8 @@ modelo = nn.Sequential(
                         for (let i = 0; i < k; i++) {
                             entrenarEpoca(redRef.current, datosRef.current, lrRef.current, optimRef.current, 0.9, lambdaRef.current, dropoutRef.current, classWRef.current); epocaRef.current++;
                             const { perdida } = evaluar(redRef.current, datosRef.current);
-                            if (isFinite(perdida)) lossHistRef.current.push(perdida);
-                            if (valRef.current.length) { const ve = evaluar(redRef.current, valRef.current); if (isFinite(ve.perdida)) valHistRef.current.push(ve.perdida); }
+                            if (isFinite(perdida)) { lossHistRef.current.push(perdida); epocasHistRef.current.tr.push(epocaRef.current); }
+                            if (valRef.current.length) { const ve = evaluar(redRef.current, valRef.current); if (isFinite(ve.perdida)) { valHistRef.current.push(ve.perdida); epocasHistRef.current.va.push(epocaRef.current); } }
                         }
                         pintar(); pintarCurva();
                         const r = evaluar(redRef.current, datosRef.current);
@@ -2809,7 +2930,23 @@ modelo = nn.Sequential(
                             {chapter >= 3 && (
                                 <div className="mt-3 rounded-lg border border-gray-200 bg-white p-2">
                                     <div className="text-[0.7rem] font-bold text-navy mb-1 flex items-center gap-1"><i className="fas fa-chart-line text-secondary"></i>Curva de pérdida — la huella del descenso del gradiente</div>
-                                    <canvas ref={curvaCanvasRef} width={360} height={120} style={{ width: '100%', height: 'auto', display: 'block' }} aria-label="Curva de la pérdida BCE a lo largo de las épocas de entrenamiento" />
+                                    <div className="relative">
+                                        <canvas ref={curvaCanvasRef} width={360} height={ALTO_CURVA} tabIndex={0} role="img"
+                                            onPointerMove={apuntarCurva} onPointerDown={apuntarCurva} onPointerLeave={soltarCurva} onKeyDown={teclaCurva} onBlur={soltarCurva}
+                                            className="rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                                            style={{ width: '100%', height: ALTO_CURVA, display: 'block', touchAction: 'pan-y', cursor: 'crosshair' }}
+                                            aria-label={`Curva de la pérdida BCE a lo largo de las épocas de entrenamiento${chapter >= 5 ? ', con la curva de validación' : ''}. Con las flechas izquierda y derecha se recorren las épocas.`} />
+                                        <div ref={curvaTipRef} aria-hidden="true" className="absolute pointer-events-none rounded-md border border-gray-200 bg-white/95 shadow-sm px-2 py-1 text-[0.7rem] leading-snug" style={{ display: 'none' }}></div>
+                                        <span ref={curvaAvisoRef} className="sr-only" aria-live="polite"></span>
+                                    </div>
+                                    <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[0.68rem] text-gray-600 mt-1">
+                                        {chapter >= 5 && (<>
+                                            <span><span className="inline-block w-4 align-middle mr-1" style={{ borderTop: '2px solid #3D008D' }}></span>Entrenamiento</span>
+                                            <span><span className="inline-block w-4 align-middle mr-1" style={{ borderTop: '2px solid #ED1E79' }}></span>Validación</span>
+                                            <span><span className="inline-block w-2.5 h-2.5 rounded-full align-middle mr-1" style={{ border: '2px solid #ED1E79' }}></span>Mínimo de validación (fondo de la «U»)</span>
+                                        </>)}
+                                        <span className="text-gray-500">Al pasar el puntero (o con las flechas ← →) se lee la pérdida de cada época.</span>
+                                    </div>
                                 </div>
                             )}
                         </div>
