@@ -898,7 +898,15 @@
                 // y Plotly.purge(id) fallaba en silencio, dejando vivo el bucle WebGL de las gráficas 3D.
                 const el = document.getElementById(id);
                 if (!el || !window.Plotly) return undefined;
-                window.Plotly.newPlot(el, dataFn(), { separators: ',.', ...layoutFn() }, { responsive: true, displayModeBar: false });
+                const layout = { separators: ',.', ...layoutFn() };
+                // Leyenda horizontal ENCIMA de la gráfica: debajo competía con el título del eje x (y al envolverse en móvil, lo pisaba).
+                if (layout.legend && layout.legend.orientation === 'h') layout.legend = { ...layout.legend, x: 0, xanchor: 'left', y: 1.02, yanchor: 'bottom' };
+                const dibujo = window.Plotly.newPlot(el, dataFn(), layout, { responsive: true, displayModeBar: false });
+                // Plotly mide la leyenda al dibujar: si Montserrat aún no había cargado, la mide con la fuente de respaldo
+                // (más angosta) y después recorta el texto («Frontera del percep…»). Se redibuja cuando las fuentes están listas.
+                if (document.fonts && document.fonts.ready) Promise.resolve(dibujo).then(() => document.fonts.ready).then(() => {
+                    if (el.isConnected) { try { const p = window.Plotly.redraw(el); if (p && p.catch) p.catch(() => { }); } catch (e) { } }
+                });
                 // Reajuste al tamaño real del contenedor: en móvil la gráfica puede montarse mientras el menú
                 // lateral aún se cierra (transición) y quedarse con el ancho de ese instante.
                 let ro = null;
@@ -919,6 +927,34 @@
 
         /* Número con coma decimal para el texto visible (regla B: coma en prosa, leyendas y UI; punto en código y LaTeX). */
         const fmtDec = (v, d) => v.toFixed(d).replace('.', ',');
+
+        /* Lienzo nítido: ajusta el búfer del <canvas> a su tamaño en pantalla × devicePixelRatio y devuelve el contexto
+           ya escalado, para dibujar en px CSS sin que el navegador estire (y difumine) la imagen. */
+        const lienzoNitido = (cv, altoCss) => {
+            const dpr = Math.min(window.devicePixelRatio || 1, 3);
+            const w = Math.max(1, Math.round(cv.clientWidth || cv.width)), h = Math.max(1, Math.round(altoCss || cv.clientHeight || cv.height));
+            const bw = Math.round(w * dpr), bh = Math.round(h * dpr);
+            if (cv.width !== bw || cv.height !== bh) { cv.width = bw; cv.height = bh; }
+            const ctx = cv.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            return { ctx, w, h, dpr };
+        };
+
+        /* Ancho de dibujo de las gráficas SVG de datos: el viewBox sigue al ancho real del contenedor (sin pasar del
+           ancho de diseño), así el texto conserva su tamaño en pantallas angostas en vez de encogerse con la figura. */
+        const useAnchoGrafica = (anchoDiseno) => {
+            const ref = useRef(null);
+            const [ancho, setAncho] = useState(anchoDiseno);
+            useEffect(() => {
+                const el = ref.current; if (!el) return undefined;
+                const medir = () => { const w = el.clientWidth; if (w > 0) setAncho(Math.max(300, Math.min(anchoDiseno, Math.round(w)))); };
+                medir();
+                if (!window.ResizeObserver) return undefined;
+                const ro = new ResizeObserver(medir); ro.observe(el);
+                return () => ro.disconnect();
+            }, [anchoDiseno]);
+            return [ref, ancho];
+        };
 
         /* Pie de figura normalizado: «Figura c.n.» + descripción + fuente.
            Numeración por capítulo del módulo (c = capítulo, n = orden de aparición dentro del capítulo). */
@@ -1767,8 +1803,8 @@ def caracteristicas_manuales(imagen):
                 });
             }, () => ({
                 margin: { t: 10, r: 10, b: 30, l: 35 }, legend: { orientation: 'h', y: -0.18 },
-                xaxis: { zeroline: true, gridcolor: '#eee', range: [-6, 6] },
-                yaxis: { zeroline: true, gridcolor: '#eee', range: deriv ? [-0.2, 1.2] : [-1.3, 3] },
+                xaxis: { title: 'z (preactivación)', automargin: true, zeroline: true, gridcolor: '#eee', range: [-6, 6] },
+                yaxis: { title: deriv ? 'f′(z) (derivada)' : 'f(z) (activación)', automargin: true, zeroline: true, gridcolor: '#eee', range: deriv ? [-0.2, 1.2] : [-1.3, 3] },
                 font: { family: 'Montserrat', size: 11 }, paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
             }), [vis, deriv]);
             return (
@@ -1909,7 +1945,7 @@ modelo = nn.Sequential(
                     { x: xt, y: yt, name: 'Función objetivo', mode: 'lines', line: { color: '#3D008D', width: 3 } },
                 ];
             }, () => ({
-                margin: { t: 8, r: 8, b: 22, l: 8 }, legend: { orientation: 'h', y: -0.16, font: { size: 10 } },
+                margin: { t: 8, r: 8, b: 22, l: 8 }, legend: { orientation: 'h', y: -0.16, font: { size: 11 } },
                 xaxis: { visible: false, range: [0, 10] }, yaxis: { visible: false, range: [0, 3.6] },
                 font: { family: 'Montserrat', size: 11 }, paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
             }), [n]);
@@ -2132,6 +2168,7 @@ modelo = nn.Sequential(
             const RES = 56;      // resolución del mapa de calor (RES×RES predicciones)
             const LIENZO = 380;  // lado del canvas en px
             const ALTO_CURVA = 180;  // alto de la curva de pérdida en px CSS (el ancho sigue al contenedor)
+            const ALTO_RED = 190;    // alto del diagrama de la red en px CSS (el ancho sigue al contenedor)
 
             // ===== Activaciones y sus derivadas (en función de la salida activada `a`) =====
             const sigmoide = (z) => 1 / (1 + Math.exp(-z));
@@ -2335,7 +2372,7 @@ modelo = nn.Sequential(
             const pintar = () => {
                 const cv = canvasRef.current, red = redRef.current;
                 if (!cv || !red) return;
-                const ctx = cv.getContext('2d'), Wd = cv.width, Hd = cv.height;
+                const { ctx, w: Wd, h: Hd } = lienzoNitido(cv, cv.clientWidth);   // cuadrado, en px CSS y a la resolución de la pantalla
 
                 // 1) Mapa de calor de la red actual (grilla pequeña escalada y suavizada)
                 let off = offRef.current;
@@ -2383,13 +2420,13 @@ modelo = nn.Sequential(
             const pintarRed = () => {
                 const cv = redCanvasRef.current, red = redRef.current;
                 if (!cv || !red) return;
-                const ctx = cv.getContext('2d'), Wd = cv.width, Hd = cv.height;
+                const { ctx, w: Wd, h: Hd } = lienzoNitido(cv, ALTO_RED);
                 ctx.clearRect(0, 0, Wd, Hd);
-                const sz = red.sizes, L = sz.length, padX = 52, padY = 26;
+                const sz = red.sizes, L = sz.length, padX = Math.min(52, Math.max(28, Wd * 0.1)), padY = 22, padYinf = 38;   // abajo, espacio para los rótulos de capa
                 const maxN = Math.max(...sz);
-                const r = Math.max(5, Math.min(12, (Hd - 2 * padY) / (maxN * 2.3)));   // radio de neurona, adaptado al nº de nodos
+                const r = Math.max(5, Math.min(12, (Hd - padY - padYinf) / (maxN * 2.3)));   // radio de neurona, adaptado al nº de nodos
                 const xs = sz.map((_, i) => padX + (Wd - 2 * padX) * (L === 1 ? 0.5 : i / (L - 1)));
-                const ys = sz.map(n => Array.from({ length: n }, (_, j) => padY + (Hd - 2 * padY) * (n === 1 ? 0.5 : j / (n - 1))));
+                const ys = sz.map(n => Array.from({ length: n }, (_, j) => padY + (Hd - padY - padYinf) * (n === 1 ? 0.5 : j / (n - 1))));
 
                 // Magnitud máxima de los pesos, para normalizar grosor y opacidad
                 let maxAbs = 0.5;
@@ -2433,7 +2470,8 @@ modelo = nn.Sequential(
                 ctx.fillStyle = '#64748B'; ctx.font = '600 11px Montserrat'; ctx.textBaseline = 'alphabetic';
                 ctx.fillText('Entrada', xs[0], Hd - 8);
                 ctx.fillText('Salida', xs[L - 1], Hd - 8);
-                for (let l = 1; l < L - 1; l++) ctx.fillText('Oculta ' + l, xs[l], Hd - 8);
+                const corto = L > 2 && ctx.measureText('Oculta 1').width + 8 > (Wd - 2 * padX) / (L - 1);   // en pantallas angostas, «Oc. 1»
+                for (let l = 1; l < L - 1; l++) ctx.fillText((corto ? 'Oc. ' : 'Oculta ') + l, xs[l], Hd - 8);
             };
 
             // ===== "Modo linterna" (Cap 4): anima el flujo forward → pausa → backward sobre el diagrama;
@@ -2444,9 +2482,9 @@ modelo = nn.Sequential(
             const pintarLinterna = () => {
                 const cv = redCanvasRef.current, red = redRef.current;
                 if (!cv || !red) return;
-                const ctx = cv.getContext('2d'), Wd = cv.width, Hd = cv.height;
+                const { ctx, w: Wd, h: Hd } = lienzoNitido(cv, ALTO_RED);
                 ctx.clearRect(0, 0, Wd, Hd);
-                const sz = red.sizes, L = sz.length, padX = 52, padY = 30;
+                const sz = red.sizes, L = sz.length, padX = Math.min(52, Math.max(28, Wd * 0.1)), padY = 30;
                 const maxN = Math.max(...sz);
                 const r = Math.max(5, Math.min(12, (Hd - 2 * padY) / (maxN * 2.3)));
                 const xs = sz.map((_, i) => padX + (Wd - 2 * padX) * (L === 1 ? 0.5 : i / (L - 1)));
@@ -2488,9 +2526,10 @@ modelo = nn.Sequential(
                 // 4) etiqueta de la fase
                 ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '700 12px Montserrat';
                 ctx.fillStyle = fase === 'forward' ? '#3b82f6' : fase === 'backward' ? '#ED1E79' : '#94A3B8';
-                ctx.fillText(fase === 'forward' ? '▶  Hacia adelante: la predicción fluye'
-                    : fase === 'backward' ? '◀  Retropropagación: grosor ∝ log del gradiente (escala fija)'
-                        : '·  ·  ·', Wd / 2, 14);
+                const etqs = fase === 'forward' ? ['▶  Hacia adelante: la predicción fluye', '▶  Hacia adelante']
+                    : fase === 'backward' ? ['◀  Retropropagación: grosor ∝ log del gradiente (escala fija)', '◀  Retropropagación: grosor ∝ log del gradiente', '◀  Retropropagación']
+                        : ['·  ·  ·'];
+                ctx.fillText(etqs.find(t => ctx.measureText(t).width <= Wd - 12) || etqs[etqs.length - 1], Wd / 2, 14);   // la versión larga que quepa
             };
             const avanzarLinterna = () => {
                 const red = redRef.current; if (!red) return;
@@ -2707,6 +2746,13 @@ modelo = nn.Sequential(
             }, [chapter]);
             // Limpieza al desmontar
             useEffect(() => () => { corriendoRef.current = false; if (animRef.current) cancelAnimationFrame(animRef.current); }, []);
+            // El mapa y el diagrama de la red se redibujan al cambiar su ancho (siempre a la resolución real de la pantalla)
+            useEffect(() => {
+                if (!window.ResizeObserver) return undefined;
+                const ro = new ResizeObserver(() => pintar());
+                [canvasRef.current, redCanvasRef.current].forEach(c => { if (c) ro.observe(c); });
+                return () => ro.disconnect();
+            }, []);
             // La curva de pérdida se redibuja al cambiar el ancho de su columna (y con la nitidez de la pantalla)
             useEffect(() => {
                 const cv = curvaCanvasRef.current; if (!cv) return;
@@ -2907,7 +2953,7 @@ modelo = nn.Sequential(
                         {/* ---------- Lienzo + métricas ---------- */}
                         <div className="order-1 md:order-2">
                             <div className="rounded-xl overflow-hidden border border-gray-800 shadow-inner mx-auto" style={{ maxWidth: LIENZO }}>
-                                <canvas ref={canvasRef} width={LIENZO} height={LIENZO} style={{ width: '100%', height: 'auto', display: 'block', background: '#0b0f1c' }} aria-label="Mapa de calor de la frontera de decisión" />
+                                <canvas ref={canvasRef} width={LIENZO} height={LIENZO} style={{ width: '100%', height: 'auto', aspectRatio: '1 / 1', display: 'block', background: '#0b0f1c' }} aria-label="Mapa de calor de la frontera de decisión" />
                             </div>
                             <div className="grid grid-cols-3 gap-2 mt-3">
                                 {[
@@ -2962,7 +3008,7 @@ modelo = nn.Sequential(
                             <div className="p-4 grid md:grid-cols-2 gap-4 items-center">
                                 {/* Diagrama de neuronas y conexiones */}
                                 <div className="rounded-lg border border-gray-200 bg-white p-2">
-                                    <canvas ref={redCanvasRef} width={580} height={230} style={{ width: '100%', height: 'auto', display: 'block' }} aria-label="Diagrama de la red neuronal: neuronas por capa y conexiones (pesos)" />
+                                    <canvas ref={redCanvasRef} width={580} height={ALTO_RED} style={{ width: '100%', height: ALTO_RED, display: 'block' }} aria-label="Diagrama de la red neuronal: neuronas por capa y conexiones (pesos)" />
                                     <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-[0.68rem] text-gray-500 mt-1">
                                         {chapter === 4 ? (<>
                                             <span><span className="inline-block w-4 align-middle mr-1" style={{ borderTop: '3px solid #3b82f6' }}></span>Hacia adelante</span>
@@ -3025,7 +3071,8 @@ modelo = nn.Sequential(
             const lrRef = useRef(lr);
             const dragRef = useRef(null);
 
-            const LW = 560, LH = 320;
+            const LW = 560, LH = 320;                                  // proporción del lienzo (el ancho real sigue al contenedor)
+            const dimRef = useRef({ w: LW, h: LH });                   // tamaño en px CSS del último dibujo
             const DX0 = -1.05, DX1 = 1.05, DY0 = -1.18, DY1 = 1.18;   // dominio de visualización
 
             // Activaciones (ocultas); la salida es LINEAL
@@ -3124,21 +3171,33 @@ modelo = nn.Sequential(
                 let s = 0; for (const p of datos) s += (salida(red, p.x) - p.y) ** 2; return s / datos.length;
             };
 
-            const toPx = (wx, wy) => [(wx - DX0) / (DX1 - DX0) * LW, (DY1 - wy) / (DY1 - DY0) * LH];
+            const toPx = (wx, wy) => { const { w, h } = dimRef.current; return [(wx - DX0) / (DX1 - DX0) * w, (DY1 - wy) / (DY1 - DY0) * h]; };
 
             const pintar = () => {
                 const cv = canvasRef.current, red = redRef.current;
                 if (!cv || !red) return;
-                const ctx = cv.getContext('2d');
-                ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, LW, LH);
+                const ancho = cv.clientWidth || LW;
+                const { ctx, w: W, h: H } = lienzoNitido(cv, Math.round(ancho * LH / LW));   // px CSS a la resolución de la pantalla
+                dimRef.current = { w: W, h: H };
+                ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, W, H);
                 // rejilla
                 ctx.strokeStyle = '#EEE9F6'; ctx.lineWidth = 1;
-                for (let gx = -1; gx <= 1.001; gx += 0.25) { const [px] = toPx(gx, 0); ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, LH); ctx.stroke(); }
-                for (let gy = -1; gy <= 1.001; gy += 0.25) { const [, py] = toPx(0, gy); ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(LW, py); ctx.stroke(); }
+                for (let gx = -1; gx <= 1.001; gx += 0.25) { const [px] = toPx(gx, 0); ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, H); ctx.stroke(); }
+                for (let gy = -1; gy <= 1.001; gy += 0.25) { const [, py] = toPx(0, gy); ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(W, py); ctx.stroke(); }
                 // ejes
                 const [px0, py0] = toPx(0, 0);
                 ctx.strokeStyle = '#D9D2EA'; ctx.lineWidth = 1.5;
-                ctx.beginPath(); ctx.moveTo(0, py0); ctx.lineTo(LW, py0); ctx.moveTo(px0, 0); ctx.lineTo(px0, LH); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, py0); ctx.lineTo(W, py0); ctx.moveTo(px0, 0); ctx.lineTo(px0, H); ctx.stroke();
+                // marcas de los ejes (−1 … 1) y sus nombres, con halo blanco para leerse sobre la rejilla
+                ctx.font = '500 11px Montserrat, sans-serif'; ctx.fillStyle = '#64748B'; ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 3; ctx.lineJoin = 'round';
+                const rotulo = (t, x, y) => { ctx.strokeText(t, x, y); ctx.fillText(t, x, y); };
+                ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+                [-1, -0.5, 0.5, 1].forEach(v => { const [px] = toPx(v, 0); rotulo(fmtDec(v, v % 1 ? 1 : 0).replace('-', '−'), px, py0 + 5); });
+                ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+                [-1, -0.5, 0.5, 1].forEach(v => { const [, py] = toPx(0, v); rotulo(fmtDec(v, v % 1 ? 1 : 0).replace('-', '−'), px0 - 6, py); });
+                ctx.font = 'italic 600 12px Montserrat, sans-serif'; ctx.fillStyle = '#334155';
+                ctx.textAlign = 'right'; ctx.textBaseline = 'bottom'; rotulo('x', W - 6, py0 - 4);
+                ctx.textAlign = 'left'; ctx.textBaseline = 'top'; rotulo('y', px0 + 6, 4);
                 // residuos: línea punteada de cada punto a la curva (lo que minimiza el MSE)
                 ctx.strokeStyle = 'rgba(100,116,139,0.5)'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
                 for (const p of datosRef.current) {
@@ -3147,7 +3206,7 @@ modelo = nn.Sequential(
                 }
                 ctx.setLineDash([]);
                 // curva ajustada por la red
-                ctx.strokeStyle = '#ED1E79'; ctx.lineWidth = 2.6; ctx.beginPath();
+                ctx.strokeStyle = '#ED1E79'; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.beginPath();
                 for (let s = 0; s <= 240; s++) {
                     const wx = DX0 + (DX1 - DX0) * s / 240;
                     const wy = Math.max(DY0 - 1, Math.min(DY1 + 1, salida(red, wx)));
@@ -3158,7 +3217,7 @@ modelo = nn.Sequential(
                 // puntos (arrastrables)
                 datosRef.current.forEach((p, idx) => {
                     const [px, py] = toPx(p.x, p.y);
-                    ctx.beginPath(); ctx.arc(px, py, idx === dragRef.current ? 8 : 6, 0, 2 * Math.PI);
+                    ctx.beginPath(); ctx.arc(px, py, idx === dragRef.current ? 9 : 7, 0, 2 * Math.PI);
                     ctx.fillStyle = idx === dragRef.current ? '#FDB913' : '#3D008D';
                     ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#fff'; ctx.stroke();
                 });
@@ -3180,10 +3239,10 @@ modelo = nn.Sequential(
 
             // Interacción: clic para añadir, arrastrar para mover
             const eventoMundo = (e) => {
-                const cv = canvasRef.current, rect = cv.getBoundingClientRect();
-                const px = (e.clientX - rect.left) * (LW / rect.width);
-                const py = (e.clientY - rect.top) * (LH / rect.height);
-                return { px, py, wx: DX0 + px / LW * (DX1 - DX0), wy: DY1 - py / LH * (DY1 - DY0) };
+                const cv = canvasRef.current, rect = cv.getBoundingClientRect(), { w, h } = dimRef.current;
+                const px = (e.clientX - rect.left) * (w / rect.width);    // px CSS del dibujo
+                const py = (e.clientY - rect.top) * (h / rect.height);
+                return { px, py, wx: DX0 + px / w * (DX1 - DX0), wy: DY1 - py / h * (DY1 - DY0) };
             };
             const clamp = (v) => Math.max(-1, Math.min(1, v));
             // El MSE mostrado se recalcula también al añadir o arrastrar puntos (aunque el entrenamiento esté en pausa)
@@ -3191,7 +3250,7 @@ modelo = nn.Sequential(
             const onDown = (e) => {
                 e.preventDefault();
                 const { px, py, wx, wy } = eventoMundo(e);
-                let idx = -1, mejor = 196;   // radio de captura 14px
+                let idx = -1, mejor = 324;   // radio de captura 18 px
                 datosRef.current.forEach((p, i) => { const [qx, qy] = toPx(p.x, p.y); const d = (qx - px) ** 2 + (qy - py) ** 2; if (d < mejor) { mejor = d; idx = i; } });
                 if (idx === -1 && datosRef.current.length < 24) { datosRef.current.push({ x: clamp(wx), y: clamp(wy) }); idx = datosRef.current.length - 1; }
                 dragRef.current = idx >= 0 ? idx : null;
@@ -3207,6 +3266,11 @@ modelo = nn.Sequential(
             const onUp = () => { const habia = dragRef.current != null; dragRef.current = null; pintar(); if (habia) actualizarMSE(); };
 
             useEffect(() => { datosRef.current = puntosEjemplo(); reconstruir(); }, []);
+            useEffect(() => {   // redibujo al cambiar el ancho del lienzo
+                const cv = canvasRef.current; if (!cv || !window.ResizeObserver) return undefined;
+                const ro = new ResizeObserver(() => pintar()); ro.observe(cv);
+                return () => ro.disconnect();
+            }, []);
             useEffect(() => { reconstruir(); }, [nCapas, nNodos, activacion]);
             useEffect(() => { lrRef.current = lr; }, [lr]);
             useEffect(() => () => { corriendoRef.current = false; if (animRef.current) cancelAnimationFrame(animRef.current); }, []);
@@ -3227,7 +3291,7 @@ modelo = nn.Sequential(
                         <div className="rounded-xl overflow-hidden border border-gray-200 shadow-inner">
                             <canvas ref={canvasRef} width={LW} height={LH}
                                 onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerLeave={onUp}
-                                style={{ width: '100%', height: 'auto', display: 'block', background: '#fff', touchAction: 'none', cursor: 'pointer' }}
+                                style={{ width: '100%', height: 'auto', aspectRatio: `${LW} / ${LH}`, display: 'block', background: '#fff', touchAction: 'none', cursor: 'pointer' }}
                                 aria-label="Lienzo de interpolación: puntos arrastrables y la curva ajustada por la red" />
                         </div>
                         <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[0.7rem] text-gray-500 mt-2">
@@ -3635,13 +3699,13 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
             return (
                 <div className="my-4">
                     <div className="flex flex-wrap items-center gap-3 mb-2 bg-bg rounded-lg p-3">
-                        <label className="text-xs font-bold text-navy whitespace-nowrap" htmlFor="lr-range">η = {lr.toFixed(2)}</label>
+                        <label className="text-xs font-bold text-navy whitespace-nowrap" htmlFor="lr-range">η = {fmtDec(lr, 2)}</label>
                         <input id="lr-range" type="range" min="0.05" max="1.10" step="0.05" value={lr}
                             onChange={e => setLr(+e.target.value)} className="usta-range flex-1" style={{ minWidth: 160 }}
                             aria-label="Tasa de aprendizaje eta" />
                         <span className="text-xs font-bold px-3 py-1 rounded-full text-white whitespace-nowrap" style={{ background: color }}>{estado}</span>
                     </div>
-                    <ChartFrame id="chart-lr-playground" fig="3.3" caption="Al variar η: con pasos pequeños el descenso es recto; cerca de η=0.5 alcanza el valle casi de un salto; por encima de η=1 diverge."
+                    <ChartFrame id="chart-lr-playground" fig="3.3" caption="Al variar η: con pasos pequeños el descenso es recto; cerca de η = 0,5 alcanza el valle casi de un salto; por encima de η = 1 diverge."
                         alt={`Parábola L(θ) = θ² con los pasos del descenso del gradiente para η = ${fmtDec(lr, 2)}; régimen: ${estado}.`} />
                 </div>
             );
@@ -3684,9 +3748,9 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                 for (let j = -3; j <= 3; j += 0.12) gridy.push(+j.toFixed(2));
                 const z = gridy.map(yy => gridx.map(xx => a * xx * xx + b * yy * yy));
                 const traces = [
-                    { type: 'contour', x: gridx, y: gridy, z, showscale: false, colorscale: [[0, '#EDE7F6'], [1, '#C7B8E0']], contours: { coloring: 'lines' }, line: { width: 1 }, hoverinfo: 'skip' },
+                    { type: 'contour', x: gridx, y: gridy, z, showscale: false, colorscale: [[0, '#DCD2EE'], [1, '#A994D4']], contours: { coloring: 'lines' }, line: { width: 1 }, hoverinfo: 'skip' },
                 ];
-                if (vis.gd) traces.push({ x: gd.px, y: gd.py, mode: 'lines+markers', name: 'GD simple', line: { color: '#B91C1C', width: 2 }, marker: { size: 5 } });
+                if (vis.gd) traces.push({ x: gd.px, y: gd.py, mode: 'lines+markers', name: 'GD simple', line: { color: '#0E7490', width: 2 }, marker: { size: 5 } });
                 if (vis.mom) traces.push({ x: mom.px, y: mom.py, mode: 'lines+markers', name: 'Momentum', line: { color: '#ED1E79', width: 2 }, marker: { size: 5 } });
                 if (vis.adam) traces.push({ x: adam.px, y: adam.py, mode: 'lines+markers', name: 'Adam', line: { color: '#15803D', width: 2 }, marker: { size: 5 } });
                 traces.push({ x: [0], y: [0], mode: 'markers', name: 'mínimo', marker: { size: 14, color: '#FDB913', symbol: 'star', line: { color: '#3D008D', width: 1 } } });
@@ -3698,7 +3762,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                 font: { family: 'Montserrat', size: 11 }, paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
             }), [vis.gd, vis.mom, vis.adam]);
 
-            const defs = { gd: { name: 'GD simple', color: '#B91C1C' }, mom: { name: 'Momentum', color: '#ED1E79', boton: '#BE185D' }, adam: { name: 'Adam', color: '#15803D' } };
+            const defs = { gd: { name: 'GD simple', color: '#0E7490' }, mom: { name: 'Momentum', color: '#ED1E79', boton: '#BE185D' }, adam: { name: 'Adam', color: '#15803D' } };
             return (
                 <div className="my-4">
                     <div className="flex flex-wrap gap-2 mb-2">
@@ -3720,7 +3784,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
         /* Gráfica SVG nativa: curva de la entropía cruzada L = -log(ŷ).
            Se dibuja a mano (sin Plotly) y marca sobre la curva los valores de la tabla BCE. */
         const EntropiaCruzadaChart = () => {
-            const W = 560, H = 340;
+            const [refAncho, W] = useAnchoGrafica(560), H = 340;    // en pantallas angostas el dibujo se estrecha y el texto conserva su tamaño
             const padL = 56, padR = 18, padT = 18, padB = 46;
             const plotW = W - padL - padR;
             const plotH = H - padT - padB;
@@ -3745,7 +3809,7 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
             const cy = padT + plotH / 2;
 
             return (
-                <div className="my-4">
+                <div className="my-4" ref={refAncho}>
                     <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img"
                         aria-label="Curva de la entropía cruzada: el costo menos logaritmo de y-hat crece sin límite cuando la probabilidad asignada a la clase correcta tiende a cero, y vale cero cuando esa probabilidad es uno."
                         style={{ display: 'block', maxWidth: '640px', margin: '0 auto', background: '#FAF8FF', borderRadius: '12px', border: '1px solid rgba(61,0,141,0.12)' }}>
@@ -3764,11 +3828,11 @@ perdida = huber(pred, objetivo)  # se elige UNA según la naturaleza de los dato
                         {puntos.map((pt, i) => (
                             <g key={'pt' + i}>
                                 <circle cx={xPix(pt.p)} cy={yPix(pt.L)} r="5" fill="#3D008D" stroke="#fff" strokeWidth="1.5" />
-                                <text x={xPix(pt.p) + (pt.p > 0.8 ? -9 : 9)} y={yPix(pt.L) - 7}
+                                <text x={xPix(pt.p) + (pt.p === 0.99 ? 4 : pt.p > 0.8 ? -9 : 9)} y={yPix(pt.L) - (pt.p === 0.99 ? 12 : pt.p === 0.90 ? 16 : 7)}
                                     textAnchor={pt.p > 0.8 ? 'end' : 'start'} fontSize="10.5" fill="#3D008D" fontFamily="Montserrat" fontWeight="700">{fmtDec(pt.L, 2)}</text>
                             </g>
                         ))}
-                        <text x={padL + plotW / 2} y={H - 8} textAnchor="middle" fontSize="12" fill="#334155" fontFamily="Montserrat" fontWeight="600">ŷ — probabilidad asignada a la clase correcta</text>
+                        <text x={padL + plotW / 2} y={H - 8} textAnchor="middle" fontSize="12" fill="#334155" fontFamily="Montserrat" fontWeight="600">{W < 420 ? 'ŷ (probabilidad de la clase correcta)' : 'ŷ — probabilidad asignada a la clase correcta'}</text>
                         <text transform={`rotate(-90 16 ${cy})`} x="16" y={cy} textAnchor="middle" fontSize="12" fill="#334155" fontFamily="Montserrat" fontWeight="600">Costo  −log(ŷ)</text>
                     </svg>
                     <PieFigura n="3.1" className="mt-2">
@@ -4767,7 +4831,7 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
                 margin: { t: 10, r: 10, b: 40, l: 45 }, legend: { orientation: 'h', y: -0.22 },
                 xaxis: { title: 'Época', gridcolor: '#eee' }, yaxis: { title: 'Error', gridcolor: '#eee' },
                 shapes: [{ type: 'line', x0: 50, x1: 50, y0: 0, y1: 0.9, line: { color: '#15803D', dash: 'dot', width: 2 } }],
-                annotations: [{ x: 50, y: 0.78, text: 'Parada temprana', showarrow: false, font: { color: '#15803D', size: 10 } }],
+                annotations: [{ x: 50, y: 0.78, xanchor: 'left', xshift: 5, text: 'Parada temprana', showarrow: false, bgcolor: 'rgba(255,255,255,0.85)', font: { color: '#15803D', size: 11 } }],
                 font: { family: 'Montserrat', size: 11 }, paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)'
             }), []);
             return <ChartFrame id="chart-curvas" fig="5.2" fuente="elaboración propia (curvas sintéticas ilustrativas)."
@@ -4809,7 +4873,7 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
            modelo real (AUC ≈ 0,85) y perfecto (AUC 1).
         ============================================================ */
         const ROCChart = () => {
-            const W = 520, H = 380;
+            const [refAncho, W] = useAnchoGrafica(520), H = 380;    // en pantallas angostas el dibujo se estrecha y el texto conserva su tamaño
             const padL = 58, padR = 18, padT = 18, padB = 48;
             const plotW = W - padL - padR;
             const plotH = H - padT - padB;
@@ -4825,9 +4889,10 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
             const dArea = dReal + 'L' + xPix(1).toFixed(1) + ' ' + yPix(0).toFixed(1) + ' L' + xPix(0).toFixed(1) + ' ' + yPix(0).toFixed(1) + ' Z';
             const ticks = [0, 0.25, 0.5, 0.75, 1];
             const cy = padT + plotH / 2;
+            const anguloAzar = -Math.atan2(plotH, plotW) * 180 / Math.PI;   // inclinación real de la diagonal en pantalla
 
             return (
-                <div className="my-4">
+                <div className="my-4" ref={refAncho}>
                     <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img"
                         aria-label="Curva ROC: relaciona la tasa de verdaderos positivos (recall) con la tasa de falsos positivos al variar el umbral de decisión. La diagonal es un clasificador al azar (AUC 0,5); una curva que se abomba hacia la esquina superior izquierda es un buen modelo (AUC 0,85); el ángulo recto perfecto alcanza AUC 1."
                         style={{ display: 'block', maxWidth: '560px', margin: '0 auto', background: '#FAF8FF', borderRadius: '12px', border: '1px solid rgba(61,0,141,0.12)' }}>
@@ -4845,9 +4910,11 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
                         <line x1={xPix(0)} y1={yPix(0)} x2={xPix(1)} y2={yPix(1)} stroke="#94A3B8" strokeWidth="2" strokeDasharray="6,4" />
                         <path d={dReal} fill="none" stroke="#ED1E79" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                         <text x={xPix(0.14)} y={yPix(0.965)} fontSize="11.5" fill="#15803D" fontFamily="Montserrat" fontWeight="700">Perfecto · AUC = 1</text>
-                        <text x={xPix(0.30)} y={yPix(0.66)} fontSize="11.5" fill="#ED1E79" fontFamily="Montserrat" fontWeight="700">Modelo real · AUC ≈ 0,85</text>
-                        <text x={xPix(0.58)} y={yPix(0.50)} textAnchor="middle" fontSize="11" fill="#64748B" fontFamily="Montserrat" fontWeight="700" transform={`rotate(-35 ${xPix(0.58)} ${yPix(0.50)})`}>Azar · AUC = 0,5</text>
-                        <text x={padL + plotW / 2} y={H - 8} textAnchor="middle" fontSize="12" fill="#334155" fontFamily="Montserrat" fontWeight="600">Tasa de falsos positivos — FPR = FP / (FP + VN)</text>
+                        <text x={xPix(W < 420 ? 0.16 : 0.30)} y={yPix(0.66)} fontSize="11.5" fill="#ED1E79" fontFamily="Montserrat" fontWeight="700">
+                            {W < 420 ? (<><tspan x={xPix(0.16)}>Modelo real</tspan><tspan x={xPix(0.16)} dy="14">AUC ≈ 0,85</tspan></>) : 'Modelo real · AUC ≈ 0,85'}
+                        </text>
+                        <text x={xPix(0.72)} y={yPix(0.72)} dy="19" textAnchor="middle" fontSize="11" fill="#64748B" fontFamily="Montserrat" fontWeight="700" stroke="#FAF8FF" strokeWidth="3" paintOrder="stroke" transform={`rotate(${anguloAzar.toFixed(1)} ${xPix(0.72)} ${yPix(0.72)})`}>Azar · AUC = 0,5</text>
+                        <text x={padL + plotW / 2} y={H - 8} textAnchor="middle" fontSize="12" fill="#334155" fontFamily="Montserrat" fontWeight="600">{W < 420 ? 'Falsos positivos: FPR = FP / (FP + VN)' : 'Tasa de falsos positivos — FPR = FP / (FP + VN)'}</text>
                         <text transform={`rotate(-90 16 ${cy})`} x="16" y={cy} textAnchor="middle" fontSize="12" fill="#334155" fontFamily="Montserrat" fontWeight="600">Tasa de verdaderos positivos (sensibilidad)</text>
                     </svg>
                     <PieFigura n="5.5" className="mt-2" fuente="elaboración propia (curvas ilustrativas).">
@@ -4928,7 +4995,7 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
            Eje distinto al de épocas: entrenamiento ↓ monótono, validación en «U».
         ============================================================ */
         const ComplejidadUCurvaSVG = () => {
-            const W = 520, H = 300;
+            const [refAncho, W] = useAnchoGrafica(520), H = 300;    // en pantallas angostas el dibujo se estrecha y el texto conserva su tamaño
             const padL = 54, padR = 18, padT = 20, padB = 54;
             const plotW = W - padL - padR, plotH = H - padT - padB;
             const px = x => padL + x * plotW;
@@ -4944,7 +5011,7 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
             xsamp.forEach(x => { const v = val(x); if (v < vmin) { vmin = v; xmin = x; } });
 
             return (
-                <div className="my-4">
+                <div className="my-4" ref={refAncho}>
                     <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img"
                         aria-label="Error frente a complejidad del modelo. El error de entrenamiento siempre baja al aumentar la capacidad; el error de validación forma una U: a la izquierda hay subajuste (sesgo alto), a la derecha sobreajuste (varianza alta), y el mínimo marca la capacidad óptima. Este eje es la complejidad del modelo, distinto del eje de épocas."
                         style={{ display: 'block', maxWidth: '560px', margin: '0 auto', background: '#FAF8FF', borderRadius: '12px', border: '1px solid rgba(61,0,141,0.12)' }}>
@@ -4953,10 +5020,10 @@ print(dW1, dW2)               # -> 16.0  4.0  (aquí domina la 1.ª capa porque 
                         <line x1={padL} y1={padT + plotH} x2={W - padR} y2={padT + plotH} stroke="#94A3B8" strokeWidth="1.5" />
                         <path d={path(train)} fill="none" stroke="#3D008D" strokeWidth="3" strokeLinecap="round" />
                         <path d={path(val)} fill="none" stroke="#ED1E79" strokeWidth="3" strokeLinecap="round" />
-                        <line x1={px(xmin)} y1={padT} x2={px(xmin)} y2={padT + plotH} stroke="#15803D" strokeWidth="2" strokeDasharray="5,4" />
+                        <line x1={px(xmin)} y1={padT + 20} x2={px(xmin)} y2={padT + plotH} stroke="#15803D" strokeWidth="2" strokeDasharray="5,4" />
                         <circle cx={px(xmin)} cy={py(val(xmin))} r="4" fill="#15803D" />
-                        <text x={px(0.80)} y={py(train(0.80)) + 16} fontSize="11.5" fill="#3D008D" fontFamily="Montserrat" fontWeight="700">Entrenamiento</text>
-                        <text x={px(0.60)} y={py(val(0.60)) - 9} fontSize="11.5" fill="#ED1E79" fontFamily="Montserrat" fontWeight="700">Validación</text>
+                        <text x={px(1)} y={py(train(0.9)) + 16} textAnchor="end" fontSize="11.5" fill="#3D008D" fontFamily="Montserrat" fontWeight="700">Entrenamiento</text>
+                        <text x={px(0.78)} y={py(val(0.80)) - 10} textAnchor="end" fontSize="11.5" fill="#ED1E79" fontFamily="Montserrat" fontWeight="700">Validación</text>
                         <text x={px(0.15)} y={padT + 13} textAnchor="middle" fontSize="10.5" fill="#B45309" fontFamily="Montserrat" fontWeight="700">Subajuste</text>
                         <text x={px(xmin)} y={padT + 13} textAnchor="middle" fontSize="10.5" fill="#15803D" fontFamily="Montserrat" fontWeight="700">Óptimo</text>
                         <text x={px(0.86)} y={padT + 13} textAnchor="middle" fontSize="10.5" fill="#ED1E79" fontFamily="Montserrat" fontWeight="700">Sobreajuste</text>
