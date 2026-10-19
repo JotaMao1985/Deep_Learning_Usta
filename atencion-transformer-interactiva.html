@@ -196,6 +196,9 @@
     .wrow,.whead{grid-template-columns:62px minmax(0,1fr) 36px minmax(0,1fr) 44px;gap:5px;}
     .prob-row{grid-template-columns:62px minmax(0,1fr) 48px;}
     .tok{padding:6px 10px;}
+    /* mapa de calor: celdas un poco más angostas y números más grandes (≥ 11 px), sin desborde */
+    table.heat th{padding:3px 3px;}
+    table.heat td{width:31px;height:30px;font-size:.7rem;}
   }
 
   /* ---- Movimiento reducido (S-10) ---- */
