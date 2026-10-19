@@ -368,6 +368,28 @@
             return ref;
         };
 
+        /* Diagramas en pantallas angostas: cuando el ancho útil del contenedor no alcanza para que la versión
+           de escritorio conserve su texto legible (umbral ≈ 85 % de su viewBox), se dibuja una variante propia de 300
+           unidades de ancho (texto ≥ 12,5) en lugar de encoger la figura. Devuelve [ref, ¿angosto?]. */
+        const useDiagramaAngosto = (umbral) => {
+            const ref = useRef(null);
+            const [angosto, setAngosto] = useState(() => (window.innerWidth || 1024) < umbral + 96);
+            useEffect(() => {
+                const el = ref.current; if (!el) return undefined;
+                const medir = () => {
+                    const cs = getComputedStyle(el);
+                    const w = el.clientWidth - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0);
+                    if (w > 0) setAngosto(w < umbral);
+                };
+                medir();
+                if (!window.ResizeObserver) return undefined;
+                const ro = new ResizeObserver(medir); ro.observe(el);
+                return () => ro.disconnect();
+            }, [umbral]);
+            return [ref, angosto];
+        };
+        const SVG_MOVIL = { maxWidth: 440, display: 'block', margin: '0 auto' };
+
         /* ============================================================
            Re-tipografiado de LaTeX revelado dinámicamente
         ============================================================ */
@@ -602,11 +624,68 @@
             for (let r = 1; r <= 3; r++) for (let c = 1; c <= 3; c++) kernel.push({ r, c });
             const conectadas = modo === 'densa' ? inputCells : kernel;
 
+            // Variante angosta (móvil): la rejilla arriba, la neurona de salida debajo y el contador en dos líneas
+            const [angRef, angosto] = useDiagramaAngosto(Math.round(W * 0.85));
+            const gsM = 30, oxM = 75, oyM = 34, outXM = 150, outYM = 236, HM = 340;
+
             return (
                 <div ref={revRef} className="visual-container reveal">
                     <h4 className="visual-title">
                         <i className="fas fa-table-cells text-secondary mr-2"></i>Conexiones: capa densa vs. convolución
                     </h4>
+                    <div ref={angRef}>
+                    {angosto ? (
+                    <svg viewBox={`0 0 300 ${HM}`} className="svg-chart" style={SVG_MOVIL} role="img"
+                        aria-label="Comparación entre una capa densa y una capa convolucional sobre una rejilla de imagen de cinco por cinco. En modo densa, una neurona de salida se conecta a las veinticinco celdas de entrada. En modo convolución, la neurona solo se conecta a un parche local de tres por tres, gracias a la conectividad local y los pesos compartidos.">
+                        <defs>
+                            <linearGradient id="convCellGrad-m" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#F5F0FA" />
+                                <stop offset="100%" stopColor="#EDE5F7" />
+                            </linearGradient>
+                            <radialGradient id="convOutGlow-m" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stopColor="#ED1E79" stopOpacity="0.35" />
+                                <stop offset="100%" stopColor="#ED1E79" stopOpacity="0" />
+                            </radialGradient>
+                        </defs>
+                        {/* Conexiones */}
+                        {conectadas.map((cell, i) => (
+                            <line key={`lnm${i}`} x1={oxM + cell.c * gsM + gsM / 2} y1={oyM + cell.r * gsM + gsM / 2} x2={outXM} y2={outYM}
+                                stroke={modo === 'densa' ? '#CBD5E1' : '#15803D'}
+                                strokeWidth={modo === 'densa' ? 0.6 : 1.3}
+                                opacity={modo === 'densa' ? 0.55 : 0.85}
+                                style={{ transition: 'all 0.4s' }} />
+                        ))}
+                        {/* Rejilla de entrada */}
+                        {inputCells.map((cell, i) => {
+                            const enParche = modo === 'conv' && cell.r >= 1 && cell.r <= 3 && cell.c >= 1 && cell.c <= 3;
+                            return (
+                                <rect key={`cm${i}`} x={oxM + cell.c * gsM} y={oyM + cell.r * gsM} width={gsM - 3} height={gsM - 3} rx="4"
+                                    fill={enParche ? '#DCFCE7' : 'url(#convCellGrad-m)'}
+                                    stroke={enParche ? '#15803D' : '#C4B5D6'}
+                                    strokeWidth={enParche ? 2 : 1}
+                                    style={{ transition: 'all 0.4s' }} />
+                            );
+                        })}
+                        {/* Neurona de salida */}
+                        <circle cx={outXM} cy={outYM} r="22" fill="url(#convOutGlow-m)" />
+                        <circle cx={outXM} cy={outYM} r="14" fill={modo === 'densa' ? '#ED1E79' : '#15803D'}
+                            stroke="white" strokeWidth="3" style={{ transition: 'fill 0.4s' }} />
+                        <text x={outXM} y={outYM + 5} textAnchor="middle" fontSize="14" fontWeight="bold" fill="white">+</text>
+                        {/* Etiquetas */}
+                        <text x={outXM} y="20" textAnchor="middle" fontSize="13" fill="#64748B" fontWeight="600">Imagen 5×5 (25 píxeles)</text>
+                        <text x={outXM} y={outYM + 36} textAnchor="middle" fontSize="12.5" fill="#64748B" fontWeight="600">salida</text>
+                        {/* Contador de pesos */}
+                        <rect x="10" y={HM - 54} width="280" height="46" rx="8" fill="white" stroke="#E2E8F0" />
+                        <text x={outXM} y={HM - 35} textAnchor="middle" fontSize="13" fontWeight="bold"
+                            fill={modo === 'densa' ? '#ED1E79' : '#15803D'}>
+                            {modo === 'densa' ? 'Pesos para esta salida: 25' : 'Pesos compartidos: 9 (parche 3×3)'}
+                        </text>
+                        <text x={outXM} y={HM - 17} textAnchor="middle" fontSize="13" fontWeight="bold"
+                            fill={modo === 'densa' ? '#ED1E79' : '#15803D'}>
+                            {modo === 'densa' ? '(uno por píxel)' : 'en toda la imagen'}
+                        </text>
+                    </svg>
+                    ) : (
                     <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
                         aria-label="Comparación entre una capa densa y una capa convolucional sobre una rejilla de imagen de cinco por cinco. En modo densa, una neurona de salida se conecta a las veinticinco celdas de entrada. En modo convolución, la neurona solo se conecta a un parche local de tres por tres, gracias a la conectividad local y los pesos compartidos.">
                         <defs>
@@ -659,6 +738,8 @@
                             {modo === 'densa' ? 'Pesos para esta salida: 25 (uno por píxel)' : 'Pesos compartidos: 9 (parche 3×3) en toda la imagen'}
                         </text>
                     </svg>
+                    )}
+                    </div>
                     <div className="flex gap-2 mt-3 justify-center flex-wrap">
                         <button onClick={() => setModo('densa')}
                             className={`text-xs font-bold px-4 py-1.5 rounded-full border-2 transition-all ${modo === 'densa' ? 'border-secondary text-secondary bg-pink-50' : 'border-gray-300 text-gray-600 hover:border-secondary hover:text-secondary'}`}>
@@ -704,20 +785,73 @@
                 </g>
             );
 
+            // Variante angosta (móvil): misma disposición (cinta arriba, compuertas debajo) con texto legible
+            const [angRef, angosto] = useDiagramaAngosto(Math.round(W * 0.85));
+            const beltYM = 62, beltX1M = 16, beltX2M = 282;
+            const GateM = ({ x, label, val, color, sub }) => (
+                <g>
+                    <circle cx={x} cy={150} r="26" fill="white" stroke={color} strokeWidth="2.5" />
+                    <text x={x} y={146} textAnchor="middle" fontSize="15" fontWeight="bold" fill={color}>{label}</text>
+                    <text x={x} y={163} textAnchor="middle" fontSize="13" fill={color}>{coma(val)}</text>
+                    <text x={x} y={196} textAnchor="middle" fontSize="13" fill="#64748B" fontWeight="600">{sub}</text>
+                </g>
+            );
+
             return (
                 <div ref={revRef} className="visual-container reveal">
                     <h4 className="visual-title">
                         <i className="fas fa-conveyor-belt-empty text-secondary mr-2"></i>La celda LSTM: tres compuertas y el estado de celda
                     </h4>
-                    <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
+                    <div ref={angRef}>
+                    {angosto ? (
+                    <svg viewBox="0 0 300 244" className="svg-chart" style={SVG_MOVIL} role="img"
                         aria-label="Esquema de una celda LSTM. En la parte superior, una cinta transportadora representa el estado de celda, la memoria a largo plazo que se actualiza con una suma y solo se multiplica por la compuerta de olvido. Debajo, tres compuertas sigmoides (olvido, entrada y salida) controlan qué se descarta, qué se almacena y qué se expone como salida.">
                         <defs>
-                            <linearGradient id="beltGrad" x1="0" y1="0" x2="1" y2="0">
+                            {/* userSpaceOnUse: una línea horizontal no tiene alto, y con objectBoundingBox el degradado no se pinta */}
+                            <linearGradient id="beltGrad-m" gradientUnits="userSpaceOnUse" x1={beltX1M} y1={beltYM} x2={beltX2M} y2={beltYM}>
                                 <stop offset="0%" stopColor="#15803D" />
                                 <stop offset="100%" stopColor="#22C55E" />
                             </linearGradient>
-                            <marker id="lstmArr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-                                <path d="M0,0 L6,3 L0,6 Z" fill="#15803D" />
+                            <marker id="lstmArr-m" markerWidth="4" markerHeight="4" refX="3" refY="1.5" orient="auto">
+                                <path d="M0,0 L3,1.5 L0,3 Z" fill="#15803D" />
+                            </marker>
+                        </defs>
+                        {/* Cinta transportadora (estado de celda) */}
+                        <line x1={beltX1M} y1={beltYM} x2={beltX2M} y2={beltYM}
+                            stroke="url(#beltGrad-m)" strokeWidth={2 + Cnew * 6} strokeLinecap="round"
+                            markerEnd="url(#lstmArr-m)" style={{ transition: 'stroke-width 0.3s' }} />
+                        <text x="150" y="16" textAnchor="middle" fontSize="12.5" fill="#15803D" fontWeight="700">Estado de celda (memoria larga · sumas)</text>
+                        <text x={beltX1M - 2} y="38" fontSize="13" fill="#15803D" fontWeight="700">Cₜ₋₁</text>
+                        <text x={beltX2M - 30} y="38" fontSize="13" fill="#15803D" fontWeight="700">Cₜ</text>
+                        {/* Operación de olvido (multiplicación) sobre la cinta */}
+                        <circle cx="60" cy={beltYM} r="10" fill="white" stroke="#B45309" strokeWidth="2" />
+                        <text x="60" y={beltYM + 4.5} textAnchor="middle" fontSize="13" fill="#B45309" fontWeight="bold">×</text>
+                        {/* Operación de entrada (suma) sobre la cinta */}
+                        <circle cx="150" cy={beltYM} r="10" fill="white" stroke="#3D008D" strokeWidth="2" />
+                        <text x="150" y={beltYM + 5} textAnchor="middle" fontSize="14" fill="#3D008D" fontWeight="bold">+</text>
+                        {/* Líneas de las compuertas hacia la cinta */}
+                        <line x1="60" y1="124" x2="60" y2={beltYM + 10} stroke="#B45309" strokeWidth="1.5" strokeDasharray="3,3" />
+                        <line x1="150" y1="124" x2="150" y2={beltYM + 10} stroke="#3D008D" strokeWidth="1.5" strokeDasharray="3,3" />
+                        {/* Compuertas */}
+                        <GateM x={60} label="f" val={forget} color="#B45309" sub="olvido" />
+                        <GateM x={150} label="i" val={input} color="#3D008D" sub="entrada" />
+                        <GateM x={240} label="o" val={output} color="#0E7490" sub="salida" />
+                        {/* Salida h(t) */}
+                        <line x1="240" y1="203" x2="240" y2="219" stroke="#0E7490" strokeWidth="1.5" strokeDasharray="3,3" />
+                        <text x="240" y="236" textAnchor="middle" fontSize="13" fill="#0E7490" fontWeight="700">hₜ = {coma(hOut)}</text>
+                    </svg>
+                    ) : (
+                    <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
+                        aria-label="Esquema de una celda LSTM. En la parte superior, una cinta transportadora representa el estado de celda, la memoria a largo plazo que se actualiza con una suma y solo se multiplica por la compuerta de olvido. Debajo, tres compuertas sigmoides (olvido, entrada y salida) controlan qué se descarta, qué se almacena y qué se expone como salida.">
+                        <defs>
+                            {/* userSpaceOnUse: la cinta es una línea horizontal sin alto; con objectBoundingBox el degradado no se pintaba */}
+                            <linearGradient id="beltGrad" gradientUnits="userSpaceOnUse" x1={beltX1} y1={beltY} x2={beltX2} y2={beltY}>
+                                <stop offset="0%" stopColor="#15803D" />
+                                <stop offset="100%" stopColor="#22C55E" />
+                            </linearGradient>
+                            {/* la punta escala con el grosor de la cinta (hasta 8): se dibuja a la mitad para que no crezca de más */}
+                            <marker id="lstmArr" markerWidth="4" markerHeight="4" refX="3" refY="1.5" orient="auto">
+                                <path d="M0,0 L3,1.5 L0,3 Z" fill="#15803D" />
                             </marker>
                         </defs>
                         {/* Cinta transportadora (estado de celda) */}
@@ -744,6 +878,8 @@
                         <line x1="330" y1="172" x2="330" y2="210" stroke="#0E7490" strokeWidth="1.5" strokeDasharray="3,3" />
                         <text x="330" y="222" textAnchor="middle" fontSize="9" fill="#0E7490" fontWeight="700">hₜ = {coma(hOut)}</text>
                     </svg>
+                    )}
+                    </div>
                     <div className="grid grid-cols-3 gap-2 mt-3">
                         <div>
                             <label className="block text-[0.62rem] font-bold text-amber-700 text-center mb-1">Olvido (f)</label>
@@ -790,11 +926,59 @@
             const colW = (W - 40) / tokens.length;
             const baseY = 150;
 
+            // Variante angosta (móvil): las palabras de entrada se apilan y sus barras de peso pasan a horizontales
+            const [angRef, angosto] = useDiagramaAngosto(Math.round(W * 0.85));
+            const filaY0 = 60, filaH = 34, barEsc = 140;
+
             return (
                 <div ref={revRef} className="visual-container reveal">
                     <h4 className="visual-title">
                         <i className="fas fa-highlighter text-secondary mr-2"></i>Atención: ¿a qué palabra mirar en cada paso?
                     </h4>
+                    <div ref={angRef}>
+                    {angosto ? (
+                    <svg viewBox="0 0 300 306" className="svg-chart" style={SVG_MOVIL} role="img"
+                        aria-label="Visualización del mecanismo de atención. Una palabra que se está generando reparte su atención sobre las palabras de la frase de entrada. La intensidad del resaltador muestra qué tanto peso recibe cada palabra; el peso total suma uno. Al cambiar la palabra objetivo, el foco se desplaza hacia la palabra de entrada más relevante.">
+                        {/* Token objetivo (consulta) */}
+                        <rect x="10" y="10" width="100" height="32" rx="10" fill="#3D008D" />
+                        <text x="60" y="31" textAnchor="middle" fontSize="13" fill="white" fontWeight="bold">
+                            {esc.objetivo}
+                        </text>
+                        <text x="122" y="31" fontSize="12.5" fill="#64748B" fontWeight="600">palabra a generar (Query)</text>
+                        {/* Tokens de entrada con barras de atención */}
+                        {tokens.map((tk, i) => {
+                            const y = filaY0 + i * filaH;
+                            const peso = esc.pesos[i];
+                            const barW = peso * barEsc;
+                            return (
+                                <g key={i}>
+                                    <line x1="40" y1="42" x2="80" y2={y + 13}
+                                        stroke="#ED1E79" strokeWidth={0.5 + peso * 6}
+                                        opacity={0.25 + peso * 0.7}
+                                        style={{ transition: 'all 0.4s' }} />
+                                    {/* Caja del token */}
+                                    <rect x="80" y={y} width="76" height="26" rx="7"
+                                        fill="#F5F0FA" stroke="#C4B5D6" strokeWidth="1" />
+                                    <text x="118" y={y + 18} textAnchor="middle" fontSize="13" fill="#3D008D" fontWeight="600">{tk}</text>
+                                    {/* Barra de peso */}
+                                    <rect x="164" y={y + 3} width={barW} height="20" rx="3"
+                                        fill="#ED1E79" opacity={0.35 + peso * 0.6}
+                                        style={{ transition: 'all 0.4s' }} />
+                                    <text x={169 + barW} y={y + 18} fontSize="12.5" fill="#BE185D" fontWeight="700"
+                                        style={{ transition: 'all 0.4s' }}>
+                                        {peso.toFixed(2).replace('.', ',')}
+                                    </text>
+                                </g>
+                            );
+                        })}
+                        <text x="150" y="282" textAnchor="middle" fontSize="12.5" fill="#64748B" fontWeight="600">
+                            secuencia de entrada (Keys / Values)
+                        </text>
+                        <text x="150" y="298" textAnchor="middle" fontSize="12.5" fill="#64748B" fontWeight="600">
+                            — los pesos suman 1
+                        </text>
+                    </svg>
+                    ) : (
                     <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
                         aria-label="Visualización del mecanismo de atención. Una palabra que se está generando reparte su atención sobre las palabras de la frase de entrada. La intensidad del resaltador muestra qué tanto peso recibe cada palabra; el peso total suma uno. Al cambiar la palabra objetivo, el foco se desplaza hacia la palabra de entrada más relevante.">
                         {/* Token objetivo (consulta) */}
@@ -833,6 +1017,8 @@
                             secuencia de entrada (Keys / Values) — los pesos suman 1
                         </text>
                     </svg>
+                    )}
+                    </div>
                     <div className="flex gap-2 mt-3 justify-center flex-wrap">
                         {escenarios.map((e, i) => (
                             <button key={i} onClick={() => setIdx(i)}
@@ -865,11 +1051,84 @@
                 <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={color} strokeWidth="2" markerEnd="url(#genArr)" />
             );
 
+            // Variante angosta (móvil): cada flujo pasa a vertical (de arriba hacia abajo); alto común a las tres familias
+            const [angRef, angosto] = useDiagramaAngosto(Math.round(W * 0.85));
+            const BoxM = ({ x, y, w, h, label, fill, stroke, fs = 14 }) => (
+                <g>
+                    <rect x={x} y={y} width={w} height={h} rx="10" fill={fill} stroke={stroke} strokeWidth="1.8" />
+                    <text x={x + w / 2} y={y + h / 2 + 5} textAnchor="middle" fontSize={fs} fontWeight="bold" fill={stroke}>{label}</text>
+                </g>
+            );
+            const ArrowM = ({ x1, y1, x2, y2, color }) => (
+                <line x1={x1} y1={y1} x2={x2} y2={y2} stroke={color} strokeWidth="2" markerEnd="url(#genArr-m)" />
+            );
+
             return (
                 <div ref={revRef} className="visual-container reveal">
                     <h4 className="visual-title">
                         <i className="fas fa-shapes text-secondary mr-2"></i>Tres formas de generar: VAE, GAN y Difusión
                     </h4>
+                    <div ref={angRef}>
+                    {angosto ? (
+                    <svg viewBox="0 0 300 340" className="svg-chart" style={SVG_MOVIL} role="img"
+                        aria-label="Diagrama comparativo de tres familias generativas. El VAE codifica la entrada en una distribución de probabilidad y la decodifica. La GAN enfrenta un generador y un discriminador en un juego adversario. El modelo de difusión añade ruido a una imagen y aprende a quitarlo paso a paso.">
+                        <defs>
+                            <marker id="genArr-m" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                                <path d="M0,0 L6,3 L0,6 Z" fill="#3D008D" />
+                            </marker>
+                        </defs>
+                        {familia === 'vae' && (
+                            <>
+                                <text x="150" y="20" textAnchor="middle" fontSize="13" fill="#64748B" fontWeight="700">Comprime a una distribución latente</text>
+                                <text x="150" y="37" textAnchor="middle" fontSize="13" fill="#64748B" fontWeight="700">y reconstruye</text>
+                                <BoxM x={80} y={56} w={80} h={40} label="x" fs={15} fill="#F5F0FA" stroke="#3D008D" />
+                                <ArrowM x1={120} y1={96} x2={120} y2={122} color="#3D008D" />
+                                <BoxM x={50} y={124} w={140} h={44} label="Codificador" fs={13.5} fill="#EDE5F7" stroke="#3D008D" />
+                                <ArrowM x1={120} y1={168} x2={120} y2={194} color="#3D008D" />
+                                <BoxM x={65} y={196} w={110} h={42} label="μ, σ → z" fill="#FCE7F1" stroke="#BE185D" />
+                                <text x="186" y="213" fontSize="12.5" fill="#BE185D">espacio latente</text>
+                                <text x="186" y="230" fontSize="12.5" fill="#BE185D">continuo</text>
+                                <ArrowM x1={120} y1={238} x2={120} y2={264} color="#3D008D" />
+                                <BoxM x={50} y={266} w={140} h={44} label="Decodificador" fs={13.5} fill="#EDE5F7" stroke="#3D008D" />
+                            </>
+                        )}
+                        {familia === 'gan' && (
+                            <>
+                                <BoxM x={55} y={16} w={100} h={44} label="ruido z" fill="#FEF3C7" stroke="#B45309" />
+                                <ArrowM x1={105} y1={60} x2={105} y2={94} color="#B45309" />
+                                <BoxM x={40} y={96} w={130} h={50} label="Generador G" fill="#EDE5F7" stroke="#3D008D" />
+                                <ArrowM x1={105} y1={146} x2={105} y2={180} color="#3D008D" />
+                                <BoxM x={45} y={182} w={120} h={50} label="Discrim. D" fill="#FCE7F1" stroke="#BE185D" />
+                                <BoxM x={192} y={186} w={100} h={42} label="datos reales" fs={13} fill="#DCFCE7" stroke="#15803D" />
+                                <ArrowM x1={192} y1={207} x2={167} y2={207} color="#15803D" />
+                                <text x="105" y="262" textAnchor="middle" fontSize="14" fill="#BE185D" fontWeight="700">¿real / falso?</text>
+                                <text x="150" y="318" textAnchor="middle" fontSize="13" fill="#64748B" fontWeight="700">Juego adversario: G engaña, D juzga</text>
+                            </>
+                        )}
+                        {familia === 'diff' && (
+                            <>
+                                <text x="150" y="20" textAnchor="middle" fontSize="13" fill="#64748B" fontWeight="700">Añade ruido (proceso directo)</text>
+                                <text x="150" y="37" textAnchor="middle" fontSize="13" fill="#64748B" fontWeight="700">y aprende a quitarlo (inverso)</text>
+                                {[0, 1, 2, 3].map(i => {
+                                    const y = 54 + i * 64;
+                                    const op = 1 - i * 0.28; // de imagen nítida a ruido
+                                    return (
+                                        <g key={i}>
+                                            <rect x={99} y={y} width="42" height="42" rx="8"
+                                                fill={`rgba(61,0,141,${op * 0.5})`} stroke="#3D008D" strokeWidth="1.5" />
+                                            <text x={154} y={y + 26} fontSize="13" fill="#64748B">
+                                                {i === 0 ? 'imagen' : i === 3 ? 'ruido' : 'paso ' + i}
+                                            </text>
+                                            {i < 3 && <ArrowM x1={120} y1={y + 42} x2={120} y2={y + 64} color="#B45309" />}
+                                        </g>
+                                    );
+                                })}
+                                <text x="150" y="314" textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="700">▲ El proceso inverso (quitar ruido)</text>
+                                <text x="150" y="331" textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="700">reconstruye paso a paso</text>
+                            </>
+                        )}
+                    </svg>
+                    ) : (
                     <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
                         aria-label="Diagrama comparativo de tres familias generativas. El VAE codifica la entrada en una distribución de probabilidad y la decodifica. La GAN enfrenta un generador y un discriminador en un juego adversario. El modelo de difusión añade ruido a una imagen y aprende a quitarlo paso a paso.">
                         <defs>
@@ -924,6 +1183,8 @@
                             </>
                         )}
                     </svg>
+                    )}
+                    </div>
                     <div className="flex gap-2 mt-3 justify-center flex-wrap">
                         <button onClick={() => setFamilia('vae')}
                             className={`text-xs font-bold px-4 py-1.5 rounded-full border-2 transition-all ${familia === 'vae' ? 'border-primary text-primary bg-purple-50' : 'border-gray-300 text-gray-600 hover:border-primary'}`}>VAE</button>
@@ -963,11 +1224,43 @@
 
             const lh = 38, lx = 60, lw = 240;
 
+            // Variante angosta (móvil): capas a todo el ancho y la leyenda en dos líneas
+            const [angRef, angosto] = useDiagramaAngosto(Math.round(W * 0.85));
+            const lhM = 40, lxM = 12, lwM = 276;
+
             return (
                 <div ref={revRef} className="visual-container reveal">
                     <h4 className="visual-title">
                         <i className="fas fa-snowflake text-secondary mr-2"></i>Aprendizaje por transferencia: ¿qué capas congelar?
                     </h4>
+                    <div ref={angRef}>
+                    {angosto ? (
+                    <svg viewBox="0 0 300 296" className="svg-chart" style={SVG_MOVIL} role="img"
+                        aria-label="Pila de capas de una red preentrenada. En extracción de características, todas las capas base están congeladas y solo se entrena un clasificador nuevo. En ajuste fino, las últimas capas se descongelan y se reentrenan con una tasa de aprendizaje baja, junto con el clasificador nuevo.">
+                        {capas.map((c, i) => {
+                            const y = 12 + i * (lhM + 8);
+                            const fr = congelada(c, i);
+                            const fill = c.tipo === 'nuevo' ? '#FCE7F1' : (fr ? '#DBEAFE' : '#DCFCE7');
+                            const stroke = c.tipo === 'nuevo' ? '#BE185D' : (fr ? '#2563EB' : '#15803D');
+                            return (
+                                <g key={i}>
+                                    <rect x={lxM} y={y} width={lwM} height={lhM} rx="9" fill={fill} stroke={stroke} strokeWidth="1.8"
+                                        style={{ transition: 'all 0.4s' }} />
+                                    <text x={lxM + 14} y={y + lhM / 2 + 5} fontSize="13.5" fill={stroke} fontWeight="600">{c.label}</text>
+                                    <text x={lxM + lwM - 20} y={y + lhM / 2 + 6} textAnchor="middle" fontSize="17">
+                                        {c.tipo === 'nuevo' ? '🎯' : (fr ? '🔒' : '🔥')}
+                                    </text>
+                                </g>
+                            );
+                        })}
+                        <text x="150" y="270" textAnchor="middle" fontSize="12.5" fill="#64748B" fontWeight="600">
+                            🔒 congelada · 🔥 reentrenable (lr baja) ·
+                        </text>
+                        <text x="150" y="287" textAnchor="middle" fontSize="12.5" fill="#64748B" fontWeight="600">
+                            🎯 nueva
+                        </text>
+                    </svg>
+                    ) : (
                     <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
                         aria-label="Pila de capas de una red preentrenada. En extracción de características, todas las capas base están congeladas y solo se entrena un clasificador nuevo. En ajuste fino, las últimas capas se descongelan y se reentrenan con una tasa de aprendizaje baja, junto con el clasificador nuevo.">
                         {capas.map((c, i) => {
@@ -990,6 +1283,8 @@
                             🔒 congelada · 🔥 reentrenable (lr baja) · 🎯 nueva
                         </text>
                     </svg>
+                    )}
+                    </div>
                     <div className="flex gap-2 mt-3 justify-center flex-wrap">
                         <button onClick={() => setModo('extract')}
                             className={`text-xs font-bold px-4 py-1.5 rounded-full border-2 transition-all ${modo === 'extract' ? 'border-blue-500 text-blue-700 bg-blue-50' : 'border-gray-300 text-gray-600 hover:border-blue-500'}`}>
