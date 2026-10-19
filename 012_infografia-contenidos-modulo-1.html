@@ -153,6 +153,17 @@
         /* Los hijos de una rejilla pueden encogerse: las fórmulas anchas se desplazan dentro
            de su píldora .eq en lugar de ensanchar la página en móvil (375 px). */
         .grid > * { min-width: 0; }
+
+        /* Diagramas en celular: cada SVG de escritorio (.svg-d) tiene una variante angosta propia (.svg-m,
+           viewBox de 300 de ancho, texto ≥ 12) en lugar de encogerse hasta 4–7 px; las mini-gráficas
+           suben la letra y las curvas de aprendizaje se redibujan con su geometría angosta (script). */
+        .svg-m { display: none; }
+        @media (max-width: 640px) {
+            .svg-d { display: none !important; }
+            .svg-m { display: block; width: 100%; height: auto; max-width: 440px; margin: 0 auto; }
+            svg[aria-labelledby="softmaxTitle softmaxDesc"] text { font-size: 12px; }
+            .plot-lego text { font-size: 13px; }
+        }
     </style>
 </head>
 
@@ -383,7 +394,31 @@
                     <p class="text-[0.86rem] text-gray-600 mb-3">Una neurona es una <strong>regresión lineal envuelta en una función de decisión</strong>: suma ponderada + no-linealidad.</p>
                     <div class="eq text-center my-3">$$y = \sigma\left(\sum_{i=1}^n w_i x_i + b\right) = \sigma(\mathbf{w}^\top \mathbf{x} + b)$$</div>
                     <!-- SVG neurona -->
-                    <svg viewBox="0 0 420 200" class="w-full" role="img" aria-labelledby="neuronaTitle neuronaDesc">
+                    <svg viewBox="0 0 300 200" class="svg-m" role="img" aria-labelledby="neuronaTitle-m neuronaDesc-m">
+                        <title id="neuronaTitle-m">Anatomía de una neurona artificial</title>
+                        <desc id="neuronaDesc-m">Tres entradas x₁, x₂, x₃ se conectan mediante pesos w₁, w₂, w₃ a un nodo de suma ponderada Σ con sesgo b; el resultado pasa por una función de activación σ y produce la salida y.</desc>
+                        <g stroke="#94A3B8" stroke-width="1.5">
+                            <line x1="40" y1="40" x2="104" y2="100"/><line x1="40" y1="100" x2="104" y2="100"/><line x1="40" y1="160" x2="104" y2="100"/>
+                        </g>
+                        <g font-size="14" font-family="Montserrat" fill="#334155">
+                            <circle cx="24" cy="40" r="16" fill="#FCE7F1" stroke="#ED1E79"/><text x="24" y="45" text-anchor="middle">x₁</text>
+                            <circle cx="24" cy="100" r="16" fill="#FCE7F1" stroke="#ED1E79"/><text x="24" y="105" text-anchor="middle">x₂</text>
+                            <circle cx="24" cy="160" r="16" fill="#FCE7F1" stroke="#ED1E79"/><text x="24" y="165" text-anchor="middle">x₃</text>
+                        </g>
+                        <g font-size="13" fill="#64748B" font-style="italic">
+                            <text x="62" y="58">w₁</text><text x="64" y="94">w₂</text><text x="62" y="150">w₃</text>
+                        </g>
+                        <circle cx="128" cy="100" r="24" fill="#F5F0FA" stroke="#3D008D" stroke-width="2"/>
+                        <text x="128" y="107" text-anchor="middle" font-size="20" fill="#3D008D">Σ</text>
+                        <text x="128" y="148" text-anchor="middle" font-size="12" fill="#64748B">+ b (sesgo)</text>
+                        <line x1="152" y1="100" x2="168" y2="100" stroke="#94A3B8" stroke-width="1.5"/>
+                        <rect x="168" y="74" width="74" height="52" rx="8" fill="#FFF7ED" stroke="#B45309"/>
+                        <text x="205" y="97" text-anchor="middle" font-size="15" fill="#B45309">σ</text>
+                        <text x="205" y="115" text-anchor="middle" font-size="12" fill="#9A3412">activación</text>
+                        <line x1="242" y1="100" x2="258" y2="100" stroke="#94A3B8" stroke-width="1.5"/>
+                        <circle cx="276" cy="100" r="18" fill="#DCFCE7" stroke="#15803D"/><text x="276" y="105" text-anchor="middle" font-size="15" fill="#15803D">y</text>
+                    </svg>
+                    <svg viewBox="0 0 420 200" class="w-full svg-d" role="img" aria-labelledby="neuronaTitle neuronaDesc">
                         <title id="neuronaTitle">Anatomía de una neurona artificial</title>
                         <desc id="neuronaDesc">Tres entradas x₁, x₂, x₃ se conectan mediante pesos w₁, w₂, w₃ a un nodo de suma ponderada Σ con sesgo b; el resultado pasa por una función de activación σ y produce la salida y.</desc>
                         <!-- entradas -->
@@ -421,7 +456,25 @@
                     <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-network-wired text-secondary"></i><span>Arquitectura prealimentada (<em>feedforward</em>) del MLP</span></h3>
                     <p class="text-[0.86rem] text-gray-600 mb-3">Las <strong>capas ocultas</strong> transforman «papeles» en «conceptos interpretables». Aprenden representaciones <strong>jerárquicas</strong>.</p>
                     <!-- SVG MLP -->
-                    <svg viewBox="0 0 420 210" class="w-full" role="img" aria-labelledby="mlpTitle mlpDesc">
+                    <svg viewBox="0 0 300 214" class="svg-m" role="img" aria-labelledby="mlpTitle-m mlpDesc-m">
+                        <title id="mlpTitle-m">Arquitectura prealimentada de un perceptrón multicapa</title>
+                        <desc id="mlpDesc-m">Red densamente conectada: una capa de entrada con tres nodos, dos capas ocultas (de cuatro y dos nodos) y una neurona de salida; cada nodo de una capa se enlaza con todos los de la siguiente.</desc>
+                        <g stroke="#E2E8F0" stroke-width="1">
+                            <line x1="30" y1="45" x2="116" y2="35"/><line x1="30" y1="45" x2="116" y2="85"/><line x1="30" y1="45" x2="116" y2="125"/><line x1="30" y1="45" x2="116" y2="165"/><line x1="30" y1="105" x2="116" y2="35"/><line x1="30" y1="105" x2="116" y2="85"/><line x1="30" y1="105" x2="116" y2="125"/><line x1="30" y1="105" x2="116" y2="165"/><line x1="30" y1="165" x2="116" y2="35"/><line x1="30" y1="165" x2="116" y2="85"/><line x1="30" y1="165" x2="116" y2="125"/><line x1="30" y1="165" x2="116" y2="165"/>
+                            <line x1="116" y1="35" x2="202" y2="65"/><line x1="116" y1="35" x2="202" y2="135"/><line x1="116" y1="85" x2="202" y2="65"/><line x1="116" y1="85" x2="202" y2="135"/><line x1="116" y1="125" x2="202" y2="65"/><line x1="116" y1="125" x2="202" y2="135"/><line x1="116" y1="165" x2="202" y2="65"/><line x1="116" y1="165" x2="202" y2="135"/>
+                            <line x1="202" y1="65" x2="274" y2="100"/><line x1="202" y1="135" x2="274" y2="100"/>
+                        </g>
+                        <g fill="#FCE7F1" stroke="#ED1E79"><circle cx="30" cy="45" r="12"/><circle cx="30" cy="105" r="12"/><circle cx="30" cy="165" r="12"/></g>
+                        <g fill="#F5F0FA" stroke="#3D008D"><circle cx="116" cy="35" r="12"/><circle cx="116" cy="85" r="12"/><circle cx="116" cy="125" r="12"/><circle cx="116" cy="165" r="12"/></g>
+                        <g fill="#F5F0FA" stroke="#3D008D"><circle cx="202" cy="65" r="12"/><circle cx="202" cy="135" r="12"/></g>
+                        <circle cx="274" cy="100" r="14" fill="#DCFCE7" stroke="#15803D"/>
+                        <g font-size="12.5" font-family="Montserrat" fill="#64748B" text-anchor="middle">
+                            <text x="32" y="202">Entrada</text>
+                            <text x="159" y="202">Capas ocultas</text>
+                            <text x="274" y="136">Salida</text>
+                        </g>
+                    </svg>
+                    <svg viewBox="0 0 420 210" class="w-full svg-d" role="img" aria-labelledby="mlpTitle mlpDesc">
                         <title id="mlpTitle">Arquitectura prealimentada de un perceptrón multicapa</title>
                         <desc id="mlpDesc">Red densamente conectada: una capa de entrada con tres nodos, dos capas ocultas (de cuatro y dos nodos) y una neurona de salida; cada nodo de una capa se enlaza con todos los de la siguiente.</desc>
                         <!-- conexiones generadas: dibujamos manualmente algunas para sugerir densidad -->
@@ -648,7 +701,30 @@
             <div class="card p-6 mb-5">
                 <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-diagram-project text-teal"></i>Pensar en grafos, no en neuronas</h3>
                 <p class="text-[0.86rem] text-gray-600 mb-4">La ecuación \(y=\text{ReLU}(w\cdot x + b)\) se descompone en nodos elementales. Los datos fluyen <span class="font-semibold text-blue-600">hacia adelante</span> (predicción); la <span class="font-semibold text-red-500">responsabilidad</span> (gradiente) fluye <span class="font-semibold text-red-500">hacia atrás</span>.</p>
-                <svg viewBox="0 0 660 150" class="w-full" role="img" aria-labelledby="grafobpTitle grafobpDesc">
+                <svg viewBox="0 0 300 392" class="svg-m" role="img" aria-labelledby="grafobpTitle-m grafobpDesc-m">
+                    <title id="grafobpTitle-m">Grafo computacional de la retropropagación</title>
+                    <desc id="grafobpDesc-m">Cinco nodos elementales A (x·w), B (+b), C (ReLU), D (−y) y E (cuadrado del error) en cadena; el paso hacia adelante (azul) calcula la predicción y el paso hacia atrás (rojo, punteado) propaga el gradiente del error.</desc>
+                    <defs>
+                        <marker id="arrB-m" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2563EB"/></marker>
+                        <marker id="arrR-m" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#EF4444"/></marker>
+                    </defs>
+                    <g stroke="#2563EB" stroke-width="2" fill="none" marker-end="url(#arrB-m)">
+                        <line x1="88" y1="74" x2="88" y2="98"/><line x1="88" y1="144" x2="88" y2="168"/><line x1="88" y1="214" x2="88" y2="238"/><line x1="88" y1="284" x2="88" y2="308"/>
+                    </g>
+                    <g stroke="#EF4444" stroke-width="2" fill="none" marker-end="url(#arrR-m)" stroke-dasharray="5 3">
+                        <line x1="104" y1="100" x2="104" y2="76"/><line x1="104" y1="170" x2="104" y2="146"/><line x1="104" y1="240" x2="104" y2="216"/><line x1="104" y1="310" x2="104" y2="286"/>
+                    </g>
+                    <g font-family="Montserrat" text-anchor="middle">
+                        <g><circle cx="96" cy="52" r="22" fill="#ECFEFF" stroke="#0E7490" stroke-width="2"/><text x="96" y="57" font-size="15" font-weight="700" fill="#0E7490">A</text><text x="132" y="57" font-size="13" fill="#475569" text-anchor="start">x·w</text></g>
+                        <g><circle cx="96" cy="122" r="22" fill="#ECFEFF" stroke="#0E7490" stroke-width="2"/><text x="96" y="127" font-size="15" font-weight="700" fill="#0E7490">B</text><text x="132" y="127" font-size="13" fill="#475569" text-anchor="start">+ b</text></g>
+                        <g><circle cx="96" cy="192" r="22" fill="#ECFEFF" stroke="#0E7490" stroke-width="2"/><text x="96" y="197" font-size="15" font-weight="700" fill="#0E7490">C</text><text x="132" y="197" font-size="13" fill="#475569" text-anchor="start">ReLU</text></g>
+                        <g><circle cx="96" cy="262" r="22" fill="#ECFEFF" stroke="#0E7490" stroke-width="2"/><text x="96" y="267" font-size="15" font-weight="700" fill="#0E7490">D</text><text x="132" y="267" font-size="13" fill="#475569" text-anchor="start">− y</text></g>
+                        <g><circle cx="96" cy="334" r="24" fill="#FEF2F2" stroke="#EF4444" stroke-width="2"/><text x="96" y="339" font-size="15" font-weight="700" fill="#EF4444">E</text><text x="132" y="339" font-size="13" fill="#475569" text-anchor="start">( )²  Error</text></g>
+                    </g>
+                    <text x="8" y="18" font-size="12.5" fill="#2563EB" font-weight="600">▼ Paso hacia adelante (predicción)</text>
+                    <text x="8" y="384" font-size="12.5" fill="#EF4444" font-weight="600">▲ Paso hacia atrás (gradiente)</text>
+                </svg>
+                <svg viewBox="0 0 660 150" class="w-full svg-d" role="img" aria-labelledby="grafobpTitle grafobpDesc">
                     <title id="grafobpTitle">Grafo computacional de la retropropagación</title>
                     <desc id="grafobpDesc">Cinco nodos elementales A (x·w), B (+b), C (ReLU), D (−y) y E (cuadrado del error) en cadena; el paso hacia adelante (azul) calcula la predicción y el paso hacia atrás (rojo, punteado) propaga el gradiente del error.</desc>
                     <defs>
@@ -1021,29 +1097,37 @@ y.<span class="fn">backward</span>()   <span class="cm"># …y deriva sola</span
         (function () {
             const el = document.querySelector('.plot-curves');
             if (!el) return;
-            const w = 360, h = 170, pad = 30, exMax = 50;
+            const mq = window.matchMedia('(max-width: 640px)');
+            const dibujar = () => {
+            const ang = mq.matches;   // celular: 300 de ancho, letra 12,5 y leyenda debajo del eje
+            const w = ang ? 300 : 360, h = ang ? 236 : 170, pad = 30, padB = ang ? 66 : 30, exMax = 50, fs = ang ? 12.5 : 9;
             const train = e => 0.9 * Math.exp(-e / 8) + 0.06;
             const val = e => 0.82 * Math.exp(-e / 6.5) + 0.07 + 0.00050 * e * e;
             const X = x => pad + x / exMax * (w - 2 * pad);
-            const Y = y => h - pad - y / 1.0 * (h - 2 * pad);
+            const Y = y => h - padB - y / 1.0 * (h - pad - padB);
             // minimo de val
             let minE = 0, minV = 99; for (let e = 0; e <= exMax; e++) { if (val(e) < minV) { minV = val(e); minE = e; } }
             let svg = '<svg viewBox="0 0 ' + w + ' ' + h + '" class="w-full">';
-            svg += '<line x1="' + pad + '" y1="' + (h - pad) + '" x2="' + (w - pad) + '" y2="' + (h - pad) + '" stroke="#CBD5E1"/>';
-            svg += '<line x1="' + pad + '" y1="' + pad + '" x2="' + pad + '" y2="' + (h - pad) + '" stroke="#CBD5E1"/>';
-            svg += '<text x="' + (w / 2) + '" y="' + (h - 6) + '" font-size="9" fill="#64748B" text-anchor="middle">Épocas →</text>';
-            svg += '<text x="10" y="' + (h / 2) + '" font-size="9" fill="#64748B" transform="rotate(-90 10 ' + (h / 2) + ')" text-anchor="middle">Error</text>';
+            const yEje = h - padB, yMedio = (pad + yEje) / 2;
+            svg += '<line x1="' + pad + '" y1="' + yEje + '" x2="' + (w - pad) + '" y2="' + yEje + '" stroke="#CBD5E1"/>';
+            svg += '<line x1="' + pad + '" y1="' + pad + '" x2="' + pad + '" y2="' + yEje + '" stroke="#CBD5E1"/>';
+            svg += '<text x="' + (w / 2) + '" y="' + (ang ? yEje + 20 : h - 6) + '" font-size="' + fs + '" fill="#64748B" text-anchor="middle">Épocas →</text>';
+            svg += '<text x="' + (ang ? 14 : 10) + '" y="' + (ang ? yMedio : h / 2) + '" font-size="' + fs + '" fill="#64748B" transform="rotate(-90 ' + (ang ? 14 : 10) + ' ' + (ang ? yMedio : h / 2) + ')" text-anchor="middle">Error</text>';
             function curve(fn, color) { let d = ''; for (let e = 0; e <= exMax; e++) { d += (e ? ' L' : 'M') + X(e).toFixed(1) + ',' + Y(fn(e)).toFixed(1); } return '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="2.5"/>'; }
             svg += curve(train, '#15803D');
             svg += curve(val, '#ED1E79');
             // early stopping
-            svg += '<line x1="' + X(minE) + '" y1="' + pad + '" x2="' + X(minE) + '" y2="' + (h - pad) + '" stroke="#3D008D" stroke-width="1.5" stroke-dasharray="4 3"/>';
+            svg += '<line x1="' + X(minE) + '" y1="' + pad + '" x2="' + X(minE) + '" y2="' + yEje + '" stroke="#3D008D" stroke-width="1.5" stroke-dasharray="4 3"/>';
             svg += '<circle cx="' + X(minE) + '" cy="' + Y(minV) + '" r="4" fill="#3D008D"/>';
-            svg += '<text x="' + (X(minE) + 4) + '" y="' + (pad + 10) + '" font-size="8.5" fill="#3D008D" font-weight="700">Parada temprana</text>';
-            // leyenda
-            svg += '<circle cx="' + (w - 92) + '" cy="' + (pad + 2) + '" r="3.5" fill="#15803D"/><text x="' + (w - 85) + '" y="' + (pad + 5) + '" font-size="9" fill="#475569">Entrenamiento</text>';
-            svg += '<circle cx="' + (w - 92) + '" cy="' + (pad + 16) + '" r="3.5" fill="#ED1E79"/><text x="' + (w - 85) + '" y="' + (pad + 19) + '" font-size="9" fill="#475569">Validación</text>';
+            svg += '<text x="' + (X(minE) + 4) + '" y="' + (ang ? pad - 8 : pad + 10) + '" font-size="' + (ang ? 12.5 : 8.5) + '" fill="#3D008D" font-weight="700">Parada temprana</text>';
+            // leyenda (celular: en una fila debajo del eje)
+            const ley = ang ? [[pad + 8, h - 12], [pad + 140, h - 12]] : [[w - 92, pad + 2], [w - 92, pad + 16]];
+            svg += '<circle cx="' + ley[0][0] + '" cy="' + (ley[0][1] - (ang ? 4 : 0)) + '" r="' + (ang ? 4.5 : 3.5) + '" fill="#15803D"/><text x="' + (ley[0][0] + 7) + '" y="' + (ley[0][1] + (ang ? 0 : 3)) + '" font-size="' + fs + '" fill="#475569">Entrenamiento</text>';
+            svg += '<circle cx="' + ley[1][0] + '" cy="' + (ley[1][1] - (ang ? 4 : 0)) + '" r="' + (ang ? 4.5 : 3.5) + '" fill="#ED1E79"/><text x="' + (ley[1][0] + 7) + '" y="' + (ley[1][1] + (ang ? 0 : 3)) + '" font-size="' + fs + '" fill="#475569">Validación</text>';
             el.innerHTML = svg + '</svg>';
+            };
+            dibujar();
+            if (mq.addEventListener) mq.addEventListener('change', dibujar); else mq.addListener(dibujar);
         })();
 
         /* ---------- Scroll-spy nav + botón arriba + reveal ---------- */
