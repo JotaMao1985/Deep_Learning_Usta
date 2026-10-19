@@ -131,6 +131,17 @@
   .svglabel{font-size:14px;font-weight:700;fill:var(--tinta-fuerte);pointer-events:none;}
   .svgsub{font-size:12px;fill:var(--tinta-suave);pointer-events:none;}
   .gateval{font-size:12.5px;font-weight:800;pointer-events:none;}
+  .gateval.tanhc{font-size:11.5px;}
+  /* Celular (una columna, iframe de ~300 px): menos relleno, el diagrama ocupa el ancho de la tarjeta y la letra
+     sube un punto y medio; así el texto de las celdas queda en ≥ 10,5 px en vez de ~8 px. */
+  @media(max-width:480px){
+    body{padding:10px 8px 40px;}
+    .panel{padding:12px 10px;}
+    svg.cell{width:calc(100% + 12px);margin:0 -6px;}
+    .svgsub{font-size:13.5px;}
+    .gateval{font-size:13.5px;}
+    .gateval.tanhc{font-size:13px;}
+  }
 
   /* ---- Lecturas en vivo (gates + estados) ------------------------------ */
   .readout{margin-top:10px;}
@@ -570,7 +581,7 @@ function svgLSTM(){return `
   <line class="flow" x1="250" y1="38" x2="250" y2="54" stroke="var(--celda)" stroke-width="2" marker-end="url(#al)"/>
   <circle class="node" cx="250" cy="72" r="16" fill="#FFF7ED" stroke="var(--celda)" stroke-width="2"
     data-tip="<b>tanh(C<sub>t</sub>)</b>: comprime la memoria al intervalo (−1, 1) antes de exponerla como salida."/>
-  <text class="gateval" x="250" y="76" text-anchor="middle" fill="#B45309" style="font-size:11.5px">tanh</text>
+  <text class="gateval tanhc" x="250" y="76" text-anchor="middle" fill="#B45309">tanh</text>
 
   <!-- estado oculto h_t = o ⊙ tanh(C_t) -->
   <line class="flow" x1="266" y1="72" x2="278" y2="72" stroke="var(--salida)" stroke-width="2" marker-end="url(#al)"/>
