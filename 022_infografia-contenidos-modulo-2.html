@@ -153,6 +153,14 @@
         /* Móvil: los hijos de las rejillas pueden encogerse por debajo de su contenido
            (las ecuaciones anchas quedan dentro del desplazamiento propio de .eq). */
         .grid > * { min-width: 0; }
+
+        /* Diagramas en pantallas angostas: cada SVG de escritorio (.svg-d) tiene una variante
+           propia de 300 unidades de ancho (.svg-m) con texto legible; se alternan por CSS. */
+        .svg-m { display: none; }
+        @media (max-width: 640px) {
+            .svg-d { display: none !important; }
+            .svg-m { display: block; width: 100%; height: auto; max-width: 440px; margin: 0 auto; }
+        }
     </style>
 </head>
 
@@ -278,7 +286,7 @@
                     <p class="text-[0.86rem] text-gray-600 mb-3">Un <strong>filtro</strong> (<em>kernel</em>) se desliza sobre la imagen; en cada posición se multiplica elemento a elemento y se suma, produciendo un <strong>mapa de características</strong>. Los valores del filtro <strong>se aprenden</strong> por retropropagación: la red descubre sola qué bordes o curvas detectar.</p>
                     <div class="eq text-center my-3">$$S(i,j) = (I * K)(i,j) = \sum_{m}\sum_{n} I(i+m,\,j+n)\,K(m,n)$$</div>
                     <!-- SVG convolución -->
-                    <svg viewBox="0 0 420 180" class="w-full" role="img" aria-labelledby="convTitle convDesc">
+                    <svg viewBox="0 0 420 180" class="w-full svg-d" role="img" aria-labelledby="convTitle convDesc">
                         <title id="convTitle">Operación de convolución sobre una imagen</title>
                         <desc id="convDesc">Una imagen de entrada en forma de cuadrícula con un filtro de tres por tres resaltado se multiplica y suma para producir una sola celda de un mapa de características más pequeño a la derecha.</desc>
                         <!-- entrada 5x5 -->
@@ -322,6 +330,50 @@
                         </g>
                         <line x1="70" y1="40" x2="336" y2="44" stroke="#ED1E79" stroke-width="1" stroke-dasharray="3 3" opacity="0.55"/>
                     </svg>
+                    <!-- SVG convolución · variante angosta (móvil) -->
+                    <svg viewBox="0 0 300 136" class="svg-m" role="img" aria-labelledby="convTitle-m convDesc-m">
+                        <title id="convTitle-m">Operación de convolución sobre una imagen</title>
+                        <desc id="convDesc-m">Una imagen de entrada en forma de cuadrícula con un filtro de tres por tres resaltado se multiplica y suma para producir una sola celda de un mapa de características más pequeño a la derecha.</desc>
+                        <defs>
+                            <marker id="arrConv-m" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker>
+                        </defs>
+                        <!-- entrada 5x5 -->
+                        <g>
+                            <text x="62" y="16" text-anchor="middle" font-size="13" fill="#64748B" font-family="Montserrat">Entrada 5×5</text>
+                            <rect x="12" y="28" width="100" height="100" stroke="#CBD5E1" fill="#F8FAFC"/>
+                            <g stroke="#E2E8F0" stroke-width="1">
+                                <line x1="12" y1="48" x2="112" y2="48"/><line x1="12" y1="68" x2="112" y2="68"/><line x1="12" y1="88" x2="112" y2="88"/><line x1="12" y1="108" x2="112" y2="108"/>
+                                <line x1="32" y1="28" x2="32" y2="128"/><line x1="52" y1="28" x2="52" y2="128"/><line x1="72" y1="28" x2="72" y2="128"/><line x1="92" y1="28" x2="92" y2="128"/>
+                            </g>
+                            <!-- ventana del filtro 3x3 resaltada -->
+                            <rect x="12" y="28" width="60" height="60" fill="rgba(237,30,121,0.14)" stroke="#ED1E79" stroke-width="2"/>
+                        </g>
+                        <!-- filtro -->
+                        <g>
+                            <text x="159" y="16" text-anchor="middle" font-size="13" fill="#64748B" font-family="Montserrat">Filtro 3×3</text>
+                            <rect x="132" y="28" width="54" height="54" fill="#FFF7ED" stroke="#B45309" stroke-width="1.5"/>
+                            <g stroke="#FBBF77">
+                                <line x1="150" y1="28" x2="150" y2="82"/><line x1="168" y1="28" x2="168" y2="82"/>
+                                <line x1="132" y1="46" x2="186" y2="46"/><line x1="132" y1="64" x2="186" y2="64"/>
+                            </g>
+                            <text x="159" y="108" text-anchor="middle" font-size="18" fill="#B45309">⊛</text>
+                        </g>
+                        <!-- flecha -->
+                        <line x1="193" y1="56" x2="222" y2="56" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrConv-m)"/>
+                        <!-- salida 3x3 -->
+                        <g>
+                            <text x="258" y="16" text-anchor="middle" font-size="13" fill="#64748B" font-family="Montserrat">Mapa 3×3</text>
+                            <rect x="228" y="28" width="60" height="60" fill="#F5F0FA" stroke="#3D008D" stroke-width="1.5"/>
+                            <g stroke="#D6BCEF">
+                                <line x1="248" y1="28" x2="248" y2="88"/><line x1="268" y1="28" x2="268" y2="88"/>
+                                <line x1="228" y1="48" x2="288" y2="48"/><line x1="228" y1="68" x2="288" y2="68"/>
+                            </g>
+                            <rect x="228" y="28" width="20" height="20" fill="rgba(237,30,121,0.25)"/>
+                            <text x="258" y="108" text-anchor="middle" font-size="12" fill="#3D008D" font-family="Montserrat">una celda =</text>
+                            <text x="258" y="124" text-anchor="middle" font-size="12" fill="#3D008D" font-family="Montserrat">Σ productos</text>
+                        </g>
+                        <line x1="72" y1="36" x2="238" y2="38" stroke="#ED1E79" stroke-width="1" stroke-dasharray="3 3" opacity="0.55"/>
+                    </svg>
                     <p class="text-center text-[0.78rem] text-gray-500 mt-1">Tamaño de salida: \(O=\left\lfloor\frac{W-K+2P}{S}\right\rfloor+1\)</p>
                     <div class="callout mt-2" style="border-color:#B45309; background:#FFFBEB">
                         <p class="text-[0.82rem] text-gray-700"><i class="fas fa-magnifying-glass mr-1" style="color:#B45309"></i><strong>Hiperparámetros:</strong> el <strong>paso</strong> (<em>stride</em>, \(S\)) es cuánto salta el filtro; el <strong>relleno</strong> (<em>padding</em>, \(P\)) rellena los bordes con ceros para no encoger la imagen (<em>same padding</em>: \(P=\frac{K-1}{2}\)).</p>
@@ -329,10 +381,10 @@
                 </div>
 
                 <div class="card p-6">
-                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-compress text-primary"></i><em>Max pooling</em>: invarianza y reducción</h3>
+                    <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-compress text-primary"></i><span><em>Max pooling</em>: invarianza y reducción</span></h3>
                     <p class="text-[0.86rem] text-gray-600 mb-3">El <em>pooling</em> divide el mapa en regiones (p. ej. \(2\times 2\)) y conserva el <strong>máximo</strong> de cada una. Reduce el cómputo y aporta <strong>invarianza a pequeñas traslaciones</strong>: si el ojo del jaguar se movió un píxel, el valor máximo de la ventana sigue siendo el mismo.</p>
                     <!-- SVG max pooling -->
-                    <svg viewBox="0 0 420 160" class="w-full" role="img" aria-labelledby="poolTitle poolDesc">
+                    <svg viewBox="0 0 420 160" class="w-full svg-d" role="img" aria-labelledby="poolTitle poolDesc">
                         <title id="poolTitle">Operación de Max Pooling 2 por 2</title>
                         <desc id="poolDesc">Una cuadrícula de cuatro por cuatro se divide en cuatro bloques de dos por dos; de cada bloque se toma el valor máximo, produciendo una cuadrícula de dos por dos a la derecha.</desc>
                         <!-- entrada 4x4 con numeros -->
@@ -366,6 +418,41 @@
                         </g>
                         <text x="312" y="155" text-anchor="middle" font-size="10" fill="#64748B" font-family="Montserrat">Salida 2×2</text>
                     </svg>
+                    <!-- SVG max pooling · variante angosta (móvil) -->
+                    <svg viewBox="0 0 300 162" class="svg-m" role="img" aria-labelledby="poolTitle-m poolDesc-m">
+                        <title id="poolTitle-m">Operación de Max Pooling 2 por 2</title>
+                        <desc id="poolDesc-m">Una cuadrícula de cuatro por cuatro se divide en cuatro bloques de dos por dos; de cada bloque se toma el valor máximo, produciendo una cuadrícula de dos por dos a la derecha.</desc>
+                        <!-- entrada 4x4 con numeros -->
+                        <g font-family="Fira Code" font-size="14" fill="#334155" text-anchor="middle">
+                            <rect x="8" y="12" width="120" height="120" fill="#F8FAFC" stroke="#CBD5E1"/>
+                            <rect x="8" y="12" width="60" height="60" fill="rgba(237,30,121,0.10)"/>
+                            <rect x="68" y="12" width="60" height="60" fill="rgba(61,0,141,0.08)"/>
+                            <rect x="8" y="72" width="60" height="60" fill="rgba(14,116,144,0.08)"/>
+                            <rect x="68" y="72" width="60" height="60" fill="rgba(253,185,19,0.14)"/>
+                            <g stroke="#E2E8F0"><line x1="38" y1="12" x2="38" y2="132"/><line x1="98" y1="12" x2="98" y2="132"/><line x1="8" y1="42" x2="128" y2="42"/><line x1="8" y1="102" x2="128" y2="102"/><line x1="8" y1="72" x2="128" y2="72" stroke="#CBD5E1"/><line x1="68" y1="12" x2="68" y2="132" stroke="#CBD5E1"/></g>
+                            <text x="23" y="32">1</text><text x="53" y="32" font-weight="700" fill="#ED1E79">8</text><text x="83" y="32">3</text><text x="113" y="32">2</text>
+                            <text x="23" y="62">4</text><text x="53" y="62">2</text><text x="83" y="62" font-weight="700" fill="#3D008D">9</text><text x="113" y="62">1</text>
+                            <text x="23" y="92">6</text><text x="53" y="92">3</text><text x="83" y="92">1</text><text x="113" y="92" font-weight="700" fill="#FDB913">7</text>
+                            <text x="23" y="122" font-weight="700" fill="#0E7490">5</text><text x="53" y="122">0</text><text x="83" y="122">4</text><text x="113" y="122">2</text>
+                        </g>
+                        <text x="68" y="153" text-anchor="middle" font-size="13" fill="#64748B" font-family="Montserrat">Entrada 4×4</text>
+                        <!-- flecha -->
+                        <line x1="138" y1="72" x2="186" y2="72" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrPool-m)"/>
+                        <text x="162" y="62" text-anchor="middle" font-size="12" fill="#64748B" font-family="Montserrat">máx 2×2</text>
+                        <defs><marker id="arrPool-m" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker></defs>
+                        <!-- salida 2x2 -->
+                        <g font-family="Fira Code" font-size="17" text-anchor="middle">
+                            <rect x="196" y="26" width="92" height="92" fill="#F8FAFC" stroke="#CBD5E1"/>
+                            <rect x="196" y="26" width="46" height="46" fill="rgba(237,30,121,0.18)"/>
+                            <rect x="242" y="26" width="46" height="46" fill="rgba(61,0,141,0.14)"/>
+                            <rect x="196" y="72" width="46" height="46" fill="rgba(14,116,144,0.14)"/>
+                            <rect x="242" y="72" width="46" height="46" fill="rgba(253,185,19,0.22)"/>
+                            <line x1="242" y1="26" x2="242" y2="118" stroke="#CBD5E1"/><line x1="196" y1="72" x2="288" y2="72" stroke="#CBD5E1"/>
+                            <text x="219" y="55" font-weight="700" fill="#ED1E79">8</text><text x="265" y="55" font-weight="700" fill="#3D008D">9</text>
+                            <text x="219" y="101" font-weight="700" fill="#0E7490">5</text><text x="265" y="101" font-weight="700" fill="#FDB913">7</text>
+                        </g>
+                        <text x="242" y="153" text-anchor="middle" font-size="13" fill="#64748B" font-family="Montserrat">Salida 2×2</text>
+                    </svg>
                     <div class="callout mt-2" style="border-color:#0E7490; background:#ECFEFF">
                         <p class="text-[0.82rem] text-gray-700"><i class="fas fa-magnifying-glass mr-1 text-teal"></i><strong>La lupa sobre la fototrampa:</strong> cada filtro recorre la foto viendo un pequeño círculo a la vez (campo receptivo local) con el mismo criterio en toda la imagen (pesos compartidos); ReLU conserva lo útil, el <em>pooling</em> resume y las capas densas emiten el veredicto («jaguar: 95 %»).</p>
                     </div>
@@ -377,7 +464,7 @@
                 <h3 class="font-bold text-navy mb-1 flex items-center gap-2"><i class="fas fa-timeline text-primary"></i>De LeNet a ResNet: la carrera por la profundidad</h3>
                 <p class="text-sm text-gray-500 mb-5">Cada arquitectura resolvió un cuello de botella de la anterior.</p>
                 <!-- SVG timeline -->
-                <svg viewBox="0 0 680 120" class="w-full" role="img" aria-labelledby="evoTitle evoDesc">
+                <svg viewBox="0 0 680 120" class="w-full svg-d" role="img" aria-labelledby="evoTitle evoDesc">
                     <title id="evoTitle">Evolución histórica de las arquitecturas CNN</title>
                     <desc id="evoDesc">Línea de tiempo horizontal con cinco hitos: LeNet en 1998, AlexNet en 2012, VGG e Inception en 2014, y ResNet en 2015, con su profundidad creciente en número de capas.</desc>
                     <line x1="40" y1="62" x2="650" y2="62" stroke="#CBD5E1" stroke-width="2"/>
@@ -387,6 +474,19 @@
                         <g><circle cx="350" cy="62" r="8" fill="#0E7490"/><text x="350" y="40" font-size="11" font-weight="700" fill="#001A4D">VGG</text><text x="350" y="86" font-size="9" fill="#64748B">2014 · 16 capas</text><text x="350" y="100" font-size="8" fill="#94A3B8">filtros 3×3 apilados</text></g>
                         <g><circle cx="490" cy="62" r="8" fill="#B45309"/><text x="490" y="40" font-size="11" font-weight="700" fill="#001A4D">Inception</text><text x="490" y="86" font-size="9" fill="#64748B">2014 · módulos ∥</text><text x="490" y="100" font-size="8" fill="#94A3B8">conv 1×1, ≈5 M parám.</text></g>
                         <g><circle cx="630" cy="62" r="9" fill="#5B1C9E"/><text x="630" y="40" font-size="11" font-weight="700" fill="#001A4D">ResNet</text><text x="630" y="86" font-size="9" fill="#64748B">2015 · 152 capas</text><text x="630" y="100" font-size="8" fill="#94A3B8">skip connections</text></g>
+                    </g>
+                </svg>
+                <!-- SVG timeline · variante angosta (móvil): la línea de tiempo pasa a vertical -->
+                <svg viewBox="0 0 300 332" class="svg-m" role="img" aria-labelledby="evoTitle-m evoDesc-m">
+                    <title id="evoTitle-m">Evolución histórica de las arquitecturas CNN</title>
+                    <desc id="evoDesc-m">Línea de tiempo vertical con cinco hitos: LeNet en 1998, AlexNet en 2012, VGG e Inception en 2014, y ResNet en 2015, con su profundidad creciente en número de capas.</desc>
+                    <line x1="70" y1="20" x2="70" y2="316" stroke="#CBD5E1" stroke-width="2"/>
+                    <g font-family="Montserrat" text-anchor="start">
+                        <g><circle cx="70" cy="40" r="8" fill="#3D008D"/><text x="92" y="30" font-size="14" font-weight="700" fill="#001A4D">LeNet-5</text><text x="92" y="48" font-size="12.5" fill="#64748B">1998 · 7 capas</text><text x="92" y="64" font-size="12" fill="#94A3B8">cheques MNIST</text></g>
+                        <g><circle cx="70" cy="104" r="8" fill="#ED1E79"/><text x="92" y="94" font-size="14" font-weight="700" fill="#001A4D">AlexNet</text><text x="92" y="112" font-size="12.5" fill="#64748B">2012 · 8 capas</text><text x="92" y="128" font-size="12" fill="#94A3B8">ReLU + GPU + <tspan font-style="italic">Dropout</tspan></text></g>
+                        <g><circle cx="70" cy="168" r="8" fill="#0E7490"/><text x="92" y="158" font-size="14" font-weight="700" fill="#001A4D">VGG</text><text x="92" y="176" font-size="12.5" fill="#64748B">2014 · 16 capas</text><text x="92" y="192" font-size="12" fill="#94A3B8">filtros 3×3 apilados</text></g>
+                        <g><circle cx="70" cy="232" r="8" fill="#B45309"/><text x="92" y="222" font-size="14" font-weight="700" fill="#001A4D">Inception</text><text x="92" y="240" font-size="12.5" fill="#64748B">2014 · módulos ∥</text><text x="92" y="256" font-size="12" fill="#94A3B8">conv 1×1, ≈5 M parám.</text></g>
+                        <g><circle cx="70" cy="296" r="9" fill="#5B1C9E"/><text x="92" y="286" font-size="14" font-weight="700" fill="#001A4D">ResNet</text><text x="92" y="304" font-size="12.5" fill="#64748B">2015 · 152 capas</text><text x="92" y="320" font-size="12" fill="#94A3B8">skip connections</text></g>
                     </g>
                 </svg>
                 <div class="callout mt-3" style="border-color:#5B1C9E; background:#FAF8FF">
@@ -401,7 +501,7 @@
                     <p class="text-[0.86rem] text-gray-600 mb-3">En vez de deslizar filtros, el ViT trocea la imagen en <strong>parches</strong> cuadrados, los trata como «palabras visuales» y deja que la <strong>autoatención</strong> relacione cada parche con todos los demás: campo receptivo <strong>global</strong> desde la primera capa.</p>
                     <div class="eq text-center my-2">$$N = \frac{H\cdot W}{P^2}\quad(224\times224,\;P{=}16 \Rightarrow N{=}196)$$</div>
                     <!-- SVG parches -->
-                    <svg viewBox="0 0 360 130" class="w-full" role="img" aria-labelledby="vitTitle vitDesc">
+                    <svg viewBox="0 0 360 130" class="w-full svg-d" role="img" aria-labelledby="vitTitle vitDesc">
                         <title id="vitTitle">Una imagen dividida en parches para un Vision Transformer</title>
                         <desc id="vitDesc">Una imagen cuadrada se divide en una cuadrícula de parches numerados que luego se aplanan en una fila de tokens, ilustrando el tratamiento de la imagen como una secuencia.</desc>
                         <g font-family="Fira Code" font-size="9" fill="#475569" text-anchor="middle">
@@ -421,6 +521,29 @@
                             <rect x="280" y="50" width="34" height="28" rx="3" fill="#5B1C9E"/><text x="297" y="68">t196</text>
                         </g>
                         <text x="240" y="98" text-anchor="middle" font-size="9" fill="#64748B" font-family="Montserrat">+ codificación posicional → autoatención</text>
+                    </svg>
+                    <!-- SVG parches · variante angosta (móvil): imagen arriba, fila de tokens debajo -->
+                    <svg viewBox="0 0 300 274" class="svg-m" role="img" aria-labelledby="vitTitle-m vitDesc-m">
+                        <title id="vitTitle-m">Una imagen dividida en parches para un Vision Transformer</title>
+                        <desc id="vitDesc-m">Una imagen cuadrada se divide en una cuadrícula de parches numerados que luego se aplanan en una fila de tokens, ilustrando el tratamiento de la imagen como una secuencia.</desc>
+                        <g font-family="Fira Code" font-size="13" fill="#475569" text-anchor="middle">
+                            <rect x="90" y="8" width="120" height="120" fill="#F5F0FA" stroke="#3D008D"/>
+                            <g stroke="#C4B5FD"><line x1="120" y1="8" x2="120" y2="128"/><line x1="150" y1="8" x2="150" y2="128"/><line x1="180" y1="8" x2="180" y2="128"/><line x1="90" y1="38" x2="210" y2="38"/><line x1="90" y1="68" x2="210" y2="68"/><line x1="90" y1="98" x2="210" y2="98"/></g>
+                            <text x="105" y="28">1</text><text x="135" y="28">2</text><text x="165" y="28">3</text><text x="195" y="28">4</text>
+                            <text x="105" y="88">9</text>
+                        </g>
+                        <text x="150" y="148" text-anchor="middle" font-size="13" fill="#64748B" font-family="Montserrat">Imagen → parches</text>
+                        <line x1="150" y1="157" x2="150" y2="184" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrVit-m)"/>
+                        <defs><marker id="arrVit-m" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker></defs>
+                        <g font-family="Fira Code" font-size="13" fill="#fff" text-anchor="middle">
+                            <rect x="33" y="192" width="40" height="34" rx="4" fill="#ED1E79"/><text x="53" y="214">t1</text>
+                            <rect x="79" y="192" width="40" height="34" rx="4" fill="#3D008D"/><text x="99" y="214">t2</text>
+                            <rect x="125" y="192" width="40" height="34" rx="4" fill="#0E7490"/><text x="145" y="214">t3</text>
+                            <rect x="171" y="192" width="40" height="34" rx="4" fill="#B45309"/><text x="191" y="214">…</text>
+                            <rect x="217" y="192" width="50" height="34" rx="4" fill="#5B1C9E"/><text x="242" y="214">t196</text>
+                        </g>
+                        <text x="150" y="248" text-anchor="middle" font-size="13" fill="#64748B" font-family="Montserrat">+ codificación posicional</text>
+                        <text x="150" y="266" text-anchor="middle" font-size="13" fill="#64748B" font-family="Montserrat">→ autoatención</text>
                     </svg>
                     <div class="callout mt-2" style="border-color:#B45309; background:#FFFBEB">
                         <p class="text-[0.82rem] text-gray-700"><i class="fas fa-database mr-1" style="color:#B45309"></i><strong>Hambre de datos:</strong> el ViT carece del <em>sesgo inductivo</em> de la convolución, así que necesita millones de imágenes (JFT-300M) o preentrenamiento masivo. Con pocos datos, una ResNet suele ganarle.</p>
@@ -524,7 +647,7 @@
                 <p class="text-[0.86rem] text-gray-600 mb-3">La RNN es la misma celda copiada en el tiempo: en cada paso recibe la entrada \(x_t\) y el estado oculto anterior \(h_{t-1}\), y produce un nuevo estado \(h_t\) que actúa como su «memoria».</p>
                 <div class="eq text-center my-3">$$h_t = \tanh(W_{xh}\,x_t + W_{hh}\,h_{t-1} + b_h)\qquad \hat{y}_t = \operatorname{softmax}(W_{hy}\,h_t + b_y)$$</div>
                 <!-- SVG RNN desenrollada -->
-                <svg viewBox="0 0 640 150" class="w-full" role="img" aria-labelledby="rnnTitle rnnDesc">
+                <svg viewBox="0 0 640 150" class="w-full svg-d" role="img" aria-labelledby="rnnTitle rnnDesc">
                     <title id="rnnTitle">Red neuronal recurrente desenrollada en el tiempo</title>
                     <desc id="rnnDesc">Cuatro celdas recurrentes idénticas conectadas en cadena; cada una recibe una entrada en su instante de tiempo y pasa su estado oculto a la siguiente, produciendo una salida en cada paso.</desc>
                     <defs><marker id="arrRnn" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker></defs>
@@ -556,6 +679,40 @@
                         <text x="149" y="68" font-size="9" fill="#3D008D" font-style="italic">W₍ₕₕ₎</text>
                     </g>
                 </svg>
+                <!-- SVG RNN desenrollada · variante angosta (móvil): el tiempo avanza hacia abajo;
+                     entradas por la izquierda y salidas por la derecha -->
+                <svg viewBox="0 0 300 326" class="svg-m" role="img" aria-labelledby="rnnTitle-m rnnDesc-m">
+                    <title id="rnnTitle-m">Red neuronal recurrente desenrollada en el tiempo</title>
+                    <desc id="rnnDesc-m">Cuatro celdas recurrentes idénticas conectadas en cadena; cada una recibe una entrada en su instante de tiempo y pasa su estado oculto a la siguiente, produciendo una salida en cada paso.</desc>
+                    <defs><marker id="arrRnn-m" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker></defs>
+                    <g font-family="Montserrat" text-anchor="middle">
+                        <!-- celdas -->
+                        <g>
+                            <rect x="118" y="14" width="64" height="42" rx="8" fill="#FCE7F1" stroke="#ED1E79" stroke-width="2"/><text x="150" y="41" font-size="16" fill="#ED1E79" font-weight="700">h₁</text>
+                            <rect x="118" y="92" width="64" height="42" rx="8" fill="#FCE7F1" stroke="#ED1E79" stroke-width="2"/><text x="150" y="119" font-size="16" fill="#ED1E79" font-weight="700">h₂</text>
+                            <rect x="118" y="170" width="64" height="42" rx="8" fill="#FCE7F1" stroke="#ED1E79" stroke-width="2"/><text x="150" y="197" font-size="16" fill="#ED1E79" font-weight="700">h₃</text>
+                            <rect x="118" y="270" width="64" height="42" rx="8" fill="#FCE7F1" stroke="#ED1E79" stroke-width="2"/><text x="150" y="297" font-size="16" fill="#ED1E79" font-weight="700">hₜ</text>
+                        </g>
+                        <!-- estado oculto entre celdas -->
+                        <g stroke="#3D008D" stroke-width="2" fill="none" marker-end="url(#arrRnn-m)">
+                            <line x1="150" y1="56" x2="150" y2="90"/><line x1="150" y1="134" x2="150" y2="168"/>
+                        </g>
+                        <line x1="150" y1="212" x2="150" y2="226" stroke="#3D008D" stroke-width="2"/>
+                        <text x="145" y="241" font-size="16" fill="#3D008D" transform="rotate(90 145 241)">···</text>
+                        <line x1="150" y1="252" x2="150" y2="268" stroke="#3D008D" stroke-width="2" marker-end="url(#arrRnn-m)"/>
+                        <!-- entradas -->
+                        <g stroke="#94A3B8" stroke-width="1.5" fill="none" marker-end="url(#arrRnn-m)">
+                            <line x1="62" y1="35" x2="116" y2="35"/><line x1="62" y1="113" x2="116" y2="113"/><line x1="62" y1="191" x2="116" y2="191"/><line x1="62" y1="291" x2="116" y2="291"/>
+                        </g>
+                        <g font-size="14" fill="#64748B"><text x="44" y="40">x₁</text><text x="44" y="118">x₂</text><text x="44" y="196">x₃</text><text x="44" y="296">xₜ</text></g>
+                        <!-- salidas -->
+                        <g stroke="#15803D" stroke-width="1.5" fill="none" marker-end="url(#arrRnn-m)">
+                            <line x1="182" y1="35" x2="236" y2="35"/><line x1="182" y1="113" x2="236" y2="113"/><line x1="182" y1="191" x2="236" y2="191"/><line x1="182" y1="291" x2="236" y2="291"/>
+                        </g>
+                        <g font-size="14" fill="#15803D"><text x="256" y="40">ŷ₁</text><text x="256" y="118">ŷ₂</text><text x="256" y="196">ŷ₃</text><text x="256" y="296">ŷₜ</text></g>
+                        <text x="160" y="78" font-size="12" fill="#3D008D" font-style="italic" text-anchor="start">W₍ₕₕ₎</text>
+                    </g>
+                </svg>
                 <div class="callout mt-3" style="border-color:#DC2626; background:#FEF2F2">
                     <p class="text-[0.86rem] text-gray-700"><i class="fas fa-phone-slash mr-1 text-red-600"></i><strong>El «teléfono roto» (desvanecimiento del gradiente):</strong> al entrenar con <strong>BPTT</strong>, el término \(\frac{\partial h_t}{\partial h_k}=\prod_{j=k+1}^{t}\operatorname{diag}\big(1-h_j^{2}\big)\,W_{hh}\) multiplica muchas matrices (con la convención de gradiente cada factor aparece traspuesto; la norma es la misma). Si el mayor valor singular de \(W_{hh}\) es menor que 1 (condición suficiente), el gradiente tiende <strong>exponencialmente a cero</strong>: la red aprende lo reciente pero <strong>olvida lo lejano</strong> (el sujeto plural «estudiantes» al inicio de una frase larga).</p>
                 </div>
@@ -567,7 +724,7 @@
                     <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-door-closed text-secondary"></i>LSTM: la cinta transportadora con compuertas</h3>
                     <p class="text-[0.86rem] text-gray-600 mb-3">La LSTM (1997) separa la memoria a <strong>largo plazo</strong> (estado de celda \(C_t\)) de la de <strong>corto plazo</strong> (\(h_t\)). Tres compuertas sigmoides regulan el flujo con valores en \((0, 1)\); la de olvido, hoy estándar, la añadieron Gers et al. (2000).</p>
                     <!-- SVG compuertas LSTM -->
-                    <svg viewBox="0 0 380 170" class="w-full" role="img" aria-labelledby="lstmTitle lstmDesc">
+                    <svg viewBox="0 0 380 170" class="w-full svg-d" role="img" aria-labelledby="lstmTitle lstmDesc">
                         <title id="lstmTitle">Celda LSTM con sus tres compuertas y el estado de la celda</title>
                         <desc id="lstmDesc">El estado de la celda recorre la parte superior como una cinta transportadora; debajo, las compuertas de olvido, entrada y salida regulan qué información se descarta, se añade y se expone.</desc>
                         <!-- cinta transportadora (cell state) -->
@@ -593,6 +750,34 @@
                         <!-- hidden state salida -->
                         <line x1="332" y1="126" x2="332" y2="150" stroke="#2563EB" stroke-width="1.5" marker-end="url(#arrLstm)"/>
                         <text x="332" y="164" font-size="10" fill="#2563EB" text-anchor="middle" font-family="Montserrat" font-weight="700">hₜ</text>
+                    </svg>
+                    <!-- SVG compuertas LSTM · variante angosta (móvil): cinta arriba, compuertas debajo -->
+                    <svg viewBox="0 0 300 192" class="svg-m" role="img" aria-labelledby="lstmTitle-m lstmDesc-m">
+                        <title id="lstmTitle-m">Celda LSTM con sus tres compuertas y el estado de la celda</title>
+                        <desc id="lstmDesc-m">El estado de la celda recorre la parte superior como una cinta transportadora; debajo, las compuertas de olvido, entrada y salida regulan qué información se descarta, se añade y se expone.</desc>
+                        <!-- cinta transportadora (cell state) -->
+                        <line x1="10" y1="50" x2="286" y2="50" stroke="#001A4D" stroke-width="4" marker-end="url(#arrLstm-m)"/>
+                        <defs><marker id="arrLstm-m" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#001A4D"/></marker></defs>
+                        <text x="150" y="16" font-size="12" fill="#475569" font-family="Montserrat" text-anchor="middle">estado de celda (memoria larga)</text>
+                        <text x="10" y="36" font-size="13" fill="#001A4D" font-family="Montserrat" font-weight="700">C₍ₜ₋₁₎</text>
+                        <text x="256" y="36" font-size="13" fill="#001A4D" font-family="Montserrat" font-weight="700" text-anchor="end">Cₜ</text>
+                        <!-- operadores sobre la cinta -->
+                        <circle cx="66" cy="50" r="11" fill="#fff" stroke="#DC2626" stroke-width="1.5"/><text x="66" y="55" font-size="13" fill="#DC2626" text-anchor="middle">⊙</text>
+                        <circle cx="150" cy="50" r="11" fill="#fff" stroke="#15803D" stroke-width="1.5"/><text x="150" y="55.5" font-size="15" fill="#15803D" text-anchor="middle">+</text>
+                        <!-- compuertas -->
+                        <g font-family="Montserrat" text-anchor="middle">
+                            <rect x="4" y="104" width="70" height="40" rx="6" fill="#FEF2F2" stroke="#DC2626"/><text x="39" y="121" font-size="14" fill="#DC2626" font-weight="700">fₜ</text><text x="39" y="137" font-size="12" fill="#9A3412">olvido</text>
+                            <rect x="78" y="104" width="70" height="40" rx="6" fill="#F0FDF4" stroke="#15803D"/><text x="113" y="121" font-size="14" fill="#15803D" font-weight="700">iₜ</text><text x="113" y="137" font-size="12" fill="#166534">entrada</text>
+                            <rect x="152" y="104" width="70" height="40" rx="6" fill="#FFFBEB" stroke="#B45309"/><text x="187" y="121" font-size="14" fill="#B45309" font-weight="700">C̃ₜ</text><text x="187" y="137" font-size="12" fill="#92400E">candidato</text>
+                            <rect x="226" y="104" width="70" height="40" rx="6" fill="#EFF6FF" stroke="#2563EB"/><text x="261" y="121" font-size="14" fill="#2563EB" font-weight="700">oₜ</text><text x="261" y="137" font-size="12" fill="#1D4ED8">salida</text>
+                        </g>
+                        <!-- conexiones compuerta->cinta -->
+                        <g stroke="#94A3B8" stroke-width="1.2" fill="none" stroke-dasharray="3 2">
+                            <line x1="39" y1="104" x2="62" y2="61"/><line x1="113" y1="104" x2="144" y2="61"/><line x1="187" y1="104" x2="156" y2="61"/>
+                        </g>
+                        <!-- hidden state salida -->
+                        <line x1="261" y1="144" x2="261" y2="166" stroke="#2563EB" stroke-width="1.5" marker-end="url(#arrLstm-m)"/>
+                        <text x="261" y="186" font-size="14" fill="#2563EB" text-anchor="middle" font-family="Montserrat" font-weight="700">hₜ</text>
                     </svg>
                     <div class="text-[0.78rem] text-gray-600 space-y-1 mt-2">
                         <div class="eq text-center">$$C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$$</div>
@@ -646,7 +831,7 @@
                 <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-right-left text-secondary"></i>Del cuello de botella seq2seq a la atención</h3>
                 <p class="text-[0.86rem] text-gray-600 mb-4">El <strong>codificador-decodificador</strong> (<em>encoder-decoder</em>) comprime toda la frase de entrada en un único vector de contexto \(c\). En frases largas ese vector se satura (el «mensajero que solo puede memorizar una frase»). La <strong>atención</strong> (Bahdanau et al., 2015) deja que el decodificador <strong>mire de regreso</strong> a todos los estados del codificador y pondere los relevantes.</p>
                 <!-- SVG atención -->
-                <svg viewBox="0 0 600 160" class="w-full" role="img" aria-labelledby="attnTitle attnDesc">
+                <svg viewBox="0 0 600 160" class="w-full svg-d" role="img" aria-labelledby="attnTitle attnDesc">
                     <title id="attnTitle">Mecanismo de atención entre codificador y decodificador</title>
                     <desc id="attnDesc">Una fila de estados del codificador en la parte inferior se conecta mediante pesos de atención de distinto grosor a un paso del decodificador en la parte superior; las conexiones más gruesas indican mayor atención.</desc>
                     <g font-family="Montserrat" text-anchor="middle">
@@ -670,6 +855,34 @@
                             <line x1="462" y1="110" x2="518" y2="50" stroke-width="0.8" opacity="0.45"/>
                         </g>
                         <text x="300" y="80" font-size="9" fill="#3D008D" font-style="italic">αₜ,ᵢ (pesos de atención)</text>
+                    </g>
+                </svg>
+                <!-- SVG atención · variante angosta (móvil): codificador abajo, decodificador arriba -->
+                <svg viewBox="0 0 300 230" class="svg-m" role="img" aria-labelledby="attnTitle-m attnDesc-m">
+                    <title id="attnTitle-m">Mecanismo de atención entre codificador y decodificador</title>
+                    <desc id="attnDesc-m">Una fila de estados del codificador en la parte inferior se conecta mediante pesos de atención de distinto grosor a un paso del decodificador en la parte superior; las conexiones más gruesas indican mayor atención.</desc>
+                    <g font-family="Montserrat" text-anchor="middle">
+                        <!-- encoder states -->
+                        <g>
+                            <rect x="15" y="150" width="46" height="36" rx="6" fill="#FCE7F1" stroke="#ED1E79"/><text x="38" y="174" font-size="15" fill="#ED1E79" font-weight="700">h₁</text>
+                            <rect x="71" y="150" width="46" height="36" rx="6" fill="#FCE7F1" stroke="#ED1E79"/><text x="94" y="174" font-size="15" fill="#ED1E79" font-weight="700">h₂</text>
+                            <rect x="127" y="150" width="46" height="36" rx="6" fill="#FCE7F1" stroke="#ED1E79"/><text x="150" y="174" font-size="15" fill="#ED1E79" font-weight="700">h₃</text>
+                            <rect x="183" y="150" width="46" height="36" rx="6" fill="#FCE7F1" stroke="#ED1E79"/><text x="206" y="174" font-size="15" fill="#ED1E79" font-weight="700">h₄</text>
+                            <rect x="239" y="150" width="46" height="36" rx="6" fill="#FCE7F1" stroke="#ED1E79"/><text x="262" y="174" font-size="15" fill="#ED1E79" font-weight="700">h₅</text>
+                        </g>
+                        <text x="150" y="206" font-size="12" fill="#64748B">Estados del codificador</text>
+                        <text x="150" y="222" font-size="12" fill="#64748B">(entrada completa, disponible)</text>
+                        <!-- decoder step -->
+                        <rect x="212" y="10" width="72" height="48" rx="8" fill="#F5F0FA" stroke="#3D008D" stroke-width="2"/><text x="248" y="33" font-size="15" fill="#3D008D" font-weight="700">sₜ</text><text x="248" y="50" font-size="12" fill="#475569">decodif.</text>
+                        <!-- pesos de atención: grosor distinto -->
+                        <g fill="none" stroke="#3D008D">
+                            <line x1="38" y1="150" x2="222" y2="56" stroke-width="0.8" opacity="0.45"/>
+                            <line x1="94" y1="150" x2="224" y2="54" stroke-width="1.2" opacity="0.55"/>
+                            <line x1="150" y1="150" x2="226" y2="52" stroke-width="4.5" opacity="0.9"/>
+                            <line x1="206" y1="150" x2="228" y2="50" stroke-width="1.6" opacity="0.6"/>
+                            <line x1="262" y1="150" x2="230" y2="48" stroke-width="0.8" opacity="0.45"/>
+                        </g>
+                        <text x="12" y="64" font-size="12.5" fill="#3D008D" font-style="italic" text-anchor="start">αₜ,ᵢ (pesos de atención)</text>
                     </g>
                 </svg>
                 <div class="grid md:grid-cols-2 gap-4 mt-3">
@@ -707,7 +920,7 @@
                     <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-compress-arrows-alt" style="color:#B45309"></i>Autocodificador (AE): comprimir y reconstruir</h3>
                     <p class="text-[0.86rem] text-gray-600 mb-3">El «reloj de arena»: un <strong>codificador</strong> (<em>encoder</em>) comprime hasta el <strong>cuello de botella</strong> (código latente \(z\)) y un <strong>decodificador</strong> (<em>decoder</em>) reconstruye. La restricción impide copiar la identidad: la red conserva solo lo esencial.</p>
                     <!-- SVG AE hourglass -->
-                    <svg viewBox="0 0 380 150" class="w-full" role="img" aria-labelledby="aeTitle aeDesc">
+                    <svg viewBox="0 0 380 150" class="w-full svg-d" role="img" aria-labelledby="aeTitle aeDesc">
                         <title id="aeTitle">Arquitectura de reloj de arena de un autocodificador</title>
                         <desc id="aeDesc">Una columna de muchos nodos a la izquierda (entrada) se estrecha hacia un cuello de botella central de pocos nodos (código latente) y se vuelve a expandir a la derecha (reconstrucción).</desc>
                         <g fill="#FCE7F1" stroke="#ED1E79">
@@ -734,6 +947,34 @@
                             <text x="344" y="148" fill="#15803D">x̂</text>
                         </g>
                     </svg>
+                    <!-- SVG AE hourglass · variante angosta (móvil) -->
+                    <svg viewBox="0 0 300 170" class="svg-m" role="img" aria-labelledby="aeTitle-m aeDesc-m">
+                        <title id="aeTitle-m">Arquitectura de reloj de arena de un autocodificador</title>
+                        <desc id="aeDesc-m">Una columna de muchos nodos a la izquierda (entrada) se estrecha hacia un cuello de botella central de pocos nodos (código latente) y se vuelve a expandir a la derecha (reconstrucción).</desc>
+                        <g fill="#FCE7F1" stroke="#ED1E79">
+                            <circle cx="30" cy="36" r="10"/><circle cx="30" cy="61" r="10"/><circle cx="30" cy="86" r="10"/><circle cx="30" cy="111" r="10"/><circle cx="30" cy="136" r="10"/>
+                        </g>
+                        <g fill="#F5F0FA" stroke="#3D008D">
+                            <circle cx="90" cy="61" r="10"/><circle cx="90" cy="86" r="10"/><circle cx="90" cy="111" r="10"/>
+                        </g>
+                        <!-- bottleneck -->
+                        <g fill="#FEF9E7" stroke="#B45309" stroke-width="2">
+                            <circle cx="150" cy="73" r="12"/><circle cx="150" cy="99" r="12"/>
+                        </g>
+                        <g fill="#F5F0FA" stroke="#3D008D">
+                            <circle cx="210" cy="61" r="10"/><circle cx="210" cy="86" r="10"/><circle cx="210" cy="111" r="10"/>
+                        </g>
+                        <g fill="#DCFCE7" stroke="#15803D">
+                            <circle cx="270" cy="36" r="10"/><circle cx="270" cy="61" r="10"/><circle cx="270" cy="86" r="10"/><circle cx="270" cy="111" r="10"/><circle cx="270" cy="136" r="10"/>
+                        </g>
+                        <g font-family="Montserrat" text-anchor="middle" font-size="12.5" fill="#64748B">
+                            <text x="8" y="164" text-anchor="start">x (entrada)</text>
+                            <text x="90" y="16" fill="#3D008D">codificador f</text>
+                            <text x="150" y="130" fill="#B45309" font-weight="700">z (latente)</text>
+                            <text x="210" y="16" fill="#3D008D">decodificador g</text>
+                            <text x="270" y="164" fill="#15803D">x̂</text>
+                        </g>
+                    </svg>
                     <div class="eq text-center my-2 text-sm">$$\mathcal{L}_{\text{rec}} = \lVert x - g(f(x))\rVert^2$$</div>
                     <div class="callout mt-1" style="border-color:#0E7490; background:#ECFEFF">
                         <p class="text-[0.82rem] text-gray-700"><i class="fas fa-bus mr-1 text-teal"></i><strong>TransMilenio:</strong> los alimentadores (codificador) canalizan pasajeros dispersos hacia el bus articulado rojo (vector latente \(z\)); al llegar, se dispersan (decodificador). Un <strong>elefante</strong> que intenta entrar no se comprime → alto error de reconstrucción → <strong>detección de anomalías</strong> (fraude en un banco digital, eliminación de ruido en audio bioacústico).</p>
@@ -744,7 +985,7 @@
                     <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-circle-nodes" style="color:#B45309"></i>VAE: un espacio latente continuo y navegable</h3>
                     <p class="text-[0.86rem] text-gray-600 mb-3">El VAE mapea la entrada a una <strong>distribución</strong> (\(\mu,\sigma\)) en vez de a un punto fijo. Esto dota al espacio latente de <strong>continuidad</strong>: entre dos datos válidos hay infinitos estados intermedios igualmente válidos. Permite <strong>interpolar</strong> y generar.</p>
                     <!-- SVG interpolación latente -->
-                    <svg viewBox="0 0 380 150" class="w-full" role="img" aria-labelledby="vaeTitle vaeDesc">
+                    <svg viewBox="0 0 380 150" class="w-full svg-d" role="img" aria-labelledby="vaeTitle vaeDesc">
                         <title id="vaeTitle">Interpolación en el espacio latente de un VAE</title>
                         <desc id="vaeDesc">Dos nubes de probabilidad gaussianas etiquetadas como mu uno y mu dos se conectan mediante una trayectoria de puntos intermedios; cada punto representa una muestra válida generada al navegar suavemente entre ambas distribuciones.</desc>
                         <!-- nubes -->
@@ -762,6 +1003,25 @@
                             <text x="190" y="38" fill="#B45309">interpolación válida</text>
                         </g>
                     </svg>
+                    <!-- SVG interpolación latente · variante angosta (móvil) -->
+                    <svg viewBox="0 0 300 158" class="svg-m" role="img" aria-labelledby="vaeTitle-m vaeDesc-m">
+                        <title id="vaeTitle-m">Interpolación en el espacio latente de un VAE</title>
+                        <desc id="vaeDesc-m">Dos nubes de probabilidad gaussianas etiquetadas como mu uno y mu dos se conectan mediante una trayectoria de puntos intermedios; cada punto representa una muestra válida generada al navegar suavemente entre ambas distribuciones.</desc>
+                        <!-- nubes -->
+                        <ellipse cx="72" cy="96" rx="40" ry="30" fill="rgba(237,30,121,0.12)" stroke="#ED1E79" stroke-dasharray="4 3"/>
+                        <ellipse cx="228" cy="72" rx="40" ry="30" fill="rgba(61,0,141,0.12)" stroke="#3D008D" stroke-dasharray="4 3"/>
+                        <circle cx="72" cy="96" r="5" fill="#ED1E79"/><circle cx="228" cy="72" r="5" fill="#3D008D"/>
+                        <!-- trayectoria de interpolación -->
+                        <path d="M72,96 Q150,52 228,72" fill="none" stroke="#B45309" stroke-width="2" stroke-dasharray="2 3"/>
+                        <g fill="#FDB913" stroke="#B45309" stroke-width="0.8">
+                            <circle cx="111" cy="78" r="4.5"/><circle cx="150" cy="68" r="4.5"/><circle cx="189" cy="66" r="4.5"/>
+                        </g>
+                        <g font-family="Montserrat" text-anchor="middle" font-size="12.5" fill="#64748B">
+                            <text x="72" y="148">μ₁ (ajiaco espeso)</text>
+                            <text x="228" y="122">μ₂ (ajiaco ligero)</text>
+                            <text x="150" y="40" fill="#B45309">interpolación válida</text>
+                        </g>
+                    </svg>
                     <div class="eq text-center my-2 text-[0.82rem]">$$\mathcal{L}_{\text{ELBO}}=\mathbb{E}[\log p_\theta(x|z)] - D_{\text{KL}}(q_\phi(z|x)\,\|\,p(z))$$</div>
                     <p class="text-center text-[0.74rem] text-gray-500 -mt-1">Truco de reparametrización: \(z=\mu+\sigma\odot\epsilon\) (para que fluya el gradiente).</p>
                     <div class="callout mt-2" style="border-color:#B45309; background:#FFFBEB">
@@ -774,7 +1034,7 @@
             <div class="card p-6 mb-5">
                 <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-masks-theater" style="color:#B45309"></i>GAN: el juego adversario de dos redes</h3>
                 <p class="text-[0.86rem] text-gray-600 mb-4">Un <strong>Generador</strong> (\(G\), el verseador) crea muestras falsas a partir de ruido; un <strong>Discriminador</strong> (\(D\), el jurado) intenta distinguir reales de falsas. Compiten en un juego <strong>minimax</strong> hasta que \(D\) no puede distinguir (\(D(x)=1/2\)).</p>
-                <svg viewBox="0 0 600 140" class="w-full" role="img" aria-labelledby="ganTitle ganDesc">
+                <svg viewBox="0 0 600 140" class="w-full svg-d" role="img" aria-labelledby="ganTitle ganDesc">
                     <title id="ganTitle">Arquitectura adversaria de una GAN</title>
                     <desc id="ganDesc">Un vector de ruido entra al generador que produce una muestra falsa; junto con datos reales, alimenta al discriminador, que emite la probabilidad de ser real o falso y devuelve una señal de error a ambas redes.</desc>
                     <defs><marker id="arrGan" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker></defs>
@@ -803,6 +1063,38 @@
                         <text x="250" y="125" font-size="8" fill="#DC2626">señal de error (entrena G para engañar a D)</text>
                     </g>
                 </svg>
+                <!-- SVG GAN · variante angosta (móvil): el flujo baja de z a D; la señal de error
+                     regresa por la derecha hasta G -->
+                <svg viewBox="0 0 300 318" class="svg-m" role="img" aria-labelledby="ganTitle-m ganDesc-m">
+                    <title id="ganTitle-m">Arquitectura adversaria de una GAN</title>
+                    <desc id="ganDesc-m">Un vector de ruido entra al generador que produce una muestra falsa; junto con datos reales, alimenta al discriminador, que emite la probabilidad de ser real o falso y devuelve una señal de error a ambas redes.</desc>
+                    <defs><marker id="arrGan-m" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker></defs>
+                    <g font-family="Montserrat" text-anchor="middle">
+                        <!-- ruido -->
+                        <circle cx="60" cy="32" r="24" fill="#F1F5F9" stroke="#94A3B8"/><text x="60" y="30" font-size="14" fill="#475569">z</text><text x="60" y="45" font-size="12" fill="#64748B">ruido</text>
+                        <!-- G -->
+                        <rect x="20" y="80" width="80" height="50" rx="8" fill="#FEF9E7" stroke="#B45309" stroke-width="2"/><text x="60" y="102" font-size="16" fill="#B45309" font-weight="700">G</text><text x="60" y="120" font-size="12" fill="#92400E">Generador</text>
+                        <!-- muestra falsa -->
+                        <rect x="24" y="154" width="72" height="46" rx="6" fill="#FFFBEB" stroke="#FBBF24"/><text x="60" y="174" font-size="13" fill="#92400E">G(z)</text><text x="60" y="191" font-size="12" fill="#A16207">falsa</text>
+                        <!-- datos reales -->
+                        <rect x="150" y="154" width="72" height="46" rx="6" fill="#DCFCE7" stroke="#15803D"/><text x="186" y="174" font-size="13" fill="#166534">x</text><text x="186" y="191" font-size="12" fill="#15803D">real</text>
+                        <!-- D -->
+                        <rect x="12" y="232" width="96" height="50" rx="8" fill="#F5F0FA" stroke="#3D008D" stroke-width="2"/><text x="60" y="254" font-size="16" fill="#3D008D" font-weight="700">D</text><text x="60" y="272" font-size="12" fill="#5B1C9E">Discriminador</text>
+                        <!-- salida -->
+                        <text x="142" y="254" font-size="13" fill="#475569" text-anchor="start">D(x) ∈ (0, 1)</text>
+                        <text x="142" y="270" font-size="12" fill="#64748B" text-anchor="start">¿real o falsa?</text>
+                        <!-- flechas -->
+                        <g stroke="#94A3B8" stroke-width="1.5" fill="none" marker-end="url(#arrGan-m)">
+                            <line x1="60" y1="56" x2="60" y2="78"/><line x1="60" y1="130" x2="60" y2="152"/>
+                            <line x1="60" y1="200" x2="60" y2="230"/><line x1="162" y1="200" x2="106" y2="230"/>
+                            <line x1="108" y1="257" x2="136" y2="257"/>
+                        </g>
+                        <!-- realimentación adversaria -->
+                        <path d="M60,282 C60,304 76,308 104,308 L266,308 C282,308 288,300 288,284 L288,124 C288,110 280,105 266,105 L102,105" fill="none" stroke="#DC2626" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#arrGan-m)"/>
+                        <text x="196" y="76" font-size="12" fill="#DC2626">señal de error</text>
+                        <text x="196" y="92" font-size="12" fill="#DC2626">(entrena G para engañar a D)</text>
+                    </g>
+                </svg>
                 <div class="eq text-center my-2">$$\min_G \max_D V(D,G) = \mathbb{E}_{x\sim p_{\text{data}}}[\log D(x)] + \mathbb{E}_{z\sim p_z}[\log(1 - D(G(z)))]$$</div>
                 <div class="grid md:grid-cols-2 gap-3 mt-2">
                     <div class="callout" style="border-color:#DC2626; background:#FEF2F2">
@@ -819,9 +1111,9 @@
                 <h3 class="font-bold text-navy mb-2 flex items-center gap-2"><i class="fas fa-water" style="color:#B45309"></i>Modelos de difusión: destruir para aprender a reconstruir</h3>
                 <p class="text-[0.86rem] text-gray-600 mb-4">El proceso <strong>directo</strong> (<em>forward</em>; fijo, sin parámetros) añade ruido gaussiano paso a paso hasta convertir la imagen en estática pura. El proceso <strong>inverso</strong> (<em>reverse</em>; aprendido) entrena una red para <strong>quitar</strong> ese ruido y recuperar la imagen. Generar = partir de ruido y aplicar el proceso inverso \(T\) veces.</p>
                 <!-- SVG difusión -->
-                <svg viewBox="0 0 600 130" class="w-full" role="img" aria-labelledby="diffTitle diffDesc">
+                <svg viewBox="0 0 600 130" class="w-full svg-d" role="img" aria-labelledby="diffTitle diffDesc">
                     <title id="diffTitle">Procesos directo e inverso de un modelo de difusión</title>
-                    <desc id="diffDesc">Una imagen nítida se degrada progresivamente en cuatro pasos hacia la izquierda hasta convertirse en ruido puro (proceso directo, en rojo); el proceso inverso, en verde, recorre la cadena en sentido inverso reconstruyendo la imagen.</desc>
+                    <desc id="diffDesc">Una imagen nítida se degrada progresivamente en cuatro pasos hacia la derecha hasta convertirse en ruido puro (proceso directo, en rojo); el proceso inverso, en verde, recorre la cadena en sentido inverso reconstruyendo la imagen.</desc>
                     <g>
                         <!-- estados con niveles de ruido crecientes -->
                         <rect x="30" y="40" width="60" height="60" rx="6" fill="#DCFCE7" stroke="#15803D"/><text x="60" y="74" text-anchor="middle" font-size="9" fill="#166534" font-family="Montserrat">x₀</text>
@@ -844,6 +1136,34 @@
                         <line x1="508" y1="106" x2="482" y2="106"/><line x1="418" y1="106" x2="352" y2="106"/><line x1="288" y1="106" x2="222" y2="106"/><line x1="158" y1="106" x2="92" y2="106"/>
                     </g>
                     <text x="300" y="124" text-anchor="middle" font-size="10" fill="#15803D" font-weight="600" font-family="Montserrat">◀ Inverso: quitar ruido (aprendido, pθ)</text>
+                </svg>
+                <!-- SVG difusión · variante angosta (móvil): la cadena pasa a vertical; el proceso
+                     directo baja por la izquierda y el inverso sube por la derecha -->
+                <svg viewBox="0 0 300 400" class="svg-m" role="img" aria-labelledby="diffTitle-m diffDesc-m">
+                    <title id="diffTitle-m">Procesos directo e inverso de un modelo de difusión</title>
+                    <desc id="diffDesc-m">Una imagen nítida se degrada progresivamente en cuatro pasos hacia abajo hasta convertirse en ruido puro (proceso directo, en rojo); el proceso inverso, en verde, recorre la cadena en sentido inverso reconstruyendo la imagen.</desc>
+                    <text x="150" y="18" text-anchor="middle" font-size="13" fill="#DC2626" font-weight="600" font-family="Montserrat">▼ Directo: añadir ruido (fijo)</text>
+                    <g>
+                        <!-- estados con niveles de ruido crecientes -->
+                        <rect x="100" y="32" width="100" height="40" rx="6" fill="#DCFCE7" stroke="#15803D"/><text x="150" y="58" text-anchor="middle" font-size="15" fill="#166534" font-family="Montserrat">x₀</text>
+                        <rect x="100" y="106" width="100" height="40" rx="6" fill="#E7F6E9" stroke="#86C99A"/><text x="150" y="132" text-anchor="middle" font-size="15" fill="#475569" font-family="Montserrat">x₁</text>
+                        <rect x="100" y="180" width="100" height="40" rx="6" fill="#EEF2F7" stroke="#B0B9C6"/><text x="150" y="206" text-anchor="middle" font-size="15" fill="#475569" font-family="Montserrat">x₂</text>
+                        <rect x="100" y="254" width="100" height="40" rx="6" fill="#F1F5F9" stroke="#94A3B8"/><text x="150" y="280" text-anchor="middle" font-size="15" fill="#475569" font-family="Montserrat">…</text>
+                        <rect x="100" y="328" width="100" height="40" rx="6" fill="#E2E8F0" stroke="#64748B" stroke-dasharray="3 2"/><text x="150" y="354" text-anchor="middle" font-size="15" fill="#334155" font-family="Montserrat">xₜ ruido</text>
+                    </g>
+                    <defs>
+                        <marker id="arrFwd-m" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#DC2626"/></marker>
+                        <marker id="arrRev-m" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#15803D"/></marker>
+                    </defs>
+                    <!-- forward (rojo, izquierda, hacia abajo) -->
+                    <g stroke="#DC2626" stroke-width="2" fill="none" marker-end="url(#arrFwd-m)">
+                        <line x1="90" y1="74" x2="90" y2="104"/><line x1="90" y1="148" x2="90" y2="178"/><line x1="90" y1="222" x2="90" y2="252"/><line x1="90" y1="296" x2="90" y2="326"/>
+                    </g>
+                    <!-- reverse (verde, derecha, hacia arriba) -->
+                    <g stroke="#15803D" stroke-width="2" fill="none" marker-end="url(#arrRev-m)">
+                        <line x1="210" y1="326" x2="210" y2="296"/><line x1="210" y1="252" x2="210" y2="222"/><line x1="210" y1="178" x2="210" y2="148"/><line x1="210" y1="104" x2="210" y2="74"/>
+                    </g>
+                    <text x="150" y="392" text-anchor="middle" font-size="13" fill="#15803D" font-weight="600" font-family="Montserrat">▲ Inverso: quitar ruido (aprendido, pθ)</text>
                 </svg>
                 <div class="callout mt-2" style="border-color:#5B1C9E; background:#FAF8FF">
                     <p class="text-[0.84rem] text-gray-700"><i class="fas fa-water mr-1" style="color:#5B1C9E"></i><strong>La limpieza del río Bogotá:</strong> el río cristalino de páramo recibe vertimientos paso a paso (proceso directo, fijo); una planta de tratamiento aprende a revertir la contaminación por etapas (proceso inverso, aprendido). Hoy <strong>dominan</strong> la generación de imágenes: sustentan DALL·E 2, Stable Diffusion y buena parte de los generadores actuales (el DALL·E original de 2021 era un Transformer autorregresivo). Ventajas: entrenamiento estable, gran diversidad y control texto-a-imagen. Desventaja: muestreo lento (decenas a cientos de pasos; uno o pocos con destilación).</p>
@@ -1012,7 +1332,7 @@
             const lstm = t => 0.30 + 0.70 * Math.exp(-t / 120);      // se mantiene cerca de 1 (carrusel aditivo)
             const X = x => pad + x / tMax * (w - 2 * pad);
             const Y = y => h - pad - y * (h - 2 * pad);
-            let svg = '<svg viewBox="0 0 ' + w + ' ' + h + '" class="w-full">';
+            let svg = '<svg viewBox="0 0 ' + w + ' ' + h + '" class="w-full svg-d">';
             svg += '<line x1="' + pad + '" y1="' + (h - pad) + '" x2="' + (w - pad) + '" y2="' + (h - pad) + '" stroke="#CBD5E1"/>';
             svg += '<line x1="' + pad + '" y1="' + pad + '" x2="' + pad + '" y2="' + (h - pad) + '" stroke="#CBD5E1"/>';
             svg += '<text x="' + (w / 2) + '" y="' + (h - 6) + '" font-size="9" fill="#64748B" text-anchor="middle">Pasos de tiempo &#8594;</text>';
@@ -1023,7 +1343,28 @@
             // leyenda
             svg += '<circle cx="' + (w - 92) + '" cy="' + (pad + 2) + '" r="3.5" fill="#15803D"/><text x="' + (w - 85) + '" y="' + (pad + 5) + '" font-size="9" fill="#475569">LSTM</text>';
             svg += '<circle cx="' + (w - 92) + '" cy="' + (pad + 16) + '" r="3.5" fill="#DC2626"/><text x="' + (w - 85) + '" y="' + (pad + 19) + '" font-size="9" fill="#475569">RNN simple</text>';
-            el.innerHTML = svg + '</svg>';
+            svg += '</svg>';
+
+            // Variante angosta (móvil, .svg-m): 300 unidades de ancho, texto ≥ 12 y la leyenda
+            // en la zona libre de la derecha (entre ambas curvas).
+            const wm = 300, hm = 200, pl = 36, pr = 12, pt = 14, pb = 38;
+            const Xm = x => pl + x / tMax * (wm - pl - pr);
+            const Ym = y => hm - pb - y * (hm - pt - pb);
+            function curveM(fn, color) { let d = ''; for (let t = 0; t <= tMax; t++) { d += (t ? ' L' : 'M') + Xm(t).toFixed(1) + ',' + Ym(fn(t)).toFixed(1); } return '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="2.5"/>'; }
+            const yMid = (pt + hm - pb) / 2, xMid = (pl + wm - pr) / 2;
+            let svgM = '<svg viewBox="0 0 ' + wm + ' ' + hm + '" class="svg-m">';
+            svgM += '<line x1="' + pl + '" y1="' + (hm - pb) + '" x2="' + (wm - pr) + '" y2="' + (hm - pb) + '" stroke="#CBD5E1"/>';
+            svgM += '<line x1="' + pl + '" y1="' + pt + '" x2="' + pl + '" y2="' + (hm - pb) + '" stroke="#CBD5E1"/>';
+            svgM += '<text x="' + xMid + '" y="' + (hm - 12) + '" font-size="13" fill="#64748B" text-anchor="middle">Pasos de tiempo &#8594;</text>';
+            svgM += '<text x="18" y="' + yMid + '" font-size="13" fill="#64748B" transform="rotate(-90 18 ' + yMid + ')" text-anchor="middle">Se&#241;al conservada</text>';
+            svgM += curveM(lstm, '#15803D');
+            svgM += curveM(rnn, '#DC2626');
+            // leyenda
+            const lx = 176, ly1 = Ym(0.55), ly2 = Ym(0.38);
+            svgM += '<circle cx="' + lx + '" cy="' + ly1.toFixed(1) + '" r="4.5" fill="#15803D"/><text x="' + (lx + 10) + '" y="' + (ly1 + 4.5).toFixed(1) + '" font-size="13" fill="#475569">LSTM</text>';
+            svgM += '<circle cx="' + lx + '" cy="' + ly2.toFixed(1) + '" r="4.5" fill="#DC2626"/><text x="' + (lx + 10) + '" y="' + (ly2 + 4.5).toFixed(1) + '" font-size="13" fill="#475569">RNN simple</text>';
+            svgM += '</svg>';
+            el.innerHTML = svg + svgM;
         })();
 
         /* ---------- Scroll-spy nav + botón arriba + reveal ---------- */
