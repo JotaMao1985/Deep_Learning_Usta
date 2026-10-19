@@ -827,6 +827,28 @@
         ============================================================ */
         /* Número con coma decimal para el texto visible (regla B: coma en prosa, leyendas, SVG y UI; punto en código y LaTeX). */
         const fmtDec = (v, d) => v.toFixed(d).replace('.', ',');
+
+        /* Diagramas esquemáticos en pantallas angostas: cuando el ancho útil del contenedor no alcanza para que la versión
+           de escritorio conserve su texto legible (umbral ≈ 85 % de su viewBox), se dibuja una variante propia de 320
+           unidades de ancho (texto ≥ 12) en lugar de encoger la figura o desplazarla de lado. Devuelve [ref, ¿angosto?]. */
+        const useDiagramaAngosto = (umbral) => {
+            const ref = useRef(null);
+            const [angosto, setAngosto] = useState(() => (window.innerWidth || 1024) < umbral + 96);
+            useEffect(() => {
+                const el = ref.current; if (!el) return undefined;
+                const medir = () => {
+                    const cs = getComputedStyle(el);
+                    const w = el.clientWidth - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0);
+                    if (w > 0) setAngosto(w < umbral);
+                };
+                medir();
+                if (!window.ResizeObserver) return undefined;
+                const ro = new ResizeObserver(medir); ro.observe(el);
+                return () => ro.disconnect();
+            }, [umbral]);
+            return [ref, angosto];
+        };
+        const SVG_MOVIL = { maxWidth: 440 };
         // Pinta en cursiva los tramos marcados *así* en cadenas de datos (glosario); para ordenar o buscar se usa s.replace(/\*/g, '').
         const conCursivas = (s) => typeof s === 'string' ? s.split(/\*([^*]+)\*/).map((p, i) => i % 2 ? <em key={i}>{p}</em> : p) : s;
 
@@ -1201,13 +1223,67 @@
             const x0 = 40, y0 = 60; // origen de la matriz de entrada
             const kx0 = 360, ky0 = 95; // origen del kernel
             const mx0 = 560, my0 = 95; // origen del mapa de características
+            const [ref, angosto] = useDiagramaAngosto(629);
+            const aria = 'Operación de convolución: un kernel 3 por 3 se desliza sobre una matriz de entrada 5 por 5 y produce un mapa de características 3 por 3.';
+            const titulo = 'La ventana 3×3 resaltada sobre la entrada se multiplica elemento a elemento por el kernel; la suma de los productos genera un valor del mapa de características.';
+            // Variante angosta: la entrada arriba; debajo, ∗ kernel → mapa en una fila; el cálculo partido en renglones.
+            const nc = 32, nx0 = 80, ny0 = 34, nkx = 46, nky = 240, nmx = 206, nmy = 240, nfy = 368;
 
             return (
                 <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
-                    <div className="overflow-x-auto">
+                    <div ref={ref} className="overflow-x-auto">
+                    {angosto ? (
+                    <svg viewBox="0 0 320 518" className="w-full block mx-auto" style={SVG_MOVIL} role="img" aria-label={aria}>
+                        <title>{titulo}</title>
+                        <text x={nx0 + (5 * nc) / 2} y={ny0 - 12} textAnchor="middle" fontSize="14" fill="#3D008D" fontWeight="bold">Entrada (5×5)</text>
+                        {entrada.map((fila, i) => fila.map((v, j) => {
+                            const enVentana = i < 3 && j < 3;
+                            return (
+                                <g key={`ne-${i}-${j}`}>
+                                    <rect x={nx0 + j * nc} y={ny0 + i * nc} width={nc} height={nc}
+                                        fill={enVentana ? '#FCE7F3' : '#F8FAFC'} stroke={enVentana ? '#ED1E79' : '#CBD5E1'} strokeWidth={enVentana ? 2 : 1} />
+                                    <text x={nx0 + j * nc + nc / 2} y={ny0 + i * nc + nc / 2 + 4.5} textAnchor="middle" fontSize="13" fill="#334155">{v}</text>
+                                </g>
+                            );
+                        }))}
+                        <rect x={nx0} y={ny0} width={3 * nc} height={3 * nc} fill="none" stroke="#ED1E79" strokeWidth="3" rx="3" />
+
+                        <text x={nkx - 22} y={nky + nc * 1.5 + 5} textAnchor="middle" fontSize="22" fill="#001A4D" fontWeight="bold">∗</text>
+                        <text x={nkx + (3 * nc) / 2} y={nky - 12} textAnchor="middle" fontSize="14" fill="#0E7490" fontWeight="bold">Kernel (3×3)</text>
+                        {kernel.map((fila, i) => fila.map((v, j) => (
+                            <g key={`nk-${i}-${j}`}>
+                                <rect x={nkx + j * nc} y={nky + i * nc} width={nc} height={nc} fill="#ECFEFF" stroke="#0E7490" strokeWidth="1.5" />
+                                <text x={nkx + j * nc + nc / 2} y={nky + i * nc + nc / 2 + 4.5} textAnchor="middle" fontSize="13" fill="#0E7490" fontWeight="bold">{v}</text>
+                            </g>
+                        )))}
+
+                        <text x={nmx - 32} y={nmy + nc * 1.5 + 7} textAnchor="middle" fontSize="22" fill="#15803D" fontWeight="bold">→</text>
+                        <text x={nmx + (3 * nc) / 2} y={nmy - 12} textAnchor="middle" fontSize="14" fill="#15803D" fontWeight="bold">Mapa (3×3)</text>
+                        {Array.from({ length: 3 }).map((_, i) => Array.from({ length: 3 }).map((_, j) => {
+                            const destino = i === 0 && j === 0;
+                            return (
+                                <g key={`nm-${i}-${j}`}>
+                                    <rect x={nmx + j * nc} y={nmy + i * nc} width={nc} height={nc}
+                                        fill={destino ? '#DCFCE7' : '#F8FAFC'} stroke={destino ? '#15803D' : '#CBD5E1'} strokeWidth={destino ? 2.5 : 1} />
+                                    {destino && <text x={nmx + j * nc + nc / 2} y={nmy + i * nc + nc / 2 + 4.5} textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="bold">−5</text>}
+                                </g>
+                            );
+                        }))}
+
+                        <text x="16" y={nfy} fontSize="13" fill="#475569">
+                            S<tspan baselineShift="sub" fontSize="12">0,0</tspan> = Σ ( I × K )
+                        </text>
+                        <text x="40" y={nfy + 24} fontSize="13" fill="#475569">= (3·1 + 0·0 + 1·(−1))</text>
+                        <text x="40" y={nfy + 44} fontSize="13" fill="#475569">+ (1·1 + 5·0 + 8·(−1))</text>
+                        <text x="40" y={nfy + 64} fontSize="13" fill="#475569">+ (2·1 + 7·0 + 2·(−1)) = −5</text>
+                        {['La ventana rosa se multiplica elemento a', 'elemento por el kernel; la suma de productos', 'llena una celda del mapa y luego la ventana', 'se desplaza (stride).'].map((l, k) => (
+                            <text key={`nn-${k}`} x="16" y={nfy + 92 + k * 16} fontSize="12" fill="#64748B" fontStyle="italic">{l}</text>
+                        ))}
+                    </svg>
+                    ) : (
                     <svg viewBox="0 0 740 336" className="w-full" style={{ minWidth: 620 }} role="img"
-                        aria-label="Operación de convolución: un kernel 3 por 3 se desliza sobre una matriz de entrada 5 por 5 y produce un mapa de características 3 por 3.">
-                        <title>La ventana 3×3 resaltada sobre la entrada se multiplica elemento a elemento por el kernel; la suma de los productos genera un valor del mapa de características.</title>
+                        aria-label={aria}>
+                        <title>{titulo}</title>
 
                         {/* --- Matriz de entrada 5×5 --- */}
                         <text x={x0 + (5 * cel) / 2} y={y0 - 14} textAnchor="middle" fontSize="13" fill="#3D008D" fontWeight="bold">Entrada (5×5)</text>
@@ -1263,8 +1339,9 @@
                             la suma de productos llena una celda del mapa y luego la ventana se desplaza (stride).
                         </text>
                     </svg>
+                    )}
                     </div>
-                    <AvisoDesplazar />
+                    {!angosto && <AvisoDesplazar />}
                     <PieFigura n="2.1.2" className="mt-2">
                         Operación de convolución: el kernel recorre la entrada produciendo, en cada posición, un único valor del mapa de características (aquí, S<sub>0,0</sub> = −5).
                     </PieFigura>
@@ -1277,12 +1354,43 @@
            Un filtro con la profundidad de la entrada (3 canales RGB)
            produce UN mapa; N filtros producen N mapas (profundidad N).
         ============================================================ */
-        const MultiChannelConvSVG = () => (
+        const MultiChannelConvSVG = () => {
+            const [ref, angosto] = useDiagramaAngosto(629);
+            const aria = 'Convolución multicanal: un filtro con la misma profundidad que la entrada RGB de tres canales produce un único mapa de características; aplicar N filtros distintos genera N mapas que se apilan en un volumen de profundidad N.';
+            const titulo = 'Cada filtro abarca los tres canales de la entrada y produce un solo mapa 2D; el número de filtros N fija la profundidad del volumen de salida.';
+            return (
             <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
-                <div className="overflow-x-auto">
+                <div ref={ref} className="overflow-x-auto">
+                {angosto ? (
+                /* variante angosta: fila 1 = entrada ∗ filtro; fila 2 = → 1 mapa × N filtros, N mapas */
+                <svg viewBox="0 0 320 316" className="w-full block mx-auto" style={SVG_MOVIL} role="img" aria-label={aria}>
+                    <title>{titulo}</title>
+                    <text x="84" y="24" textAnchor="middle" fontSize="14" fill="#3D008D" fontWeight="bold">Entrada RGB</text>
+                    <rect x="44" y="44" width="56" height="56" fill="#DBEAFE" stroke="#1D4ED8" strokeWidth="1.6" />
+                    <rect x="56" y="56" width="56" height="56" fill="#DCFCE7" stroke="#15803D" strokeWidth="1.6" />
+                    <rect x="68" y="68" width="56" height="56" fill="#FEE2E2" stroke="#B91C1C" strokeWidth="1.6" />
+                    <text x="96" y="144" textAnchor="middle" fontSize="12" fill="#64748B" fontStyle="italic">3 canales</text>
+                    <text x="160" y="100" textAnchor="middle" fontSize="22" fill="#001A4D" fontWeight="bold">∗</text>
+                    <text x="240" y="24" textAnchor="middle" fontSize="14" fill="#0E7490" fontWeight="bold">Filtro 3×3×3</text>
+                    <rect x="204" y="56" width="44" height="44" fill="#ECFEFF" stroke="#0E7490" strokeWidth="1.4" />
+                    <rect x="214" y="66" width="44" height="44" fill="#ECFEFF" stroke="#0E7490" strokeWidth="1.4" />
+                    <rect x="224" y="76" width="44" height="44" fill="#ECFEFF" stroke="#0E7490" strokeWidth="1.6" />
+                    <text x="246" y="144" textAnchor="middle" fontSize="12" fill="#64748B" fontStyle="italic">misma profundidad</text>
+                    <text x="30" y="236" textAnchor="middle" fontSize="22" fill="#15803D" fontWeight="bold">→</text>
+                    <rect x="56" y="200" width="56" height="56" fill="#DCFCE7" stroke="#15803D" strokeWidth="2" />
+                    <text x="84" y="276" textAnchor="middle" fontSize="12" fill="#15803D" fontWeight="bold">1 mapa</text>
+                    <text x="150" y="228" textAnchor="middle" fontSize="15" fill="#ED1E79" fontWeight="bold">× N</text>
+                    <text x="150" y="246" textAnchor="middle" fontSize="12" fill="#64748B">filtros</text>
+                    <text x="242" y="184" textAnchor="middle" fontSize="14" fill="#15803D" fontWeight="bold">N mapas</text>
+                    {[0, 1, 2, 3].map((i) => (
+                        <rect key={`nm-${i}`} x={198 + i * 12} y={196 + i * 12} width="52" height="52" fill="#DCFCE7" stroke="#15803D" strokeWidth="1.6" />
+                    ))}
+                    <text x="260" y="304" textAnchor="middle" fontSize="12" fill="#64748B" fontStyle="italic">profundidad N</text>
+                </svg>
+                ) : (
                 <svg viewBox="0 0 740 250" className="w-full" style={{ minWidth: 640 }} role="img"
-                    aria-label="Convolución multicanal: un filtro con la misma profundidad que la entrada RGB de tres canales produce un único mapa de características; aplicar N filtros distintos genera N mapas que se apilan en un volumen de profundidad N.">
-                    <title>Cada filtro abarca los tres canales de la entrada y produce un solo mapa 2D; el número de filtros N fija la profundidad del volumen de salida.</title>
+                    aria-label={aria}>
+                    <title>{titulo}</title>
                     <text x="95" y="38" textAnchor="middle" fontSize="13" fill="#3D008D" fontWeight="bold">Entrada RGB</text>
                     <rect x="60" y="70" width="70" height="70" fill="#DBEAFE" stroke="#1D4ED8" strokeWidth="1.6" />
                     <rect x="75" y="85" width="70" height="70" fill="#DCFCE7" stroke="#15803D" strokeWidth="1.6" />
@@ -1305,11 +1413,13 @@
                     ))}
                     <text x="650" y="192" textAnchor="middle" fontSize="11" fill="#64748B" fontStyle="italic">profundidad N</text>
                 </svg>
+                )}
                 </div>
-                <AvisoDesplazar />
+                {!angosto && <AvisoDesplazar />}
                 <PieFigura n="2.1.3" className="mt-2">Convolución multicanal: cada filtro abarca los tres canales y produce un único mapa; el número de filtros N determina la profundidad del volumen de salida.</PieFigura>
             </div>
-        );
+            );
+        };
 
         const Cap21Section = () => {
             const ref = useRef(null);
@@ -1862,12 +1972,93 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
            Regla: dentro de <text> NO se usan delimitadores MathJax;
            solo texto nativo, <tspan baselineShift="sub"> y Unicode.
         ============================================================ */
-        const LSTMCellSVG = ({ cita = null }) => (
+        const LSTMCellSVG = ({ cita = null }) => {
+            const [ref, angosto] = useDiagramaAngosto(663);
+            const aria = 'Celda LSTM vista como tuberías y válvulas: la memoria antigua C(t-1) circula por la cinta principal; la válvula de olvido la multiplica, se le suma la memoria nueva (memoria candidata por la válvula de entrada) y la válvula de salida expone el estado oculto h(t).';
+            const titulo = 'Analogía de tuberías y válvulas: la tubería de memoria C sufre solo dos interacciones lineales —una multiplicación por la válvula de olvido y una suma de memoria nueva—; la válvula de salida decide cuánta memoria, filtrada por tanh, se expone como h(t).';
+            return (
             <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
-                <div className="overflow-x-auto">
+                <div ref={ref} className="overflow-x-auto">
+                {angosto ? (
+                /* variante angosta: la celda girada — la cinta C baja por la izquierda, las válvulas a la derecha y el bus x_t, h_t−1 por el borde derecho */
+                <svg viewBox="0 0 320 568" className="w-full block mx-auto" style={SVG_MOVIL} role="img" aria-label={aria}>
+                    <title>{titulo}</title>
+                    <rect x="6" y="8" width="308" height="552" rx="16" fill="#FBF8FF" stroke="#3D008D" strokeWidth="2" />
+                    <text x="54" y="34" fontSize="14" fill="#3D008D" fontWeight="bold">Celda LSTM · paso t</text>
+                    <text x="54" y="52" fontSize="12" fill="#64748B" fontStyle="italic">analogía de tuberías y válvulas</text>
+
+                    {/* cinta transportadora C (vertical) */}
+                    <line x1="34" y1="8" x2="34" y2="558" stroke="#15803D" strokeWidth="4" />
+                    <polygon points="34,560 27,546 41,546" fill="#15803D" />
+                    <text x="50" y="84" fontSize="14" fill="#15803D" fontWeight="bold">C<tspan baselineShift="sub" fontSize="12">t−1</tspan></text>
+                    <text x="50" y="106" fontSize="12" fill="#15803D" fontStyle="italic">memoria antigua</text>
+                    <text x="50" y="531" fontSize="14" fill="#15803D" fontWeight="bold">C<tspan baselineShift="sub" fontSize="12">t</tspan></text>
+                    <text x="50" y="553" fontSize="12" fill="#15803D" fontStyle="italic">memoria actualizada</text>
+
+                    {/* válvula de olvido → ⊙ sobre la cinta */}
+                    <circle cx="34" cy="150" r="16" fill="#FEF2F2" stroke="#B91C1C" strokeWidth="2" />
+                    <text x="34" y="156" textAnchor="middle" fontSize="16" fill="#B91C1C" fontWeight="bold">⊙</text>
+                    <rect x="144" y="124" width="142" height="52" rx="10" fill="#FEF2F2" stroke="#B91C1C" strokeWidth="1.8" />
+                    <text x="215" y="145" textAnchor="middle" fontSize="13" fill="#B91C1C" fontWeight="bold">Válvula de olvido</text>
+                    <text x="215" y="165" textAnchor="middle" fontSize="14" fill="#B91C1C">σ</text>
+                    <line x1="144" y1="150" x2="54" y2="150" stroke="#B91C1C" strokeWidth="2" />
+                    <polygon points="52,150 64,144 64,156" fill="#B91C1C" />
+                    <text x="70" y="141" fontSize="13" fill="#B91C1C" fontWeight="bold">f<tspan baselineShift="sub" fontSize="12">t</tspan></text>
+                    <text x="88" y="141" fontSize="12" fill="#64748B" fontStyle="italic">∈ (0, 1)</text>
+
+                    {/* memoria nueva = válvula de entrada ⊙ memoria candidata → + sobre la cinta */}
+                    <circle cx="34" cy="300" r="16" fill="#F0FDF4" stroke="#15803D" strokeWidth="2" />
+                    <text x="34" y="307" textAnchor="middle" fontSize="18" fill="#15803D" fontWeight="bold">+</text>
+                    <rect x="144" y="194" width="142" height="64" rx="10" fill="#F0FDF4" stroke="#15803D" strokeWidth="1.8" />
+                    <text x="215" y="213" textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="bold">Válvula de entrada</text>
+                    <text x="215" y="231" textAnchor="middle" fontSize="14" fill="#15803D">σ</text>
+                    <text x="215" y="247" textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="bold">i<tspan baselineShift="sub" fontSize="12">t</tspan></text>
+                    <rect x="144" y="268" width="142" height="64" rx="10" fill="#ECFEFF" stroke="#0E7490" strokeWidth="1.8" />
+                    <text x="215" y="287" textAnchor="middle" fontSize="13" fill="#0E7490" fontWeight="bold">Memoria candidata</text>
+                    <text x="215" y="305" textAnchor="middle" fontSize="14" fill="#0E7490">tanh</text>
+                    <text x="215" y="321" textAnchor="middle" fontSize="13" fill="#0E7490" fontWeight="bold">C̃<tspan baselineShift="sub" fontSize="12">t</tspan></text>
+                    <circle cx="118" cy="300" r="13" fill="#F0FDF4" stroke="#15803D" strokeWidth="1.8" />
+                    <text x="118" y="305" textAnchor="middle" fontSize="14" fill="#15803D" fontWeight="bold">⊙</text>
+                    <line x1="144" y1="226" x2="118" y2="226" stroke="#15803D" strokeWidth="1.8" />
+                    <line x1="118" y1="226" x2="118" y2="287" stroke="#15803D" strokeWidth="1.8" />
+                    <line x1="144" y1="300" x2="131" y2="300" stroke="#0E7490" strokeWidth="1.8" />
+                    <line x1="105" y1="300" x2="54" y2="300" stroke="#15803D" strokeWidth="2" />
+                    <polygon points="52,300 64,294 64,306" fill="#15803D" />
+                    <text x="80" y="276" textAnchor="middle" fontSize="12" fill="#15803D" fontStyle="italic">memoria</text>
+                    <text x="80" y="291" textAnchor="middle" fontSize="12" fill="#15803D" fontStyle="italic">nueva</text>
+
+                    {/* válvula de salida: toma C_t de la cinta, tanh y ⊙ por o_t → h_t */}
+                    <line x1="36" y1="372" x2="58" y2="372" stroke="#3D008D" strokeWidth="1.8" strokeDasharray="4 3" />
+                    <rect x="58" y="359" width="48" height="26" rx="6" fill="#F5F0FA" stroke="#3D008D" strokeWidth="1.4" />
+                    <text x="82" y="376.5" textAnchor="middle" fontSize="13" fill="#3D008D">tanh</text>
+                    <line x1="82" y1="385" x2="111" y2="421" stroke="#3D008D" strokeWidth="1.8" strokeDasharray="4 3" />
+                    <circle cx="122" cy="430" r="13" fill="#F5F0FA" stroke="#3D008D" strokeWidth="1.8" />
+                    <text x="122" y="435" textAnchor="middle" fontSize="14" fill="#3D008D" fontWeight="bold">⊙</text>
+                    <rect x="144" y="398" width="142" height="64" rx="10" fill="#F5F0FA" stroke="#3D008D" strokeWidth="1.8" />
+                    <text x="215" y="417" textAnchor="middle" fontSize="13" fill="#3D008D" fontWeight="bold">Válvula de salida</text>
+                    <text x="215" y="435" textAnchor="middle" fontSize="14" fill="#3D008D">σ</text>
+                    <text x="215" y="451" textAnchor="middle" fontSize="13" fill="#3D008D" fontWeight="bold">o<tspan baselineShift="sub" fontSize="12">t</tspan></text>
+                    <line x1="144" y1="430" x2="135" y2="430" stroke="#3D008D" strokeWidth="1.8" />
+                    <line x1="122" y1="443" x2="122" y2="500" stroke="#3D008D" strokeWidth="3" />
+                    <line x1="122" y1="500" x2="194" y2="500" stroke="#3D008D" strokeWidth="3" />
+                    <polygon points="197,500 185,494 185,506" fill="#3D008D" />
+                    <text x="204" y="505" fontSize="14" fill="#3D008D" fontWeight="bold">h<tspan baselineShift="sub" fontSize="12">t</tspan></text>
+                    <text x="226" y="505" fontSize="12" fill="#64748B" fontStyle="italic">salida</text>
+
+                    {/* bus de entrada compartido: x_t y h_t−1 alimentan las tres válvulas y la candidata */}
+                    <text x="262" y="84" textAnchor="middle" fontSize="14" fill="#001A4D" fontWeight="bold">x<tspan baselineShift="sub" fontSize="12">t</tspan></text>
+                    <text x="294" y="84" textAnchor="middle" fontSize="14" fill="#001A4D" fontWeight="bold">h<tspan baselineShift="sub" fontSize="12">t−1</tspan></text>
+                    <line x1="277" y1="94" x2="277" y2="104" stroke="#94A3B8" strokeWidth="1.4" strokeDasharray="3 3" />
+                    <line x1="277" y1="104" x2="298" y2="104" stroke="#94A3B8" strokeWidth="1.4" strokeDasharray="3 3" />
+                    <line x1="298" y1="104" x2="298" y2="430" stroke="#94A3B8" strokeWidth="1.4" strokeDasharray="3 3" />
+                    {[150, 226, 300, 430].map((y) => (
+                        <line key={`nb-${y}`} x1="298" y1={y} x2="286" y2={y} stroke="#94A3B8" strokeWidth="1.4" strokeDasharray="3 3" />
+                    ))}
+                </svg>
+                ) : (
                 <svg viewBox="0 0 780 400" className="w-full" style={{ minWidth: 680 }} role="img"
-                    aria-label="Celda LSTM vista como tuberías y válvulas: la memoria antigua C(t-1) circula por la cinta superior; la válvula de olvido la multiplica, se le suma la memoria nueva (memoria candidata por la válvula de entrada) y la válvula de salida expone el estado oculto h(t).">
-                    <title>Analogía de tuberías y válvulas: la tubería de memoria C sufre solo dos interacciones lineales —una multiplicación por la válvula de olvido y una suma de memoria nueva—; la válvula de salida decide cuánta memoria, filtrada por tanh, se expone como h(t).</title>
+                    aria-label={aria}>
+                    <title>{titulo}</title>
 
                     {/* Caja de la celda */}
                     <rect x="25" y="52" width="730" height="316" rx="16" fill="#FBF8FF" stroke="#3D008D" strokeWidth="2" />
@@ -1950,17 +2141,19 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <line x1="452" y1="326" x2="452" y2="308" stroke="#94A3B8" strokeWidth="1.4" strokeDasharray="3 3" />
                     <line x1="642" y1="326" x2="642" y2="308" stroke="#94A3B8" strokeWidth="1.4" strokeDasharray="3 3" />
                 </svg>
+                )}
                 </div>
-                <AvisoDesplazar />
+                {!angosto && <AvisoDesplazar />}
                 <PieFigura n="2.2.3" className="mt-2" fuente={<>elaboración propia{cita ? <>; la «cinta» del estado de la celda retoma la metáfora de {cita}</> : null}.</>}>
-                    La LSTM como <strong>tuberías y válvulas</strong>: la memoria C recorre la tubería superior sufriendo solo
+                    La LSTM como <strong>tuberías y válvulas</strong>: la memoria C recorre la tubería principal sufriendo solo
                     <strong> dos interacciones lineales</strong> —la válvula de olvido la multiplica (⊙ por f<sub>t</sub>) y se le suma (+) la
                     <strong> memoria nueva</strong> (i<sub>t</sub> ⊙ C̃<sub>t</sub>)—, lo que preserva el gradiente. La válvula de salida (o<sub>t</sub>)
                     decide cuánta memoria, filtrada por tanh, se expone como estado oculto h<sub>t</sub>. Las tres válvulas σ y la memoria
                     candidata reciben las mismas entradas: x<sub>t</sub> y h<sub>t−1</sub>.
                 </PieFigura>
             </div>
-        );
+            );
+        };
 
         /* ============================================================
            DIAGRAMA SVG: mecanismo de atención (Bahdanau)
@@ -1981,12 +2174,46 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
             const cel = 64;
             const gx = 200, gy = 90; // origen de la rejilla de pesos
             const tono = (v) => `rgba(61,0,141,${(0.12 + 0.82 * v).toFixed(3)})`; // morado USTA con opacidad ∝ α
+            const [ref, angosto] = useDiagramaAngosto(476);
+            const aria = 'Mapa de calor de los pesos de atención que alinean cada palabra de salida con las palabras de entrada relevantes.';
+            const titulo = 'Cada fila corresponde a una palabra generada (salida) y cada columna a un estado del codificador (entrada); la intensidad de la celda es el peso de atención α que indica dónde mira el decodificador.';
+            const nc = 60, ngx = 118, ngy = 104; // variante angosta
             return (
                 <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
-                    <div className="overflow-x-auto">
+                    <div ref={ref} className="overflow-x-auto">
+                    {angosto ? (
+                    <svg viewBox="0 0 320 368" className="w-full block mx-auto" style={SVG_MOVIL} role="img" aria-label={aria}>
+                        <title>{titulo}</title>
+                        <text x={ngx + (3 * nc) / 2} y="22" textAnchor="middle" fontSize="14" fill="#3D008D" fontWeight="bold">Pesos de atención α</text>
+                        <text x={ngx + (3 * nc) / 2} y="41" textAnchor="middle" fontSize="12" fill="#64748B" fontStyle="italic">entrada (codificador) ↔</text>
+                        <text x={ngx + (3 * nc) / 2} y="57" textAnchor="middle" fontSize="12" fill="#64748B" fontStyle="italic">salida (decodificador)</text>
+                        {/* h₁…h₃ con subíndice en tspan: los dígitos subíndice Unicode quedan diminutos a este tamaño */}
+                        {entradaLbl.map((h, j) => (
+                            <text key={`ncol-${j}`} x={ngx + j * nc + nc / 2} y={ngy - 14} textAnchor="middle" fontSize="15" fill="#0E7490" fontWeight="bold">h<tspan baselineShift="sub" fontSize="12">{j + 1}</tspan></text>
+                        ))}
+                        {alpha.map((fila, t) => fila.map((v, i) => (
+                            <g key={`na-${t}-${i}`}>
+                                <rect x={ngx + i * nc} y={ngy + t * nc} width={nc} height={nc} fill={tono(v)} stroke="#FFFFFF" strokeWidth="2" />
+                                <text x={ngx + i * nc + nc / 2} y={ngy + t * nc + nc / 2 + 5} textAnchor="middle"
+                                    fontSize="14" fill={v > 0.5 ? '#FFFFFF' : '#3D008D'} fontWeight="bold">{fmtDec(v, 2)}</text>
+                            </g>
+                        )))}
+                        {salida.map((w, t) => (
+                            <g key={`nrow-${t}`}>
+                                <text x={ngx - 12} y={ngy + t * nc + nc / 2 - 6} textAnchor="end" fontSize="14" fill="#ED1E79" fontWeight="bold">y<tspan baselineShift="sub" fontSize="12">{t + 1}</tspan></text>
+                                <text x={ngx - 12} y={ngy + t * nc + nc / 2 + 17} textAnchor="end" fontSize="12" fill="#64748B" fontStyle="italic">«{w}»</text>
+                            </g>
+                        ))}
+                        <text x={ngx + (3 * nc) / 2} y={ngy + 3 * nc + 34} textAnchor="middle" fontSize="15" fill="#475569">
+                            c<tspan baselineShift="sub" fontSize="12">t</tspan> = Σ<tspan baselineShift="sub" fontSize="12">i</tspan> α<tspan baselineShift="sub" fontSize="12">t,i</tspan> · h<tspan baselineShift="sub" fontSize="12">i</tspan>
+                        </text>
+                        <text x="160" y={ngy + 3 * nc + 60} textAnchor="middle" fontSize="12" fill="#64748B" fontStyle="italic">Cada fila suma 1 (softmax); el color marca</text>
+                        <text x="160" y={ngy + 3 * nc + 76} textAnchor="middle" fontSize="12" fill="#64748B" fontStyle="italic">dónde se concentra la atención.</text>
+                    </svg>
+                    ) : (
                     <svg viewBox="0 0 560 380" className="w-full" style={{ minWidth: 520 }} role="img"
-                        aria-label="Mapa de calor de los pesos de atención que alinean cada palabra de salida con las palabras de entrada relevantes.">
-                        <title>Cada fila corresponde a una palabra generada (salida) y cada columna a un estado del codificador (entrada); la intensidad de la celda es el peso de atención α que indica dónde mira el decodificador.</title>
+                        aria-label={aria}>
+                        <title>{titulo}</title>
 
                         <text x={gx + (3 * cel) / 2} y="40" textAnchor="middle" fontSize="13" fill="#3D008D" fontWeight="bold">Pesos de atención α</text>
                         <text x={gx + (3 * cel) / 2} y="58" textAnchor="middle" fontSize="11" fill="#64748B" fontStyle="italic">entrada (codificador) ↔ salida (decodificador)</text>
@@ -2022,8 +2249,9 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                             Cada fila suma 1 (softmax); el color marca dónde se concentra la atención.
                         </text>
                     </svg>
+                    )}
                     </div>
-                    <AvisoDesplazar />
+                    {!angosto && <AvisoDesplazar />}
                     <PieFigura n="2.2.5" className="mt-2" fuente="elaboración propia (pesos ilustrativos, no calculados).">
                         Mapa de alineamiento de una traducción del wayuunaiki al español: al generar «wayuu», el decodificador vuelca el
                         85 % de su atención sobre el tercer estado del codificador; el contexto dinámico c<sub>t</sub> recupera selectivamente
@@ -2041,12 +2269,45 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
         const RNNUnrolledSVG = () => {
             const steps = [1, 2, 3, 4];
             const colX = [170, 320, 470, 620];
+            const [ref, angosto] = useDiagramaAngosto(646);
+            const aria = 'Red neuronal recurrente desenrollada en cuatro pasos temporales. En cada paso, la entrada x sub t entra por abajo, una caja RNN con pesos W la procesa, el estado oculto h fluye horizontalmente de izquierda a derecha y la salida y gorro sub t sale por arriba. Los mismos pesos W se comparten en todos los pasos.';
+            const titulo = 'RNN desenrollada: el estado oculto h se propaga hacia la derecha mientras la misma caja de pesos W se reutiliza en cada paso temporal.';
+            const ncolX = [50, 124, 198, 272]; // variante angosta: misma disposición horizontal, columnas más juntas
             return (
                 <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
-                    <div className="overflow-x-auto">
+                    <div ref={ref} className="overflow-x-auto">
+                    {angosto ? (
+                    <svg viewBox="0 0 320 268" className="w-full block mx-auto" style={SVG_MOVIL} role="img" aria-label={aria}>
+                        <title>{titulo}</title>
+                        <rect x="10" y="8" width="300" height="28" rx="14" fill="#F5F0FA" stroke="#3D008D" strokeWidth="1.5" />
+                        <text x="160" y="26.5" textAnchor="middle" fontSize="12" fill="#3D008D" fontWeight="bold">Mismos pesos W compartidos en cada paso</text>
+                        <line x1="20" y1="158" x2="306" y2="158" stroke="#15803D" strokeWidth="4" />
+                        <polygon points="316,158 304,152 304,164" fill="#15803D" />
+                        <text x="11" y="145" textAnchor="middle" fontSize="15" fill="#15803D" fontWeight="bold">h<tspan baselineShift="sub" fontSize="12">0</tspan></text>
+                        {steps.map((t, i) => {
+                            const cx = ncolX[i];
+                            return (
+                                <g key={`nstep-${t}`}>
+                                    <rect x={cx - 22} y={133} width="44" height="50" rx="12" fill="#F5F0FA" stroke="#3D008D" strokeWidth="2" />
+                                    <text x={cx} y={156} textAnchor="middle" fontSize="14" fill="#3D008D" fontWeight="bold">RNN</text>
+                                    <text x={cx} y={174} textAnchor="middle" fontSize="12" fill="#3D008D">(W)</text>
+                                    <text x={cx + 37} y={145} textAnchor="middle" fontSize="15" fill="#15803D" fontWeight="bold">h<tspan baselineShift="sub" fontSize="12">{t}</tspan></text>
+                                    <rect x={cx - 22} y={222} width="44" height="36" rx="8" fill="#E8EDF7" stroke="#001A4D" strokeWidth="1.8" />
+                                    <text x={cx} y={245} textAnchor="middle" fontSize="15" fill="#001A4D" fontWeight="bold">x<tspan baselineShift="sub" fontSize="12">{t}</tspan></text>
+                                    <line x1={cx} y1={222} x2={cx} y2={187} stroke="#001A4D" strokeWidth="2" />
+                                    <polygon points={`${cx},185 ${cx - 6},197 ${cx + 6},197`} fill="#001A4D" />
+                                    <rect x={cx - 22} y={54} width="44" height="36" rx="8" fill="#E8EDF7" stroke="#001A4D" strokeWidth="1.8" />
+                                    <text x={cx} y={77} textAnchor="middle" fontSize="15" fill="#001A4D" fontWeight="bold">ŷ<tspan baselineShift="sub" fontSize="12">{t}</tspan></text>
+                                    <line x1={cx} y1={129} x2={cx} y2={94} stroke="#001A4D" strokeWidth="2" />
+                                    <polygon points={`${cx},92 ${cx - 6},104 ${cx + 6},104`} fill="#001A4D" />
+                                </g>
+                            );
+                        })}
+                    </svg>
+                    ) : (
                     <svg viewBox="0 0 760 320" className="w-full" style={{ minWidth: 700 }} role="img"
-                        aria-label="Red neuronal recurrente desenrollada en cuatro pasos temporales. En cada paso, la entrada x sub t entra por abajo, una caja RNN con pesos W la procesa, el estado oculto h fluye horizontalmente de izquierda a derecha y la salida y gorro sub t sale por arriba. Los mismos pesos W se comparten en todos los pasos.">
-                        <title>RNN desenrollada: el estado oculto h se propaga hacia la derecha mientras la misma caja de pesos W se reutiliza en cada paso temporal.</title>
+                        aria-label={aria}>
+                        <title>{titulo}</title>
                         <rect x="230" y="14" width="300" height="26" rx="13" fill="#F5F0FA" stroke="#3D008D" strokeWidth="1.5" />
                         <text x="380" y="31" textAnchor="middle" fontSize="12" fill="#3D008D" fontWeight="bold">Mismos pesos W compartidos en cada paso</text>
                         <line x1="50" y1="160" x2="715" y2="160" stroke="#15803D" strokeWidth="4" />
@@ -2072,8 +2333,9 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                             );
                         })}
                     </svg>
+                    )}
                     </div>
-                    <AvisoDesplazar />
+                    {!angosto && <AvisoDesplazar />}
                     <PieFigura n="2.2.1" className="mt-2">RNN desenrollada en el tiempo: la misma caja de pesos W (que resume W<sub>xh</sub>, W<sub>hh</sub> y W<sub>hy</sub>) procesa cada entrada x<sub>t</sub>, propaga el estado oculto h<sub>t</sub> (cinta verde) y emite ŷ<sub>t</sub>.</PieFigura>
                 </div>
             );
@@ -2098,12 +2360,52 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                 { from: 2, to: 1, color: '#94A3B8', mag: '0,06' },
                 { from: 1, to: 0, color: '#CBD5E1', mag: '0,016' },
             ];
+            const [ref, angosto] = useDiagramaAngosto(646);
+            const aria = 'Desvanecimiento del gradiente en una RNN desenrollada de cinco pasos. La retropropagación viaja de derecha a izquierda y su color se desvanece de rosa intenso a gris claro, mientras la magnitud del gradiente decae exponencialmente, con un factor ilustrativo de 0,25 por paso: 1,0; 0,25; 0,06; 0,016 y 0,004.';
+            const titulo = 'El gradiente parte con magnitud 1,0 en el último paso y se desvanece exponencialmente al retroceder en el tiempo, perdiendo casi toda su intensidad antes de alcanzar los primeros pasos.';
+            const nnx = [46, 104, 162, 220, 278]; // variante angosta: misma cadena horizontal, nodos más juntos
             return (
                 <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
-                    <div className="overflow-x-auto">
+                    <div ref={ref} className="overflow-x-auto">
+                    {angosto ? (
+                    <svg viewBox="0 0 320 200" className="w-full block mx-auto" style={SVG_MOVIL} role="img" aria-label={aria}>
+                        <title>{titulo}</title>
+                        <g transform="translate(0 -60)">
+                        <line x1="14" y1="150" x2="306" y2="150" stroke="#15803D" strokeWidth="3" />
+                        {nodes.map((n, k) => (
+                            <g key={`nnode-${n.label}`}>
+                                <circle cx={nnx[k]} cy="150" r="18" fill="#F5F0FA" stroke="#3D008D" strokeWidth="2" />
+                                <text x={nnx[k]} y={155} textAnchor="middle" fontSize="14" fill="#3D008D" fontWeight="bold">h<tspan baselineShift="sub" fontSize="12">{n.label}</tspan></text>
+                                <text x={nnx[k]} y={186} textAnchor="middle" fontSize="12" fill="#475569">paso {n.label}</text>
+                            </g>
+                        ))}
+                        {backArrows.map((a, i) => {
+                            const xs = nnx[a.from];
+                            const xe = nnx[a.to];
+                            const yTop = 98;
+                            const xMid = (xs + xe) / 2;
+                            return (
+                                <g key={`nback-${i}`}>
+                                    <path d={`M ${xs - 12} 134 C ${xs - 12} ${yTop}, ${xe + 12} ${yTop}, ${xe + 12} 134`} fill="none" stroke={a.color} strokeWidth={4 - i * 0.6} />
+                                    <polygon points={`${xe + 12},136 ${xe + 6},125 ${xe + 18},125`} fill={a.color} />
+                                    <rect x={xMid - 23} y={yTop - 24} width="46" height="21" rx="6" fill="#FFFFFF" stroke={a.color} strokeWidth="1.4" />
+                                    <text x={xMid} y={yTop - 9} textAnchor="middle" fontSize="12" fill={a.color} fontWeight="bold">{a.mag}</text>
+                                </g>
+                            );
+                        })}
+                        <text x={nnx[4] + 12} y={110} textAnchor="middle" fontSize="12" fill="#ED1E79" fontWeight="bold">∂L (1,0)</text>
+                        <line x1={nnx[4] + 12} y1={115} x2={nnx[4] + 12} y2={130} stroke="#ED1E79" strokeWidth="3" />
+                        <polygon points={`${nnx[4] + 12},137 ${nnx[4] + 6},125 ${nnx[4] + 18},125`} fill="#ED1E79" />
+                        <text x="18" y="118" textAnchor="middle" fontSize="12" fill="#CBD5E1" fontWeight="bold">0,004</text>
+                        <rect x="14" y="204" width="292" height="46" rx="14" fill="#FCE9F3" stroke="#ED1E79" strokeWidth="1.4" />
+                        <text x="160" y="223" textAnchor="middle" fontSize="12" fill="#B91C1C" fontWeight="bold">∂L/∂h decae exponencialmente</text>
+                        <text x="160" y="240" textAnchor="middle" fontSize="12" fill="#B91C1C" fontWeight="bold">al retroceder en el tiempo</text>
+                        </g>
+                    </svg>
+                    ) : (
                     <svg viewBox="0 0 760 300" className="w-full" style={{ minWidth: 700 }} role="img"
-                        aria-label="Desvanecimiento del gradiente en una RNN desenrollada de cinco pasos. La retropropagación viaja de derecha a izquierda y su color se desvanece de rosa intenso a gris claro, mientras la magnitud del gradiente decae exponencialmente, con un factor ilustrativo de 0,25 por paso: 1,0; 0,25; 0,06; 0,016 y 0,004.">
-                        <title>El gradiente parte con magnitud 1,0 en el último paso y se desvanece exponencialmente al retroceder en el tiempo, perdiendo casi toda su intensidad antes de alcanzar los primeros pasos.</title>
+                        aria-label={aria}>
+                        <title>{titulo}</title>
                         <line x1="70" y1="150" x2="730" y2="150" stroke="#15803D" strokeWidth="3" />
                         {nodes.map((n) => (
                             <g key={`node-${n.label}`}>
@@ -2133,8 +2435,9 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                         <rect x="180" y="232" width="400" height="30" rx="14" fill="#FCE9F3" stroke="#ED1E79" strokeWidth="1.4" />
                         <text x="380" y="251" textAnchor="middle" fontSize="12" fill="#B91C1C" fontWeight="bold">∂L/∂h decae exponencialmente al retroceder en el tiempo</text>
                     </svg>
+                    )}
                     </div>
-                    <AvisoDesplazar />
+                    {!angosto && <AvisoDesplazar />}
                     <PieFigura n="2.2.2" className="mt-2" fuente="elaboración propia (factor ilustrativo).">Desvanecimiento del gradiente: al retropropagar de derecha a izquierda, ∂L/∂h<sub>t</sub> decae exponencialmente; con un factor ilustrativo de 0,25 por paso, 1,0 → 0,25 → 0,06 → 0,016 → 0,004, lo que impide aprender dependencias de largo plazo.</PieFigura>
                 </div>
             );
@@ -2145,12 +2448,82 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
            Un solo estado h y dos compuertas: reinicio r y
            actualización z. Notablemente más simple que la LSTM.
         ============================================================ */
-        const GRUCellSVG = ({ cita = null }) => (
+        const GRUCellSVG = ({ cita = null }) => {
+            const [ref, angosto] = useDiagramaAngosto(646);
+            const aria = 'Celda GRU: variante simplificada de la LSTM con un único estado oculto h y solo dos compuertas. La compuerta de reinicio r y la de actualización z, ambas sigmoides, reciben la entrada x sub t y el estado anterior h sub t menos 1; el candidato (tangente hiperbólica) recibe x sub t y el estado anterior filtrado por r. El estado final es una interpolación lineal entre el estado anterior y el candidato, ponderada por z.';
+            const titulo = 'La GRU usa un solo estado h: la compuerta de reinicio r decide cuánto del pasado entra al candidato, y la compuerta de actualización z interpola entre el estado anterior y el candidato para producir h sub t.';
+            return (
             <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
-                <div className="overflow-x-auto">
+                <div ref={ref} className="overflow-x-auto">
+                {angosto ? (
+                /* variante angosta: la celda girada, como la LSTM — la cinta h baja por la izquierda, las compuertas a la derecha y el bus x_t por el borde derecho */
+                <svg viewBox="0 0 320 498" className="w-full block mx-auto" style={SVG_MOVIL} role="img" aria-label={aria}>
+                    <title>{titulo}</title>
+                    <rect x="6" y="44" width="308" height="396" rx="16" fill="#FBF8FF" stroke="#3D008D" strokeWidth="2" />
+                    <text x="62" y="68" fontSize="13" fill="#3D008D" fontWeight="bold">Celda GRU · paso t ·</text>
+                    <text x="62" y="86" fontSize="13" fill="#3D008D" fontWeight="bold">1 estado, 2 compuertas</text>
+                    <text x="62" y="104" fontSize="13" fill="#3D008D" fontWeight="bold">(más simple que la LSTM)</text>
+
+                    {/* cinta única del estado oculto h (vertical) */}
+                    <line x1="44" y1="44" x2="44" y2="438" stroke="#15803D" strokeWidth="4" />
+                    <polygon points="44,440 38,428 50,428" fill="#15803D" />
+                    <text x="44" y="32" textAnchor="middle" fontSize="15" fill="#15803D" fontWeight="bold">h<tspan baselineShift="sub" fontSize="12">t−1</tspan></text>
+                    <text x="44" y="462" textAnchor="middle" fontSize="15" fill="#15803D" fontWeight="bold">h<tspan baselineShift="sub" fontSize="12">t</tspan></text>
+
+                    {/* compuerta de reinicio r (h_t−1 entra por la izquierda, x_t por arriba) */}
+                    <rect x="112" y="150" width="110" height="52" rx="10" fill="#FEF2F2" stroke="#B91C1C" strokeWidth="1.8" />
+                    <text x="167" y="171" textAnchor="middle" fontSize="13" fill="#B91C1C" fontWeight="bold">Reinicio</text>
+                    <text x="167" y="191" textAnchor="middle" fontSize="14" fill="#B91C1C">r · σ</text>
+                    <line x1="46" y1="176" x2="112" y2="176" stroke="#94A3B8" strokeWidth="1.6" strokeDasharray="4 3" />
+
+                    {/* r_t ⊙ h_t−1 → candidato */}
+                    <line x1="167" y1="202" x2="167" y2="234" stroke="#B91C1C" strokeWidth="2" />
+                    <polygon points="167,244 161,232 173,232" fill="#B91C1C" />
+                    <text x="158" y="228" textAnchor="end" fontSize="12" fill="#B91C1C" fontWeight="bold">r<tspan baselineShift="sub" fontSize="12">t</tspan> ⊙ h<tspan baselineShift="sub" fontSize="12">t−1</tspan></text>
+                    <rect x="112" y="244" width="110" height="52" rx="10" fill="#F0FDF4" stroke="#15803D" strokeWidth="1.8" />
+                    <text x="167" y="265" textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="bold">Candidato</text>
+                    <text x="167" y="285" textAnchor="middle" fontSize="14" fill="#15803D">h̃<tspan baselineShift="sub" fontSize="12">t</tspan> · tanh</text>
+
+                    {/* compuerta de actualización z → ⊙ sobre la cinta; h_t−1 también la alimenta */}
+                    <rect x="112" y="326" width="110" height="52" rx="10" fill="#FEF2F2" stroke="#B91C1C" strokeWidth="1.8" />
+                    <text x="167" y="347" textAnchor="middle" fontSize="13" fill="#B91C1C" fontWeight="bold">Actualización</text>
+                    <text x="167" y="367" textAnchor="middle" fontSize="14" fill="#B91C1C">z · σ</text>
+                    <line x1="46" y1="334" x2="112" y2="334" stroke="#94A3B8" strokeWidth="1.6" strokeDasharray="4 3" />
+                    <line x1="112" y1="352" x2="70" y2="352" stroke="#B91C1C" strokeWidth="1.8" />
+                    <polygon points="60,352 72,346 72,358" fill="#B91C1C" />
+                    <circle cx="44" cy="352" r="15" fill="#FEF2F2" stroke="#B91C1C" strokeWidth="2" />
+                    <text x="44" y="357" textAnchor="middle" fontSize="15" fill="#B91C1C" fontWeight="bold">⊙</text>
+                    <text x="18" y="357" textAnchor="middle" fontSize="13" fill="#B91C1C" fontWeight="bold">z<tspan baselineShift="sub" fontSize="12">t</tspan></text>
+
+                    {/* rama (1−z)⊙h̃ que vuelve a la suma, por la derecha de las cajas; z también la pondera */}
+                    <line x1="222" y1="282" x2="250" y2="282" stroke="#15803D" strokeWidth="2" />
+                    <line x1="250" y1="282" x2="250" y2="416" stroke="#15803D" strokeWidth="2" />
+                    <line x1="250" y1="416" x2="70" y2="416" stroke="#15803D" strokeWidth="2" />
+                    <polygon points="60,416 72,410 72,422" fill="#15803D" />
+                    <line x1="222" y1="352" x2="240" y2="352" stroke="#B91C1C" strokeWidth="1.6" strokeDasharray="3 2" />
+                    <circle cx="250" cy="352" r="10" fill="#FEF2F2" stroke="#B91C1C" strokeWidth="1.6" />
+                    <text x="250" y="356.5" textAnchor="middle" fontSize="12" fill="#B91C1C" fontWeight="bold">⊙</text>
+                    <text x="150" y="404" textAnchor="middle" fontSize="12" fill="#15803D" fontWeight="bold">(1−z<tspan baselineShift="sub" fontSize="12">t</tspan>) ⊙ h̃<tspan baselineShift="sub" fontSize="12">t</tspan> → suma</text>
+                    <circle cx="44" cy="416" r="15" fill="#F5F0FA" stroke="#3D008D" strokeWidth="2" />
+                    <text x="44" y="422" textAnchor="middle" fontSize="17" fill="#3D008D" fontWeight="bold">+</text>
+
+                    {/* entrada x_t: bus por el borde derecho que alimenta las tres cajas */}
+                    <text x="292" y="128" textAnchor="middle" fontSize="15" fill="#001A4D" fontWeight="bold">x<tspan baselineShift="sub" fontSize="12">t</tspan></text>
+                    <line x1="292" y1="136" x2="292" y2="336" stroke="#001A4D" strokeWidth="1.6" strokeDasharray="3 3" />
+                    <line x1="292" y1="140" x2="167" y2="140" stroke="#001A4D" strokeWidth="1.6" strokeDasharray="3 3" />
+                    <line x1="167" y1="140" x2="167" y2="150" stroke="#001A4D" strokeWidth="1.6" strokeDasharray="3 3" />
+                    <line x1="292" y1="256" x2="232" y2="256" stroke="#001A4D" strokeWidth="1.6" strokeDasharray="3 3" />
+                    <polygon points="226,256 236,251 236,261" fill="#001A4D" />
+                    <line x1="292" y1="336" x2="232" y2="336" stroke="#001A4D" strokeWidth="1.6" strokeDasharray="3 3" />
+                    <polygon points="226,336 236,331 236,341" fill="#001A4D" />
+
+                    {/* fórmula de la interpolación lineal */}
+                    <text x="160" y="488" textAnchor="middle" fontSize="14" fill="#3D008D" fontWeight="bold">h<tspan baselineShift="sub" fontSize="12">t</tspan> = z<tspan baselineShift="sub" fontSize="12">t</tspan> ⊙ h<tspan baselineShift="sub" fontSize="12">t−1</tspan> + (1−z<tspan baselineShift="sub" fontSize="12">t</tspan>) ⊙ h̃<tspan baselineShift="sub" fontSize="12">t</tspan></text>
+                </svg>
+                ) : (
                 <svg viewBox="0 0 760 360" className="w-full" style={{ minWidth: 660 }} role="img"
-                    aria-label="Celda GRU: variante simplificada de la LSTM con un único estado oculto h y solo dos compuertas. La compuerta de reinicio r y la de actualización z, ambas sigmoides, reciben la entrada x sub t y el estado anterior h sub t menos 1; el candidato (tangente hiperbólica) recibe x sub t y el estado anterior filtrado por r. El estado final es una interpolación lineal entre el estado anterior y el candidato, ponderada por z.">
-                    <title>La GRU usa un solo estado h: la compuerta de reinicio r decide cuánto del pasado entra al candidato, y la compuerta de actualización z interpola entre el estado anterior y el candidato para producir h sub t.</title>
+                    aria-label={aria}>
+                    <title>{titulo}</title>
                     <rect x="40" y="70" width="680" height="240" rx="16" fill="#FBF8FF" stroke="#3D008D" strokeWidth="2" />
                     <text x="58" y="98" fontSize="13" fill="#3D008D" fontWeight="bold">Celda GRU · paso t · 1 estado, 2 compuertas (más simple que la LSTM)</text>
 
@@ -2215,11 +2588,13 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     {/* Fórmula de la interpolación lineal */}
                     <text x="380" y="340" textAnchor="middle" fontSize="13" fill="#3D008D" fontWeight="bold">h<tspan baselineShift="sub" fontSize="9">t</tspan> = z<tspan baselineShift="sub" fontSize="9">t</tspan> ⊙ h<tspan baselineShift="sub" fontSize="9">t−1</tspan> + (1−z<tspan baselineShift="sub" fontSize="9">t</tspan>) ⊙ h̃<tspan baselineShift="sub" fontSize="9">t</tspan></text>
                 </svg>
+                )}
                 </div>
-                <AvisoDesplazar />
+                {!angosto && <AvisoDesplazar />}
                 <PieFigura n="2.2.4" className="mt-2">Celda GRU: un único estado h<sub>t</sub> y dos compuertas (reinicio r, actualización z), alimentadas por x<sub>t</sub> y h<sub>t−1</sub>; el candidato h̃<sub>t</sub> recibe x<sub>t</sub> y r<sub>t</sub> ⊙ h<sub>t−1</sub>. El estado final es la interpolación h<sub>t</sub> = z<sub>t</sub> ⊙ h<sub>t−1</sub> + (1−z<sub>t</sub>) ⊙ h̃<sub>t</sub>{cita ? <>, la forma de {cita} y de PyTorch</> : null}, notablemente más simple que la LSTM.</PieFigura>
             </div>
-        );
+            );
+        };
 
         const Cap22Section = () => {
             const ref = useRef(null);
@@ -2679,12 +3054,52 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
            Regla: dentro de <text> NO se usan delimitadores MathJax;
            solo texto nativo, <tspan baselineShift="sub"> y Unicode.
         ============================================================ */
-        const AutoencoderSVG = () => (
+        const AutoencoderSVG = () => {
+            const [ref, angosto] = useDiagramaAngosto(646);
+            const aria = 'Arquitectura de un autocodificador: el codificador reduce la entrada hasta un cuello de botella latente z, y el decodificador la reconstruye.';
+            const titulo = 'La entrada x atraviesa el codificador que reduce su dimensión hasta el código latente z (cuello de botella); el decodificador expande z para producir la reconstrucción x̂.';
+            const flechaAbajo = (y1, y2) => (
+                <g>
+                    <line x1="160" y1={y1} x2="160" y2={y2 - 6} stroke="#94A3B8" strokeWidth="2" />
+                    <polygon points={`160,${y2} 155,${y2 - 10} 165,${y2 - 10}`} fill="#94A3B8" />
+                </g>
+            );
+            return (
             <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
-                <div className="overflow-x-auto">
+                <div ref={ref} className="overflow-x-auto">
+                {angosto ? (
+                /* variante angosta: el reloj de arena en vertical — entrada arriba, cuello de botella al centro, reconstrucción abajo */
+                <svg viewBox="0 0 320 368" className="w-full block mx-auto" style={SVG_MOVIL} role="img" aria-label={aria}>
+                    <title>{titulo}</title>
+                    {[0, 1, 2, 3, 4].map((i) => (
+                        <circle key={`nin-${i}`} cx={108 + i * 26} cy="30" r="9" fill="#FFFFFF" stroke="#3D008D" strokeWidth="2" />
+                    ))}
+                    <text x="92" y="34" textAnchor="end" fontSize="12" fill="#64748B" fontStyle="italic">entrada</text>
+                    <text x="228" y="35" fontSize="15" fill="#001A4D" fontWeight="bold">x</text>
+                    {flechaAbajo(42, 64)}
+                    <polygon points="50,64 270,64 210,144 110,144" fill="#F5F0FA" stroke="#3D008D" strokeWidth="2" />
+                    <text x="160" y="100" textAnchor="middle" fontSize="14" fill="#3D008D" fontWeight="bold">Codificador</text>
+                    <text x="160" y="119" textAnchor="middle" fontSize="12" fill="#64748B" fontStyle="italic">z = f(x)</text>
+                    {flechaAbajo(144, 164)}
+                    <rect x="130" y="164" width="60" height="56" rx="10" fill="#0E7490" stroke="#001A4D" strokeWidth="2" />
+                    <text x="160" y="200" textAnchor="middle" fontSize="22" fill="#FFFFFF" fontWeight="bold">z</text>
+                    <text x="122" y="197" textAnchor="end" fontSize="13" fill="#0E7490" fontWeight="bold">cuello de botella</text>
+                    <text x="198" y="198" fontSize="14" fill="#0E7490" fontStyle="italic">z ∈ ℝ<tspan baselineShift="super" fontSize="12">d</tspan></text>
+                    {flechaAbajo(220, 240)}
+                    <polygon points="110,240 210,240 270,320 50,320" fill="#FCE9F3" stroke="#ED1E79" strokeWidth="2" />
+                    <text x="160" y="278" textAnchor="middle" fontSize="14" fill="#ED1E79" fontWeight="bold">Decodificador</text>
+                    <text x="160" y="297" textAnchor="middle" fontSize="12" fill="#64748B" fontStyle="italic">x̂ = g(z)</text>
+                    {flechaAbajo(320, 340)}
+                    {[0, 1, 2, 3, 4].map((i) => (
+                        <circle key={`nout-${i}`} cx={108 + i * 26} cy="352" r="9" fill="#FFFFFF" stroke="#ED1E79" strokeWidth="2" />
+                    ))}
+                    <text x="92" y="356" textAnchor="end" fontSize="12" fill="#64748B" fontStyle="italic">reconstrucción</text>
+                    <text x="228" y="357" fontSize="15" fill="#ED1E79" fontWeight="bold">x̂</text>
+                </svg>
+                ) : (
                 <svg viewBox="0 0 760 340" className="w-full" style={{ minWidth: 660 }} role="img"
-                    aria-label="Arquitectura de un autocodificador: el codificador reduce la entrada hasta un cuello de botella latente z, y el decodificador la reconstruye.">
-                    <title>La entrada x atraviesa el codificador que reduce su dimensión hasta el código latente z (cuello de botella); el decodificador expande z para producir la reconstrucción x̂.</title>
+                    aria-label={aria}>
+                    <title>{titulo}</title>
 
                     {/* --- Encoder: trapecio que se estrecha --- */}
                     <polygon points="90,60 200,110 200,230 90,280" fill="#F5F0FA" stroke="#3D008D" strokeWidth="2" />
@@ -2729,14 +3144,16 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                     <line x1="673" y1="170" x2="700" y2="170" stroke="#94A3B8" strokeWidth="2" />
                     <polygon points="704,170 694,165 694,175" fill="#94A3B8" />
                 </svg>
+                )}
                 </div>
-                <AvisoDesplazar />
+                {!angosto && <AvisoDesplazar />}
                 <PieFigura n="2.3.3" className="mt-2">
                     Reloj de arena del autocodificador: el codificador comprime x hasta el código latente z; el decodificador
                     reconstruye x̂. En el VAE, z no es un punto fijo sino una distribución 𝒩(μ, σ²) muestreada.
                 </PieFigura>
             </div>
-        );
+            );
+        };
 
         /* ============================================================
            DIAGRAMA SVG: juego adversario de una GAN
@@ -2745,12 +3162,63 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
            Regla: dentro de <text> solo texto nativo, <tspan baselineShift>
            y Unicode (sin delimitadores MathJax).
         ============================================================ */
-        const GanGameSVG = () => (
+        const GanGameSVG = () => {
+            const [ref, angosto] = useDiagramaAngosto(646);
+            const aria = 'Juego adversario de una GAN: el generador transforma ruido en muestras falsas que, junto a datos reales, alimentan al discriminador, que decide real o falso.';
+            const titulo = 'El generador G convierte el ruido z en una muestra falsa G(z); el discriminador D recibe tanto datos reales como falsos y emite la probabilidad de que sean reales. El error de D retroalimenta a G.';
+            return (
             <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
-                <div className="overflow-x-auto">
+                <div ref={ref} className="overflow-x-auto">
+                {angosto ? (
+                /* variante angosta: ruido → G → G(z) en columna; G(z) y el dato real convergen en D; el bucle dorado sube por la derecha hasta G */
+                <svg viewBox="0 0 320 414" className="w-full block mx-auto" style={SVG_MOVIL} role="img" aria-label={aria}>
+                    <title>{titulo}</title>
+                    <circle cx="82" cy="46" r="30" fill="#F5F0FA" stroke="#3D008D" strokeWidth="2" />
+                    <text x="82" y="45" textAnchor="middle" fontSize="17" fill="#3D008D" fontWeight="bold">z</text>
+                    <text x="82" y="62" textAnchor="middle" fontSize="12" fill="#64748B">𝒩(0, I)</text>
+                    <text x="46" y="50" textAnchor="end" fontSize="12" fill="#64748B" fontStyle="italic">ruido</text>
+                    <line x1="82" y1="76" x2="82" y2="90" stroke="#94A3B8" strokeWidth="2" />
+                    <polygon points="82,96 77,86 87,86" fill="#94A3B8" />
+
+                    <rect x="16" y="96" width="132" height="56" rx="12" fill="#3D008D" stroke="#001A4D" strokeWidth="2" />
+                    <text x="82" y="120" textAnchor="middle" fontSize="14" fill="#FFFFFF" fontWeight="bold">Generador G</text>
+                    <text x="82" y="139" textAnchor="middle" fontSize="12" fill="#E9D5FF" fontStyle="italic">verseador</text>
+                    <line x1="82" y1="152" x2="82" y2="180" stroke="#94A3B8" strokeWidth="2" />
+                    <polygon points="82,186 77,176 87,176" fill="#94A3B8" />
+
+                    <rect x="16" y="186" width="132" height="56" rx="10" fill="#FCE9F3" stroke="#ED1E79" strokeWidth="2" />
+                    <text x="82" y="210" textAnchor="middle" fontSize="15" fill="#ED1E79" fontWeight="bold">G(z)</text>
+                    <text x="82" y="229" textAnchor="middle" fontSize="13" fill="#64748B">muestra falsa</text>
+                    <rect x="166" y="186" width="132" height="56" rx="10" fill="#F0FDF4" stroke="#15803D" strokeWidth="2" />
+                    <text x="232" y="210" textAnchor="middle" fontSize="15" fill="#15803D" fontWeight="bold">x</text>
+                    <text x="232" y="229" textAnchor="middle" fontSize="13" fill="#64748B">dato real (p<tspan baselineShift="sub" fontSize="12">data</tspan>)</text>
+
+                    <line x1="82" y1="242" x2="101.8" y2="268.4" stroke="#ED1E79" strokeWidth="2" />
+                    <polygon points="109,278 97.8,271.4 105.8,265.4" fill="#ED1E79" />
+                    <line x1="232" y1="242" x2="217" y2="267.6" stroke="#15803D" strokeWidth="2" />
+                    <polygon points="211,278 221.4,270.1 212.7,265.1" fill="#15803D" />
+
+                    <rect x="60" y="280" width="200" height="64" rx="12" fill="#001A4D" stroke="#001A4D" strokeWidth="2" />
+                    <text x="160" y="307" textAnchor="middle" fontSize="14" fill="#FFFFFF" fontWeight="bold">Discriminador D</text>
+                    <text x="160" y="327" textAnchor="middle" fontSize="12" fill="#FDB913" fontStyle="italic">jurado/público</text>
+
+                    <line x1="160" y1="344" x2="160" y2="360" stroke="#94A3B8" strokeWidth="2" />
+                    <polygon points="160,366 155,356 165,356" fill="#94A3B8" />
+                    <text x="104" y="386" textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="bold">real</text>
+                    <text x="104" y="403" textAnchor="middle" fontSize="12" fill="#64748B">D(x) → 1</text>
+                    <text x="216" y="386" textAnchor="middle" fontSize="13" fill="#B91C1C" fontWeight="bold">falso</text>
+                    <text x="216" y="403" textAnchor="middle" fontSize="12" fill="#64748B">D(G(z)) → 0</text>
+
+                    <path d="M260 312 H 298 Q 310 312 310 300 V 136 Q 310 124 298 124 H 160" fill="none" stroke="#FDB913" strokeWidth="2" strokeDasharray="6 4" />
+                    <polygon points="150,124 162,118 162,130" fill="#FDB913" />
+                    <text x="232" y="72" textAnchor="middle" fontSize="12" fill="#B45309" fontWeight="bold">gradiente adversario:</text>
+                    <text x="232" y="88" textAnchor="middle" fontSize="12" fill="#B45309" fontWeight="bold">el error de D</text>
+                    <text x="232" y="104" textAnchor="middle" fontSize="12" fill="#B45309" fontWeight="bold">entrena a G</text>
+                </svg>
+                ) : (
                 <svg viewBox="0 0 760 360" className="w-full" style={{ minWidth: 680 }} role="img"
-                    aria-label="Juego adversario de una GAN: el generador transforma ruido en muestras falsas que, junto a datos reales, alimentan al discriminador, que decide real o falso.">
-                    <title>El generador G convierte el ruido z en una muestra falsa G(z); el discriminador D recibe tanto datos reales como falsos y emite la probabilidad de que sean reales. El error de D retroalimenta a G.</title>
+                    aria-label={aria}>
+                    <title>{titulo}</title>
 
                     {/* --- Ruido z --- */}
                     <circle cx="60" cy="120" r="30" fill="#F5F0FA" stroke="#3D008D" strokeWidth="2" />
@@ -2801,14 +3269,16 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                     <polygon points="210,155 204,167 216,167" fill="#FDB913" />
                     <text x="385" y="345" textAnchor="middle" fontSize="11" fill="#B45309" fontWeight="bold">gradiente adversario: el error de D entrena a G</text>
                 </svg>
+                )}
                 </div>
-                <AvisoDesplazar />
+                {!angosto && <AvisoDesplazar />}
                 <PieFigura n="2.3.5" className="mt-2">
                     El juego minimax de una GAN: G aprende a engañar a D y D aprende a no dejarse engañar; el bucle dorado
                     cierra la competencia que perfecciona al generador.
                 </PieFigura>
             </div>
-        );
+            );
+        };
 
         /* ============================================================
            DIAGRAMA SVG: cadena de difusión (forward / reverse)
@@ -2821,12 +3291,43 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
             const grises = ['#001A4D', '#3D008D', '#7C3AED', '#A78BFA', '#CBD5E1'];
             const subt = ['imagen', '', '', '', 'ruido 𝒩(0, I)'];
             const cx = (i) => 80 + i * 150;
+            const [ref, angosto] = useDiagramaAngosto(646);
+            const aria = 'Cadena de difusión: el proceso directo añade ruido gaussiano paso a paso hasta convertir la imagen en ruido puro; el proceso inverso, aprendido por una red, lo revierte.';
+            const titulo = 'El proceso directo q(xₜ | xₜ₋₁) destruye la imagen x₀ añadiendo ruido hasta llegar a ruido puro x_T; el proceso inverso p_θ(xₜ₋₁ | xₜ), aprendido por la red, regenera la imagen.';
+            /* variante angosta: la cadena en vertical (x₀ arriba, x_T abajo); directo por la izquierda (baja), inverso por la derecha (sube) */
+            const nsub = ['0', '1', '2', '3', 'T'];
+            const ntop = (i) => (i < 4 ? 60 + i * 80 : 410);
             return (
                 <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
-                    <div className="overflow-x-auto">
+                    <div ref={ref} className="overflow-x-auto">
+                    {angosto ? (
+                    <svg viewBox="0 0 320 520" className="w-full block mx-auto" style={SVG_MOVIL} role="img" aria-label={aria}>
+                        <title>{titulo}</title>
+                        <text x="160" y="22" textAnchor="middle" fontSize="14" fill="#B91C1C" fontWeight="bold">Directo (fijo): añade ruido <tspan fontSize="18">↓</tspan></text>
+                        <text x="160" y="43" textAnchor="middle" fontSize="13" fill="#B91C1C">q(x<tspan baselineShift="sub" fontSize="12">t</tspan> | x<tspan baselineShift="sub" fontSize="12">t−1</tspan>) = 𝒩(√(1−β<tspan baselineShift="sub" fontSize="12">t</tspan>) x<tspan baselineShift="sub" fontSize="12">t−1</tspan>, β<tspan baselineShift="sub" fontSize="12">t</tspan> I)</text>
+                        {nsub.map((d, i) => (
+                            <g key={`nx-${i}`}>
+                                <rect x="130" y={ntop(i)} width="60" height="50" rx="12" fill={grises[i]} stroke="#001A4D" strokeWidth="1.6" opacity={i === 4 ? 0.55 : 1} />
+                                <text x="160" y={ntop(i) + 31} textAnchor="middle" fontSize="17" fill="#FFFFFF" fontWeight="bold">x<tspan baselineShift="sub" fontSize="12">{d}</tspan></text>
+                                {subt[i] && <text x="204" y={ntop(i) + 30} fontSize="12" fill="#64748B" fontStyle="italic">{subt[i]}</text>}
+                            </g>
+                        ))}
+                        <text x="160" y="386" textAnchor="middle" fontSize="22" fill="#64748B" fontWeight="bold">⋯</text>
+                        {[0, 1, 2, 3].map((i) => (
+                            <g key={`nfw-${i}`}>
+                                <line x1="118" y1={ntop(i) + 52} x2="118" y2={ntop(i + 1) - 8} stroke="#B91C1C" strokeWidth="2" />
+                                <polygon points={`118,${ntop(i + 1) - 2} 113,${ntop(i + 1) - 12} 123,${ntop(i + 1) - 12}`} fill="#B91C1C" />
+                                <line x1="202" y1={ntop(i + 1) - 2} x2="202" y2={ntop(i) + 58} stroke="#15803D" strokeWidth="2" />
+                                <polygon points={`202,${ntop(i) + 52} 197,${ntop(i) + 62} 207,${ntop(i) + 62}`} fill="#15803D" />
+                            </g>
+                        ))}
+                        <text x="160" y="486" textAnchor="middle" fontSize="14" fill="#15803D" fontWeight="bold"><tspan fontSize="18">↑</tspan> Inverso (aprendido): quita ruido</text>
+                        <text x="160" y="507" textAnchor="middle" fontSize="13" fill="#15803D">p<tspan baselineShift="sub" fontSize="12">θ</tspan>(x<tspan baselineShift="sub" fontSize="12">t−1</tspan> | x<tspan baselineShift="sub" fontSize="12">t</tspan>) = 𝒩(μ<tspan baselineShift="sub" fontSize="12">θ</tspan>, Σ<tspan baselineShift="sub" fontSize="12">θ</tspan>)</text>
+                    </svg>
+                    ) : (
                     <svg viewBox="0 0 760 300" className="w-full" style={{ minWidth: 700 }} role="img"
-                        aria-label="Cadena de difusión: el proceso directo añade ruido gaussiano paso a paso hasta convertir la imagen en ruido puro; el proceso inverso, aprendido por una red, lo revierte.">
-                        <title>El proceso directo q(xₜ | xₜ₋₁) destruye la imagen x₀ añadiendo ruido hasta llegar a ruido puro x_T; el proceso inverso p_θ(xₜ₋₁ | xₜ), aprendido por la red, regenera la imagen.</title>
+                        aria-label={aria}>
+                        <title>{titulo}</title>
 
                         {/* --- Estados de la cadena --- */}
                         {xs.map((lbl, i) => {
@@ -2865,8 +3366,9 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                         <text x="380" y="244" textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="bold">← Inverso (aprendido): quita ruido</text>
                         <text x="380" y="266" textAnchor="middle" fontSize="12" fill="#15803D">p<tspan baselineShift="sub" fontSize="8">θ</tspan>(x<tspan baselineShift="sub" fontSize="8">t−1</tspan> | x<tspan baselineShift="sub" fontSize="8">t</tspan>) = 𝒩(μ<tspan baselineShift="sub" fontSize="8">θ</tspan>, Σ<tspan baselineShift="sub" fontSize="8">θ</tspan>)</text>
                     </svg>
+                    )}
                     </div>
-                    <AvisoDesplazar />
+                    {!angosto && <AvisoDesplazar />}
                     <PieFigura n="2.3.7" className="mt-2">
                         Cadena de difusión: el proceso directo (rojo) destruye la imagen grano a grano; el proceso inverso (verde),
                         aprendido por la red, la reconstruye paso a paso desde el ruido puro.
@@ -2899,12 +3401,51 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                 { x: 465, y: 250 }, { x: 510, y: 225 }, { x: 555, y: 200 },
                 { x: 615, y: 165 }, { x: 665, y: 235 },
             ];
+            const [ref, angosto] = useDiagramaAngosto(646);
+            const aria = 'Comparación del espacio latente. A la izquierda, un autocodificador (AE) produce puntos fijos y aislados con huecos vacíos entre ellos: espacio discontinuo. A la derecha, un autocodificador variacional (VAE) produce distribuciones gaussianas solapadas que cubren el espacio sin huecos, permitiendo una interpolación suave y navegable.';
+            const titulo = 'El autocodificador mapea cada entrada a un punto fijo dejando huecos sin sentido, mientras el VAE codifica distribuciones gaussianas que se solapan y cubren un espacio latente continuo y navegable.';
+            /* variante angosta: se conservan los dos paneles lado a lado (el texto dice «a la izquierda… a la derecha»),
+               con las mismas posiciones relativas reescaladas a paneles de 152 de ancho (nubes al 60 % para que sigan solapándose) */
+            const kx = 0.443, ky = 0.75;
+            const nxL = (x) => 14 + (x - 51) * kx, nxR = (x) => 174 + (x - 421) * kx, nyy = (y) => 76 + (y - 106) * ky;
             return (
                 <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
-                    <div className="overflow-x-auto">
+                    <div ref={ref} className="overflow-x-auto">
+                    {angosto ? (
+                    <svg viewBox="0 0 320 302" className="w-full block mx-auto" style={SVG_MOVIL} role="img" aria-label={aria}>
+                        <title>{titulo}</title>
+                        <rect x="4" y="8" width="152" height="236" rx="12" fill="#F8FAFC" stroke="#475569" strokeWidth="1.5" />
+                        <text x="80" y="29" textAnchor="middle" fontSize="13" fill="#001A4D" fontWeight="bold">Autocodificador</text>
+                        <text x="80" y="45" textAnchor="middle" fontSize="13" fill="#001A4D" fontWeight="bold">(AE)</text>
+                        {aePoints.map((p, i) => (
+                            <circle key={`nae-${i}`} cx={nxL(p.x)} cy={nyy(p.y)} r="4.5" fill="#001A4D" />
+                        ))}
+                        {aeGaps.map((g, i) => (
+                            <text key={`ngap-${i}`} x={nxL(g.x)} y={nyy(g.y)} textAnchor="middle" fontSize="16" fill="#CBD5E1" fontWeight="bold">∅</text>
+                        ))}
+                        {['discontinuo ·', 'interpolar cae', 'en el vacío'].map((l, k) => (
+                            <text key={`ncl-${k}`} x="80" y={262 + k * 16} textAnchor="middle" fontSize="12" fill="#B91C1C" fontWeight="bold">{l}</text>
+                        ))}
+                        <rect x="164" y="8" width="152" height="236" rx="12" fill="#FBF8FF" stroke="#3D008D" strokeWidth="1.5" />
+                        <text x="240" y="37" textAnchor="middle" fontSize="13" fill="#3D008D" fontWeight="bold">VAE · 𝒩(μ, σ²)</text>
+                        {vaeClouds.map((c, i) => (
+                            <g key={`nvae-${i}`}>
+                                <circle cx={nxR(c.x)} cy={nyy(c.y)} r={c.r * 0.6} fill={`rgba(61,0,141,${c.op})`} stroke="#7C3AED" strokeWidth="1" />
+                                <circle cx={nxR(c.x)} cy={nyy(c.y)} r="2.5" fill="#3D008D" />
+                            </g>
+                        ))}
+                        <polyline points={interpStops.map((s) => `${nxR(s.x)},${nyy(s.y)}`).join(' ')} fill="none" stroke="#ED1E79" strokeWidth="2.2" strokeDasharray="5 3" />
+                        {interpStops.map((s, i) => (
+                            <circle key={`nstop-${i}`} cx={nxR(s.x)} cy={nyy(s.y)} r="3.5" fill="#ED1E79" />
+                        ))}
+                        {['continuo ·', 'interpolar transita', 'suave'].map((l, k) => (
+                            <text key={`ncr-${k}`} x="240" y={262 + k * 16} textAnchor="middle" fontSize="12" fill="#15803D" fontWeight="bold">{l}</text>
+                        ))}
+                    </svg>
+                    ) : (
                     <svg viewBox="0 0 760 340" className="w-full" style={{ minWidth: 700 }} role="img"
-                        aria-label="Comparación del espacio latente. A la izquierda, un autocodificador (AE) produce puntos fijos y aislados con huecos vacíos entre ellos: espacio discontinuo. A la derecha, un autocodificador variacional (VAE) produce distribuciones gaussianas solapadas que cubren el espacio sin huecos, permitiendo una interpolación suave y navegable.">
-                        <title>El autocodificador mapea cada entrada a un punto fijo dejando huecos sin sentido, mientras el VAE codifica distribuciones gaussianas que se solapan y cubren un espacio latente continuo y navegable.</title>
+                        aria-label={aria}>
+                        <title>{titulo}</title>
                         <rect x="30" y="50" width="330" height="250" rx="12" fill="#F8FAFC" stroke="#475569" strokeWidth="1.5" />
                         <text x="195" y="72" textAnchor="middle" fontSize="14" fill="#001A4D" fontWeight="bold">Autocodificador (AE)</text>
                         {aePoints.map((p, i) => (
@@ -2928,8 +3469,9 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                         ))}
                         <text x="565" y="320" textAnchor="middle" fontSize="11" fill="#15803D" fontWeight="bold">continuo · interpolar transita suave</text>
                     </svg>
+                    )}
                     </div>
-                    <AvisoDesplazar />
+                    {!angosto && <AvisoDesplazar />}
                     <PieFigura n="2.3.4" className="mt-2">Espacio latente del AE frente al del VAE: el AE deja huecos sin significado entre puntos aislados; el VAE codifica distribuciones 𝒩(μ, σ²) solapadas que forman un espacio continuo donde interpolar produce transiciones graduales.</PieFigura>
                 </div>
             );
@@ -2949,12 +3491,56 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                 { cx: 470, h: 0 }, { cx: 545, h: 0 }, { cx: 620, h: 130 }, { cx: 695, h: 0 },
             ];
             const baseY = 240;
+            const [ref, angosto] = useDiagramaAngosto(646);
+            const aria = 'Colapso de modos en una GAN. A la izquierda, la distribución real de datos es multimodal con cuatro picos bien separados que representan diversidad. A la derecha, el generador colapsado concentra toda su masa en un único pico y deja los otros tres modos vacíos, perdiendo la diversidad.';
+            const titulo = 'La distribución real tiene cuatro modos distintos; el generador colapsado produce solo uno, abandonando los demás y empobreciendo la diversidad de las muestras generadas.';
+            /* variante angosta: los dos paneles siguen lado a lado (el texto dice «a la izquierda… a la derecha»);
+               los rótulos «modo n» se alternan en dos alturas para que no choquen */
+            const nb = 196, ncx = (x0, i) => x0 + 28 + i * 32;
             return (
                 <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
-                    <div className="overflow-x-auto">
+                    <div ref={ref} className="overflow-x-auto">
+                    {angosto ? (
+                    <svg viewBox="0 0 320 330" className="w-full block mx-auto" style={SVG_MOVIL} role="img" aria-label={aria}>
+                        <title>{titulo}</title>
+                        <rect x="4" y="8" width="152" height="262" rx="12" fill="#F0FDF4" stroke="#15803D" strokeWidth="1.5" />
+                        <text x="80" y="30" textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="bold">Distribución real</text>
+                        <text x="80" y="47" textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="bold">p<tspan baselineShift="sub" fontSize="12">data</tspan></text>
+                        <line x1="10" y1={nb} x2="150" y2={nb} stroke="#475569" strokeWidth="1.5" />
+                        {realModes.map((m, i) => (
+                            <g key={`nreal-${i}`}>
+                                <path d={bell(ncx(4, i), nb, m.h, 15)} fill="rgba(61,0,141,0.25)" stroke="#3D008D" strokeWidth="2" />
+                                <text x={ncx(4, i)} y={nb + (i % 2 ? 31 : 16)} textAnchor="middle" fontSize="12" fill="#475569">modo {i + 1}</text>
+                            </g>
+                        ))}
+                        <text x="80" y="254" textAnchor="middle" fontSize="12" fill="#15803D" fontWeight="bold">4 modos → diversidad</text>
+                        <rect x="164" y="8" width="152" height="262" rx="12" fill="#FCE7F3" stroke="#ED1E79" strokeWidth="1.5" />
+                        <text x="240" y="30" textAnchor="middle" fontSize="13" fill="#ED1E79" fontWeight="bold">Generador</text>
+                        <text x="240" y="47" textAnchor="middle" fontSize="13" fill="#ED1E79" fontWeight="bold">colapsado</text>
+                        <line x1="170" y1={nb} x2="310" y2={nb} stroke="#475569" strokeWidth="1.5" />
+                        {genModes.map((m, i) => (
+                            <g key={`ngen-${i}`}>
+                                {m.h > 0 ? (
+                                    <path d={bell(ncx(164, i), nb, m.h, 17)} fill="rgba(237,30,121,0.35)" stroke="#ED1E79" strokeWidth="2.5" />
+                                ) : (
+                                    <g>
+                                        <circle cx={ncx(164, i)} cy={nb - 13} r="8" fill="none" stroke="#CBD5E1" strokeWidth="2" strokeDasharray="3 3" />
+                                        <line x1={ncx(164, i) - 5} y1={nb - 18} x2={ncx(164, i) + 5} y2={nb - 8} stroke="#CBD5E1" strokeWidth="2" />
+                                    </g>
+                                )}
+                                <text x={ncx(164, i)} y={nb + (i % 2 ? 31 : 16)} textAnchor="middle" fontSize="12" fill={m.h > 0 ? '#ED1E79' : '#64748B'}>modo {i + 1}</text>
+                            </g>
+                        ))}
+                        <text x="240" y="246" textAnchor="middle" fontSize="12" fill="#B91C1C" fontWeight="bold">1 solo modo →</text>
+                        <text x="240" y="262" textAnchor="middle" fontSize="12" fill="#B91C1C" fontWeight="bold">sin diversidad</text>
+                        <rect x="10" y="280" width="300" height="42" rx="14" fill="#FCE9F3" stroke="#ED1E79" strokeWidth="1.4" />
+                        <text x="160" y="297" textAnchor="middle" fontSize="12" fill="#B91C1C" fontStyle="italic">El verseador repite siempre su</text>
+                        <text x="160" y="313" textAnchor="middle" fontSize="12" fill="#B91C1C" fontStyle="italic">única estrofa ganadora.</text>
+                    </svg>
+                    ) : (
                     <svg viewBox="0 0 760 320" className="w-full" style={{ minWidth: 700 }} role="img"
-                        aria-label="Colapso de modos en una GAN. A la izquierda, la distribución real de datos es multimodal con cuatro picos bien separados que representan diversidad. A la derecha, el generador colapsado concentra toda su masa en un único pico y deja los otros tres modos vacíos, perdiendo la diversidad.">
-                        <title>La distribución real tiene cuatro modos distintos; el generador colapsado produce solo uno, abandonando los demás y empobreciendo la diversidad de las muestras generadas.</title>
+                        aria-label={aria}>
+                        <title>{titulo}</title>
                         <rect x="30" y="50" width="330" height="230" rx="12" fill="#F0FDF4" stroke="#15803D" strokeWidth="1.5" />
                         <text x="195" y="74" textAnchor="middle" fontSize="14" fill="#15803D" fontWeight="bold">Distribución real p<tspan baselineShift="sub" fontSize="9">data</tspan></text>
                         <line x1="45" y1={baseY} x2="345" y2={baseY} stroke="#475569" strokeWidth="1.5" />
@@ -2985,8 +3571,9 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                         <rect x="150" y="288" width="460" height="26" rx="13" fill="#FCE9F3" stroke="#ED1E79" strokeWidth="1.4" />
                         <text x="380" y="305" textAnchor="middle" fontSize="12" fill="#B91C1C" fontStyle="italic">El verseador repite siempre su única estrofa ganadora.</text>
                     </svg>
+                    )}
                     </div>
-                    <AvisoDesplazar />
+                    {!angosto && <AvisoDesplazar />}
                     <PieFigura n="2.3.6" className="mt-2">Colapso de modos (<em>mode collapse</em>): frente a una p<sub>data</sub> multimodal y diversa, el generador colapsa toda la masa en un único modo y abandona los demás.</PieFigura>
                 </div>
             );
@@ -3011,12 +3598,47 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
                 [0.65, 0.19, 0.16],
             ];
             const gx = 250, gy = 120, cell = 70, rh = 52;
+            const [ref, angosto] = useDiagramaAngosto(595);
+            const aria = 'Matriz de autoatención: cada fila es un token que consulta (Q) y cada columna un token que ofrece su clave (K). El peso de cada celda es softmax(Q por K traspuesta dividido por raíz de d_k): cuánta atención presta el token de la fila al de la columna. Los valores (V) se mezclan según esos pesos para producir una representación de cada token sensible a su contexto, c sub 1 a c sub 3. Se ilustra cómo la palabra vaina dirige el 65 % de su atención hacia pásame, ganando el sentido de objeto físico.';
+            const titulo = 'Autoatención: la matriz de pesos softmax(QKᵀ/√d_k) indica cuánta atención presta cada token (fila, consulta Q) a cada token (columna, clave K); la mezcla ponderada de los valores V produce la salida contextual.';
+            const ngx = 74, ngy = 60, nce = 52, nrh = 46; // variante angosta: misma matriz con celdas más pequeñas
             return (
                 <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
-                    <div className="overflow-x-auto">
+                    <div ref={ref} className="overflow-x-auto">
+                    {angosto ? (
+                    <svg viewBox="0 0 320 262" className="w-full block mx-auto" style={SVG_MOVIL} role="img" aria-label={aria}>
+                        <title>{titulo}</title>
+                        <text x={ngx + nce * 1.5} y="18" textAnchor="middle" fontSize="12" fill="#0E7490" fontWeight="bold">Claves (K) — ¿con quién se compara?</text>
+                        <text x="12.5" y={ngy + nrh * 1.5} textAnchor="middle" fontSize="12" fill="#3D008D" fontWeight="bold" transform={`rotate(-90 12.5 ${ngy + nrh * 1.5})`}>Consultas (Q)</text>
+                        {toks.map((t, j) => (
+                            <text key={'nk' + j} x={ngx + nce * j + (nce - 4) / 2} y={ngy - 10} textAnchor="middle" fontSize="12" fill="#0E7490" fontWeight="bold">{t}</text>
+                        ))}
+                        {toks.map((t, i) => (
+                            <text key={'nq' + i} x={ngx - 8} y={ngy + nrh * i + (nrh - 4) / 2 + 4} textAnchor="end" fontSize="12" fill="#3D008D" fontWeight="bold">{t}</text>
+                        ))}
+                        {W.map((row, i) => row.map((w, j) => (
+                            <g key={'nc' + i + '-' + j}>
+                                <rect x={ngx + nce * j} y={ngy + nrh * i} width={nce - 4} height={nrh - 4} rx="6" fill={`rgba(237,30,121,${(0.12 + w * 0.85).toFixed(3)})`} stroke="#ED1E79" strokeWidth="1" />
+                                <text x={ngx + nce * j + (nce - 4) / 2} y={ngy + nrh * i + (nrh - 4) / 2 + 5} textAnchor="middle" fontSize="13" fill={w > 0.45 ? '#FFFFFF' : '#7A1740'} fontWeight="bold">{fmtDec(w, 2)}</text>
+                            </g>
+                        )))}
+                        <line x1={ngx + nce * 3 + 2} y1={ngy + nrh * 1.5} x2={ngx + nce * 3 + 22} y2={ngy + nrh * 1.5} stroke="#94A3B8" strokeWidth="2" />
+                        <polygon points={`${ngx + nce * 3 + 28},${ngy + nrh * 1.5} ${ngx + nce * 3 + 18},${ngy + nrh * 1.5 - 5} ${ngx + nce * 3 + 18},${ngy + nrh * 1.5 + 5}`} fill="#94A3B8" />
+                        <text x={ngx + nce * 3 + 14} y={ngy + nrh * 1.5 - 9} textAnchor="middle" fontSize="12" fill="#15803D" fontWeight="bold">× V</text>
+                        {toks.map((t, i) => (
+                            <g key={'ncc' + i}>
+                                <rect x={ngx + nce * 3 + 32} y={ngy + nrh * i + 5} width={48} height={nrh - 14} rx="8" fill="#F0FDF4" stroke="#15803D" strokeWidth="1.6" />
+                                <text x={ngx + nce * 3 + 56} y={ngy + nrh * i + (nrh - 4) / 2 + 4} textAnchor="middle" fontSize="14" fill="#15803D" fontWeight="bold">c<tspan baselineShift="sub" fontSize="12">{i + 1}</tspan></text>
+                            </g>
+                        ))}
+                        <text x={ngx + nce * 3 + 56} y={ngy + nrh * 3 + 12} textAnchor="middle" fontSize="12" fill="#15803D" fontStyle="italic">salida</text>
+                        <text x={ngx + nce * 3 + 56} y={ngy + nrh * 3 + 26} textAnchor="middle" fontSize="12" fill="#15803D" fontStyle="italic">contextual</text>
+                        <text x={ngx + nce * 1.5} y={ngy + nrh * 3 + 50} textAnchor="middle" fontSize="14" fill="#001A4D" fontWeight="bold">peso = softmax( Q·K<tspan baselineShift="super" fontSize="12">T</tspan> / √d<tspan baselineShift="sub" fontSize="12">k</tspan> )</text>
+                    </svg>
+                    ) : (
                     <svg viewBox="0 0 700 350" className="w-full" style={{ minWidth: 620 }} role="img"
-                        aria-label="Matriz de autoatención: cada fila es un token que consulta (Q) y cada columna un token que ofrece su clave (K). El peso de cada celda es softmax(Q por K traspuesta dividido por raíz de d_k): cuánta atención presta el token de la fila al de la columna. Los valores (V) se mezclan según esos pesos para producir una representación de cada token sensible a su contexto, c sub 1 a c sub 3. Se ilustra cómo la palabra vaina dirige el 65 % de su atención hacia pásame, ganando el sentido de objeto físico.">
-                        <title>Autoatención: la matriz de pesos softmax(QKᵀ/√d_k) indica cuánta atención presta cada token (fila, consulta Q) a cada token (columna, clave K); la mezcla ponderada de los valores V produce la salida contextual.</title>
+                        aria-label={aria}>
+                        <title>{titulo}</title>
 
                         <text x={gx + cell * 1.5} y={28} textAnchor="middle" fontSize="12" fill="#0E7490" fontWeight="bold">Claves (K) — ¿con quién se compara?</text>
                         <text x={40} y={gy + rh * 1.5} textAnchor="middle" fontSize="12" fill="#3D008D" fontWeight="bold" transform={`rotate(-90 40 ${gy + rh * 1.5})`}>Consultas (Q)</text>
@@ -3049,8 +3671,9 @@ print(out_gru.shape)   # torch.Size([1, 5, 20])`} />
 
                         <text x={gx + cell * 1.5} y={gy + rh * 3 + 34} textAnchor="middle" fontSize="13" fill="#001A4D" fontWeight="bold">peso = softmax( Q·Kᵀ / √d<tspan baselineShift="sub" fontSize="9">k</tspan> )</text>
                     </svg>
+                    )}
                     </div>
-                    <AvisoDesplazar />
+                    {!angosto && <AvisoDesplazar />}
                     <PieFigura n="2.3.9" className="mt-2" fuente="elaboración propia; pesos calculados con el modelo de juguete de la herramienta interactiva de esta sección (en él, K y V coinciden), redondeados para que cada fila sume 1.">
                         Autoatención: cada token (fila) consulta a todos los tokens (columnas) y obtiene un peso softmax(Q·Kᵀ/√d<sub>k</sub>);
                         la mezcla ponderada de los valores (V) produce una representación sensible al contexto, c<sub>1</sub>…c<sub>3</sub>. Aquí
