@@ -194,6 +194,14 @@
         .grid > * { min-width: 0; }
         /* A 375 px, la barra de la ventana de código pasa a dos líneas en vez de ocultar el botón «Copiar» */
         .code-window-bar { flex-wrap: wrap; row-gap: .35rem; }
+
+        /* Diagramas en pantallas angostas: cada SVG de escritorio (.svg-d) tiene una variante propia de 300 unidades
+           de ancho (.svg-m), con texto ≥ 12; a ≤ 640 px se muestra la variante en lugar de encoger o desplazar la figura. */
+        .svg-m { display: none; }
+        @media (max-width: 640px) {
+            .svg-d { display: none !important; }
+            .svg-m { display: block; width: 100%; height: auto; max-width: 440px; margin: 0 auto; }
+        }
     </style>
 </head>
 
@@ -301,7 +309,7 @@
             <p class="text-slate-600 mb-6 max-w-3xl">La fase recorre el ciclo de <em>MLOps</em> de extremo a extremo: del dato organizado al modelo desplegado en campo, pasando por un <em>pipeline</em> eficiente y un entrenamiento acelerado por GPU.</p>
 
             <figure class="card p-6 overflow-x-auto">
-                <svg viewBox="0 0 940 170" width="100%" role="img" aria-labelledby="mlopsTitle mlopsDesc" style="min-width:720px">
+                <svg class="svg-d" viewBox="0 0 940 170" width="100%" role="img" aria-labelledby="mlopsTitle mlopsDesc" style="min-width:720px">
                     <title id="mlopsTitle">Ciclo de MLOps de la Fase 3</title>
                     <desc id="mlopsDesc">Los datos pasan por un pipeline con cache y prefetch, alimentan un entrenamiento en GPU con precisión mixta, el modelo se exporta a formatos estándar y finalmente se despliega offline en campo.</desc>
                     <defs>
@@ -331,6 +339,40 @@
                     <rect x="744" y="50" width="184" height="66" rx="11" fill="#ED1E79"/>
                     <text x="836" y="78" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">Despliegue</text>
                     <text x="836" y="96" text-anchor="middle" font-size="9.5" fill="#fff">offline · en campo</text>
+                </svg>
+                <!-- Variante angosta (≤ 640 px): el flujo pasa a una columna de arriba abajo -->
+                <svg class="svg-m" viewBox="0 0 300 376" role="img" aria-labelledby="mlopsTitle-m mlopsDesc-m">
+                    <title id="mlopsTitle-m">Ciclo de MLOps de la Fase 3</title>
+                    <desc id="mlopsDesc-m">Los datos pasan por un pipeline con cache y prefetch, alimentan un entrenamiento en GPU con precisión mixta, el modelo se exporta a formatos estándar y finalmente se despliega offline en campo.</desc>
+                    <defs>
+                        <linearGradient id="mlopsGrad-m" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0" stop-color="#3D008D"/><stop offset="1" stop-color="#5B1C9E"/>
+                        </linearGradient>
+                        <marker id="arrowFlow-m" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                            <path d="M0,0 L8,3 L0,6 Z" fill="#94A3B8"/>
+                        </marker>
+                    </defs>
+                    <g text-anchor="middle">
+                        <rect x="30" y="6" width="240" height="52" rx="11" fill="#EEF2FF" stroke="#C7D2FE"/>
+                        <text x="150" y="29" font-size="15" font-weight="700" fill="#1E293B">Datos</text>
+                        <text x="150" y="48" font-size="13" fill="#64748B">train · val · test</text>
+                        <rect x="30" y="84" width="240" height="52" rx="11" fill="url(#mlopsGrad-m)"/>
+                        <text x="150" y="107" font-size="15" font-weight="700" font-style="italic" fill="#fff">Pipeline</text>
+                        <text x="150" y="126" font-size="13" fill="#E9D5FF">cache · prefetch · aumento</text>
+                        <rect x="30" y="162" width="240" height="52" rx="11" fill="#0E7490"/>
+                        <text x="150" y="185" font-size="15" font-weight="700" fill="#fff">GPU</text>
+                        <text x="150" y="204" font-size="13" fill="#CFFAFE">precisión mixta (FP16)</text>
+                        <rect x="30" y="240" width="240" height="52" rx="11" fill="#0F172A"/>
+                        <text x="150" y="263" font-size="15" font-weight="700" fill="#fff">Exportación</text>
+                        <text x="150" y="282" font-size="13" fill="#94A3B8">.pth · .keras · ONNX</text>
+                        <rect x="30" y="318" width="240" height="52" rx="11" fill="#ED1E79"/>
+                        <text x="150" y="341" font-size="15" font-weight="800" fill="#fff">Despliegue</text>
+                        <text x="150" y="360" font-size="13" fill="#fff">offline · en campo</text>
+                    </g>
+                    <g stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowFlow-m)">
+                        <line x1="150" y1="58" x2="150" y2="80"/><line x1="150" y1="136" x2="150" y2="158"/>
+                        <line x1="150" y1="214" x2="150" y2="236"/><line x1="150" y1="292" x2="150" y2="314"/>
+                    </g>
                 </svg>
                 <figcaption>Figura 1. Ciclo de MLOps de la Fase 3: del dato organizado al modelo desplegado offline. Es la imagen-guía que articula toda la actividad.</figcaption>
             </figure>
@@ -387,7 +429,7 @@
                     <p class="text-sm text-slate-700">En <span class="icode">tf.data</span> esto se logra con <span class="icode">.cache()</span>, <span class="icode">.shuffle()</span>, <span class="icode">.batch()</span> y <span class="icode">.prefetch(AUTOTUNE)</span>; en PyTorch, con <span class="icode">num_workers</span>, <span class="icode">pin_memory</span> y <span class="icode">prefetch_factor</span>.</p>
                 </div>
                 <figure class="card p-5">
-                    <svg viewBox="0 0 360 210" width="100%" role="img" aria-labelledby="prefetchTitle prefetchDesc">
+                    <svg class="svg-d" viewBox="0 0 360 210" width="100%" role="img" aria-labelledby="prefetchTitle prefetchDesc">
                         <title id="prefetchTitle">Prefetch: solapamiento CPU/GPU</title>
                         <desc id="prefetchDesc">Comparación de la línea de tiempo sin prefetch y con prefetch, mostrando el solapamiento de la CPU y la GPU</desc>
                         <!-- sin prefetch -->
@@ -412,6 +454,37 @@
                         <rect x="182" y="156" width="42" height="20" fill="#C4B5FD" stroke="#8B5CF6"/><text x="203" y="170" text-anchor="middle" font-size="8.5" fill="#4C1D95">GPU</text>
                         <line x1="14" y1="186" x2="224" y2="186" stroke="#15803D" stroke-width="1.5"/>
                         <text x="119" y="200" text-anchor="middle" font-size="9.5" fill="#15803D">tiempo total corto →</text>
+                    </svg>
+                    <!-- Variante angosta (≤ 640 px): el eje de tiempo se reescala a 276 de ancho (6 bloques de 46) -->
+                    <svg class="svg-m" viewBox="0 0 300 216" role="img" aria-labelledby="prefetchTitle-m prefetchDesc-m">
+                        <title id="prefetchTitle-m">Prefetch: solapamiento CPU/GPU</title>
+                        <desc id="prefetchDesc-m">Comparación de la línea de tiempo sin prefetch y con prefetch, mostrando el solapamiento de la CPU y la GPU</desc>
+                        <!-- sin prefetch -->
+                        <text x="12" y="18" font-size="13" font-weight="700" fill="#475569">Sin prefetch · la GPU espera</text>
+                        <g text-anchor="middle" font-size="12.5">
+                            <rect x="12"  y="28" width="46" height="26" fill="#FDE68A" stroke="#FACC15"/><text x="35"  y="46" fill="#92400E">CPU</text>
+                            <rect x="58"  y="28" width="46" height="26" fill="#C4B5FD" stroke="#8B5CF6"/><text x="81"  y="46" fill="#4C1D95">GPU</text>
+                            <rect x="104" y="28" width="46" height="26" fill="#FDE68A" stroke="#FACC15"/><text x="127" y="46" fill="#92400E">CPU</text>
+                            <rect x="150" y="28" width="46" height="26" fill="#C4B5FD" stroke="#8B5CF6"/><text x="173" y="46" fill="#4C1D95">GPU</text>
+                            <rect x="196" y="28" width="46" height="26" fill="#FDE68A" stroke="#FACC15"/><text x="219" y="46" fill="#92400E">CPU</text>
+                            <rect x="242" y="28" width="46" height="26" fill="#C4B5FD" stroke="#8B5CF6"/><text x="265" y="46" fill="#4C1D95">GPU</text>
+                        </g>
+                        <line x1="12" y1="64" x2="288" y2="64" stroke="#DC2626" stroke-width="1.5"/>
+                        <text x="150" y="82" text-anchor="middle" font-size="12.5" fill="#DC2626">tiempo total largo →</text>
+                        <!-- con prefetch -->
+                        <text x="12" y="118" font-size="13" font-weight="700" fill="#475569">Con prefetch · CPU y GPU se solapan</text>
+                        <g text-anchor="middle" font-size="12.5">
+                            <rect x="12"  y="128" width="46" height="24" fill="#FDE68A" stroke="#FACC15"/><text x="35"  y="145" fill="#92400E">CPU</text>
+                            <rect x="58"  y="128" width="46" height="24" fill="#FDE68A" stroke="#FACC15"/><text x="81"  y="145" fill="#92400E">CPU</text>
+                            <rect x="104" y="128" width="46" height="24" fill="#FDE68A" stroke="#FACC15"/><text x="127" y="145" fill="#92400E">CPU</text>
+                            <rect x="150" y="128" width="46" height="24" fill="#FDE68A" stroke="#FACC15"/><text x="173" y="145" fill="#92400E">CPU</text>
+                            <rect x="58"  y="154" width="46" height="24" fill="#C4B5FD" stroke="#8B5CF6"/><text x="81"  y="171" fill="#4C1D95">GPU</text>
+                            <rect x="104" y="154" width="46" height="24" fill="#C4B5FD" stroke="#8B5CF6"/><text x="127" y="171" fill="#4C1D95">GPU</text>
+                            <rect x="150" y="154" width="46" height="24" fill="#C4B5FD" stroke="#8B5CF6"/><text x="173" y="171" fill="#4C1D95">GPU</text>
+                            <rect x="196" y="154" width="46" height="24" fill="#C4B5FD" stroke="#8B5CF6"/><text x="219" y="171" fill="#4C1D95">GPU</text>
+                        </g>
+                        <line x1="12" y1="188" x2="242" y2="188" stroke="#15803D" stroke-width="1.5"/>
+                        <text x="127" y="206" text-anchor="middle" font-size="12.5" fill="#15803D">tiempo total corto →</text>
                     </svg>
                     <figcaption>Figura 2. El <em>prefetch</em> solapa la carga de datos (CPU) con el cómputo (GPU). La GPU deja de quedarse ociosa y el tiempo por época se reduce.</figcaption>
                 </figure>
@@ -456,7 +529,7 @@ loader = <span class="fn">DataLoader</span>(dataset, batch_size=32,        <span
             </div>
             <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
                 <figure class="card p-5">
-                    <svg viewBox="0 0 360 220" width="100%" role="img" aria-labelledby="fp16Title fp16Desc">
+                    <svg class="svg-d" viewBox="0 0 360 220" width="100%" role="img" aria-labelledby="fp16Title fp16Desc">
                         <title id="fp16Title">VRAM y tiempo: FP32 frente a precisión mixta FP16</title>
                         <desc id="fp16Desc">Comparación ilustrativa de VRAM total y tiempo por época entre precisión simple FP32 y precisión mixta FP16: la VRAM total baja a cerca de dos tercios y el tiempo a cerca de dos tercios</desc>
                         <!-- ejes -->
@@ -473,6 +546,25 @@ loader = <span class="fn">DataLoader</span>(dataset, batch_size=32,        <span
                         <!-- leyenda -->
                         <rect x="250" y="26" width="11" height="11" fill="#001A4D"/><text x="266" y="35" font-size="9" fill="#475569">FP32</text>
                         <rect x="302" y="26" width="11" height="11" fill="#ED1E79"/><text x="318" y="35" font-size="9" fill="#475569">FP16</text>
+                    </svg>
+                    <!-- Variante angosta (≤ 640 px): mismas barras y leyenda arriba a la derecha, con texto mayor -->
+                    <svg class="svg-m" viewBox="0 0 300 228" role="img" aria-labelledby="fp16Title-m fp16Desc-m">
+                        <title id="fp16Title-m">VRAM y tiempo: FP32 frente a precisión mixta FP16</title>
+                        <desc id="fp16Desc-m">Comparación ilustrativa de VRAM total y tiempo por época entre precisión simple FP32 y precisión mixta FP16: la VRAM total baja a cerca de dos tercios y el tiempo a cerca de dos tercios</desc>
+                        <!-- ejes -->
+                        <line x1="40" y1="30" x2="40" y2="200" stroke="#94A3B8" stroke-width="1.2"/>
+                        <line x1="40" y1="200" x2="292" y2="200" stroke="#94A3B8" stroke-width="1.2"/>
+                        <!-- grupo VRAM -->
+                        <rect x="62"  y="60"  width="44" height="140" fill="#001A4D"/><text x="84"  y="53" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E293B">100 %</text>
+                        <rect x="112" y="103" width="44" height="97"  fill="#ED1E79"/><text x="134" y="96" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E293B">≈69 %</text>
+                        <text x="109" y="219" text-anchor="middle" font-size="13" font-weight="600" fill="#475569">VRAM</text>
+                        <!-- grupo tiempo -->
+                        <rect x="184" y="60"  width="44" height="140" fill="#001A4D"/><text x="206" y="53" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E293B">100 %</text>
+                        <rect x="234" y="107" width="44" height="93"  fill="#ED1E79"/><text x="256" y="100" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E293B">≈65 %</text>
+                        <text x="231" y="219" text-anchor="middle" font-size="13" font-weight="600" fill="#475569">Tiempo / época</text>
+                        <!-- leyenda -->
+                        <rect x="168" y="8" width="13" height="13" fill="#001A4D"/><text x="186" y="19" font-size="12.5" fill="#475569">FP32</text>
+                        <rect x="232" y="8" width="13" height="13" fill="#ED1E79"/><text x="250" y="19" font-size="12.5" fill="#475569">FP16</text>
                     </svg>
                     <figcaption>Figura 3. La precisión mixta (FP16) reduce sobre todo la memoria de las activaciones y acelera el entrenamiento al activar los Tensor Cores. Como los pesos maestros, sus gradientes y los estados de Adam siguen en FP32, el ahorro total de VRAM es menor que la mitad: del orden de un tercio en una CNN mediana con lote 32 (≈31 % en ResNet-18). Los valores son ilustrativos; cada estudiante reporta los suyos.</figcaption>
                 </figure>
@@ -516,7 +608,7 @@ scaler = torch.amp.<span class="fn">GradScaler</span>(<span class="st">"cuda"</s
             </div>
             <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
                 <figure class="card p-5">
-                    <svg viewBox="0 0 360 210" width="100%" role="img" aria-labelledby="edgeTitle edgeDesc">
+                    <svg class="svg-d" viewBox="0 0 360 210" width="100%" role="img" aria-labelledby="edgeTitle edgeDesc">
                         <title id="edgeTitle">Efecto de la cuantización</title>
                         <desc id="edgeDesc">Comparación del modelo antes y después de la optimización para el borde en tamaño, latencia y precisión</desc>
                         <!-- ejes -->
@@ -537,6 +629,29 @@ scaler = torch.amp.<span class="fn">GradScaler</span>(<span class="st">"cuda"</s
                         <!-- leyenda -->
                         <rect x="150" y="196" width="11" height="11" fill="#001A4D"/><text x="166" y="205" font-size="9" fill="#475569">Antes (FP32)</text>
                         <rect x="248" y="196" width="11" height="11" fill="#0E9F6E"/><text x="264" y="205" font-size="9" fill="#475569">Después (INT8)</text>
+                    </svg>
+                    <!-- Variante angosta (≤ 640 px): mismas barras y leyenda abajo, con texto mayor -->
+                    <svg class="svg-m" viewBox="0 0 300 226" role="img" aria-labelledby="edgeTitle-m edgeDesc-m">
+                        <title id="edgeTitle-m">Efecto de la cuantización</title>
+                        <desc id="edgeDesc-m">Comparación del modelo antes y después de la optimización para el borde en tamaño, latencia y precisión</desc>
+                        <!-- ejes -->
+                        <line x1="34" y1="24" x2="34" y2="176" stroke="#94A3B8" stroke-width="1.2"/>
+                        <line x1="34" y1="176" x2="296" y2="176" stroke="#94A3B8" stroke-width="1.2"/>
+                        <!-- grupo Tamaño -->
+                        <rect x="50"  y="48"  width="34" height="128" fill="#001A4D"/><text x="67"  y="42"  text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E293B">45 MB</text>
+                        <rect x="92"  y="128" width="34" height="48"  fill="#0E9F6E"/><text x="109" y="122" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E293B">12 MB</text>
+                        <text x="88"  y="194" text-anchor="middle" font-size="13" font-weight="600" fill="#475569">Tamaño</text>
+                        <!-- grupo Latencia -->
+                        <rect x="137" y="56"  width="34" height="120" fill="#001A4D"/><text x="154" y="50"  text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E293B">120 ms</text>
+                        <rect x="179" y="116" width="34" height="60"  fill="#0E9F6E"/><text x="196" y="110" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E293B">55 ms</text>
+                        <text x="175" y="194" text-anchor="middle" font-size="13" font-weight="600" fill="#475569">Latencia</text>
+                        <!-- grupo Precisión -->
+                        <rect x="220" y="52"  width="34" height="124" fill="#001A4D"/><text x="237" y="46"  text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E293B">94 %</text>
+                        <rect x="262" y="58"  width="34" height="118" fill="#0E9F6E"/><text x="279" y="52"  text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E293B">92 %</text>
+                        <text x="258" y="194" text-anchor="middle" font-size="13" font-weight="600" fill="#475569">Exactitud</text>
+                        <!-- leyenda -->
+                        <rect x="30"  y="206" width="13" height="13" fill="#001A4D"/><text x="48"  y="217" font-size="12.5" fill="#475569">Antes (FP32)</text>
+                        <rect x="150" y="206" width="13" height="13" fill="#0E9F6E"/><text x="168" y="217" font-size="12.5" fill="#475569">Después (INT8)</text>
                     </svg>
                     <figcaption>Figura 4. Efecto de la cuantización sobre la rama visual: el tamaño y la latencia caen con fuerza y la exactitud apenas baja. Los valores son ilustrativos; cada estudiante reporta los suyos.</figcaption>
                 </figure>
@@ -565,7 +680,7 @@ scaler = torch.amp.<span class="fn">GradScaler</span>(<span class="st">"cuda"</s
             </div>
             <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
                 <figure class="card p-5">
-                    <svg viewBox="0 0 380 250" width="100%" role="img" aria-labelledby="deployTitle deployDesc">
+                    <svg class="svg-d" viewBox="0 0 380 250" width="100%" role="img" aria-labelledby="deployTitle deployDesc">
                         <title id="deployTitle">Exportación y despliegue dual</title>
                         <desc id="deployDesc">Dos implementaciones equivalentes (PyTorch y Keras) producen cada una su propio formato; ONNX actúa como pasaporte portable hacia el despliegue en la nube y en una tablet offline</desc>
                         <defs>
@@ -598,6 +713,48 @@ scaler = torch.amp.<span class="fn">GradScaler</span>(<span class="st">"cuda"</s
                         <text x="330" y="182" text-anchor="middle" font-size="8.5" fill="#fff">LiteRT · visual</text>
                         <line x1="244" y1="115" x2="284" y2="80"  stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
                         <line x1="244" y1="120" x2="284" y2="170" stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep)"/>
+                    </svg>
+                    <!-- Variante angosta (≤ 640 px): el flujo pasa de arriba abajo (modelos → formatos → destinos) -->
+                    <svg class="svg-m" viewBox="0 0 300 250" role="img" aria-labelledby="deployTitle-m deployDesc-m">
+                        <title id="deployTitle-m">Exportación y despliegue dual</title>
+                        <desc id="deployDesc-m">Dos implementaciones equivalentes (PyTorch y Keras) producen cada una su propio formato; ONNX actúa como pasaporte portable hacia el despliegue en la nube y en una tablet offline</desc>
+                        <defs>
+                            <linearGradient id="deployGrad-m" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0" stop-color="#3D008D"/><stop offset="1" stop-color="#5B1C9E"/>
+                            </linearGradient>
+                            <marker id="arrowDep-m" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/>
+                            </marker>
+                        </defs>
+                        <!-- dos implementaciones equivalentes -->
+                        <text x="150" y="16" text-anchor="middle" font-size="12.5" font-weight="700" fill="#475569">≈ equivalentes</text>
+                        <rect x="6" y="26" width="136" height="48" rx="10" fill="url(#deployGrad-m)"/>
+                        <text x="74" y="46" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Modelo PyTorch</text>
+                        <text x="74" y="64" text-anchor="middle" font-size="12.5" fill="#E9D5FF">implementación A</text>
+                        <rect x="158" y="26" width="136" height="48" rx="10" fill="#0E7490"/>
+                        <text x="226" y="46" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Modelo Keras</text>
+                        <text x="226" y="64" text-anchor="middle" font-size="12.5" fill="#CFFAFE">implementación B</text>
+                        <!-- formatos propios -->
+                        <rect x="6"   y="112" width="62"  height="36" rx="8" fill="#0F172A"/><text x="37"  y="135" text-anchor="middle" font-size="13" fill="#fff">.pth</text>
+                        <rect x="84"  y="112" width="132" height="36" rx="8" fill="#3D008D"/><text x="150" y="135" text-anchor="middle" font-size="13" fill="#fff">ONNX (pasaporte)</text>
+                        <rect x="232" y="112" width="62"  height="36" rx="8" fill="#0F172A"/><text x="263" y="135" text-anchor="middle" font-size="13" fill="#fff">.keras</text>
+                        <g stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep-m)">
+                            <line x1="37"  y1="74" x2="37"  y2="108"/>
+                            <line x1="263" y1="74" x2="263" y2="108"/>
+                            <line x1="112" y1="74" x2="130" y2="108"/>
+                            <line x1="188" y1="74" x2="170" y2="108"/>
+                        </g>
+                        <!-- destinos -->
+                        <rect x="6" y="190" width="140" height="54" rx="9" fill="#0E7490"/>
+                        <text x="76" y="211" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Nube</text>
+                        <text x="76" y="231" text-anchor="middle" font-size="12.5" fill="#CFFAFE">API REST · temporal</text>
+                        <rect x="154" y="190" width="140" height="54" rx="9" fill="#ED1E79"/>
+                        <text x="224" y="211" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">Tablet</text>
+                        <text x="224" y="231" text-anchor="middle" font-size="12.5" fill="#fff">LiteRT · visual</text>
+                        <g stroke="#94A3B8" stroke-width="1.6" marker-end="url(#arrowDep-m)">
+                            <line x1="130" y1="148" x2="98"  y2="186"/>
+                            <line x1="170" y1="148" x2="202" y2="186"/>
+                        </g>
                     </svg>
                     <figcaption>Figura 5. <span class="icode">.pth</span> y <span class="icode">.keras</span> provienen de <strong>dos implementaciones equivalentes</strong>, no del mismo objeto. ONNX es el pasaporte portable. La rama visual se despliega offline con LiteRT y la temporal por API REST en la nube. (La conversión a LiteRT puede partir directamente del modelo Keras/TF, sin pasar necesariamente por ONNX.)</figcaption>
                 </figure>
