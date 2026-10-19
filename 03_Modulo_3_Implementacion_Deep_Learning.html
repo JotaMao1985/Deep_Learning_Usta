@@ -1178,6 +1178,28 @@
             return (v < 0 ? '−' : '') + miles + (dec ? ',' + dec : '');
         };
 
+        /* Diagramas esquemáticos en pantallas angostas: cuando el ancho útil del contenedor no alcanza para que la versión
+           de escritorio conserve su texto legible (umbral ≈ 85 % de su viewBox), se dibuja una variante propia de 320
+           unidades de ancho (texto ≥ 12) en lugar de encoger la figura o desplazarla de lado. Devuelve [ref, ¿angosto?]. */
+        const useDiagramaAngosto = (umbral) => {
+            const ref = useRef(null);
+            const [angosto, setAngosto] = useState(() => (window.innerWidth || 1024) < umbral + 96);
+            useEffect(() => {
+                const el = ref.current; if (!el) return undefined;
+                const medir = () => {
+                    const cs = getComputedStyle(el);
+                    const w = el.clientWidth - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0);
+                    if (w > 0) setAngosto(w < umbral);
+                };
+                medir();
+                if (!window.ResizeObserver) return undefined;
+                const ro = new ResizeObserver(medir); ro.observe(el);
+                return () => ro.disconnect();
+            }, [umbral]);
+            return [ref, angosto];
+        };
+        const SVG_MOVIL = { maxWidth: 440 };
+
         /* Pie de figura normalizado: «Figura 3.c.n.» + descripción + fuente.
            Numeración del M3: 3.c.n, con c = capítulo del módulo (3.1, 3.2, 3.3) y n = orden de aparición
            dentro del capítulo (las simulaciones S-A y S-B ocupan el número de la figura que sustituyen). */
@@ -1496,9 +1518,63 @@
            DIAGRAMA SVG: Las tres APIs de Keras (complejidad creciente)
            Regla: dentro de <text> NO se usan delimitadores MathJax.
         ============================================================ */
-        const KerasAPIsSVG = () => (
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+        const KerasAPIsSVG = () => {
+            const [ref, angosto] = useDiagramaAngosto(629);
+            return (
+            <div ref={ref} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
                 <div className="overflow-x-auto">
+                {angosto ? (
+                /* versión angosta: las tres API en escalera, cada una más a la derecha que la anterior, sobre el mismo eje
+                   horizontal de complejidad (conserva el «de izquierda a derecha» del título) */
+                <svg viewBox="0 0 320 596" className="w-full block mx-auto" style={SVG_MOVIL} role="img"
+                    aria-label="Las tres API de Keras ordenadas por complejidad creciente: Sequential (línea de ensamblaje), Funcional (diagrama de flujo) y Subclassing (taller artesanal).">
+                    <title>De izquierda a derecha, las tres formas de construir modelos en Keras ganan flexibilidad y complejidad: Sequential apila capas en línea, la API Funcional permite ramificaciones, y Subclassing ofrece control total.</title>
+                    <defs>
+                        <marker id="arrK" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+                            <path d="M0,0 L6,3 L0,6 Z" fill="#001A4D" />
+                        </marker>
+                    </defs>
+                    {/* 1. Sequential */}
+                    <text x="107" y="20" textAnchor="middle" fontSize="14" fill="#3D008D" fontWeight="bold">1 · Sequential</text>
+                    <text x="107" y="37" textAnchor="middle" fontSize="12" fill="#64748B" fontStyle="italic">Línea de ensamblaje</text>
+                    {[0, 1, 2].map((i) => (
+                        <g key={`s-${i}`}>
+                            <rect x={72} y={48 + i * 40} width={70} height={28} rx="5" fill="#F5F0FA" stroke="#3D008D" strokeWidth="1.6" />
+                            <text x={107} y={66 + i * 40} textAnchor="middle" fontSize="12" fill="#3D008D">Capa {i + 1}</text>
+                            {i < 2 && <line x1={107} y1={76 + i * 40} x2={107} y2={87 + i * 40} stroke="#3D008D" strokeWidth="1.6" markerEnd="url(#arrK)" />}
+                        </g>
+                    ))}
+
+                    {/* 2. Funcional */}
+                    <text x="160" y="186" textAnchor="middle" fontSize="14" fill="#0E7490" fontWeight="bold">2 · Funcional (DAG)</text>
+                    <text x="160" y="203" textAnchor="middle" fontSize="12" fill="#64748B" fontStyle="italic">Diagrama de flujo</text>
+                    <rect x={80} y={214} width={74} height={28} rx="5" fill="#ECFEFF" stroke="#0E7490" strokeWidth="1.6" />
+                    <text x={117} y={232} textAnchor="middle" fontSize="12" fill="#0E7490">Entrada A</text>
+                    <rect x={166} y={214} width={74} height={28} rx="5" fill="#ECFEFF" stroke="#0E7490" strokeWidth="1.6" />
+                    <text x={203} y={232} textAnchor="middle" fontSize="12" fill="#0E7490">Entrada B</text>
+                    <line x1={117} y1={242} x2={146} y2={268} stroke="#0E7490" strokeWidth="1.6" markerEnd="url(#arrK)" />
+                    <line x1={203} y1={242} x2={174} y2={268} stroke="#0E7490" strokeWidth="1.6" markerEnd="url(#arrK)" />
+                    <rect x={114} y={272} width={92} height={28} rx="5" fill="#CFFAFE" stroke="#0E7490" strokeWidth="1.8" />
+                    <text x={160} y={290} textAnchor="middle" fontSize="12" fill="#0E7490">concatenar</text>
+                    <line x1={160} y1={300} x2={160} y2={316} stroke="#0E7490" strokeWidth="1.6" markerEnd="url(#arrK)" />
+                    <rect x={120} y={318} width={80} height={28} rx="5" fill="#DCFCE7" stroke="#15803D" strokeWidth="1.8" />
+                    <text x={160} y={336} textAnchor="middle" fontSize="12" fill="#15803D">Salida</text>
+
+                    {/* 3. Subclassing */}
+                    <text x="216" y="376" textAnchor="middle" fontSize="14" fill="#BE185D" fontWeight="bold">3 · Subclassing</text>
+                    <text x="216" y="393" textAnchor="middle" fontSize="12" fill="#64748B" fontStyle="italic">Taller artesanal</text>
+                    <rect x={131} y={404} width={170} height={140} rx="8" fill="#FFF1F7" stroke="#ED1E79" strokeWidth="1.8" strokeDasharray="5 3" />
+                    <text x={216} y={430} textAnchor="middle" fontSize="13" fill="#BE185D" fontWeight="bold">class(keras.Model)</text>
+                    <text x={216} y={458} textAnchor="middle" fontSize="12" fill="#475569">__init__: define capas</text>
+                    <text x={216} y={480} textAnchor="middle" fontSize="12" fill="#475569">call(): lógica libre</text>
+                    <text x={216} y={508} textAnchor="middle" fontSize="12" fill="#475569" fontStyle="italic">if / for / condicionales</text>
+                    <text x={216} y={528} textAnchor="middle" fontSize="12" fill="#475569" fontStyle="italic">control total</text>
+
+                    {/* Eje de complejidad */}
+                    <line x1="16" y1="564" x2="300" y2="564" stroke="#001A4D" strokeWidth="2" markerEnd="url(#arrK)" />
+                    <text x="160" y="586" textAnchor="middle" fontSize="12" fill="#001A4D" fontWeight="bold">Complejidad y flexibilidad crecientes →</text>
+                </svg>
+                ) : (
                 <svg viewBox="0 0 740 270" className="w-full" style={{ minWidth: 640 }} role="img"
                     aria-label="Las tres API de Keras ordenadas por complejidad creciente: Sequential (línea de ensamblaje), Funcional (diagrama de flujo) y Subclassing (taller artesanal).">
                     <title>De izquierda a derecha, las tres formas de construir modelos en Keras ganan flexibilidad y complejidad: Sequential apila capas en línea, la API Funcional permite ramificaciones, y Subclassing ofrece control total.</title>
@@ -1547,18 +1623,65 @@
                     <text x={610} y={170} textAnchor="middle" fontSize="10" fill="#475569" fontStyle="italic">if / for / condicionales</text>
                     <text x={610} y={190} textAnchor="middle" fontSize="10" fill="#475569" fontStyle="italic">control total</text>
                 </svg>
+                )}
                 </div>
-                <AvisoDesplazar />
+                {!angosto && <AvisoDesplazar />}
                 <PieFigura n="3.1.1" className="mt-1">Las tres API de Keras ordenadas por complejidad creciente.</PieFigura>
             </div>
-        );
+            );
+        };
 
         /* ============================================================
            DIAGRAMA SVG: Ecosistemas TF y PyTorch con Keras 3 como puente
         ============================================================ */
-        const EcosistemasSVG = () => (
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+        const EcosistemasSVG = () => {
+            const motores = [
+                { cx: 135, name: 'TensorFlow', color: '#FF6F00', txt: '#C2410C', bg: '#FFF7ED', eco: 'Ecosistema TF', itemBg: '#FFF7ED', itemBorde: '#FDBA74', itemTxt: '#9A3412', items: ['TF Serving', 'LiteRT', 'TF.js', 'TFX', 'TensorBoard'] },
+                { cx: 330, name: 'PyTorch', color: '#EE4C2C', txt: '#B91C1C', bg: '#FEF2F2', eco: 'Ecosistema PyTorch', itemBg: '#FEF2F2', itemBorde: '#FCA5A5', itemTxt: '#991B1B', items: ['Triton · FastAPI', 'torch.export + ONNX', 'torch.compile', 'ExecuTorch', 'Hugging Face'] },
+                { cx: 525, name: 'JAX', color: '#0E7490', txt: '#0E7490', bg: '#ECFEFF', eco: 'Ecosistema JAX', itemBg: '#ECFEFF', itemBorde: '#67E8F9', itemTxt: '#155E75', items: ['Flax (redes)', 'Optax (optimización)', 'Orbax (puntos de control)'] },
+            ];
+            /* versión angosta: un bloque por motor, de arriba abajo, con su ecosistema en la columna que tiene debajo;
+               un tronco discontinuo a la izquierda reparte las líneas desde Keras 3 */
+            const yMotorN = motores.reduce((acc, b) => [...acc, acc[acc.length - 1] + 79 + b.items.length * 20], [76]);
+            const yOpenVinoN = yMotorN[motores.length];
+            const [ref, angosto] = useDiagramaAngosto(629);
+            return (
+            <div ref={ref} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
                 <div className="overflow-x-auto">
+                {angosto ? (
+                <svg viewBox={`0 0 320 ${yOpenVinoN + 50}`} className="w-full block mx-auto" style={SVG_MOVIL} role="img"
+                    aria-label="Keras 3 como puente multi-backend: el mismo código se ejecuta sobre TensorFlow, PyTorch o JAX, y sobre OpenVINO solo para inferencia. Bajo cada motor, su ecosistema: TF Serving, LiteRT, TF.js, TFX y TensorBoard para TensorFlow; Triton y FastAPI, torch.export con ONNX, torch.compile, ExecuTorch y Hugging Face para PyTorch; Flax, Optax y Orbax para JAX.">
+                    <title>Keras 3 actúa como puente: el mismo código de alto nivel se ejecuta sobre los motores TensorFlow, PyTorch o JAX, cada uno con su ecosistema en la columna que tiene debajo; OpenVINO, en recuadro discontinuo, sirve solo para inferencia.</title>
+                    {/* Keras 3 puente en la parte superior */}
+                    <rect x={12} y={8} width={296} height={52} rx="10" fill="#3D008D" />
+                    <text x={160} y={30} textAnchor="middle" fontSize="15" fill="#fff" fontWeight="bold">Keras 3 — código único</text>
+                    <text x={160} y={49} textAnchor="middle" fontSize="12" fill="#E9D5FF">os.environ['KERAS_BACKEND']</text>
+                    <line x1={26} y1={60} x2={26} y2={yOpenVinoN + 20} stroke="#94A3B8" strokeWidth="1.6" strokeDasharray="4 3" />
+                    {motores.map((b, i) => {
+                        const y0 = yMotorN[i];
+                        return (
+                            <g key={i}>
+                                <line x1={26} y1={y0 + 15} x2={108} y2={y0 + 15} stroke="#94A3B8" strokeWidth="1.6" strokeDasharray="4 3" />
+                                <rect x={110} y={y0} width={124} height={30} rx="7" fill={b.bg} stroke={b.color} strokeWidth="2" />
+                                <text x={172} y={y0 + 20} textAnchor="middle" fontSize="13" fill={b.txt} fontWeight="bold">{b.name}</text>
+                                <line x1={172} y1={y0 + 30} x2={172} y2={y0 + 42} stroke={b.color} strokeWidth="1.4" strokeDasharray="4 3" />
+                                <text x={172} y={y0 + 57} textAnchor="middle" fontSize="13" fill={b.txt} fontWeight="bold">{b.eco}</text>
+                                {b.items.map((t, j) => (
+                                    <g key={j}>
+                                        <rect x={46} y={y0 + 64 + j * 20} width={252} height={17} rx="4" fill={b.itemBg} stroke={b.itemBorde} strokeWidth="1" />
+                                        <text x={172} y={y0 + 77 + j * 20} textAnchor="middle" fontSize="12" fill={b.itemTxt}>{t}</text>
+                                    </g>
+                                ))}
+                            </g>
+                        );
+                    })}
+                    {/* Cuarto motor, solo para inferencia */}
+                    <line x1={26} y1={yOpenVinoN + 20} x2={108} y2={yOpenVinoN + 20} stroke="#94A3B8" strokeWidth="1.6" strokeDasharray="4 3" />
+                    <rect x={110} y={yOpenVinoN} width={124} height={40} rx="7" fill="#F8FAFC" stroke="#64748B" strokeWidth="1.6" strokeDasharray="5 3" />
+                    <text x={172} y={yOpenVinoN + 17} textAnchor="middle" fontSize="13" fill="#334155" fontWeight="bold">OpenVINO</text>
+                    <text x={172} y={yOpenVinoN + 33} textAnchor="middle" fontSize="12" fill="#475569">(solo inferencia)</text>
+                </svg>
+                ) : (
                 <svg viewBox="0 0 740 312" className="w-full" style={{ minWidth: 660 }} role="img"
                     aria-label="Keras 3 como puente multi-backend: el mismo código se ejecuta sobre TensorFlow, PyTorch o JAX, y sobre OpenVINO solo para inferencia. Bajo cada motor, su ecosistema: TF Serving, LiteRT, TF.js, TFX y TensorBoard para TensorFlow; Triton y FastAPI, torch.export con ONNX, torch.compile, ExecuTorch y Hugging Face para PyTorch; Flax, Optax y Orbax para JAX.">
                     <title>Keras 3 actúa como puente: el mismo código de alto nivel se ejecuta sobre los motores TensorFlow, PyTorch o JAX, cada uno con su ecosistema en la columna que tiene debajo; OpenVINO, en recuadro discontinuo, sirve solo para inferencia.</title>
@@ -1568,11 +1691,7 @@
                     <text x={370} y={60} textAnchor="middle" fontSize="11" fill="#E9D5FF">os.environ['KERAS_BACKEND']</text>
 
                     {/* Tres motores, cada uno sobre su propia columna de ecosistema (texto con contraste ≥ 4,5:1) */}
-                    {[
-                        { cx: 135, name: 'TensorFlow', color: '#FF6F00', txt: '#C2410C', bg: '#FFF7ED', eco: 'Ecosistema TF', itemBg: '#FFF7ED', itemBorde: '#FDBA74', itemTxt: '#9A3412', items: ['TF Serving', 'LiteRT', 'TF.js', 'TFX', 'TensorBoard'] },
-                        { cx: 330, name: 'PyTorch', color: '#EE4C2C', txt: '#B91C1C', bg: '#FEF2F2', eco: 'Ecosistema PyTorch', itemBg: '#FEF2F2', itemBorde: '#FCA5A5', itemTxt: '#991B1B', items: ['Triton · FastAPI', 'torch.export + ONNX', 'torch.compile', 'ExecuTorch', 'Hugging Face'] },
-                        { cx: 525, name: 'JAX', color: '#0E7490', txt: '#0E7490', bg: '#ECFEFF', eco: 'Ecosistema JAX', itemBg: '#ECFEFF', itemBorde: '#67E8F9', itemTxt: '#155E75', items: ['Flax (redes)', 'Optax (optimización)', 'Orbax (puntos de control)'] },
-                    ].map((b, i) => (
+                    {motores.map((b, i) => (
                         <g key={i}>
                             <line x1={370} y1={68} x2={b.cx} y2={108} stroke="#94A3B8" strokeWidth="1.6" strokeDasharray="4 3" />
                             <rect x={b.cx - 50} y={110} width={100} height={36} rx="7" fill={b.bg} stroke={b.color} strokeWidth="2" />
@@ -1594,11 +1713,13 @@
                     <text x={671} y={126} textAnchor="middle" fontSize="12" fill="#334155" fontWeight="bold">OpenVINO</text>
                     <text x={671} y={140} textAnchor="middle" fontSize="9.5" fill="#475569">(solo inferencia)</text>
                 </svg>
+                )}
                 </div>
-                <AvisoDesplazar />
+                {!angosto && <AvisoDesplazar />}
                 <PieFigura n="3.1.2" className="mt-1">Ecosistemas de TensorFlow, PyTorch y JAX con Keras 3 como puente multi-<em>backend</em>; OpenVINO se usa solo para inferencia.</PieFigura>
             </div>
-        );
+            );
+        };
 
         const Cap31Section = () => {
             const ref = useRef(null);
@@ -2072,9 +2193,40 @@ import keras
            CAPÍTULO 3.2 — COMPUTACIÓN DE ALTO RENDIMIENTO (HPC)
         ============================================================ */
         /* DIAGRAMA SVG: CPU vs GPU (pocos núcleos potentes vs miles pequeños) */
-        const CPUvsGPUSVG = ({ fuente = 'elaboración propia.' }) => (
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+        const CPUvsGPUSVG = ({ fuente = 'elaboración propia.' }) => {
+            const [ref, angosto] = useDiagramaAngosto(629);
+            return (
+            <div ref={ref} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
                 <div className="overflow-x-auto">
+                {angosto ? (
+                /* versión angosta: CPU arriba y GPU abajo, con el «vs» entre ambas */
+                <svg viewBox="0 0 320 502" className="w-full block mx-auto" style={SVG_MOVIL} role="img"
+                    aria-label="Comparación arquitectónica: la CPU tiene pocos núcleos grandes optimizados para tareas secuenciales; la GPU tiene miles de núcleos pequeños para paralelismo masivo.">
+                    <title>La CPU dedica el silicio a pocos núcleos potentes (el despulpado a mano); la GPU lo reparte en una malla de muchos núcleos pequeños que ejecutan la misma operación sobre datos distintos (la despulpadora industrial).</title>
+                    {/* CPU */}
+                    <text x="160" y="20" textAnchor="middle" fontSize="15" fill="#3D008D" fontWeight="bold">CPU</text>
+                    <text x="160" y="38" textAnchor="middle" fontSize="12" fill="#64748B" fontStyle="italic">Despulpado a mano: pocas tareas complejas</text>
+                    <rect x="35" y="48" width="250" height="150" rx="10" fill="#F5F0FA" stroke="#3D008D" strokeWidth="1.6" />
+                    {[0, 1].map((r) => [0, 1].map((c) => (
+                        <g key={`cpu-${r}-${c}`}>
+                            <rect x={60 + c * 110} y={64 + r * 66} width={90} height={54} rx="6" fill="#3D008D" />
+                            <text x={105 + c * 110} y={96 + r * 66} textAnchor="middle" fontSize="13" fill="#fff" fontWeight="bold">Núcleo</text>
+                        </g>
+                    )))}
+                    <text x="160" y="216" textAnchor="middle" fontSize="12" fill="#475569">De pocos a más de 100 núcleos grandes</text>
+                    {/* operador */}
+                    <text x="160" y="250" textAnchor="middle" fontSize="20" fill="#001A4D" fontWeight="bold">vs</text>
+                    {/* GPU */}
+                    <text x="160" y="282" textAnchor="middle" fontSize="15" fill="#15803D" fontWeight="bold">GPU</text>
+                    <text x="160" y="300" textAnchor="middle" fontSize="12" fill="#64748B" fontStyle="italic">Despulpadora industrial:</text>
+                    <text x="160" y="315" textAnchor="middle" fontSize="12" fill="#64748B" fontStyle="italic">miles de tareas simples (SIMT)</text>
+                    <rect x="35" y="324" width="250" height="150" rx="10" fill="#F0FDF4" stroke="#15803D" strokeWidth="1.6" />
+                    {Array.from({ length: 8 }).map((_, r) => Array.from({ length: 12 }).map((_, c) => (
+                        <rect key={`gpu-${r}-${c}`} x={49 + c * 19} y={334 + r * 17} width={14} height={12} rx="2" fill="#22C55E" stroke="#15803D" strokeWidth="0.5" />
+                    )))}
+                    <text x="160" y="492" textAnchor="middle" fontSize="12" fill="#475569">Miles de núcleos pequeños</text>
+                </svg>
+                ) : (
                 <svg viewBox="0 0 740 250" className="w-full" style={{ minWidth: 620 }} role="img"
                     aria-label="Comparación arquitectónica: la CPU tiene pocos núcleos grandes optimizados para tareas secuenciales; la GPU tiene miles de núcleos pequeños para paralelismo masivo.">
                     <title>La CPU dedica el silicio a pocos núcleos potentes (el despulpado a mano); la GPU lo reparte en una malla de muchos núcleos pequeños que ejecutan la misma operación sobre datos distintos (la despulpadora industrial).</title>
@@ -2101,11 +2253,13 @@ import keras
                     {/* operador */}
                     <text x="365" y="145" textAnchor="middle" fontSize="20" fill="#001A4D" fontWeight="bold">vs</text>
                 </svg>
+                )}
                 </div>
-                <AvisoDesplazar />
+                {!angosto && <AvisoDesplazar />}
                 <PieFigura n="3.2.1" className="mt-1" fuente={fuente}>Comparación arquitectónica CPU frente a GPU: la CPU optimiza tareas secuenciales; la GPU, el paralelismo masivo (SIMT).</PieFigura>
             </div>
-        );
+            );
+        };
 
         /* DIAGRAMA SVG: la pila de software CUDA (de modelo.fit() al silicio) */
         const CudaStackSVG = () => {
@@ -2116,9 +2270,31 @@ import keras
                 { t: 'CUDA (2006)', d: 'Plataforma paralela', color: '#0E7490', bg: '#ECFEFF', txt: '#0E7490' },
                 { t: 'GPU: núcleos CUDA + Tensor Cores', d: 'Hardware', color: '#15803D', bg: '#F0FDF4', txt: '#15803D' },
             ];
+            const [ref, angosto] = useDiagramaAngosto(629);
             return (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                <div ref={ref} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
                     <div className="overflow-x-auto">
+                    {angosto ? (
+                    /* versión angosta: la descripción de cada capa pasa dentro de su caja, bajo el nombre */
+                    <svg viewBox="0 0 320 342" className="w-full block mx-auto" style={SVG_MOVIL} role="img"
+                        aria-label="La pila de software CUDA en cinco capas: el código del estudiante llama a un framework, este despacha a las bibliotecas aceleradas cuDNN, NCCL y TensorRT, que corren sobre la plataforma CUDA, la cual gobierna los núcleos CUDA y Tensor Cores de la GPU.">
+                        <title>Cada llamada de alto nivel desciende por la pila: modelo.fit() invoca al framework, el framework a cuDNN, cuDNN a CUDA y CUDA al hardware de la GPU.</title>
+                        <defs><marker id="arrC" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#94A3B8" /></marker></defs>
+                        <text x="172" y="22" textAnchor="middle" fontSize="14" fill="#001A4D" fontWeight="bold">Una línea de alto nivel desciende</text>
+                        <text x="172" y="40" textAnchor="middle" fontSize="14" fill="#001A4D" fontWeight="bold">hasta el silicio</text>
+                        {capas.map((c, i) => (
+                            <g key={i}>
+                                <rect x={30} y={56 + i * 58} width={284} height={44} rx="8" fill={c.bg} stroke={c.color} strokeWidth="2" />
+                                <text x={172} y={75 + i * 58} textAnchor="middle" fontSize="13" fill={c.txt} fontWeight="bold">{c.t}</text>
+                                <text x={172} y={92 + i * 58} textAnchor="middle" fontSize="12" fill="#64748B" fontStyle="italic">{c.d}</text>
+                            </g>
+                        ))}
+                        {[0, 1, 2, 3].map((i) => (
+                            <line key={`fl-${i}`} x1={172} y1={100 + i * 58} x2={172} y2={112 + i * 58} stroke="#94A3B8" strokeWidth="1.6" markerEnd="url(#arrC)" />
+                        ))}
+                        <text x={16} y={194} textAnchor="middle" fontSize="12" fill="#64748B" fontStyle="italic" transform="rotate(-90 16 194)">abstracción ↓</text>
+                    </svg>
+                    ) : (
                     <svg viewBox="0 0 740 262" className="w-full" style={{ minWidth: 620 }} role="img"
                         aria-label="La pila de software CUDA en cinco capas: el código del estudiante llama a un framework, este despacha a las bibliotecas aceleradas cuDNN, NCCL y TensorRT, que corren sobre la plataforma CUDA, la cual gobierna los núcleos CUDA y Tensor Cores de la GPU.">
                         <title>Cada llamada de alto nivel desciende por la pila: modelo.fit() invoca al framework, el framework a cuDNN, cuDNN a CUDA y CUDA al hardware de la GPU.</title>
@@ -2136,8 +2312,9 @@ import keras
                         ))}
                         <text x={60} y={140} textAnchor="middle" fontSize="10" fill="#64748B" fontStyle="italic" transform="rotate(-90 60 140)">abstracción ↓</text>
                     </svg>
+                    )}
                     </div>
-                    <AvisoDesplazar />
+                    {!angosto && <AvisoDesplazar />}
                     <PieFigura n="3.2.2" className="mt-1">La pila de software CUDA: de modelo.fit() al hardware de la GPU.</PieFigura>
                 </div>
             );
@@ -2152,9 +2329,46 @@ import keras
                 { n: 'FP16', bits: '16 bits', e: 5, m: 10, nota: 'rango corto: requiere escalado de pérdida' },
                 { n: 'FP8 (E4M3)', bits: '8 bits', e: 4, m: 3, nota: 'Ada (L4), Hopper y Blackwell; E5M2 para gradientes' },
             ];
+            /* versión angosta: misma escala para todas las filas (9 unidades por bit; FP32 ocupa 288), con el nombre
+               arriba de cada barra y la nota debajo */
+            const Bn = 9, X0n = 16;
+            const notaN = (f) => (f.n === 'FP8 (E4M3)' ? ['Ada (L4), Hopper y Blackwell;', 'E5M2 para gradientes'] : [f.nota]);
+            const [ref, angosto] = useDiagramaAngosto(629);
             return (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                <div ref={ref} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
                     <div className="overflow-x-auto">
+                    {angosto ? (
+                    <svg viewBox="0 0 320 430" className="w-full block mx-auto" style={SVG_MOVIL} role="img"
+                        aria-label="Anatomía de los formatos numéricos FP32, BF16, FP16 y FP8: cada fila muestra el bit de signo, los bits de exponente (que definen el rango) y los bits de mantisa (que definen la precisión). BF16 conserva los 8 bits de exponente de FP32, por eso no necesita escalado de pérdida; FP16 solo tiene 5 y sí lo requiere.">
+                        <title>Comparación a escala de los campos de bits: signo, exponente y mantisa de FP32, BF16, FP16 y FP8. El exponente define el rango representable y la mantisa la precisión.</title>
+                        <text x="160" y="20" textAnchor="middle" fontSize="13" fill="#001A4D" fontWeight="bold">signo · exponente (rango) ·</text>
+                        <text x="160" y="37" textAnchor="middle" fontSize="13" fill="#001A4D" fontWeight="bold">mantisa (precisión)</text>
+                        {/* leyenda */}
+                        <rect x={43} y={48} width={12} height={12} fill="#001A4D" /><text x={60} y={58} fontSize="12" fill="#475569">signo</text>
+                        <rect x={111} y={48} width={12} height={12} fill="#0E7490" /><text x={128} y={58} fontSize="12" fill="#475569">exponente</text>
+                        <rect x={211} y={48} width={12} height={12} fill="#BE185D" /><text x={228} y={58} fontSize="12" fill="#475569">mantisa</text>
+                        {filas.map((f, i) => {
+                            const y = 88 + i * 70;
+                            const wE = f.e * Bn, wM = f.m * Bn;
+                            return (
+                                <g key={i}>
+                                    <text x={X0n} y={y}><tspan fontSize="13" fill="#001A4D" fontWeight="bold">{f.n}</tspan>{' '}<tspan dx="4" fontSize="12" fill="#64748B">{f.bits}</tspan></text>
+                                    <rect x={X0n} y={y + 8} width={Bn} height={22} fill="#001A4D" stroke="#fff" strokeWidth="1" />
+                                    <rect x={X0n + Bn} y={y + 8} width={wE} height={22} fill="#0E7490" stroke="#fff" strokeWidth="1" />
+                                    <text x={X0n + Bn + wE / 2} y={y + 23.5} textAnchor="middle" fontSize="12" fill="#fff" fontWeight="bold">{f.e}</text>
+                                    <rect x={X0n + Bn + wE} y={y + 8} width={wM} height={22} fill="#BE185D" stroke="#fff" strokeWidth="1" />
+                                    <text x={X0n + Bn + wE + wM / 2} y={y + 23.5} textAnchor="middle" fontSize="12" fill="#fff" fontWeight="bold">{f.m}</text>
+                                    {notaN(f).map((l, k) => (
+                                        <text key={k} x={X0n} y={y + 46 + k * 15} fontSize="12" fill="#64748B" fontStyle="italic">{l}</text>
+                                    ))}
+                                </g>
+                            );
+                        })}
+                        <text x="160" y="388" textAnchor="middle" fontSize="12" fill="#64748B" fontStyle="italic">BF16 recorta la mantisa pero conserva el</text>
+                        <text x="160" y="404" textAnchor="middle" fontSize="12" fill="#64748B" fontStyle="italic">rango de FP32; frente a BF16, FP16 gana</text>
+                        <text x="160" y="420" textAnchor="middle" fontSize="12" fill="#64748B" fontStyle="italic">precisión pero pierde rango.</text>
+                    </svg>
+                    ) : (
                     <svg viewBox="0 0 740 250" className="w-full" style={{ minWidth: 660 }} role="img"
                         aria-label="Anatomía de los formatos numéricos FP32, BF16, FP16 y FP8: cada fila muestra el bit de signo, los bits de exponente (que definen el rango) y los bits de mantisa (que definen la precisión). BF16 conserva los 8 bits de exponente de FP32, por eso no necesita escalado de pérdida; FP16 solo tiene 5 y sí lo requiere.">
                         <title>Comparación a escala de los campos de bits: signo, exponente y mantisa de FP32, BF16, FP16 y FP8. El exponente define el rango representable y la mantisa la precisión.</title>
@@ -2181,17 +2395,78 @@ import keras
                         })}
                         <text x="370" y="242" textAnchor="middle" fontSize="10" fill="#64748B" fontStyle="italic">BF16 recorta la mantisa pero conserva el rango de FP32; frente a BF16, FP16 gana precisión pero pierde rango.</text>
                     </svg>
+                    )}
                     </div>
-                    <AvisoDesplazar />
+                    {!angosto && <AvisoDesplazar />}
                     <PieFigura n="3.2.4" className="mt-1">Anatomía de los formatos numéricos: el exponente define el rango y la mantisa la precisión.</PieFigura>
                 </div>
             );
         };
 
         /* DIAGRAMA SVG: flujo del entrenamiento con precisión mixta (AMP) */
-        const AMPSVG = ({ fuente = 'elaboración propia.' }) => (
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+        const AMPSVG = ({ fuente = 'elaboración propia.' }) => {
+            const [ref, angosto] = useDiagramaAngosto(629);
+            return (
+            <div ref={ref} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
                 <div className="overflow-x-auto">
+                {angosto ? (
+                /* versión angosta: el ciclo de arriba abajo; las dos vueltas a los pesos maestros suben por los márgenes
+                   (rojo a la izquierda, verde a la derecha) */
+                <svg viewBox="0 0 320 602" className="w-full block mx-auto" style={SVG_MOVIL} role="img"
+                    aria-label="Flujo del entrenamiento con precisión mixta: los pesos maestros se mantienen en FP32; los pasos hacia adelante y hacia atrás usan FP16 o BF16 en los Tensor Cores; con FP16 se escala la pérdida. Tras el paso hacia atrás se comprueba si hay valores inf o NaN: si los hay, se omite el paso y la escala se divide entre 2; si no, se desescala, se actualizan los pesos en FP32 y la escala se duplica tras 2.000 pasos estables.">
+                    <title>El ciclo conserva pesos maestros en FP32, ejecuta los pasos hacia adelante y hacia atrás en FP16 o BF16 y, solo con FP16, escala la pérdida antes de retropropagar; GradScaler omite el paso y reduce la escala si aparece un desbordamiento (inf o NaN), y la aumenta tras una racha de pasos estables.</title>
+                    <defs>
+                        <marker id="arrA" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#001A4D" /></marker>
+                    </defs>
+                    {/* Pesos maestros FP32 */}
+                    <rect x={60} y={10} width={200} height={46} rx="8" fill="#F5F0FA" stroke="#3D008D" strokeWidth="2" />
+                    <text x={160} y={29} textAnchor="middle" fontSize="13" fill="#3D008D" fontWeight="bold">Pesos maestros</text>
+                    <text x={160} y={47} textAnchor="middle" fontSize="12" fill="#3D008D">FP32 (estable)</text>
+                    {/* Paso hacia adelante en 16 bits */}
+                    <line x1={160} y1={56} x2={160} y2={82} stroke="#001A4D" strokeWidth="1.6" markerEnd="url(#arrA)" />
+                    <text x={170} y={74} fontSize="12" fill="#64748B" fontStyle="italic">copia a FP16/BF16</text>
+                    <rect x={60} y={84} width={200} height={54} rx="8" fill="#ECFEFF" stroke="#0E7490" strokeWidth="1.8" />
+                    <text x={160} y={102} textAnchor="middle" fontSize="13" fill="#0E7490" fontWeight="bold">Paso hacia adelante</text>
+                    <text x={160} y={118} textAnchor="middle" fontSize="12" fill="#0E7490">FP16/BF16</text>
+                    <text x={160} y={132} textAnchor="middle" fontSize="12" fill="#0E7490">Tensor Cores</text>
+                    {/* Escalado de pérdida */}
+                    <line x1={160} y1={138} x2={160} y2={160} stroke="#001A4D" strokeWidth="1.6" markerEnd="url(#arrA)" />
+                    <rect x={60} y={162} width={200} height={44} rx="8" fill="#FFF1F7" stroke="#ED1E79" strokeWidth="1.8" />
+                    <text x={160} y={181} textAnchor="middle" fontSize="13" fill="#BE185D" fontWeight="bold">Escalado de pérdida</text>
+                    <text x={160} y={198} textAnchor="middle" fontSize="12" fill="#BE185D">solo FP16</text>
+                    <text x={160} y={222} textAnchor="middle" fontSize="12" fill="#9D174D">Sin escalar, los gradientes</text>
+                    <text x={160} y={237} textAnchor="middle" fontSize="12" fill="#9D174D">diminutos de FP16 se anulan (→ 0)</text>
+                    {/* Paso hacia atrás */}
+                    <line x1={160} y1={244} x2={160} y2={266} stroke="#001A4D" strokeWidth="1.6" markerEnd="url(#arrA)" />
+                    <rect x={60} y={268} width={200} height={54} rx="8" fill="#ECFEFF" stroke="#0E7490" strokeWidth="1.8" />
+                    <text x={160} y={286} textAnchor="middle" fontSize="13" fill="#0E7490" fontWeight="bold">Paso hacia atrás</text>
+                    <text x={160} y={302} textAnchor="middle" fontSize="12" fill="#0E7490">gradientes de las</text>
+                    <text x={160} y={316} textAnchor="middle" fontSize="12" fill="#0E7490">activaciones en 16 bits</text>
+                    {/* scaler.update(): ¿desbordamiento? */}
+                    <line x1={160} y1={322} x2={160} y2={342} stroke="#001A4D" strokeWidth="1.6" markerEnd="url(#arrA)" />
+                    <polygon points="160,344 212,372 160,400 108,372" fill="#FFFBEB" stroke="#B45309" strokeWidth="1.6" />
+                    <text x={160} y={376} textAnchor="middle" fontSize="12" fill="#92400E" fontWeight="bold">¿inf/NaN?</text>
+                    {/* Sí: se omite el paso */}
+                    <line x1={160} y1={400} x2={160} y2={422} stroke="#B91C1C" strokeWidth="1.6" markerEnd="url(#arrA)" />
+                    <text x={168} y={416} fontSize="12" fill="#B91C1C" fontWeight="bold">Sí</text>
+                    <rect x={70} y={424} width={180} height={46} rx="8" fill="#FEF2F2" stroke="#B91C1C" strokeWidth="1.6" />
+                    <text x={160} y={443} textAnchor="middle" fontSize="13" fill="#B91C1C" fontWeight="bold">Se omite el paso</text>
+                    <text x={160} y={461} textAnchor="middle" fontSize="12" fill="#7F1D1D">y la escala se divide entre 2</text>
+                    <path d="M70 447 L24 447 L24 33 L58 33" fill="none" stroke="#B91C1C" strokeWidth="1.4" strokeDasharray="4 3" markerEnd="url(#arrA)" />
+                    <text x={14} y={240} textAnchor="middle" fontSize="12" fill="#7F1D1D" fontStyle="italic" transform="rotate(-90 14 240)">pesos sin cambio</text>
+                    {/* No: desescalar y actualizar */}
+                    <path d="M212 372 L272 372 L272 494" fill="none" stroke="#15803D" strokeWidth="1.6" markerEnd="url(#arrA)" />
+                    <text x={242} y={366} textAnchor="middle" fontSize="12" fill="#15803D" fontWeight="bold">No</text>
+                    <rect x={40} y={496} width={250} height={58} rx="8" fill="#DCFCE7" stroke="#15803D" strokeWidth="1.8" />
+                    <text x={165} y={515} textAnchor="middle" fontSize="13" fill="#166534" fontWeight="bold">Desescalar + actualizar pesos</text>
+                    <text x={165} y={531} textAnchor="middle" fontSize="12" fill="#166534">en FP32</text>
+                    <text x={165} y={547} textAnchor="middle" fontSize="12" fill="#166534">escala ×2 tras 2.000 pasos estables</text>
+                    {/* vuelta a pesos maestros */}
+                    <path d="M290 525 L306 525 L306 33 L262 33" fill="none" stroke="#15803D" strokeWidth="1.6" strokeDasharray="5 3" markerEnd="url(#arrA)" />
+                    <text x={160} y={576} textAnchor="middle" fontSize="12" fill="#166534" fontStyle="italic">El optimizador actualiza los pesos</text>
+                    <text x={160} y={592} textAnchor="middle" fontSize="12" fill="#166534" fontStyle="italic">maestros FP32 — el ciclo se repite</text>
+                </svg>
+                ) : (
                 <svg viewBox="0 0 740 292" className="w-full" style={{ minWidth: 660 }} role="img"
                     aria-label="Flujo del entrenamiento con precisión mixta: los pesos maestros se mantienen en FP32; los pasos hacia adelante y hacia atrás usan FP16 o BF16 en los Tensor Cores; con FP16 se escala la pérdida. Tras el paso hacia atrás se comprueba si hay valores inf o NaN: si los hay, se omite el paso y la escala se divide entre 2; si no, se desescala, se actualizan los pesos en FP32 y la escala se duplica tras 2.000 pasos estables.">
                     <title>El ciclo conserva pesos maestros en FP32, ejecuta los pasos hacia adelante y hacia atrás en FP16 o BF16 y, solo con FP16, escala la pérdida antes de retropropagar; GradScaler omite el paso y reduce la escala si aparece un desbordamiento (inf o NaN), y la aumenta tras una racha de pasos estables.</title>
@@ -2245,16 +2520,73 @@ import keras
                     <line x1={510} y1={234} x2={132} y2={150} stroke="#15803D" strokeWidth="1.6" strokeDasharray="5 3" markerEnd="url(#arrA)" />
                     <text x={300} y={282} textAnchor="middle" fontSize="11" fill="#166534" fontStyle="italic">El optimizador actualiza los pesos maestros FP32 — el ciclo se repite</text>
                 </svg>
+                )}
                 </div>
-                <AvisoDesplazar />
+                {!angosto && <AvisoDesplazar />}
                 <PieFigura n="3.2.5" className="mt-1" fuente={fuente}>Flujo del entrenamiento con precisión mixta (AMP). El escalado de pérdida solo es necesario con FP16; en ese caso, <span className="not-italic">GradScaler</span> ajusta la escala de forma dinámica: ante un inf o un NaN omite el paso y la divide entre 2, y la duplica tras 2.000 pasos estables.</PieFigura>
             </div>
-        );
+            );
+        };
 
         /* DIAGRAMA SVG: estrategias multi-GPU (DP / DDP / FSDP) */
-        const MultiGPUSVG = () => (
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+        const MultiGPUSVG = () => {
+            const [ref, angosto] = useDiagramaAngosto(629);
+            return (
+            <div ref={ref} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
                 <div className="overflow-x-auto">
+                {angosto ? (
+                /* versión angosta: las tres estrategias apiladas y la leyenda debajo, en varias líneas */
+                <svg viewBox="0 0 320 522" className="w-full block mx-auto" style={SVG_MOVIL} role="img"
+                    aria-label="Estrategias multi-GPU: DataParallel centraliza gradientes en la GPU 0 creando un cuello de botella; DistributedDataParallel usa un proceso por GPU con sincronización equilibrada; Fully Sharded Data Parallel fragmenta pesos, gradientes y estados del optimizador entre todas las GPU.">
+                    <title>DataParallel centraliza los gradientes en la GPU 0 (cuello de botella); DDP lanza un proceso por GPU y sincroniza de forma equilibrada con NCCL; FSDP reparte cada componente del modelo entre las GPU para entrenar modelos que no caben en una sola.</title>
+                    {/* DP */}
+                    <text x="160" y="18" textAnchor="middle" fontSize="13" fill="#B91C1C" fontWeight="bold">DataParallel (DP)</text>
+                    {[0, 1, 2].map((i) => (
+                        <g key={`dp-${i}`}>
+                            <rect x={70 + i * 64} y={42} width={52} height={36} rx="5" fill={i === 0 ? '#FECACA' : '#F1F5F9'} stroke={i === 0 ? '#B91C1C' : '#94A3B8'} strokeWidth="1.5" />
+                            <text x={96 + i * 64} y={65} textAnchor="middle" fontSize="12" fill="#475569">G{i}</text>
+                            {/* los gradientes de G1 y G2 confluyen en G0: arcos por encima de las cajas */}
+                            {i > 0 && <path d={`M ${96 + i * 64} 42 Q ${(96 + i * 64 + 100) / 2} ${i === 1 ? 28 : 18} 102 40`} fill="none" stroke="#B91C1C" strokeWidth="1.4" />}
+                        </g>
+                    ))}
+                    <text x={80} y={64} textAnchor="middle" fontSize="12" fill="#991B1B">★</text>
+                    <text x="160" y="97" textAnchor="middle" fontSize="12" fill="#B91C1C" fontStyle="italic">Cuello de botella en G0</text>
+
+                    {/* DDP */}
+                    <text x="160" y="122" textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="bold">DDP (recomendado)</text>
+                    {[0, 1, 2].map((i) => (
+                        <g key={`ddp-${i}`}>
+                            <rect x={70 + i * 64} y={136} width={52} height={36} rx="5" fill="#DCFCE7" stroke="#15803D" strokeWidth="1.5" />
+                            <text x={96 + i * 64} y={159} textAnchor="middle" fontSize="12" fill="#15803D">G{i}</text>
+                        </g>
+                    ))}
+                    <line x1={96} y1={178} x2={224} y2={178} stroke="#15803D" strokeWidth="1.6" />
+                    <text x="160" y="196" textAnchor="middle" fontSize="12" fill="#15803D" fontStyle="italic">all-reduce equilibrado (NCCL)</text>
+
+                    {/* FSDP */}
+                    <text x="160" y="226" textAnchor="middle" fontSize="13" fill="#3D008D" fontWeight="bold">FSDP (fragmentación total)</text>
+                    {[0, 1, 2].map((i) => (
+                        <g key={`fsdp-${i}`}>
+                            <rect x={70 + i * 64} y={240} width={52} height={40} rx="5" fill="#EDE9FE" stroke="#3D008D" strokeWidth="1.5" />
+                            <text x={96 + i * 64} y={256} textAnchor="middle" fontSize="12" fill="#3D008D">G{i}</text>
+                            <text x={96 + i * 64} y={272} textAnchor="middle" fontSize="12" fill="#6D28D9">1/3</text>
+                        </g>
+                    ))}
+                    <text x="160" y="298" textAnchor="middle" fontSize="12" fill="#3D008D" fontStyle="italic">pesos, gradientes y estados repartidos</text>
+
+                    {/* leyenda inferior */}
+                    <line x1={16} y1={314} x2={304} y2={314} stroke="#E2E8F0" strokeWidth="1" />
+                    <text x={160} y={336} textAnchor="middle" fontSize="12" fill="#475569">La analogía de la <tspan fontWeight="bold" fill="#001A4D">minga</tspan>: cada GPU trabaja</text>
+                    <text x={160} y={352} textAnchor="middle" fontSize="12" fill="#475569">una porción de los datos y al final todas</text>
+                    <text x={160} y={368} textAnchor="middle" fontSize="12" fill="#475569">comparten sus gradientes.</text>
+                    {['DP: simple pero ineficiente ·', 'DDP: un proceso por GPU,', 'sin cuello de botella en G0 ·', 'FSDP: modelos que exceden la VRAM', 'de una GPU'].map((l, k) => (
+                        <text key={`ley-${k}`} x={160} y={392 + k * 16} textAnchor="middle" fontSize="12" fill="#64748B" fontStyle="italic">{l}</text>
+                    ))}
+                    {['En TensorFlow, tf.distribute.MirroredStrategy()', 'ofrece multi-GPU de un nodo de forma', 'transparente.'].map((l, k) => (
+                        <text key={`tf-${k}`} x={160} y={480 + k * 16} textAnchor="middle" fontSize="12" fill="#64748B">{l}</text>
+                    ))}
+                </svg>
+                ) : (
                 <svg viewBox="0 0 740 240" className="w-full" style={{ minWidth: 660 }} role="img"
                     aria-label="Estrategias multi-GPU: DataParallel centraliza gradientes en la GPU 0 creando un cuello de botella; DistributedDataParallel usa un proceso por GPU con sincronización equilibrada; Fully Sharded Data Parallel fragmenta pesos, gradientes y estados del optimizador entre todas las GPU.">
                     <title>DataParallel centraliza los gradientes en la GPU 0 (cuello de botella); DDP lanza un proceso por GPU y sincroniza de forma equilibrada con NCCL; FSDP reparte cada componente del modelo entre las GPU para entrenar modelos que no caben en una sola.</title>
@@ -2298,11 +2630,13 @@ import keras
                     <text x={370} y={178} textAnchor="middle" fontSize="10" fill="#64748B" fontStyle="italic">DP: simple pero ineficiente · DDP: un proceso por GPU, sin cuello de botella en G0 · FSDP: modelos que exceden la VRAM de una GPU</text>
                     <text x={370} y={206} textAnchor="middle" fontSize="10" fill="#64748B">En TensorFlow, tf.distribute.MirroredStrategy() ofrece multi-GPU de un nodo de forma transparente.</text>
                 </svg>
+                )}
                 </div>
-                <AvisoDesplazar />
+                {!angosto && <AvisoDesplazar />}
                 <PieFigura n="3.2.6" className="mt-1">Estrategias de entrenamiento multi-GPU en PyTorch (DP, DDP, FSDP).</PieFigura>
             </div>
-        );
+            );
+        };
 
         /* DIAGRAMA SVG: decisión Colab vs. Kaggle */
         const DecisionPlataformaSVG = () => {
@@ -2318,9 +2652,54 @@ import keras
                 : (<g><rect x={x} y={y} width={170} height={40} rx="8" fill="#F5F0FA" stroke="#3D008D" strokeWidth="2" />
                     <text x={x + 85} y={y + 17} textAnchor="middle" fontSize="11.5" fill="#3D008D" fontWeight="bold">Colab</text>
                     <text x={x + 85} y={y + 31} textAnchor="middle" fontSize="9" fill="#3D008D">T4 · Drive · tiempo real</text></g>);
+            /* versión angosta: cada pregunta ocupa todo el ancho; «No» baja por la izquierda hacia la siguiente pregunta
+               y «Sí» baja por la derecha hacia su destino */
+            const lineasN = [
+                ['¿Cuota semanal visible o sesión sin', 'desconexión por inactividad?'],
+                ['¿Colaboración en tiempo real', '(estilo Google Docs)?'],
+                ['¿Conjunto de datos de Kaggle o más', 'de 13 GB de RAM?'],
+            ];
+            const destinoN = (tipo, x, y) => tipo === 'kaggle'
+                ? (<g><rect x={x} y={y} width={176} height={42} rx="8" fill="#ECFEFF" stroke="#0E7490" strokeWidth="2" />
+                    <text x={x + 88} y={y + 18} textAnchor="middle" fontSize="13" fill="#0E7490" fontWeight="bold">Kaggle</text>
+                    <text x={x + 88} y={y + 34} textAnchor="middle" fontSize="12" fill="#0E7490">P100 / 2×T4 · ≈30 h/semana</text></g>)
+                : (<g><rect x={x} y={y} width={176} height={42} rx="8" fill="#F5F0FA" stroke="#3D008D" strokeWidth="2" />
+                    <text x={x + 88} y={y + 18} textAnchor="middle" fontSize="13" fill="#3D008D" fontWeight="bold">Colab</text>
+                    <text x={x + 88} y={y + 34} textAnchor="middle" fontSize="12" fill="#3D008D">T4 · Drive · tiempo real</text></g>);
+            const [ref, angosto] = useDiagramaAngosto(629);
             return (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                <div ref={ref} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
                     <div className="overflow-x-auto">
+                    {angosto ? (
+                    <svg viewBox="0 0 320 554" className="w-full block mx-auto" style={SVG_MOVIL} role="img"
+                        aria-label="Diagrama de decisión entre Colab y Kaggle: la cuota semanal visible, los conjuntos de datos públicos de Kaggle y las necesidades de más de 13 GB de RAM apuntan a Kaggle; la colaboración en tiempo real y el prototipado apuntan a Colab; la estrategia combinada usa ambos.">
+                        <title>Tres preguntas guían la elección de plataforma: duración y cuota, colaboración en tiempo real, y datos o memoria; cada respuesta afirmativa dirige a Kaggle o a Colab, y responder no a todo lleva al prototipado en Colab.</title>
+                        <defs><marker id="arrQ" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#001A4D" /></marker></defs>
+                        <text x="160" y="22" textAnchor="middle" fontSize="14" fill="#001A4D" fontWeight="bold">¿Dónde entrenar hoy?</text>
+                        {pasos.map((p, i) => {
+                            const y = 34 + i * 126;
+                            return (
+                                <g key={i}>
+                                    <rect x={12} y={y} width={296} height={46} rx="8" fill="#FFFBEB" stroke="#B45309" strokeWidth="1.6" />
+                                    {lineasN[i].map((l, k) => (
+                                        <text key={k} x={160} y={y + 19 + k * 16} textAnchor="middle" fontSize="12" fill="#92400E">{l}</text>
+                                    ))}
+                                    <line x1={220} y1={y + 46} x2={220} y2={y + 66} stroke="#15803D" strokeWidth="1.6" markerEnd="url(#arrQ)" />
+                                    <text x={228} y={y + 61} fontSize="12" fill="#15803D" fontWeight="bold">Sí</text>
+                                    {destinoN(p.si, 132, y + 68)}
+                                    <line x1={50} y1={y + 46} x2={50} y2={y + 124} stroke="#B91C1C" strokeWidth="1.6" markerEnd="url(#arrQ)" />
+                                    <text x={58} y={y + 90} fontSize="12" fill="#B91C1C" fontWeight="bold">No</text>
+                                </g>
+                            );
+                        })}
+                        {destinoN('colab', 40, 412)}
+                        <text x={128} y={472} textAnchor="middle" fontSize="12" fill="#64748B" fontStyle="italic">prototipado y desarrollo del día a día</text>
+                        <rect x={42} y={486} width={236} height={58} rx="8" fill="#F0FDF4" stroke="#15803D" strokeWidth="1.6" strokeDasharray="5 3" />
+                        <text x={160} y={505} textAnchor="middle" fontSize="13" fill="#15803D" fontWeight="bold">Estrategia combinada</text>
+                        <text x={160} y={521} textAnchor="middle" fontSize="12" fill="#15803D">Colab desarrolla + Kaggle entrena</text>
+                        <text x={160} y={537} textAnchor="middle" fontSize="12" fill="#15803D">(≈30 h/semana)</text>
+                    </svg>
+                    ) : (
                     <svg viewBox="0 0 740 330" className="w-full" style={{ minWidth: 660 }} role="img"
                         aria-label="Diagrama de decisión entre Colab y Kaggle: la cuota semanal visible, los conjuntos de datos públicos de Kaggle y las necesidades de más de 13 GB de RAM apuntan a Kaggle; la colaboración en tiempo real y el prototipado apuntan a Colab; la estrategia combinada usa ambos.">
                         <title>Tres preguntas guían la elección de plataforma: duración y cuota, colaboración en tiempo real, y datos o memoria; cada respuesta afirmativa dirige a Kaggle o a Colab, y responder no a todo lleva al prototipado en Colab.</title>
@@ -2346,8 +2725,9 @@ import keras
                         <text x={602} y={275} textAnchor="middle" fontSize="10" fill="#15803D" fontWeight="bold">Estrategia combinada</text>
                         <text x={602} y={291} textAnchor="middle" fontSize="8.5" fill="#15803D">Colab desarrolla + Kaggle entrena (≈30 h/semana)</text>
                     </svg>
+                    )}
                     </div>
-                    <AvisoDesplazar />
+                    {!angosto && <AvisoDesplazar />}
                     <PieFigura n="3.2.7" className="mt-1">Diagrama de decisión entre Colab y Kaggle según las necesidades del proyecto.</PieFigura>
                 </div>
             );
@@ -2389,6 +2769,7 @@ import keras
             const [recomputacion, setRecomputacion] = useState(false);
             const [pMillones, setPMillones] = useState(100);
             const [actMB, setActMB] = useState(50);
+            const [ref, angosto] = useDiagramaAngosto(560);
             if (!S) return null;
 
             const b = 2 ** bExp, s = 2 ** sExp;
@@ -2413,6 +2794,14 @@ import keras
             const paso = pasoEje(escala / 1e9, [0.5, 1, 2, 5, 10, 20, 50, 100]);
             const marcas = [];
             for (let g = 0; g * 1e9 <= escala; g += paso) marcas.push(g);
+            // Variante angosta de la barra: la misma escala sobre 292 unidades (texto ≥ 12, sin desplazamiento lateral)
+            const X0n = 14, Wn = 292, kN = Wn / W;
+            const aN = (xd) => X0n + (xd - X0) * kN;
+            const xUtilN = aN(xUtil);
+            // mismas marcas que la versión de escritorio hasta 600 GB; por encima, un paso mayor para que no se encimen
+            const pasoN = pasoEje(escala / 1e9, [0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000]);
+            const marcasN = [];
+            for (let g = 0; g * 1e9 <= escala; g += pasoN) marcasN.push(g);
             const resumen = `${S.MODELOS[modelo].tipo === 'personalizado' ? 'Modelo personalizado' : S.MODELOS[modelo].nombre.split(' (')[0]}, lote de ${b}${esTr ? ` y secuencias de ${fmtNum(s)} fichas` : ''}, ${inferencia ? 'solo inferencia' : SA_PRECISION[precision].replace(/^Precisión/, 'precisión') + ' y ' + SA_OPT[opt]}: ` +
                 `≈ ${fmtBytes(r.total)} de ${fmtNum(r.util / 1e9, 1)} GB útiles en la ${gpuNombre.split(' (')[0]}. ` +
                 (r.cabe ? 'Cabe.' : `CUDA out of memory: faltan ≈ ${fmtBytes(r.total - r.util)}.`) +
@@ -2424,7 +2813,7 @@ import keras
             ].filter(Boolean).join('');
             const campo = 'w-full border border-gray-300 rounded-lg px-2 py-1.5 bg-white text-gray-800';
             return (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                <div ref={ref} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
                     <p className="font-bold text-navy mb-3"><i className="fas fa-warehouse mr-2 text-primary" aria-hidden="true"></i>Simulación: ¿qué llena la bodega?</p>
                     <div className="grid sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
                         <div>
@@ -2494,6 +2883,39 @@ import keras
                     </div>
 
                     <div className="overflow-x-auto mt-4">
+                        {angosto ? (
+                        <svg viewBox="0 0 320 120" className="w-full block mx-auto" style={SVG_MOVIL} role="img"
+                            aria-label={`Barra apilada de la VRAM estimada. ${resumen}`}>
+                            <defs>
+                                <pattern id="sa-rayado" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                                    <rect width="6" height="6" fill="#FEE2E2" /><line x1="0" y1="0" x2="0" y2="6" stroke="#B91C1C" strokeWidth="2" />
+                                </pattern>
+                            </defs>
+                            {/* reserva del contexto CUDA */}
+                            <rect x={xUtilN} y={28} width={Math.max(0, (xCap - xUtil) * kN)} height={40} fill="#E2E8F0" />
+                            {segs.map(t => (
+                                <rect key={t.k} x={aN(t.x)} y={30} width={Math.max(t.w * kN, 0.5)} height={36} fill={t.color} stroke="#fff" strokeWidth="1" />
+                            ))}
+                            {!r.cabe && <rect x={xUtilN} y={30} width={Math.max(0, (xTot - xUtil) * kN)} height={36} fill="url(#sa-rayado)" opacity="0.85" />}
+                            {segs.filter(t => t.w * kN >= 44).map(t => {
+                                // con CUDA OOM, el rótulo va en la parte que cabe (sin rayado), si hay sitio
+                                const tx = aN(t.x), tw = t.w * kN;
+                                const x1 = r.cabe ? tx + tw : Math.min(tx + tw, xUtilN);
+                                const xc = x1 - tx >= 44 ? (tx + x1) / 2 : tx + tw / 2;
+                                return <text key={`r-${t.k}`} x={xc} y={53} textAnchor="middle" fontSize="12" fill="#fff" fontWeight="bold" stroke={t.color} strokeWidth="3" paintOrder="stroke">{fmtPct(t.pct)}</text>;
+                            })}
+                            <line x1={xUtilN} y1={22} x2={xUtilN} y2={74} stroke="#B91C1C" strokeWidth="2" strokeDasharray="5 3" />
+                            <text x={xUtilN} y={15} textAnchor={xUtilN < 90 ? 'start' : xUtilN > 230 ? 'end' : 'middle'} fontSize="12" fill="#B91C1C" fontWeight="bold">capacidad útil: {fmtNum(r.util / 1e9, 1)} GB</text>
+                            <line x1={X0n} y1={80} x2={X0n + Wn} y2={80} stroke="#64748B" strokeWidth="1" />
+                            {marcasN.map(g => (
+                                <g key={g}>
+                                    <line x1={aN(X0 + px(g * 1e9))} y1={80} x2={aN(X0 + px(g * 1e9))} y2={84} stroke="#64748B" strokeWidth="1" />
+                                    <text x={aN(X0 + px(g * 1e9))} y={98} textAnchor="middle" fontSize="12" fill="#475569">{fmtNum(g, pasoN < 1 ? 1 : 0)}</text>
+                                </g>
+                            ))}
+                            <text x={X0n + Wn} y={114} textAnchor="end" fontSize="12" fill="#475569">GB</text>
+                        </svg>
+                        ) : (
                         <svg viewBox="0 0 560 112" className="w-full" style={{ minWidth: 560 }} role="img"
                             aria-label={`Barra apilada de la VRAM estimada. ${resumen}`}>
                             <defs>
@@ -2524,8 +2946,9 @@ import keras
                             ))}
                             <text x={X0 + W} y={110} textAnchor="end" fontSize="10.5" fill="#475569">GB</text>
                         </svg>
+                        )}
                     </div>
-                    <AvisoDesplazar />
+                    {!angosto && <AvisoDesplazar />}
 
                     <p className={`mt-3 rounded-lg px-3 py-2 text-sm font-semibold ${r.cabe ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`} aria-live="polite">
                         <i className={`fas ${r.cabe ? 'fa-circle-check' : 'fa-triangle-exclamation'} mr-2`} aria-hidden="true"></i>{resumen}
@@ -3008,9 +3431,40 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                 { n: '5', t: 'batch', d: 'agrupa en lotes', color: '#BE185D' },
                 { n: '6', t: 'prefetch', d: 'solapa CPU–GPU', color: '#15803D' },
             ];
+            /* versión angosta: las seis operaciones de arriba abajo; el aumento aleatorio ocupa el hueco entre cache y
+               shuffle, unido a la flecha por la línea discontinua */
+            const yPasoN = [58, 118, 178, 298, 358, 418];
+            const [ref, angosto] = useDiagramaAngosto(700); // = su minWidth: en tableta tampoco se desplaza
             return (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                <div ref={ref} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
                     <div className="overflow-x-auto">
+                    {angosto ? (
+                    <svg viewBox="0 0 320 472" className="w-full block mx-auto" style={SVG_MOVIL} role="img"
+                        aria-label="Orden óptimo de un flujo de datos tf.data: load, map con AUTOTUNE, cache, shuffle, batch y prefetch con AUTOTUNE como última operación. El aumento de datos aleatorio, cuando se usa, se inserta después de cache para no congelar la aleatoriedad.">
+                        <title>El flujo tf.data encadena seis transformaciones en orden: load, map (paralelo), cache, shuffle, batch y prefetch; este último siempre va al final para solapar la preparación de datos con el entrenamiento. El aumento aleatorio, si se aplica, se coloca tras cache.</title>
+                        <defs><marker id="arrT" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#001A4D" /></marker></defs>
+                        <text x="160" y="20" textAnchor="middle" fontSize="13" fill="#001A4D" fontWeight="bold">El orden importa: cache después de map,</text>
+                        <text x="160" y="37" textAnchor="middle" fontSize="13" fill="#001A4D" fontWeight="bold">prefetch siempre al final</text>
+                        {pasos.map((p, i) => {
+                            const y = yPasoN[i];
+                            return (
+                                <g key={i}>
+                                    <rect x={12} y={y} width={150} height={44} rx="8" fill="#F8FAFC" stroke={p.color} strokeWidth="2" />
+                                    <text x={87} y={y + 19} textAnchor="middle" fontSize="13" fill={p.color} fontWeight="bold">{p.t}</text>
+                                    <text x={87} y={y + 36} textAnchor="middle" fontSize="12" fill="#64748B">{p.d}</text>
+                                    <circle cx={28} cy={y} r="11" fill={p.color} stroke="#fff" strokeWidth="1.5" />
+                                    <text x={28} y={y + 4.5} textAnchor="middle" fontSize="12" fill="#fff" fontWeight="bold">{p.n}</text>
+                                    {i < pasos.length - 1 && <line x1={87} y1={y + 44} x2={87} y2={yPasoN[i + 1] - 2} stroke="#001A4D" strokeWidth="1.6" markerEnd="url(#arrT)" />}
+                                </g>
+                            );
+                        })}
+                        {/* Punto de inserción del aumento aleatorio, tras cache */}
+                        <line x1={87} y1={260} x2={112} y2={260} stroke="#B45309" strokeWidth="1.4" strokeDasharray="4 3" />
+                        <rect x={112} y={238} width={200} height={44} rx="6" fill="#FFFBEB" stroke="#B45309" strokeWidth="1.2" strokeDasharray="4 3" />
+                        <text x={212} y={256} textAnchor="middle" fontSize="12" fill="#92400E" fontWeight="bold">Aumento aleatorio (opcional)</text>
+                        <text x={212} y={273} textAnchor="middle" fontSize="12" fill="#92400E">se inserta aquí, tras cache</text>
+                    </svg>
+                    ) : (
                     <svg viewBox="0 0 740 166" className="w-full" style={{ minWidth: 700 }} role="img"
                         aria-label="Orden óptimo de un flujo de datos tf.data: load, map con AUTOTUNE, cache, shuffle, batch y prefetch con AUTOTUNE como última operación. El aumento de datos aleatorio, cuando se usa, se inserta después de cache para no congelar la aleatoriedad.">
                         <title>El flujo tf.data encadena seis transformaciones en orden: load, map (paralelo), cache, shuffle, batch y prefetch; este último siempre va al final para solapar la preparación de datos con el entrenamiento. El aumento aleatorio, si se aplica, se coloca tras cache.</title>
@@ -3035,27 +3489,62 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                         <text x={367} y={134} textAnchor="middle" fontSize="9" fill="#92400E" fontWeight="bold">Aumento aleatorio (opcional)</text>
                         <text x={367} y={147} textAnchor="middle" fontSize="9" fill="#92400E">se inserta aquí, tras cache</text>
                     </svg>
+                    )}
                     </div>
-                    <AvisoDesplazar />
+                    {!angosto && <AvisoDesplazar />}
                     <PieFigura n="3.3.1" className="mt-1">Secuencia de operaciones del flujo tf.data optimizado para entrenamiento en GPU.</PieFigura>
                 </div>
             );
         };
 
         /* DIAGRAMA SVG: taxonomía de Data Augmentation */
-        const AugmentationSVG = () => (
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+        const AugmentationSVG = () => {
+            const familias = [
+                { x: 60, title: 'Geométricas', sub: 'cambian la geometría', color: '#0E7490', bg: '#ECFEFF', items: ['RandomHorizontalFlip', 'RandomRotation', 'RandomResizedCrop', 'RandomAffine'] },
+                { x: 290, title: 'Fotométricas', sub: 'cambian los píxeles', color: '#B45309', bg: '#FFFBEB', items: ['ColorJitter', 'GaussianBlur', 'RandomAutocontrast'] },
+                { x: 520, title: 'Mezcla de muestras', sub: 'combinan 2 imágenes', color: '#BE185D', bg: '#FFF1F7', items: ['Mixup', 'CutMix'] },
+            ];
+            /* versión angosta: una familia debajo de otra, colgadas de un tronco discontinuo que parte del recuadro raíz */
+            const yFamN = [66, 236, 378];
+            const [ref, angosto] = useDiagramaAngosto(629);
+            return (
+            <div ref={ref} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
                 <div className="overflow-x-auto">
+                {angosto ? (
+                <svg viewBox="0 0 320 540" className="w-full block mx-auto" style={SVG_MOVIL} role="img"
+                    aria-label="Clasificación de las técnicas de aumento de datos en tres familias: geométricas (Flip, Rotation, ResizedCrop, Affine), fotométricas (ColorJitter, GaussianBlur, RandomAutocontrast) y de mezcla entre muestras (Mixup, CutMix). Normalize queda fuera: es preprocesamiento, no aumento.">
+                    <title>El aumento de datos se agrupa en tres familias: transformaciones geométricas que cambian la estructura espacial, fotométricas que alteran los valores de píxel, y de mezcla que combinan dos imágenes y sus etiquetas.</title>
+                    <rect x={12} y={10} width={296} height={40} rx="9" fill="#3D008D" />
+                    <text x={160} y={36} textAnchor="middle" fontSize="15" fill="#fff" fontWeight="bold">Aumento de datos</text>
+                    <line x1={28} y1={50} x2={28} y2={yFamN[2] + 20} stroke="#94A3B8" strokeWidth="1.4" strokeDasharray="4 3" />
+                    {familias.map((col, ci) => {
+                        const y0 = yFamN[ci];
+                        return (
+                            <g key={ci}>
+                                <line x1={28} y1={y0 + 20} x2={44} y2={y0 + 20} stroke="#94A3B8" strokeWidth="1.4" strokeDasharray="4 3" />
+                                <rect x={44} y={y0} width={264} height={40} rx="7" fill={col.color} />
+                                <text x={176} y={y0 + 17} textAnchor="middle" fontSize="13" fill="#fff" fontWeight="bold">{col.title}</text>
+                                <text x={176} y={y0 + 33} textAnchor="middle" fontSize="12" fill="#fff">{col.sub}</text>
+                                {col.items.map((it, ii) => (
+                                    <g key={ii}>
+                                        <rect x={52} y={y0 + 48 + ii * 28} width={248} height={22} rx="5" fill={col.bg} stroke={col.color} strokeWidth="1" />
+                                        <text x={176} y={y0 + 63.5 + ii * 28} textAnchor="middle" fontSize="12" fill={col.color}>{it}</text>
+                                    </g>
+                                ))}
+                            </g>
+                        );
+                    })}
+                    <text x={160} y={498} textAnchor="middle" fontSize="12" fill="#475569" fontStyle="italic">Normalize (media y desviación de ImageNet) es</text>
+                    <text x={160} y={514} textAnchor="middle" fontSize="12" fill="#475569" fontStyle="italic">preprocesamiento obligatorio en entrenamiento,</text>
+                    <text x={160} y={530} textAnchor="middle" fontSize="12" fill="#475569" fontStyle="italic">validación y prueba; no es aumento.</text>
+                </svg>
+                ) : (
                 <svg viewBox="0 0 740 260" className="w-full" style={{ minWidth: 660 }} role="img"
                     aria-label="Clasificación de las técnicas de aumento de datos en tres familias: geométricas (Flip, Rotation, ResizedCrop, Affine), fotométricas (ColorJitter, GaussianBlur, RandomAutocontrast) y de mezcla entre muestras (Mixup, CutMix). Normalize queda fuera: es preprocesamiento, no aumento.">
                     <title>El aumento de datos se agrupa en tres familias: transformaciones geométricas que cambian la estructura espacial, fotométricas que alteran los valores de píxel, y de mezcla que combinan dos imágenes y sus etiquetas.</title>
                     <rect x={290} y={18} width={160} height={40} rx="9" fill="#3D008D" />
                     <text x={370} y={43} textAnchor="middle" fontSize="13" fill="#fff" fontWeight="bold">Aumento de datos</text>
-                    {[
-                        { x: 60, title: 'Geométricas', sub: 'cambian la geometría', color: '#0E7490', bg: '#ECFEFF', items: ['RandomHorizontalFlip', 'RandomRotation', 'RandomResizedCrop', 'RandomAffine'] },
-                        { x: 290, title: 'Fotométricas', sub: 'cambian los píxeles', color: '#B45309', bg: '#FFFBEB', items: ['ColorJitter', 'GaussianBlur', 'RandomAutocontrast'] },
-                        { x: 520, title: 'Mezcla de muestras', sub: 'combinan 2 imágenes', color: '#BE185D', bg: '#FFF1F7', items: ['Mixup', 'CutMix'] },
-                    ].map((col, ci) => (
+                    {familias.map((col, ci) => (
                         <g key={ci}>
                             <line x1={370} y1={58} x2={col.x + 80} y2={84} stroke="#94A3B8" strokeWidth="1.4" strokeDasharray="4 3" />
                             <rect x={col.x} y={86} width={160} height={30} rx="7" fill={col.color} />
@@ -3071,16 +3560,66 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                     ))}
                     <text x={370} y={252} textAnchor="middle" fontSize="9.5" fill="#475569" fontStyle="italic">Normalize (media y desviación de ImageNet) es preprocesamiento obligatorio en entrenamiento, validación y prueba; no es aumento.</text>
                 </svg>
+                )}
                 </div>
-                <AvisoDesplazar />
+                {!angosto && <AvisoDesplazar />}
                 <PieFigura n="3.3.3" className="mt-1">Clasificación de las técnicas de aumento de datos: geométricas, fotométricas y de mezcla entre muestras.</PieFigura>
             </div>
-        );
+            );
+        };
 
         /* DIAGRAMA SVG: flujo de despliegue */
-        const DespliegueSVG = () => (
-            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+        const DespliegueSVG = () => {
+            const destinos = [
+                { y: 30, t: 'API REST', d: 'FastAPI · ONNX Runtime · Triton · TF Serving' },
+                { y: 92, t: 'Borde / móvil', d: 'LiteRT · ExecuTorch (offline)' },
+                { y: 154, t: 'Navegador', d: 'TensorFlow.js' },
+                { y: 216, t: 'Nube', d: 'Vertex AI · SageMaker · Azure ML' },
+            ];
+            /* versión angosta: los cuatro destinos apilados; un tronco discontinuo a la izquierda reparte las flechas desde
+               «Exportar formato» */
+            const destN = [
+                { y: 168, h: 54, lineas: ['FastAPI · ONNX Runtime ·', 'Triton · TF Serving'] },
+                { y: 236, h: 40, lineas: ['LiteRT · ExecuTorch (offline)'] },
+                { y: 290, h: 40, lineas: ['TensorFlow.js'] },
+                { y: 344, h: 40, lineas: ['Vertex AI · SageMaker · Azure ML'] },
+            ];
+            const [ref, angosto] = useDiagramaAngosto(680); // = su minWidth: en tableta tampoco se desplaza
+            return (
+            <div ref={ref} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
                 <div className="overflow-x-auto">
+                {angosto ? (
+                <svg viewBox="0 0 320 394" className="w-full block mx-auto" style={SVG_MOVIL} role="img"
+                    aria-label="Flujo de despliegue: del modelo entrenado se exporta a un formato (state_dict, .keras, ONNX, torch.export) y se dirige a cuatro destinos: API REST, dispositivos de borde, navegador y nube.">
+                    <title>Un modelo entrenado se exporta a un formato portable (state_dict, .keras, SavedModel, ONNX o torch.export) y desde ahí se despliega como API REST, en dispositivos de borde, en el navegador o en la nube.</title>
+                    <defs><marker id="arrD" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#001A4D" /></marker></defs>
+                    {/* entrenamiento */}
+                    <rect x={80} y={10} width={160} height={48} rx="9" fill="#F5F0FA" stroke="#3D008D" strokeWidth="2" />
+                    <text x={160} y={31} textAnchor="middle" fontSize="13" fill="#3D008D" fontWeight="bold">Modelo entrenado</text>
+                    <text x={160} y={48} textAnchor="middle" fontSize="12" fill="#3D008D">Colab / Kaggle</text>
+                    {/* exportar */}
+                    <line x1={160} y1={58} x2={160} y2={82} stroke="#001A4D" strokeWidth="1.6" markerEnd="url(#arrD)" />
+                    <rect x={70} y={84} width={180} height={64} rx="9" fill="#ECFEFF" stroke="#0E7490" strokeWidth="2" />
+                    <text x={160} y={104} textAnchor="middle" fontSize="13" fill="#0E7490" fontWeight="bold">Exportar formato</text>
+                    <text x={160} y={121} textAnchor="middle" fontSize="12" fill="#0E7490">.pth · .keras · ONNX</text>
+                    <text x={160} y={137} textAnchor="middle" fontSize="12" fill="#0E7490">SavedModel · .pt2</text>
+                    {/* destinos */}
+                    <path d={`M70 116 L22 116 L22 ${destN[3].y + destN[3].h / 2}`} fill="none" stroke="#94A3B8" strokeWidth="1.4" strokeDasharray="4 3" />
+                    {destinos.map((dst, i) => {
+                        const { y, h, lineas } = destN[i];
+                        return (
+                            <g key={i}>
+                                <line x1={22} y1={y + h / 2} x2={38} y2={y + h / 2} stroke="#94A3B8" strokeWidth="1.4" strokeDasharray="4 3" markerEnd="url(#arrD)" />
+                                <rect x={40} y={y} width={268} height={h} rx="8" fill="#DCFCE7" stroke="#15803D" strokeWidth="1.5" />
+                                <text x={54} y={y + 17} fontSize="13" fill="#15803D" fontWeight="bold">{dst.t}</text>
+                                {lineas.map((l, k) => (
+                                    <text key={k} x={54} y={y + 33 + k * 15} fontSize="12" fill="#475569">{l}</text>
+                                ))}
+                            </g>
+                        );
+                    })}
+                </svg>
+                ) : (
                 <svg viewBox="0 0 740 258" className="w-full" style={{ minWidth: 680 }} role="img"
                     aria-label="Flujo de despliegue: del modelo entrenado se exporta a un formato (state_dict, .keras, ONNX, torch.export) y se dirige a cuatro destinos: API REST, dispositivos de borde, navegador y nube.">
                     <title>Un modelo entrenado se exporta a un formato portable (state_dict, .keras, SavedModel, ONNX o torch.export) y desde ahí se despliega como API REST, en dispositivos de borde, en el navegador o en la nube.</title>
@@ -3096,12 +3635,7 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                     <text x={270} y={132} textAnchor="middle" fontSize="9" fill="#0E7490">.pth · .keras · ONNX</text>
                     <text x={270} y={144} textAnchor="middle" fontSize="9" fill="#0E7490">SavedModel · .pt2</text>
                     {/* destinos */}
-                    {[
-                        { y: 30, t: 'API REST', d: 'FastAPI · ONNX Runtime · Triton · TF Serving' },
-                        { y: 92, t: 'Borde / móvil', d: 'LiteRT · ExecuTorch (offline)' },
-                        { y: 154, t: 'Navegador', d: 'TensorFlow.js' },
-                        { y: 216, t: 'Nube', d: 'Vertex AI · SageMaker · Azure ML' },
-                    ].map((dst, i) => (
+                    {destinos.map((dst, i) => (
                         <g key={i}>
                             <line x1={340} y1={124} x2={430} y2={dst.y + 18} stroke="#94A3B8" strokeWidth="1.4" strokeDasharray="4 3" markerEnd="url(#arrD)" />
                             <rect x={432} y={dst.y} width={278} height={36} rx="8" fill="#DCFCE7" stroke="#15803D" strokeWidth="1.5" />
@@ -3110,11 +3644,13 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                         </g>
                     ))}
                 </svg>
+                )}
                 </div>
-                <AvisoDesplazar />
+                {!angosto && <AvisoDesplazar />}
                 <PieFigura n="3.3.4" className="mt-1">Flujo de despliegue de modelos: del entrenamiento a los destinos de producción.</PieFigura>
             </div>
-        );
+            );
+        };
 
         /* ============================================================
            SIMULACIÓN S-B «El mesero y el chef» — línea de tiempo de la precarga (auditoría 2026-10, M3-D-04)
@@ -3129,6 +3665,7 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
             const [B, setB] = useState(0);
             const [N, setN] = useState(10);
             const [tCopia, setTCopia] = useState(0);
+            const [ref, angosto] = useDiagramaAngosto(640);
             if (!S) return null;
 
             const p = { N, tCPU, tGPU, W, B, tCopia };
@@ -3156,6 +3693,15 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
             const huecos = [];
             let fin = 0;
             sim.gpu.forEach(g => { if (g.ini - fin > 1e-9) huecos.push({ ini: fin, fin: g.ini }); fin = g.fin; });
+            // Variante angosta del Gantt: misma escala temporal en 286 unidades; el rótulo de cada carril va arriba de él
+            const XLn = 14, WPn = 286, PASOn = 46, Y0n = 42;
+            const xN = (t) => XLn + (t / Tmax) * WPn;
+            const yCarrilN = (w) => Y0n + w * PASOn;
+            const yGPUn = yCarrilN(Wef);
+            const yEjeN = yGPUn + ALTO + 10;
+            const altoSVGn = yEjeN + 38;
+            // los números de lote se muestran si caben a 12 unidades (1 cifra: 11; 2 cifras: 17); la tolerancia evita
+            // que barras de igual duración difieran por redondeo
 
             const diagnostico = B === 0
                 ? `Sin precarga: la GPU espera ${fmtNum(tCPU)} ms en cada lote mientras la CPU prepara el siguiente.`
@@ -3174,7 +3720,7 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
             );
 
             return (
-                <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
+                <div ref={ref} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm my-4">
                     <p className="font-bold text-navy mb-3"><i className="fas fa-utensils mr-2 text-primary" aria-hidden="true"></i>Simulación: el mesero y el chef</p>
                     <div className="grid sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
                         {deslizador('sb-cpu', <>Preparar un lote en la CPU (t<sub>CPU</sub>)</>, tCPU, setTCPU, 10, 200, 10, `${tCPU} milisegundos por lote`, { unidad: ' ms' })}
@@ -3195,6 +3741,60 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                     </div>
 
                     <div className="overflow-x-auto mt-4">
+                        {angosto ? (
+                        <svg viewBox={`0 0 320 ${altoSVGn}`} className="w-full block mx-auto" style={SVG_MOVIL} role="img"
+                            aria-label={`Diagrama de Gantt con ${Wef} ${plural(Wef, 'carril', 'carriles')} de CPU y uno de GPU en la misma escala temporal. ${resumen}`}>
+                            <defs>
+                                <pattern id="sb-rayado" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                                    <rect width="6" height="6" fill="#FEE2E2" /><line x1="0" y1="0" x2="0" y2="6" stroke="#DC2626" strokeWidth="1.5" />
+                                </pattern>
+                            </defs>
+                            {sim.prep.map(e => {
+                                const y = yCarrilN(e.w), w = xN(e.fin) - xN(e.ini);
+                                return (
+                                    <g key={`p-${e.k}`}>
+                                        <rect x={xN(e.ini)} y={y} width={w} height={ALTO} rx="3" fill="#FEF3C7" stroke="#B45309" strokeWidth="1" />
+                                        {w >= (e.k >= 9 ? 17 : 11) - 1e-6 && <text x={xN(e.ini) + w / 2} y={y + 15.5} textAnchor="middle" fontSize="12" fill="#92400E">{e.k + 1}</text>}
+                                    </g>
+                                );
+                            })}
+                            {huecos.map((h, i) => (
+                                <g key={`h-${i}`}>
+                                    <rect x={xN(h.ini)} y={yGPUn} width={xN(h.fin) - xN(h.ini)} height={ALTO} fill="url(#sb-rayado)" />
+                                    {xN(h.fin) - xN(h.ini) >= 48 && <text x={(xN(h.ini) + xN(h.fin)) / 2} y={yGPUn + 15.5} textAnchor="middle" fontSize="12" fill="#991B1B" fontStyle="italic">espera</text>}
+                                </g>
+                            ))}
+                            {sim.gpu.map(g => {
+                                const xc = xN(g.ini), wc = xN(g.ini + g.copia) - xc, xt = xN(g.ini + g.copia), wt = xN(g.fin) - xt;
+                                return (
+                                    <g key={`g-${g.k}`}>
+                                        {g.copia > 0 && <rect x={xc} y={yGPUn} width={wc} height={ALTO} fill="#E0E7FF" stroke="#4338CA" strokeWidth="1" />}
+                                        <rect x={xt} y={yGPUn} width={wt} height={ALTO} rx="3" fill="#DCFCE7" stroke="#15803D" strokeWidth="1" />
+                                        {wt >= (g.k >= 9 ? 17 : 11) - 1e-6 && <text x={xt + wt / 2} y={yGPUn + 15.5} textAnchor="middle" fontSize="12" fill="#166534">{g.k + 1}</text>}
+                                    </g>
+                                );
+                            })}
+                            <line x1={xN(sim.T)} y1={22} x2={xN(sim.T)} y2={yEjeN} stroke="#3D008D" strokeWidth="1.5" strokeDasharray="4 3" />
+                            {/* rótulos de carril sobre cada carril; un fondo blanco (igual al de la tarjeta) evita que la línea de T los cruce */}
+                            {Array.from({ length: Wef }).map((_, w) => (
+                                <g key={`l-${w}`}>
+                                    <rect x={XLn - 3} y={yCarrilN(w) - 18} width={102} height={15} fill="#fff" />
+                                    <text x={XLn} y={yCarrilN(w) - 6} fontSize="12" fill="#92400E" fontWeight="bold">CPU · mesero {w + 1}</text>
+                                </g>
+                            ))}
+                            <rect x={XLn - 3} y={yGPUn - 18} width={72} height={15} fill="#fff" />
+                            <text x={XLn} y={yGPUn - 6} fontSize="12" fill="#166534" fontWeight="bold">GPU · chef</text>
+                            <text x={xN(sim.T)} y={16} textAnchor={xN(sim.T) > 260 ? 'end' : xN(sim.T) < 60 ? 'start' : 'middle'} fontSize="12" fill="#3D008D" fontWeight="bold">T = {fmtNum(sim.T)} ms</text>
+                            <line x1={XLn} y1={yEjeN} x2={XLn + WPn} y2={yEjeN} stroke="#64748B" strokeWidth="1" />
+                            {marcas.map(t => (
+                                <g key={`m-${t}`}>
+                                    <line x1={xN(t)} y1={yEjeN} x2={xN(t)} y2={yEjeN + 4} stroke="#64748B" strokeWidth="1" />
+                                    <text x={xN(t)} y={yEjeN + 17} textAnchor="middle" fontSize="12" fill="#475569">{fmtNum(t)}</text>
+                                </g>
+                            ))}
+                            <text x={XLn + WPn} y={yEjeN + 32} textAnchor="end" fontSize="12" fill="#475569">tiempo (ms)</text>
+                        </svg>
+                        ) : (
                         <svg viewBox={`0 0 640 ${altoSVG}`} className="w-full" style={{ minWidth: 640 }} role="img"
                             aria-label={`Diagrama de Gantt con ${Wef} ${plural(Wef, 'carril', 'carriles')} de CPU y uno de GPU en la misma escala temporal. ${resumen}`}>
                             <defs>
@@ -3242,8 +3842,9 @@ def guardar_checkpoint(modelo, optimizador, epoca, perdida):
                             ))}
                             <text x={XL + WP} y={yEje + 28} textAnchor="end" fontSize="10" fill="#475569">tiempo (ms)</text>
                         </svg>
+                        )}
                     </div>
-                    <AvisoDesplazar />
+                    {!angosto && <AvisoDesplazar />}
                     <p className="text-xs text-gray-600 mt-1">
                         Los números dentro de las barras identifican cada lote. Rayado rojo: la GPU espera datos.{tCopia > 0 && ' En azul, la copia de cada lote a la GPU.'}
                     </p>
