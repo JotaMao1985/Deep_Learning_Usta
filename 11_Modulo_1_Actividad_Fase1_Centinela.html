@@ -192,6 +192,14 @@
         /* Los hijos de una rejilla pueden encogerse: las fórmulas anchas se desplazan dentro
            de su píldora .eq en lugar de ensanchar la página en móvil (375 px). */
         .grid > * { min-width: 0; }
+
+        /* Figuras en celular: cada SVG de escritorio (.svg-d) tiene una variante angosta propia (.svg-m,
+           viewBox de 300 de ancho, texto ≥ 12) en lugar de encogerse a 6–7 px o desplazarse de lado. */
+        .svg-m { display: none; }
+        @media (max-width: 640px) {
+            .svg-d { display: none !important; }
+            .svg-m { display: block; width: 100%; height: auto; max-width: 440px; margin: 0 auto; }
+        }
     </style>
 </head>
 
@@ -294,7 +302,33 @@
             <p class="text-slate-600 mb-6 max-w-3xl">La línea base es una tubería sencilla: las <strong>características tabulares</strong> entran a un MLP con <strong>al menos dos capas ocultas</strong>; una activación <strong>sigmoide</strong> en la salida produce la probabilidad del evento de riesgo.</p>
 
             <figure class="card p-6 overflow-x-auto">
-                <svg viewBox="0 0 680 300" width="100%" role="img" aria-labelledby="mlpTitle mlpDesc" style="min-width:560px">
+                <svg viewBox="0 0 300 366" class="svg-m" role="img" aria-labelledby="mlpTitle-m mlpDesc-m">
+                    <title id="mlpTitle-m">Arquitectura de un Perceptrón Multicapa</title>
+                    <desc id="mlpDesc-m">Tres características de entrada se conectan a dos capas ocultas con activación ReLU y a una neurona de salida con activación sigmoide que produce la predicción de riesgo.</desc>
+                    <g stroke="#CBD5E1" stroke-width="1">
+                        <line x1="150" y1="52" x2="150" y2="132"/><line x1="150" y1="52" x2="205" y2="132"/><line x1="150" y1="52" x2="260" y2="132"/><line x1="205" y1="52" x2="150" y2="132"/><line x1="205" y1="52" x2="205" y2="132"/><line x1="205" y1="52" x2="260" y2="132"/><line x1="260" y1="52" x2="150" y2="132"/><line x1="260" y1="52" x2="205" y2="132"/><line x1="260" y1="52" x2="260" y2="132"/>
+                        <line x1="150" y1="132" x2="177" y2="212"/><line x1="150" y1="132" x2="233" y2="212"/><line x1="205" y1="132" x2="177" y2="212"/><line x1="205" y1="132" x2="233" y2="212"/><line x1="260" y1="132" x2="177" y2="212"/><line x1="260" y1="132" x2="233" y2="212"/>
+                        <line x1="177" y1="212" x2="205" y2="286"/><line x1="233" y1="212" x2="205" y2="286"/>
+                    </g>
+                    <g><circle cx="150" cy="52" r="15" fill="#E2E8F0" stroke="#94A3B8"/><text x="150" y="57" text-anchor="middle" font-size="13" fill="#475569" font-style="italic">x₁</text><circle cx="205" cy="52" r="15" fill="#E2E8F0" stroke="#94A3B8"/><text x="205" y="57" text-anchor="middle" font-size="13" fill="#475569" font-style="italic">x₂</text><circle cx="260" cy="52" r="15" fill="#E2E8F0" stroke="#94A3B8"/><text x="260" y="57" text-anchor="middle" font-size="13" fill="#475569" font-style="italic">x₃</text></g>
+                    <g fill="#3D008D"><circle cx="150" cy="132" r="15"/><circle cx="205" cy="132" r="15"/><circle cx="260" cy="132" r="15"/></g>
+                    <g fill="#5B1C9E"><circle cx="177" cy="212" r="15"/><circle cx="233" cy="212" r="15"/></g>
+                    <circle cx="205" cy="286" r="18" fill="#ED1E79"/>
+                    <text x="205" y="292" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">σ</text>
+                    <line x1="205" y1="304" x2="205" y2="330" stroke="#94A3B8" stroke-width="2"/>
+                    <text x="199" y="350" text-anchor="end" font-size="14" fill="#475569" font-style="italic">ŷ</text>
+                    <text x="211" y="350" font-size="12" fill="#94A3B8">riesgo</text>
+                    <!-- rótulos de fila (capa) -->
+                    <text x="6" y="49" font-size="13" font-weight="600" fill="#64748B">Entrada</text>
+                    <text x="6" y="65" font-size="12" fill="#94A3B8">características</text>
+                    <text x="6" y="129" font-size="13" font-weight="600" fill="#3D008D">Capa oculta 1</text>
+                    <text x="6" y="145" font-size="12" fill="#94A3B8">ReLU</text>
+                    <text x="6" y="209" font-size="13" font-weight="600" fill="#5B1C9E">Capa oculta 2</text>
+                    <text x="6" y="225" font-size="12" fill="#94A3B8">ReLU</text>
+                    <text x="6" y="283" font-size="13" font-weight="600" fill="#ED1E79">Salida</text>
+                    <text x="6" y="299" font-size="12" fill="#94A3B8">Sigmoide</text>
+                </svg>
+                <svg viewBox="0 0 680 300" width="100%" class="svg-d" role="img" aria-labelledby="mlpTitle mlpDesc" style="min-width:560px">
                     <title id="mlpTitle">Arquitectura de un Perceptrón Multicapa</title>
                     <desc id="mlpDesc">Tres características de entrada se conectan a dos capas ocultas con activación ReLU y a una neurona de salida con activación sigmoide que produce la predicción de riesgo.</desc>
                     <!-- aristas: entrada(3) -> oculta1(3) -->
@@ -415,7 +449,31 @@
                     <div class="eq">$$ \mathrm{ReLU}(z) = \max(0,\,z) \qquad \sigma(z) = \dfrac{1}{1 + e^{-z}} $$</div>
                 </div>
                 <figure class="card p-5">
-                    <svg viewBox="0 0 360 210" width="100%" role="img" aria-labelledby="neuronaTitle neuronaDesc">
+                    <svg viewBox="0 0 300 196" class="svg-m" role="img" aria-labelledby="neuronaTitle-m neuronaDesc-m">
+                        <title id="neuronaTitle-m">Anatomía de una neurona</title>
+                        <desc id="neuronaDesc-m">Una neurona suma las entradas ponderadas por sus pesos, añade un sesgo y aplica una activación</desc>
+                        <defs>
+                            <marker id="arrowNeur-m" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/>
+                            </marker>
+                        </defs>
+                        <circle cx="20" cy="40"  r="15" fill="#E2E8F0" stroke="#94A3B8"/><text x="20" y="45" text-anchor="middle" font-size="13" fill="#475569" font-style="italic">x₁</text>
+                        <circle cx="20" cy="98"  r="15" fill="#E2E8F0" stroke="#94A3B8"/><text x="20" y="103" text-anchor="middle" font-size="13" fill="#475569" font-style="italic">x₂</text>
+                        <circle cx="20" cy="156" r="15" fill="#E2E8F0" stroke="#94A3B8"/><text x="20" y="161" text-anchor="middle" font-size="13" fill="#475569" font-style="italic">x₃</text>
+                        <line x1="35" y1="40"  x2="106" y2="91"  stroke="#94A3B8" stroke-width="1.5"/><text x="58" y="56"  font-size="12.5" fill="#ED1E79" font-style="italic">w₁</text>
+                        <line x1="35" y1="98"  x2="106" y2="98"  stroke="#94A3B8" stroke-width="1.5"/><text x="60" y="92"  font-size="12.5" fill="#ED1E79" font-style="italic">w₂</text>
+                        <line x1="35" y1="156" x2="106" y2="105" stroke="#94A3B8" stroke-width="1.5"/><text x="58" y="148" font-size="12.5" fill="#ED1E79" font-style="italic">w₃</text>
+                        <circle cx="126" cy="98" r="20" fill="#3D008D"/><text x="126" y="105" text-anchor="middle" font-size="18" fill="#fff">Σ</text>
+                        <text x="126" y="150" text-anchor="middle" font-size="12" fill="#475569">+ sesgo <tspan font-style="italic">b</tspan></text>
+                        <line x1="126" y1="138" x2="126" y2="121" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#arrowNeur-m)"/>
+                        <line x1="146" y1="98" x2="174" y2="98" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowNeur-m)"/>
+                        <text x="160" y="89" text-anchor="middle" font-size="12.5" fill="#475569" font-style="italic">z</text>
+                        <rect x="178" y="76" width="46" height="44" rx="10" fill="#ED1E79"/><text x="201" y="104" text-anchor="middle" font-size="17" fill="#fff" font-style="italic">φ</text>
+                        <line x1="224" y1="98" x2="252" y2="98" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowNeur-m)"/>
+                        <text x="274" y="96" text-anchor="middle" font-size="15" fill="#3D008D" font-style="italic">a</text>
+                        <text x="274" y="113" text-anchor="middle" font-size="12" fill="#94A3B8">salida</text>
+                    </svg>
+                    <svg viewBox="0 0 360 210" width="100%" class="svg-d" role="img" aria-labelledby="neuronaTitle neuronaDesc">
                         <title id="neuronaTitle">Anatomía de una neurona</title>
                         <desc id="neuronaDesc">Una neurona suma las entradas ponderadas por sus pesos, añade un sesgo y aplica una activación</desc>
                         <defs>
@@ -486,7 +544,35 @@
                     <div class="eq">$$ \theta \leftarrow \theta - \eta\,\nabla_\theta \mathcal{L} $$</div>
                 </div>
                 <figure class="card p-5">
-                    <svg viewBox="0 0 380 230" width="100%" role="img" aria-labelledby="bucleTitle bucleDesc">
+                    <svg viewBox="0 0 300 226" class="svg-m" role="img" aria-labelledby="bucleTitle-m bucleDesc-m">
+                        <title id="bucleTitle-m">Bucle de entrenamiento</title>
+                        <desc id="bucleDesc-m">Ciclo de entrenamiento: limpieza de gradientes (paso 0), forward, cálculo de la pérdida, backward y actualización de los pesos</desc>
+                        <defs>
+                            <marker id="arrowLoop-m" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L7,3 L0,6 Z" fill="#3D008D"/>
+                            </marker>
+                        </defs>
+                        <rect x="4"   y="10"  width="136" height="52" rx="10" fill="#EEF2FF" stroke="#C7D2FE"/>
+                        <text x="72"  y="32" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E293B">1 · Forward</text>
+                        <text x="72"  y="50" text-anchor="middle" font-size="12" fill="#475569" font-style="italic">ŷ = f(x)</text>
+                        <rect x="160" y="10"  width="136" height="52" rx="10" fill="#FCE7F3" stroke="#FBCFE8"/>
+                        <text x="228" y="32" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E293B">2 · Pérdida</text>
+                        <text x="228" y="50" text-anchor="middle" font-size="12" fill="#475569">ℒ(ŷ, y)</text>
+                        <rect x="160" y="164" width="136" height="52" rx="10" fill="#F3E8FF" stroke="#E9D5FF"/>
+                        <text x="228" y="186" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E293B">3 · Backward</text>
+                        <text x="228" y="204" text-anchor="middle" font-size="12" fill="#475569">∇ℒ (gradientes)</text>
+                        <rect x="4"   y="164" width="136" height="52" rx="10" fill="#FEF9C3" stroke="#FEF08A"/>
+                        <text x="72"  y="186" text-anchor="middle" font-size="12.5" font-weight="700" fill="#1E293B">4 · Actualización</text>
+                        <text x="72"  y="204" text-anchor="middle" font-size="12" fill="#475569">θ ← θ − η∇ℒ</text>
+                        <line x1="140" y1="36"  x2="156" y2="36"  stroke="#3D008D" stroke-width="2" marker-end="url(#arrowLoop-m)"/>
+                        <line x1="228" y1="64"  x2="228" y2="160" stroke="#3D008D" stroke-width="2" marker-end="url(#arrowLoop-m)"/>
+                        <line x1="160" y1="190" x2="144" y2="190" stroke="#3D008D" stroke-width="2" marker-end="url(#arrowLoop-m)"/>
+                        <line x1="72"  y1="162" x2="72"  y2="66"  stroke="#3D008D" stroke-width="2" marker-end="url(#arrowLoop-m)"/>
+                        <text x="80"  y="104" font-size="12" fill="#64748B">0 · zero_grad</text>
+                        <text x="160" y="130" text-anchor="middle" font-size="12.5" font-weight="700" fill="#64748B">época</text>
+                        <text x="160" y="146" text-anchor="middle" font-size="12" fill="#94A3B8">× 50</text>
+                    </svg>
+                    <svg viewBox="0 0 380 230" width="100%" class="svg-d" role="img" aria-labelledby="bucleTitle bucleDesc">
                         <title id="bucleTitle">Bucle de entrenamiento</title>
                         <desc id="bucleDesc">Ciclo de entrenamiento: limpieza de gradientes (paso 0), forward, cálculo de la pérdida, backward y actualización de los pesos</desc>
                         <defs>
@@ -554,7 +640,31 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
             </div>
             <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
                 <figure class="card p-5">
-                    <svg viewBox="0 0 430 240" width="100%" role="img" aria-labelledby="overfitTitle overfitDesc">
+                    <svg viewBox="0 0 300 240" class="svg-m" role="img" aria-labelledby="overfitTitle-m overfitDesc-m">
+                        <title id="overfitTitle-m">Curvas de pérdida y sobreajuste</title>
+                        <desc id="overfitDesc-m">Curvas de pérdida de entrenamiento y validación que ilustran el sobreajuste y su corrección con Dropout; cada curva está rotulada al final con su nombre</desc>
+                        <!-- leyenda (arriba, en dos filas) -->
+                        <line x1="6" y1="12" x2="26" y2="12" stroke="#3D008D" stroke-width="2.5"/><text x="30" y="16" font-size="12" fill="#334155">entrenamiento</text>
+                        <line x1="146" y1="12" x2="166" y2="12" stroke="#ED1E79" stroke-width="2.5"/><text x="170" y="16" font-size="12" fill="#334155">validación</text>
+                        <line x1="6" y1="29" x2="26" y2="29" stroke="#0E7490" stroke-width="2.2" stroke-dasharray="5 3"/><text x="30" y="33" font-size="12" fill="#334155">val. + Dropout</text>
+                        <!-- ejes -->
+                        <line x1="40.0" y1="58" x2="40.0" y2="208" stroke="#94A3B8" stroke-width="1.5"/>
+                        <line x1="40.0" y1="208" x2="209.9" y2="208" stroke="#94A3B8" stroke-width="1.5"/>
+                        <text x="18" y="132.6" text-anchor="middle" font-size="12" fill="#64748B" transform="rotate(-90 18,132.6)">pérdida</text>
+                        <text x="124.7" y="230" text-anchor="middle" font-size="12" fill="#64748B">épocas</text>
+                        <!-- región de sobreajuste -->
+                        <rect x="126.3" y="58" width="83.6" height="150.0" fill="#FEF2F2" opacity="0.7"/>
+                        <line x1="126.3" y1="58" x2="126.3" y2="208" stroke="#DC2626" stroke-width="1.2" stroke-dasharray="4 3"/>
+                        <text x="168.1" y="74" text-anchor="middle" font-size="12" fill="#B91C1C" font-weight="700">sobreajuste</text>
+                        <text x="126.3" y="53" text-anchor="middle" font-size="12" fill="#B91C1C" font-weight="600">punto óptimo</text>
+                        <polyline points="42.8,88 67.8,122.3 92.9,148 120.8,167.7 151.4,180.6 182,188.3 207.1,193.4" fill="none" stroke="#3D008D" stroke-width="2.5"/>
+                        <polyline points="42.8,99.1 67.8,133.4 92.9,156.6 126.3,163.4 154.2,150.6 182,130 207.1,111.1" fill="none" stroke="#ED1E79" stroke-width="2.5"/>
+                        <polyline points="42.8,104.3 76.2,140.3 120.8,162.6 159.8,169.4 187.6,171.1 207.1,172" fill="none" stroke="#0E7490" stroke-width="2.2" stroke-dasharray="5 3"/>
+                        <text x="213.9" y="196" font-size="12" font-weight="700" fill="#3D008D">entren.</text>
+                        <text x="213.9" y="113.7"  font-size="12" font-weight="700" fill="#ED1E79">val</text>
+                        <text x="213.9" y="175.4" font-size="12" font-weight="700" fill="#0E7490">val + Dropout</text>
+                    </svg>
+                    <svg viewBox="0 0 430 240" width="100%" class="svg-d" role="img" aria-labelledby="overfitTitle overfitDesc">
                         <title id="overfitTitle">Curvas de pérdida y sobreajuste</title>
                         <desc id="overfitDesc">Curvas de pérdida de entrenamiento y validación que ilustran el sobreajuste y su corrección con Dropout; cada curva está rotulada al final con su nombre</desc>
                         <!-- ejes -->
@@ -606,7 +716,31 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
             </div>
             <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
                 <figure class="card p-5">
-                    <svg viewBox="0 0 360 250" width="100%" role="img" aria-labelledby="matrizTitle matrizDesc">
+                    <svg viewBox="0 0 300 226" class="svg-m" role="img" aria-labelledby="matrizTitle-m matrizDesc-m">
+                        <title id="matrizTitle-m">Matriz de confusión</title>
+                        <desc id="matrizDesc-m">Matriz de confusión dos por dos con verdaderos y falsos positivos y negativos</desc>
+                        <text x="174" y="20" text-anchor="middle" font-size="13" font-weight="700" fill="#3D008D">Predicho</text>
+                        <text x="116" y="42" text-anchor="middle" font-size="12" fill="#475569">Positivo</text>
+                        <text x="232" y="42" text-anchor="middle" font-size="12" fill="#475569">Negativo</text>
+                        <text x="16" y="136" text-anchor="middle" font-size="13" font-weight="700" fill="#3D008D" transform="rotate(-90 16,136)">Real</text>
+                        <text x="46" y="96"  text-anchor="middle" font-size="12" fill="#475569" transform="rotate(-90 46,96)">Positivo</text>
+                        <text x="46" y="176" text-anchor="middle" font-size="12" fill="#475569" transform="rotate(-90 46,176)">Negativo</text>
+                        <rect x="58"  y="54"  width="116" height="82" fill="#DCFCE7" stroke="#86EFAC"/>
+                        <text x="116" y="90"  text-anchor="middle" font-size="14" font-weight="700" fill="#15803D">VP</text>
+                        <text x="116" y="108" text-anchor="middle" font-size="12" fill="#15803D">acierto</text>
+                        <rect x="174" y="54"  width="116" height="82" fill="#FEE2E2" stroke="#FCA5A5"/>
+                        <text x="232" y="78"  text-anchor="middle" font-size="14" font-weight="700" fill="#B91C1C">FN</text>
+                        <text x="232" y="95"  text-anchor="middle" font-size="12" fill="#B91C1C">falso negativo</text>
+                        <text x="232" y="111" text-anchor="middle" font-size="12" fill="#B91C1C">¡el más</text>
+                        <text x="232" y="125" text-anchor="middle" font-size="12" fill="#B91C1C">peligroso!</text>
+                        <rect x="58"  y="136" width="116" height="82" fill="#FEF3C7" stroke="#FDE68A"/>
+                        <text x="116" y="172" text-anchor="middle" font-size="14" font-weight="700" fill="#B45309">FP</text>
+                        <text x="116" y="190" text-anchor="middle" font-size="12" fill="#B45309">falso positivo</text>
+                        <rect x="174" y="136" width="116" height="82" fill="#DCFCE7" stroke="#86EFAC"/>
+                        <text x="232" y="172" text-anchor="middle" font-size="14" font-weight="700" fill="#15803D">VN</text>
+                        <text x="232" y="190" text-anchor="middle" font-size="12" fill="#15803D">acierto</text>
+                    </svg>
+                    <svg viewBox="0 0 360 250" width="100%" class="svg-d" role="img" aria-labelledby="matrizTitle matrizDesc">
                         <title id="matrizTitle">Matriz de confusión</title>
                         <desc id="matrizDesc">Matriz de confusión dos por dos con verdaderos y falsos positivos y negativos</desc>
                         <!-- encabezado de columnas: Predicho -->
