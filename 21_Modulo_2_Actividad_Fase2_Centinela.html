@@ -174,6 +174,14 @@
            (las ecuaciones anchas quedan dentro del desplazamiento propio de .eq). */
         .grid > * { min-width: 0; }
 
+        /* Diagramas en pantallas angostas: cada SVG de escritorio (.svg-d) tiene una variante
+           propia de 300 unidades de ancho (.svg-m) con texto legible; se alternan por CSS. */
+        .svg-m { display: none; }
+        @media (max-width: 640px) {
+            .svg-d { display: none !important; }
+            .svg-m { display: block; width: 100%; height: auto; max-width: 440px; margin: 0 auto; }
+        }
+
         /* Tabla genérica */
         .tbl { width:100%; border-collapse: collapse; font-size:.9rem; }
         .tbl th, .tbl td { border:1px solid #E2E8F0; padding:.6rem .7rem; vertical-align: top; text-align:left; }
@@ -309,7 +317,7 @@
             </div>
 
             <figure class="card p-6 overflow-x-auto">
-                <svg viewBox="0 0 900 320" width="100%" role="img" aria-labelledby="mapaTitle mapaDesc" style="min-width:680px">
+                <svg viewBox="0 0 900 320" width="100%" class="svg-d" role="img" aria-labelledby="mapaTitle mapaDesc" style="min-width:680px">
                     <title id="mapaTitle">Arquitectura multimodal del sistema Centinela</title>
                     <desc id="mapaDesc">Una rama de imagen procesada por una red convolucional y una rama de serie temporal procesada por una red recurrente convergen en una capa de fusión que produce la predicción de riesgo.</desc>
                     <defs>
@@ -359,6 +367,58 @@
                     <rect x="655" y="125" width="150" height="70" rx="12" fill="url(#gF)"/>
                     <text x="730" y="152" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">Predicción</text>
                     <text x="730" y="170" text-anchor="middle" font-size="10.5" fill="#fff">riesgo / alerta</text>
+                </svg>
+                <!-- Variante angosta (móvil): las dos ramas bajan en paralelo y convergen en la fusión -->
+                <svg viewBox="0 0 300 376" class="svg-m" role="img" aria-labelledby="mapaTitle-m mapaDesc-m">
+                    <title id="mapaTitle-m">Arquitectura multimodal del sistema Centinela</title>
+                    <desc id="mapaDesc-m">Una rama de imagen procesada por una red convolucional y una rama de serie temporal procesada por una red recurrente convergen en una capa de fusión que produce la predicción de riesgo.</desc>
+                    <defs>
+                        <linearGradient id="gA-m" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0" stop-color="#3D008D"/><stop offset="1" stop-color="#5B1C9E"/>
+                        </linearGradient>
+                        <linearGradient id="gB-m" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0" stop-color="#0E7490"/><stop offset="1" stop-color="#0891B2"/>
+                        </linearGradient>
+                        <linearGradient id="gF-m" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0" stop-color="#ED1E79"/><stop offset="1" stop-color="#FDB913"/>
+                        </linearGradient>
+                        <marker id="arrow-m" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                            <path d="M0,0 L8,3 L0,6 Z" fill="#94A3B8"/>
+                        </marker>
+                    </defs>
+
+                    <!-- Rama A: imagen -> CNN -->
+                    <rect x="8" y="10" width="138" height="56" rx="10" fill="#EEF2FF" stroke="#C7D2FE"/>
+                    <text x="77" y="34" text-anchor="middle" font-size="14" font-weight="700" fill="#1E293B">Imágenes</text>
+                    <text x="77" y="54" text-anchor="middle" font-size="12.5" fill="#64748B">rama A (crudas)</text>
+                    <line x1="77" y1="66" x2="77" y2="92" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow-m)"/>
+                    <rect x="8" y="96" width="138" height="60" rx="12" fill="url(#gA-m)"/>
+                    <text x="77" y="122" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">CNN</text>
+                    <text x="77" y="142" text-anchor="middle" font-size="12.5" fill="#E9D5FF">Transfer Learning</text>
+                    <line x1="124" y1="156" x2="142" y2="214" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow-m)"/>
+                    <text x="10" y="196" font-size="13" fill="#475569">embedding <tspan font-style="italic">z</tspan><tspan baseline-shift="sub" font-size="12">img</tspan></text>
+
+                    <!-- Rama B: serie -> RNN -->
+                    <rect x="154" y="10" width="138" height="56" rx="10" fill="#ECFEFF" stroke="#A5F3FC"/>
+                    <text x="223" y="34" text-anchor="middle" font-size="14" font-weight="700" fill="#1E293B">Serie temporal</text>
+                    <text x="223" y="54" text-anchor="middle" font-size="12.5" fill="#64748B">rama B (ventanas)</text>
+                    <line x1="223" y1="66" x2="223" y2="92" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow-m)"/>
+                    <rect x="154" y="96" width="138" height="60" rx="12" fill="url(#gB-m)"/>
+                    <text x="223" y="122" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">LSTM / GRU</text>
+                    <text x="223" y="142" text-anchor="middle" font-size="12.5" fill="#CFFAFE">recurrente</text>
+                    <line x1="176" y1="156" x2="158" y2="214" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow-m)"/>
+                    <text x="290" y="196" text-anchor="end" font-size="13" fill="#475569">embedding <tspan font-style="italic">z</tspan><tspan baseline-shift="sub" font-size="12">seq</tspan></text>
+
+                    <!-- Fusión -->
+                    <rect x="75" y="218" width="150" height="56" rx="12" fill="#0F172A"/>
+                    <text x="150" y="242" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">Fusión</text>
+                    <text x="150" y="262" text-anchor="middle" font-size="12.5" fill="#94A3B8">concatenación</text>
+                    <line x1="150" y1="274" x2="150" y2="302" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrow-m)"/>
+
+                    <!-- Cabeza de decisión -->
+                    <rect x="75" y="306" width="150" height="60" rx="12" fill="url(#gF-m)"/>
+                    <text x="150" y="332" text-anchor="middle" font-size="14" font-weight="800" fill="#fff">Predicción</text>
+                    <text x="150" y="352" text-anchor="middle" font-size="12.5" fill="#fff">riesgo / alerta</text>
                 </svg>
                 <figcaption>Figura 1. Arquitectura objetivo de la Fase 2: dos ramas especializadas producen vectores de representación (<em>embeddings</em>) que la capa de fusión integra para emitir la alerta. Es la imagen-guía que articula toda la actividad.</figcaption>
             </figure>
@@ -417,7 +477,7 @@
                         <div class="eq">$$ O = \left\lfloor \dfrac{W - K + 2P}{S} \right\rfloor + 1 $$</div>
                     </div>
                     <figure class="card p-5">
-                        <svg viewBox="0 0 360 220" width="100%" role="img" aria-labelledby="convTitle convDesc">
+                        <svg viewBox="0 0 360 220" width="100%" class="svg-d" role="img" aria-labelledby="convTitle convDesc">
                             <title id="convTitle">Operación de convolución</title>
                             <desc id="convDesc">Un filtro de 3 por 3 se desliza sobre una rejilla de entrada y produce una celda del mapa de características</desc>
                             <!-- rejilla de entrada (5x5 celdas de 30 px) -->
@@ -447,6 +507,37 @@
                                     <path d="M0,0 L8,3 L0,6 Z" fill="#94A3B8"/>
                                 </marker>
                             </defs>
+                        </svg>
+                        <!-- Variante angosta (móvil) -->
+                        <svg viewBox="0 0 300 176" class="svg-m" role="img" aria-labelledby="convTitle-m convDesc-m">
+                            <title id="convTitle-m">Operación de convolución</title>
+                            <desc id="convDesc-m">Un filtro de 3 por 3 se desliza sobre una rejilla de entrada y produce una celda del mapa de características</desc>
+                            <defs>
+                                <marker id="arrowConv-m" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+                                    <path d="M0,0 L8,3 L0,6 Z" fill="#94A3B8"/>
+                                </marker>
+                            </defs>
+                            <!-- rejilla de entrada (5x5 celdas de 26 unidades) -->
+                            <g stroke="#CBD5E1" fill="#F8FAFC">
+                                <rect x="10" y="14" width="130" height="130"/>
+                                <g>
+                                    <line x1="36" y1="14" x2="36" y2="144"/><line x1="62" y1="14" x2="62" y2="144"/>
+                                    <line x1="88" y1="14" x2="88" y2="144"/><line x1="114" y1="14" x2="114" y2="144"/>
+                                    <line x1="10" y1="40" x2="140" y2="40"/><line x1="10" y1="66" x2="140" y2="66"/>
+                                    <line x1="10" y1="92" x2="140" y2="92"/><line x1="10" y1="118" x2="140" y2="118"/>
+                                </g>
+                            </g>
+                            <!-- ventana del kernel resaltada (3x3 celdas) -->
+                            <rect x="10" y="14" width="78" height="78" fill="rgba(237,30,121,.16)" stroke="#ED1E79" stroke-width="2.5"/>
+                            <text x="8" y="166" font-size="13" fill="#64748B">entrada <tspan font-style="italic">I</tspan> · ventana 3×3</text>
+                            <!-- flecha -->
+                            <line x1="150" y1="60" x2="200" y2="60" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowConv-m)"/>
+                            <text x="175" y="47" text-anchor="middle" font-size="13" fill="#475569">Σ <tspan font-style="italic">I</tspan>·<tspan font-style="italic">K</tspan></text>
+                            <!-- celda de salida -->
+                            <rect x="208" y="33" width="54" height="54" rx="6" fill="#3D008D"/>
+                            <text x="235" y="66" text-anchor="middle" font-size="16" font-weight="700" fill="#fff"><tspan font-style="italic">S</tspan><tspan baseline-shift="sub" font-size="12">ij</tspan></text>
+                            <text x="235" y="110" text-anchor="middle" font-size="13" fill="#64748B">mapa de</text>
+                            <text x="235" y="127" text-anchor="middle" font-size="13" fill="#64748B">características</text>
                         </svg>
                         <figcaption>Figura 2. La convolución reutiliza el mismo filtro en toda la imagen (pesos compartidos, <em>parameter sharing</em>), lo que reduce drásticamente los parámetros frente a un MLP y aporta equivarianza a la traslación: si el patrón se desplaza, su respuesta en el mapa se desplaza con él.</figcaption>
                     </figure>
@@ -504,7 +595,7 @@ base.fc = nn.<span class="fn">Linear</span>(base.fc.in_features, n_clases)  <spa
                         <div class="eq">$$ \dfrac{\partial h_t}{\partial h_k} = \prod_{\tau=k+1}^{t} \dfrac{\partial h_\tau}{\partial h_{\tau-1}} \;\xrightarrow[\;t-k \text{ grande}\;]{}\; 0 $$</div>
                     </div>
                     <figure class="card p-5">
-                        <svg viewBox="0 0 360 210" width="100%" role="img" aria-labelledby="lstmTitle lstmDesc">
+                        <svg viewBox="0 0 360 210" width="100%" class="svg-d" role="img" aria-labelledby="lstmTitle lstmDesc">
                             <title id="lstmTitle">Celda LSTM</title>
                             <desc id="lstmDesc">Celda LSTM con compuerta de olvido, de entrada y de salida actuando sobre el estado de celda</desc>
                             <defs>
@@ -541,6 +632,45 @@ base.fc = nn.<span class="fn">Linear</span>(base.fc.in_features, n_clases)  <spa
                             <!-- salida h_t -->
                             <line x1="300" y1="142" x2="300" y2="172" stroke="#0E7490" stroke-width="2" marker-end="url(#arrowB)"/>
                             <text x="300" y="185" text-anchor="middle" font-size="11" fill="#0E7490"><tspan font-style="italic">h</tspan><tspan baseline-shift="sub" font-size="8">t</tspan></text>
+                        </svg>
+                        <!-- Variante angosta (móvil): rótulos de las compuertas sobre la autopista; salida a la derecha -->
+                        <svg viewBox="0 0 300 232" class="svg-m" role="img" aria-labelledby="lstmTitle-m lstmDesc-m">
+                            <title id="lstmTitle-m">Celda LSTM</title>
+                            <desc id="lstmDesc-m">Celda LSTM con compuerta de olvido, de entrada y de salida actuando sobre el estado de celda</desc>
+                            <defs>
+                                <marker id="arrowB-m" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+                                    <path d="M0,0 L7,3 L0,6 Z" fill="#0E7490"/>
+                                </marker>
+                            </defs>
+                            <rect x="6" y="6" width="288" height="220" rx="14" fill="#ECFEFF" stroke="#A5F3FC"/>
+                            <text x="150" y="27" text-anchor="middle" font-size="14" font-weight="700" fill="#0E7490">Celda LSTM</text>
+                            <!-- línea del estado de celda (la autopista) -->
+                            <line x1="22" y1="72" x2="280" y2="72" stroke="#0E7490" stroke-width="3"/>
+                            <text x="16" y="52" font-size="13.5" fill="#0E7490"><tspan font-style="italic">C</tspan><tspan baseline-shift="sub" font-size="12">t−1</tspan></text>
+                            <text x="264" y="52" font-size="13.5" fill="#0E7490"><tspan font-style="italic">C</tspan><tspan baseline-shift="sub" font-size="12">t</tspan></text>
+                            <!-- nodo 1: compuerta de olvido, multiplica el estado previo -->
+                            <circle cx="92" cy="72" r="14" fill="#fff" stroke="#ED1E79" stroke-width="2"/>
+                            <text x="92" y="77" text-anchor="middle" font-size="14" fill="#ED1E79">×</text>
+                            <text x="92" y="52" text-anchor="middle" font-size="13" fill="#475569">olvido <tspan font-style="italic">f</tspan><tspan baseline-shift="sub" font-size="12">t</tspan></text>
+                            <!-- nodo 2: suma la escritura de la compuerta de entrada -->
+                            <circle cx="192" cy="72" r="14" fill="#fff" stroke="#3D008D" stroke-width="2"/>
+                            <text x="192" y="77" text-anchor="middle" font-size="14" fill="#3D008D">+</text>
+                            <text x="192" y="52" text-anchor="middle" font-size="13" fill="#475569">entrada <tspan font-style="italic">i</tspan><tspan baseline-shift="sub" font-size="12">t</tspan> ⊙ <tspan font-style="italic">C&#x0303;</tspan><tspan baseline-shift="sub" font-size="12">t</tspan></text>
+                            <line x1="192" y1="128" x2="192" y2="88" stroke="#3D008D" stroke-width="2" marker-end="url(#arrowB-m)"/>
+                            <!-- compuerta de salida: lee tanh(C_t) y produce h_t (fuera de la autopista) -->
+                            <circle cx="262" cy="138" r="14" fill="#fff" stroke="#0E7490" stroke-width="2"/>
+                            <text x="262" y="143" text-anchor="middle" font-size="14" fill="#0E7490">×</text>
+                            <text x="246" y="162" text-anchor="end" font-size="13" fill="#475569">salida <tspan font-style="italic">o</tspan><tspan baseline-shift="sub" font-size="12">t</tspan></text>
+                            <line x1="262" y1="86" x2="262" y2="122" stroke="#0E7490" stroke-width="2" marker-end="url(#arrowB-m)"/>
+                            <text x="254" y="108" text-anchor="end" font-size="12.5" fill="#0E7490">tanh</text>
+                            <!-- entradas -->
+                            <line x1="44" y1="196" x2="44" y2="88" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowB-m)"/>
+                            <text x="44" y="214" text-anchor="middle" font-size="13" fill="#475569"><tspan font-style="italic">x</tspan><tspan baseline-shift="sub" font-size="12">t</tspan>, <tspan font-style="italic">h</tspan><tspan baseline-shift="sub" font-size="12">t−1</tspan></text>
+                            <line x1="140" y1="196" x2="140" y2="88" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowB-m)"/>
+                            <text x="140" y="214" text-anchor="middle" font-size="13" fill="#475569"><tspan font-style="italic">x</tspan><tspan baseline-shift="sub" font-size="12">t</tspan>, <tspan font-style="italic">h</tspan><tspan baseline-shift="sub" font-size="12">t−1</tspan></text>
+                            <!-- salida h_t -->
+                            <line x1="262" y1="152" x2="262" y2="186" stroke="#0E7490" stroke-width="2" marker-end="url(#arrowB-m)"/>
+                            <text x="262" y="204" text-anchor="middle" font-size="13.5" fill="#0E7490"><tspan font-style="italic">h</tspan><tspan baseline-shift="sub" font-size="12">t</tspan></text>
                         </svg>
                         <figcaption>Figura 3. La autopista del estado de celda (de C<sub>t−1</sub> a C<sub>t</sub>) permite que la información fluya casi sin alteración: la compuerta de olvido f<sub>t</sub> multiplica lo que se conserva, la de entrada i<sub>t</sub> suma lo que se escribe y la de salida o<sub>t</sub> lee tanh(C<sub>t</sub>) para emitir h<sub>t</sub>. Las tres compuertas (f<sub>t</sub>, i<sub>t</sub>, o<sub>t</sub>) se calculan a partir de [h<sub>t−1</sub>, x<sub>t</sub>] —como detallan las ecuaciones de abajo—; el diagrama resalta solo el flujo del estado de celda. Así se mitiga el desvanecimiento del gradiente.</figcaption>
                     </figure>
@@ -608,7 +738,7 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
                         <p class="text-sm text-slate-700">donde \(z_{img}\) proviene de la CNN, \(z_{seq}\) de la red recurrente, y \(\Vert\) denota concatenación. La <strong>fusión temprana</strong> (combinar antes de procesar) y la <strong>fusión por atención</strong> se admiten como extensiones de nivel avanzado.</p>
                     </div>
                     <figure class="card p-5">
-                        <svg viewBox="0 0 360 210" width="100%" role="img" aria-labelledby="fusionTitle fusionDesc">
+                        <svg viewBox="0 0 360 210" width="100%" class="svg-d" role="img" aria-labelledby="fusionTitle fusionDesc">
                             <title id="fusionTitle">Fusión multimodal</title>
                             <desc id="fusionDesc">Dos representaciones vectoriales se concatenan y pasan por una cabeza densa que produce la predicción</desc>
                             <defs>
@@ -628,6 +758,38 @@ gru  = nn.<span class="fn">GRU</span>(n_feat, hidden, batch_first=<span class="k
                             <rect x="268" y="82" width="78" height="48" rx="10" fill="url(#gF)"/>
                             <text x="307" y="103" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">Dense</text>
                             <text x="307" y="119" text-anchor="middle" font-size="12" font-weight="800" fill="#fff" font-style="italic">ŷ</text>
+                        </svg>
+                        <!-- Variante angosta (móvil): los dos embeddings arriba, la concatenación y la cabeza densa debajo.
+                             Define sus propios degradados (el SVG de escritorio usa los del mapa de la fase). -->
+                        <svg viewBox="0 0 300 250" class="svg-m" role="img" aria-labelledby="fusionTitle-m fusionDesc-m">
+                            <title id="fusionTitle-m">Fusión multimodal</title>
+                            <desc id="fusionDesc-m">Dos representaciones vectoriales se concatenan y pasan por una cabeza densa que produce la predicción</desc>
+                            <defs>
+                                <linearGradient id="fusionA-m" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0" stop-color="#3D008D"/><stop offset="1" stop-color="#5B1C9E"/>
+                                </linearGradient>
+                                <linearGradient id="fusionB-m" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0" stop-color="#0E7490"/><stop offset="1" stop-color="#0891B2"/>
+                                </linearGradient>
+                                <linearGradient id="fusionF-m" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0" stop-color="#ED1E79"/><stop offset="1" stop-color="#FDB913"/>
+                                </linearGradient>
+                                <marker id="arrowC-m" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeWidth">
+                                    <path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/>
+                                </marker>
+                            </defs>
+                            <rect x="30" y="12" width="100" height="46" rx="9" fill="url(#fusionA-m)"/>
+                            <text x="80" y="41" text-anchor="middle" font-size="15" font-weight="700" fill="#fff"><tspan font-style="italic">z</tspan><tspan baseline-shift="sub" font-size="12">img</tspan></text>
+                            <rect x="170" y="12" width="100" height="46" rx="9" fill="url(#fusionB-m)"/>
+                            <text x="220" y="41" text-anchor="middle" font-size="15" font-weight="700" fill="#fff"><tspan font-style="italic">z</tspan><tspan baseline-shift="sub" font-size="12">seq</tspan></text>
+                            <line x1="80" y1="58" x2="136" y2="106" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowC-m)"/>
+                            <line x1="220" y1="58" x2="164" y2="106" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowC-m)"/>
+                            <rect x="110" y="110" width="80" height="42" rx="8" fill="#0F172A"/>
+                            <text x="150" y="136" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">concat</text>
+                            <line x1="150" y1="152" x2="150" y2="180" stroke="#94A3B8" stroke-width="2" marker-end="url(#arrowC-m)"/>
+                            <rect x="100" y="184" width="100" height="56" rx="10" fill="url(#fusionF-m)"/>
+                            <text x="150" y="207" text-anchor="middle" font-size="14" font-weight="800" fill="#fff">Dense</text>
+                            <text x="150" y="229" text-anchor="middle" font-size="15" font-weight="800" fill="#fff" font-style="italic">ŷ</text>
                         </svg>
                         <figcaption>Figura 4. Fusión tardía por concatenación de <em>embeddings</em>. Es la estrategia de partida por su simplicidad y porque permite diagnosticar el aporte de cada modalidad por separado.</figcaption>
                     </figure>
