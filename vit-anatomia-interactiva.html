@@ -122,14 +122,16 @@
     75% { transform: translate(0, 20px); }
   }
   
-  /* Pantallas estrechas (incluido el iframe del Módulo 2 a 375 px): los diagramas conservan la escala 1:1
-     y se desplazan en horizontal, como las figuras del núcleo; las tarjetas reducen su relleno. */
-  .aviso-desplazar { display: none; }
+  /* Pantallas estrechas (incluido el iframe del Módulo 2 en un teléfono): menos relleno; las columnas CNN y ViT
+     recortan el margen vacío de su viewBox (script al final) y el bloque encoder cambia a su variante vertical
+     propia (.svg-movil, texto ≥ 12): todo se lee completo, sin desplazarse de lado. */
+  .svg-movil { display: none; }
   @media (max-width: 640px) {
-    .card, .card-cnn, .card-vit { padding: 0.75rem !important; min-width: 0; }
-    .svg-desplazable { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    .svg-desplazable > svg { min-width: 400px; }
-    .aviso-desplazar { display: block; margin-top: 0.25rem; font-size: 0.75rem; color: #64748B; text-align: center; }
+    body > .p-4 { padding: 0.5rem; }
+    .card, .card-cnn, .card-vit { padding: 0.5rem !important; min-width: 0; }
+    #vit-svg text[font-size="11"] { font-size: 11.5px; }
+    .svg-escritorio { display: none; }
+    .svg-movil { display: block; width: 100%; height: auto; max-width: 440px; margin: 0 auto; }
   }
 
   .rf-cell:focus-visible, .tab-btn:focus-visible { outline: 2px solid #ED1E79; outline-offset: 2px; }
@@ -509,7 +511,6 @@ img,video{max-width:100%;height:auto}
               </marker>
             </defs>
           </svg></div>
-          <p class="aviso-desplazar" aria-hidden="true">← desplazar para ver el diagrama completo →</p>
         </div>
         
         <!-- ViT Column -->
@@ -611,7 +612,6 @@ img,video{max-width:100%;height:auto}
               </marker>
             </defs>
           </svg></div>
-          <p class="aviso-desplazar" aria-hidden="true">← desplazar para ver el diagrama completo →</p>
         </div>
       </div>
       
@@ -878,7 +878,80 @@ img,video{max-width:100%;height:auto}
         
         <!-- Diagram -->
         <div class="card rounded-xl p-6">
-          <div class="svg-desplazable"><svg viewBox="0 0 400 550" class="w-full" role="img" aria-label="Bloque encoder del ViT con pre-normalización: LayerNorm, autoatención multicabeza y suma residual; luego LayerNorm, MLP y suma residual.">
+          <div class="svg-desplazable"><svg class="svg-movil" viewBox="0 0 300 596" role="img" aria-label="Bloque encoder del ViT con pre-normalización: LayerNorm, autoatención multicabeza y suma residual; luego LayerNorm, MLP y suma residual.">
+            <defs>
+              <marker id="arrow-enc-m" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L8,3 z" fill="#60a5fa"/>
+              </marker>
+            </defs>
+            <!-- Entrada z_(l-1) -->
+            <rect x="60" y="8" width="140" height="32" fill="#1f2937" stroke="#60a5fa" stroke-width="2" rx="4"/>
+            <text x="130" y="29" text-anchor="middle" fill="#60a5fa" font-size="13" font-weight="bold">Entrada z<tspan baseline-shift="sub" font-size="9">ℓ−1</tspan></text>
+            <line x1="130" y1="40" x2="130" y2="56" stroke="#60a5fa" stroke-width="1.5" marker-end="url(#arrow-enc-m)"/>
+            <!-- Residual 1 -->
+            <path d="M 130 48 L 18 48 L 18 212 L 114 212" stroke="#10b981" stroke-width="2" fill="none" stroke-dasharray="4"/>
+            <text x="13" y="130" text-anchor="middle" fill="#10b981" font-size="12" transform="rotate(-90 13 130)">Residual</text>
+            <!-- LayerNorm 1 -->
+            <rect x="75" y="58" width="110" height="28" fill="#064e3b" stroke="#10b981" stroke-width="2" rx="4"/>
+            <text x="130" y="77" text-anchor="middle" fill="#6ee7b7" font-size="12.5">LayerNorm</text>
+            <line x1="130" y1="86" x2="130" y2="98" stroke="#60a5fa" stroke-width="1.5" marker-end="url(#arrow-enc-m)"/>
+            <!-- Autoatención multicabeza -->
+            <rect x="30" y="100" width="200" height="86" fill="#312e81" stroke="#a78bfa" stroke-width="2" rx="6"/>
+            <text x="130" y="120" text-anchor="middle" fill="#c4b5fd" font-size="12.5" font-weight="bold">Autoatención multicabeza</text>
+            <text x="130" y="137" text-anchor="middle" fill="#c4b5fd" font-size="12.5" font-weight="bold">(MSA)</text>
+            <rect x="36" y="150" width="38" height="25" fill="#4c1d95" rx="3"/>
+            <text x="55" y="167" text-anchor="middle" fill="#ddd6fe" font-size="12">Q</text>
+            <rect x="80" y="150" width="38" height="25" fill="#4c1d95" rx="3"/>
+            <text x="99" y="167" text-anchor="middle" fill="#ddd6fe" font-size="12">K</text>
+            <rect x="124" y="150" width="38" height="25" fill="#4c1d95" rx="3"/>
+            <text x="143" y="167" text-anchor="middle" fill="#ddd6fe" font-size="12">V</text>
+            <rect x="168" y="150" width="56" height="25" fill="#4c1d95" rx="3"/>
+            <text x="196" y="167" text-anchor="middle" fill="#ddd6fe" font-size="12">Cabezas</text>
+            <line x1="130" y1="186" x2="130" y2="194" stroke="#60a5fa" stroke-width="1.5" marker-end="url(#arrow-enc-m)"/>
+            <!-- Suma residual 1 -->
+            <circle cx="130" cy="212" r="14" fill="#064e3b" stroke="#10b981" stroke-width="2"/>
+            <text x="130" y="217" text-anchor="middle" fill="#6ee7b7" font-size="15" font-weight="bold">+</text>
+            <text x="152" y="205" fill="#475569" font-size="12">z′<tspan baseline-shift="sub" font-size="9">ℓ</tspan> = MSA(LN(z<tspan baseline-shift="sub" font-size="9">ℓ−1</tspan>))</text>
+            <text x="152" y="224" fill="#475569" font-size="12">+ z<tspan baseline-shift="sub" font-size="9">ℓ−1</tspan></text>
+            <line x1="130" y1="226" x2="130" y2="246" stroke="#60a5fa" stroke-width="1.5" marker-end="url(#arrow-enc-m)"/>
+            <!-- Residual 2 -->
+            <path d="M 130 236 L 18 236 L 18 432 L 114 432" stroke="#10b981" stroke-width="2" fill="none" stroke-dasharray="4"/>
+            <text x="13" y="334" text-anchor="middle" fill="#10b981" font-size="12" transform="rotate(-90 13 334)">Residual</text>
+            <!-- LayerNorm 2 -->
+            <rect x="75" y="248" width="110" height="28" fill="#064e3b" stroke="#10b981" stroke-width="2" rx="4"/>
+            <text x="130" y="267" text-anchor="middle" fill="#6ee7b7" font-size="12.5">LayerNorm</text>
+            <line x1="130" y1="276" x2="130" y2="288" stroke="#60a5fa" stroke-width="1.5" marker-end="url(#arrow-enc-m)"/>
+            <!-- MLP -->
+            <rect x="30" y="290" width="200" height="100" fill="#1e3a8a" stroke="#60a5fa" stroke-width="2" rx="6"/>
+            <text x="130" y="310" text-anchor="middle" fill="#93c5fd" font-size="12.5" font-weight="bold">MLP (<tspan font-style="italic">feed-forward</tspan>)</text>
+            <rect x="36" y="320" width="114" height="26" fill="#1e40af" rx="3"/>
+            <text x="93" y="338" text-anchor="middle" fill="#bfdbfe" font-size="12">Linear (D → 4D)</text>
+            <rect x="156" y="320" width="68" height="26" fill="#1e40af" rx="3"/>
+            <text x="190" y="338" text-anchor="middle" fill="#bfdbfe" font-size="12">GELU</text>
+            <rect x="36" y="354" width="114" height="26" fill="#1e40af" rx="3"/>
+            <text x="93" y="372" text-anchor="middle" fill="#bfdbfe" font-size="12">Linear (→ D)</text>
+            <rect x="156" y="354" width="68" height="26" fill="#1e40af" rx="3"/>
+            <text x="190" y="372" text-anchor="middle" fill="#bfdbfe" font-size="12" font-style="italic">Dropout</text>
+            <line x1="130" y1="390" x2="130" y2="414" stroke="#60a5fa" stroke-width="1.5" marker-end="url(#arrow-enc-m)"/>
+            <!-- Suma residual 2 -->
+            <circle cx="130" cy="432" r="14" fill="#064e3b" stroke="#10b981" stroke-width="2"/>
+            <text x="130" y="437" text-anchor="middle" fill="#6ee7b7" font-size="15" font-weight="bold">+</text>
+            <text x="152" y="425" fill="#475569" font-size="12">z<tspan baseline-shift="sub" font-size="9">ℓ</tspan> = MLP(LN(z′<tspan baseline-shift="sub" font-size="9">ℓ</tspan>))</text>
+            <text x="152" y="444" fill="#475569" font-size="12">+ z′<tspan baseline-shift="sub" font-size="9">ℓ</tspan></text>
+            <line x1="130" y1="446" x2="130" y2="470" stroke="#60a5fa" stroke-width="1.5" marker-end="url(#arrow-enc-m)"/>
+            <!-- Salida -->
+            <rect x="24" y="472" width="212" height="34" fill="#1f2937" stroke="#60a5fa" stroke-width="2" rx="4"/>
+            <text x="130" y="494" text-anchor="middle" fill="#60a5fa" font-size="12.5" font-weight="bold">Salida z<tspan baseline-shift="sub" font-size="9">ℓ</tspan> → siguiente bloque</text>
+            <!-- Indicador de repetición -->
+            <text x="276" y="330" text-anchor="middle" fill="#b45309" font-size="12.5" font-weight="bold">× N</text>
+            <text x="276" y="346" text-anchor="middle" fill="#b45309" font-size="12">(12–32)</text>
+            <path d="M 238 262 Q 262 340 238 418" stroke="#f59e0b" stroke-width="1.5" fill="none" marker-end="url(#arrow-enc-m)"/>
+            <!-- Pie: Pre-LN frente a Post-LN -->
+            <text x="150" y="534" text-anchor="middle" fill="#334155" font-size="12" font-weight="bold">Pre-LN (ViT): LayerNorm antes</text>
+            <text x="150" y="550" text-anchor="middle" fill="#334155" font-size="12" font-weight="bold">de cada subcapa</text>
+            <text x="150" y="572" text-anchor="middle" fill="#475569" font-size="12">El Transformer original (Vaswani et al., 2017)</text>
+            <text x="150" y="588" text-anchor="middle" fill="#475569" font-size="12">normalizaba después (Post-LN)</text>
+          </svg><svg class="svg-escritorio w-full" viewBox="0 0 400 550" role="img" aria-label="Bloque encoder del ViT con pre-normalización: LayerNorm, autoatención multicabeza y suma residual; luego LayerNorm, MLP y suma residual.">
             <!-- Entrada z_(l-1) -->
             <rect x="130" y="10" width="140" height="35" fill="#1f2937" stroke="#60a5fa" stroke-width="2" rx="4"/>
             <text x="200" y="32" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="bold">Entrada z<tspan baseline-shift="sub" font-size="8">ℓ−1</tspan></text>
@@ -959,7 +1032,6 @@ img,video{max-width:100%;height:auto}
               </marker>
             </defs>
           </svg></div>
-          <p class="aviso-desplazar" aria-hidden="true">← desplazar para ver el diagrama completo →</p>
         </div>
         
         <!-- Explanation -->
@@ -1159,6 +1231,18 @@ function createPatchGrid() {
     }
   }
 }
+
+/* Pantallas estrechas: las columnas CNN y ViT recortan el margen vacío de su viewBox (el contenido ocupa
+   x 58–342 de 400) para dibujarse ~40 % más grandes sin desplazarse de lado. */
+(function () {
+  const mq = window.matchMedia('(max-width: 640px)');
+  const ajustar = () => ['cnn-svg', 'vit-svg'].forEach(id => {
+    const svg = document.getElementById(id);
+    if (svg) svg.setAttribute('viewBox', mq.matches ? '58 0 284 500' : '0 0 400 500');
+  });
+  ajustar();
+  if (mq.addEventListener) mq.addEventListener('change', ajustar); else mq.addListener(ajustar);
+})();
 
 function animateCNNKernel() {
   const kernel = document.getElementById('cnn-kernel1');
