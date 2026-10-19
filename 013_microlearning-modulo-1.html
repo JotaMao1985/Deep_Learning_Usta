@@ -303,6 +303,8 @@
             background: linear-gradient(90deg, #3D008D, #ED1E79, #FDB913);
             opacity: 0.6;
         }
+        /* Celular: menos relleno alrededor de las gráficas (que usan su geometría angosta, ver useAngosto) */
+        @media (max-width: 480px) { .visual-container { padding: 0.9rem 0.5rem; } }
         .visual-title {
             text-align: center;
             color: #001A4D;
@@ -370,6 +372,23 @@
         /* ============================================================
            IntersectionObserver for scroll reveal
         ============================================================ */
+        /* Gráficas en celular: si el ancho disponible queda por debajo de 400 px, cada gráfica se dibuja con su
+           geometría angosta (viewBox de 300 de ancho, letra ≥ 12) en lugar de encoger la de escritorio hasta 7 px.
+           Devuelve [ref del contenedor, ¿angosto?]. */
+        const useAngosto = (umbral = 400) => {
+            const ref = useRef(null);
+            const [angosto, setAngosto] = useState(() => (window.innerWidth || 1024) < umbral + 60);
+            useEffect(() => {
+                const el = ref.current; if (!el) return undefined;
+                const medir = () => { const w = el.clientWidth; if (w > 0) setAngosto(w < umbral); };
+                medir();
+                if (!window.ResizeObserver) return undefined;
+                const ro = new ResizeObserver(medir); ro.observe(el);
+                return () => ro.disconnect();
+            }, [umbral]);
+            return [ref, angosto];
+        };
+
         const useReveal = () => {
             const ref = useRef(null);
             useEffect(() => {
@@ -592,8 +611,9 @@
             const [animating, setAnimating] = useState(false);
             const animRef = useRef(null);
 
-            const W = 340, H = 300;
-            const m = { t: 35, r: 30, b: 50, l: 50 };
+            const [anchoRef, ang] = useAngosto();
+            const W = ang ? 300 : 340, H = ang ? 340 : 300;
+            const m = ang ? { t: 30, r: 16, b: 82, l: 46 } : { t: 35, r: 30, b: 50, l: 50 };
             const pw = W - m.l - m.r, ph = H - m.t - m.b;
             const sx = (v) => m.l + v * pw;
             const sy = (v) => m.t + (1 - v) * ph;
@@ -661,6 +681,7 @@
                     <h4 className="visual-title">
                         <i className="fas fa-braille text-secondary mr-2"></i>Diagrama de dispersión del XOR — ¿se puede separar con una línea?
                     </h4>
+                    <div ref={anchoRef}>
                     <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
                         aria-label="Diagrama de dispersión del problema XOR: las clases 0 están en las esquinas (0,0) y (1,1) y las clases 1 en (0,1) y (1,0). Ninguna línea recta separa ambas clases; solo una frontera no lineal lo logra.">
                         <defs>
@@ -696,14 +717,14 @@
                         {/* Axes */}
                         <line className="axis-line" x1={m.l} y1={m.t + ph} x2={m.l + pw} y2={m.t + ph} />
                         <line className="axis-line" x1={m.l} y1={m.t} x2={m.l} y2={m.t + ph} />
-                        <text x={sx(0.5)} y={H - 8} textAnchor="middle" fontSize="11" fill="#64748B" fontWeight="600">Entrada A</text>
-                        <text x="14" y={sy(0.5)} textAnchor="middle" fontSize="11" fill="#64748B" fontWeight="600"
+                        <text x={sx(0.5)} y={ang ? m.t + ph + 48 : H - 8} textAnchor="middle" fontSize={ang ? 13 : 11} fill="#64748B" fontWeight="600">Entrada A</text>
+                        <text x="14" y={sy(0.5)} textAnchor="middle" fontSize={ang ? 13 : 11} fill="#64748B" fontWeight="600"
                             transform={`rotate(-90, 14, ${sy(0.5)})`}>Entrada B</text>
                         {/* Axis labels */}
-                        <text x={sx(0)} y={m.t + ph + 16} textAnchor="middle" fontSize="10" fill="#94A3B8">0</text>
-                        <text x={sx(1)} y={m.t + ph + 16} textAnchor="middle" fontSize="10" fill="#94A3B8">1</text>
-                        <text x={m.l - 10} y={sy(0) + 4} textAnchor="middle" fontSize="10" fill="#94A3B8">0</text>
-                        <text x={m.l - 10} y={sy(1) + 4} textAnchor="middle" fontSize="10" fill="#94A3B8">1</text>
+                        <text x={sx(0)} y={m.t + ph + (ang ? 29 : 16)} textAnchor="middle" fontSize={ang ? 13 : 10} fill="#94A3B8">0</text>
+                        <text x={sx(1)} y={m.t + ph + (ang ? 29 : 16)} textAnchor="middle" fontSize={ang ? 13 : 10} fill="#94A3B8">1</text>
+                        <text x={m.l - (ang ? 22 : 10)} y={sy(0) + (ang ? 5 : 4)} textAnchor="middle" fontSize={ang ? 13 : 10} fill="#94A3B8">0</text>
+                        <text x={m.l - (ang ? 22 : 10)} y={sy(1) + (ang ? 5 : 4)} textAnchor="middle" fontSize={ang ? 13 : 10} fill="#94A3B8">1</text>
 
                         {/* Decision regions (shown when curve is active) */}
                         {showCurve && (
@@ -747,11 +768,11 @@
                                         filter="url(#pointShadow)"
                                         style={{ transition: 'r 0.3s', filter: isHov ? 'brightness(1.15)' : 'none' }} />
                                     <text x={sx(p.x)} y={sy(p.y) + 1} textAnchor="middle" dominantBaseline="central"
-                                        fontSize="11" fontWeight="bold" fill="white">
+                                        fontSize={ang ? 13 : 11} fontWeight="bold" fill="white">
                                         {p.cls}
                                     </text>
                                     {/* Tooltip */}
-                                    {isHov && (
+                                    {isHov && !ang && (
                                         <g>
                                             <rect x={sx(p.x) - 55} y={sy(p.y) - 34} width="110" height="22" rx="6"
                                                 fill="#1E293B" opacity="0.92" />
@@ -759,18 +780,40 @@
                                                 fontSize="10" fill="white" fontWeight="600">{p.label}</text>
                                         </g>
                                     )}
+                                    {isHov && ang && (() => {
+                                        /* celular: rótulo más grande y dentro del lienzo (los puntos están en las esquinas) */
+                                        const bx = Math.max(2, Math.min(W - 132, sx(p.x) - 65)), by = p.y === 1 ? sy(p.y) + 22 : sy(p.y) - 46;
+                                        return (
+                                            <g>
+                                                <rect x={bx} y={by} width="130" height="26" rx="6" fill="#1E293B" opacity="0.92" />
+                                                <text x={bx + 65} y={by + 17} textAnchor="middle" fontSize="12.5" fill="white" fontWeight="600">{p.label}</text>
+                                            </g>
+                                        );
+                                    })()}
                                 </g>
                             );
                         })}
-                        {/* Legend */}
-                        <g transform={`translate(${W - 100}, 8)`}>
+                        {/* Legend (celular: en una fila debajo del eje) */}
+                        {ang ? (
+                            <g transform={`translate(${W / 2 - 92}, ${H - 26})`}>
+                                <rect width="184" height="24" rx="8" fill="white" stroke="#E2E8F0" strokeWidth="1" />
+                                <circle cx="16" cy="12" r="6" fill="#ED1E79" />
+                                <text x="28" y="16.5" fontSize="12.5" fill="#64748B" fontWeight="600">Clase 0</text>
+                                <circle cx="104" cy="12" r="6" fill="#15803D" />
+                                <text x="116" y="16.5" fontSize="12.5" fill="#64748B" fontWeight="600">Clase 1</text>
+                            </g>
+                        ) : (
+                        /* arriba al centro: en la esquina superior derecha tapaba el punto (1, 1) */
+                        <g transform={`translate(${sx(0.5) - 46}, 4)`}>
                             <rect width="92" height="38" rx="8" fill="white" stroke="#E2E8F0" strokeWidth="1" filter="url(#pointShadow)" />
                             <circle cx="14" cy="16" r="6" fill="#ED1E79" />
                             <text x="26" y="20" fontSize="10" fill="#64748B" fontWeight="600">Clase 0</text>
                             <circle cx="14" cy="32" r="6" fill="#15803D" />
                             <text x="26" y="36" fontSize="10" fill="#64748B" fontWeight="600">Clase 1</text>
                         </g>
+                        )}
                     </svg>
+                    </div>
                     <div className="flex gap-2 mt-3 justify-center flex-wrap">
                         <button onClick={animateLine} disabled={animating}
                             className="text-xs font-bold px-4 py-1.5 rounded-full border-2 border-gray-300 text-gray-600 hover:border-secondary hover:text-secondary transition-all disabled:opacity-40">
@@ -809,8 +852,9 @@
                 reluDeriv.push({ z, d: z > 0 ? 1 : 0 });
             }
 
-            const W = 380, H = 220;
-            const m = { t: 25, r: 20, b: 35, l: 40 };
+            const [anchoRef, ang] = useAngosto();
+            const W = ang ? 300 : 380, H = ang ? 240 : 220;
+            const m = ang ? { t: 62, r: 12, b: 38, l: 26 } : { t: 25, r: 20, b: 35, l: 40 };
             const pw = W - m.l - m.r, ph = H - m.t - m.b;
             const xS = (z) => m.l + ((z + 6) / 12) * pw;
             const yNorm = (v, max) => m.t + ph - (v / max) * ph;
@@ -838,6 +882,7 @@
                     <h4 className="visual-title">
                         <i className="fas fa-wave-square text-secondary mr-2"></i>Funciones de activación: sigmoide vs. ReLU
                     </h4>
+                    <div ref={anchoRef}>
                     <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" role="img"
                         aria-label="Comparación de funciones de activación: la sigmoide satura (se aplana) en los extremos y su derivada máxima es 0,25, lo que provoca desvanecimiento del gradiente; ReLU es lineal para z mayor que cero y su derivada vale 1, dejando fluir el gradiente.">
                         <defs>
@@ -865,7 +910,7 @@
                         {/* y=1 reference */}
                         <line x1={m.l} y1={yNorm(1, 1.1)} x2={m.l + pw} y2={yNorm(1, 1.1)}
                             stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4,4" />
-                        <text x={m.l - 4} y={yNorm(1, 1.1) + 4} textAnchor="end" fontSize="9" fill="#94A3B8">1</text>
+                        <text x={m.l - 4} y={yNorm(1, 1.1) + 4} textAnchor="end" fontSize={ang ? 12 : 9} fill="#94A3B8">1</text>
 
                         {/* Areas */}
                         {mounted && <path d={sigmoidAreaPath} fill="url(#sigmoidGrad)" />}
@@ -889,11 +934,26 @@
 
                         {/* Axis labels */}
                         {[-6, -4, -2, 0, 2, 4, 6].map(z => (
-                            <text key={z} x={xS(z)} y={m.t + ph + 14} textAnchor="middle" fontSize="9" fill="#94A3B8">{z}</text>
+                            <text key={z} x={xS(z)} y={m.t + ph + (ang ? 16 : 14)} textAnchor="middle" fontSize={ang ? 12 : 9} fill="#94A3B8">{z}</text>
                         ))}
-                        <text x={xS(0)} y={H - 4} textAnchor="middle" fontSize="10" fill="#64748B" fontWeight="600">z</text>
+                        <text x={xS(0)} y={H - 4} textAnchor="middle" fontSize={ang ? 13 : 10} fill="#64748B" fontWeight="600">z</text>
 
-                        {/* Legend */}
+                        {/* Legend (celular: arriba del gráfico, en filas) */}
+                        {ang ? (
+                            <>
+                                <rect x="2" y="4" width="296" height={showDerivatives ? 48 : 30} rx="8" fill="white" stroke="#E2E8F0" strokeWidth="1" />
+                                <line x1="10" y1="19" x2="30" y2="19" stroke="#ED1E79" strokeWidth="3" />
+                                <text x="35" y="23.5" fontSize="12.5" fill="#64748B" fontWeight="600">Sigmoide σ(z)</text>
+                                <line x1="156" y1="19" x2="176" y2="19" stroke="#15803D" strokeWidth="3" />
+                                <text x="181" y="23.5" fontSize="12.5" fill="#64748B" fontWeight="600">ReLU max(0,z)</text>
+                                {showDerivatives && (
+                                    <>
+                                        <line x1="10" y1="38" x2="30" y2="38" stroke="#ED1E79" strokeWidth="1.5" strokeDasharray="4,3" />
+                                        <text x="35" y="42.5" fontSize="12" fill="#94A3B8">σ'(z)</text>
+                                    </>
+                                )}
+                            </>
+                        ) : (<>
                         <rect x={W - 130} y="8" width="120" height={showDerivatives ? "54" : "38"} rx="8" fill="white" stroke="#E2E8F0" strokeWidth="1" />
                         <line x1={W - 122} y1="20" x2={W - 100} y2="20" stroke="#ED1E79" strokeWidth="3" />
                         <text x={W - 96} y="24" fontSize="10" fill="#64748B" fontWeight="600">Sigmoide σ(z)</text>
@@ -905,7 +965,9 @@
                                 <text x={W - 96} y="54" fontSize="9" fill="#94A3B8">σ'(z)</text>
                             </>
                         )}
+                        </>)}
                     </svg>
+                    </div>
                     <div className="flex gap-2 mt-2 justify-center">
                         <button onClick={() => setShowDerivatives(!showDerivatives)}
                             className={`text-xs font-bold px-4 py-1.5 rounded-full border-2 transition-all ${showDerivatives ? 'border-primary text-primary bg-purple-50' : 'border-gray-300 text-gray-600 hover:border-primary hover:text-primary'}`}>
@@ -944,8 +1006,9 @@
                 return path;
             };
 
-            const W = 400, H = 220;
-            const m = { t: 30, r: 20, b: 40, l: 45 };
+            const [anchoRef, ang] = useAngosto();
+            const W = ang ? 300 : 400, H = 220;
+            const m = ang ? { t: 24, r: 12, b: 42, l: 34 } : { t: 30, r: 20, b: 40, l: 45 };
             const pw = W - m.l - m.r, ph = H - m.t - m.b;
             const xRange = [-5, 8];
             const yRange = [0, 18];
@@ -982,6 +1045,7 @@
                         <i className="fas fa-person-hiking text-secondary mr-2"></i>Tres tasas de aprendizaje, tres destinos
                     </h4>
                     <Eq>{String.raw`$$\theta_{t+1} = \theta_t - \eta \cdot \nabla L(\theta_t)$$`}</Eq>
+                    <div ref={anchoRef}>
                     <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart mt-2" role="img"
                         aria-label="Trayectorias del descenso del gradiente sobre una superficie de pérdida en forma de valle, según la tasa de aprendizaje: una tasa baja converge muy lento, una tasa ideal alcanza el mínimo y una tasa alta diverge rebotando por las laderas.">
                         <defs>
@@ -1010,7 +1074,7 @@
                         <circle cx={xS(3)} cy={yS(f(3))} r="12" fill="url(#minGlow)" />
                         <circle cx={xS(3)} cy={yS(f(3))} r="5" fill="#15803D" opacity="0.3" />
                         <circle cx={xS(3)} cy={yS(f(3))} r="3" fill="#15803D" />
-                        <text x={xS(3)} y={yS(f(3)) + 16} textAnchor="middle" fontSize="9" fill="#15803D" fontWeight="bold">mínimo</text>
+                        <text x={xS(3)} y={yS(f(3)) + (ang ? 18 : 16)} textAnchor="middle" fontSize={ang ? 12 : 9} fill="#15803D" fontWeight="bold">mínimo</text>
 
                         {/* Trajectories */}
                         {scenarios.map((s, i) => {
@@ -1041,10 +1105,11 @@
                         })}
 
                         {/* Labels */}
-                        <text x={m.l + pw / 2} y={H - 6} textAnchor="middle" fontSize="10" fill="#64748B" fontWeight="600">θ (parámetro)</text>
-                        <text x="12" y={m.t + ph / 2} textAnchor="middle" fontSize="10" fill="#64748B" fontWeight="600"
-                            transform={`rotate(-90, 12, ${m.t + ph / 2})`}>L(θ) pérdida</text>
+                        <text x={m.l + pw / 2} y={H - 6} textAnchor="middle" fontSize={ang ? 13 : 10} fill="#64748B" fontWeight="600">θ (parámetro)</text>
+                        <text x={ang ? 14 : 12} y={m.t + ph / 2} textAnchor="middle" fontSize={ang ? 13 : 10} fill="#64748B" fontWeight="600"
+                            transform={`rotate(-90, ${ang ? 14 : 12}, ${m.t + ph / 2})`}>L(θ) pérdida</text>
                     </svg>
+                    </div>
                     {/* Selector buttons */}
                     <div className="flex gap-2 mt-3 justify-center flex-wrap">
                         {scenarios.map((s, i) => (
@@ -1101,13 +1166,22 @@
             };
             useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
 
-            const W = 580, H = 200;
+            const [anchoRef, ang] = useAngosto();
+            const W = ang ? 300 : 580, H = ang ? 200 : 200;
+            /* celular: los cinco nodos siguen en una fila (izquierda → derecha), más angostos; los rótulos
+               de cada nodo se alternan en dos alturas y la leyenda inferior se parte en dos líneas */
+            const G = ang
+                ? { xs: [2, 66, 130, 194, 256], nw: 42, ny: 40, nh: 40, fy: 60, by: 126, dy: 146, sy: [100, 116, 100, 116, 100], fsN: 15, fsS: 12, fsD: 12 }
+                : { xs: nodes.map(n => n.x), nw: 50, ny: 60, nh: 40, fy: 80, by: 140, dy: 158, sy: [118, 118, 118, 118, 118], fsN: 13, fsS: 9, fsD: 8 };
+            const anclaSub = i => !ang ? 'middle' : (i === 0 ? 'start' : i === 4 ? 'end' : 'middle');
+            const xSub = i => !ang ? G.xs[i] + 25 : (i === 0 ? 2 : i === 4 ? 298 : G.xs[i] + G.nw / 2);
 
             return (
                 <div ref={revRef} className="visual-container reveal">
                     <h4 className="visual-title">
                         <i className="fas fa-diagram-project text-secondary mr-2"></i>Grafo computacional: <em>forward</em> frente a <em>backward</em>
                     </h4>
+                    <div ref={anchoRef}>
                     <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart" style={{ minWidth: 280 }} role="img"
                         aria-label="Grafo computacional con los nodos producto x·w, suma del sesgo, activación, predicción y pérdida. En la fase forward el flujo avanza de izquierda a derecha para calcular la predicción; en la fase backward el gradiente regresa de derecha a izquierda aplicando la regla de la cadena.">
 
@@ -1115,8 +1189,9 @@
                             <marker id="arrF" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
                                 <path d="M0,0 L6,3 L0,6 Z" fill="#2563EB" />
                             </marker>
-                            <marker id="arrB" markerWidth="8" markerHeight="8" refX="2" refY="3" orient="auto">
-                                <path d="M6,0 L0,3 L6,6 Z" fill="#DC2626" />
+                            {/* la línea ya va de derecha a izquierda: con orient="auto" la punta se dibuja hacia +x */}
+                            <marker id="arrB" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                                <path d="M0,0 L6,3 L0,6 Z" fill="#DC2626" />
                             </marker>
                             <linearGradient id="nodeGrad" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0%" stopColor="#F5F0FA" />
@@ -1138,7 +1213,7 @@
                         {/* Forward arrows */}
                         {nodes.slice(0, -1).map((n, i) => (
                             <line key={`f${i}`}
-                                x1={n.x + 50} y1="80" x2={nodes[i+1].x} y2="80"
+                                x1={G.xs[i] + G.nw} y1={G.fy} x2={G.xs[i + 1]} y2={G.fy}
                                 stroke={phase === 'forward' && activeNode >= i ? '#2563EB' : '#CBD5E1'}
                                 strokeWidth="2" markerEnd="url(#arrF)"
                                 style={{ transition: 'stroke 0.3s' }} />
@@ -1146,16 +1221,16 @@
                         {/* Backward arrows */}
                         {nodes.slice(0, -1).map((n, i) => (
                             <line key={`b${i}`}
-                                x1={nodes[i+1].x} y1="140" x2={n.x + 50} y2="140"
+                                x1={G.xs[i + 1]} y1={G.by} x2={G.xs[i] + G.nw} y2={G.by}
                                 stroke={phase === 'backward' && activeNode <= i + 1 ? '#DC2626' : '#CBD5E1'}
                                 strokeWidth="2" strokeDasharray="5,3" markerEnd="url(#arrB)"
                                 style={{ transition: 'stroke 0.3s' }} />
                         ))}
-                        {/* Derivative labels on backward arrows */}
-                        {['∂L/∂ŷ', '∂ŷ/∂σ', '∂σ/∂z', '∂z/∂w'].map((label, i) => (
+                        {/* Derivative labels on backward arrows (cada derivada local entre los nodos que enlaza) */}
+                        {['∂z/∂w', '∂σ/∂z', '∂ŷ/∂σ', '∂L/∂ŷ'].map((label, i) => (
                             <text key={`dl${i}`}
-                                x={(nodes[i].x + 50 + nodes[i+1].x) / 2} y="158"
-                                textAnchor="middle" fontSize="8" fill="#DC2626" fontWeight="600"
+                                x={(G.xs[i] + G.nw + G.xs[i + 1]) / 2} y={G.dy}
+                                textAnchor="middle" fontSize={G.fsD} fill="#DC2626" fontWeight="600"
                                 opacity={phase === 'backward' ? 0.8 : 0.3}
                                 style={{ transition: 'opacity 0.3s' }}>
                                 {label}
@@ -1172,30 +1247,39 @@
                                 : '#3D008D';
                             return (
                                 <g key={i} filter={isActive ? 'url(#glow)' : undefined}>
-                                    <rect x={n.x} y="60" width="50" height="40" rx="12"
+                                    <rect x={G.xs[i]} y={G.ny} width={G.nw} height={G.nh} rx="12"
                                         fill={nodeFill} stroke={nodeStroke} strokeWidth={isActive ? 2.5 : 1.5}
                                         style={{ transition: 'all 0.3s' }} />
-                                    <text x={n.x + 25} y="84" textAnchor="middle"
-                                        fontSize="13" fill={isActive ? nodeStroke : '#3D008D'} fontWeight="bold"
+                                    <text x={G.xs[i] + G.nw / 2} y={G.ny + 24} textAnchor="middle"
+                                        fontSize={G.fsN} fill={isActive ? nodeStroke : '#3D008D'} fontWeight="bold"
                                         style={{ transition: 'fill 0.3s' }}>
                                         {n.label}
                                     </text>
-                                    <text x={n.x + 25} y="118" textAnchor="middle" fontSize="9" fill="#64748B">
+                                    <text x={xSub(i)} y={G.sy[i]} textAnchor={anclaSub(i)} fontSize={G.fsS} fill="#64748B">
                                         {n.sub}
                                     </text>
                                 </g>
                             );
                         })}
                         {/* Phase labels */}
-                        <text x="20" y="30" fontSize="12" fill="#2563EB" fontWeight="bold"
+                        <text x={ang ? 4 : 20} y={ang ? 22 : 30} fontSize={ang ? 13 : 12} fill="#2563EB" fontWeight="bold"
                             opacity={phase === 'forward' ? 1 : 0.4} style={{ transition: 'opacity 0.3s' }}>
                             ▶ Hacia adelante (predicción)
                         </text>
+                        {ang ? (
+                            <text x="4" y="174" fontSize="13" fill="#DC2626" fontWeight="bold"
+                                opacity={phase === 'backward' ? 1 : 0.4} style={{ transition: 'opacity 0.3s' }}>
+                                <tspan x="4">◀ Hacia atrás</tspan>
+                                <tspan x="22" dy="17">(gradiente = regla de la cadena)</tspan>
+                            </text>
+                        ) : (
                         <text x="20" y="185" fontSize="12" fill="#DC2626" fontWeight="bold"
                             opacity={phase === 'backward' ? 1 : 0.4} style={{ transition: 'opacity 0.3s' }}>
                             ◀ Hacia atrás (gradiente = regla de la cadena)
                         </text>
+                        )}
                     </svg>
+                    </div>
                     <div className="flex gap-2 mt-3 justify-center flex-wrap">
                         <button onClick={() => runAnimation('forward')}
                             className="text-xs font-bold px-4 py-2 rounded-full border-2 border-blue-300 text-blue-600 hover:bg-blue-50 transition-all">
@@ -1222,8 +1306,9 @@
 
             useEffect(() => { const t = setTimeout(() => setMounted(true), 300); return () => clearTimeout(t); }, []);
 
-            const W = 400, H = 220;
-            const m = { t: 30, r: 25, b: 40, l: 50 };
+            const [anchoRef, ang] = useAngosto();
+            const W = ang ? 300 : 400, H = ang ? 250 : 220;
+            const m = ang ? { t: 58, r: 12, b: 42, l: 38 } : { t: 30, r: 25, b: 40, l: 50 };
             const pw = W - m.l - m.r, ph = H - m.t - m.b;
             const epochs = Array.from({ length: 50 }, (_, i) => i + 1);
             const trainY = epochs.map(e => 0.9 * Math.exp(-e / 18) + 0.05);
@@ -1263,6 +1348,7 @@
                     <h4 className="visual-title">
                         <i className="fas fa-chart-line text-secondary mr-2"></i>Curvas de aprendizaje: la firma del sobreajuste
                     </h4>
+                    <div ref={anchoRef}>
                     <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} className="svg-chart cursor-crosshair"
                         role="img"
                         aria-label="Curvas de aprendizaje a lo largo de 50 épocas: la pérdida de entrenamiento sigue bajando, mientras que la pérdida de validación deja de mejorar y empieza a subir a partir de la época 22, marcada con una línea de parada temprana como punto ideal para detener el entrenamiento."
@@ -1284,7 +1370,7 @@
                         <rect x={m.l} y={m.t} width={pw} height={ph} fill="url(#overfitDotGrid)" />
                         {/* Overfit region */}
                         <rect className="overfit-region" x={xS(stopX)} y={m.t} width={m.l + pw - xS(stopX)} height={ph} rx="4" fill="url(#overfitGrad)" />
-                        <text x={xS(36)} y={m.t + 40} textAnchor="middle" fontSize="9" fill="#ED1E79" fontWeight="600" opacity="0.7">
+                        <text x={xS(36)} y={m.t + 40} textAnchor="middle" fontSize={ang ? 12 : 9} fill="#ED1E79" fontWeight="600" opacity="0.7">
                             Zona de sobreajuste
                         </text>
                         {/* Divergence gap highlight */}
@@ -1298,7 +1384,7 @@
                         ))}
                         {/* Early stop line */}
                         <line className="stop-line" x1={xS(stopX)} y1={m.t} x2={xS(stopX)} y2={m.t + ph} />
-                        <text x={xS(stopX)} y={m.t - 4} textAnchor="middle" fontSize="9" fill="#15803D" fontWeight="bold">
+                        <text x={xS(stopX)} y={m.t - (ang ? 6 : 4)} textAnchor="middle" fontSize={ang ? 12 : 9} fill="#15803D" fontWeight="bold">
                             ✋ Parada temprana
                         </text>
                         {/* Curves */}
@@ -1313,6 +1399,18 @@
                                 <circle cx={xS(he)} cy={yS(trainAtH)} r="4" fill="#3D008D" stroke="white" strokeWidth="2" />
                                 <circle cx={xS(he)} cy={yS(valAtH)} r="4" fill="#ED1E79" stroke="white" strokeWidth="2" />
                                 {/* Tooltip box */}
+                                {ang ? (() => {
+                                    /* celular: rótulo más grande, con los dos valores en líneas separadas */
+                                    const bx = xS(he) + (he > 25 ? -118 : 8);
+                                    return (
+                                        <g>
+                                            <rect x={bx} y={m.t + 20} width="110" height="56" rx="6" fill="#1E293B" opacity="0.9" />
+                                            <text x={bx + 55} y={m.t + 38} textAnchor="middle" fontSize="12.5" fill="white" fontWeight="bold">Época {he}</text>
+                                            <text x={bx + 55} y={m.t + 54} textAnchor="middle" fontSize="12" fill="#A5B4FC">Ent. {trainAtH.toFixed(3).replace('.', ',')}</text>
+                                            <text x={bx + 55} y={m.t + 69} textAnchor="middle" fontSize="12" fill="#A5B4FC">Val. {valAtH.toFixed(3).replace('.', ',')}</text>
+                                        </g>
+                                    );
+                                })() : (<>
                                 <rect x={xS(he) + (he > 35 ? -110 : 8)} y={m.t + 20} width="100" height="40" rx="6"
                                     fill="#1E293B" opacity="0.9" />
                                 <text x={xS(he) + (he > 35 ? -60 : 58)} y={m.t + 36}
@@ -1323,22 +1421,34 @@
                                     textAnchor="middle" fontSize="8" fill="#A5B4FC">
                                     Ent. {trainAtH.toFixed(3).replace('.', ',')} · Val. {valAtH.toFixed(3).replace('.', ',')}
                                 </text>
+                                </>)}
                             </g>
                         )}
-                        {/* Legend */}
+                        {/* Legend (celular: arriba del gráfico, en una fila) */}
+                        {ang ? (
+                            <>
+                                <rect x="2" y="4" width="296" height="26" rx="8" fill="white" stroke="#E2E8F0" strokeWidth="1" />
+                                <line x1="10" y1="17" x2="30" y2="17" stroke="#3D008D" strokeWidth="3" />
+                                <text x="35" y="21.5" fontSize="12.5" fill="#64748B" fontWeight="600">Entrenamiento</text>
+                                <line x1="160" y1="17" x2="180" y2="17" stroke="#ED1E79" strokeWidth="3" />
+                                <text x="185" y="21.5" fontSize="12.5" fill="#64748B" fontWeight="600">Validación</text>
+                            </>
+                        ) : (<>
                         <rect x={W - 130} y="12" width="120" height="38" rx="8" fill="white" stroke="#E2E8F0" strokeWidth="1" />
                         <line x1={W - 122} y1="24" x2={W - 102} y2="24" stroke="#3D008D" strokeWidth="3" />
                         <text x={W - 98} y="28" fontSize="10" fill="#64748B" fontWeight="600">Entrenamiento</text>
                         <line x1={W - 122} y1="40" x2={W - 102} y2="40" stroke="#ED1E79" strokeWidth="3" />
                         <text x={W - 98} y="44" fontSize="10" fill="#64748B" fontWeight="600">Validación</text>
+                        </>)}
                         {/* Axis labels */}
-                        <text x={m.l + pw / 2} y={H - 6} textAnchor="middle" fontSize="10" fill="#64748B" fontWeight="600">Época</text>
-                        <text x="12" y={m.t + ph / 2} textAnchor="middle" fontSize="10" fill="#64748B" fontWeight="600"
-                            transform={`rotate(-90, 12, ${m.t + ph / 2})`}>Pérdida</text>
-                        <text x={xS(1)} y={m.t + ph + 14} textAnchor="middle" fontSize="9" fill="#94A3B8">1</text>
-                        <text x={xS(25)} y={m.t + ph + 14} textAnchor="middle" fontSize="9" fill="#94A3B8">25</text>
-                        <text x={xS(50)} y={m.t + ph + 14} textAnchor="middle" fontSize="9" fill="#94A3B8">50</text>
+                        <text x={m.l + pw / 2} y={H - 6} textAnchor="middle" fontSize={ang ? 13 : 10} fill="#64748B" fontWeight="600">Época</text>
+                        <text x={ang ? 14 : 12} y={m.t + ph / 2} textAnchor="middle" fontSize={ang ? 13 : 10} fill="#64748B" fontWeight="600"
+                            transform={`rotate(-90, ${ang ? 14 : 12}, ${m.t + ph / 2})`}>Pérdida</text>
+                        <text x={xS(1)} y={m.t + ph + (ang ? 16 : 14)} textAnchor="middle" fontSize={ang ? 12 : 9} fill="#94A3B8">1</text>
+                        <text x={xS(25)} y={m.t + ph + (ang ? 16 : 14)} textAnchor="middle" fontSize={ang ? 12 : 9} fill="#94A3B8">25</text>
+                        <text x={xS(50)} y={m.t + ph + (ang ? 16 : 14)} textAnchor="middle" fontSize={ang ? 12 : 9} fill="#94A3B8">50</text>
                     </svg>
+                    </div>
                     <div className="grid grid-cols-2 gap-3 mt-3">
                         <div className="bg-purple-50 rounded-xl p-3 text-center border border-purple-100">
                             <i className="fas fa-arrow-down text-primary mr-1 text-sm"></i>
