@@ -92,9 +92,18 @@
   /* Diagramas SVG */
   svg.diagrama{width:100%;height:auto;display:block;background:var(--lienzo);
     border-radius:12px;border:1px solid var(--borde);}
-  /* En pantallas angostas el diagrama conserva un ancho legible y se desplaza en horizontal */
+  /* En pantallas angostas cada diagrama cambia a su variante vertical propia (svg.dg-m, viewBox de 300 de
+     ancho, texto de 12,5–14): se lee completo sin desplazarse de lado ni encoger la letra. */
   .dg-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  @media(max-width:600px){ .dg-wrap svg.diagrama{min-width:560px;} }
+  svg.diagrama.dg-m{display:none;max-width:440px;margin:0 auto;}
+  svg.dg-m .dg-label{font-size:14px;}
+  svg.dg-m .dg-sub{font-size:12.5px;}
+  @media(max-width:640px){
+    body{padding:10px 8px 40px;}
+    .panel{padding:12px 10px;}
+    .dg-wrap svg.diagrama{display:none;}
+    .dg-wrap svg.diagrama.dg-m{display:block;}
+  }
   .dg-node{fill:#fff;stroke:#94A3B8;stroke-width:1.6;cursor:help;}
   .dg-node.hot{stroke-width:2.2;}
   .dg-flow{stroke:#94A3B8;stroke-width:2;fill:none;}
@@ -343,6 +352,48 @@
       <path class="dg-grad" d="M480,132 C400,185 180,185 110,152" marker-end="url(#arrR)"
             data-tip="Retropropagación: ∂ℒ/∂θ actualiza decodificador y codificador en cada paso de descenso del gradiente."/>
       <text class="dg-sub" x="300" y="196" text-anchor="middle" fill="#B91C1C">∇ retropropagación</text>
+    </svg>
+    <svg class="diagrama dg-m" id="dg-ae-m" viewBox="0 0 300 428" role="img"
+         aria-label="Diagrama del autoencoder: x pasa por el codificador al latente z, el decodificador produce la reconstrucción y la pérdida compara ambas.">
+      <defs>
+        <marker id="arrA-m" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker>
+        <marker id="arrR-m" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#EF4444"/></marker>
+      </defs>
+      <rect class="dg-node" x="108" y="8" width="84" height="50" rx="10"
+            data-tip="Entrada x ∈ ℝ²: un punto del conjunto de datos (aquí, coordenadas 2-D)."/>
+      <text class="dg-label" x="150" y="31" text-anchor="middle">x</text>
+      <text class="dg-sub"   x="150" y="49" text-anchor="middle">entrada</text>
+      <polygon class="dg-node" points="50,74 250,74 200,132 100,132"
+            data-tip="Codificador f(x): red densa que reduce la dimensión (2 → 16 → 1). Aprende QUÉ conservar."/>
+      <text class="dg-label" x="150" y="100" text-anchor="middle">Codificador</text>
+      <text class="dg-sub"   x="150" y="118" text-anchor="middle">2 → 16 → 1</text>
+      <circle class="dg-node" cx="150" cy="163" r="17"
+            data-tip="Código latente z ∈ ℝ: cuello de botella determinista. Toda la información debe pasar por este único número."/>
+      <text class="dg-label" x="150" y="168" text-anchor="middle">z</text>
+      <text class="dg-sub"   x="176" y="167">cuello de botella</text>
+      <polygon class="dg-node" points="100,196 200,196 250,254 50,254"
+            data-tip="Decodificador g(z): reconstruye la entrada a partir del código (1 → 16 → 2)."/>
+      <text class="dg-label" x="150" y="222" text-anchor="middle">Decodificador</text>
+      <text class="dg-sub"   x="150" y="240" text-anchor="middle">1 → 16 → 2</text>
+      <rect class="dg-node" x="94" y="270" width="112" height="50" rx="10"
+            data-tip="Reconstrucción x̂ = g(f(x)): la mejor copia de x que cabe por el cuello de botella."/>
+      <text class="dg-label" x="150" y="292" text-anchor="middle">x̂</text>
+      <text class="dg-sub"   x="150" y="310" text-anchor="middle">reconstrucción</text>
+      <rect class="dg-loss" x="50" y="338" width="200" height="60" rx="12"
+            data-tip="Error cuadrático medio: penaliza la distancia entre la entrada y su reconstrucción. Es la ÚNICA señal de aprendizaje."/>
+      <text class="dg-label" x="150" y="363" text-anchor="middle">ℒ = ‖x − x̂‖²</text>
+      <text class="dg-sub"   x="150" y="383" text-anchor="middle">pérdida de reconstrucción</text>
+      <path class="dg-flow" d="M150,58 L150,70"   marker-end="url(#arrA-m)"/>
+      <path class="dg-flow" d="M150,132 L150,142" marker-end="url(#arrA-m)"/>
+      <path class="dg-flow" d="M150,180 L150,192" marker-end="url(#arrA-m)"/>
+      <path class="dg-flow" d="M150,254 L150,266" marker-end="url(#arrA-m)"/>
+      <path class="dg-flow" d="M150,320 L150,334" marker-end="url(#arrA-m)"/>
+      <path class="dg-flow" d="M108,33 L24,33 Q12,33 12,45 L12,356 Q12,368 24,368 L46,368" marker-end="url(#arrA-m)" style="opacity:.55"/>
+      <path class="dg-grad" d="M250,368 L278,368 Q290,368 290,356 L290,112 Q290,100 278,100 L236,100" marker-end="url(#arrR-m)"
+            data-tip="Retropropagación: ∂ℒ/∂θ actualiza decodificador y codificador en cada paso de descenso del gradiente."/>
+      <text class="dg-sub" x="150" y="418" text-anchor="middle" fill="#B91C1C">∇ retropropagación</text>
     </svg></div>
   </div>
 
@@ -513,6 +564,64 @@
       <!-- gradiente -->
       <path class="dg-grad" d="M440,205 C250,205 130,195 108,172" marker-end="url(#arrR2)"
             data-tip="El gradiente cruza el muestreo gracias a la reparametrización y llega hasta el codificador."/>
+    </svg>
+    <svg class="diagrama dg-m" id="dg-vae-m" viewBox="0 0 300 494" role="img"
+         aria-label="Diagrama del VAE: el codificador produce mu y sigma, se muestrea z con ruido epsilon, el decodificador reconstruye y la pérdida suma reconstrucción y divergencia KL.">
+      <defs>
+        <marker id="arrB-m" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker>
+        <marker id="arrR2-m" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#EF4444"/></marker>
+        <marker id="arrK-m" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#B45309"/></marker>
+      </defs>
+      <rect class="dg-node" x="110" y="8" width="80" height="46" rx="10"
+            data-tip="Entrada x: un punto 2-D del conjunto de datos."/>
+      <text class="dg-label" x="150" y="36" text-anchor="middle">x</text>
+      <polygon class="dg-node" points="40,70 260,70 215,128 85,128"
+            data-tip="Codificador probabilístico: en lugar de un z fijo produce los parámetros μ y log σ² de una gaussiana q(z|x)."/>
+      <text class="dg-label" x="150" y="95" text-anchor="middle">Codificador</text>
+      <text class="dg-sub"   x="150" y="113" text-anchor="middle">2 → 16 → (μ, log σ²)</text>
+      <rect class="dg-node" x="78" y="146" width="50" height="32" rx="8"
+            data-tip="μ(x): centro de la distribución latente para esta entrada."/>
+      <text class="dg-label" x="103" y="167" text-anchor="middle">μ</text>
+      <rect class="dg-node" x="142" y="146" width="50" height="32" rx="8"
+            data-tip="σ(x): incertidumbre del código. Se predice log σ² por estabilidad numérica."/>
+      <text class="dg-label" x="167" y="167" text-anchor="middle">σ</text>
+      <circle class="dg-node" cx="246" cy="162" r="16"
+            data-tip="Ruido externo ε ~ 𝒩(0, 1): la aleatoriedad se saca fuera de la red para que el gradiente pueda fluir hacia μ y σ (truco de reparametrización)."/>
+      <text class="dg-label" x="246" y="167" text-anchor="middle">ε</text>
+      <text class="dg-sub"   x="246" y="140" text-anchor="middle">𝒩(0, 1)</text>
+      <rect class="dg-node" x="70" y="206" width="130" height="46" rx="10"
+            data-tip="Muestreo reparametrizado: z = μ + σ⊙ε. Es una operación DIFERENCIABLE respecto de μ y σ."/>
+      <text class="dg-label" x="135" y="227" text-anchor="middle">z = μ + σ·ε</text>
+      <text class="dg-sub"   x="135" y="244" text-anchor="middle">muestreo</text>
+      <polygon class="dg-node" points="85,266 215,266 260,324 40,324"
+            data-tip="Decodificador g(z): igual que en el AE, mapea el latente a una reconstrucción (1 → 16 → 2). Para GENERAR se le alimenta z ~ 𝒩(0, 1)."/>
+      <text class="dg-label" x="150" y="291" text-anchor="middle">Decodificador</text>
+      <text class="dg-sub"   x="150" y="309" text-anchor="middle">1 → 16 → 2</text>
+      <rect class="dg-node" x="110" y="338" width="80" height="46" rx="10"
+            data-tip="Reconstrucción x̂ (durante el entrenamiento) o muestra nueva (al decodificar z del prior)."/>
+      <text class="dg-label" x="150" y="366" text-anchor="middle">x̂</text>
+      <rect class="dg-loss" x="40" y="400" width="220" height="68" rx="12"
+            data-tip="ELBO negativa: reconstrucción + β·KL. El primer término exige fidelidad; el segundo ordena el latente hacia 𝒩(0, 1)."/>
+      <text class="dg-label" x="150" y="420" text-anchor="middle">ℒ = ‖x−x̂‖²</text>
+      <text class="dg-label" x="150" y="438" text-anchor="middle">+ β·D_KL(q‖𝒩(0, 1))</text>
+      <text class="dg-sub"   x="150" y="457" text-anchor="middle">reconstrucción + regularización</text>
+      <path class="dg-flow" d="M150,54 L150,66"   marker-end="url(#arrB-m)"/>
+      <path class="dg-flow" d="M118,128 L108,142" marker-end="url(#arrB-m)"/>
+      <path class="dg-flow" d="M168,128 L168,142" marker-end="url(#arrB-m)"/>
+      <path class="dg-flow" d="M103,178 L116,202" marker-end="url(#arrB-m)"/>
+      <path class="dg-flow" d="M167,178 L156,202" marker-end="url(#arrB-m)"/>
+      <path class="dg-flow" d="M246,178 L246,214 L204,226" marker-end="url(#arrB-m)" style="opacity:.6"/>
+      <path class="dg-flow" d="M150,252 L150,262" marker-end="url(#arrB-m)"/>
+      <path class="dg-flow" d="M150,324 L150,334" marker-end="url(#arrB-m)"/>
+      <path class="dg-flow" d="M150,384 L150,396" marker-end="url(#arrB-m)"/>
+      <path class="dg-kl" d="M78,162 L26,162 Q14,162 14,174 L14,422 Q14,434 26,434 L36,434" marker-end="url(#arrK-m)"
+            data-tip="El término KL solo depende de μ y σ: penaliza que q(z|x) se aleje del prior 𝒩(0, 1)."/>
+      <text class="dg-sub" x="150" y="486" text-anchor="middle" fill="#92400E">D_KL(q(z|x) ‖ 𝒩(0, 1))</text>
+      <path class="dg-grad" d="M260,434 L278,434 Q290,434 290,422 L290,110 Q290,98 278,98 L244,98" marker-end="url(#arrR2-m)"
+            data-tip="El gradiente cruza el muestreo gracias a la reparametrización y llega hasta el codificador."/>
     </svg></div>
   </div>
 
@@ -677,6 +786,59 @@
       <path class="dg-grad" d="M552,210 C420,246 200,240 150,222" marker-end="url(#arrR3)"
             data-tip="Gradiente de ℒ_G: atraviesa a D (sin actualizarlo) y llega hasta G."/>
       <text class="dg-sub" x="360" y="243" text-anchor="middle" fill="#B91C1C">∇ hacia G (D congelado)</text>
+    </svg>
+    <svg class="diagrama dg-m" id="dg-gan-m" viewBox="0 0 300 434" role="img"
+         aria-label="Diagrama de la GAN: el ruido z entra al generador G que produce datos falsos; datos reales y falsos entran al discriminador D que estima la probabilidad de real; las pérdidas adversariales actualizan G y D.">
+      <defs>
+        <marker id="arrC-m" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker>
+        <marker id="arrR3-m" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#EF4444"/></marker>
+      </defs>
+      <circle class="dg-node" cx="70" cy="30" r="22"
+            data-tip="Ruido z ~ 𝒩(0, I): la «semilla» aleatoria. G la transforma en un candidato a dato."/>
+      <text class="dg-label" x="70" y="35" text-anchor="middle">z</text>
+      <text class="dg-sub"   x="100" y="35">ruido 𝒩(0, I)</text>
+      <polygon class="dg-node" points="30,70 110,70 138,128 2,128"
+            data-tip="Generador G(z): red 2 → 16 → 16 → 2. NUNCA ve los datos reales; solo recibe el gradiente que atraviesa a D."/>
+      <text class="dg-label" x="70" y="97" text-anchor="middle">Generador G</text>
+      <text class="dg-sub"   x="70" y="114" text-anchor="middle">2 → 16 → 16 → 2</text>
+      <rect class="dg-node" x="26" y="142" width="88" height="52" rx="10"
+            data-tip="Muestra falsa x̂ = G(z). El objetivo de G es que D la clasifique como real."/>
+      <text class="dg-label" x="70" y="164" text-anchor="middle">x̂ falso</text>
+      <text class="dg-sub"   x="70" y="182" text-anchor="middle">G(z)</text>
+      <rect class="dg-node" x="186" y="142" width="88" height="52" rx="10"
+            data-tip="Muestra real x del conjunto de datos: la referencia que D usa para calibrar su detector."/>
+      <text class="dg-label" x="230" y="164" text-anchor="middle">x real</text>
+      <text class="dg-sub"   x="230" y="182" text-anchor="middle">datos</text>
+      <polygon class="dg-node" points="50,222 250,222 210,278 90,278"
+            data-tip="Discriminador D(x): red 2 → 16 → 16 → 1 con salida sigmoide. Estima P(real). Es un CLASIFICADOR binario entrenado con las etiquetas real=1 / falso=0."/>
+      <text class="dg-label" x="150" y="246" text-anchor="middle">Discriminador D</text>
+      <text class="dg-sub"   x="150" y="264" text-anchor="middle">2 → 16 → 16 → 1</text>
+      <rect class="dg-node" x="88" y="292" width="124" height="48" rx="10"
+            data-tip="Salida de D: probabilidad de que la entrada sea real. Cerca de 1 = «parece real»; cerca de 0 = «parece falsa»."/>
+      <text class="dg-label" x="150" y="313" text-anchor="middle">D(·) ∈ (0, 1)</text>
+      <text class="dg-sub"   x="150" y="330" text-anchor="middle">P(real)</text>
+      <rect class="dg-loss" x="8" y="370" width="132" height="56" rx="12"
+            data-tip="Pérdida de D: entropía cruzada binaria. D maximiza log D(x) + log(1 − D(G(z))): acertar en reales Y en falsos."/>
+      <text class="dg-label" x="74" y="393" text-anchor="middle">ℒ_D</text>
+      <text class="dg-sub"   x="74" y="411" text-anchor="middle">detectar lo falso</text>
+      <rect class="dg-loss" x="160" y="370" width="132" height="56" rx="12"
+            data-tip="Pérdida de G (variante no saturante): minimizar −log D(G(z)), es decir, maximizar el «engaño». El gradiente atraviesa a D congelado y llega a G."/>
+      <text class="dg-label" x="226" y="393" text-anchor="middle">ℒ_G</text>
+      <text class="dg-sub"   x="226" y="411" text-anchor="middle">engañar a D</text>
+      <path class="dg-flow" d="M70,52 L70,66"   marker-end="url(#arrC-m)"/>
+      <path class="dg-flow" d="M70,128 L70,138" marker-end="url(#arrC-m)"/>
+      <path class="dg-flow" d="M70,194 C70,208 100,212 114,218" marker-end="url(#arrC-m)"/>
+      <path class="dg-flow" d="M230,194 C230,208 200,212 186,218" marker-end="url(#arrC-m)"/>
+      <path class="dg-flow" d="M150,278 L150,288" marker-end="url(#arrC-m)"/>
+      <path class="dg-flow" d="M126,340 L96,366"  marker-end="url(#arrC-m)"/>
+      <path class="dg-flow" d="M174,340 L204,366" marker-end="url(#arrC-m)"/>
+      <path class="dg-grad" d="M8,386 Q2,386 2,374 L2,262 Q2,250 14,250 L64,250" marker-end="url(#arrR3-m)"
+            data-tip="Gradiente de ℒ_D: solo actualiza los pesos de D."/>
+      <path class="dg-grad" d="M292,386 Q296,386 296,374 L296,112 Q296,100 284,100 L132,100" marker-end="url(#arrR3-m)"
+            data-tip="Gradiente de ℒ_G: atraviesa a D (sin actualizarlo) y llega hasta G."/>
+      <text class="dg-sub" x="214" y="92" text-anchor="middle" fill="#B91C1C">∇ hacia G (D congelado)</text>
     </svg></div>
   </div>
 
@@ -850,6 +1012,61 @@
       <path class="dg-grad" d="M544,152 C420,228 220,232 168,216" marker-end="url(#arrR4)"
             data-tip="La retropropagación llega a W_Q, W_K, W_V y a los embeddings. El entrenamiento es PARALELO en toda la secuencia (teacher forcing)."/>
       <text class="dg-sub" x="360" y="234" text-anchor="middle" fill="#B91C1C">∇ retropropagación (paralela en toda la secuencia)</text>
+    </svg>
+    <svg class="diagrama dg-m" id="dg-trf-m" viewBox="0 0 300 456" role="img"
+         aria-label="Diagrama del Transformer: los tokens con codificación posicional producen Q, K y V; la atención softmax de Q por K transpuesta pondera los valores; la salida se compara con el objetivo mediante entropía cruzada.">
+      <defs>
+        <marker id="arrD-m" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#94A3B8"/></marker>
+        <marker id="arrR4-m" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L7,3 L0,6 Z" fill="#EF4444"/></marker>
+      </defs>
+      <rect class="dg-node" x="8" y="8" width="132" height="50" rx="10"
+            data-tip="Secuencia de tokens de entrada (aquí: letras A–D). En un LLM serían fragmentos de texto."/>
+      <text class="dg-label" x="74" y="30" text-anchor="middle">tokens</text>
+      <text class="dg-sub"   x="74" y="48" text-anchor="middle">x₁ … x_L</text>
+      <rect class="dg-node" x="160" y="8" width="132" height="50" rx="10"
+            data-tip="Codificación posicional: sin ella la atención no sabría EN QUÉ ORDEN llegan los tokens (sin posición, la atención es equivariante a permutaciones: reordenar los tokens solo reordena sus salidas)."/>
+      <text class="dg-label" x="226" y="30" text-anchor="middle">+ posición</text>
+      <text class="dg-sub"   x="226" y="48" text-anchor="middle">p₁ … p_L</text>
+      <rect class="dg-node" x="30" y="88" width="56" height="38" rx="9"
+            data-tip="Consultas Q = X·W_Q: «qué busca» cada posición."/>
+      <text class="dg-label" x="58" y="112" text-anchor="middle">Q</text>
+      <rect class="dg-node" x="122" y="88" width="56" height="38" rx="9"
+            data-tip="Claves K = X·W_K: «qué ofrece» cada posición para ser encontrada."/>
+      <text class="dg-label" x="150" y="112" text-anchor="middle">K</text>
+      <rect class="dg-node" x="214" y="88" width="56" height="38" rx="9"
+            data-tip="Valores V = X·W_V: el contenido que se mezcla una vez decidida la atención."/>
+      <text class="dg-label" x="242" y="112" text-anchor="middle">V</text>
+      <rect class="dg-node" x="50" y="156" width="200" height="50" rx="12"
+            data-tip="Puntuaciones s_ij = Q_i·K_j/√dₖ, normalizadas con softmax por fila: α_ij dice cuánto atiende la posición i a la posición j. En el laboratorio esta matriz se ve como mapa de calor."/>
+      <text class="dg-label" x="150" y="178" text-anchor="middle">α = softmax(QKᵀ/√dₖ)</text>
+      <text class="dg-sub"   x="150" y="196" text-anchor="middle">pesos de atención</text>
+      <rect class="dg-node" x="60" y="226" width="180" height="46" rx="12"
+            data-tip="Cada salida es una combinación convexa de los valores: out_i = Σ_j α_ij·V_j."/>
+      <text class="dg-label" x="150" y="246" text-anchor="middle">out = α · V</text>
+      <text class="dg-sub"   x="150" y="263" text-anchor="middle">mezcla ponderada</text>
+      <rect class="dg-node" x="75" y="290" width="150" height="48" rx="10"
+            data-tip="Distribución sobre el vocabulario para cada posición (tras capa de salida + softmax). En generación se muestrea/elige el token y se realimenta."/>
+      <text class="dg-label" x="150" y="310" text-anchor="middle">ŷ₁ … ŷ_L</text>
+      <text class="dg-sub"   x="150" y="328" text-anchor="middle">softmax vocabulario</text>
+      <rect class="dg-loss" x="60" y="358" width="180" height="50" rx="12"
+            data-tip="Entropía cruzada: −Σ log ŷ_i[objetivo_i]. Máxima verosimilitud del siguiente token: la receta de los LLM."/>
+      <text class="dg-label" x="150" y="379" text-anchor="middle">ℒ = −Σ log ŷ[y]</text>
+      <text class="dg-sub"   x="150" y="397" text-anchor="middle">entropía cruzada</text>
+      <path class="dg-flow" d="M74,58 C74,70 60,72 60,84"    marker-end="url(#arrD-m)"/>
+      <path class="dg-flow" d="M206,58 C206,70 154,72 152,84" marker-end="url(#arrD-m)"/>
+      <path class="dg-flow" d="M240,58 L241,84"               marker-end="url(#arrD-m)"/>
+      <path class="dg-flow" d="M62,126 C66,140 100,142 108,152" marker-end="url(#arrD-m)"/>
+      <path class="dg-flow" d="M150,126 L150,152"             marker-end="url(#arrD-m)"/>
+      <path class="dg-flow" d="M270,107 L280,107 Q292,107 292,119 L292,237 Q292,249 280,249 L244,249" marker-end="url(#arrD-m)"/>
+      <path class="dg-flow" d="M150,206 L150,222" marker-end="url(#arrD-m)"/>
+      <path class="dg-flow" d="M150,272 L150,286" marker-end="url(#arrD-m)"/>
+      <path class="dg-flow" d="M150,338 L150,354" marker-end="url(#arrD-m)"/>
+      <path class="dg-grad" d="M60,383 L20,383 Q8,383 8,371 L8,119 Q8,107 20,107 L26,107" marker-end="url(#arrR4-m)"
+            data-tip="La retropropagación llega a W_Q, W_K, W_V y a los embeddings. El entrenamiento es PARALELO en toda la secuencia (teacher forcing)."/>
+      <text class="dg-sub" x="150" y="430" text-anchor="middle" fill="#B91C1C">∇ retropropagación</text>
+      <text class="dg-sub" x="150" y="447" text-anchor="middle" fill="#B91C1C">(paralela en toda la secuencia)</text>
     </svg></div>
   </div>
 
@@ -1312,11 +1529,13 @@ function kick(){ if(!loopOn&&demoOcupada()){ loopOn=true; requestAnimationFrame(
 function wireAuto(btn,demo,svgId){
   btn.addEventListener("click",()=>demo.setAuto(!demo.auto));
   demo._autoBtn=btn; demo._svg=document.getElementById(svgId);
+  demo._svgM=document.getElementById(svgId+"-m");   // variante angosta del mismo diagrama
 }
 function setAutoState(demo,on){
   demo.auto=on;
   if(demo._autoBtn) demo._autoBtn.textContent=on?"⏸ Pausa":"▶ Auto";
   if(demo._svg) demo._svg.classList.toggle("training",on); // el diagrama "fluye"
+  if(demo._svgM) demo._svgM.classList.toggle("training",on);
   if(on) kick();
 }
 
