@@ -211,16 +211,14 @@
   html.embedded body{min-height:0;}
   html.embedded footer.temporal{position:static;}
 
-  /* ---- Pantallas estrechas (auditoría 2026-10, S-05): en lugar de encoger el diagrama
-     hasta una letra de 4 px, se fija un ancho mínimo (letra efectiva ≥ 10 px) y el
-     diagrama se desplaza en horizontal dentro de su panel. ---- */
+  /* ---- Pantallas estrechas (auditoría 2026-10, S-05): en lugar de encoger el diagrama de
+     760 de ancho hasta una letra de 4 px o desplazarlo de lado, se dibuja con la geometría
+     angosta G_MOV (viewBox de 300, texto ≥ 12; ver construirDiagrama). ---- */
   main > *{min-width:0;}
   .svg-scroll{width:100%;}
-  .aviso-desplazar{display:none;font-size:.72rem;color:var(--tinta-suave);text-align:center;padding:2px 8px 4px;}
   @media (max-width:640px){
-    .svg-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-    #svg-lstm{min-width:700px;touch-action:pan-x pan-y;}
-    .aviso-desplazar{display:block;}
+    #zona-lienzo .cuerpo{padding:6px 4px 10px;}
+    #svg-lstm{max-width:440px;margin:0 auto;touch-action:pan-y;}
   }
 
   /* ---- Movimiento reducido (S-10) ---- */
@@ -288,7 +286,6 @@
         <span><i style="background:var(--oculto)"></i> Estado oculto h<sub>t</sub></span>
       </div>
       <!-- El SVG se construye por JS (geometria "a mano" con semilla fija) -->
-      <div class="aviso-desplazar" aria-hidden="true">← El diagrama se desplaza en horizontal →</div>
       <div class="svg-scroll"><svg id="svg-lstm" viewBox="0 0 760 492" role="img" aria-label="Diagrama de una celda LSTM"></svg></div>
     </div>
   </section>
@@ -487,18 +484,52 @@ const state = {
      - Productos puntuales: entrada×candidato -> ⊕ ; salida×tanh(c) -> h_t.
      - Bus de entradas x_t, h_{t-1} en la parte inferior (y=418).
    ========================================================================== */
-const G = { // coordenadas clave
-  beltY:70,
+const G_ESC = { // coordenadas clave (escritorio, viewBox 760×492)
+  vb:'0 0 760 492',
+  beltY:70, beltX0:30,
   multF:{x:250,y:70},   // f_t · c_{t-1}
   add:{x:470,y:70},     // + i_t·~c_t
   gateY:300, gateW:70, gateH:48,
   fx:250, ix:390, gx:470, ox:610,       // centros x de compuertas f,i,g,o
   prodIG:{x:445,y:175}, // i_t · ~c_t  (desplazado de x=470 para separarlo de la columna de la suma)
   tcell:{x:610,y:130},  // tanh(c_t)
+  tcellW:60,
   prodO:{x:610,y:205},  // o_t · tanh(c_t) -> h_t
-  busY:418,
+  busY:418, busX0:90,
   outCX:740,            // salida c_t (derecha)
+  marco:[150,40,470,400], rotMarco:[160,58],
+  cIn:[26,61,'start'], cOut:[738,61],
+  lblX:[70,412,'end'], valX:[96,412], lblH:[70,432,'end'], valH:[96,432],
+  hVal:[738,16],          // x y desplazamiento vertical del valor de h_t
+  fb:'M 741 212 C 780 255, 780 478, 400 478 C 150 478, 96 478, 82 450',
+  fbArrow:'M 82 442 L 87 451 L 77 451 Z',
+  fbLbl:[[410,472,'hₜ se realimenta como hₜ₋₁ en el paso siguiente']],
+  fs:{etq:15, val:13, rot:12, valBus:11, marco:12, tanh:12, op:16, fb:11},
 };
+/* Geometría angosta (celular / iframe de ~300 px): la misma celda en 300 unidades de ancho;
+   las entradas xₜ, hₜ₋₁ entran por debajo del recuadro y la letra no baja de 12. */
+const G_MOV = {
+  vb:'0 0 300 434',
+  beltY:62, beltX0:6,
+  multF:{x:66,y:62}, add:{x:168,y:62},
+  gateY:250, gateW:42, gateH:44,
+  fx:66, ix:121, gx:168, ox:227,
+  prodIG:{x:144,y:160},
+  tcell:{x:227,y:118}, tcellW:56,
+  prodO:{x:227,y:180},
+  busY:318, busX0:10,
+  outCX:296,
+  marco:[36,24,226,268], rotMarco:[44,42],
+  cIn:[4,50,'start'], cOut:[294,50],
+  lblX:[10,338,'start'], valX:[30,338], lblH:[10,356,'start'], valH:[46,356],
+  hVal:[290,26],
+  fb:'M 296 186 C 300 250, 300 392, 220 392 L 22 392 C 9 392, 6 384, 6 372',
+  fbArrow:'M 6 362 L 11 371 L 1 371 Z',
+  fbLbl:[[150,411,'hₜ se realimenta como hₜ₋₁'],[150,427,'en el paso siguiente']],
+  fs:{etq:15, val:13.5, rot:13, valBus:12, marco:12.5, tanh:13, op:16, fb:12.5},
+};
+const mqAngosto = window.matchMedia('(max-width: 640px)');
+let G = G_ESC;
 const svg = document.getElementById('svg-lstm');
 // Referencias a elementos dinamicos que se actualizan por paso:
 const dyn = {};  // dyn[clave] = {path, label, kind}
@@ -517,17 +548,19 @@ function nodo(clave){ // helper para registrar grupos interactivos (raton + tecl
 }
 
 function construirDiagrama(){
+  G = mqAngosto.matches ? G_MOV : G_ESC;
+  svg.setAttribute('viewBox', G.vb);
   svg.innerHTML='';
   const frag=document.createDocumentFragment();
 
   // --- Envoltura de la celda (recuadro tenue "a mano") -------------------
-  const marco=el('path',{d:sketchRect(150,40,470,400,1001,2.2),fill:'#FEFEFF',stroke:'#CBD5E1','stroke-width':1.4,'stroke-linejoin':'round'});
+  const marco=el('path',{d:sketchRect(...G.marco,1001,2.2),fill:'#FEFEFF',stroke:'#CBD5E1','stroke-width':1.4,'stroke-linejoin':'round'});
   frag.appendChild(marco);
-  const rotMarco=el('text',{x:160,y:58,'font-size':12,fill:'#94A3B8','font-style':'italic'}); rotMarco.textContent='celda LSTM (paso t)'; frag.appendChild(rotMarco);
+  const rotMarco=el('text',{x:G.rotMarco[0],y:G.rotMarco[1],'font-size':G.fs.marco,fill:'#94A3B8','font-style':'italic'}); rotMarco.textContent='celda LSTM (paso t)'; frag.appendChild(rotMarco);
 
   // --- CINTA DE CELDA (memoria de largo plazo) ---------------------------
   // Segmento de entrada c_{t-1} -> multF
-  const beltIn=el('path',{d:sketchLine(30,G.beltY,G.multF.x,G.beltY,201,1.2),fill:'none',stroke:'var(--celda)','stroke-linecap':'round'});
+  const beltIn=el('path',{d:sketchLine(G.beltX0,G.beltY,G.multF.x,G.beltY,201,1.2),fill:'none',stroke:'var(--celda)','stroke-linecap':'round'});
   dyn.beltIn={path:beltIn,kind:'belt'}; frag.appendChild(beltIn);
   // Segmento multF -> add
   const beltMid=el('path',{d:sketchLine(G.multF.x,G.beltY,G.add.x,G.beltY,202,1.2),fill:'none',stroke:'var(--celda)','stroke-linecap':'round'});
@@ -536,15 +569,15 @@ function construirDiagrama(){
   const beltOut=el('path',{d:sketchLine(G.add.x,G.beltY,G.outCX,G.beltY,203,1.2),fill:'none',stroke:'var(--celda)','stroke-linecap':'round'});
   dyn.beltOut={path:beltOut,kind:'belt'}; frag.appendChild(beltOut);
 
-  const cIn=el('text',{x:26,y:G.beltY-9,'font-size':12,fill:'var(--celda)','font-weight':700}); cIn.textContent='Cₜ₋₁'; frag.appendChild(cIn);
-  const cOut=el('text',{x:G.outCX-2,y:G.beltY-9,'font-size':12,fill:'var(--celda)','font-weight':700,'text-anchor':'end'}); cOut.textContent='Cₜ'; frag.appendChild(cOut);
+  const cIn=el('text',{x:G.cIn[0],y:G.cIn[1],'font-size':G.fs.rot,fill:'var(--celda)','font-weight':700}); cIn.textContent='Cₜ₋₁'; frag.appendChild(cIn);
+  const cOut=el('text',{x:G.cOut[0],y:G.cOut[1],'font-size':G.fs.rot,fill:'var(--celda)','font-weight':700,'text-anchor':'end'}); cOut.textContent='Cₜ'; frag.appendChild(cOut);
 
   // --- BUS DE ENTRADAS x_t , h_{t-1} -------------------------------------
-  const bus=el('path',{d:sketchLine(90,G.busY,G.ox,G.busY,210,1.0),fill:'none',stroke:'#94A3B8','stroke-width':1.6}); frag.appendChild(bus);
-  const lblX=el('text',{x:70,y:G.busY-6,'font-size':12,fill:'var(--tinta-fuerte)','font-weight':700,'text-anchor':'end'}); lblX.textContent='xₜ'; frag.appendChild(lblX);
-  const lblH=el('text',{x:70,y:G.busY+14,'font-size':12,fill:'var(--oculto)','font-weight':700,'text-anchor':'end'}); lblH.textContent='hₜ₋₁'; frag.appendChild(lblH);
-  dyn.busXVal=el('text',{x:96,y:G.busY-6,'font-size':11,fill:'var(--tinta-suave)'}); frag.appendChild(dyn.busXVal);
-  dyn.busHVal=el('text',{x:96,y:G.busY+14,'font-size':11,fill:'var(--tinta-suave)'}); frag.appendChild(dyn.busHVal);
+  const bus=el('path',{d:sketchLine(G.busX0,G.busY,G.ox,G.busY,210,1.0),fill:'none',stroke:'#94A3B8','stroke-width':1.6}); frag.appendChild(bus);
+  const lblX=el('text',{x:G.lblX[0],y:G.lblX[1],'font-size':G.fs.rot,fill:'var(--tinta-fuerte)','font-weight':700,'text-anchor':G.lblX[2]}); lblX.textContent='xₜ'; frag.appendChild(lblX);
+  const lblH=el('text',{x:G.lblH[0],y:G.lblH[1],'font-size':G.fs.rot,fill:'var(--oculto)','font-weight':700,'text-anchor':G.lblH[2]}); lblH.textContent='hₜ₋₁'; frag.appendChild(lblH);
+  dyn.busXVal=el('text',{x:G.valX[0],y:G.valX[1],'font-size':G.fs.valBus,fill:'var(--tinta-suave)'}); frag.appendChild(dyn.busXVal);
+  dyn.busHVal=el('text',{x:G.valH[0],y:G.valH[1],'font-size':G.fs.valBus,fill:'var(--tinta-suave)'}); frag.appendChild(dyn.busHVal);
 
   // Conectores del bus hacia el pie de cada compuerta
   [['f',G.fx,'var(--olvido)',221],['i',G.ix,'var(--entrada)',222],['g',G.gx,'var(--candidato)',223],['o',G.ox,'var(--salida)',224]].forEach(([k,x,col,seed])=>{
@@ -557,8 +590,8 @@ function construirDiagrama(){
     const g=nodo(clave);
     const x=cx-G.gateW/2, y=G.gateY-G.gateH/2;
     const caja=el('path',{d:sketchRect(x,y,G.gateW,G.gateH,seed,1.5),fill:'#fff',stroke:color,'stroke-width':2.4,class:'caja-nodo','stroke-linejoin':'round'});
-    const et=el('text',{x:cx,y:G.gateY-3,'font-size':15,'text-anchor':'middle',fill:color,'font-weight':700}); et.textContent=etiqueta;
-    const val=el('text',{x:cx,y:G.gateY+16,'font-size':13,'text-anchor':'middle',fill:color,class:'txt-valor'});
+    const et=el('text',{x:cx,y:G.gateY-3,'font-size':G.fs.etq,'text-anchor':'middle',fill:color,'font-weight':700}); et.textContent=etiqueta;
+    const val=el('text',{x:cx,y:G.gateY+16,'font-size':G.fs.val,'text-anchor':'middle',fill:color,class:'txt-valor'});
     // area de hover generosa
     const hit=el('rect',{x:x-6,y:y-6,width:G.gateW+12,height:G.gateH+12,fill:'transparent'});
     g.appendChild(caja); g.appendChild(et); g.appendChild(val); g.appendChild(hit);
@@ -596,10 +629,10 @@ function construirDiagrama(){
   frag.appendChild(l_c2tanh);
   // caja tanh(c_t)
   const gT=nodo('tcell');
-  const tcx=G.tcell.x-30, tcy=G.tcell.y-14;
-  const cajaT=el('path',{d:sketchRect(tcx,tcy,60,28,305,1.3),fill:'#fff',stroke:'var(--celda)','stroke-width':2.0,class:'caja-nodo','stroke-linejoin':'round'});
-  const etT=el('text',{x:G.tcell.x,y:G.tcell.y+4,'font-size':12,'text-anchor':'middle',fill:'var(--celda)','font-weight':700}); etT.textContent='tanh';
-  const hitT=el('rect',{x:tcx-5,y:tcy-5,width:70,height:38,fill:'transparent'});
+  const tcx=G.tcell.x-G.tcellW/2, tcy=G.tcell.y-14;
+  const cajaT=el('path',{d:sketchRect(tcx,tcy,G.tcellW,28,305,1.3),fill:'#fff',stroke:'var(--celda)','stroke-width':2.0,class:'caja-nodo','stroke-linejoin':'round'});
+  const etT=el('text',{x:G.tcell.x,y:G.tcell.y+4,'font-size':G.fs.tanh,'text-anchor':'middle',fill:'var(--celda)','font-weight':700}); etT.textContent='tanh';
+  const hitT=el('rect',{x:tcx-5,y:tcy-5,width:G.tcellW+10,height:38,fill:'transparent'});
   gT.appendChild(cajaT); gT.appendChild(etT); gT.appendChild(hitT); frag.appendChild(gT);
   dyn.tcell={path:cajaT,kind:'gate',color:'var(--celda)'};
   // tanh(c_t) -> producto o
@@ -613,19 +646,21 @@ function construirDiagrama(){
   // producto o -> h_t (sale a la derecha y baja)
   const l_h=el('path',{d:sketchLine(G.prodO.x+14,G.prodO.y,G.outCX,G.prodO.y,318,1.0),fill:'none',stroke:'var(--oculto)','stroke-width':2.6,'stroke-linecap':'round'});
   dyn.l_h={path:l_h,kind:'flow',metric:'hmag'}; frag.appendChild(l_h);
-  const lblHT=el('text',{x:G.outCX-2,y:G.prodO.y-8,'font-size':12,fill:'var(--oculto)','font-weight':700,'text-anchor':'end'}); lblHT.textContent='hₜ'; frag.appendChild(lblHT);
-  dyn.hVal=el('text',{x:G.outCX-2,y:G.prodO.y+16,'font-size':11,fill:'var(--oculto)','text-anchor':'end'}); frag.appendChild(dyn.hVal);
+  const lblHT=el('text',{x:G.outCX-2,y:G.prodO.y-8,'font-size':G.fs.rot,fill:'var(--oculto)','font-weight':700,'text-anchor':'end'}); lblHT.textContent='hₜ'; frag.appendChild(lblHT);
+  dyn.hVal=el('text',{x:G.hVal[0],y:G.prodO.y+G.hVal[1],'font-size':G.fs.valBus,fill:'var(--oculto)','text-anchor':'end'}); frag.appendChild(dyn.hVal);
 
   // --- Realimentacion h_t -> h_{t-1} del siguiente paso (cable tenue punteado) ---
   // La caracteristica definitoria de una LSTM desenrollada: la salida h_t de este
   // paso ES la entrada h_{t-1} del siguiente. Se dibuja como un lazo por debajo.
-  const fb=el('path',{d:'M 741 212 C 780 255, 780 478, 400 478 C 150 478, 96 478, 82 450',
+  const fb=el('path',{d:G.fb,
     fill:'none',stroke:'var(--oculto)','stroke-width':1.6,'stroke-dasharray':'6 5',opacity:.5,'stroke-linecap':'round'});
   frag.appendChild(fb);
-  const fbArrow=el('path',{d:'M 82 442 L 87 451 L 77 451 Z',fill:'var(--oculto)',opacity:.65}); // punta hacia el bus h_{t-1}
+  const fbArrow=el('path',{d:G.fbArrow,fill:'var(--oculto)',opacity:.65}); // punta hacia el bus h_{t-1}
   frag.appendChild(fbArrow);
-  const fbLbl=el('text',{x:410,y:472,'font-size':11,'text-anchor':'middle',fill:'var(--oculto)','font-style':'italic'});
-  fbLbl.textContent='hₜ se realimenta como hₜ₋₁ en el paso siguiente'; frag.appendChild(fbLbl);
+  G.fbLbl.forEach(([x,y,texto])=>{
+    const fbLbl=el('text',{x,y,'font-size':G.fs.fb,'text-anchor':'middle',fill:'var(--oculto)','font-style':'italic'});
+    fbLbl.textContent=texto; frag.appendChild(fbLbl);
+  });
 
   svg.appendChild(frag);
 }
@@ -644,7 +679,7 @@ function crearOp(clave,x,y,simbolo,color,frag,seed){
   }
   d+='Z';
   const circ=el('path',{d,fill:'#fff',stroke:color,'stroke-width':2.2,class:'caja-nodo'});
-  const sim=el('text',{x,y:y+5,'font-size':16,'text-anchor':'middle',fill:color,'font-weight':700}); sim.textContent=simbolo;
+  const sim=el('text',{x,y:y+5,'font-size':G.fs.op,'text-anchor':'middle',fill:color,'font-weight':700}); sim.textContent=simbolo;
   const hit=el('circle',{cx:x,cy:y,r:r+7,fill:'transparent'});
   g.appendChild(circ); g.appendChild(sim); g.appendChild(hit); frag.appendChild(g);
   dyn[clave]={path:circ,kind:'op',color};
@@ -1015,6 +1050,9 @@ function runSelfTest(){
    ========================================================================== */
 function init(){
   construirDiagrama();
+  // Al cruzar el umbral de pantalla angosta se redibuja la celda con la otra geometría
+  const alCambiarAncho=()=>{ construirDiagrama(); actualizarDiagrama(); };
+  if(mqAngosto.addEventListener) mqAngosto.addEventListener('change',alCambiarAncho); else mqAngosto.addListener(alCambiarAncho);
   construirPesos();
   wire();
   recomputar(false);
