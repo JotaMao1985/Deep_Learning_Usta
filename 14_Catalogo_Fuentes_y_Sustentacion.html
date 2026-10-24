@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Catálogo de fuentes de datos reales, públicas y no-Kaggle para el Proyecto Centinela (imagen y serie temporal), con licencias, avisos de datos personales y de salud, test de procedencia para detectar réplicas de Kaggle y referencias APA 7; y la logística pública de la sustentación oral: compuerta de autoría, protocolo, video de pantalla y regla de grabación, consentimiento y custodia. Maestría en Ciencia de Datos, Universidad Santo Tomás.">
+    <title>Catálogo de fuentes y sustentación · Proyecto Centinela (Fase 1) — USTA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Tailwind CSS (utilidades), versión fija: sin versión, el CDN redirige a la última -->
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+
+    <!-- Font Awesome (iconografía de apoyo) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Google Fonts: Montserrat (texto) y Fira Code (código) -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Montserrat', 'Helvetica Neue', 'Arial', 'sans-serif'] },
+                    colors: {
+                        primary: '#3D008D',
+                        secondary: '#ED1E79',
+                        navy: '#001A4D',
+                        gold: '#FDB913',
+                        teal: '#0E7490',
+                        bg: '#F8FAFC',
+                        surface: '#FFFFFF',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #F8FAFC;
+            color: #1E293B;
+        }
+        html { scroll-behavior: smooth; }
+        [id] { scroll-margin-top: 4.5rem; }   /* las anclas no quedan bajo la barra fija */
+        code, pre, .mono { font-family: 'Fira Code', monospace; }
+        [hidden] { display: none !important; }   /* los botones del bloque Markdown aparecen solo con JavaScript */
+
+        /* Gradientes institucionales USTA */
+        .usta-gradient { background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%); }
+        .usta-header { background: linear-gradient(135deg, #001A4D 0%, #3D008D 60%, #5B1C9E 100%); color: #fff; }   /* blanco también sin JavaScript (sin Tailwind) */
+
+        /* Tarjeta base */
+        .card {
+            background: #fff; border-radius: 16px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+            transition: box-shadow .25s ease, transform .25s ease;
+        }
+        .card:hover { box-shadow: 0 12px 30px rgba(0,0,0,0.11); }
+
+        /* Barra de desplazamiento */
+        ::-webkit-scrollbar { width: 9px; height: 9px; }
+        ::-webkit-scrollbar-track { background: #eef2f7; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg,#3D008D,#ED1E79); border-radius: 5px; }
+
+        /* Código en línea y bloques */
+        .icode {
+            background: #F1F5F9; color: #0F172A; padding: .08rem .42rem;
+            border-radius: 5px; font-size: .85em; font-family: 'Fira Code', monospace;
+            overflow-wrap: anywhere;
+        }
+        .codeblock {
+            background: #0F172A; color: #E2E8F0; border-radius: 12px;
+            padding: 1rem 1.1rem; font-family: 'Fira Code', monospace;
+            font-size: .82rem; line-height: 1.7; overflow-x: auto;
+            white-space: pre; tab-size: 4;
+        }
+
+        /* ====== Ventana de código (cromo tipo terminal · marca USTA) ====== */
+        .code-window {
+            position: relative; background: #0F172A; border: 1px solid #1E293B;
+            border-radius: 14px; overflow: hidden; box-shadow: 0 12px 32px rgba(2,6,23,.30);
+        }
+        .code-window::before {
+            content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; z-index: 2;
+            background: linear-gradient(90deg, #3D008D 0%, #ED1E79 60%, #FDB913 100%);
+        }
+        .code-window-bar {
+            display: flex; align-items: center; gap: .55rem;
+            padding: .62rem .95rem; padding-top: calc(.62rem + 3px);
+            background: #0B1326; border-bottom: 1px solid #1E293B;
+        }
+        .code-window-dots { display: flex; gap: .42rem; }
+        .code-window-dots span { width: 11px; height: 11px; border-radius: 50%; display: block; }
+        .code-window-dots .d-r { background: #FF5F56; }
+        .code-window-dots .d-y { background: #FFBD2E; }
+        .code-window-dots .d-g { background: #27C93F; }
+        .code-window-title { font-family: 'Fira Code', monospace; font-size: .72rem; color: #CBD5E1; letter-spacing: .01em; overflow-wrap: anywhere; }
+        .code-window-lang {
+            margin-left: auto; font-family: 'Fira Code', monospace; font-size: .67rem;
+            color: #FDE68A; background: rgba(253,185,19,.13); padding: .14rem .55rem;
+            border-radius: 999px; white-space: nowrap;
+        }
+        .code-window .codeblock { border-radius: 0; box-shadow: none; }
+
+        /* Callout / analogía */
+        .callout { border-left: 4px solid; border-radius: 12px; padding: .9rem 1.1rem; }
+        .callout-info   { background:#F3F0FC; border-color:#3D008D; }
+        .callout-tip    { background:#ECFDF5; border-color:#0E9F6E; }
+        .callout-warn   { background:#FFFBEB; border-color:#FDB913; }
+        .callout-danger { background:#FEF2F2; border-color:#DC2626; }
+        .callout-eth    { background:#F0F9FF; border-color:#0E7490; }
+
+        h2.sec-title { font-weight: 800; letter-spacing: -.02em; }
+
+        /* Navegación sticky */
+        .navbar { backdrop-filter: blur(8px); background: rgba(255,255,255,.86); }
+        .navlink { transition: color .2s ease, background .2s ease; }
+        .navlink:hover { color:#3D008D; }
+
+        /* Tabla genérica */
+        .tbl { width:100%; border-collapse: collapse; font-size:.9rem; }
+        .tbl th, .tbl td { border:1px solid #E2E8F0; padding:.6rem .7rem; vertical-align: top; text-align:left; }
+        .tbl thead th { color:#fff; }
+        .tbl tbody th { background:#F8FAFC; color:#001A4D; font-weight:700; }
+
+        /* Numeración de secciones */
+        .step-num {
+            flex: 0 0 auto; width:34px; height:34px; border-radius:10px;
+            display:flex; align-items:center; justify-content:center;
+            font-weight:800; color:#fff; background:linear-gradient(140deg,#3D008D,#ED1E79);
+        }
+
+        /* Regiones desplazables enfocables con el teclado. «position: relative» contiene los avisos .sr-only
+           (posición absoluta) de los enlaces de las tablas anchas: sin ella escapan del recorte y ensanchan la página. */
+        [role="region"][tabindex="0"]:focus-visible { outline: 3px solid #FDB913; outline-offset: 2px; }
+        [role="region"], .overflow-x-auto { position: relative; }
+
+        /* Enlaces dentro del texto: subrayados (el Preflight de Tailwind quita el subrayado) */
+        main p a:not([class]), main li a:not([class]), main td a:not([class]), main label a:not([class]), main .campo a:not([class]) {
+            color: #BE185D; text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px;
+        }
+
+        main a.url-literal { color: #BE185D; text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px; overflow-wrap: anywhere; }
+
+        /* Plantilla: campos a diligenciar, casillas y firmas */
+        .campo-rot { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #BE185D; margin: .9rem 0 .3rem; }
+        .campo {
+            border: 1.5px dashed #64748B; border-radius: 10px; background: #fff;
+            padding: .6rem .8rem; min-height: 3.4rem; color: #475569; font-size: .85rem; font-style: italic;
+        }
+        .campo-lg { min-height: 6.5rem; }
+        .tbl td.vacia { height: 2.4rem; background: #fff; }
+        .tbl td.ejemplo { color: #475569; font-style: italic; }
+        .chk { display: flex; gap: .65rem; align-items: flex-start; }
+        .chk input { flex: none; width: 1.05rem; height: 1.05rem; margin-top: .2rem; accent-color: #3D008D; }
+
+        /* Bloque «Plantilla en Markdown» */
+        .md-region { max-height: 34rem; overflow: auto; background: #0F172A; }
+        .md-pre { white-space: pre-wrap; overflow-wrap: anywhere; overflow: visible; }
+        .btn {
+            display: inline-flex; align-items: center; gap: .5rem; font-weight: 700; font-size: .875rem;
+            border-radius: 10px; padding: .55rem .95rem; border: 2px solid #3D008D; cursor: pointer; text-decoration: none;
+        }
+        .btn-primario { background: #3D008D; color: #fff; }
+        .btn-primario:hover { background: #2E006B; }
+        .btn-secundario { background: #fff; color: #3D008D; }
+        .btn-secundario:hover { background: #F3F0FC; }
+        .btn:focus-visible { outline: 3px solid #FDB913; outline-offset: 2px; }
+
+        /* Preferencias del usuario */
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .card { transition: none; }
+        }
+        @media (forced-colors: active) {
+            .campo { border-color: CanvasText; }
+            .btn { border-color: ButtonText; }
+        }
+
+        /* Impresión / PDF (A4): sin barra, sin botones ni bloque Markdown; tablas completas y URL visibles */
+        @media print {
+            @page { size: A4; margin: 14mm 12mm; }
+            body { background: #fff; font-size: 10pt; }
+            .no-print { display: none !important; }
+            .usta-header { background: #fff !important; border-bottom: 2px solid #3D008D; }
+            .usta-header, .usta-header * { color: #001A4D !important; }
+            .usta-header .rounded-full { border: 1px solid #64748B; }
+            .card { box-shadow: none; border: 1px solid #e5e7eb; }
+            .card, .callout, tr, li, .campo, [role="group"] { break-inside: avoid; }
+            h2, h3 { break-after: avoid; }
+            section { break-inside: auto; }
+            main { padding-top: 1rem !important; }
+            .space-y-14 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.6rem !important; }
+            .overflow-x-auto, [role="region"] { overflow: visible !important; max-height: none !important; }
+            .tbl { min-width: 0 !important; width: 100% !important; table-layout: fixed; font-size: 8.5pt; }
+            .tbl th, .tbl td { padding: .25rem .3rem; overflow-wrap: anywhere; }
+            thead { display: table-header-group; }
+            .tbl thead tr { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            input[type="checkbox"] { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            a { color: #1E293B; text-decoration: underline; }
+            a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .8em; overflow-wrap: anywhere; color: #475569; }
+            a.url-completa::after { content: none; }   /* el texto del enlace ya es la URL completa (referencias) */
+        }
+
+        /* Los hijos de una rejilla pueden encogerse: nada ensancha la página en móvil (375 px). */
+        .grid > * { min-width: 0; }
+        /* En celular, el número decorativo de cada sección se oculta (el título ya lo lleva) y cede su ancho. */
+        @media (max-width: 639px) { .step-num { display: none; } }
+    </style>
+</head>
+
+<body>
+    <a href="#contenido" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-white focus:text-primary focus:px-4 focus:py-2 focus:rounded-lg focus:font-semibold">Saltar al contenido</a>
+
+    <!-- ====================== ENCABEZADO ====================== -->
+    <header class="usta-header text-white">
+        <div class="max-w-6xl mx-auto px-5 md:px-8 py-10 md:py-14">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="usta-gradient p-2.5 rounded-xl shadow-lg"><i aria-hidden="true" class="fas fa-database text-lg"></i></span>
+                <span class="text-[11px] md:text-xs uppercase tracking-[0.25em] text-gold font-bold">Universidad Santo Tomás · Maestría en Ciencia de Datos</span>
+            </div>
+            <p class="text-pink-300 font-semibold text-sm md:text-base mb-1">Profundización I: Redes Neuronales — Deep Learning · EA-N-F-004</p>
+            <h1 class="text-3xl md:text-5xl font-extrabold leading-tight tracking-tight">
+                Catálogo de <span class="text-gold">fuentes de datos</span><br class="hidden md:block">
+                y sustentación · Proyecto Centinela
+            </h1>
+            <p class="text-lg md:text-2xl font-light text-white/90 mt-3">Fuentes reales no-Kaggle, datos de personas y logística pública de la sustentación</p>
+            <div class="flex flex-wrap gap-2 mt-6 text-xs md:text-sm">
+                <span class="bg-white/15 rounded-full px-3 py-1"><i aria-hidden="true" class="fas fa-ban mr-1.5 text-gold"></i>Sin Kaggle ni réplicas</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i aria-hidden="true" class="fas fa-scale-balanced mr-1.5 text-gold"></i>Licencias verificadas</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i aria-hidden="true" class="fas fa-user-shield mr-1.5 text-gold"></i>Ley 1581 de 2012</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i aria-hidden="true" class="fas fa-comments mr-1.5 text-gold"></i>Sustentación de 10 a 15 min</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ====================== NAVEGACIÓN STICKY ====================== -->
+    <nav aria-label="Secciones del catálogo" class="navbar sticky top-0 z-40 border-b border-slate-200 no-print">
+        <div class="max-w-6xl mx-auto px-4 flex items-stretch">
+            <div class="flex gap-1 md:gap-3 overflow-x-auto text-xs md:text-sm font-semibold py-2.5 whitespace-nowrap flex-1 min-w-0">
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#fuentes"><i aria-hidden="true" class="fas fa-database mr-1"></i>Catálogo</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#imagen"><i aria-hidden="true" class="fas fa-image mr-1"></i>Imagen</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#serie"><i aria-hidden="true" class="fas fa-chart-line mr-1"></i>Serie temporal</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#repositorios"><i aria-hidden="true" class="fas fa-compass mr-1"></i>Repositorios</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#combinaciones"><i aria-hidden="true" class="fas fa-shuffle mr-1"></i>Combinaciones</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#ruta-por-defecto"><i aria-hidden="true" class="fas fa-star mr-1"></i>Ruta por defecto</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#datos-personales"><i aria-hidden="true" class="fas fa-user-shield mr-1"></i>Datos de personas</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#kaggle"><i aria-hidden="true" class="fas fa-fingerprint mr-1"></i>Kaggle</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#sustentacion"><i aria-hidden="true" class="fas fa-comments mr-1"></i>Sustentación</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#grabacion"><i aria-hidden="true" class="fas fa-video mr-1"></i>Grabación</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#referencias"><i aria-hidden="true" class="fas fa-book mr-1"></i>Referencias</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#markdown"><i aria-hidden="true" class="fab fa-markdown mr-1"></i>Markdown</a>
+            </div>
+            <div class="flex-none w-14 md:w-24" aria-hidden="true"></div>
+        </div>
+    </nav>
+
+    <main id="contenido" tabindex="-1" class="max-w-6xl mx-auto px-5 md:px-8 py-10 md:py-14 space-y-14">
+
+        <!-- ====================== CATÁLOGO: CÓMO SE USA Y ADMISIBILIDAD ====================== -->
+        <section id="fuentes">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-4"><i aria-hidden="true" class="fas fa-database text-pink-700 mr-2"></i>Catálogo de fuentes de datos (no-Kaggle)</h2>
+            <p class="text-slate-700 max-w-4xl mb-5">Catálogo <strong>curado</strong> de fuentes de datos <strong>reales, públicas y citables</strong> para elegir los insumos del Proyecto Centinela. No es una lista exhaustiva de conjuntos de datos «bonitos»: es una selección operada bajo la <strong>política de datos</strong> del proyecto (no-Kaggle, multimodal, datos crudos), pensada para que el sistema tenga <strong>una rama de imagen</strong> y <strong>una rama de serie temporal</strong> con camino claro hacia el Módulo 2.</p>
+            <div class="callout callout-info">
+                <h3 class="text-sm font-bold text-primary mb-1.5"><i aria-hidden="true" class="fas fa-circle-info text-primary mr-2"></i>Cómo se usa este catálogo</h3>
+                <ol class="text-sm list-decimal pl-5 space-y-1.5">
+                    <li>Se leen primero las <strong><a href="#admisibilidad">reglas de admisibilidad</a></strong>, incluido por qué se veta Kaggle.</li>
+                    <li>Se elige <strong>una fuente de imagen</strong> + <strong>una fuente temporal</strong> que compartan el mismo problema y el mismo cliente (<a href="#imagen">imagen</a>, <a href="#serie">serie temporal</a> y <a href="#repositorios">repositorios</a>); las <a href="#combinaciones">combinaciones multimodales</a> sirven de inspiración.</li>
+                    <li>Se redacta la <a href="12_Plantilla_Propuesta_de_Datos_Fase1.html"><strong>Propuesta de Datos de 1 página</strong></a>, con su <a href="12_Plantilla_Propuesta_de_Datos_Fase1.html#ley-1581"><strong><em>checklist</em> de protección de datos</strong></a>, y se entrega para aprobación del docente antes de modelar: es la <strong>compuerta</strong> de la <a href="11_Modulo_1_Actividad_Fase1_Centinela.html#paso-0">Actividad 1 · Fase 1</a>.</li>
+                </ol>
+            </div>
+
+            <div id="admisibilidad" class="mt-8">
+                <h3 class="font-bold text-navy text-xl mb-3"><i aria-hidden="true" class="fas fa-circle-check text-emerald-700 mr-2"></i>Reglas de admisibilidad: qué sí admite el proyecto</h3>
+                <ul class="text-sm text-slate-700 list-disc pl-5 space-y-2 max-w-4xl">
+                    <li><strong>Fuentes reales y públicas, internacionales o nacionales.</strong> No tienen que ser colombianas: se <strong>alientan</strong> repositorios globales (NASA, NOAA, Copernicus, GBIF, FAO, Zenodo, Mendeley, portales gubernamentales). Los datos propios (de una finca, una cooperativa o un empleador) no son públicos: solo se admiten con las <a href="#datos-propios">salvaguardas de los datos propios</a>.</li>
+                    <li><strong>Preparado para ser multimodal.</strong> El problema debe admitir <strong>una rama de imagen Y una rama temporal</strong>. En la <strong>Fase 1 (Módulo 1)</strong> se modela <strong>una sola</strong> de las dos modalidades, en versión <strong>tabular</strong> (rasgos extraídos de la imagen <strong>o</strong> la serie agregada por ventana); la Propuesta muestra el <strong>camino a ambas modalidades</strong> para el Módulo 2 y demuestra la clave de alineación con una prueba de acoplamiento (<a href="12_Plantilla_Propuesta_de_Datos_Fase1.html#formato">formato de la Propuesta</a>).</li>
+                    <li><strong>Datos crudos o no perfectamente limpios.</strong> Que exijan EDA, limpieza, manejo de valores faltantes y atípicos (<em lang="en">outliers</em>) y decisiones de ingeniería de características. Ahí vive el aprendizaje.</li>
+                    <li><strong>Licencia o uso verificable.</strong> Creative Commons (CC0, CC BY, CC BY-SA, CC BY-NC), dominio público, o términos de uso gubernamentales explícitos. Si la licencia no se puede citar, la fuente no se usa.</li>
+                    <li><strong>Origen primario citable en APA 7.</strong> DOI, repositorio institucional o portal oficial, no un <em lang="en">blog</em> que rehospeda el archivo.</li>
+                </ul>
+
+                <h3 class="font-bold text-navy text-xl mt-8 mb-3"><i aria-hidden="true" class="fas fa-circle-xmark text-red-700 mr-2"></i>Qué no admite el proyecto</h3>
+                <div class="grid lg:grid-cols-2 gap-5 items-start">
+                    <div class="callout callout-danger">
+                        <h4 class="text-sm font-bold text-red-800 mb-1.5"><i aria-hidden="true" class="fas fa-ban text-red-700 mr-2"></i>Veto a Kaggle (conjuntos de datos y competencias): se mantiene</h4>
+                        <p class="text-sm"><strong>Prohibido usar conjuntos de datos o competencias de Kaggle</strong>, y sus réplicas (<em lang="en">mirrors</em>). El veto <strong>no se relaja</strong>; su razón es <strong>pedagógica</strong>, no ideológica, y conviene precisarla: el problema <strong>no es la plataforma</strong>, son los <strong>retos ya resueltos</strong> y los <strong>datos demasiado limpios</strong>. El veto existe para <strong>proteger el reto real</strong> —enfrentar el dato crudo y decidir con criterio propio—:</p>
+                        <ul class="text-sm list-disc pl-5 mt-2 space-y-1.5">
+                            <li>La mayoría de las competencias son <strong>retos ya resueltos con tabla de posiciones</strong> (<em lang="en">leaderboard</em>): hay cientos de cuadernos públicos con la solución y la ingeniería de características hecha. Copiar y adaptar no es aprender.</li>
+                            <li>Muchos conjuntos de Kaggle vienen <strong>«demasiado limpios»</strong>: sin valores faltantes, ya particionados, con la etiqueta perfectamente balanceada. Le quitan al trabajo su parte más formativa: enfrentar el dato sucio.</li>
+                            <li>Rompen la <strong>defensa anti-copia</strong> del proyecto: si todos parten del mismo CSV pulido, no hay diversidad de elección.</li>
+                        </ul>
+                        <p class="text-sm mt-2"><strong>Ejemplos de qué evitar:</strong> <code class="icode">PlantVillage</code> <em>vía Kaggle</em>, <code class="icode">Coffee Leaf Diseases</code> de Kaggle, cualquier conjunto etiquetado como «… (Kaggle competition)», las «Playground Series» y las resubidas de conjuntos reales que solo agregan un CSV «listo para <code class="icode">model.fit()</code>». Si un recurso solo existe cómodo en Kaggle, <strong>se busca su fuente primaria</strong> (p. ej., PlantVillage se publicó en plantvillage.org y la copia de referencia de sus autores está en GitHub; ver las <a href="#imagen">fuentes de imagen</a>).</p>
+                        <p class="text-sm mt-2"><strong>Cómo se demuestra que una fuente no es una réplica:</strong> con el <a href="#kaggle"><strong>test de procedencia</strong></a> de la Propuesta de Datos. Usar Kaggle solo como <strong>entorno de cómputo</strong> es válido si los datos vienen de la fuente primaria.</p>
+                    </div>
+                    <div class="callout callout-warn">
+                        <h4 class="text-sm font-bold text-amber-900 mb-1.5"><i aria-hidden="true" class="fas fa-triangle-exclamation text-amber-700 mr-2"></i>Otras exclusiones</h4>
+                        <ul class="text-sm list-disc pl-5 space-y-1.5">
+                            <li><strong>Datos sintéticos o de juguete</strong> como insumo principal (Iris, MNIST, <code class="icode">make_classification</code>). Sirven para depurar código, no como proyecto.</li>
+                            <li><strong>Fuentes sin licencia clara</strong> o que rehospedan datos de terceros sin atribución.</li>
+                            <li><strong>Datos personales</strong> (cualquier información asociable a una persona determinable: Ley 1581 de 2012, art. 3 lit. c) <strong>sin una base legal declarada</strong>. Los <strong>datos sensibles</strong> (salud, biométricos, origen étnico, opinión política, vida sexual: art. 5) solo se admiten anonimizados por la fuente oficial o con supresión de identidad (art. 6 lit. e). Los datos de <strong>niños, niñas y adolescentes</strong>, solo si son públicos o están anonimizados y agregados (art. 7). <strong>En la Fase 1, además, no se admiten personas identificables:</strong> solo datos públicos, agregados o anonimizados por la fuente oficial. Ver <a href="#datos-personales">«Datos de personas»</a> y el <a href="12_Plantilla_Propuesta_de_Datos_Fase1.html#ley-1581"><em>checklist</em> de protección de datos</a>.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== FUENTES DE IMAGEN ====================== -->
+        <section id="imagen">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-2"><i aria-hidden="true" class="fas fa-image text-pink-700 mr-2"></i>Fuentes de imagen (no-Kaggle)</h2>
+            <p class="text-slate-700 max-w-4xl mb-5">Para la <strong>rama visual</strong> del sistema (CNN o aprendizaje por transferencia en la Fase 2). En la Fase 1, cada imagen se puede resumir en rasgos tabulares (color medio por canal, índices de vegetación, descriptores de textura, porcentaje del área con síntoma).</p>
+            <div role="region" tabindex="0" aria-label="Tabla de fuentes de imagen (se desplaza horizontalmente)" class="overflow-x-auto card p-1">
+                <table class="tbl" style="min-width:1000px">
+                    <caption class="sr-only">Fuentes de imagen no-Kaggle: contenido, modalidad, enlace, licencia y por qué presentan reto</caption>
+                    <thead><tr style="background:#3D008D"><th scope="col" style="width:13%">Fuente</th><th scope="col" style="width:22%">Qué contiene</th><th scope="col" style="width:10%">Modalidad</th><th scope="col" style="width:15%">Enlace</th><th scope="col" style="width:20%">Licencia / uso</th><th scope="col">Por qué presenta reto</th></tr></thead>
+                    <tbody>
+                        <tr><th scope="row">RoCoLe (Mendeley Data)</th><td>1.560 imágenes de <strong>hoja de café robusta</strong>: sanas, con ácaros y con roya, anotadas por estado y severidad. <strong>Fuente primaria del escenario de referencia.</strong></td><td>Imagen</td><td><a class="url-literal" href="https://data.mendeley.com/datasets/c5yvn32dzg/2" target="_blank" rel="noopener">data.mendeley.com/datasets/c5yvn32dzg/2<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>CC BY 4.0</td><td>Imágenes de campo con fondo variable, iluminación irregular y clases desbalanceadas; la severidad es una etiqueta ordinal, no binaria.</td></tr>
+                        <tr><th scope="row">PlantVillage (copia de los autores en GitHub)</th><td>54.306 imágenes de hojas de 14 cultivos y 26 enfermedades. <strong>Se usa el repositorio original, NO la réplica de Kaggle.</strong></td><td>Imagen</td><td><a class="url-literal" href="https://github.com/spMohanty/PlantVillage-Dataset" target="_blank" rel="noopener">github.com/spMohanty/PlantVillage-Dataset<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td><strong>CC BY-SA 3.0 Unported</strong>, declarada por los autores en el artículo de publicación (Hughes y Salathé, 2015, pág. 3); el repositorio de GitHub no trae archivo de licencia. <strong><em lang="en">ShareAlike</em> también para los modelos entrenados</strong> (ver <a href="#plantvillage">el aviso</a>).</td><td>Sesgo de fondo (laboratorio) que obliga a discutir la generalización a campo; clases muy desbalanceadas.</td></tr>
+                        <tr><th scope="row">GBIF (<em lang="en">Global Biodiversity Information Facility</em>)</th><td>Cientos de millones de registros de <strong>ocurrencia de especies</strong>, muchos con fotos asociadas (multimedia) y coordenadas y fecha.</td><td>Imagen + tabular (geo-temporal)</td><td><a class="url-literal" href="https://www.gbif.org/" target="_blank" rel="noopener">gbif.org<span class="sr-only"> (se abre en una pestaña nueva)</span></a> · API: <a class="url-literal" href="https://techdocs.gbif.org/en/openapi/" target="_blank" rel="noopener">techdocs.gbif.org<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>CC0 / CC BY / CC BY-NC por registro (BY-NC: sin uso comercial). <strong>Aviso:</strong> cada registro trae nombres de observadores (ver <a href="#datos-personales">«Datos de personas»</a>).</td><td>Datos ciudadanos ruidosos: fotos heterogéneas, identificaciones dudosas, sesgo de muestreo espacial y temporal.</td></tr>
+                        <tr><th scope="row">iNaturalist Open Data (AWS S3)</th><td>Imágenes con licencia CC de observaciones de calidad de investigación (<em lang="en">research-grade</em>) de biodiversidad, con metadatos (taxón, lugar, fecha).</td><td>Imagen + tabular</td><td><a class="url-literal" href="https://registry.opendata.aws/inaturalist-open-data/" target="_blank" rel="noopener">registry.opendata.aws/inaturalist-open-data<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>CC0 / CC BY / CC BY-NC por foto (BY-NC: sin uso comercial). <strong>Aviso:</strong> metadatos con usuarios y coordenadas (ver <a href="#datos-personales">«Datos de personas»</a>).</td><td>Escala masiva: requiere muestreo y descarga desde S3; etiquetas colaborativas con error humano.</td></tr>
+                        <tr><th scope="row">Copernicus Data Space (Sentinel-1/2)</th><td>Imágenes satelitales <strong>gratuitas</strong> Sentinel-2 (óptico) y Sentinel-1 (radar), revisita de unos 5 días, global.</td><td>Imagen (multiespectral, geo-temporal)</td><td><a class="url-literal" href="https://dataspace.copernicus.eu/" target="_blank" rel="noopener">dataspace.copernicus.eu<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>Datos Copernicus abiertos (gratuitos)</td><td>Datos multiespectrales pesados; exige manejo de bandas, nubes, reproyección y mosaicos. Multimodal por diseño (imagen + tiempo).</td></tr>
+                        <tr><th scope="row">USGS EarthExplorer (Landsat)</th><td>Archivo histórico de <strong>Landsat</strong> (1972–presente) y otros productos de observación terrestre.</td><td>Imagen (multiespectral, geo-temporal)</td><td><a class="url-literal" href="https://earthexplorer.usgs.gov/" target="_blank" rel="noopener">earthexplorer.usgs.gov<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>Dominio público (USGS)</td><td>Serie temporal larga de imágenes; calibración entre sensores y corrección atmosférica no triviales.</td></tr>
+                        <tr><th scope="row">Registry of Open Data on AWS</th><td>Catálogo de conjuntos abiertos alojados en AWS: Sentinel-2 COG, Landsat, NOAA GOES, imágenes de desastres (Maxar Open Data), etc.</td><td>Imagen + multimodal</td><td><a class="url-literal" href="https://registry.opendata.aws/" target="_blank" rel="noopener">registry.opendata.aws<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>Variable por conjunto (se revisa cada ficha)</td><td>Acceso vía S3/CLI: obliga a aprender ingesta a escala y a leer la licencia de cada colección.</td></tr>
+                        <tr><th scope="row">Zenodo / Mendeley Data (agricultura, medicina)</th><td>Repositorios con DOI donde investigadores publican conjuntos de <strong>imágenes médicas, agronómicas y ambientales</strong> crudas.</td><td>Imagen (búsqueda por dominio)</td><td><a class="url-literal" href="https://zenodo.org/" target="_blank" rel="noopener">zenodo.org<span class="sr-only"> (se abre en una pestaña nueva)</span></a> · <a class="url-literal" href="https://data.mendeley.com/" target="_blank" rel="noopener">data.mendeley.com<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>CC por depósito (se verifica el DOI). <strong>Aviso:</strong> las imágenes médicas son <strong>datos de salud</strong> (ver <a href="#datos-personales">«Datos de personas»</a>).</td><td>Conjuntos de nicho, poco «pulidos»: ideales para el reto, pero exigen leer el artículo asociado y validar la anotación.</td></tr>
+                        <tr><th scope="row">NASA Black Marble (VIIRS DNB): luces nocturnas</th><td><strong>Brillo nocturno</strong> medido por satélite, corregido por luz lunar: compuestos <strong>diarios (VNP46A2) y mensuales (VNP46A3)</strong> a 500 m, globales, desde 2012. <strong>La vía de entrada visual para problemas socioeconómicos.</strong></td><td>Imagen (ráster geo-temporal)</td><td><a class="url-literal" href="https://blackmarble.gsfc.nasa.gov/" target="_blank" rel="noopener">blackmarble.gsfc.nasa.gov<span class="sr-only"> (se abre en una pestaña nueva)</span></a> · descarga: <a class="url-literal" href="https://ladsweb.modaps.eosdis.nasa.gov/" target="_blank" rel="noopener">ladsweb.modaps.eosdis.nasa.gov<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>Datos NASA de libre uso (registro gratuito)</td><td>Dato <strong>crudo</strong> de verdad: nubes, corrección de luz lunar, luz dispersa, saturación en centros urbanos y quemas de gas (<em lang="en">gas flares</em>) que se confunden con actividad. Exige recortar por polígono de ciudad y decidir el estadístico (suma de radiancia, área iluminada, entropía espacial).</td></tr>
+                        <tr><th scope="row">Earth Observation Group (EOG): VIIRS nocturno</th><td>Alternativa a Black Marble: compuestos <strong>mensuales y anuales</strong> de VIIRS DNB, con versiones filtradas de nubes y de fuentes espurias. Descarga directa por archivo.</td><td>Imagen (ráster geo-temporal)</td><td><a class="url-literal" href="https://eogdata.mines.edu/products/vnl/" target="_blank" rel="noopener">eogdata.mines.edu/products/vnl<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>Uso libre con atribución (registro gratuito)</td><td>Menos preprocesado que Black Marble en algunas versiones; obliga a leer qué correcciones trae cada producto antes de compararlos entre meses.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-5 mt-5 items-start">
+                <div id="plantvillage" class="callout callout-warn">
+                    <h3 class="text-sm font-bold text-amber-900 mb-1.5"><i aria-hidden="true" class="fas fa-scale-balanced text-amber-700 mr-2"></i>PlantVillage: la licencia está en el artículo, y su <em lang="en">ShareAlike</em> alcanza a los modelos</h3>
+                    <p class="text-sm">Los autores publicaron las imágenes bajo <strong>CC BY-SA 3.0 Unported</strong> y precisaron que los algoritmos entrenados con ellas quedan bajo la misma licencia (Hughes y Salathé, 2015, pág. 3). Quien usa PlantVillage asume tres obligaciones: (1) <strong>atribuir</strong> a los autores e indicar los cambios; (2) redistribuir cualquier derivado de los datos con la <strong>misma licencia</strong>; (3) tratar el <strong>modelo entrenado</strong> también como obra bajo CC BY-SA 3.0, lo que condiciona su despliegue en la Fase 3 y cualquier uso comercial por parte del cliente. La licencia se cita desde el artículo de publicación, no desde el repositorio de GitHub, que no la declara. La copia aumentada que un tercero subió a Mendeley Data con una dedicación CC0 no es una alternativa válida: esa dedicación solo puede hacerla el titular de los derechos.</p>
+                </div>
+                <div class="callout callout-tip">
+                    <h3 class="text-sm font-bold text-emerald-800 mb-1.5"><i aria-hidden="true" class="fas fa-lightbulb text-emerald-700 mr-2"></i>Estrategia para la rama de imagen en la Fase 1</h3>
+                    <p class="text-sm">Todavía no hace falta entrenar una CNN. Se extraen <strong>rasgos tabulares</strong> de un subconjunto de imágenes (estadísticos de color por canal HSV o RGB, índices tipo <em>ExG</em> o <em>NDVI</em>, descriptores de textura como GLCM o LBP, porcentaje de píxeles con síntoma) y se usan en el MLP. En el Módulo 2, esos rasgos se sustituyen por las imágenes crudas.</p>
+                </div>
+            </div>
+
+            <div id="socioeconomico" class="callout callout-warn mt-5">
+                <h3 class="text-sm font-bold text-amber-900 mb-1.5"><i aria-hidden="true" class="fas fa-city text-amber-700 mr-2"></i>Si el problema es socioeconómico, la modalidad visual no es obvia: se resuelve en la Propuesta, no en la Fase 2</h3>
+                <p class="text-sm">Casi todas las fuentes de arriba son agrícolas, ambientales o de biodiversidad, porque el escenario de referencia lo es. Cuando el problema elegido es <strong>macroeconómico o social</strong> (precios, empleo, poder adquisitivo, movilidad, seguridad), no existe una «foto del fenómeno»: nadie fotografía la inflación. Eso <strong>no descalifica el tema</strong>, pero obliga a decidir la rama visual <strong>antes</strong> de empezar, porque es la decisión que más tarde cuesta deshacer.</p>
+                <p class="text-sm mt-2">La vía establecida es la <strong>teledetección como proxy de actividad económica</strong>: el brillo nocturno (filas <strong>NASA Black Marble</strong> y <strong>EOG</strong>) es el caso canónico, con literatura sólida detrás (Henderson et al., 2012; Donaldson y Storeygard, 2016). La clave: el ráster de luces <strong>está georreferenciado y fechado</strong>, así que admite un <strong>co-registro real por muestra</strong> —(ciudad, mes)— contra cualquier serie oficial publicada por ciudad. Eso es exactamente lo que la <a href="21_Modulo_2_Actividad_Fase2_Centinela.html#rubrica">rúbrica de la Fase 2</a> premia en su nivel más alto.</p>
+                <p class="text-sm mt-2"><strong>Advertencia de honestidad:</strong> las luces miden <strong>actividad</strong>, no precios. Son un proxy del lado real de la economía, no de la inflación. Sirven, pero el informe debe decir qué se está midiendo de verdad, y la ablación dirá cuánto aporta. Además VIIRS arranca en <strong>2012</strong>: si la serie económica es más larga, la parte multimodal cubre solo de ahí en adelante, y eso se declara.</p>
+            </div>
+
+            <div id="serie-imagen" class="callout callout-danger mt-5">
+                <h3 class="text-sm font-bold text-red-800 mb-1.5"><i aria-hidden="true" class="fas fa-triangle-exclamation text-red-700 mr-2"></i>La trampa de «convertir la serie en imagen»</h3>
+                <p class="text-sm">Ante la falta de imágenes, la salida tentadora es <strong>codificar la propia serie como imagen</strong> (matriz de recurrencia, mapa de calor calendario, espectrograma) y llamar a eso «segunda modalidad». Conviene entender qué se gana y qué no:</p>
+                <ol class="text-sm list-decimal pl-5 mt-2 space-y-1.5">
+                    <li><strong>No es multimodal, es <em>multi-vista</em>.</strong> Ambas ramas nacen de la misma señal. Es una decisión <strong>admisible si se declara desde la portada</strong> y la ablación mide la redundancia, nunca si se presenta como multimodalidad plena.</li>
+                    <li><strong>La codificación puede ser ciega a la etiqueta.</strong> Antes de entrenar nada, hay que responder una pregunta de una línea: <em>¿puede esta imagen, en principio, determinar esta etiqueta?</em> Ejemplo real: una matriz de recurrencia, con R<sub><i>ij</i></sub> = 1 si |<i>r</i><sub><i>i</i></sub> − <i>r</i><sub><i>j</i></sub>| &lt; ε y 0 en otro caso, <strong>no cambia</strong> si se suma una constante a toda la ventana (|(<i>r</i><sub><i>i</i></sub> + <i>c</i>) − (<i>r</i><sub><i>j</i></sub> + <i>c</i>)| = |<i>r</i><sub><i>i</i></sub> − <i>r</i><sub><i>j</i></sub>|) ni si se invierte el signo. Si la etiqueta depende del <strong>nivel</strong> o del <strong>signo</strong> —p. ej. «retorno acumulado &gt; +1 %»—, la red recibe una entrada de la que la etiqueta <em>no es función</em>: ninguna arquitectura arregla eso.</li>
+                    <li><strong>Si se elige esta vía, se usa la codificación correcta.</strong> El <em lang="en">Gramian Angular Field</em> + <em lang="en">Markov Transition Field</em> (Wang y Oates, 2015) preservan nivel y signo, apilados como canales. Dos condiciones que suelen pasarse por alto: (a) el escalador debe ajustarse sobre la <strong>serie completa</strong>, no por ventana —con escalador por ventana el GAF vuelve a ser ciego al nivel, igual que la matriz de recurrencia—; y (b) <strong>GASF por sí sola es invariante al signo</strong>, hace falta <strong>GADF</strong> para capturarlo.</li>
+                    <li><strong>El aumento de datos casi nunca aplica.</strong> Los ejes de estas imágenes <strong>son el tiempo</strong>: rotar, voltear o cambiar el brillo no «aumenta la robustez», destruye la estructura que se quiere aprender. Si se omite, hay que justificarlo; si se aplica, hay que argumentar por qué es válido para esa codificación.</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- ====================== FUENTES DE SERIE TEMPORAL ====================== -->
+        <section id="serie">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-2"><i aria-hidden="true" class="fas fa-chart-line text-pink-700 mr-2"></i>Fuentes de serie temporal (no-Kaggle)</h2>
+            <p class="text-slate-700 max-w-4xl mb-5">Para la <strong>rama temporal</strong> del sistema (LSTM o GRU en la Fase 2). Casi siempre es la serie <strong>climática, epidemiológica o socioeconómica</strong> que condiciona el evento de riesgo.</p>
+            <div role="region" tabindex="0" aria-label="Tabla de fuentes de serie temporal (se desplaza horizontalmente)" class="overflow-x-auto card p-1">
+                <table class="tbl" style="min-width:1000px">
+                    <caption class="sr-only">Fuentes de serie temporal no-Kaggle: contenido, modalidad, enlace, licencia y por qué presentan reto</caption>
+                    <thead><tr style="background:#3D008D"><th scope="col" style="width:13%">Fuente</th><th scope="col" style="width:22%">Qué contiene</th><th scope="col" style="width:10%">Modalidad</th><th scope="col" style="width:15%">Enlace</th><th scope="col" style="width:20%">Licencia / uso</th><th scope="col">Por qué presenta reto</th></tr></thead>
+                    <tbody>
+                        <tr><th scope="row">NASA POWER</th><td>Más de 300 parámetros <strong>meteorológicos y solares</strong> diarios u horarios, <strong>globales</strong>, vía API por coordenadas (temperatura, humedad, lluvia, radiación).</td><td>Serie temporal (API)</td><td><a class="url-literal" href="https://power.larc.nasa.gov/" target="_blank" rel="noopener">power.larc.nasa.gov<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>Datos NASA de libre uso</td><td>Datos satelitales o modelados: hay que entender la resolución, los sesgos frente a la estación local y los huecos por parámetro.</td></tr>
+                        <tr><th scope="row">NOAA Climate Data Online (CDO)</th><td>Archivo histórico global de clima de estaciones: temperatura, precipitación, viento, normales de 30 años; acceso por API con <em lang="en">token</em>.</td><td>Serie temporal (API)</td><td><a class="url-literal" href="https://www.ncei.noaa.gov/cdo-web/" target="_blank" rel="noopener">ncei.noaa.gov/cdo-web<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>Dominio público (NOAA)</td><td>Cobertura de estaciones irregular, muchos faltantes, formatos heredados; requiere <em lang="en">token</em> y paginación.</td></tr>
+                        <tr><th scope="row">IDEAM: DHIME (Colombia)</th><td>Series <strong>hidrometeorológicas crudas</strong> de la red de estaciones colombiana: temperatura, precipitación, nivel, caudal (horarias a anuales).</td><td>Serie temporal</td><td><a class="url-literal" href="http://dhime.ideam.gov.co/atencionciudadano/" target="_blank" rel="noopener">dhime.ideam.gov.co<span class="sr-only"> (se abre en una pestaña nueva)</span></a> · ver <a class="url-literal" href="https://www.ideam.gov.co/dhime" target="_blank" rel="noopener">ideam.gov.co/dhime<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>Datos abiertos IDEAM (uso público)</td><td>Datos <strong>crudos</strong> con vacíos y banderas de calidad; ideal para el escenario cafetero colombiano.</td></tr>
+                        <tr><th scope="row">Copernicus Climate Data Store (CDS)</th><td>Reanálisis (ERA5), indicadores agrometeorológicos, proyecciones climáticas; catálogo completo vía <strong>CDS API</strong>.</td><td>Serie temporal (API)</td><td><a class="url-literal" href="https://cds.climate.copernicus.eu/" target="_blank" rel="noopener">cds.climate.copernicus.eu<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>Licencia Copernicus (gratuita, con registro)</td><td>Volumen alto y formato NetCDF o GRIB: exige aprender ingesta científica de datos climáticos.</td></tr>
+                        <tr><th scope="row">World Bank Open Data</th><td>Indicadores de <strong>desarrollo</strong> anuales por país (salud, economía, energía, clima), 1960–presente, con API.</td><td>Serie temporal (API)</td><td><a class="url-literal" href="https://data.worldbank.org/" target="_blank" rel="noopener">data.worldbank.org<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>CC BY 4.0</td><td>Series anuales con vacíos por país y año; la baja frecuencia obliga a pensar bien la ventana temporal.</td></tr>
+                        <tr><th scope="row">FAOSTAT (FAO)</th><td>Estadísticas globales de <strong>alimentación y agricultura</strong> (producción, comercio, precios, emisiones) de más de 245 países, desde 1961.</td><td>Serie temporal</td><td><a class="url-literal" href="https://www.fao.org/faostat/" target="_blank" rel="noopener">fao.org/faostat<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>CC BY 4.0</td><td>Series con cambios metodológicos entre años y países; reto de armonización temporal.</td></tr>
+                        <tr><th scope="row">SIVIGILA / INS (Colombia)</th><td>Vigilancia <strong>epidemiológica</strong> oficial: notificación semanal de eventos de salud pública (dengue, IRA, etc.).</td><td>Serie temporal</td><td><a class="url-literal" href="https://portalsivigila.ins.gov.co/" target="_blank" rel="noopener">portalsivigila.ins.gov.co<span class="sr-only"> (se abre en una pestaña nueva)</span></a> · datos en <a class="url-literal" href="https://www.datos.gov.co/Salud-y-Protecci-n-Social/Datos-de-Vigilancia-en-Salud-P-blica-de-Colombia/4hyg-wa9d" target="_blank" rel="noopener">datos.gov.co<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td><strong>CC BY-SA 4.0</strong>, declarada en la ficha del conjunto en datos.gov.co (atribución: Instituto Nacional de Salud); la Ley 1712 de 2014 es la ley de transparencia, no una licencia. <strong>Aviso:</strong> <strong>datos de salud</strong> (sensibles), agregados por evento, municipio y semana (ver <a href="#datos-personales">«Datos de personas»</a>).</td><td>Conteos semanales con subregistro y cambios de definición de caso; exige cuidado ético y epidemiológico.</td></tr>
+                        <tr><th scope="row">datos.gov.co (y equivalentes gubernamentales)</th><td>Portal de <strong>datos abiertos del Gobierno colombiano</strong>: clima, salud, ambiente, movilidad, energía. Cada país tiene su equivalente (data.gov, data.gov.uk, etc.).</td><td>Serie temporal + tabular</td><td><a class="url-literal" href="https://www.datos.gov.co/" target="_blank" rel="noopener">datos.gov.co<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>Términos de datos abiertos de cada conjunto. <strong>Aviso:</strong> «abierto» no equivale a «sin datos personales» (ver <a href="#datos-personales">«Datos de personas»</a>).</td><td>Calidad y frescura variables entre conjuntos; obliga a validar el conjunto antes de confiar en él.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="callout callout-info mt-5">
+                <h3 class="text-sm font-bold text-primary mb-1.5"><i aria-hidden="true" class="fas fa-clock text-primary mr-2"></i>Frecuencia y alineación temporal</h3>
+                <p class="text-sm">La rama temporal y la de imagen casi nunca llegan a la misma cadencia (clima diario frente a fotos esporádicas frente a la revisita satelital de 5 días). Parte del reto multimodal es <strong>alinear y agregar</strong> ambas a una ventana común (p. ej., el clima de los 14 días previos a cada observación de hoja). Esa decisión se documenta: es evaluable.</p>
+            </div>
+        </section>
+
+        <!-- ====================== REPOSITORIOS Y BUSCADORES ====================== -->
+        <section id="repositorios">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-2"><i aria-hidden="true" class="fas fa-compass text-pink-700 mr-2"></i>Repositorios y buscadores generales (no-Kaggle)</h2>
+            <p class="text-slate-700 max-w-4xl mb-5">Sirven para <strong>descubrir</strong> fuentes primarias, no como destino final.</p>
+            <div role="region" tabindex="0" aria-label="Tabla de repositorios y buscadores (se desplaza horizontalmente)" class="overflow-x-auto card p-1">
+                <table class="tbl" style="min-width:760px">
+                    <caption class="sr-only">Repositorios y buscadores generales no-Kaggle: para qué sirven, enlace y criterio de uso</caption>
+                    <thead><tr style="background:#3D008D"><th scope="col" style="width:18%">Recurso</th><th scope="col" style="width:30%">Para qué sirve</th><th scope="col" style="width:20%">Enlace</th><th scope="col">Criterio de uso</th></tr></thead>
+                    <tbody>
+                        <tr><th scope="row">UCI Machine Learning Repository</th><td>Conjuntos clásicos y nuevos para aprendizaje automático (clasificación, regresión, series).</td><td><a class="url-literal" href="https://archive.ics.uci.edu/" target="_blank" rel="noopener">archive.ics.uci.edu<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td><strong>Con criterio:</strong> se evitan los conjuntos de juguete (Iris, Wine) y se buscan los recientes, multivariados y «sucios».</td></tr>
+                        <tr><th scope="row">Zenodo (CERN / OpenAIRE)</th><td>Conjuntos de investigación con <strong>DOI</strong>, muchos asociados a artículos.</td><td><a class="url-literal" href="https://zenodo.org/" target="_blank" rel="noopener">zenodo.org<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>Fuente primaria citable por excelencia. Se verifica la licencia en cada depósito.</td></tr>
+                        <tr><th scope="row">Mendeley Data</th><td>Repositorio de conjuntos de investigación con DOI (Elsevier).</td><td><a class="url-literal" href="https://data.mendeley.com/" target="_blank" rel="noopener">data.mendeley.com<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>Donde vive <strong>RoCoLe</strong>. Bueno para conjuntos agronómicos o médicos de nicho.</td></tr>
+                        <tr><th scope="row">Hugging Face Datasets</th><td>Repositorio con más de un millón de conjuntos multimodales (texto, imagen, audio, <strong>series temporales</strong>, tabular).</td><td><a class="url-literal" href="https://huggingface.co/datasets" target="_blank" rel="noopener">huggingface.co/datasets<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>Se filtra por modalidad y licencia, y se rastrea siempre la <strong>fuente original</strong> del conjunto. «Abierto» no equivale a «sin datos personales» (ver <a href="#datos-personales">«Datos de personas»</a>).</td></tr>
+                        <tr><th scope="row">Registry of Open Data on AWS</th><td>Catálogo de conjuntos abiertos alojados en AWS (Sentinel, Landsat, NOAA, genómica).</td><td><a class="url-literal" href="https://registry.opendata.aws/" target="_blank" rel="noopener">registry.opendata.aws<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>Para datos a escala vía S3. Cada ficha enlaza su licencia y su fuente.</td></tr>
+                        <tr><th scope="row">Google Dataset Search</th><td><strong>Buscador</strong> federado de conjuntos de datos en la web. <strong>No es una fuente</strong>, es un índice.</td><td><a class="url-literal" href="https://datasetsearch.research.google.com/" target="_blank" rel="noopener">datasetsearch.research.google.com<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>Sirve para encontrar la fuente primaria; <strong>nunca se cita Google Dataset Search</strong>: se cita el origen.</td></tr>
+                        <tr><th scope="row">Portales gubernamentales</th><td>datos.gov.co, data.gov (EE. UU.), data.gov.uk, data.europa.eu, etc.</td><td><a class="url-literal" href="https://www.datos.gov.co/" target="_blank" rel="noopener">datos.gov.co<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>Datos oficiales con términos de uso claros; calidad variable, ideal para un EDA real.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="callout callout-warn mt-5">
+                <h3 class="text-sm font-bold text-amber-900 mb-1.5"><i aria-hidden="true" class="fas fa-magnifying-glass text-amber-700 mr-2"></i>Google Dataset Search no es una cita válida</h3>
+                <p class="text-sm">Es un <strong>buscador</strong>, no un repositorio. Si se llega a un conjunto a través de él, se sigue el enlace hasta su <strong>origen primario</strong> (Zenodo, Mendeley, un portal gubernamental, un repositorio institucional) y se cita <strong>ese</strong>.</p>
+            </div>
+        </section>
+
+        <!-- ====================== COMBINACIONES MULTIMODALES ====================== -->
+        <section id="combinaciones">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-2"><i aria-hidden="true" class="fas fa-shuffle text-pink-700 mr-2"></i>Combinaciones multimodales de ejemplo</h2>
+            <p class="text-slate-700 max-w-4xl mb-5">Seis emparejamientos <strong>imagen + serie temporal</strong> que cumplen la política y tienen camino claro a ambas ramas. El primero es el <strong>escenario de referencia</strong> del proyecto; el último es la vía para problemas <strong>socioeconómicos</strong>.</p>
+            <div role="region" tabindex="0" aria-label="Tabla de combinaciones multimodales (se desplaza horizontalmente)" class="overflow-x-auto card p-1">
+                <table class="tbl" style="min-width:860px">
+                    <caption class="sr-only">Combinaciones multimodales de ejemplo: problema, rama de imagen, rama temporal y por qué no es un reto resuelto</caption>
+                    <thead><tr style="background:#3D008D"><th scope="col" style="width:22%">Problema o evento de riesgo</th><th scope="col" style="width:22%">Rama de imagen</th><th scope="col" style="width:24%">Rama temporal</th><th scope="col">Por qué NO es un reto resuelto</th></tr></thead>
+                    <tbody>
+                        <tr><th scope="row"><strong>Centinela del Café</strong> (escenario de referencia): anticipar brotes de roya (<em>Hemileia vastatrix</em>)</th><td>RoCoLe: hojas de café (<a class="url-literal" href="https://data.mendeley.com/datasets/c5yvn32dzg/2" target="_blank" rel="noopener">Mendeley<span class="sr-only"> (se abre en una pestaña nueva)</span></a>)</td><td>Clima del municipio: <a class="url-literal" href="https://power.larc.nasa.gov/" target="_blank" rel="noopener">NASA POWER<span class="sr-only"> (se abre en una pestaña nueva)</span></a> o <a class="url-literal" href="http://dhime.ideam.gov.co/atencionciudadano/" target="_blank" rel="noopener">IDEAM DHIME<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>Hay que <strong>fusionar</strong> el síntoma visual con las condiciones climáticas previas y alinear cadencias; no existe un CSV listo.</td></tr>
+                        <tr><th scope="row">Alerta de plaga en el cultivo X: detectar estrés foliar</th><td>PlantVillage (fuente primaria en <a class="url-literal" href="https://github.com/spMohanty/PlantVillage-Dataset" target="_blank" rel="noopener">GitHub<span class="sr-only"> (se abre en una pestaña nueva)</span></a>) o Zenodo agronómico</td><td>NASA POWER del lote / <a class="url-literal" href="https://www.fao.org/faostat/" target="_blank" rel="noopener">FAOSTAT<span class="sr-only"> (se abre en una pestaña nueva)</span></a> producción regional</td><td>El sesgo de fondo de PlantVillage y el clima crudo obligan a discutir la generalización.</td></tr>
+                        <tr><th scope="row">Riesgo de dengue o arbovirosis: anticipar picos</th><td>Imágenes de criaderos o del entorno vía <a class="url-literal" href="https://www.gbif.org/" target="_blank" rel="noopener">GBIF<span class="sr-only"> (se abre en una pestaña nueva)</span></a> o <a class="url-literal" href="https://registry.opendata.aws/inaturalist-open-data/" target="_blank" rel="noopener">iNaturalist<span class="sr-only"> (se abre en una pestaña nueva)</span></a> (mosquitos)</td><td>Casos semanales de <a class="url-literal" href="https://portalsivigila.ins.gov.co/" target="_blank" rel="noopener">SIVIGILA<span class="sr-only"> (se abre en una pestaña nueva)</span></a> (datos de salud: ver <a href="#datos-personales">«Datos de personas»</a>) + clima de <a class="url-literal" href="https://power.larc.nasa.gov/" target="_blank" rel="noopener">NASA POWER<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>Subregistro epidemiológico y datos ciudadanos ruidosos: lejos de un conjunto de referencia limpio.</td></tr>
+                        <tr><th scope="row">Sequía o estrés hídrico agrícola</th><td>NDVI de Sentinel-2 (<a class="url-literal" href="https://dataspace.copernicus.eu/" target="_blank" rel="noopener">Copernicus Data Space<span class="sr-only"> (se abre en una pestaña nueva)</span></a>)</td><td>ERA5 o agrometeorología (<a class="url-literal" href="https://cds.climate.copernicus.eu/" target="_blank" rel="noopener">CDS<span class="sr-only"> (se abre en una pestaña nueva)</span></a>)</td><td>Imagen multiespectral pesada y reanálisis en NetCDF: ingeniería de datos real.</td></tr>
+                        <tr><th scope="row">Deforestación o cambio de cobertura</th><td>Landsat (<a class="url-literal" href="https://earthexplorer.usgs.gov/" target="_blank" rel="noopener">USGS EarthExplorer<span class="sr-only"> (se abre en una pestaña nueva)</span></a>) o Sentinel-1</td><td>Indicadores ambientales del <a class="url-literal" href="https://data.worldbank.org/" target="_blank" rel="noopener">World Bank<span class="sr-only"> (se abre en una pestaña nueva)</span></a> / <a class="url-literal" href="https://www.datos.gov.co/" target="_blank" rel="noopener">datos.gov.co<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>Serie larga de imágenes e indicadores anuales: alineación y armonización no triviales.</td></tr>
+                        <tr><th scope="row"><strong>Problema socioeconómico</strong>: p. ej., presión sobre el poder adquisitivo, empleo o actividad local</th><td><strong>Luces nocturnas</strong> VIIRS por ciudad (<a class="url-literal" href="https://blackmarble.gsfc.nasa.gov/" target="_blank" rel="noopener">Black Marble<span class="sr-only"> (se abre en una pestaña nueva)</span></a> o <a class="url-literal" href="https://eogdata.mines.edu/products/vnl/" target="_blank" rel="noopener">EOG<span class="sr-only"> (se abre en una pestaña nueva)</span></a>)</td><td>Serie oficial <strong>publicada por ciudad</strong>: IPC (<a class="url-literal" href="https://www.dane.gov.co/index.php/estadisticas-por-tema/precios-y-costos/indice-de-precios-al-consumidor-ipc" target="_blank" rel="noopener">DANE<span class="sr-only"> (se abre en una pestaña nueva)</span></a>) u otros indicadores de <a class="url-literal" href="https://www.datos.gov.co/" target="_blank" rel="noopener">datos.gov.co<span class="sr-only"> (se abre en una pestaña nueva)</span></a></td><td>Nadie ha empaquetado esto: exige recortar rásteres por polígono de ciudad, lidiar con nubes y luz lunar, y <strong>decidir</strong> qué estadístico de brillo resume la actividad. La clave (ciudad, mes) es <strong>co-registro real por muestra</strong>.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="grid lg:grid-cols-2 gap-5 mt-5 items-start">
+                <div class="callout callout-info">
+                    <h3 class="text-sm font-bold text-primary mb-1.5"><i aria-hidden="true" class="fas fa-city text-primary mr-2"></i>Cómo se arma el escenario socioeconómico, en concreto</h3>
+                    <p class="text-sm"><strong>Unidad de análisis: (ciudad, mes).</strong> Una imagen = el ráster de brillo nocturno recortado al polígono de una ciudad en un mes; su pareja = los indicadores oficiales de <strong>esa misma ciudad</strong> en <strong>ese mismo mes</strong>. Como el DANE publica el IPC para decenas de ciudades y VIIRS ofrece compuestos mensuales desde 2012, salen <strong>miles de pares</strong>, muy por encima del mínimo de 500 imágenes en tres o más clases.</p>
+                    <p class="text-sm mt-2"><strong>Por qué es multimodalidad de verdad:</strong> un radiómetro contando fotones y un encuestador levantando precios son <strong>dos instrumentos distintos</strong> observando la misma economía. La ablación (solo imagen / solo serie / fusión) responde entonces una pregunta real —<em>¿la vista satelital de la actividad aporta algo que las estadísticas de precios no tengan?</em>— y <strong>cualquier respuesta, incluso negativa, es un hallazgo</strong>. Compárese con codificar la serie como imagen, donde el resultado está decidido de antemano.</p>
+                    <p class="text-sm mt-2"><strong>Lo que hay que declarar:</strong> (1) las luces miden <strong>actividad</strong>, no precios: proxy del lado real, no de la inflación; (2) VIIRS empieza en <strong>2012</strong>, así que una serie más larga solo es multimodal desde ahí; (3) los centros urbanos <strong>saturan</strong> y las quemas de gas (<em lang="en">gas flares</em>) imitan actividad.</p>
+                </div>
+                <div class="callout callout-tip">
+                    <h3 class="text-sm font-bold text-emerald-800 mb-1.5"><i aria-hidden="true" class="fas fa-mug-hot text-emerald-700 mr-2"></i>El escenario de referencia, en una línea</h3>
+                    <p class="text-sm"><strong>Centinela del Café = RoCoLe (imagen) + NASA POWER o IDEAM (serie climática)</strong> → predecir el riesgo de roya antes de que el daño sea visible a simple vista. Es adoptable tal cual, o sirve de plantilla para un problema propio.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== RUTA POR DEFECTO ====================== -->
+        <section id="ruta-por-defecto">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-2"><i aria-hidden="true" class="fas fa-star text-pink-700 mr-2"></i>Ruta por defecto (100 % libre): RoCoLe + NASA POWER</h2>
+            <p class="text-slate-700 max-w-4xl mb-5">Si <strong>no se cuenta con datos propios</strong> georreferenciados, esta es la combinación <strong>recomendada por defecto</strong>, con acceso <strong>libre confirmado</strong> en ambas fuentes:</p>
+            <div role="region" tabindex="0" aria-label="Tabla de la ruta por defecto (se desplaza horizontalmente)" class="overflow-x-auto card p-1">
+                <table class="tbl" style="min-width:600px">
+                    <caption class="sr-only">Ruta por defecto: las dos fuentes, su licencia y la confirmación del acceso libre</caption>
+                    <thead><tr style="background:#3D008D"><th scope="col" style="width:14%">Pieza</th><th scope="col" style="width:26%">Fuente</th><th scope="col">Licencia / acceso</th><th scope="col">Confirmación</th></tr></thead>
+                    <tbody>
+                        <tr><th scope="row">Imagen</th><td><strong>RoCoLe</strong> (Mendeley Data)</td><td><strong>CC BY 4.0</strong>: libre con atribución</td><td>Acceso libre confirmado (descarga directa con DOI)</td></tr>
+                        <tr><th scope="row">Temporal</th><td><strong>NASA POWER</strong></td><td><strong>Libre y abierto</strong> (datos NASA de libre uso)</td><td>Acceso libre confirmado (API por coordenadas, sin <em lang="en">token</em>)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="callout callout-warn mt-5">
+                <h3 class="text-sm font-bold text-amber-900 mb-1.5"><i aria-hidden="true" class="fas fa-code-merge text-amber-700 mr-2"></i>Receta de <em lang="en">join</em> agregado, y por qué es honesto declararlo</h3>
+                <p class="text-sm">RoCoLe <strong>no trae fecha ni GPS por imagen</strong>, así que <strong>no existe</strong> un emparejamiento muestra a muestra entre la hoja y el clima. El <em lang="en">join</em> posible es <strong>agregado</strong>:</p>
+                <ol class="text-sm list-decimal pl-5 mt-2 space-y-1.5">
+                    <li>Se toma la <strong>etiqueta o región</strong> asociada al subconjunto de imágenes (el conjunto es de café robusta; se sitúa en una región cafetera de referencia).</li>
+                    <li>Se descarga de <strong>NASA POWER</strong> el <strong>clima mensual</strong> (temperatura, humedad relativa, precipitación) de <strong>esa región y ese periodo</strong>.</li>
+                    <li>Se <strong>une</strong> cada imagen al vector climático <strong>mensual</strong> de su región y periodo. Esa es la clave de alineación: <strong>(región, mes)</strong>, no <strong>(imagen, día)</strong>.</li>
+                </ol>
+                <p class="text-sm mt-2">Este <em lang="en">join</em> se declara <strong>explícitamente como agregado</strong> en la Propuesta de Datos, con sus dos salvedades:</p>
+                <ul class="text-sm list-disc pl-5 mt-1 space-y-1.5">
+                    <li><strong>Fuga de datos (<em lang="en">leakage</em>):</strong> al compartir el clima por región y periodo, varias imágenes heredan el mismo vector; conviene cuidar que la partición no mezcle la misma ventana entre entrenamiento y prueba.</li>
+                    <li><strong>Rasgo climático casi constante:</strong> si todas las imágenes de una clase caen en la misma ventana agregada, el clima <strong>deja de discriminar</strong> y el modelo puede aprender un artefacto. Se reporta y, si es posible, se <strong>amplía la variabilidad</strong> de regiones y periodos.</li>
+                </ul>
+                <p class="text-sm mt-2"><strong>No se inventa</strong> un conjunto pareado por muestra que no existe. El <strong>co-registro real</strong> —unidad <strong>(finca, semana)</strong>, misma entidad en la misma ventana espaciotemporal— solo se alcanza con <strong>datos propios georreferenciados y fechados</strong>, y es lo que más sube la calificación de fusión en la Fase 2 (<a href="21_Modulo_2_Actividad_Fase2_Centinela.html#rubrica">rúbrica de la Fase 2</a>).</p>
+            </div>
+        </section>
+
+        <!-- ====================== DATOS DE PERSONAS ====================== -->
+        <section id="datos-personales">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i aria-hidden="true" class="fas fa-user-shield text-pink-700 mr-2"></i>Datos de personas: la regla de la Fase 1</h2>
+            <div class="callout callout-danger">
+                <h3 class="text-sm font-bold text-red-800 mb-1.5"><i aria-hidden="true" class="fas fa-user-slash text-red-700 mr-2"></i>Regla de la Fase 1: sin personas identificables</h3>
+                <p class="text-sm">En la Fase 1 solo se usan datos <strong>públicos, agregados o anonimizados por la fuente oficial</strong>. Una fuente que contiene personas identificables —directamente o al combinar columnas— no es admisible en esta fase, aunque sea pública. Los datos personales se reservan para fases posteriores, con el <em>checklist</em> de protección de datos completo y el visto bueno del docente.</p>
+                <p class="text-sm mt-2">Ese <em>checklist</em> de protección de datos (Ley 1581 de 2012, bloques A a J) está en la <a href="12_Plantilla_Propuesta_de_Datos_Fase1.html#ley-1581">plantilla de la Propuesta</a> y se diligencia para cada fuente.</p>
+            </div>
+
+            <div class="callout callout-warn mt-5">
+                <h3 class="text-sm font-bold text-amber-900 mb-1.5"><i aria-hidden="true" class="fas fa-triangle-exclamation text-amber-700 mr-2"></i>Fuentes con datos de personas: qué declarar y qué implica en la Fase 1</h3>
+                <p class="text-sm"><strong>Regla de la Fase 1:</strong> no se usan personas identificables; solo datos públicos, agregados o anonimizados por la fuente oficial. Toda fuente con datos de personas se declara en el <a href="12_Plantilla_Propuesta_de_Datos_Fase1.html#ley-1581"><em>checklist</em> de protección de datos</a> y se trata así:</p>
+                <ul class="text-sm list-disc pl-5 mt-2 space-y-1.5">
+                    <li><strong>SIVIGILA / salud:</strong> datos de <strong>salud</strong> (sensibles, Ley 1581 de 2012, art. 5), agregados por evento, municipio y semana. Más de la mitad de las filas tiene <strong>conteo 1</strong>. Se usa solo el evento del problema (p. ej., dengue); no se publican subconjuntos de municipios pequeños ni se cruzan con fuentes que permitan reidentificar; si se publica un derivado, las celdas pequeñas se agregan o se suprimen (práctica habitual de control de divulgación estadística). <em>En la Fase 1:</em> admisible, porque la fuente oficial los publica agregados, siempre que la Propuesta declare estas precauciones.</li>
+                    <li><strong>Imágenes médicas (Zenodo, Mendeley, PhysioNet…):</strong> se declaran como datos de salud; se usan solo conjuntos <strong>anonimizados por la fuente</strong>, con licencia y términos de uso citados, y no se redistribuyen. <em>En la Fase 1:</em> quedan fuera las imágenes con rasgos biométricos (rostro, iris, fondo de ojo), aunque vengan sin nombre, porque pueden identificar a la persona.</li>
+                    <li><strong>GBIF / iNaturalist:</strong> se eliminan los campos con nombres de personas (<code class="icode">recordedBy</code>, <code class="icode">identifiedBy</code>, <code class="icode">rightsHolder</code>) y se revisa la licencia <strong>por registro</strong> (BY-NC no admite uso comercial). <em>En la Fase 1:</em> admisibles sin esos campos.</li>
+                    <li><strong>Microdatos individuales</strong> (una fila por persona: consumo por usuario, resultados de pruebas de Estado, registros clínicos): <em>en la Fase 1</em>, solo si la fuente oficial los publica anonimizados y la prueba de reidentificación del <em>checklist</em> (bloque F) sale negativa. Un identificador seudonimizado (un NIU, un documento cifrado) sigue siendo un dato personal y deja la fuente fuera de la fase; si los titulares pueden ser menores, solo se usan datos agregados (bloque C).</li>
+                    <li><strong>Portales de datos abiertos y Hugging Face:</strong> «abierto» no equivale a «sin datos personales»; se revisa cada ficha.</li>
+                </ul>
+            </div>
+
+            <div id="datos-propios" class="callout callout-warn mt-5">
+                <h3 class="text-sm font-bold text-amber-900 mb-1.5"><i aria-hidden="true" class="fas fa-house-user text-amber-700 mr-2"></i>Datos propios: con autorización y sin publicar la ubicación</h3>
+                <p class="text-sm">Los datos recolectados por el estudiante (fotos de fincas, registros de una cooperativa o de un empleador) <strong>no son públicos</strong> y, si permiten identificar a una persona —el dueño de la finca por las coordenadas, un usuario por su número de cuenta—, son <strong>datos personales</strong> (Ley 1581 de 2012, art. 3). Se admiten con cuatro condiciones: (1) <strong>autorización escrita</strong> del titular o de la entidad dueña de los datos, con la finalidad académica declarada (Ley 1581, arts. 4 lit. b y 9; Decreto 1074 de 2015, art. 2.2.2.25.2.4); (2) <strong>borrado de los metadatos EXIF/GPS</strong> y coordenadas generalizadas (p. ej., a vereda o municipio) antes de cualquier carga a Colab, Drive o un asistente de IA; (3) <strong>no publicación</strong> de los datos crudos (solo agregados); (4) declaración en el <a href="12_Plantilla_Propuesta_de_Datos_Fase1.html#ley-1581"><em>checklist</em> de la Propuesta</a> (bloques D y F).</p>
+                <p class="text-sm mt-3"><strong>En la Fase 1</strong> los datos propios se usan solo si, aplicadas esas cuatro salvaguardas, <strong>no queda ninguna persona identificable</strong>. Si la generalización de la ubicación no basta para impedirlo, la Fase 1 se hace con la <a href="#ruta-por-defecto">ruta por defecto</a> y el dato propio se reserva para una fase posterior, con el visto bueno del docente.</p>
+            </div>
+        </section>
+
+        <!-- ====================== KAGGLE: TEST DE PROCEDENCIA ====================== -->
+        <section id="kaggle">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-2"><i aria-hidden="true" class="fas fa-fingerprint text-pink-700 mr-2"></i>Cómo se detecta una réplica de Kaggle: el test de procedencia</h2>
+            <p class="text-slate-700 max-w-4xl mb-5">El <a href="#admisibilidad">veto a Kaggle</a> se demuestra con el <strong>test de procedencia</strong>, que es la sección 4 de la <a href="12_Plantilla_Propuesta_de_Datos_Fase1.html#procedencia">Propuesta de Datos</a>; sus evidencias se recogen en el <a href="12_Plantilla_Propuesta_de_Datos_Fase1.html#anexo-b">anexo B</a>. Usar Kaggle solo como <strong>entorno de cómputo</strong> es válido si los datos vienen de la fuente primaria.</p>
+            <div class="callout callout-info">
+                <p class="text-sm mb-2">Cinco comprobaciones que el docente verifica en minutos; las evidencias van en el anexo de la Propuesta.</p>
+                <ol class="text-sm list-decimal pl-5 space-y-2">
+                    <li><strong>Cadena de procedencia.</strong> Por cada archivo: URL o DOI del <strong>productor primario</strong> (institución, repositorio con DOI o API oficial), fecha de descarga, nombre exacto del archivo y su huella SHA-256, calculada en el cuaderno con <code class="icode">hashlib.sha256(open(ruta, "rb").read()).hexdigest()</code>.</li>
+                    <li><strong>Descarga trazable.</strong> La celda de carga obtiene los datos de esa URL o API (o de una copia en el repositorio con la misma huella). No se admiten <code class="icode">kaggle datasets download</code>, <code class="icode">kagglehub</code> ni rutas <code class="icode">/kaggle/input/</code>. El docente lo comprueba con <code class="icode">grep -inE "kaggle|kagglehub|/kaggle/input" *.ipynb</code>. Usar Kaggle solo como entorno de cómputo es válido si los datos vienen de la fuente primaria.</li>
+                    <li><strong>Búsqueda declarada de espejos.</strong> Se busca el nombre del conjunto y del archivo en kaggle.com/datasets (y con <code class="icode">site:kaggle.com "&lt;nombre&gt;"</code>). La Propuesta lista las coincidencias (hasta tres, con su URL) o declara «sin coincidencias», con la fecha de la búsqueda.</li>
+                    <li><strong>Huella de crudeza.</strong> Antes de limpiar se reportan filas × columnas, el porcentaje de faltantes y el balance de la etiqueta. Un archivo sin faltantes, ya dividido en entrenamiento y prueba y con la clase balanceada es indicio de una réplica preprocesada: el docente pide la fuente primaria.</li>
+                    <li><strong>Contraste con el espejo.</strong> Si existe en Kaggle un conjunto con el mismo origen, se muestra que el archivo usado no coincide con él (huella distinta, más filas o faltantes, columnas originales). Si coincide, la Propuesta no se aprueba.</li>
+                </ol>
+            </div>
+            <p class="text-sm text-slate-700 max-w-4xl mt-4">El escenario del ejemplo resuelto del curso (heladas en la floración del tulipán con datos del KNMI) tampoco es admisible como entrega: ya está resuelto públicamente.</p>
+        </section>
+
+        <!-- ====================== SUSTENTACIÓN ====================== -->
+        <section id="sustentacion">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i aria-hidden="true" class="fas fa-comments text-pink-700 mr-2"></i>Sustentación oral: logística y criterios</h2>
+            <div class="callout callout-info">
+                <p class="text-sm"><strong>Propósito.</strong> Verificar <strong>la autoría y la comprensión real</strong> de todo el entregable. Es el filtro contra la copia más robusto: una solución copiada o delegada sin entender <strong>no se puede defender</strong> en vivo. La sustentación <strong>no suma puntos</strong> y se hace <strong>antes de emitir la nota</strong>.</p>
+            </div>
+
+            <div class="card p-5 md:p-6 mt-5">
+                <h3 class="font-bold text-navy text-lg"><i aria-hidden="true" class="fas fa-gavel text-primary mr-2"></i>Regla de la rúbrica (sección 5)</h3>
+                <p class="text-sm text-slate-700 mt-1">Texto literal de la sección 5 («Sustentación y compuerta de autoría») de la <a href="11_Modulo_1_Actividad_Fase1_Centinela.html#rubrica">rúbrica de la Fase 1</a>, versión 1.4:</p>
+                <div id="rubrica-s5" class="border-l-4 pl-4 mt-3 text-sm text-slate-700 space-y-2" style="border-color:#3D008D">
+                    <p>La sustentación se hace <strong>antes de emitir la nota</strong> y no suma puntos: verifica la autoría de todo el entregable. Durante ella se puede tener a la vista el cuaderno, el informe y la bitácora. En los equipos, cada integrante responde por una parte distinta.</p>
+                    <p><strong>Compuerta de autoría.</strong> Si quien sustenta no logra explicar una parte sustancial del trabajo —dos preguntas seguidas sobre la misma parte sin una respuesta válida, según la hoja de sustentación—, el criterio que se apoya en esa parte queda como máximo en Inicial, y el Criterio 5 también. En los equipos, la compuerta se aplica a cada integrante por separado.</p>
+                </div>
+                <p class="text-sm text-slate-700 mt-3">Ningún mecanismo del curso convierte la sustentación en puntos: su única consecuencia es la compuerta de autoría, que alcanza a todos los criterios y no solo al Criterio 5.</p>
+            </div>
+
+            <div id="como-es" class="card p-6 mt-5">
+                <h3 class="font-bold text-primary mb-2"><i aria-hidden="true" class="fas fa-calendar-check text-pink-700 mr-2"></i>Cómo es la sustentación</h3>
+                <ul class="text-sm text-slate-700 space-y-1.5 list-disc pl-5">
+                    <li><strong>Cuándo y cuánto dura.</strong> Después de la entrega y antes de emitir la nota; de 10 a 15 minutos por videollamada: unos 3 minutos de presentación y luego preguntas sobre el propio código y la bitácora.</li>
+                    <li><strong>Materiales.</strong> Se puede tener a la vista el cuaderno, el informe y la bitácora; no se leen respuestas preparadas.</li>
+                    <li><strong>Equipos.</strong> Cada integrante responde por una parte distinta del trabajo, y la compuerta de autoría se aplica a cada uno por separado.</li>
+                    <li><strong>Quiénes sustentan en vivo.</strong> Mientras la cohorte sea de 20 entregas o menos, todos. Si crece, todos entregan un video de pantalla que responde dos preguntas asignadas tras la entrega y se convoca en vivo a una parte (alrededor del 30 %). Quien necesite un ajuste razonable lo solicita al docente.</li>
+                    <li><strong>Qué se valora.</strong> Que quien sustenta explique con sus palabras las decisiones propias —datos y partición, arquitectura, bucle de entrenamiento, regularización, métricas y umbral— y las entradas de la bitácora. Una respuesta es válida si da la razón de la decisión, no si recita una definición.</li>
+                    <li><strong>Consecuencia.</strong> La sustentación no suma puntos. Si una parte sustancial no se logra explicar —dos preguntas seguidas sobre la misma parte sin una respuesta válida—, el criterio que se apoya en esa parte queda como máximo en Inicial, y el Criterio 5 también (compuerta de autoría).</li>
+                </ul>
+            </div>
+
+            <div id="protocolo" class="mt-6">
+                <h3 class="font-bold text-navy text-xl mb-3"><i aria-hidden="true" class="fas fa-list-check text-primary mr-2"></i>Protocolo</h3>
+                <div role="region" tabindex="0" aria-label="Tabla del protocolo de la sustentación (se desplaza horizontalmente)" class="overflow-x-auto card p-1">
+                    <table class="tbl" style="min-width:620px">
+                        <caption class="sr-only">Protocolo de la sustentación oral: parámetros y su definición</caption>
+                        <thead><tr style="background:#3D008D"><th scope="col" style="width:22%">Parámetro</th><th scope="col">Definición</th></tr></thead>
+                        <tbody>
+                            <tr><th scope="row">Cuándo</th><td>Después de la entrega y <strong>antes de emitir la nota</strong>. Se agenda en franjas.</td></tr>
+                            <tr><th scope="row">Duración (fija)</th><td>De <strong>10 a 15 minutos</strong> por entrega, por videollamada: unos 3 minutos de presentación y luego preguntas sobre el propio código y la bitácora. La franja es la misma para todos: ni se extiende para «rescatar» ni se recorta para penalizar.</td></tr>
+                            <tr><th scope="row">Modalidad</th><td><strong>Sincrónica</strong>, por videollamada, compartiendo en pantalla el cuaderno o el informe. La cámara se pide al inicio para verificar la identidad y tiene una alternativa sin cámara (ver <a href="#grabacion">«Grabación, consentimiento y custodia»</a>). Cuando la sesión sincrónica no es viable, se admite un <a href="#video">video de pantalla</a>.</td></tr>
+                            <tr><th scope="row">Materiales</th><td>Se puede tener a la vista el cuaderno, el informe y la bitácora; no se leen respuestas preparadas.</td></tr>
+                            <tr><th scope="row">Insumo del docente</th><td>La entrega completa y la <strong><a href="13_Plantilla_Bitacora_IA.html">Bitácora de IA</a></strong>: las preguntas se anclan al propio código y a las propias entradas.</td></tr>
+                            <tr><th scope="row">Equipos</th><td>Cada integrante responde por una parte distinta del trabajo, y la compuerta de autoría se aplica a cada uno por separado.</td></tr>
+                            <tr><th scope="row">Qué se valora</th><td>Que quien sustenta explique con sus palabras las decisiones propias —datos y partición, arquitectura, bucle de entrenamiento, regularización, métricas y umbral— y las entradas de la bitácora. Una respuesta es válida si da la razón de la decisión, no si recita una definición.</td></tr>
+                            <tr><th scope="row">Consecuencia</th><td>La sustentación no suma puntos. Si una parte sustancial no se logra explicar —dos preguntas seguidas sobre la misma parte sin una respuesta válida—, el criterio que se apoya en esa parte queda como máximo en Inicial, y el Criterio 5 también (compuerta de autoría).</td></tr>
+                            <tr><th scope="row">Ajuste razonable</th><td>Quien necesite un ajuste razonable (tiempo, formato o modalidad) lo solicita al docente.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-5 mt-6 items-start">
+                <div id="quienes" class="callout callout-tip">
+                    <h3 class="text-sm font-bold text-emerald-800 mb-1.5"><i aria-hidden="true" class="fas fa-users text-emerald-700 mr-2"></i>Quiénes sustentan en vivo</h3>
+                    <ul class="text-sm list-disc pl-5 space-y-1.5">
+                        <li><strong>Cohorte de 20 entregas o menos:</strong> sustentan todos, en vivo.</li>
+                        <li><strong>Cohorte mayor:</strong> todos entregan un <a href="#video">video de pantalla</a> que responde dos preguntas asignadas después de la entrega, y se convoca en vivo a una parte, alrededor del 30 %. Se anuncia desde el inicio que cualquiera puede ser convocado, de modo que todos preparan la defensa, y el sorteo se hace el día de la sesión.</li>
+                        <li><strong>Convocatoria dirigida</strong>, además del sorteo, cuando hay <strong>señales de riesgo</strong>: entrega sin bitácora, código incongruente con el informe, similitud entre entregas, métricas inverosímiles o un video con una respuesta que no es válida.</li>
+                        <li>En <strong>equipos</strong>, se pregunta a <strong>cada integrante</strong> sobre una parte distinta, y la compuerta se aplica a cada uno por separado.</li>
+                        <li>Quien necesite un ajuste razonable lo solicita al docente.</li>
+                    </ul>
+                </div>
+                <div id="video" class="callout callout-info">
+                    <h3 class="text-sm font-bold text-primary mb-1.5"><i aria-hidden="true" class="fas fa-display text-primary mr-2"></i>Video de pantalla: alternativa asíncrona (5 a 8 minutos)</h3>
+                    <p class="text-sm">Para garantizar la <strong>equidad de acceso</strong> (zonas horarias, conectividad inestable, cuidados, discapacidad) y en las <strong>cohortes grandes</strong> (ver <a href="#quienes">«Quiénes sustentan en vivo»</a>), se admite un <strong>video de pantalla de 5 a 8 minutos</strong> en el que quien sustenta, <strong>mostrando el propio cuaderno en pantalla y con su voz</strong>, responde <strong>dos preguntas que el docente asigna después de la entrega</strong>.</p>
+                    <ul class="text-sm list-disc pl-5 mt-2 space-y-1.5">
+                        <li><strong>Cuándo aplica:</strong> cuando la sesión sincrónica no es viable para una persona, o como vía por defecto en las cohortes de más de 20 entregas.</li>
+                        <!-- A CONFIRMAR POR EL DOCENTE: la política (uso-responsable-ia.md, §4.5) propone «48 horas desde la asignación de las preguntas». Mientras no se confirme, la página remite al campus virtual. -->
+                        <li><strong>Plazo:</strong> se entrega en el plazo que fija el campus virtual, contado desde la asignación de las preguntas.</li>
+                        <li><strong>Qué se muestra:</strong> la pantalla con el cuaderno <strong>mientras se explica</strong> (no diapositivas leídas), señalando las líneas concretas de las que se habla, no en abstracto. No se exige mostrar el rostro.</li>
+                        <li><strong>En equipo:</strong> cada integrante responde sus propias preguntas.</li>
+                        <li><strong>Equivalencia:</strong> rigen los mismos criterios que en la sesión en vivo (ver el <a href="#protocolo">protocolo</a>).</li>
+                        <li><strong>Compuerta:</strong> si una de las dos respuestas no es válida, se convoca a una sesión breve en vivo, antes de emitir la nota, con una repregunta sobre la misma parte; si tampoco es válida, se aplica la compuerta de autoría.</li>
+                        <li><strong>Entrega:</strong> solo por el aula virtual institucional, nunca como enlace público, con las reglas de <a href="#grabacion">grabación, consentimiento y custodia</a>.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== GRABACIÓN, CONSENTIMIENTO Y CUSTODIA ====================== -->
+        <section id="grabacion">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i aria-hidden="true" class="fas fa-video text-pink-700 mr-2"></i>Grabación, consentimiento y custodia</h2>
+            <div class="callout callout-eth">
+                <h3 class="text-sm font-bold text-cyan-900 mb-1.5"><i aria-hidden="true" class="fas fa-user-lock text-teal mr-2"></i>La imagen y la voz son datos personales</h3>
+                <p class="text-sm">La imagen y la voz de quien sustenta son datos personales (Ley 1581 de 2012). Estas reglas se informan al convocar la sustentación o al asignar las preguntas del video.</p>
+            </div>
+            <div role="region" tabindex="0" aria-label="Tabla de reglas de grabación, consentimiento y custodia (se desplaza horizontalmente)" class="overflow-x-auto card p-1 mt-5">
+                <table class="tbl" style="min-width:620px">
+                    <caption class="sr-only">Reglas de grabación, consentimiento y custodia de la sustentación</caption>
+                    <thead><tr style="background:#3D008D"><th scope="col" style="width:22%">Aspecto</th><th scope="col">Regla</th></tr></thead>
+                    <tbody>
+                        <tr><th scope="row">Qué se graba</th><td>Por defecto, <strong>la sesión sincrónica no se graba</strong>: la evidencia es la hoja de puntaje con las conductas observadas. El <a href="#video">video asíncrono</a> sí es una grabación de pantalla y voz.</td></tr>
+                        <tr><th scope="row">Aviso y consentimiento</th><td>Si se quiere grabar la sesión sincrónica (para una segunda revisión o un reclamo), se avisa al convocarla y, al inicio, se pide <strong>autorización previa, expresa e informada</strong>; la hora de la autorización queda en la hoja. <strong>Negarse no penaliza</strong>: se continúa sin grabar. En el video, el mensaje de entrega incluye la autorización para tratarlo con estas reglas.</td></tr>
+                        <tr><th scope="row">Finalidad</th><td>Solo la evaluación de esta fase y su eventual reclamo. La grabación no se usa como material de clase ni se sube a asistentes de IA o a servicios de transcripción en la nube.</td></tr>
+                        <tr><th scope="row">Quién la ve</th><td>El docente del curso y, si hay un reclamo, la instancia académica competente.</td></tr>
+                        <tr><th scope="row">Dónde se guarda</th><td>En el almacenamiento institucional (aula virtual o cuenta institucional del docente); nunca en el repositorio público del curso ni en enlaces públicos.</td></tr>
+                        <!-- A CONFIRMAR POR EL DOCENTE: plazo exacto de conservación de las grabaciones (la política dice «plazo exacto a confirmar por el docente»). -->
+                        <tr><th scope="row">Cuánto tiempo</th><td>Hasta el cierre de las calificaciones del periodo académico y de los reclamos sobre la nota de la fase; después se elimina.</td></tr>
+                        <tr><th scope="row">Cámara</th><td>Se pide al inicio para verificar la identidad. Si no es posible (conectividad, discapacidad, privacidad del entorno), la identidad se verifica por otro medio —p. ej., el ingreso con la cuenta institucional— y se sigue con pantalla compartida y voz. Se permite fondo virtual.</td></tr>
+                        <tr><th scope="row">Video sin rostro</th><td>En el video basta la pantalla y la voz; no se exige mostrar el rostro.</td></tr>
+                        <tr><th scope="row">Ajuste razonable</th><td>Quien necesite otra forma de sustentar (tiempo, formato o modalidad) lo solicita al docente, sin tener que aportar más información personal que la indispensable.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- A CONFIRMAR POR EL DOCENTE: enlace oficial a la política de tratamiento de datos personales de la Universidad Santo Tomás (se menciona sin URL). -->
+            <p class="text-sm text-slate-700 max-w-4xl mt-4"><strong>Base normativa.</strong> Ley 1581 de 2012 (autorización previa, expresa e informada del titular) y Decreto 1377 de 2013, compilado en el Decreto 1074 de 2015, junto con la política de tratamiento de datos personales de la Universidad. Las referencias completas de las normas están <a href="#referencias">al final</a>.</p>
+        </section>
+
+        <!-- ====================== REFERENCIAS ====================== -->
+        <section id="referencias">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-2"><i aria-hidden="true" class="fas fa-book text-pink-700 mr-2"></i>Referencias (APA 7)</h2>
+            <p class="text-slate-700 max-w-4xl mb-5">Fuentes principales citadas en este catálogo. Siguen la norma <strong>APA 7.ª edición</strong> (estándar institucional USTA), como la bibliografía del curso.</p>
+            <div class="card p-5 md:p-6">
+                <ul id="lista-referencias" class="text-sm text-slate-700 space-y-2.5">
+                    <li>Congreso de la República de Colombia. (2012). <em>Ley Estatutaria 1581 de 2012, por la cual se dictan disposiciones generales para la protección de datos personales</em>. <a class="url-literal url-completa" href="https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=49981" target="_blank" rel="noopener">https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=49981<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>Congreso de la República de Colombia. (2014). <em>Ley 1712 de 2014, por medio de la cual se crea la Ley de Transparencia y del Derecho de Acceso a la Información Pública Nacional</em>.</li>
+                    <li>Copernicus Climate Change Service. (s. f.). <em>Copernicus Climate Data Store (CDS)</em> [Conjunto de datos]. <a class="url-literal url-completa" href="https://cds.climate.copernicus.eu/" target="_blank" rel="noopener">https://cds.climate.copernicus.eu/<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>Departamento Administrativo Nacional de Estadística. (s. f.). <em>Índice de Precios al Consumidor (IPC)</em> [Conjunto de datos]. <a class="url-literal url-completa" href="https://www.dane.gov.co/index.php/estadisticas-por-tema/precios-y-costos/indice-de-precios-al-consumidor-ipc" target="_blank" rel="noopener">https://www.dane.gov.co/index.php/estadisticas-por-tema/precios-y-costos/indice-de-precios-al-consumidor-ipc<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>Donaldson, D. y Storeygard, A. (2016). The view from above: Applications of satellite data in economics. <em>Journal of Economic Perspectives</em>, <em>30</em>(4), 171–198. <a class="url-literal url-completa" href="https://doi.org/10.1257/jep.30.4.171" target="_blank" rel="noopener">https://doi.org/10.1257/jep.30.4.171<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>Earth Observation Group. (s. f.). <em>VIIRS nighttime lights</em> [Conjunto de datos]. <a class="url-literal url-completa" href="https://eogdata.mines.edu/products/vnl/" target="_blank" rel="noopener">https://eogdata.mines.edu/products/vnl/<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>European Space Agency. (s. f.). <em>Copernicus Data Space Ecosystem</em> [Conjunto de datos]. <a class="url-literal url-completa" href="https://dataspace.copernicus.eu/" target="_blank" rel="noopener">https://dataspace.copernicus.eu/<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>Food and Agriculture Organization of the United Nations. (s. f.). <em>FAOSTAT: Food and agriculture statistics</em> [Conjunto de datos]. <a class="url-literal url-completa" href="https://www.fao.org/faostat/" target="_blank" rel="noopener">https://www.fao.org/faostat/<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>Global Biodiversity Information Facility. (s. f.). <em>GBIF: The Global Biodiversity Information Facility</em> [Conjunto de datos]. <a class="url-literal url-completa" href="https://www.gbif.org/" target="_blank" rel="noopener">https://www.gbif.org/<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>Henderson, J. V., Storeygard, A. y Weil, D. N. (2012). Measuring economic growth from outer space. <em>American Economic Review</em>, <em>102</em>(2), 994–1028. <a class="url-literal url-completa" href="https://doi.org/10.1257/aer.102.2.994" target="_blank" rel="noopener">https://doi.org/10.1257/aer.102.2.994<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>Hughes, D. P. y Salathé, M. (2015). <em>An open access repository of images on plant health to enable the development of mobile disease diagnostics</em> [Preprint]. arXiv. <a class="url-literal url-completa" href="https://doi.org/10.48550/arXiv.1511.08060" target="_blank" rel="noopener">https://doi.org/10.48550/arXiv.1511.08060<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>iNaturalist. (s. f.). <em>iNaturalist open data</em> [Conjunto de datos]. <a class="url-literal url-completa" href="https://registry.opendata.aws/inaturalist-open-data/" target="_blank" rel="noopener">https://registry.opendata.aws/inaturalist-open-data/<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>Instituto de Hidrología, Meteorología y Estudios Ambientales. (s. f.). <em>DHIME: Consulta y descarga de datos hidrometeorológicos</em> [Conjunto de datos]. <a class="url-literal url-completa" href="https://dhime.ideam.gov.co/atencionciudadano/" target="_blank" rel="noopener">https://dhime.ideam.gov.co/atencionciudadano/<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>Instituto Nacional de Salud. (s. f.). <em>SIVIGILA: Sistema de Vigilancia en Salud Pública</em> [Conjunto de datos]. <a class="url-literal url-completa" href="https://portalsivigila.ins.gov.co/" target="_blank" rel="noopener">https://portalsivigila.ins.gov.co/<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>Ministerio de Tecnologías de la Información y las Comunicaciones. (s. f.). <em>Datos Abiertos Colombia (datos.gov.co)</em> [Conjunto de datos]. <a class="url-literal url-completa" href="https://www.datos.gov.co/" target="_blank" rel="noopener">https://www.datos.gov.co/<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>Mohanty, S. P. (s. f.). <em>PlantVillage-Dataset</em> [Conjunto de datos]. <a class="url-literal url-completa" href="https://github.com/spMohanty/PlantVillage-Dataset" target="_blank" rel="noopener">https://github.com/spMohanty/PlantVillage-Dataset<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>Mohanty, S. P., Hughes, D. P. y Salathé, M. (2016). Using deep learning for image-based plant disease detection. <em>Frontiers in Plant Science</em>, <em>7</em>, 1419. <a class="url-literal url-completa" href="https://doi.org/10.3389/fpls.2016.01419" target="_blank" rel="noopener">https://doi.org/10.3389/fpls.2016.01419<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>National Aeronautics and Space Administration. (s. f.). <em>NASA's Black Marble: Nighttime lights product suite (VNP46)</em> [Conjunto de datos]. <a class="url-literal url-completa" href="https://blackmarble.gsfc.nasa.gov/" target="_blank" rel="noopener">https://blackmarble.gsfc.nasa.gov/<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>National Aeronautics and Space Administration. (s. f.). <em>POWER: Prediction Of Worldwide Energy Resources</em> [Conjunto de datos]. <a class="url-literal url-completa" href="https://power.larc.nasa.gov/" target="_blank" rel="noopener">https://power.larc.nasa.gov/<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>National Oceanic and Atmospheric Administration. (s. f.). <em>Climate Data Online (CDO)</em> [Conjunto de datos]. <a class="url-literal url-completa" href="https://www.ncei.noaa.gov/cdo-web/" target="_blank" rel="noopener">https://www.ncei.noaa.gov/cdo-web/<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>Parraga-Alava, J., Cusme, K., Loor, A. y Santander, E. (2019). <em>RoCoLe: A robusta coffee leaf images dataset</em> (Versión 2) [Conjunto de datos]. Mendeley Data. <a class="url-literal url-completa" href="https://doi.org/10.17632/c5yvn32dzg.2" target="_blank" rel="noopener">https://doi.org/10.17632/c5yvn32dzg.2<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>Parraga-Alava, J., Cusme, K., Loor, A. y Santander, E. (2019). RoCoLe: A robusta coffee leaf images dataset for evaluation of machine learning based methods in plant diseases recognition. <em>Data in Brief</em>, <em>25</em>, 104414. <a class="url-literal url-completa" href="https://doi.org/10.1016/j.dib.2019.104414" target="_blank" rel="noopener">https://doi.org/10.1016/j.dib.2019.104414<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>Presidencia de la República de Colombia. (2013). <em>Decreto 1377 de 2013, por el cual se reglamenta parcialmente la Ley 1581 de 2012</em>. <a class="url-literal url-completa" href="https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=53646" target="_blank" rel="noopener">https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=53646<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>Presidencia de la República de Colombia. (2015). <em>Decreto 1074 de 2015, por medio del cual se expide el Decreto Único Reglamentario del Sector Comercio, Industria y Turismo</em>. <a class="url-literal url-completa" href="https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=76608" target="_blank" rel="noopener">https://www.funcionpublica.gov.co/eva/gestornormativo/norma.php?i=76608<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>Superintendencia de Industria y Comercio. (2022). <em>Circular Única, Título V: Protección de datos personales</em> (versión del 29 de septiembre de 2022). <a class="url-literal url-completa" href="https://www.sic.gov.co/sites/default/files/normatividad/092022/T%C3%ADtulo%20V%20Versi%C3%B3n%2029-09-2022.pdf" target="_blank" rel="noopener">https://www.sic.gov.co/sites/default/files/normatividad/092022/T%C3%ADtulo%20V%20Versi%C3%B3n%2029-09-2022.pdf<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>University of California, Irvine. (s. f.). <em>UCI Machine Learning Repository</em> [Conjunto de datos]. <a class="url-literal url-completa" href="https://archive.ics.uci.edu/" target="_blank" rel="noopener">https://archive.ics.uci.edu/<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>U.S. Geological Survey. (s. f.). <em>EarthExplorer</em> [Conjunto de datos]. <a class="url-literal url-completa" href="https://earthexplorer.usgs.gov/" target="_blank" rel="noopener">https://earthexplorer.usgs.gov/<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>Wang, Z. y Oates, T. (2015). Imaging time-series to improve classification and imputation. En <em>Proceedings of the 24th International Joint Conference on Artificial Intelligence (IJCAI)</em> (pp. 3939–3945). AAAI Press. <a class="url-literal url-completa" href="https://arxiv.org/abs/1506.00327" target="_blank" rel="noopener">https://arxiv.org/abs/1506.00327<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>World Bank. (s. f.). <em>World Bank Open Data</em> [Conjunto de datos]. <a class="url-literal url-completa" href="https://data.worldbank.org/" target="_blank" rel="noopener">https://data.worldbank.org/<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                    <li>Zenodo. (s. f.). <em>Zenodo: Research data repository</em> [Conjunto de datos]. <a class="url-literal url-completa" href="https://zenodo.org/" target="_blank" rel="noopener">https://zenodo.org/<span class="sr-only"> (se abre en una pestaña nueva)</span></a></li>
+                </ul>
+            </div>
+            <div class="callout callout-info mt-5">
+                <h3 class="text-sm font-bold text-primary mb-1.5"><i aria-hidden="true" class="fas fa-link text-primary mr-2"></i>Verificación de enlaces y acceso libre</h3>
+                <p class="text-sm">Las URL de las fuentes principales (NASA POWER, RoCoLe/Mendeley, GBIF, Copernicus, UCI, Zenodo, NOAA, World Bank, FAOSTAT, IDEAM, SIVIGILA, datos.gov.co) se <strong>verificaron</strong> a la fecha de creación del catálogo. Las añadidas el <strong>2026-07-15</strong> —<strong>NASA Black Marble</strong>, <strong>LAADS DAAC</strong>, <strong>EOG/VIIRS</strong>, <strong>DANE IPC</strong> y <strong>datos.gov.co</strong>— se verificaron esa fecha (HTTP 200). Black Marble y EOG exigen <strong>registro gratuito</strong> para descargar (no para consultar el catálogo). En particular, las <strong>dos fuentes de la <a href="#ruta-por-defecto">ruta por defecto</a></strong> tienen <strong>acceso libre confirmado</strong>: <strong>RoCoLe</strong> es <strong>CC BY 4.0</strong> (descarga directa con DOI, libre con atribución) y <strong>NASA POWER</strong> es de <strong>libre uso</strong> (API por coordenadas, sin <em lang="en">token</em> ni registro). El <strong>2026-10-23</strong> se verificaron en su fuente primaria tres licencias: RoCoLe (CC BY 4.0, ficha DataCite del DOI), PlantVillage (CC BY-SA 3.0, artículo de publicación de Hughes y Salathé, 2015) y SIVIGILA (CC BY-SA 4.0, ficha del conjunto en datos.gov.co); las normas del <a href="12_Plantilla_Propuesta_de_Datos_Fase1.html#ley-1581"><em>checklist</em> de protección de datos</a> se cotejaron ese mismo día en Función Pública, la Secretaría del Senado y la SIC. Las referencias siguen la bibliografía maestra del curso; las cuatro normas de protección de datos (Ley 1581, Decretos 1377 y 1074, Circular Única de la SIC) se añadieron aquí. Si un enlace deja de responder, se consulta la fuente equivalente o su DOI.</p>
+            </div>
+        </section>
+
+        <!-- ====================== PLANTILLA EN MARKDOWN ====================== -->
+        <section id="markdown" class="no-print">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-2"><i aria-hidden="true" class="fab fa-markdown text-pink-700 mr-2"></i>Plantilla en Markdown: fuentes y procedencia</h2>
+            <p class="text-slate-700 max-w-4xl mb-4">Las partes de la Propuesta de Datos que se llenan mientras se recorre el catálogo: la tabla de fuentes (sección 3), el test de procedencia con sus evidencias (sección 4 y anexo B) y las citas APA (sección 8). La Propuesta completa está en su <a href="12_Plantilla_Propuesta_de_Datos_Fase1.html#markdown">propia plantilla</a>. El recuadro se puede seleccionar y copiar a mano; con JavaScript activo, los botones lo copian o lo descargan como <span class="icode">fuentes-y-procedencia.md</span>.</p>
+            <div class="flex flex-wrap gap-3 mb-3">
+                <button type="button" id="md-copiar" class="btn btn-primario" hidden><i aria-hidden="true" class="fas fa-copy"></i>Copiar la plantilla en Markdown</button>
+                <a id="md-descargar" class="btn btn-secundario" download="fuentes-y-procedencia.md" hidden><i aria-hidden="true" class="fas fa-download"></i>Descargar .md</a>
+            </div>
+            <p id="md-estado" class="text-sm font-semibold text-emerald-700 min-h-[1.25rem] mb-2" role="status" aria-live="polite"></p>
+            <div class="code-window">
+                <div class="code-window-bar">
+                    <div class="code-window-dots" aria-hidden="true"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></div>
+                    <span class="code-window-title">fuentes-y-procedencia.md</span>
+                    <span class="code-window-lang">Markdown</span>
+                </div>
+                <div role="region" tabindex="0" aria-label="Plantilla en Markdown de fuentes y procedencia (se desplaza)" class="md-region">
+<pre id="md-fuente" class="codeblock md-pre">
+# Fuentes y procedencia · Propuesta de Datos · Proyecto Centinela · Fase 1
+
+Secciones 3, 4 y 8 de la Propuesta de Datos y su anexo B. La plantilla completa de la Propuesta está en https://jotamao1985.github.io/Deep_Learning_Usta/12_Plantilla_Propuesta_de_Datos_Fase1.html
+
+## 3. Fuentes (con enlaces y licencia)
+
+| Modalidad | Fuente (productor primario) | Enlace o DOI | Licencia y versión | Dónde se verificó la licencia | ¿Datos de personas? |
+| --- | --- | --- | --- | --- | --- |
+| Imagen | _(…)_ | _(…)_ | _(…)_ | _(…)_ | _(…)_ |
+| Temporal | _(…)_ | _(…)_ | _(…)_ | _(…)_ | _(…)_ |
+
+Avisos que se revisan en cada fuente:
+
+- [ ] Licencia con su nombre y su versión, verificada en la fuente primaria (no en una copia).
+- [ ] ShareAlike (p. ej., PlantVillage, CC BY-SA 3.0): los derivados y los modelos entrenados van con la misma licencia.
+- [ ] BY-NC (p. ej., registros de GBIF o fotos de iNaturalist): sin uso comercial.
+- [ ] Datos de salud (p. ej., SIVIGILA, imágenes médicas): agregados o anonimizados por la fuente, sin cruces que permitan reidentificar.
+- [ ] Campos con nombres de personas (p. ej., `recordedBy`, `identifiedBy`, `rightsHolder` en GBIF): se eliminan.
+
+## 4. Por qué NO es un reto resuelto: test de procedencia
+
+- [ ] 1. Cadena de procedencia: URL o DOI del productor primario, fecha de descarga, nombre exacto y huella SHA-256 de cada archivo.
+- [ ] 2. Descarga trazable: la celda de carga obtiene los datos de esa URL o API; sin `kaggle datasets download`, `kagglehub` ni rutas `/kaggle/input/`.
+- [ ] 3. Búsqueda declarada de espejos en `kaggle.com/datasets`, con su fecha: hasta tres coincidencias con su URL, o «sin coincidencias».
+- [ ] 4. Huella de crudeza antes de limpiar: filas × columnas, porcentaje de faltantes y balance de la etiqueta.
+- [ ] 5. Contraste con el espejo, si existe: huella distinta, más filas o faltantes, columnas originales.
+
+### Anexo B · Evidencias
+
+| Archivo (nombre exacto) | URL o DOI del productor primario | Fecha de descarga | Huella SHA-256 |
+| --- | --- | --- | --- |
+| _(…)_ | _(…)_ | _(AAAA-MM-DD)_ | _(…)_ |
+
+- **Descarga trazable:** _(celda de carga, URL o API de la que obtiene los datos y resultado de la búsqueda de «kaggle» en el cuaderno)_
+- **Búsqueda de espejos** (fecha AAAA-MM-DD): _(coincidencias con su URL, o «sin coincidencias»)_
+- **Huella de crudeza:** filas × columnas _(…)_ · faltantes _(… %)_ · balance de la etiqueta _(…)_
+- **Contraste con el espejo:** _(…)_
+
+## 8. Cita APA 7 de cada fuente
+
+- _(…)_
+- _(…)_
+
+Ejemplos de la ruta por defecto:
+
+- Parraga-Alava, J., Cusme, K., Loor, A. y Santander, E. (2019). *RoCoLe: A robusta coffee leaf images dataset* (Versión 2) [Conjunto de datos]. Mendeley Data. https://doi.org/10.17632/c5yvn32dzg.2
+- National Aeronautics and Space Administration. (s. f.). *POWER: Prediction Of Worldwide Energy Resources* [Conjunto de datos]. https://power.larc.nasa.gov/
+</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== RELACIONADO ====================== -->
+        <section id="lugar">
+            <div class="usta-header rounded-2xl p-7 text-white">
+                <h2 class="text-xl md:text-2xl font-extrabold mb-3"><i aria-hidden="true" class="fas fa-diagram-project mr-2"></i>Lugar de este catálogo en el curso</h2>
+                <div class="grid md:grid-cols-3 gap-4 text-sm">
+                    <div class="bg-black/20 rounded-xl p-4">
+                        <p class="font-bold mb-1">La actividad</p>
+                        <p class="text-white">Las fuentes alimentan la <a href="11_Modulo_1_Actividad_Fase1_Centinela.html#paso-0" class="underline font-semibold text-white">Propuesta de Datos (Paso 0)</a>; la sustentación cierra la <a href="11_Modulo_1_Actividad_Fase1_Centinela.html#ia" class="underline font-semibold text-white">parte de uso de IA</a> después de la <a href="11_Modulo_1_Actividad_Fase1_Centinela.html#entrega" class="underline font-semibold text-white">entrega</a> y aplica la compuerta de autoría de la <a href="11_Modulo_1_Actividad_Fase1_Centinela.html#rubrica" class="underline font-semibold text-white">rúbrica</a>.</p>
+                    </div>
+                    <div class="bg-black/20 rounded-xl p-4">
+                        <p class="font-bold mb-1">Las plantillas</p>
+                        <p class="text-white">La <a href="12_Plantilla_Propuesta_de_Datos_Fase1.html" class="underline font-semibold text-white">Propuesta de Datos</a> recoge las fuentes elegidas, y la <a href="13_Plantilla_Bitacora_IA.html" class="underline font-semibold text-white">Bitácora de IA</a> es el insumo de las preguntas de la sustentación.</p>
+                    </div>
+                    <a href="index.html" class="bg-black/20 hover:bg-black/30 transition rounded-xl p-4 block">
+                        <p class="font-bold mb-1">Portal del curso <i aria-hidden="true" class="fas fa-arrow-right ml-1 text-xs"></i></p>
+                        <p class="text-white">Todos los materiales, actividades y plantillas de los tres módulos.</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ====================== PIE ====================== -->
+    <footer class="bg-navy text-white/80 text-sm">
+        <div class="max-w-6xl mx-auto px-5 md:px-8 py-8">
+            <p class="font-bold text-white mb-1">Universidad Santo Tomás · Maestría en Ciencia de Datos</p>
+            <p>Profundización I: Redes Neuronales — Deep Learning (EA-N-F-004) · Experto temático: Javier Mauricio Sierra</p>
+            <p class="text-white/55 mt-3 text-xs">Proyecto Centinela · Fase 1 — Fundamentos del Aprendizaje Profundo. Material de aprendizaje autónomo. Metodología «Ingeniería de Trinchera»: si una arquitectura no corre en Google Colab, no existe.</p>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            'use strict';
+
+            // Realce del enlace de navegación activo según la sección visible.
+            var secs = document.querySelectorAll('main section[id]');
+            var links = document.querySelectorAll('.navlink');
+            if ('IntersectionObserver' in window) {
+                var navIO = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (e) {
+                        if (!e.isIntersecting) return;
+                        links.forEach(function (l) { l.classList.remove('text-primary', 'bg-slate-100'); l.removeAttribute('aria-current'); });
+                        var active = document.querySelector('.navlink[href="#' + e.target.id + '"]');
+                        if (active) { active.classList.add('text-primary', 'bg-slate-100'); active.setAttribute('aria-current', 'location'); }
+                    });
+                }, { rootMargin: '-45% 0px -50% 0px' });
+                secs.forEach(function (s) { navIO.observe(s); });
+            }
+
+            // Bloque «Plantilla en Markdown»: copiar y descargar. Sin JavaScript, el texto se selecciona a mano.
+            var fuente = document.getElementById('md-fuente');
+            var estado = document.getElementById('md-estado');
+            var btnCopiar = document.getElementById('md-copiar');
+            var enlace = document.getElementById('md-descargar');
+            if (!fuente || !estado) return;
+            var texto = fuente.textContent.replace(/^\n/, '');
+
+            function avisar(msg) {
+                estado.textContent = '';
+                window.setTimeout(function () { estado.textContent = msg; }, 60);   // se vuelve a anunciar aunque se repita
+            }
+            function seleccionar() {
+                var sel = window.getSelection();
+                var rango = document.createRange();
+                rango.selectNodeContents(fuente);
+                sel.removeAllRanges();
+                sel.addRange(rango);
+            }
+            function respaldo() {
+                seleccionar();
+                var ok = false;
+                try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+                avisar(ok ? 'Plantilla copiada en el portapapeles.'
+                          : 'El texto quedó seleccionado: se copia con Ctrl+C (Cmd+C en Mac).');
+            }
+
+            if (btnCopiar) {
+                btnCopiar.hidden = false;
+                btnCopiar.addEventListener('click', function () {
+                    if (!(navigator.clipboard && window.isSecureContext)) { respaldo(); return; }
+                    // Si el navegador no resuelve la promesa (permiso pendiente), se usa la selección del texto.
+                    var resuelto = false;
+                    var espera = window.setTimeout(function () { if (!resuelto) { resuelto = true; respaldo(); } }, 1200);
+                    navigator.clipboard.writeText(texto).then(function () {
+                        if (resuelto) return;
+                        resuelto = true; window.clearTimeout(espera);
+                        avisar('Plantilla copiada en el portapapeles.');
+                    }, function () {
+                        if (resuelto) return;
+                        resuelto = true; window.clearTimeout(espera);
+                        respaldo();
+                    });
+                });
+            }
+
+            if (enlace && window.Blob && window.URL && URL.createObjectURL) {
+                enlace.href = URL.createObjectURL(new Blob([texto], { type: 'text/markdown;charset=utf-8' }));
+                enlace.hidden = false;
+                enlace.addEventListener('click', function () {
+                    avisar('Descarga iniciada: ' + enlace.getAttribute('download') + '.');
+                });
+            }
+        })();
+    </script>
+    <script defer src="portal-nav.js"></script>
+</body>
+
+</html>

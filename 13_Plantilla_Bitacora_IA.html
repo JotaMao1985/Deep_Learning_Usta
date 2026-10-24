@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Plantilla de la Bitácora de IA del Proyecto Centinela: datos de la entrega, declaración de uso o de no uso firmada por cada integrante, ficha E-0 de cada interacción con la IA (decisión, verificación y evidencia de origen) y ficha de la auditoría a la IA, real o inducida y declarada. Sirve para las tres fases. Maestría en Ciencia de Datos, Universidad Santo Tomás.">
+    <title>Plantilla · Bitácora de IA · Proyecto Centinela — USTA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Tailwind CSS (utilidades), versión fija: sin versión, el CDN redirige a la última -->
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+
+    <!-- Font Awesome (iconografía de apoyo) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Google Fonts: Montserrat (texto) y Fira Code (código) -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Montserrat', 'Helvetica Neue', 'Arial', 'sans-serif'] },
+                    colors: {
+                        primary: '#3D008D',
+                        secondary: '#ED1E79',
+                        navy: '#001A4D',
+                        gold: '#FDB913',
+                        teal: '#0E7490',
+                        bg: '#F8FAFC',
+                        surface: '#FFFFFF',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #F8FAFC;
+            color: #1E293B;
+        }
+        html { scroll-behavior: smooth; }
+        [id] { scroll-margin-top: 4.5rem; }   /* las anclas no quedan bajo la barra fija */
+        code, pre, .mono { font-family: 'Fira Code', monospace; }
+        [hidden] { display: none !important; }   /* los botones del bloque Markdown aparecen solo con JavaScript */
+
+        /* Gradientes institucionales USTA */
+        .usta-gradient { background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%); }
+        .usta-header { background: linear-gradient(135deg, #001A4D 0%, #3D008D 60%, #5B1C9E 100%); color: #fff; }   /* blanco también sin JavaScript (sin Tailwind) */
+
+        /* Tarjeta base */
+        .card {
+            background: #fff; border-radius: 16px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+            transition: box-shadow .25s ease, transform .25s ease;
+        }
+        .card:hover { box-shadow: 0 12px 30px rgba(0,0,0,0.11); }
+
+        /* Barra de desplazamiento */
+        ::-webkit-scrollbar { width: 9px; height: 9px; }
+        ::-webkit-scrollbar-track { background: #eef2f7; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg,#3D008D,#ED1E79); border-radius: 5px; }
+
+        /* Código en línea y bloques */
+        .icode {
+            background: #F1F5F9; color: #0F172A; padding: .08rem .42rem;
+            border-radius: 5px; font-size: .85em; font-family: 'Fira Code', monospace;
+            overflow-wrap: anywhere;
+        }
+        .codeblock {
+            background: #0F172A; color: #E2E8F0; border-radius: 12px;
+            padding: 1rem 1.1rem; font-family: 'Fira Code', monospace;
+            font-size: .82rem; line-height: 1.7; overflow-x: auto;
+            white-space: pre; tab-size: 4;
+        }
+
+        /* ====== Ventana de código (cromo tipo terminal · marca USTA) ====== */
+        .code-window {
+            position: relative; background: #0F172A; border: 1px solid #1E293B;
+            border-radius: 14px; overflow: hidden; box-shadow: 0 12px 32px rgba(2,6,23,.30);
+        }
+        .code-window::before {
+            content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; z-index: 2;
+            background: linear-gradient(90deg, #3D008D 0%, #ED1E79 60%, #FDB913 100%);
+        }
+        .code-window-bar {
+            display: flex; align-items: center; gap: .55rem;
+            padding: .62rem .95rem; padding-top: calc(.62rem + 3px);
+            background: #0B1326; border-bottom: 1px solid #1E293B;
+        }
+        .code-window-dots { display: flex; gap: .42rem; }
+        .code-window-dots span { width: 11px; height: 11px; border-radius: 50%; display: block; }
+        .code-window-dots .d-r { background: #FF5F56; }
+        .code-window-dots .d-y { background: #FFBD2E; }
+        .code-window-dots .d-g { background: #27C93F; }
+        .code-window-title { font-family: 'Fira Code', monospace; font-size: .72rem; color: #CBD5E1; letter-spacing: .01em; overflow-wrap: anywhere; }
+        .code-window-lang {
+            margin-left: auto; font-family: 'Fira Code', monospace; font-size: .67rem;
+            color: #FDE68A; background: rgba(253,185,19,.13); padding: .14rem .55rem;
+            border-radius: 999px; white-space: nowrap;
+        }
+        .code-window .codeblock { border-radius: 0; box-shadow: none; }
+
+        /* Callout / analogía */
+        .callout { border-left: 4px solid; border-radius: 12px; padding: .9rem 1.1rem; }
+        .callout-info   { background:#F3F0FC; border-color:#3D008D; }
+        .callout-tip    { background:#ECFDF5; border-color:#0E9F6E; }
+        .callout-warn   { background:#FFFBEB; border-color:#FDB913; }
+        .callout-danger { background:#FEF2F2; border-color:#DC2626; }
+        .callout-eth    { background:#F0F9FF; border-color:#0E7490; }
+
+        h2.sec-title { font-weight: 800; letter-spacing: -.02em; }
+
+        /* Navegación sticky */
+        .navbar { backdrop-filter: blur(8px); background: rgba(255,255,255,.86); }
+        .navlink { transition: color .2s ease, background .2s ease; }
+        .navlink:hover { color:#3D008D; }
+
+        /* Tabla genérica */
+        .tbl { width:100%; border-collapse: collapse; font-size:.9rem; }
+        .tbl th, .tbl td { border:1px solid #E2E8F0; padding:.6rem .7rem; vertical-align: top; text-align:left; }
+        .tbl thead th { color:#fff; }
+        .tbl tbody th { background:#F8FAFC; color:#001A4D; font-weight:700; }
+
+        /* Numeración de secciones */
+        .step-num {
+            flex: 0 0 auto; width:34px; height:34px; border-radius:10px;
+            display:flex; align-items:center; justify-content:center;
+            font-weight:800; color:#fff; background:linear-gradient(140deg,#3D008D,#ED1E79);
+        }
+
+        /* Regiones desplazables enfocables con el teclado. «position: relative» contiene los avisos .sr-only
+           (posición absoluta) de los enlaces de las tablas anchas: sin ella escapan del recorte y ensanchan la página. */
+        [role="region"][tabindex="0"]:focus-visible { outline: 3px solid #FDB913; outline-offset: 2px; }
+        [role="region"], .overflow-x-auto { position: relative; }
+
+        /* Enlaces dentro del texto: subrayados (el Preflight de Tailwind quita el subrayado) */
+        main p a:not([class]), main li a:not([class]), main td a:not([class]), main label a:not([class]), main .campo a:not([class]) {
+            color: #BE185D; text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px;
+        }
+
+        main a.url-literal { color: #BE185D; text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px; overflow-wrap: anywhere; }
+
+        /* Plantilla: campos a diligenciar, casillas y firmas */
+        .campo-rot { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #BE185D; margin: .9rem 0 .3rem; }
+        .campo {
+            border: 1.5px dashed #64748B; border-radius: 10px; background: #fff;
+            padding: .6rem .8rem; min-height: 3.4rem; color: #475569; font-size: .85rem; font-style: italic;
+        }
+        .campo-lg { min-height: 6.5rem; }
+        .tbl td.vacia { height: 2.4rem; background: #fff; }
+        .tbl td.ejemplo { color: #475569; font-style: italic; }
+        .chk { display: flex; gap: .65rem; align-items: flex-start; }
+        .chk input { flex: none; width: 1.05rem; height: 1.05rem; margin-top: .2rem; accent-color: #3D008D; }
+
+        /* Bloque «Plantilla en Markdown» */
+        .md-region { max-height: 34rem; overflow: auto; background: #0F172A; }
+        .md-pre { white-space: pre-wrap; overflow-wrap: anywhere; overflow: visible; }
+        .btn {
+            display: inline-flex; align-items: center; gap: .5rem; font-weight: 700; font-size: .875rem;
+            border-radius: 10px; padding: .55rem .95rem; border: 2px solid #3D008D; cursor: pointer; text-decoration: none;
+        }
+        .btn-primario { background: #3D008D; color: #fff; }
+        .btn-primario:hover { background: #2E006B; }
+        .btn-secundario { background: #fff; color: #3D008D; }
+        .btn-secundario:hover { background: #F3F0FC; }
+        .btn:focus-visible { outline: 3px solid #FDB913; outline-offset: 2px; }
+
+        /* Preferencias del usuario */
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .card { transition: none; }
+        }
+        @media (forced-colors: active) {
+            .campo { border-color: CanvasText; }
+            .btn { border-color: ButtonText; }
+        }
+
+        /* Impresión / PDF (A4): sin barra, sin botones ni bloque Markdown; tablas completas y URL visibles */
+        @media print {
+            @page { size: A4; margin: 14mm 12mm; }
+            body { background: #fff; font-size: 10pt; }
+            .no-print { display: none !important; }
+            .usta-header { background: #fff !important; border-bottom: 2px solid #3D008D; }
+            .usta-header, .usta-header * { color: #001A4D !important; }
+            .usta-header .rounded-full { border: 1px solid #64748B; }
+            .card { box-shadow: none; border: 1px solid #e5e7eb; }
+            .card, .callout, tr, li, .campo, [role="group"] { break-inside: avoid; }
+            h2, h3 { break-after: avoid; }
+            section { break-inside: auto; }
+            main { padding-top: 1rem !important; }
+            .space-y-14 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.6rem !important; }
+            .overflow-x-auto, [role="region"] { overflow: visible !important; max-height: none !important; }
+            .tbl { min-width: 0 !important; width: 100% !important; table-layout: fixed; font-size: 8.5pt; }
+            .tbl th, .tbl td { padding: .25rem .3rem; overflow-wrap: anywhere; }
+            thead { display: table-header-group; }
+            .tbl thead tr { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            input[type="checkbox"] { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            a { color: #1E293B; text-decoration: underline; }
+            a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .8em; overflow-wrap: anywhere; color: #475569; }
+            a.url-completa::after { content: none; }   /* el texto del enlace ya es la URL completa (referencias) */
+        }
+
+        /* Los hijos de una rejilla pueden encogerse: nada ensancha la página en móvil (375 px). */
+        .grid > * { min-width: 0; }
+        /* En celular, el número decorativo de cada sección se oculta (el título ya lo lleva) y cede su ancho. */
+        @media (max-width: 639px) { .step-num { display: none; } }
+    </style>
+</head>
+
+<body>
+    <a href="#contenido" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-white focus:text-primary focus:px-4 focus:py-2 focus:rounded-lg focus:font-semibold">Saltar al contenido</a>
+
+    <!-- ====================== ENCABEZADO ====================== -->
+    <header class="usta-header text-white">
+        <div class="max-w-6xl mx-auto px-5 md:px-8 py-10 md:py-14">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="usta-gradient p-2.5 rounded-xl shadow-lg"><i aria-hidden="true" class="fas fa-book-open text-lg"></i></span>
+                <span class="text-[11px] md:text-xs uppercase tracking-[0.25em] text-gold font-bold">Universidad Santo Tomás · Maestría en Ciencia de Datos</span>
+            </div>
+            <p class="text-pink-300 font-semibold text-sm md:text-base mb-1">Profundización I: Redes Neuronales — Deep Learning · EA-N-F-004</p>
+            <h1 class="text-3xl md:text-5xl font-extrabold leading-tight tracking-tight">
+                Plantilla · <span class="text-gold">Bitácora de IA</span><span class="md:hidden"> ·</span><br class="hidden md:block">
+                Proyecto Centinela
+            </h1>
+            <p class="text-lg md:text-2xl font-light text-white/90 mt-3">Registro fechado, declaraciones y auditoría a la IA · Fases 1, 2 y 3</p>
+            <div class="flex flex-wrap gap-2 mt-6 text-xs md:text-sm">
+                <span class="bg-white/15 rounded-full px-3 py-1"><i aria-hidden="true" class="fas fa-calendar-day mr-1.5 text-gold"></i>Se diligencia en el momento</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i aria-hidden="true" class="fas fa-scale-balanced mr-1.5 text-gold"></i>Criterio 5 · 15 % (Fase 1)</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i aria-hidden="true" class="fas fa-signature mr-1.5 text-gold"></i>Una firma por integrante</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i aria-hidden="true" class="fas fa-layer-group mr-1.5 text-gold"></i>Sirve para las tres fases</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ====================== NAVEGACIÓN STICKY ====================== -->
+    <nav aria-label="Secciones de la plantilla" class="navbar sticky top-0 z-40 border-b border-slate-200 no-print">
+        <div class="max-w-6xl mx-auto px-4 flex items-stretch">
+            <div class="flex gap-1 md:gap-3 overflow-x-auto text-xs md:text-sm font-semibold py-2.5 whitespace-nowrap flex-1 min-w-0">
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#uso"><i aria-hidden="true" class="fas fa-circle-info mr-1"></i>Cómo se usa</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#uso-adecuado"><i aria-hidden="true" class="fas fa-scale-balanced mr-1"></i>Uso adecuado</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#datos-entrega"><i aria-hidden="true" class="fas fa-id-card mr-1"></i>Datos de la entrega</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#declaraciones"><i aria-hidden="true" class="fas fa-signature mr-1"></i>Declaraciones</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#registro"><i aria-hidden="true" class="fas fa-table-list mr-1"></i>Registro</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#auditoria"><i aria-hidden="true" class="fas fa-bug-slash mr-1"></i>Auditoría</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#markdown"><i aria-hidden="true" class="fab fa-markdown mr-1"></i>Markdown</a>
+            </div>
+            <div class="flex-none w-14 md:w-24" aria-hidden="true"></div>
+        </div>
+    </nav>
+
+    <main id="contenido" tabindex="-1" class="max-w-6xl mx-auto px-5 md:px-8 py-10 md:py-14 space-y-14">
+
+        <!-- ====================== CÓMO SE USA ====================== -->
+        <section id="uso">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-4"><i aria-hidden="true" class="fas fa-circle-info text-pink-700 mr-2"></i>Cómo se usa esta plantilla</h2>
+            <p class="text-slate-700 max-w-4xl mb-5">La bitácora hace <strong>visible y evaluable el proceso de pensamiento</strong>: muestra que detrás de cada artefacto hubo una persona decidiendo —aceptando, modificando o rechazando lo que la IA propuso— <strong>y justificando por qué</strong>.</p>
+            <div class="callout callout-info">
+                <p class="text-sm">La plantilla se copia a la entrega y se diligencia <strong>a lo largo del proyecto</strong>, no al final. No se registra <em>cada</em> indicación (<em lang="en">prompt</em>): se documentan las <strong>interacciones que cambiaron una decisión técnica</strong> (arquitectura, datos, métricas, un error resuelto, un enfoque descartado). Pocas entradas bien razonadas valen más que muchas que solo dicen «Aceptada». La política completa es la de Uso Responsable de IA del curso, y la rúbrica de la fase (Criterio 5) está en la <a href="11_Modulo_1_Actividad_Fase1_Centinela.html#rubrica">Actividad 1 · Fase 1</a>. Las Fases 2 y 3 califican el uso de IA con su propia rúbrica, en la página de cada actividad (<a href="21_Modulo_2_Actividad_Fase2_Centinela.html#rubrica">Fase 2</a> y <a href="31_Modulo_3_Actividad_Fase3_Centinela.html#rubrica">Fase 3</a>).</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-4 mt-5">
+                <div class="card p-5">
+                    <h3 class="font-bold text-navy mb-1"><i aria-hidden="true" class="fas fa-clock text-primary mr-1.5"></i>Cuándo se diligencia</h3>
+                    <p class="text-sm text-slate-700">Durante el proyecto, en el momento de cada consulta, no al final. Si la entrega se hace por repositorio, el historial de <em lang="en">commits</em> respalda las fechas.</p>
+                </div>
+                <div class="card p-5">
+                    <h3 class="font-bold text-navy mb-1"><i aria-hidden="true" class="fas fa-users text-primary mr-1.5"></i>En equipo</h3>
+                    <p class="text-sm text-slate-700">Cada integrante firma la Declaración de uso (o la de no uso), y cada entrada dice quién hizo la consulta. En la <a href="14_Catalogo_Fuentes_y_Sustentacion.html#sustentacion">sustentación</a>, cada integrante responde por una parte distinta del trabajo.</p>
+                </div>
+                <div class="card p-5">
+                    <h3 class="font-bold text-navy mb-1"><i aria-hidden="true" class="fas fa-ban text-primary mr-1.5"></i>Sin uso de IA</h3>
+                    <p class="text-sm text-slate-700">Quien no usó IA lo declara en la bitácora («<a href="#no-uso">Declaración de no uso</a>») y hace la <a href="#auditoria">auditoría inducida</a>; no usarla no se penaliza.</p>
+                </div>
+            </div>
+            <div class="grid lg:grid-cols-2 gap-5 mt-5 items-start">
+                <div class="callout callout-warn">
+                    <h3 class="text-sm font-bold text-amber-900 mb-1.5"><i aria-hidden="true" class="fas fa-calendar-check text-amber-700 mr-2"></i>Las fechas se escriben en el momento</h3>
+                    <p class="text-sm">Cada entrada lleva la fecha y la hora de la consulta, anotadas cuando ocurre. Una bitácora que describe decisiones que el cuaderno entregado no refleja, o cuyas fechas son posteriores a la entrega, queda en Inicial en el Criterio 5. Si la entrega se hace por repositorio, el historial de <em lang="en">commits</em> respalda las fechas.</p>
+                </div>
+                <div class="callout callout-warn">
+                    <p class="text-sm"><i aria-hidden="true" class="fas fa-user-shield text-amber-600 mr-2"></i><strong>Datos personales y asistentes de IA.</strong> No se pegan ni se suben a un asistente de IA (ni a un servicio en la nube no autorizado) registros con datos personales —nombres, documentos, números de cuenta, coordenadas exactas, historias clínicas— ni datos de terceros sin su permiso: equivale a comunicarlos a otro responsable, a menudo fuera del país (Ley 1581 de 2012, art. 26). A la IA se le muestran el esquema y filas sintéticas, nunca los registros reales, y la bitácora registra qué datos se compartieron.</p>
+                </div>
+            </div>
+            <div class="callout callout-tip mt-5">
+                <h3 class="text-sm font-bold text-emerald-800 mb-1.5"><i aria-hidden="true" class="fas fa-lightbulb text-emerald-700 mr-2"></i>Lo que da valor a un «no»</h3>
+                <p class="text-sm">Una bitácora en la que <strong>todo se aceptó</strong> sugiere delegación ciega. Pero el valor de una entrada <em>Modificada</em> o <em>Rechazada</em> no está en el veredicto, sino en su <strong>verificación</strong> y en su <strong>evidencia de origen</strong>: un rechazo sin la salida literal de la IA ni la prueba que lo confirmó no demuestra criterio.</p>
+            </div>
+        </section>
+
+        <!-- ====================== USO ADECUADO Y MALA PRAXIS ====================== -->
+        <section id="uso-adecuado">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-4"><i aria-hidden="true" class="fas fa-scale-balanced text-pink-700 mr-2"></i>Qué se permite, qué se espera y qué es mala praxis</h2>
+            <div class="callout callout-info mb-5">
+                <p class="text-sm"><strong>Regla de oro.</strong> Lo que se puede <strong>explicar, verificar y defender</strong> como propio está bien usado, sin importar cuánta IA intervino. Lo que no, es mala praxis, sin importar cuán poca IA intervino.</p>
+            </div>
+            <div role="region" tabindex="0" aria-label="Tabla de uso adecuado y mala praxis (se desplaza horizontalmente)" class="overflow-x-auto card p-1">
+                <table class="tbl" style="min-width:720px">
+                    <caption class="sr-only">Uso adecuado y uso inadecuado de la IA generativa, por dimensión del trabajo</caption>
+                    <thead><tr style="background:#3D008D"><th scope="col" style="width:18%">Dimensión</th><th scope="col">Uso adecuado (esperado)</th><th scope="col">Uso inadecuado (mala praxis)</th></tr></thead>
+                    <tbody>
+                        <tr><th scope="row">Planteamiento del problema</th><td>Explorar enfoques, contrastar arquitecturas candidatas, hacer una lluvia de ideas sobre fuentes de datos.</td><td>Que la IA <strong>elija el problema y el conjunto de datos</strong> sin criterio propio (la <a href="12_Plantilla_Propuesta_de_Datos_Fase1.html">Propuesta de Datos</a> es de quien la presenta).</td></tr>
+                        <tr><th scope="row">Código</th><td>Generar código repetitivo, depurar errores, refactorizar, <strong>entendiendo cada línea</strong> antes de aceptarla.</td><td>Pegar bloques que <strong>no se comprenden</strong> ni se pueden explicar línea a línea en la sustentación.</td></tr>
+                        <tr><th scope="row">Teoría y conceptos</th><td>Pedir explicaciones alternativas y analogías; aclarar dudas de retropropagación, regularización o fusión.</td><td>Tomar afirmaciones teóricas <strong>sin contrastarlas</strong> con el material del curso o con fuentes citables.</td></tr>
+                        <tr><th scope="row">Datos</th><td>Pedir estrategias de EDA, limpieza, partición y aumento de datos.</td><td>Aceptar una partición o un preprocesamiento con <strong>fuga de datos</strong> (información del conjunto de prueba que entra al ajuste) sin auditarlo.</td></tr>
+                        <tr><th scope="row">Datos personales</th><td>Mostrar a la IA el esquema (nombres y tipos de columnas) y filas sintéticas, y registrar en la bitácora qué datos se compartieron.</td><td>Pegar o subir a un asistente de IA (o a un servicio en la nube no autorizado) <strong>registros con datos personales</strong> —nombres, documentos, números de cuenta, coordenadas exactas, historias clínicas— o datos de terceros sin su permiso.</td></tr>
+                        <tr><th scope="row">Métricas y evaluación</th><td>Discutir qué métrica conviene (F1 frente a exactitud con clases desbalanceadas) e interpretar matrices de confusión.</td><td>Reportar una métrica que <strong>no se entiende</strong> o que la IA interpretó mal (p. ej., una exactitud alta con clases desbalanceadas).</td></tr>
+                        <tr><th scope="row">Redacción</th><td>Mejorar la claridad, la ortografía y la estructura del informe, <strong>con las ideas y los resultados propios</strong>.</td><td>Generar <strong>resultados o conclusiones inventados</strong> que el modelo nunca produjo.</td></tr>
+                        <tr><th scope="row">Trazabilidad</th><td><strong>Registrar</strong> las interacciones relevantes en la Bitácora de IA, con su fecha.</td><td>Ocultar el uso de IA o presentar como propio un texto o un código sin la Declaración de uso.</td></tr>
+                        <tr><th scope="row">Integridad académica</th><td>Citar fuentes reales y verificar que las referencias <strong>existen</strong>.</td><td>Usar <strong>citas o artículos inventados</strong> por la IA (referencias que no existen).</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="text-sm text-slate-700 max-w-4xl mt-4">Ocultar el uso de IA, presentar como propio material que no se comprende o inventar resultados no se califica con la rúbrica: es una falta de integridad académica (<a href="11_Modulo_1_Actividad_Fase1_Centinela.html#rubrica">rúbrica de la Fase 1, sección 6</a>).</p>
+        </section>
+
+        <!-- ====================== 1. DATOS DE LA ENTREGA ====================== -->
+        <section id="datos-entrega">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-4"><i aria-hidden="true" class="fas fa-id-card text-pink-700 mr-2"></i>1. Datos de la entrega</h2>
+            <div class="card p-5 md:p-6">
+                <table class="tbl">
+                    <caption class="sr-only">Datos de la entrega: campos a diligenciar</caption>
+                    <thead><tr style="background:#3D008D"><th scope="col" style="width:34%">Campo</th><th scope="col">Detalle</th></tr></thead>
+                    <tbody>
+                        <tr><th scope="row">Integrantes</th><td class="ejemplo">Nombre de cada integrante: individual o equipo de hasta 3.</td></tr>
+                        <tr><th scope="row">Proyecto</th><td class="ejemplo">Nombre del Centinela y problema que aborda.</td></tr>
+                        <tr><th scope="row">Fase</th><td class="ejemplo">Fase 1 · MLP / Fase 2 · Multimodal / Fase 3 · Despliegue.</td></tr>
+                        <tr><th scope="row">Primer identificador de esta fase</th><td class="ejemplo">E-1 en la Fase 1; en las fases siguientes, el número que sigue al último de la fase anterior.</td></tr>
+                        <tr><th scope="row">Fecha de entrega</th><td class="ejemplo">AAAA-MM-DD.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ====================== 2. DECLARACIONES ====================== -->
+        <section id="declaraciones">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-4"><i aria-hidden="true" class="fas fa-signature text-pink-700 mr-2"></i>2. Declaración de uso de IA</h2>
+            <div class="card p-5 md:p-6">
+                <h3 class="font-bold text-navy text-lg">Declaración de uso <span class="font-normal text-slate-600">(la firma cada integrante)</span></h3>
+                <div class="border-l-4 pl-4 mt-3 text-sm text-slate-700 space-y-2" style="border-color:#3D008D">
+                    <p>Quienes firman declaran que durante esta fase usaron las siguientes herramientas de IA generativa:</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong class="text-slate-600"><em>(herramienta · modelo · versión, si se conoce)</em></strong> → para <em class="text-slate-600">(propósito, p. ej. depurar el bucle de entrenamiento)</em>.</li>
+                        <li><strong class="text-slate-600"><em>(herramienta · modelo · versión, si se conoce)</em></strong> → para <em class="text-slate-600">(propósito)</em>.</li>
+                    </ul>
+                    <p>Partes del entregable redactadas o programadas sin IA: <em class="text-slate-600">(…)</em>.</p>
+                    <p>Quienes firman declaran también que <strong>comprenden, verificaron y pueden defender</strong> como propio cada artefacto entregado, que cada integrante responde en la sustentación por una parte distinta del trabajo y que esta bitácora refleja con honestidad cómo se usaron estas herramientas.</p>
+                </div>
+                <table class="tbl mt-4">
+                    <caption class="sr-only">Firmas de la declaración de uso, una por integrante, con su fecha</caption>
+                    <thead><tr style="background:#3D008D"><th scope="col">Integrante</th><th scope="col">Firma</th><th scope="col" style="width:26%">Fecha (AAAA-MM-DD)</th></tr></thead>
+                    <tbody>
+                        <tr><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td></tr>
+                        <tr><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td></tr>
+                        <tr><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="no-uso" class="card p-5 md:p-6 mt-5">
+                <h3 class="font-bold text-navy text-lg">Declaración de no uso <span class="font-normal text-slate-600">(alternativa)</span></h3>
+                <div class="border-l-4 pl-4 mt-3 text-sm text-slate-700" style="border-color:#3D008D">
+                    <p>Quien firma declara que durante esta fase <strong>no usó IA generativa</strong> para elaborar el entregable (código, análisis ni redacción). En ese caso, la auditoría de la sección 4 es <strong>inducida y declarada</strong>, y las consultas que la producen se registran como entradas en la sección 3. No usar IA no se penaliza.</p>
+                </div>
+                <table class="tbl mt-4">
+                    <caption class="sr-only">Firma de la declaración de no uso, con su fecha</caption>
+                    <thead><tr style="background:#3D008D"><th scope="col">Integrante</th><th scope="col">Firma</th><th scope="col" style="width:26%">Fecha (AAAA-MM-DD)</th></tr></thead>
+                    <tbody>
+                        <tr><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="callout callout-info mt-5">
+                <p class="text-sm"><strong>En equipo.</strong> Cada integrante firma la declaración que le corresponde: la de uso o la de no uso. Las filas que sobran se borran.</p>
+            </div>
+        </section>
+
+        <!-- ====================== 3. REGISTRO ====================== -->
+        <section id="registro">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-4"><i aria-hidden="true" class="fas fa-table-list text-pink-700 mr-2"></i>3. Registro de interacciones</h2>
+            <div class="callout callout-tip">
+                <h3 class="text-sm font-bold text-emerald-800 mb-1.5"><i aria-hidden="true" class="fas fa-scale-balanced text-emerald-700 mr-2"></i>La decisión es el campo central</h3>
+                <p class="text-sm">Cada interacción se marca como <strong>Aceptada · Modificada · Rechazada</strong>. Lo que da valor a una entrada <em>Modificada</em> o <em>Rechazada</em> es su verificación y su <strong>evidencia de origen</strong>, obligatoria en esas dos decisiones: la salida literal de la IA, o una captura de pantalla con fecha y herramienta. En las entradas <em>Aceptadas</em> la evidencia es opcional.</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-4 mt-5">
+                <div class="card p-5">
+                    <h3 class="font-bold text-navy mb-1"><i aria-hidden="true" class="fas fa-hashtag text-primary mr-1.5"></i>Cómo se numera</h3>
+                    <p class="text-sm text-slate-700">La ficha E-0 es el molde: se copia una vez por interacción y cada copia recibe el identificador siguiente (E-1, E-2…). La numeración no se reinicia entre fases: la Fase 2 continúa desde el último identificador de la Fase 1. El mismo identificador se escribe como comentario en la línea del código que cambió (<code class="icode"># E-3</code>), para que la entrada se pueda localizar en el cuaderno.</p>
+                </div>
+                <div class="card p-5">
+                    <h3 class="font-bold text-navy mb-1"><i aria-hidden="true" class="fas fa-list-ol text-primary mr-1.5"></i>Cuántas entradas</h3>
+                    <p class="text-sm text-slate-700">Para llegar a Básico, el Criterio 5 pide al menos tres entradas fechadas, con su decisión y una justificación en cada una. La bitácora vale por la profundidad del criterio y por su verificabilidad, no por el número de entradas; lo que piden los niveles superiores está en la <a href="11_Modulo_1_Actividad_Fase1_Centinela.html#rubrica">rúbrica de la Fase 1</a>.</p>
+                </div>
+            </div>
+
+            <div id="ficha-e0" class="card p-5 md:p-6 mt-5">
+                <h3 class="font-bold text-navy text-lg"><i aria-hidden="true" class="fas fa-clipboard-list text-primary mr-2"></i>E-0 · molde</h3>
+                <p class="text-sm text-slate-700 mt-1">Catorce campos por entrada. La columna «Registro» indica lo que se escribe en cada uno.</p>
+                <div role="region" tabindex="0" aria-label="Ficha E-0 del registro de interacciones (se desplaza horizontalmente)" class="overflow-x-auto mt-3">
+                    <table class="tbl" style="min-width:560px">
+                        <caption class="sr-only">Ficha E-0: los catorce campos de cada entrada de la bitácora</caption>
+                        <thead><tr style="background:#3D008D"><th scope="col" style="width:32%">Campo</th><th scope="col">Registro</th></tr></thead>
+                        <tbody>
+                            <tr><th scope="row">ID</th><td class="ejemplo">E-n</td></tr>
+                            <tr><th scope="row">Fecha y hora</th><td class="ejemplo">AAAA-MM-DD hh:mm de la consulta</td></tr>
+                            <tr><th scope="row">Fase · paso</th><td class="ejemplo">p. ej. F1 · Paso 3</td></tr>
+                            <tr><th scope="row">Integrante que hizo la consulta</th><td class="ejemplo">nombre; en una entrega individual, se omite</td></tr>
+                            <tr><th scope="row">Herramienta y modelo</th><td class="ejemplo">producto · modelo · versión, si se conoce</td></tr>
+                            <tr><th scope="row">Celda o <em lang="en">commit</em> afectado</th><td class="ejemplo">celda n del cuaderno, o hash corto del <em lang="en">commit</em> · etiqueta <code class="icode"># E-n</code> en el código</td></tr>
+                            <tr><th scope="row">Objetivo de la consulta</th><td class="ejemplo">qué se buscaba resolver</td></tr>
+                            <tr><th scope="row">Indicación (resumen)</th><td class="ejemplo">resumen de la indicación o <em lang="en">prompt</em></td></tr>
+                            <tr><th scope="row">Qué devolvió la IA</th><td class="ejemplo">resumen de la respuesta: código, afirmación, métrica o referencia</td></tr>
+                            <tr><th scope="row">Datos compartidos con la IA</th><td class="ejemplo">ninguno · solo el esquema, con nombres y tipos de columnas · filas sintéticas · otro: qué y por qué no contenía datos personales</td></tr>
+                            <tr><th scope="row">Decisión</th><td class="ejemplo">Aceptada · Modificada · Rechazada</td></tr>
+                            <tr><th scope="row">Justificación</th><td class="ejemplo">por qué se decidió así, con fundamento en la teoría del curso o en la documentación oficial</td></tr>
+                            <tr><th scope="row">Cómo se verificó</th><td class="ejemplo">prueba ejecutada → resultado, con su cifra</td></tr>
+                            <tr><th scope="row">Evidencia de origen</th><td class="ejemplo">obligatoria en Modificada y Rechazada: salida literal de la IA, o captura de pantalla con fecha y herramienta, p. ej. <code class="icode">bitacora/E-n.png</code></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="callout callout-info mt-5">
+                <p class="text-sm"><strong>Más entradas.</strong> Para cada interacción nueva se copia la ficha E-0 completa y se cambia su identificador. La ficha E-0 puede quedarse como molde vacío o borrarse: no cuenta como entrada. El docente puede anclar las preguntas de la <strong><a href="14_Catalogo_Fuentes_y_Sustentacion.html#sustentacion">sustentación</a></strong> a cualquiera de las entradas.</p>
+            </div>
+        </section>
+
+        <!-- ====================== 4. AUDITORÍA ====================== -->
+        <section id="auditoria">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-4"><i aria-hidden="true" class="fas fa-bug-slash text-pink-700 mr-2"></i>4. Auditoría a la IA</h2>
+            <div class="callout callout-warn">
+                <h3 class="text-sm font-bold text-amber-900 mb-1.5"><i aria-hidden="true" class="fas fa-triangle-exclamation text-amber-700 mr-2"></i>Obligatoria</h3>
+                <p class="text-sm">Se documenta <strong>al menos un caso</strong> en que la IA falló durante el propio proyecto y cómo se corrigió. Suele ser una de las entradas <em>Modificada</em> o <em>Rechazada</em> de la sección 3, desarrollada a fondo. Los casos que el curso ya publicó (doble sigmoide, bucle sin limpieza de gradientes, fuga del escalador) solo cuentan si ocurrieron en el propio proceso. La auditoría va dentro de la Bitácora de IA, como su sección final.</p>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-5 mt-5 items-start">
+                <div role="group" aria-labelledby="rot-tipo" class="card p-5 md:p-6 space-y-3 text-sm text-slate-700">
+                    <h3 id="rot-tipo" class="font-bold text-navy text-lg">Tipo de auditoría <span class="font-normal text-slate-600">(se marca una)</span></h3>
+                    <label class="chk"><input type="checkbox" name="tipo-auditoria"><span><strong>Real:</strong> la IA produjo el fallo durante el proyecto.</span></label>
+                    <label class="chk"><input type="checkbox" name="tipo-auditoria"><span><strong>Inducida y declarada:</strong> la IA no produjo un fallo genuino; se le pidió revisar una parte del propio código (p. ej., el bucle o la evaluación) y se auditó su respuesta. Llega como máximo al nivel Autónomo del Criterio 5.</span></label>
+                </div>
+                <div class="callout callout-tip">
+                    <h3 class="text-sm font-bold text-emerald-800 mb-1.5"><i aria-hidden="true" class="fas fa-flask text-emerald-700 mr-2"></i>Auditoría inducida y declarada: techo Autónomo</h3>
+                    <p class="text-sm">Si durante la fase la IA no produjo un fallo genuino, se admite una <strong>auditoría inducida y declarada</strong>: se pide a la IA que revise una parte del propio código (p. ej., el bucle o la evaluación) y se audita su respuesta con la misma ficha, indicando expresamente que fue inducida. Llega como máximo al nivel <strong>Autónomo</strong> del Criterio 5. Quien no usó IA lo declara en la bitácora («Declaración de no uso») y hace la auditoría inducida; no usarla no se penaliza. Fabricar un fallo y presentarlo como real es una falta de integridad académica (<a href="11_Modulo_1_Actividad_Fase1_Centinela.html#rubrica">rúbrica de la Fase 1, sección 6</a>).</p>
+                </div>
+            </div>
+
+            <div id="niveles" class="card p-5 md:p-6 mt-5">
+                <h3 class="font-bold text-navy text-lg"><i aria-hidden="true" class="fas fa-stairs text-primary mr-2"></i>Qué evidencia corresponde a cada nivel</h3>
+                <p class="text-sm text-slate-700 mt-1">Lo que la auditoría aporta a cada nivel del Criterio 5; los demás requisitos de cada nivel, los de la bitácora, están en la <a href="11_Modulo_1_Actividad_Fase1_Centinela.html#rubrica">rúbrica</a>.</p>
+                <div role="region" tabindex="0" aria-label="Tabla de niveles de evidencia de la auditoría (se desplaza horizontalmente)" class="overflow-x-auto mt-3">
+                    <table class="tbl" style="min-width:560px">
+                        <caption class="sr-only">Niveles de evidencia de la auditoría a la IA en el Criterio 5</caption>
+                        <thead><tr style="background:#3D008D"><th scope="col" style="width:22%">Nivel del Criterio 5</th><th scope="col">Qué muestra la auditoría</th></tr></thead>
+                        <tbody>
+                            <tr><th scope="row">Básico</th><td>La auditoría describe un fallo de la IA, aunque sea de forma genérica (sin la salida literal ni su ubicación).</td></tr>
+                            <tr><th scope="row">Autónomo</th><td>La auditoría documenta un fallo real del propio proyecto, con su <strong>evidencia de origen</strong> (salida literal de la IA, o captura de pantalla con fecha y herramienta), la <strong>corrección</strong> y su <strong>fundamento</strong>. Es también el techo de la auditoría inducida y declarada.</td></tr>
+                            <tr><th scope="row">Estratégico</th><td>Además, la auditoría <strong>reproduce</strong> el fallo: una celda ejecuta la versión de la IA sobre los datos propios y la misma semilla, y otra ejecuta la versión corregida con la misma medición, que incluye una métrica de decisión (<em>recall</em>, matriz o AUC).</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-sm text-slate-700 mt-3">Sin auditoría, el Criterio 5 queda en Inicial.</p>
+            </div>
+
+            <div class="callout callout-info mt-5">
+                <h3 class="text-sm font-bold text-primary mb-1.5"><i aria-hidden="true" class="fas fa-circle-xmark text-primary mr-2"></i>Lo que no es una auditoría</h3>
+                <ul class="text-sm list-disc pl-5 space-y-1">
+                    <li>Un error propio que la IA corrigió: se registra en la sección 3 como entrada <em>Aceptada</em>, pero no audita a la IA.</li>
+                    <li>Un caso que el curso ya publicó, narrado sin evidencia propia: queda como descripción genérica.</li>
+                </ul>
+            </div>
+
+            <div id="ficha-caso" class="card p-5 md:p-6 mt-5">
+                <h3 class="font-bold text-navy text-lg"><i aria-hidden="true" class="fas fa-file-medical text-primary mr-2"></i>Ficha del caso</h3>
+                <div role="region" tabindex="0" aria-label="Ficha del caso de auditoría (se desplaza horizontalmente)" class="overflow-x-auto mt-3">
+                    <table class="tbl" style="min-width:560px">
+                        <caption class="sr-only">Ficha del caso de auditoría a la IA: campos a diligenciar</caption>
+                        <thead><tr style="background:#3D008D"><th scope="col" style="width:32%">Campo</th><th scope="col">Registro</th></tr></thead>
+                        <tbody>
+                            <tr><th scope="row">Entrada de la bitácora</th><td class="ejemplo">E-n</td></tr>
+                            <tr><th scope="row">Contexto</th><td class="ejemplo">en qué parte del proyecto y con qué objetivo se consultó a la IA</td></tr>
+                            <tr><th scope="row">Qué dijo la IA</th><td class="ejemplo">la sugerencia: código, afirmación, métrica o referencia</td></tr>
+                            <tr><th scope="row">Evidencia de origen</th><td class="ejemplo">salida literal de la IA, o captura de pantalla con fecha y herramienta</td></tr>
+                            <tr><th scope="row">Por qué estaba mal</th><td class="ejemplo">el error concreto y su fundamento: teoría del curso o documentación oficial</td></tr>
+                            <tr><th scope="row">Cómo se detectó</th><td class="ejemplo">la señal: error de ejecución, resultado inverosímil, contradicción con la teoría, referencia inexistente…</td></tr>
+                            <tr><th scope="row">Corrección aplicada</th><td class="ejemplo">qué se cambió, en qué celda y cómo se comprobó que ahora es correcto</td></tr>
+                            <tr><th scope="row">Reproducción <span class="font-normal">(la exige el nivel Estratégico)</span></th><td class="ejemplo">celda con la versión de la IA · celda con la versión corregida · semilla · medición común, con una métrica de decisión: <em>recall</em>, matriz o AUC</td></tr>
+                            <tr><th scope="row">Resultado de la medición</th><td class="ejemplo">cifras de las dos versiones</td></tr>
+                            <tr><th scope="row">Lección</th><td class="ejemplo">qué se aprendió sobre los límites de la IA y cómo cambia la forma de usarla</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== PLANTILLA EN MARKDOWN ====================== -->
+        <section id="markdown" class="no-print">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-2"><i aria-hidden="true" class="fab fa-markdown text-pink-700 mr-2"></i>Plantilla en Markdown</h2>
+            <p class="text-slate-700 max-w-4xl mb-4">La bitácora completa, en Markdown limpio, para diligenciarla en el repositorio, en un editor de texto o en una celda de texto del cuaderno. El recuadro se puede seleccionar y copiar a mano; con JavaScript activo, los botones lo copian o lo descargan como <span class="icode">bitacora-ia.md</span>.</p>
+            <div class="flex flex-wrap gap-3 mb-3">
+                <button type="button" id="md-copiar" class="btn btn-primario" hidden><i aria-hidden="true" class="fas fa-copy"></i>Copiar la plantilla en Markdown</button>
+                <a id="md-descargar" class="btn btn-secundario" download="bitacora-ia.md" hidden><i aria-hidden="true" class="fas fa-download"></i>Descargar .md</a>
+            </div>
+            <p id="md-estado" class="text-sm font-semibold text-emerald-700 min-h-[1.25rem] mb-2" role="status" aria-live="polite"></p>
+            <div class="code-window">
+                <div class="code-window-bar">
+                    <div class="code-window-dots" aria-hidden="true"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></div>
+                    <span class="code-window-title">bitacora-ia.md</span>
+                    <span class="code-window-lang">Markdown</span>
+                </div>
+                <div role="region" tabindex="0" aria-label="Plantilla en Markdown de la Bitácora de IA (se desplaza)" class="md-region">
+<pre id="md-fuente" class="codeblock md-pre">
+# Bitácora de IA · Proyecto Centinela
+
+La bitácora se diligencia a lo largo del proyecto, no al final. No se registra cada indicación (*prompt*): se documentan las interacciones que cambiaron una decisión técnica (arquitectura, datos, métricas, un error resuelto, un enfoque descartado). Cada entrada lleva la fecha y la hora de la consulta, anotadas cuando ocurre.
+
+A un asistente de IA no se le pegan ni se le suben registros con datos personales ni datos de terceros sin su permiso: se le muestran el esquema y filas sintéticas, y la bitácora registra qué datos se compartieron.
+
+## 1. Datos de la entrega
+
+| Campo | Detalle |
+| --- | --- |
+| **Integrantes** | _(nombre de cada integrante: individual o equipo de hasta 3)_ |
+| **Proyecto** | _(nombre del Centinela y problema que aborda)_ |
+| **Fase** | _(Fase 1 · MLP / Fase 2 · Multimodal / Fase 3 · Despliegue)_ |
+| **Primer identificador de esta fase** | _(E-1 en la Fase 1; en las fases siguientes, el número que sigue al último de la fase anterior)_ |
+| **Fecha de entrega** | _(AAAA-MM-DD)_ |
+
+## 2. Declaración de uso de IA
+
+### Declaración de uso (la firma cada integrante)
+
+Quienes firman declaran que durante esta fase usaron las siguientes herramientas de IA generativa:
+
+- **_(herramienta · modelo · versión, si se conoce)_** → para _(propósito, p. ej. depurar el bucle de entrenamiento)_.
+- **_(herramienta · modelo · versión, si se conoce)_** → para _(propósito)_.
+
+Partes del entregable redactadas o programadas sin IA: _(…)_.
+
+Quienes firman declaran también que **comprenden, verificaron y pueden defender** como propio cada artefacto entregado, que cada integrante responde en la sustentación por una parte distinta del trabajo y que esta bitácora refleja con honestidad cómo se usaron estas herramientas.
+
+| Integrante | Firma | Fecha |
+| --- | --- | --- |
+| _(nombre)_ | ______________________ | _(AAAA-MM-DD)_ |
+| _(nombre)_ | ______________________ | _(AAAA-MM-DD)_ |
+| _(nombre)_ | ______________________ | _(AAAA-MM-DD)_ |
+
+### Declaración de no uso (alternativa)
+
+Quien firma declara que durante esta fase **no usó IA generativa** para elaborar el entregable (código, análisis ni redacción). En ese caso, la auditoría de la sección 4 es **inducida y declarada**, y las consultas que la producen se registran como entradas en la sección 3. No usar IA no se penaliza.
+
+| Integrante | Firma | Fecha |
+| --- | --- | --- |
+| _(nombre)_ | ______________________ | _(AAAA-MM-DD)_ |
+
+En equipo, cada integrante firma la declaración que le corresponde: la de uso o la de no uso. Las filas que sobran se borran.
+
+## 3. Registro de interacciones
+
+Cada interacción se marca como **Aceptada · Modificada · Rechazada**. La evidencia de origen (la salida literal de la IA, o una captura de pantalla con fecha y herramienta) es obligatoria en las entradas Modificada y Rechazada; en las Aceptadas es opcional.
+
+**Cómo se numera.** La ficha E-0 es el molde: se copia una vez por interacción y cada copia recibe el identificador siguiente (E-1, E-2…). La numeración no se reinicia entre fases: la Fase 2 continúa desde el último identificador de la Fase 1. El mismo identificador se escribe como comentario en la línea del código que cambió (`# E-3`), para que la entrada se pueda localizar en el cuaderno.
+
+**Cuántas entradas.** Para llegar a Básico, el Criterio 5 pide al menos tres entradas fechadas, con su decisión y una justificación en cada una.
+
+### E-0 · molde
+
+| Campo | Registro |
+| --- | --- |
+| **ID** | _(E-n)_ |
+| **Fecha y hora** | _(AAAA-MM-DD hh:mm de la consulta)_ |
+| **Fase · paso** | _(p. ej. F1 · Paso 3)_ |
+| **Integrante que hizo la consulta** | _(nombre; en una entrega individual, se omite)_ |
+| **Herramienta y modelo** | _(producto · modelo · versión, si se conoce)_ |
+| **Celda o *commit* afectado** | _(celda n del cuaderno, o hash corto del *commit* · etiqueta `# E-n` en el código)_ |
+| **Objetivo de la consulta** | _(qué se buscaba resolver)_ |
+| **Indicación (resumen)** | _(resumen de la indicación o *prompt*)_ |
+| **Qué devolvió la IA** | _(resumen de la respuesta: código, afirmación, métrica o referencia)_ |
+| **Datos compartidos con la IA** | _(ninguno · solo el esquema, con nombres y tipos de columnas · filas sintéticas · otro: qué y por qué no contenía datos personales)_ |
+| **Decisión** | _(Aceptada · Modificada · Rechazada)_ |
+| **Justificación** | _(por qué se decidió así, con fundamento en la teoría del curso o en la documentación oficial)_ |
+| **Cómo se verificó** | _(prueba ejecutada → resultado, con su cifra)_ |
+| **Evidencia de origen** | _(obligatoria en Modificada y Rechazada: salida literal de la IA, o captura de pantalla con fecha y herramienta, p. ej. `bitacora/E-n.png`)_ |
+
+Para cada interacción nueva se copia la ficha E-0 completa y se cambia su identificador. La ficha E-0 puede quedarse como molde vacío o borrarse: no cuenta como entrada.
+
+## 4. Auditoría a la IA
+
+Obligatoria: se documenta al menos un caso en que la IA falló durante el propio proyecto y cómo se corrigió. Suele ser una de las entradas Modificada o Rechazada de la sección 3, desarrollada a fondo. Los casos que el curso ya publicó (doble sigmoide, bucle sin limpieza de gradientes, fuga del escalador) solo cuentan si ocurrieron en el propio proceso.
+
+**Tipo de auditoría** (se marca una):
+
+- [ ] **Real:** la IA produjo el fallo durante el proyecto.
+- [ ] **Inducida y declarada:** la IA no produjo un fallo genuino; se le pidió revisar una parte del propio código (p. ej., el bucle o la evaluación) y se auditó su respuesta. Llega como máximo al nivel Autónomo del Criterio 5.
+
+**Qué evidencia corresponde a cada nivel**
+
+| Nivel del Criterio 5 | Qué muestra la auditoría |
+| --- | --- |
+| **Básico** | La auditoría describe un fallo de la IA, aunque sea de forma genérica (sin la salida literal ni su ubicación). |
+| **Autónomo** | La auditoría documenta un fallo real del propio proyecto, con su **evidencia de origen** (salida literal de la IA, o captura de pantalla con fecha y herramienta), la **corrección** y su **fundamento**. Es también el techo de la auditoría inducida y declarada. |
+| **Estratégico** | Además, la auditoría **reproduce** el fallo: una celda ejecuta la versión de la IA sobre los datos propios y la misma semilla, y otra ejecuta la versión corregida con la misma medición, que incluye una métrica de decisión (*recall*, matriz o AUC). |
+
+Lo que no es una auditoría: un error propio que la IA corrigió (se registra en la sección 3 como entrada Aceptada, pero no audita a la IA) y un caso que el curso ya publicó, narrado sin evidencia propia (queda como descripción genérica).
+
+### Ficha del caso
+
+| Campo | Registro |
+| --- | --- |
+| **Entrada de la bitácora** | _(E-n)_ |
+| **Contexto** | _(en qué parte del proyecto y con qué objetivo se consultó a la IA)_ |
+| **Qué dijo la IA** | _(la sugerencia: código, afirmación, métrica o referencia)_ |
+| **Evidencia de origen** | _(salida literal de la IA, o captura de pantalla con fecha y herramienta)_ |
+| **Por qué estaba mal** | _(el error concreto y su fundamento: teoría del curso o documentación oficial)_ |
+| **Cómo se detectó** | _(la señal: error de ejecución, resultado inverosímil, contradicción con la teoría, referencia inexistente…)_ |
+| **Corrección aplicada** | _(qué se cambió, en qué celda y cómo se comprobó que ahora es correcto)_ |
+| **Reproducción** (la exige el nivel Estratégico) | _(celda con la versión de la IA · celda con la versión corregida · semilla · medición común, con una métrica de decisión: *recall*, matriz o AUC)_ |
+| **Resultado de la medición** | _(cifras de las dos versiones)_ |
+| **Lección** | _(qué se aprendió sobre los límites de la IA y cómo cambia la forma de usarla)_ |
+</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== RELACIONADO ====================== -->
+        <section id="lugar">
+            <div class="usta-header rounded-2xl p-7 text-white">
+                <h2 class="text-xl md:text-2xl font-extrabold mb-3"><i aria-hidden="true" class="fas fa-diagram-project mr-2"></i>Lugar de esta plantilla en el curso</h2>
+                <div class="grid md:grid-cols-3 gap-4 text-sm">
+                    <div class="bg-black/20 rounded-xl p-4">
+                        <p class="font-bold mb-1">La actividad</p>
+                        <p class="text-white">La bitácora y la auditoría son el mecanismo de <a href="11_Modulo_1_Actividad_Fase1_Centinela.html#ia" class="underline font-semibold text-white">uso responsable de IA</a> de la Fase 1, se adjuntan a la <a href="11_Modulo_1_Actividad_Fase1_Centinela.html#entrega" class="underline font-semibold text-white">entrega</a> y se califican en el Criterio 5 de la <a href="11_Modulo_1_Actividad_Fase1_Centinela.html#rubrica" class="underline font-semibold text-white">rúbrica</a>. Empiezan con la <a href="11_Modulo_1_Actividad_Fase1_Centinela.html#paso-0" class="underline font-semibold text-white">Propuesta de Datos (Paso 0)</a>.</p>
+                    </div>
+                    <div class="bg-black/20 rounded-xl p-4">
+                        <p class="font-bold mb-1">Las otras plantillas</p>
+                        <p class="text-white">La <a href="12_Plantilla_Propuesta_de_Datos_Fase1.html" class="underline font-semibold text-white">Propuesta de Datos</a> abre la fase, y el <a href="14_Catalogo_Fuentes_y_Sustentacion.html" class="underline font-semibold text-white">catálogo de fuentes y sustentación</a> explica cómo se defiende la bitácora en vivo.</p>
+                    </div>
+                    <a href="index.html" class="bg-black/20 hover:bg-black/30 transition rounded-xl p-4 block">
+                        <p class="font-bold mb-1">Portal del curso <i aria-hidden="true" class="fas fa-arrow-right ml-1 text-xs"></i></p>
+                        <p class="text-white">Todos los materiales, actividades y plantillas de los tres módulos.</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ====================== PIE ====================== -->
+    <footer class="bg-navy text-white/80 text-sm">
+        <div class="max-w-6xl mx-auto px-5 md:px-8 py-8">
+            <p class="font-bold text-white mb-1">Universidad Santo Tomás · Maestría en Ciencia de Datos</p>
+            <p>Profundización I: Redes Neuronales — Deep Learning (EA-N-F-004) · Experto temático: Javier Mauricio Sierra</p>
+            <p class="text-white/55 mt-3 text-xs">Proyecto Centinela · Fase 1 — Fundamentos del Aprendizaje Profundo. Material de aprendizaje autónomo. Metodología «Ingeniería de Trinchera»: si una arquitectura no corre en Google Colab, no existe.</p>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            'use strict';
+
+            // Realce del enlace de navegación activo según la sección visible.
+            var secs = document.querySelectorAll('main section[id]');
+            var links = document.querySelectorAll('.navlink');
+            if ('IntersectionObserver' in window) {
+                var navIO = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (e) {
+                        if (!e.isIntersecting) return;
+                        links.forEach(function (l) { l.classList.remove('text-primary', 'bg-slate-100'); l.removeAttribute('aria-current'); });
+                        var active = document.querySelector('.navlink[href="#' + e.target.id + '"]');
+                        if (active) { active.classList.add('text-primary', 'bg-slate-100'); active.setAttribute('aria-current', 'location'); }
+                    });
+                }, { rootMargin: '-45% 0px -50% 0px' });
+                secs.forEach(function (s) { navIO.observe(s); });
+            }
+
+            // Bloque «Plantilla en Markdown»: copiar y descargar. Sin JavaScript, el texto se selecciona a mano.
+            var fuente = document.getElementById('md-fuente');
+            var estado = document.getElementById('md-estado');
+            var btnCopiar = document.getElementById('md-copiar');
+            var enlace = document.getElementById('md-descargar');
+            if (!fuente || !estado) return;
+            var texto = fuente.textContent.replace(/^\n/, '');
+
+            function avisar(msg) {
+                estado.textContent = '';
+                window.setTimeout(function () { estado.textContent = msg; }, 60);   // se vuelve a anunciar aunque se repita
+            }
+            function seleccionar() {
+                var sel = window.getSelection();
+                var rango = document.createRange();
+                rango.selectNodeContents(fuente);
+                sel.removeAllRanges();
+                sel.addRange(rango);
+            }
+            function respaldo() {
+                seleccionar();
+                var ok = false;
+                try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+                avisar(ok ? 'Plantilla copiada en el portapapeles.'
+                          : 'El texto quedó seleccionado: se copia con Ctrl+C (Cmd+C en Mac).');
+            }
+
+            if (btnCopiar) {
+                btnCopiar.hidden = false;
+                btnCopiar.addEventListener('click', function () {
+                    if (!(navigator.clipboard && window.isSecureContext)) { respaldo(); return; }
+                    // Si el navegador no resuelve la promesa (permiso pendiente), se usa la selección del texto.
+                    var resuelto = false;
+                    var espera = window.setTimeout(function () { if (!resuelto) { resuelto = true; respaldo(); } }, 1200);
+                    navigator.clipboard.writeText(texto).then(function () {
+                        if (resuelto) return;
+                        resuelto = true; window.clearTimeout(espera);
+                        avisar('Plantilla copiada en el portapapeles.');
+                    }, function () {
+                        if (resuelto) return;
+                        resuelto = true; window.clearTimeout(espera);
+                        respaldo();
+                    });
+                });
+            }
+
+            if (enlace && window.Blob && window.URL && URL.createObjectURL) {
+                enlace.href = URL.createObjectURL(new Blob([texto], { type: 'text/markdown;charset=utf-8' }));
+                enlace.hidden = false;
+                enlace.addEventListener('click', function () {
+                    avisar('Descarga iniciada: ' + enlace.getAttribute('download') + '.');
+                });
+            }
+        })();
+    </script>
+    <script defer src="portal-nav.js"></script>
+</body>
+
+</html>

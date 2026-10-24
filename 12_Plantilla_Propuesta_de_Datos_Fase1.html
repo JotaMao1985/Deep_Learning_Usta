@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Plantilla de la Propuesta de Datos de una página para la compuerta de la Fase 1 del Proyecto Centinela (Paso 0): problema y cliente, objetivo binario, dos modalidades, fuentes con licencia, test de procedencia, clave de alineación con prueba de acoplamiento, línea base comprometida y checklist de protección de datos (Ley 1581 de 2012). Maestría en Ciencia de Datos, Universidad Santo Tomás.">
+    <title>Plantilla · Propuesta de Datos · Proyecto Centinela (Fase 1) — USTA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- Tailwind CSS (utilidades), versión fija: sin versión, el CDN redirige a la última -->
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+
+    <!-- Font Awesome (iconografía de apoyo) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Google Fonts: Montserrat (texto) y Fira Code (código) -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Montserrat', 'Helvetica Neue', 'Arial', 'sans-serif'] },
+                    colors: {
+                        primary: '#3D008D',
+                        secondary: '#ED1E79',
+                        navy: '#001A4D',
+                        gold: '#FDB913',
+                        teal: '#0E7490',
+                        bg: '#F8FAFC',
+                        surface: '#FFFFFF',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #F8FAFC;
+            color: #1E293B;
+        }
+        html { scroll-behavior: smooth; }
+        [id] { scroll-margin-top: 4.5rem; }   /* las anclas no quedan bajo la barra fija */
+        code, pre, .mono { font-family: 'Fira Code', monospace; }
+        [hidden] { display: none !important; }   /* los botones del bloque Markdown aparecen solo con JavaScript */
+
+        /* Gradientes institucionales USTA */
+        .usta-gradient { background: linear-gradient(140deg, #3D008D 0%, #ED1E79 100%); }
+        .usta-header { background: linear-gradient(135deg, #001A4D 0%, #3D008D 60%, #5B1C9E 100%); color: #fff; }   /* blanco también sin JavaScript (sin Tailwind) */
+
+        /* Tarjeta base */
+        .card {
+            background: #fff; border-radius: 16px;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+            transition: box-shadow .25s ease, transform .25s ease;
+        }
+        .card:hover { box-shadow: 0 12px 30px rgba(0,0,0,0.11); }
+
+        /* Barra de desplazamiento */
+        ::-webkit-scrollbar { width: 9px; height: 9px; }
+        ::-webkit-scrollbar-track { background: #eef2f7; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg,#3D008D,#ED1E79); border-radius: 5px; }
+
+        /* Código en línea y bloques */
+        .icode {
+            background: #F1F5F9; color: #0F172A; padding: .08rem .42rem;
+            border-radius: 5px; font-size: .85em; font-family: 'Fira Code', monospace;
+            overflow-wrap: anywhere;
+        }
+        .codeblock {
+            background: #0F172A; color: #E2E8F0; border-radius: 12px;
+            padding: 1rem 1.1rem; font-family: 'Fira Code', monospace;
+            font-size: .82rem; line-height: 1.7; overflow-x: auto;
+            white-space: pre; tab-size: 4;
+        }
+
+        /* ====== Ventana de código (cromo tipo terminal · marca USTA) ====== */
+        .code-window {
+            position: relative; background: #0F172A; border: 1px solid #1E293B;
+            border-radius: 14px; overflow: hidden; box-shadow: 0 12px 32px rgba(2,6,23,.30);
+        }
+        .code-window::before {
+            content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; z-index: 2;
+            background: linear-gradient(90deg, #3D008D 0%, #ED1E79 60%, #FDB913 100%);
+        }
+        .code-window-bar {
+            display: flex; align-items: center; gap: .55rem;
+            padding: .62rem .95rem; padding-top: calc(.62rem + 3px);
+            background: #0B1326; border-bottom: 1px solid #1E293B;
+        }
+        .code-window-dots { display: flex; gap: .42rem; }
+        .code-window-dots span { width: 11px; height: 11px; border-radius: 50%; display: block; }
+        .code-window-dots .d-r { background: #FF5F56; }
+        .code-window-dots .d-y { background: #FFBD2E; }
+        .code-window-dots .d-g { background: #27C93F; }
+        .code-window-title { font-family: 'Fira Code', monospace; font-size: .72rem; color: #CBD5E1; letter-spacing: .01em; overflow-wrap: anywhere; }
+        .code-window-lang {
+            margin-left: auto; font-family: 'Fira Code', monospace; font-size: .67rem;
+            color: #FDE68A; background: rgba(253,185,19,.13); padding: .14rem .55rem;
+            border-radius: 999px; white-space: nowrap;
+        }
+        .code-window .codeblock { border-radius: 0; box-shadow: none; }
+
+        /* Callout / analogía */
+        .callout { border-left: 4px solid; border-radius: 12px; padding: .9rem 1.1rem; }
+        .callout-info   { background:#F3F0FC; border-color:#3D008D; }
+        .callout-tip    { background:#ECFDF5; border-color:#0E9F6E; }
+        .callout-warn   { background:#FFFBEB; border-color:#FDB913; }
+        .callout-danger { background:#FEF2F2; border-color:#DC2626; }
+        .callout-eth    { background:#F0F9FF; border-color:#0E7490; }
+
+        h2.sec-title { font-weight: 800; letter-spacing: -.02em; }
+
+        /* Navegación sticky */
+        .navbar { backdrop-filter: blur(8px); background: rgba(255,255,255,.86); }
+        .navlink { transition: color .2s ease, background .2s ease; }
+        .navlink:hover { color:#3D008D; }
+
+        /* Tabla genérica */
+        .tbl { width:100%; border-collapse: collapse; font-size:.9rem; }
+        .tbl th, .tbl td { border:1px solid #E2E8F0; padding:.6rem .7rem; vertical-align: top; text-align:left; }
+        .tbl thead th { color:#fff; }
+        .tbl tbody th { background:#F8FAFC; color:#001A4D; font-weight:700; }
+
+        /* Numeración de secciones */
+        .step-num {
+            flex: 0 0 auto; width:34px; height:34px; border-radius:10px;
+            display:flex; align-items:center; justify-content:center;
+            font-weight:800; color:#fff; background:linear-gradient(140deg,#3D008D,#ED1E79);
+        }
+
+        /* Regiones desplazables enfocables con el teclado. «position: relative» contiene los avisos .sr-only
+           (posición absoluta) de los enlaces de las tablas anchas: sin ella escapan del recorte y ensanchan la página. */
+        [role="region"][tabindex="0"]:focus-visible { outline: 3px solid #FDB913; outline-offset: 2px; }
+        [role="region"], .overflow-x-auto { position: relative; }
+
+        /* Enlaces dentro del texto: subrayados (el Preflight de Tailwind quita el subrayado) */
+        main p a:not([class]), main li a:not([class]), main td a:not([class]), main label a:not([class]), main .campo a:not([class]) {
+            color: #BE185D; text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px;
+        }
+
+        main a.url-literal { color: #BE185D; text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 1px; overflow-wrap: anywhere; }
+
+        /* Plantilla: campos a diligenciar, casillas y firmas */
+        .campo-rot { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #BE185D; margin: .9rem 0 .3rem; }
+        .campo {
+            border: 1.5px dashed #64748B; border-radius: 10px; background: #fff;
+            padding: .6rem .8rem; min-height: 3.4rem; color: #475569; font-size: .85rem; font-style: italic;
+        }
+        .campo-lg { min-height: 6.5rem; }
+        .tbl td.vacia { height: 2.4rem; background: #fff; }
+        .tbl td.ejemplo { color: #475569; font-style: italic; }
+        .chk { display: flex; gap: .65rem; align-items: flex-start; }
+        .chk input { flex: none; width: 1.05rem; height: 1.05rem; margin-top: .2rem; accent-color: #3D008D; }
+
+        /* Bloque «Plantilla en Markdown» */
+        .md-region { max-height: 34rem; overflow: auto; background: #0F172A; }
+        .md-pre { white-space: pre-wrap; overflow-wrap: anywhere; overflow: visible; }
+        .btn {
+            display: inline-flex; align-items: center; gap: .5rem; font-weight: 700; font-size: .875rem;
+            border-radius: 10px; padding: .55rem .95rem; border: 2px solid #3D008D; cursor: pointer; text-decoration: none;
+        }
+        .btn-primario { background: #3D008D; color: #fff; }
+        .btn-primario:hover { background: #2E006B; }
+        .btn-secundario { background: #fff; color: #3D008D; }
+        .btn-secundario:hover { background: #F3F0FC; }
+        .btn:focus-visible { outline: 3px solid #FDB913; outline-offset: 2px; }
+
+        /* Preferencias del usuario */
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .card { transition: none; }
+        }
+        @media (forced-colors: active) {
+            .campo { border-color: CanvasText; }
+            .btn { border-color: ButtonText; }
+        }
+
+        /* Impresión / PDF (A4): sin barra, sin botones ni bloque Markdown; tablas completas y URL visibles */
+        @media print {
+            @page { size: A4; margin: 14mm 12mm; }
+            body { background: #fff; font-size: 10pt; }
+            .no-print { display: none !important; }
+            .usta-header { background: #fff !important; border-bottom: 2px solid #3D008D; }
+            .usta-header, .usta-header * { color: #001A4D !important; }
+            .usta-header .rounded-full { border: 1px solid #64748B; }
+            .card { box-shadow: none; border: 1px solid #e5e7eb; }
+            .card, .callout, tr, li, .campo, [role="group"] { break-inside: avoid; }
+            h2, h3 { break-after: avoid; }
+            section { break-inside: auto; }
+            main { padding-top: 1rem !important; }
+            .space-y-14 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.6rem !important; }
+            .overflow-x-auto, [role="region"] { overflow: visible !important; max-height: none !important; }
+            .tbl { min-width: 0 !important; width: 100% !important; table-layout: fixed; font-size: 8.5pt; }
+            .tbl th, .tbl td { padding: .25rem .3rem; overflow-wrap: anywhere; }
+            thead { display: table-header-group; }
+            .tbl thead tr { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            input[type="checkbox"] { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            a { color: #1E293B; text-decoration: underline; }
+            a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .8em; overflow-wrap: anywhere; color: #475569; }
+            a.url-completa::after { content: none; }   /* el texto del enlace ya es la URL completa (referencias) */
+        }
+
+        /* Los hijos de una rejilla pueden encogerse: nada ensancha la página en móvil (375 px). */
+        .grid > * { min-width: 0; }
+        /* En celular, el número decorativo de cada sección se oculta (el título ya lo lleva) y cede su ancho. */
+        @media (max-width: 639px) { .step-num { display: none; } }
+    </style>
+</head>
+
+<body>
+    <a href="#contenido" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-white focus:text-primary focus:px-4 focus:py-2 focus:rounded-lg focus:font-semibold">Saltar al contenido</a>
+
+    <!-- ====================== ENCABEZADO ====================== -->
+    <header class="usta-header text-white">
+        <div class="max-w-6xl mx-auto px-5 md:px-8 py-10 md:py-14">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="usta-gradient p-2.5 rounded-xl shadow-lg"><i aria-hidden="true" class="fas fa-file-signature text-lg"></i></span>
+                <span class="text-[11px] md:text-xs uppercase tracking-[0.25em] text-gold font-bold">Universidad Santo Tomás · Maestría en Ciencia de Datos</span>
+            </div>
+            <p class="text-pink-300 font-semibold text-sm md:text-base mb-1">Profundización I: Redes Neuronales — Deep Learning · EA-N-F-004</p>
+            <h1 class="text-3xl md:text-5xl font-extrabold leading-tight tracking-tight">
+                Plantilla · <span class="text-gold">Propuesta de Datos</span><span class="md:hidden"> ·</span><br class="hidden md:block">
+                Proyecto Centinela · Fase 1
+            </h1>
+            <p class="text-lg md:text-2xl font-light text-white/90 mt-3">Paso 0 · Compuerta de aprobación antes de modelar</p>
+            <div class="flex flex-wrap gap-2 mt-6 text-xs md:text-sm">
+                <span class="bg-white/15 rounded-full px-3 py-1"><i aria-hidden="true" class="fas fa-file-lines mr-1.5 text-gold"></i>Una página + anexos</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i aria-hidden="true" class="fas fa-door-open mr-1.5 text-gold"></i>Compuerta del Paso 0</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i aria-hidden="true" class="fas fa-users mr-1.5 text-gold"></i>Individual o en equipo (≤ 3)</span>
+                <span class="bg-white/15 rounded-full px-3 py-1"><i aria-hidden="true" class="fas fa-user-shield mr-1.5 text-gold"></i>Ley 1581 de 2012</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ====================== NAVEGACIÓN STICKY ====================== -->
+    <nav aria-label="Secciones de la plantilla" class="navbar sticky top-0 z-40 border-b border-slate-200 no-print">
+        <div class="max-w-6xl mx-auto px-4 flex items-stretch">
+            <div class="flex gap-1 md:gap-3 overflow-x-auto text-xs md:text-sm font-semibold py-2.5 whitespace-nowrap flex-1 min-w-0">
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#como"><i aria-hidden="true" class="fas fa-route mr-1"></i>Cómo funciona</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#compuerta"><i aria-hidden="true" class="fas fa-door-open mr-1"></i>Compuerta</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#formato"><i aria-hidden="true" class="fas fa-file-lines mr-1"></i>Formato</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#modalidades"><i aria-hidden="true" class="fas fa-images mr-1"></i>Dos modalidades</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#procedencia"><i aria-hidden="true" class="fas fa-fingerprint mr-1"></i>Procedencia</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#anexos"><i aria-hidden="true" class="fas fa-paperclip mr-1"></i>Anexos</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#ley-1581"><i aria-hidden="true" class="fas fa-user-shield mr-1"></i>Ley 1581</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#datos-propios"><i aria-hidden="true" class="fas fa-house-user mr-1"></i>Datos propios</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#markdown"><i aria-hidden="true" class="fab fa-markdown mr-1"></i>Markdown</a>
+            </div>
+            <div class="flex-none w-14 md:w-24" aria-hidden="true"></div>
+        </div>
+    </nav>
+
+    <main id="contenido" tabindex="-1" class="max-w-6xl mx-auto px-5 md:px-8 py-10 md:py-14 space-y-14">
+
+        <!-- ====================== CÓMO FUNCIONA ====================== -->
+        <section id="como">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-4"><i aria-hidden="true" class="fas fa-route text-pink-700 mr-2"></i>Cómo funciona la Propuesta de Datos</h2>
+            <p class="text-slate-700 max-w-4xl mb-5">La Propuesta de Datos es el entregable que se lleva a aprobación <strong>antes de modelar</strong>: es la <strong>compuerta</strong> de la <a href="11_Modulo_1_Actividad_Fase1_Centinela.html#paso-0">Actividad 1 · Fase 1</a>. Funciona así:</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="card p-5">
+                    <h3 class="font-bold text-navy mb-1"><i aria-hidden="true" class="fas fa-calendar-day text-primary mr-1.5"></i>Cuándo y cómo</h3>
+                    <p class="text-sm text-slate-700">Se entrega <strong>por separado</strong>, a más tardar en <strong>la fecha que fija el campus virtual</strong>. Ocupa <strong>una página</strong> de texto; la prueba de acoplamiento, las evidencias del test de procedencia y el <em>checklist</em> de protección de datos van como anexos y no cuentan en la extensión.</p>
+                </div>
+                <div class="card p-5">
+                    <h3 class="font-bold text-navy mb-1"><i aria-hidden="true" class="fas fa-users text-primary mr-1.5"></i>Quiénes</h3>
+                    <p class="text-sm text-slate-700">La Fase 1 se hace de forma individual o en equipo de hasta tres integrantes, con rendición individual. Los integrantes se declaran en la Propuesta; después, cada uno firma la <a href="13_Plantilla_Bitacora_IA.html">Bitácora de IA</a> y responde en la <a href="14_Catalogo_Fuentes_y_Sustentacion.html#sustentacion">sustentación</a> por una parte distinta del trabajo.</p>
+                </div>
+                <div class="card p-5">
+                    <h3 class="font-bold text-navy mb-1"><i aria-hidden="true" class="fas fa-reply text-primary mr-1.5"></i>Respuesta</h3>
+                    <p class="text-sm text-slate-700">El docente responde «Aprobada» o «Ajustes» según las cinco condiciones del <a href="#criterio">criterio de aprobación</a>. Si pide ajustes, la Propuesta se corrige y se vuelve a presentar antes de modelar.</p>
+                </div>
+                <div class="card p-5">
+                    <h3 class="font-bold text-navy mb-1"><i aria-hidden="true" class="fas fa-lock text-primary mr-1.5"></i>Consecuencia</h3>
+                    <p class="text-sm text-slate-700">Sin Propuesta aprobada no se modela, y la fase no se califica hasta aprobarla (condición de admisibilidad de la <a href="11_Modulo_1_Actividad_Fase1_Centinela.html#rubrica">rúbrica</a>). El cuaderno usa exactamente las fuentes aprobadas, y la versión aprobada, con su fecha, se adjunta a la entrega.</p>
+                </div>
+                <div class="card p-5">
+                    <h3 class="font-bold text-navy mb-1"><i aria-hidden="true" class="fas fa-arrow-right-arrow-left text-primary mr-1.5"></i>Continuidad</h3>
+                    <p class="text-sm text-slate-700">La versión aprobada (v1) es el punto de partida de la Fase 2, que la retoma y anota sus cambios (v2).</p>
+                </div>
+                <div class="card p-5">
+                    <h3 class="font-bold text-navy mb-1"><i aria-hidden="true" class="fas fa-pen-to-square text-primary mr-1.5"></i>Cómo se usa esta página</h3>
+                    <p class="text-sm text-slate-700">Las secciones 0 a 8 traen lo que se pide y su campo a diligenciar; los anexos y el <em>checklist</em> vienen después. El bloque <a href="#markdown">«Plantilla en Markdown»</a> trae el mismo formato listo para copiar o descargar, y la página también se imprime en A4.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== LO QUE REVISA LA COMPUERTA ====================== -->
+        <section id="compuerta">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i aria-hidden="true" class="fas fa-door-open text-pink-700 mr-2"></i>Lo que revisa la compuerta</h2>
+            <div class="grid lg:grid-cols-2 gap-5 items-start">
+                <div class="callout callout-info">
+                    <h3 class="text-sm font-bold text-primary mb-1.5"><i aria-hidden="true" class="fas fa-magnifying-glass-chart text-primary mr-2"></i>Lo que la compuerta verifica</h3>
+                    <ol class="text-sm list-decimal pl-5 space-y-1.5">
+                        <li><strong>Objetivo binario.</strong> El evento de riesgo es sí/no. Si el fenómeno es continuo o multiclase, la Propuesta fija el umbral o la agrupación que lo vuelve binario y lo justifica.</li>
+                        <li><strong>Dos modalidades reales.</strong> Dos instrumentos distintos del mismo fenómeno: la imagen no puede derivarse de la serie ni dibujarse a partir de una columna. Pregunta de control: «¿La imagen contiene algo que un número no contenga?».</li>
+                        <li><strong>Clave de alineación.</strong> La entidad y la ventana espaciotemporal que comparten las dos fuentes —agregada, p. ej., (región, mes), con su salvedad de fuga; o por muestra, p. ej., (finca, semana)— y una <strong>prueba de acoplamiento</strong>: diez filas reales unidas por esa clave.</li>
+                        <li><strong>Línea base comprometida.</strong> La Fase 1 reporta la clase mayoritaria y, si la modalidad aplanada resume un escalar, el desempeño de ese escalar crudo.</li>
+                        <li><strong>Control de datos.</strong> En la Fase 1 no hay personas identificables: solo datos públicos, agregados o anonimizados por la fuente oficial. La Propuesta diligencia el <em>checklist</em> de protección de datos (Ley 1581 de 2012) que acompaña <a href="#ley-1581" style="color:#BE185D">su plantilla</a>.</li>
+                    </ol>
+                </div>
+                <div id="criterio" class="callout callout-tip">
+                    <h3 class="text-sm font-bold text-emerald-800 mb-1.5"><i aria-hidden="true" class="fas fa-list-check text-emerald-700 mr-2"></i>Criterio de aprobación: las cinco condiciones</h3>
+                    <p class="text-sm mb-2">Una propuesta se aprueba si cumple estas cinco condiciones:</p>
+                    <ul class="text-sm space-y-1.5">
+                        <li><strong>(a)</strong> tiene <strong>dos modalidades reales</strong>: dos instrumentos distintos del mismo fenómeno, con una fila de imagen con URL y licencia en la sección 3 (ver <a href="#modalidades">la prueba de abajo</a>);</li>
+                        <li><strong>(b)</strong> las fuentes son <strong>públicas, no-Kaggle y con licencia citable</strong>: el <a href="#procedencia">test de procedencia</a> no encuentra una réplica de Kaggle, y la licencia, con su nombre y su versión, se verificó en la fuente primaria;</li>
+                        <li><strong>(c)</strong> el dato <strong>exige EDA</strong>: la huella de crudeza muestra faltantes, desbalance, ruido o escalas heterogéneas;</li>
+                        <li><strong>(d)</strong> declara una <strong>clave de alineación válida</strong> entre modalidades —agregada con su salvedad o por muestra— y la <strong>demuestra con la <a href="#anexo-a">prueba de acoplamiento</a></strong> de diez filas reales, que prueba que <strong>ambas fuentes existen y son acoplables</strong>;</li>
+                        <li><strong>(e)</strong> los <strong>riesgos éticos</strong> y de protección de datos están identificados y el <strong><a href="#ley-1581"><em>checklist</em> de protección de datos</a></strong> está completo; en la Fase 1, <strong>sin personas identificables</strong>.</li>
+                    </ul>
+                    <p class="text-sm mt-3">La compuerta revisa además dos compromisos de los que depende la calificación de la Fase 1: el <strong>objetivo binario</strong> (sección 1) y la <strong>línea base comprometida</strong> (sección 6). Si falla cualquiera de estos puntos, el docente responde «Ajustes» y la Propuesta se corrige antes de modelar. Nombrar una mitigación para cada riesgo no es condición de la compuerta, pero el Criterio 1 de la rúbrica lo exige desde el nivel Autónomo.</p>
+                </div>
+            </div>
+            <div class="callout callout-danger mt-5">
+                <h3 class="text-sm font-bold text-red-800 mb-1.5"><i aria-hidden="true" class="fas fa-ban text-red-700 mr-2"></i>Si la Propuesta no pasa la compuerta</h3>
+                <ul class="text-sm list-disc pl-5 space-y-1.5">
+                    <li>El docente responde «Ajustes»: la Propuesta se corrige y se vuelve a presentar <strong>antes de modelar</strong>. El cuaderno usa exactamente las fuentes aprobadas.</li>
+                    <li>Sin Propuesta aprobada, la fase <strong>no se califica hasta aprobarla</strong>. La rúbrica lo fija como la primera condición de admisibilidad: «No son admisibles una fuente de Kaggle o una réplica suya, un reto ya resuelto ni el escenario vetado del ejemplo resuelto» (<a href="11_Modulo_1_Actividad_Fase1_Centinela.html#rubrica">rúbrica de la Fase 1, sección 2</a>).</li>
+                    <li>El escenario del ejemplo resuelto del curso (heladas en la floración del tulipán con datos del KNMI, o variaciones menores) <strong>no supera la compuerta</strong>: ya está resuelto públicamente.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ====================== FORMATO ====================== -->
+        <section id="formato">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-2"><i aria-hidden="true" class="fas fa-file-lines text-pink-700 mr-2"></i>Formato de la Propuesta (1 página + anexos)</h2>
+            <p class="text-slate-700 max-w-4xl mb-6">La página única recoge las secciones 0 a 8. La prueba de acoplamiento y las evidencias del test de procedencia van en los <a href="#anexos">anexos A y B</a>, y el <a href="#ley-1581"><em>checklist</em> de protección de datos</a>, en el anexo C. Cada sección trae lo que se pide y el campo que se diligencia.</p>
+
+            <div class="space-y-5">
+                <!-- 0 -->
+                <div class="card p-5 md:p-6">
+                    <div class="flex gap-3 items-start">
+                        <span class="step-num" aria-hidden="true">0</span>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-navy text-lg">0. Encabezado</h3>
+                            <p class="text-sm text-slate-700 mt-1">Título del proyecto · integrantes (individual o equipo de hasta 3) · fecha (AAAA-MM-DD) · versión (v1 en la Fase 1).</p>
+                            <p class="campo-rot">Campo a diligenciar</p>
+                            <table class="tbl">
+                                <caption class="sr-only">Encabezado de la Propuesta: campos a diligenciar</caption>
+                                <tbody>
+                                    <tr><th scope="row" style="width:34%">Título del proyecto</th><td class="vacia"></td></tr>
+                                    <tr><th scope="row">Integrantes</th><td class="vacia"></td></tr>
+                                    <tr><th scope="row">Fecha (AAAA-MM-DD)</th><td class="vacia"></td></tr>
+                                    <tr><th scope="row">Versión</th><td class="ejemplo">v1 en la Fase 1</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 1 -->
+                <div class="card p-5 md:p-6">
+                    <div class="flex gap-3 items-start">
+                        <span class="step-num" aria-hidden="true">1</span>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-navy text-lg">1. Problema, cliente y objetivo binario</h3>
+                            <ul class="text-sm text-slate-700 mt-1 list-disc pl-5 space-y-1.5">
+                                <li>El evento de riesgo que se anticipa y para quién: una frase sobre el cliente y otra sobre el impacto.</li>
+                                <li><strong>Objetivo binario.</strong> El evento es sí/no (p. ej., «hoja enferma: sí/no»). Si el fenómeno es <strong>continuo</strong> (temperatura, casos, precio), se fija el <strong>umbral</strong> que lo vuelve binario —p. ej., «helada: temperatura mínima por debajo de 0 °C»; «brote: casos semanales por encima del percentil 75 histórico del municipio»— y se justifica por el costo para el cliente. Si es <strong>multiclase</strong> u <strong>ordinal</strong> (p. ej., la severidad de la roya), se fija la <strong>agrupación</strong> —p. ej., «sana» frente a «cualquier grado de enfermedad»— y se declara qué información se pierde.</li>
+                            </ul>
+                            <p class="campo-rot">Campo a diligenciar</p>
+                            <div class="grid md:grid-cols-2 gap-3">
+                                <div class="campo">Evento de riesgo y cliente (una frase).</div>
+                                <div class="campo">Impacto para el cliente (una frase).</div>
+                            </div>
+                            <div class="campo mt-3">Objetivo binario: sí/no; umbral (si el fenómeno es continuo) o agrupación (si es multiclase u ordinal), con su justificación por el costo para el cliente y la información que se pierde.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2 -->
+                <div class="card p-5 md:p-6">
+                    <div class="flex gap-3 items-start">
+                        <span class="step-num" aria-hidden="true">2</span>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-navy text-lg">2. Las dos modalidades del sistema completo</h3>
+                            <ul class="text-sm text-slate-700 mt-1 list-disc pl-5 space-y-1.5">
+                                <li><em>Rama de imagen:</em> qué representa cada imagen, qué instrumento la produce y qué señal aporta.</li>
+                                <li><em>Rama temporal:</em> qué variables en el tiempo, de qué instrumento y con qué frecuencia.</li>
+                                <li><strong>Pregunta de control:</strong> «¿La imagen contiene algo que un número no contenga?». Si la respuesta es no, hay una sola modalidad.</li>
+                            </ul>
+                            <p class="campo-rot">Campo a diligenciar</p>
+                            <div class="grid md:grid-cols-2 gap-3">
+                                <div class="campo">Rama de imagen: qué representa, instrumento y señal.</div>
+                                <div class="campo">Rama temporal: variables, instrumento y frecuencia.</div>
+                            </div>
+                            <div class="campo mt-3">Respuesta a la pregunta de control.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3 -->
+                <div class="card p-5 md:p-6">
+                    <div class="flex gap-3 items-start">
+                        <span class="step-num" aria-hidden="true">3</span>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-navy text-lg">3. Fuentes (con enlaces y licencia)</h3>
+                            <p class="text-sm text-slate-700 mt-1">Una fila por fuente. Las dos primeras filas son el ejemplo de la ruta por defecto (en cursiva); las fuentes candidatas están en el <a href="14_Catalogo_Fuentes_y_Sustentacion.html#fuentes">catálogo de fuentes</a>.</p>
+                            <p class="campo-rot">Campo a diligenciar</p>
+                            <div role="region" tabindex="0" aria-label="Tabla de fuentes de la Propuesta (se desplaza horizontalmente)" class="overflow-x-auto">
+                                <table class="tbl" style="min-width:820px">
+                                    <caption class="sr-only">Sección 3 de la Propuesta: una fila por fuente, con modalidad, productor primario, enlace, licencia, lugar de verificación y presencia de datos de personas</caption>
+                                    <thead><tr style="background:#3D008D"><th scope="col">Modalidad</th><th scope="col">Fuente (productor primario)</th><th scope="col">Enlace o DOI</th><th scope="col">Licencia y versión</th><th scope="col">Dónde se verificó la licencia</th><th scope="col">¿Datos de personas?</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>Imagen</td><td class="ejemplo">p. ej., RoCoLe (Mendeley Data)</td><td class="ejemplo">https://doi.org/10.17632/c5yvn32dzg.2</td><td class="ejemplo">CC BY 4.0</td><td class="ejemplo">Ficha DataCite del DOI</td><td class="ejemplo">No (hojas de café)</td></tr>
+                                        <tr><td>Temporal</td><td class="ejemplo">p. ej., NASA POWER</td><td class="ejemplo">https://power.larc.nasa.gov/</td><td class="ejemplo">Datos NASA de libre uso</td><td class="ejemplo">Página de la fuente</td><td class="ejemplo">No</td></tr>
+                                        <tr><td>Imagen</td><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td></tr>
+                                        <tr><td>Temporal</td><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4 -->
+                <div class="card p-5 md:p-6">
+                    <div class="flex gap-3 items-start">
+                        <span class="step-num" aria-hidden="true">4</span>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-navy text-lg">4. Por qué NO es un reto resuelto</h3>
+                            <p class="text-sm text-slate-700 mt-1">Evidencia de que el dato es crudo, de que no proviene de Kaggle ni de una réplica suya y de que no hay una solución pública que bastaría con copiar. Se documenta con el <strong><a href="#procedencia">test de procedencia</a></strong>; sus evidencias van en el <a href="#anexo-b">anexo B</a>.</p>
+                            <p class="campo-rot">Campo a diligenciar</p>
+                            <div class="campo campo-lg">Crudeza del dato, ausencia de réplicas de Kaggle (con la fecha de la búsqueda) y ausencia de una solución pública que bastaría con copiar.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5 -->
+                <div class="card p-5 md:p-6">
+                    <div class="flex gap-3 items-start">
+                        <span class="step-num" aria-hidden="true">5</span>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-navy text-lg">5. Plan de la Fase 1, clave de alineación y prueba de acoplamiento</h3>
+                            <ul class="text-sm text-slate-700 mt-1 list-disc pl-5 space-y-1.5">
+                                <li><strong>Modalidad que se modela en la Fase 1.</strong> En esta fase se modela <strong>una sola</strong> modalidad, aplanada a tabla (la imagen resumida en rasgos, o la serie agregada por ventana). Se declara cuál, y cómo se pasa en la Fase 2 a la arquitectura nativa (CNN para imagen, RNN/LSTM/GRU para serie), donde se incorpora la segunda.</li>
+                                <li><strong>Clave de alineación entre modalidades.</strong> No basta decir «hay un camino»: se nombra <strong>cómo se acoplan de hecho</strong> las dos fuentes, es decir, qué entidad y qué ventana espaciotemporal comparten.
+                                    <ul class="list-[circle] pl-5 mt-1 space-y-1">
+                                        <li>Si la alineación es <strong>agregada</strong> (p. ej., <strong>(región, mes)</strong>, como en la <a href="14_Catalogo_Fuentes_y_Sustentacion.html#ruta-por-defecto">ruta por defecto</a>), se declara así, <strong>con su salvedad de fuga de datos</strong> y de rasgo casi constante.</li>
+                                        <li>Si es <strong>por muestra</strong> (co-registro real, unidad recomendada <strong>(finca, semana)</strong>), se describe la llave concreta (entidad + ventana) y la fuente fechada y georreferenciada que la habilita.</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Prueba de acoplamiento (obligatoria).</strong> Va en el anexo: <strong>diez filas reales</strong> de las dos fuentes unidas por esa clave, con el código o la consulta que las produjo. Cada fila muestra la clave, un dato de la rama de imagen (el archivo o un rasgo) y un dato de la serie, cada uno tomado de su fuente. Una clave que no produce diez filas reales no está demostrada.</li>
+                                <li><strong>Extensión opcional</strong> (Criterio 1, nivel Estratégico): probar ya la clave en el cuaderno de la Fase 1 con rasgos agregados de la segunda modalidad.</li>
+                                <li><strong>Si la modalidad aplanada es una serie temporal,</strong> la partición será <strong>cronológica</strong> (entrenamiento en el pasado, validación y prueba en periodos posteriores), y los rezagos y las transformaciones se calculan sin mirar el futuro.</li>
+                            </ul>
+                            <p class="campo-rot">Campo a diligenciar</p>
+                            <div class="campo">Modalidad que se aplana en la Fase 1 y cómo pasa a la arquitectura nativa en la Fase 2.</div>
+                            <div role="group" aria-labelledby="rot-clave" class="mt-3 space-y-2 text-sm text-slate-700">
+                                <p id="rot-clave" class="font-semibold text-navy">Tipo de clave de alineación (se marca una):</p>
+                                <label class="chk"><input type="checkbox" name="clave-tipo"><span><strong>Agregada</strong>, p. ej., (región, mes), con su salvedad de fuga de datos y de rasgo casi constante.</span></label>
+                                <label class="chk"><input type="checkbox" name="clave-tipo"><span><strong>Por muestra</strong>, p. ej., (finca, semana), con la llave concreta y la fuente fechada y georreferenciada que la habilita.</span></label>
+                            </div>
+                            <div class="campo mt-3">Entidad y ventana espaciotemporal que comparten las dos fuentes; salvedad, si es agregada. La prueba de diez filas va en el <a href="#anexo-a">anexo A</a>.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6 -->
+                <div class="card p-5 md:p-6">
+                    <div class="flex gap-3 items-start">
+                        <span class="step-num" aria-hidden="true">6</span>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-navy text-lg">6. Línea base comprometida</h3>
+                            <p class="text-sm text-slate-700 mt-1">La Propuesta se compromete a reportar, en el conjunto de prueba, las referencias que el MLP debe superar:</p>
+                            <ul class="text-sm text-slate-700 mt-1 list-disc pl-5 space-y-1.5">
+                                <li>la <strong>clase mayoritaria</strong>: su exactitud y el <em>recall</em> de la clase de riesgo (que vale 0 cuando la clase mayoritaria es «sin riesgo»);</li>
+                                <li>si la modalidad aplanada <strong>resume un escalar</strong> (p. ej., cuando los rasgos de la imagen se reducen a un único índice, como el NDVI medio o el brillo nocturno total, o cuando la serie se resume en una sola variable), el <strong>desempeño de ese escalar crudo</strong> usado solo, con un umbral elegido en validación.</li>
+                            </ul>
+                            <p class="text-sm text-slate-700 mt-2">La partición, la semilla y estas cifras se conservan: son el punto de comparación de la Fase 2.</p>
+                            <p class="campo-rot">Campo a diligenciar</p>
+                            <table class="tbl">
+                                <caption class="sr-only">Sección 6 de la Propuesta: referencias de la línea base que se comprometen</caption>
+                                <tbody>
+                                    <tr><th scope="row" style="width:40%">Clase mayoritaria (exactitud y <em>recall</em> de la clase de riesgo)</th><td class="ejemplo">Se reporta en el conjunto de prueba.</td></tr>
+                                    <tr><th scope="row">¿La modalidad aplanada resume un escalar? ¿Cuál?</th><td class="vacia"></td></tr>
+                                    <tr><th scope="row">Escalar crudo usado solo (si aplica)</th><td class="ejemplo">Umbral elegido en validación; desempeño reportado en prueba.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7 -->
+                <div class="card p-5 md:p-6">
+                    <div class="flex gap-3 items-start">
+                        <span class="step-num" aria-hidden="true">7</span>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-navy text-lg">7. Riesgos éticos y protección de datos</h3>
+                            <p class="text-sm text-slate-700 mt-1">Sesgo de muestreo, representatividad y daños de una falsa alarma o de una alarma omitida para el cliente, con la mitigación de cada uno; más el <strong><a href="#ley-1581"><em>checklist</em> de protección de datos</a></strong>, diligenciado para cada fuente.</p>
+                            <p class="campo-rot">Campo a diligenciar</p>
+                            <div role="region" tabindex="0" aria-label="Tabla de riesgos éticos (se desplaza horizontalmente)" class="overflow-x-auto">
+                            <table class="tbl" style="min-width:520px">
+                                <caption class="sr-only">Sección 7 de la Propuesta: riesgos éticos, daño para el cliente y mitigación</caption>
+                                <thead><tr style="background:#3D008D"><th scope="col">Riesgo</th><th scope="col">Daño para el cliente</th><th scope="col">Mitigación</th></tr></thead>
+                                <tbody>
+                                    <tr><td class="ejemplo">Sesgo de muestreo o representatividad</td><td class="vacia"></td><td class="vacia"></td></tr>
+                                    <tr><td class="ejemplo">Falsa alarma</td><td class="vacia"></td><td class="vacia"></td></tr>
+                                    <tr><td class="ejemplo">Alarma omitida</td><td class="vacia"></td><td class="vacia"></td></tr>
+                                </tbody>
+                            </table>
+                            </div>
+                            <p class="text-xs text-slate-600 mt-2">El <em>checklist</em> de protección de datos va en el <a href="#ley-1581">anexo C</a>, uno por fuente.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8 -->
+                <div class="card p-5 md:p-6">
+                    <div class="flex gap-3 items-start">
+                        <span class="step-num" aria-hidden="true">8</span>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-navy text-lg">8. Cita APA 7 de cada fuente</h3>
+                            <p class="text-sm text-slate-700 mt-1"><strong>Cita APA 7</strong> de cada fuente, con autor o institución, año, título, tipo de recurso y URL o DOI. Las <a href="14_Catalogo_Fuentes_y_Sustentacion.html#referencias">referencias del catálogo</a> sirven de modelo.</p>
+                            <p class="campo-rot">Campo a diligenciar</p>
+                            <div class="campo">Una referencia APA 7 por fuente.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== DOS MODALIDADES REALES ====================== -->
+        <section id="modalidades">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i aria-hidden="true" class="fas fa-images text-pink-700 mr-2"></i>Prueba de las «dos modalidades reales»</h2>
+            <div class="callout callout-danger">
+                <h3 class="text-sm font-bold text-red-800 mb-1.5"><i aria-hidden="true" class="fas fa-triangle-exclamation text-red-700 mr-2"></i>El filtro que más se escapa</h3>
+                <p class="text-sm">El punto (a) es el que <strong>más caro cuesta si se aprueba mal</strong>: un vacío de modalidad que pasa la compuerta reaparece en la Fase 2, cuando ya no hay tiempo de conseguir la fuente que falta. Y en la Fase 2 pesa el <strong>30 %</strong>.</p>
+                <p class="text-sm mt-3"><strong>La prueba, en dos preguntas.</strong> Para que haya dos modalidades reales, la propuesta debe superar ambas:</p>
+                <ol class="text-sm list-decimal pl-5 mt-1 space-y-1.5">
+                    <li><strong>¿Son instrumentos distintos?</strong> Deben provenir de <strong>dos mediciones físicamente independientes</strong> del fenómeno (una cámara y un pluviómetro; un radiómetro satelital y un encuestador de precios). Si una se deriva de la otra por cálculo, hay <strong>una sola modalidad</strong>.</li>
+                    <li><strong>¿Está nombrada la fuente de imagen, con URL y licencia?</strong> No basta «se conseguirán imágenes» ni «se usará una representación visual». En la sección 3 de la Propuesta debe haber una <strong>fila de imagen</strong> con enlace y licencia verificados.</li>
+                </ol>
+                <p class="text-sm mt-3"><strong>Ejemplos que NO pasan</strong> (y hay que devolver para ajuste):</p>
+                <ul class="text-sm list-disc pl-5 mt-1 space-y-1.5">
+                    <li>«<em>Modalidad 1: la serie aplanada a tabla. Modalidad 2: la misma serie sin aplanar, con una RNN.</em>» → <strong>Una sola modalidad en dos formas.</strong> Aplanar o no aplanar es una decisión de arquitectura, no una modalidad. Es el caso más frecuente y el más fácil de dejar pasar, porque <em>suena</em> a dos cosas.</li>
+                    <li>«<em>Modalidad 2: convertiremos la serie en imagen (matriz de recurrencia / mapa de calor / espectrograma).</em>» → <strong>Multi-vista, no multimodal.</strong> Admisible solo si se declara como tal desde el inicio (ver <a href="14_Catalogo_Fuentes_y_Sustentacion.html#serie-imagen">el aviso del catálogo</a>), nunca como la segunda modalidad del proyecto.</li>
+                    <li>«<em>Las imágenes se definirán más adelante.</em>» → Sin fila de imagen con URL y licencia en la sección 3, <strong>no hay rama visual</strong>.</li>
+                </ul>
+                <p class="text-sm mt-3"><strong>Si el problema es socioeconómico</strong> y el estudiante no encuentra imagen, la respuesta del docente <strong>no es «busca más»</strong>: es señalar la fila de <strong><a href="14_Catalogo_Fuentes_y_Sustentacion.html#imagen">luces nocturnas</a></strong> y la <a href="14_Catalogo_Fuentes_y_Sustentacion.html#combinaciones">combinación socioeconómica del catálogo</a>, o pedir un cambio de problema. Es una decisión de la Fase 1, y <strong>contestarla a tiempo es responsabilidad de la compuerta</strong>.</p>
+            </div>
+        </section>
+
+        <!-- ====================== TEST DE PROCEDENCIA ====================== -->
+        <section id="procedencia">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-2"><i aria-hidden="true" class="fas fa-fingerprint text-pink-700 mr-2"></i>Test de procedencia (sección 4 de la Propuesta)</h2>
+            <p class="text-slate-700 max-w-4xl mb-5">Es la forma de demostrar que una fuente no es una réplica de Kaggle. El veto y sus razones están en el <a href="14_Catalogo_Fuentes_y_Sustentacion.html#kaggle">catálogo de fuentes</a>.</p>
+            <div class="callout callout-info">
+                <p class="text-sm mb-2">Cinco comprobaciones que el docente verifica en minutos; las evidencias van en el anexo de la Propuesta.</p>
+                <ol class="text-sm list-decimal pl-5 space-y-2">
+                    <li><strong>Cadena de procedencia.</strong> Por cada archivo: URL o DOI del <strong>productor primario</strong> (institución, repositorio con DOI o API oficial), fecha de descarga, nombre exacto del archivo y su huella SHA-256, calculada en el cuaderno con <code class="icode">hashlib.sha256(open(ruta, "rb").read()).hexdigest()</code>.</li>
+                    <li><strong>Descarga trazable.</strong> La celda de carga obtiene los datos de esa URL o API (o de una copia en el repositorio con la misma huella). No se admiten <code class="icode">kaggle datasets download</code>, <code class="icode">kagglehub</code> ni rutas <code class="icode">/kaggle/input/</code>. El docente lo comprueba con <code class="icode">grep -inE "kaggle|kagglehub|/kaggle/input" *.ipynb</code>. Usar Kaggle solo como entorno de cómputo es válido si los datos vienen de la fuente primaria.</li>
+                    <li><strong>Búsqueda declarada de espejos.</strong> Se busca el nombre del conjunto y del archivo en kaggle.com/datasets (y con <code class="icode">site:kaggle.com "&lt;nombre&gt;"</code>). La Propuesta lista las coincidencias (hasta tres, con su URL) o declara «sin coincidencias», con la fecha de la búsqueda.</li>
+                    <li><strong>Huella de crudeza.</strong> Antes de limpiar se reportan filas × columnas, el porcentaje de faltantes y el balance de la etiqueta. Un archivo sin faltantes, ya dividido en entrenamiento y prueba y con la clase balanceada es indicio de una réplica preprocesada: el docente pide la fuente primaria.</li>
+                    <li><strong>Contraste con el espejo.</strong> Si existe en Kaggle un conjunto con el mismo origen, se muestra que el archivo usado no coincide con él (huella distinta, más filas o faltantes, columnas originales). Si coincide, la Propuesta no se aprueba.</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- ====================== ANEXOS ====================== -->
+        <section id="anexos">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-2"><i aria-hidden="true" class="fas fa-paperclip text-pink-700 mr-2"></i>Anexos de la Propuesta</h2>
+            <p class="text-slate-700 max-w-4xl mb-5">No cuentan en la página única. El anexo A demuestra la clave de alineación; el B reúne las evidencias del test de procedencia; el C es el <a href="#ley-1581"><em>checklist</em> de protección de datos</a>.</p>
+
+            <div id="anexo-a" class="card p-5 md:p-6">
+                <h3 class="font-bold text-navy text-lg"><i aria-hidden="true" class="fas fa-link text-primary mr-2"></i>Anexo A · Prueba de acoplamiento (diez filas reales)</h3>
+                <p class="text-sm text-slate-700 mt-1">Diez filas reales de las dos fuentes unidas por la clave de la sección 5, con el código o la consulta que las produjo. Cada fila muestra la clave, un dato de la rama de imagen (el archivo o un rasgo) y un dato de la serie, cada uno tomado de su fuente. Una clave que no produce diez filas reales no está demostrada.</p>
+                <p class="campo-rot">Campo a diligenciar</p>
+                <div role="region" tabindex="0" aria-label="Tabla de la prueba de acoplamiento (se desplaza horizontalmente)" class="overflow-x-auto">
+                    <table class="tbl" style="min-width:640px">
+                        <caption class="sr-only">Anexo A: diez filas reales unidas por la clave de alineación</caption>
+                        <thead><tr style="background:#3D008D"><th scope="col" style="width:8%">N.º</th><th scope="col" style="width:26%">Clave (entidad, ventana)</th><th scope="col">Dato de la rama de imagen (archivo o rasgo)</th><th scope="col">Dato de la serie (variable y valor)</th></tr></thead>
+                        <tbody>
+                            <tr><th scope="row">1</th><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td></tr>
+                            <tr><th scope="row">2</th><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td></tr>
+                            <tr><th scope="row">3</th><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td></tr>
+                            <tr><th scope="row">4</th><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td></tr>
+                            <tr><th scope="row">5</th><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td></tr>
+                            <tr><th scope="row">6</th><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td></tr>
+                            <tr><th scope="row">7</th><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td></tr>
+                            <tr><th scope="row">8</th><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td></tr>
+                            <tr><th scope="row">9</th><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td></tr>
+                            <tr><th scope="row">10</th><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="campo mt-3">Código o consulta que produjo las diez filas (celda del cuaderno o consulta a la API).</div>
+            </div>
+
+            <div id="anexo-b" class="card p-5 md:p-6 mt-5">
+                <h3 class="font-bold text-navy text-lg"><i aria-hidden="true" class="fas fa-fingerprint text-primary mr-2"></i>Anexo B · Evidencias del test de procedencia</h3>
+                <p class="text-sm text-slate-700 mt-1">Una evidencia por cada una de las cinco comprobaciones del <a href="#procedencia">test de procedencia</a>.</p>
+                <p class="campo-rot">1. Cadena de procedencia (un archivo por fila)</p>
+                <div role="region" tabindex="0" aria-label="Tabla de la cadena de procedencia (se desplaza horizontalmente)" class="overflow-x-auto">
+                    <table class="tbl" style="min-width:640px">
+                        <caption class="sr-only">Anexo B: cadena de procedencia de cada archivo, con su productor primario, fecha de descarga y huella SHA-256</caption>
+                        <thead><tr style="background:#3D008D"><th scope="col">Archivo (nombre exacto)</th><th scope="col">URL o DOI del productor primario</th><th scope="col" style="width:16%">Fecha de descarga</th><th scope="col">Huella SHA-256</th></tr></thead>
+                        <tbody>
+                            <tr><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td></tr>
+                            <tr><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td></tr>
+                            <tr><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="grid md:grid-cols-2 gap-3 mt-3">
+                    <div><p class="campo-rot">2. Descarga trazable</p><div class="campo">Celda de carga, URL o API de la que obtiene los datos y resultado de la búsqueda de «kaggle» en el cuaderno.</div></div>
+                    <div><p class="campo-rot">3. Búsqueda declarada de espejos</p><div class="campo">Fecha de la búsqueda y hasta tres coincidencias con su URL, o «sin coincidencias».</div></div>
+                    <div><p class="campo-rot">4. Huella de crudeza (antes de limpiar)</p><div class="campo">Filas × columnas, porcentaje de faltantes y balance de la etiqueta.</div></div>
+                    <div><p class="campo-rot">5. Contraste con el espejo (si existe)</p><div class="campo">Huella distinta, más filas o faltantes, columnas originales.</div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== CHECKLIST LEY 1581 ====================== -->
+        <section id="ley-1581">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-2"><i aria-hidden="true" class="fas fa-user-shield text-pink-700 mr-2"></i>Anexo C · <em>Checklist</em> de protección de datos personales (Ley 1581 de 2012)</h2>
+            <div class="callout callout-danger mt-4">
+                <h3 class="text-sm font-bold text-red-800 mb-1.5"><i aria-hidden="true" class="fas fa-user-slash text-red-700 mr-2"></i>Regla de la Fase 1: sin personas identificables</h3>
+                <p class="text-sm">En la Fase 1 solo se usan datos <strong>públicos, agregados o anonimizados por la fuente oficial</strong>. Una fuente que contiene personas identificables —directamente o al combinar columnas— no es admisible en esta fase, aunque sea pública. Los datos personales se reservan para fases posteriores, con este <em>checklist</em> completo y el visto bueno del docente.</p>
+            </div>
+            <p class="text-sm text-slate-700 max-w-4xl mt-4">Este <em>checklist</em> acompaña a la Propuesta de Datos (<a href="#formato">sección 7</a>) y se diligencia <strong>para cada fuente</strong>; completarlo es parte de la condición (e) del criterio de aprobación. Las normas se verificaron el 2026-10-23 en Función Pública, la Secretaría del Senado y la Superintendencia de Industria y Comercio (SIC). Abreviaturas: «Ley» = Ley 1581 de 2012; «DUR» = Decreto 1074 de 2015 (Decreto Único Reglamentario del Sector Comercio, Industria y Turismo), que en su Parte 2, Título 2, Capítulo 25 compila el Decreto 1377 de 2013.</p>
+
+            <div class="card p-5 md:p-6 mt-5">
+                <p class="campo-rot" style="margin-top:0">Fuente a la que corresponde este <em>checklist</em></p>
+                <div class="campo" style="min-height:2.6rem">Nombre de la fuente (una copia del <em>checklist</em> por fuente).</div>
+                <div role="group" aria-labelledby="blq-resultado" class="mt-4 space-y-2 text-sm text-slate-700">
+                    <h3 id="blq-resultado" class="font-bold text-navy">Resultado <span class="font-normal">(se marca uno)</span></h3>
+                    <label class="chk"><input type="checkbox"><span>Sin datos de personas.</span></label>
+                    <label class="chk"><input type="checkbox"><span>Datos de personas <strong>anonimizados por la fuente</strong>.</span></label>
+                    <label class="chk"><input type="checkbox"><span>Datos personales o sensibles → <strong>no admisibles en la Fase 1</strong>; en fases posteriores requieren el visto bueno del docente antes de modelar.</span></label>
+                </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-5 mt-5 items-start">
+                <div role="group" aria-labelledby="blq-a" class="card p-5 space-y-2 text-sm text-slate-700">
+                    <h3 id="blq-a" class="font-bold text-navy">A. ¿Hay datos personales?</h3>
+                    <p class="text-xs text-slate-600">(Ley, art. 3 lit. c: información «vinculada o que pueda asociarse a una o varias personas naturales determinadas o determinables»)</p>
+                    <label class="chk"><input type="checkbox"><span>Se revisaron todas las columnas, imágenes y metadatos en busca de <strong>identificadores directos</strong> (nombre, documento, correo, teléfono, dirección, número de cuenta, contrato, NIU, matrícula, placa, rostro, voz).</span></label>
+                    <label class="chk"><input type="checkbox"><span>Se revisaron los <strong>identificadores indirectos</strong>, que combinados permiten señalar a alguien: coordenadas exactas, fecha + municipio pequeño, edad + sexo + institución, metadatos EXIF/GPS de fotos.</span></label>
+                    <label class="chk"><input type="checkbox"><span>Un identificador <strong>seudonimizado</strong> (p. ej., un NIU o un documento cifrado) se trata como dato personal: sigue siendo «asociable» a la persona.</span></label>
+                </div>
+
+                <div role="group" aria-labelledby="blq-b" class="card p-5 space-y-2 text-sm text-slate-700">
+                    <h3 id="blq-b" class="font-bold text-navy">B. ¿Hay datos sensibles?</h3>
+                    <p class="text-xs text-slate-600">(Ley, art. 5: salud, biométricos, vida sexual, origen étnico, opinión política, convicciones religiosas, afiliación sindical)</p>
+                    <label class="chk"><input type="checkbox"><span>Si los hay, la base es una de estas dos: autorización <strong>explícita</strong> del titular (art. 6 lit. a; DUR 2.2.2.25.2.3) o finalidad científica o estadística <strong>con supresión de identidad</strong> (art. 6 lit. e). En este curso, la regla práctica es usar solo conjuntos <strong>anonimizados por la fuente oficial</strong>.</span></label>
+                    <label class="chk"><input type="checkbox"><span>Imágenes médicas y conteos de salud (p. ej., SIVIGILA): se declaran como datos de <strong>salud</strong> y no se cruzan con fuentes que permitan reidentificar.</span></label>
+                </div>
+
+                <div role="group" aria-labelledby="blq-c" class="card p-5 space-y-2 text-sm text-slate-700">
+                    <h3 id="blq-c" class="font-bold text-navy">C. ¿Hay niños, niñas o adolescentes?</h3>
+                    <p class="text-xs text-slate-600">(Ley, art. 7; DUR 2.2.2.25.2.9)</p>
+                    <label class="chk"><input type="checkbox"><span>Si los titulares pueden ser menores (p. ej., pruebas de Estado escolares, matrícula, registros pediátricos), solo se usan datos <strong>públicos o anonimizados y agregados</strong> de fuente oficial. <strong>No</strong> se recolectan datos propios de menores en este proyecto.</span></label>
+                </div>
+
+                <div role="group" aria-labelledby="blq-d" class="card p-5 space-y-2 text-sm text-slate-700">
+                    <h3 id="blq-d" class="font-bold text-navy">D. Base legal o autorización para datos de terceros</h3>
+                    <label class="chk"><input type="checkbox"><span>Fuente pública oficial: se citan sus <strong>términos de uso</strong>. Que algo esté «en internet» no lo convierte en dato público (DUR 2.2.2.25.2.2: los datos de fuentes de acceso público solo pueden tratarse libremente si «por su naturaleza, sean datos públicos»).</span></label>
+                    <label class="chk"><input type="checkbox"><span>Datos propios o de una organización (finca, cooperativa, empleador): hay <strong>autorización previa, expresa e informada</strong> del titular o permiso escrito de la entidad (Ley, arts. 3 lit. a y 9; DUR 2.2.2.25.2.4: escrita, oral o por conducta inequívoca, «en ningún caso el silencio»), y se <strong>conserva la prueba</strong> (DUR 2.2.2.25.2.5). En la Fase 1, además, con las <a href="#datos-propios">salvaguardas de los datos propios</a> no queda ninguna persona identificable.</span></label>
+                    <label class="chk"><input type="checkbox"><span>Datos de un empleador: además, hay permiso para usarlos fuera de la empresa y se respeta su confidencialidad (Ley, art. 4 lit. h).</span></label>
+                </div>
+
+                <div role="group" aria-labelledby="blq-e" class="card p-5 space-y-2 text-sm text-slate-700">
+                    <h3 id="blq-e" class="font-bold text-navy">E. Finalidad</h3>
+                    <p class="text-xs text-slate-600">(Ley, art. 4 lit. b)</p>
+                    <label class="chk"><input type="checkbox"><span>Finalidad declarada: «uso académico para entrenar y evaluar un modelo en el curso; no se toman decisiones sobre personas identificadas».</span></label>
+                </div>
+
+                <div role="group" aria-labelledby="blq-f" class="card p-5 space-y-2 text-sm text-slate-700">
+                    <h3 id="blq-f" class="font-bold text-navy">F. Anonimización y riesgo de reidentificación</h3>
+                    <label class="chk"><input type="checkbox"><span>Se eliminaron los identificadores directos y se generalizaron los indirectos (p. ej., coordenadas → vereda o municipio; fecha → semana o mes; edad → rangos).</span></label>
+                    <label class="chk"><input type="checkbox"><span>Se borraron los metadatos EXIF/GPS de las imágenes.</span></label>
+                    <label class="chk"><input type="checkbox"><span>Prueba de reidentificación respondida por escrito: «¿podría alguien identificar a una persona combinando estas columnas con información pública?». Las celdas con conteos muy pequeños (p. ej., 1 caso por municipio y semana) no se publican sin agregar.</span></label>
+                </div>
+
+                <div role="group" aria-labelledby="blq-g" class="card p-5 space-y-2 text-sm text-slate-700">
+                    <h3 id="blq-g" class="font-bold text-navy">G. Licencia de uso</h3>
+                    <p class="text-xs text-slate-600">(de cada fuente, verificada en la fuente primaria)</p>
+                    <label class="chk"><input type="checkbox"><span>Nombre y <strong>versión</strong> de la licencia, con el enlace donde se verificó (p. ej., «CC BY 4.0, ficha DataCite del DOI»).</span></label>
+                    <label class="chk"><input type="checkbox"><span>Obligaciones anotadas: <strong>BY</strong> = atribuir e indicar los cambios (p. ej., «características tabulares derivadas de RoCoLe»); <strong>SA</strong> = los derivados redistribuidos, y en algunos casos <strong>los modelos entrenados</strong> (PlantVillage), van con la misma licencia; <strong>NC</strong> = sin uso comercial (pertinente si el cliente es una empresa); <strong>ND</strong> = sin obras derivadas.</span></label>
+                    <label class="chk"><input type="checkbox"><span>Se cumplen los términos del portal (registro, prohibición de reidentificar, cita obligatoria).</span></label>
+                </div>
+
+                <div role="group" aria-labelledby="blq-h" class="card p-5 space-y-2 text-sm text-slate-700">
+                    <h3 id="blq-h" class="font-bold text-navy">H. Transferencia o transmisión internacional</h3>
+                    <p class="text-xs text-slate-600">(Colab, Drive, GitHub, asistentes de IA)</p>
+                    <label class="chk"><input type="checkbox"><span>Se sabe que estos servicios procesan los datos fuera de Colombia (Ley, art. 26; DUR 2.2.2.25.1.3, nums. 4–5, y 2.2.2.25.5.1). Aunque el país de destino figure en la lista de la SIC (Circular Única, Título V, num. 3.2), se exige <strong>responsabilidad demostrada</strong>.</span></label>
+                    <label class="chk"><input type="checkbox"><span>A Colab, Drive y GitHub solo se suben datos <strong>sin personas identificables</strong> (públicos, anonimizados o agregados).</span></label>
+                    <label class="chk"><input type="checkbox"><span>A los asistentes de IA <strong>no</strong> se les pegan registros reales con datos personales: solo el esquema o filas sintéticas.</span></label>
+                </div>
+
+                <div role="group" aria-labelledby="blq-i" class="card p-5 space-y-2 text-sm text-slate-700">
+                    <h3 id="blq-i" class="font-bold text-navy">I. Minimización y conservación</h3>
+                    <label class="chk"><input type="checkbox"><span>Solo se descargan y conservan las columnas necesarias para el problema (DUR 2.2.2.25.2.1).</span></label>
+                    <label class="chk"><input type="checkbox"><span>Se declara dónde se guardan los datos crudos y que se <strong>borran</strong> al terminar el curso o la Fase 3 (DUR 2.2.2.25.2.8), con medidas de seguridad razonables (Ley, art. 4 lit. g).</span></label>
+                </div>
+
+                <div role="group" aria-labelledby="blq-j" class="card p-5 space-y-2 text-sm text-slate-700">
+                    <h3 id="blq-j" class="font-bold text-navy">J. Publicación del repositorio</h3>
+                    <p class="text-xs text-slate-600">(Ley, art. 4 lit. f: los datos personales no públicos no pueden estar disponibles en internet salvo con acceso técnicamente controlable)</p>
+                    <label class="chk"><input type="checkbox"><span>El repositorio es <strong>privado y compartido con el docente</strong>, o es público y <strong>no contiene datos personales</strong> y la licencia de los datos permite redistribuirlos.</span></label>
+                    <label class="chk"><input type="checkbox"><span>Si los datos no se pueden redistribuir, el repositorio trae el <strong><em>script</em> de descarga</strong> desde la fuente primaria; la carpeta de datos va en <code class="icode">.gitignore</code>.</span></label>
+                    <label class="chk"><input type="checkbox"><span>Las <strong>salidas del cuaderno</strong> (<code class="icode">df.head()</code>, ejemplos de imágenes, capturas) no muestran registros con datos personales.</span></label>
+                </div>
+            </div>
+
+            <div id="declaracion" class="card p-5 md:p-6 mt-5">
+                <h3 class="font-bold text-navy text-lg"><i aria-hidden="true" class="fas fa-signature text-primary mr-2"></i>Declaración</h3>
+                <p class="text-sm text-slate-700 mt-1">Lo consignado en este <em>checklist</em> es verdadero y se revisó para cada fuente de la Propuesta. Firma de cada integrante:</p>
+                <table class="tbl mt-3">
+                    <caption class="sr-only">Firma de la declaración del checklist por cada integrante, con su fecha</caption>
+                    <thead><tr style="background:#3D008D"><th scope="col">Integrante</th><th scope="col">Firma</th><th scope="col" style="width:26%">Fecha (AAAA-MM-DD)</th></tr></thead>
+                    <tbody>
+                        <tr><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td></tr>
+                        <tr><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td></tr>
+                        <tr><td class="vacia"></td><td class="vacia"></td><td class="vacia"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ====================== SALVAGUARDAS DE LOS DATOS PROPIOS ====================== -->
+        <section id="datos-propios">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-5"><i aria-hidden="true" class="fas fa-house-user text-pink-700 mr-2"></i>Salvaguardas de los datos propios</h2>
+            <div class="callout callout-warn">
+                <h3 class="text-sm font-bold text-amber-900 mb-1.5"><i aria-hidden="true" class="fas fa-triangle-exclamation text-amber-700 mr-2"></i>Datos propios: con autorización y sin publicar la ubicación</h3>
+                <p class="text-sm">Los datos recolectados por el estudiante (fotos de fincas, registros de una cooperativa o de un empleador) <strong>no son públicos</strong> y, si permiten identificar a una persona —el dueño de la finca por las coordenadas, un usuario por su número de cuenta—, son <strong>datos personales</strong> (Ley 1581 de 2012, art. 3). Se admiten con cuatro condiciones: (1) <strong>autorización escrita</strong> del titular o de la entidad dueña de los datos, con la finalidad académica declarada (Ley 1581, arts. 4 lit. b y 9; Decreto 1074 de 2015, art. 2.2.2.25.2.4); (2) <strong>borrado de los metadatos EXIF/GPS</strong> y coordenadas generalizadas (p. ej., a vereda o municipio) antes de cualquier carga a Colab, Drive o un asistente de IA; (3) <strong>no publicación</strong> de los datos crudos (solo agregados); (4) declaración en el <a href="#ley-1581"><em>checklist</em> de la Propuesta</a> (bloques D y F).</p>
+                <p class="text-sm mt-3"><strong>En la Fase 1</strong> los datos propios se usan solo si, aplicadas esas cuatro salvaguardas, <strong>no queda ninguna persona identificable</strong>. Si la generalización de la ubicación no basta para impedirlo, la Fase 1 se hace con la ruta por defecto y el dato propio se reserva para una fase posterior, con el visto bueno del docente.</p>
+            </div>
+            <p class="text-sm text-slate-700 max-w-4xl mt-4">Las fuentes públicas que contienen datos de personas (salud, imágenes médicas, biodiversidad con observadores, microdatos individuales) tienen su propio aviso en el <a href="14_Catalogo_Fuentes_y_Sustentacion.html#datos-personales">catálogo de fuentes</a>, y la ruta por defecto (RoCoLe + NASA POWER), sin datos de personas, está en <a href="14_Catalogo_Fuentes_y_Sustentacion.html#ruta-por-defecto">su propia sección</a>.</p>
+        </section>
+
+        <!-- ====================== PLANTILLA EN MARKDOWN ====================== -->
+        <section id="markdown" class="no-print">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-2"><i aria-hidden="true" class="fab fa-markdown text-pink-700 mr-2"></i>Plantilla en Markdown</h2>
+            <p class="text-slate-700 max-w-4xl mb-4">El mismo formato, en Markdown limpio, para diligenciar en un editor de texto, en el repositorio o en una celda de texto del cuaderno. El recuadro se puede seleccionar y copiar a mano; con JavaScript activo, los botones lo copian o lo descargan como <span class="icode">propuesta-de-datos-fase1.md</span>.</p>
+            <div class="flex flex-wrap gap-3 mb-3">
+                <button type="button" id="md-copiar" class="btn btn-primario" hidden><i aria-hidden="true" class="fas fa-copy"></i>Copiar la plantilla en Markdown</button>
+                <a id="md-descargar" class="btn btn-secundario" download="propuesta-de-datos-fase1.md" hidden><i aria-hidden="true" class="fas fa-download"></i>Descargar .md</a>
+            </div>
+            <p id="md-estado" class="text-sm font-semibold text-emerald-700 min-h-[1.25rem] mb-2" role="status" aria-live="polite"></p>
+            <div class="code-window">
+                <div class="code-window-bar">
+                    <div class="code-window-dots" aria-hidden="true"><span class="d-r"></span><span class="d-y"></span><span class="d-g"></span></div>
+                    <span class="code-window-title">propuesta-de-datos-fase1.md</span>
+                    <span class="code-window-lang">Markdown</span>
+                </div>
+                <div role="region" tabindex="0" aria-label="Plantilla en Markdown de la Propuesta de Datos (se desplaza)" class="md-region">
+<pre id="md-fuente" class="codeblock md-pre">
+# Propuesta de Datos · Proyecto Centinela · Fase 1
+
+Una página de texto (secciones 0 a 8) más tres anexos que no cuentan en la extensión: A. prueba de acoplamiento; B. evidencias del test de procedencia; C. checklist de protección de datos (uno por fuente).
+
+## 0. Encabezado
+
+| Campo | Detalle |
+| --- | --- |
+| Título del proyecto | _(…)_ |
+| Integrantes | _(individual o equipo de hasta 3)_ |
+| Fecha | _(AAAA-MM-DD)_ |
+| Versión | v1 en la Fase 1 |
+
+## 1. Problema, cliente y objetivo binario
+
+- **Evento de riesgo y cliente:** _(el evento que se anticipa y para quién, en una frase)_
+- **Impacto:** _(una frase sobre el impacto para el cliente)_
+- **Objetivo binario:** _(el evento es sí/no; si el fenómeno es continuo, el umbral que lo vuelve binario; si es multiclase u ordinal, la agrupación y la información que se pierde; con su justificación por el costo para el cliente)_
+
+## 2. Las dos modalidades del sistema completo
+
+- **Rama de imagen:** _(qué representa cada imagen, qué instrumento la produce y qué señal aporta)_
+- **Rama temporal:** _(qué variables en el tiempo, de qué instrumento y con qué frecuencia)_
+- **Pregunta de control, «¿La imagen contiene algo que un número no contenga?»:** _(respuesta; si es no, hay una sola modalidad)_
+
+## 3. Fuentes (con enlaces y licencia)
+
+| Modalidad | Fuente (productor primario) | Enlace o DOI | Licencia y versión | Dónde se verificó la licencia | ¿Datos de personas? |
+| --- | --- | --- | --- | --- | --- |
+| Imagen | _(…)_ | _(…)_ | _(…)_ | _(…)_ | _(…)_ |
+| Temporal | _(…)_ | _(…)_ | _(…)_ | _(…)_ | _(…)_ |
+
+Ejemplo de fila: Imagen · RoCoLe (Mendeley Data) · https://doi.org/10.17632/c5yvn32dzg.2 · CC BY 4.0 · Ficha DataCite del DOI · No (hojas de café).
+
+## 4. Por qué NO es un reto resuelto
+
+_(evidencia de que el dato es crudo, de que no proviene de Kaggle ni de una réplica suya y de que no hay una solución pública que bastaría con copiar; se documenta con el test de procedencia, cuyas evidencias van en el anexo B)_
+
+## 5. Plan de la Fase 1, clave de alineación y prueba de acoplamiento
+
+- **Modalidad que se modela en la Fase 1 (aplanada a tabla):** _(…)_
+- **Paso a la Fase 2:** _(arquitectura nativa: CNN para imagen o RNN/LSTM/GRU para serie, e incorporación de la segunda modalidad)_
+- **Clave de alineación (se marca una):**
+  - [ ] Agregada, p. ej., (región, mes), con su salvedad de fuga de datos y de rasgo casi constante: _(…)_
+  - [ ] Por muestra, p. ej., (finca, semana): llave concreta (entidad + ventana) y fuente fechada y georreferenciada que la habilita: _(…)_
+- **Prueba de acoplamiento (obligatoria):** diez filas reales en el anexo A.
+- **Si la modalidad aplanada es una serie temporal:** partición cronológica; los rezagos y las transformaciones se calculan sin mirar el futuro.
+
+## 6. Línea base comprometida
+
+- **Clase mayoritaria:** exactitud y *recall* de la clase de riesgo en el conjunto de prueba (el *recall* vale 0 cuando la clase mayoritaria es «sin riesgo»).
+- **Escalar crudo** (solo si la modalidad aplanada resume un escalar): _(cuál, y su desempeño usado solo, con un umbral elegido en validación)_
+- La partición, la semilla y estas cifras se conservan: son el punto de comparación de la Fase 2.
+
+## 7. Riesgos éticos y protección de datos
+
+| Riesgo | Daño para el cliente | Mitigación |
+| --- | --- | --- |
+| Sesgo de muestreo o representatividad | _(…)_ | _(…)_ |
+| Falsa alarma | _(…)_ | _(…)_ |
+| Alarma omitida | _(…)_ | _(…)_ |
+
+El checklist de protección de datos va en el anexo C, uno por fuente.
+
+## 8. Cita APA 7 de cada fuente
+
+- _(…)_
+
+---
+
+## Anexo A · Prueba de acoplamiento
+
+Clave: _(entidad, ventana)_
+
+| N.º | Clave | Dato de la rama de imagen (archivo o rasgo) | Dato de la serie (variable y valor) |
+| --- | --- | --- | --- |
+| 1 | | | |
+| 2 | | | |
+| 3 | | | |
+| 4 | | | |
+| 5 | | | |
+| 6 | | | |
+| 7 | | | |
+| 8 | | | |
+| 9 | | | |
+| 10 | | | |
+
+Código o consulta que produjo las filas: _(…)_
+
+## Anexo B · Evidencias del test de procedencia
+
+1. **Cadena de procedencia** (un archivo por fila):
+
+| Archivo (nombre exacto) | URL o DOI del productor primario | Fecha de descarga | Huella SHA-256 |
+| --- | --- | --- | --- |
+| _(…)_ | _(…)_ | _(AAAA-MM-DD)_ | _(…)_ |
+
+2. **Descarga trazable:** _(celda de carga, URL o API de la que obtiene los datos y resultado de la búsqueda de «kaggle» en el cuaderno)_
+3. **Búsqueda declarada de espejos** (fecha AAAA-MM-DD): _(hasta tres coincidencias con su URL, o «sin coincidencias»)_
+4. **Huella de crudeza** (antes de limpiar): filas × columnas _(…)_ · faltantes _(… %)_ · balance de la etiqueta _(…)_
+5. **Contraste con el espejo** (si existe): _(huella distinta, más filas o faltantes, columnas originales)_
+
+## Anexo C · Checklist de protección de datos personales (uno por fuente)
+
+Fuente: _(…)_
+
+Regla de la Fase 1: sin personas identificables. Solo se usan datos públicos, agregados o anonimizados por la fuente oficial. «Ley» = Ley 1581 de 2012; «DUR» = Decreto 1074 de 2015, que compila el Decreto 1377 de 2013.
+
+**Resultado** (se marca uno):
+
+- [ ] Sin datos de personas.
+- [ ] Datos de personas anonimizados por la fuente.
+- [ ] Datos personales o sensibles → no admisibles en la Fase 1; en fases posteriores requieren el visto bueno del docente antes de modelar.
+
+### A. ¿Hay datos personales? (Ley, art. 3 lit. c)
+
+- [ ] Se revisaron todas las columnas, imágenes y metadatos en busca de identificadores directos (nombre, documento, correo, teléfono, dirección, número de cuenta, contrato, NIU, matrícula, placa, rostro, voz).
+- [ ] Se revisaron los identificadores indirectos, que combinados permiten señalar a alguien: coordenadas exactas, fecha + municipio pequeño, edad + sexo + institución, metadatos EXIF/GPS de fotos.
+- [ ] Un identificador seudonimizado (p. ej., un NIU o un documento cifrado) se trata como dato personal: sigue siendo «asociable» a la persona.
+
+### B. ¿Hay datos sensibles? (Ley, art. 5)
+
+- [ ] Si los hay, la base es una de estas dos: autorización explícita del titular (art. 6 lit. a; DUR 2.2.2.25.2.3) o finalidad científica o estadística con supresión de identidad (art. 6 lit. e). En este curso, la regla práctica es usar solo conjuntos anonimizados por la fuente oficial.
+- [ ] Imágenes médicas y conteos de salud (p. ej., SIVIGILA): se declaran como datos de salud y no se cruzan con fuentes que permitan reidentificar.
+
+### C. ¿Hay niños, niñas o adolescentes? (Ley, art. 7; DUR 2.2.2.25.2.9)
+
+- [ ] Si los titulares pueden ser menores (p. ej., pruebas de Estado escolares, matrícula, registros pediátricos), solo se usan datos públicos o anonimizados y agregados de fuente oficial. No se recolectan datos propios de menores en este proyecto.
+
+### D. Base legal o autorización para datos de terceros
+
+- [ ] Fuente pública oficial: se citan sus términos de uso. Que algo esté «en internet» no lo convierte en dato público (DUR 2.2.2.25.2.2: los datos de fuentes de acceso público solo pueden tratarse libremente si «por su naturaleza, sean datos públicos»).
+- [ ] Datos propios o de una organización (finca, cooperativa, empleador): hay autorización previa, expresa e informada del titular o permiso escrito de la entidad (Ley, arts. 3 lit. a y 9; DUR 2.2.2.25.2.4: escrita, oral o por conducta inequívoca, «en ningún caso el silencio»), y se conserva la prueba (DUR 2.2.2.25.2.5). En la Fase 1, además, con las salvaguardas de los datos propios no queda ninguna persona identificable.
+- [ ] Datos de un empleador: además, hay permiso para usarlos fuera de la empresa y se respeta su confidencialidad (Ley, art. 4 lit. h).
+
+### E. Finalidad (Ley, art. 4 lit. b)
+
+- [ ] Finalidad declarada: «uso académico para entrenar y evaluar un modelo en el curso; no se toman decisiones sobre personas identificadas».
+
+### F. Anonimización y riesgo de reidentificación
+
+- [ ] Se eliminaron los identificadores directos y se generalizaron los indirectos (p. ej., coordenadas → vereda o municipio; fecha → semana o mes; edad → rangos).
+- [ ] Se borraron los metadatos EXIF/GPS de las imágenes.
+- [ ] Prueba de reidentificación respondida por escrito: «¿podría alguien identificar a una persona combinando estas columnas con información pública?». Las celdas con conteos muy pequeños (p. ej., 1 caso por municipio y semana) no se publican sin agregar.
+
+### G. Licencia de uso (de cada fuente, verificada en la fuente primaria)
+
+- [ ] Nombre y versión de la licencia, con el enlace donde se verificó (p. ej., «CC BY 4.0, ficha DataCite del DOI»).
+- [ ] Obligaciones anotadas: BY = atribuir e indicar los cambios (p. ej., «características tabulares derivadas de RoCoLe»); SA = los derivados redistribuidos, y en algunos casos los modelos entrenados (PlantVillage), van con la misma licencia; NC = sin uso comercial (pertinente si el cliente es una empresa); ND = sin obras derivadas.
+- [ ] Se cumplen los términos del portal (registro, prohibición de reidentificar, cita obligatoria).
+
+### H. Transferencia o transmisión internacional (Colab, Drive, GitHub, asistentes de IA)
+
+- [ ] Se sabe que estos servicios procesan los datos fuera de Colombia (Ley, art. 26; DUR 2.2.2.25.1.3, nums. 4–5, y 2.2.2.25.5.1). Aunque el país de destino figure en la lista de la SIC (Circular Única, Título V, num. 3.2), se exige responsabilidad demostrada.
+- [ ] A Colab, Drive y GitHub solo se suben datos sin personas identificables (públicos, anonimizados o agregados).
+- [ ] A los asistentes de IA no se les pegan registros reales con datos personales: solo el esquema o filas sintéticas.
+
+### I. Minimización y conservación
+
+- [ ] Solo se descargan y conservan las columnas necesarias para el problema (DUR 2.2.2.25.2.1).
+- [ ] Se declara dónde se guardan los datos crudos y que se borran al terminar el curso o la Fase 3 (DUR 2.2.2.25.2.8), con medidas de seguridad razonables (Ley, art. 4 lit. g).
+
+### J. Publicación del repositorio (Ley, art. 4 lit. f)
+
+- [ ] El repositorio es privado y compartido con el docente, o es público y no contiene datos personales y la licencia de los datos permite redistribuirlos.
+- [ ] Si los datos no se pueden redistribuir, el repositorio trae el script de descarga desde la fuente primaria; la carpeta de datos va en `.gitignore`.
+- [ ] Las salidas del cuaderno (`df.head()`, ejemplos de imágenes, capturas) no muestran registros con datos personales.
+
+**Declaración.** Lo consignado en este checklist es verdadero y se revisó para cada fuente de la Propuesta.
+
+| Integrante | Firma | Fecha (AAAA-MM-DD) |
+| --- | --- | --- |
+| _(…)_ | | |
+| _(…)_ | | |
+| _(…)_ | | |
+</pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================== RELACIONADO ====================== -->
+        <section id="lugar">
+            <div class="usta-header rounded-2xl p-7 text-white">
+                <h2 class="text-xl md:text-2xl font-extrabold mb-3"><i aria-hidden="true" class="fas fa-diagram-project mr-2"></i>Lugar de esta plantilla en el curso</h2>
+                <div class="grid md:grid-cols-3 gap-4 text-sm">
+                    <div class="bg-black/20 rounded-xl p-4">
+                        <p class="font-bold mb-1">La actividad</p>
+                        <p class="text-white">La Propuesta es el <a href="11_Modulo_1_Actividad_Fase1_Centinela.html#paso-0" class="underline font-semibold text-white">Paso 0 de la Fase 1</a>. La misma página explica el <a href="11_Modulo_1_Actividad_Fase1_Centinela.html#ia" class="underline font-semibold text-white">uso de IA</a>, la <a href="11_Modulo_1_Actividad_Fase1_Centinela.html#entrega" class="underline font-semibold text-white">entrega</a> y la <a href="11_Modulo_1_Actividad_Fase1_Centinela.html#rubrica" class="underline font-semibold text-white">rúbrica</a>.</p>
+                    </div>
+                    <div class="bg-black/20 rounded-xl p-4">
+                        <p class="font-bold mb-1">Las otras plantillas</p>
+                        <p class="text-white">El <a href="14_Catalogo_Fuentes_y_Sustentacion.html" class="underline font-semibold text-white">catálogo de fuentes y sustentación</a> ofrece las fuentes candidatas, y la <a href="13_Plantilla_Bitacora_IA.html" class="underline font-semibold text-white">Bitácora de IA</a> se diligencia desde la Propuesta en adelante.</p>
+                    </div>
+                    <a href="index.html" class="bg-black/20 hover:bg-black/30 transition rounded-xl p-4 block">
+                        <p class="font-bold mb-1">Portal del curso <i aria-hidden="true" class="fas fa-arrow-right ml-1 text-xs"></i></p>
+                        <p class="text-white">Todos los materiales, actividades y plantillas de los tres módulos.</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ====================== PIE ====================== -->
+    <footer class="bg-navy text-white/80 text-sm">
+        <div class="max-w-6xl mx-auto px-5 md:px-8 py-8">
+            <p class="font-bold text-white mb-1">Universidad Santo Tomás · Maestría en Ciencia de Datos</p>
+            <p>Profundización I: Redes Neuronales — Deep Learning (EA-N-F-004) · Experto temático: Javier Mauricio Sierra</p>
+            <p class="text-white/55 mt-3 text-xs">Proyecto Centinela · Fase 1 — Fundamentos del Aprendizaje Profundo. Material de aprendizaje autónomo. Metodología «Ingeniería de Trinchera»: si una arquitectura no corre en Google Colab, no existe.</p>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            'use strict';
+
+            // Realce del enlace de navegación activo según la sección visible.
+            var secs = document.querySelectorAll('main section[id]');
+            var links = document.querySelectorAll('.navlink');
+            if ('IntersectionObserver' in window) {
+                var navIO = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (e) {
+                        if (!e.isIntersecting) return;
+                        links.forEach(function (l) { l.classList.remove('text-primary', 'bg-slate-100'); l.removeAttribute('aria-current'); });
+                        var active = document.querySelector('.navlink[href="#' + e.target.id + '"]');
+                        if (active) { active.classList.add('text-primary', 'bg-slate-100'); active.setAttribute('aria-current', 'location'); }
+                    });
+                }, { rootMargin: '-45% 0px -50% 0px' });
+                secs.forEach(function (s) { navIO.observe(s); });
+            }
+
+            // Bloque «Plantilla en Markdown»: copiar y descargar. Sin JavaScript, el texto se selecciona a mano.
+            var fuente = document.getElementById('md-fuente');
+            var estado = document.getElementById('md-estado');
+            var btnCopiar = document.getElementById('md-copiar');
+            var enlace = document.getElementById('md-descargar');
+            if (!fuente || !estado) return;
+            var texto = fuente.textContent.replace(/^\n/, '');
+
+            function avisar(msg) {
+                estado.textContent = '';
+                window.setTimeout(function () { estado.textContent = msg; }, 60);   // se vuelve a anunciar aunque se repita
+            }
+            function seleccionar() {
+                var sel = window.getSelection();
+                var rango = document.createRange();
+                rango.selectNodeContents(fuente);
+                sel.removeAllRanges();
+                sel.addRange(rango);
+            }
+            function respaldo() {
+                seleccionar();
+                var ok = false;
+                try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+                avisar(ok ? 'Plantilla copiada en el portapapeles.'
+                          : 'El texto quedó seleccionado: se copia con Ctrl+C (Cmd+C en Mac).');
+            }
+
+            if (btnCopiar) {
+                btnCopiar.hidden = false;
+                btnCopiar.addEventListener('click', function () {
+                    if (!(navigator.clipboard && window.isSecureContext)) { respaldo(); return; }
+                    // Si el navegador no resuelve la promesa (permiso pendiente), se usa la selección del texto.
+                    var resuelto = false;
+                    var espera = window.setTimeout(function () { if (!resuelto) { resuelto = true; respaldo(); } }, 1200);
+                    navigator.clipboard.writeText(texto).then(function () {
+                        if (resuelto) return;
+                        resuelto = true; window.clearTimeout(espera);
+                        avisar('Plantilla copiada en el portapapeles.');
+                    }, function () {
+                        if (resuelto) return;
+                        resuelto = true; window.clearTimeout(espera);
+                        respaldo();
+                    });
+                });
+            }
+
+            if (enlace && window.Blob && window.URL && URL.createObjectURL) {
+                enlace.href = URL.createObjectURL(new Blob([texto], { type: 'text/markdown;charset=utf-8' }));
+                enlace.hidden = false;
+                enlace.addEventListener('click', function () {
+                    avisar('Descarga iniciada: ' + enlace.getAttribute('download') + '.');
+                });
+            }
+        })();
+    </script>
+    <script defer src="portal-nav.js"></script>
+</body>
+
+</html>
