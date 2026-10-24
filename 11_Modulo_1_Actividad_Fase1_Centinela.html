@@ -588,7 +588,7 @@
             </div>
 
             <div class="callout callout-danger mt-4">
-                <p class="text-sm"><i aria-hidden="true" class="fas fa-bolt text-red-600 mr-2"></i><strong>Antipatrón: la doble sigmoide.</strong> Dejar <span class="icode">nn.Sigmoid()</span> dentro del modelo <em>y</em> usar <span class="icode">BCEWithLogitsLoss</span> aplica la sigmoide <strong>dos veces</strong>. El código corre sin errores, y por eso es peligroso: la probabilidad efectiva queda atrapada entre 0,5 y 0,73, la pérdida no puede bajar de un piso cercano a 0,5 (las curvas dejan de servir para diagnosticar el sobreajuste) y el gradiente llega atenuado. Si en la evaluación se aplica otra vez <span class="icode">torch.sigmoid</span>, <strong>todas</strong> las probabilidades superan 0,5: con el umbral 0,5 todo sale positivo y la exactitud cae a 0,5 con clases balanceadas, aunque el AUC casi se conserva (el modelo sigue ordenando bien los casos). La ruta recomendada deja la última capa como <span class="icode">nn.Linear(8, 1)</span> (un <strong>logit</strong>; en general, <span class="icode">nn.Linear(k, 1)</span>) y combina sigmoide y entropía cruzada en un solo paso numéricamente estable con <span class="icode">BCEWithLogitsLoss</span>; la sigmoide solo se aplica con <span class="icode">torch.sigmoid</span> <strong>en la evaluación</strong>. La alternativa válida es <span class="icode">nn.Sigmoid()</span> en el modelo con <span class="icode">nn.BCELoss()</span> (entonces la salida ya es una probabilidad y no se vuelve a aplicar la sigmoide); lo prohibido es mezclarlas.</p>
+                <p class="text-sm"><i aria-hidden="true" class="fas fa-bolt text-red-600 mr-2"></i><strong>Antipatrón: la doble sigmoide.</strong> Dejar <span class="icode">nn.Sigmoid()</span> dentro del modelo <em>y</em> usar <span class="icode">BCEWithLogitsLoss</span> aplica la sigmoide <strong>dos veces</strong>. El código corre sin errores, y por eso es peligroso: la probabilidad efectiva queda atrapada entre 0,5 y 0,73, la pérdida no puede bajar de un piso (≈ 0,5 con clases balanceadas; más alto con desbalance: 0,62 en el ejemplo resuelto), así que las curvas dejan de servir para diagnosticar el sobreajuste, y el gradiente llega atenuado. Si en la evaluación se aplica otra vez <span class="icode">torch.sigmoid</span>, <strong>todas</strong> las probabilidades superan 0,5: con el umbral 0,5 todo sale positivo y la exactitud cae a 0,5 con clases balanceadas, aunque el AUC casi se conserva (el modelo sigue ordenando bien los casos). La ruta recomendada deja la última capa como <span class="icode">nn.Linear(8, 1)</span> (un <strong>logit</strong>; en general, <span class="icode">nn.Linear(k, 1)</span>) y combina sigmoide y entropía cruzada en un solo paso numéricamente estable con <span class="icode">BCEWithLogitsLoss</span>; la sigmoide solo se aplica con <span class="icode">torch.sigmoid</span> <strong>en la evaluación</strong>. La alternativa válida es <span class="icode">nn.Sigmoid()</span> en el modelo con <span class="icode">nn.BCELoss()</span> (entonces la salida ya es una probabilidad y no se vuelve a aplicar la sigmoide); lo prohibido es mezclarlas.</p>
             </div>
 
             <!-- Paso 3 + figura bucle -->
@@ -676,7 +676,8 @@
                     <span class="code-window-lang">Python · PyTorch</span>
                     <button class="code-copy" type="button" aria-label="Copiar el código de entrenamiento.py" title="Copiar"><i aria-hidden="true" class="fas fa-copy"></i></button>
                 </div>
-                <div class="codeblock" tabindex="0" role="region" aria-label="Código de entrenamiento.py (desplazable)"><span class="cm"># entrenamiento.py — requiere X_train, X_val (N, n_feat) e y_train, y_val (0/1) del Paso 1</span>
+                <div class="codeblock" tabindex="0" role="region" aria-label="Código de entrenamiento.py (desplazable)"><span class="cm"># entrenamiento.py — requiere del Paso 1 X_train, X_val (arreglos NumPy (N, n_feat), p. ej. la salida</span>
+<span class="cm"># del escalador; un DataFrame se pasa con .to_numpy()) e y_train, y_val (0/1)</span>
 <span class="kw">import</span> copy
 <span class="kw">import</span> torch
 <span class="kw">import</span> torch.nn <span class="kw">as</span> nn
@@ -740,7 +741,7 @@ modelo.<span class="fn">load_state_dict</span>(mejor_estado)               <span
             <div class="flex gap-4 mb-2 mt-8"><span class="step-num">4</span>
                 <div class="flex-1">
                     <h3 class="font-bold text-navy text-lg">Experimentación y regularización</h3>
-                    <p class="text-sm text-slate-600 mt-1">Entrenamiento por <strong>50 épocas como referencia</strong> (ajustables, con la justificación en el informe) y graficación de las curvas de pérdida de <strong>entrenamiento vs. validación</strong>. El desafío consiste en inducir intencionalmente <strong>sobreajuste</strong> (más neuronas o más épocas) y luego corregirlo con <strong>Dropout</strong> o ajustando la tasa de aprendizaje (ajustar la tasa ayuda si se combina con la parada temprana o con menos épocas), documentando el cambio en las gráficas. El sobreajuste rara vez aparece en 50 actualizaciones: para provocarlo se reduce el conjunto de entrenamiento a unos cientos de muestras, se agranda la red y se entrena varios cientos de épocas, como en el ejemplo resuelto.</p>
+                    <p class="text-sm text-slate-600 mt-1">Entrenamiento por <strong>50 épocas como referencia</strong> (ajustables, con la justificación en el informe) y graficación de las curvas de pérdida de <strong>entrenamiento vs. validación</strong>. El desafío consiste en inducir intencionalmente <strong>sobreajuste</strong> (más neuronas o más épocas) y luego corregirlo con <strong>Dropout</strong>, ajustando la tasa de aprendizaje o reduciendo el tamaño de la red (ajustar la tasa ayuda si se combina con la parada temprana o con menos épocas), documentando el cambio en las gráficas. El sobreajuste rara vez aparece en 50 actualizaciones: para provocarlo se reduce el conjunto de entrenamiento a unos cientos de muestras, se agranda la red y se entrena varios cientos de épocas, como en el ejemplo resuelto.</p>
                 </div>
             </div>
             <div class="grid md:grid-cols-2 gap-6 my-5 items-start">
@@ -806,7 +807,7 @@ modelo.<span class="fn">load_state_dict</span>(mejor_estado)               <span
                     <p class="text-sm text-slate-700 mb-2">Herramientas de regularización de esta fase (Dropout o ajuste de la tasa, más la parada temprana para elegir la versión final):</p>
                     <ul class="text-sm text-slate-700 space-y-1.5 list-disc pl-5">
                         <li><strong>Dropout:</strong> apaga aleatoriamente una fracción de neuronas en cada paso, forzando representaciones redundantes.</li>
-                        <li><strong>Parada temprana</strong> (<em lang="en">early stopping</em>): tras cada época se mide la pérdida de validación y se guarda el estado del modelo cada vez que alcanza un nuevo mínimo; al terminar —o tras una <strong>paciencia</strong> de 5 a 10 épocas sin mejora— se <strong>restaura</strong> ese estado como versión final (Cap. 5). En esta fase detener el bucle es opcional; lo obligatorio es <strong>nombrar esa época y restaurar sus pesos</strong>, como hace el código del Paso 3.</li>
+                        <li><strong>Parada temprana</strong> (<em lang="en">early stopping</em>): tras cada época se mide la pérdida de validación y se guarda el estado del modelo cada vez que alcanza un nuevo mínimo; al terminar —o tras una <strong>paciencia</strong> de 5 a 10 épocas sin mejora— se <strong>restaura</strong> ese estado como versión final (Cap. 5). En esta fase detener el bucle es opcional; lo que se pide es <strong>nombrar esa época y restaurar sus pesos</strong> (el Criterio 3 lo exige en el nivel Estratégico), como hace el código del Paso 3.</li>
                         <li>Ajuste de la <strong>tasa de aprendizaje</strong> y del número de neuronas.</li>
                     </ul>
                 </div>
@@ -1509,7 +1510,7 @@ modelo.<span class="fn">load_state_dict</span>(mejor_estado)               <span
                         '<span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">' + c.peso + ' %</span>' +
                     '</div>' +
                     '<select id="' + selId + '" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary" aria-describedby="ae-desc-' + i + '">' +
-                        '<option value="-1" selected>— Nivel —</option>' + opciones +
+                        '<option value="-1" selected>— Elegir un nivel —</option>' + opciones +
                     '</select>' +
                     '<p id="ae-desc-' + i + '" class="text-sm text-slate-600 mt-3 leading-relaxed" aria-live="polite"></p>' +
                     '<p id="ae-feed-' + i + '" class="text-sm mt-2 leading-relaxed font-medium"></p>';
