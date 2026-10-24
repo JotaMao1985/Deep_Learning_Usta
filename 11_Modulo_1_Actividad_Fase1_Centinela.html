@@ -862,27 +862,154 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
             </div>
         </section>
 
-        <!-- ====================== RÚBRICA ====================== -->
+        <!-- ====================== RÚBRICA (v1.4) ====================== -->
         <section id="rubrica" class="reveal">
-            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-3"><i class="fas fa-table-list text-secondary mr-2"></i>Rúbrica de evaluación</h2>
-            <p class="text-slate-600 mb-5 max-w-3xl">Niveles de desempeño: <strong>Estratégico</strong> (4,6–5,0) · <strong>Autónomo</strong> (4,0–4,5) · <strong>Básico</strong> (3,0–3,9) · <strong>Inicial</strong> (1,0–2,9) · <strong>Nulo</strong> — sin entrega (0,0). Los pesos suman 100 %.</p>
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-2"><i aria-hidden="true" class="fas fa-table-list text-secondary mr-2"></i>Rúbrica de evaluación</h2>
+            <p id="rubrica-version" class="text-sm font-semibold text-slate-600 mb-6"><i aria-hidden="true" class="fas fa-code-branch text-primary mr-1.5"></i>Rúbrica Fase 1 · versión 1.4 · vigente desde (fecha de publicación)</p>
 
-            <!-- Resumen claro por criterio -->
+            <!-- 1. Niveles y escala -->
             <div class="card p-6 mb-6">
-                <h3 class="font-bold text-primary text-lg mb-1"><i class="fas fa-list-check text-secondary mr-2"></i>Resumen claro por criterio</h3>
-                <p class="text-sm text-slate-600 mb-4">En una mirada: qué se espera de cada criterio y la evidencia mínima para <strong>aprobar</strong> (nivel Básico). El detalle por nivel está en la tabla de abajo.</p>
+                <h3 class="font-bold text-primary text-lg mb-3">1. Niveles y escala</h3>
+                <div class="grid md:grid-cols-2 gap-5 items-start">
+                    <table class="tbl">
+                        <caption class="sr-only">Niveles de desempeño y su banda de nota</caption>
+                        <thead><tr style="background:#3D008D"><th scope="col">Nivel</th><th scope="col">Banda</th></tr></thead>
+                        <tbody>
+                            <tr><th scope="row"><span class="rounded-full px-3 py-0.5 text-xs font-bold" style="background:#F3E8FF;color:#3D008D">Estratégico</span></th><td>4,6–5,0</td></tr>
+                            <tr><th scope="row"><span class="rounded-full px-3 py-0.5 text-xs font-bold" style="background:#E0F2FE;color:#0E7490">Autónomo</span></th><td>4,0–4,5</td></tr>
+                            <tr><th scope="row"><span class="rounded-full px-3 py-0.5 text-xs font-bold" style="background:#DCFCE7;color:#15803D">Básico</span></th><td>3,0–3,9</td></tr>
+                            <tr><th scope="row"><span class="rounded-full px-3 py-0.5 text-xs font-bold" style="background:#FEF3C7;color:#B45309">Inicial</span></th><td>1,0–2,9</td></tr>
+                        </tbody>
+                    </table>
+                    <p class="text-sm text-slate-700 leading-relaxed">La fase <strong>aprueba con una nota ponderada de 3,0 o más</strong>. <strong>Nulo (0,0) no es un nivel de desempeño</strong> (ver la sección 6).</p>
+                </div>
+            </div>
 
+            <!-- 2. Antes de calificar: admisibilidad -->
+            <div class="callout callout-warn mb-6">
+                <h3 class="font-bold text-navy mb-2"><i aria-hidden="true" class="fas fa-door-open text-amber-600 mr-2"></i>2. Antes de calificar: admisibilidad</h3>
+                <p class="text-sm mb-2">La entrega se califica con la tabla solo si cumple estas cuatro condiciones. Si falta alguna, no se califica: se devuelve con un plazo breve, que fija el docente, para corregirla.</p>
+                <ol class="text-sm list-decimal pl-5 space-y-1.5">
+                    <li><strong>Propuesta de Datos aprobada en la compuerta</strong> (Paso 0). No son admisibles una fuente de Kaggle o una réplica suya, un reto ya resuelto ni el escenario vetado del ejemplo resuelto.</li>
+                    <li><strong>Sin personas identificables.</strong> En la Fase 1 solo se usan datos públicos, agregados o anonimizados por la fuente oficial.</li>
+                    <li><strong>El cuaderno corre de principio a fin.</strong> Se admite como máximo una corrección de una línea por parte de quien califica (por ejemplo, la forma de la etiqueta). Esa corrección deja C2 en el piso de su banda.</li>
+                    <li><strong>La sustentación se hizo antes de emitir la nota</strong> (ver la sección 5).</li>
+                </ol>
+            </div>
+
+            <!-- 3. Cómo se aplica la tabla -->
+            <div class="card p-6 mb-6 border-l-4" style="border-color:#3D008D">
+                <h3 class="font-bold text-primary text-lg mb-2"><i aria-hidden="true" class="fas fa-scale-unbalanced text-secondary mr-2"></i>3. Cómo se aplica la tabla</h3>
+                <ol class="text-sm text-slate-700 list-decimal pl-5 space-y-1.5">
+                    <li><strong>Los niveles están anidados.</strong> Cada nivel parte del anterior: «Además de lo de…».</li>
+                    <li><strong>Se asigna el nivel que mejor describe el criterio en conjunto.</strong> Si al trabajo le falta <strong>un solo</strong> requisito de ese nivel, se queda en él con la nota en el piso de la banda. Si le faltan <strong>dos o más</strong>, baja al nivel anterior.</li>
+                    <li><strong>Las condiciones de la columna Inicial son topes.</strong> Si se presenta cualquiera de ellas, el criterio no pasa de Inicial aunque cumpla requisitos de niveles superiores.</li>
+                    <li><strong>Nota dentro de la banda.</strong> El piso corresponde a cumplir justo el nivel; el techo, a cumplir además parte del nivel siguiente. En Inicial, la nota va de 1,0 a 1,9 si hay dos o más condiciones o una que impide evaluar el criterio, y de 2,0 a 2,9 si hay una sola y el resto del criterio llega a Básico.</li>
+                    <li><strong>Un defecto se descuenta una sola vez,</strong> en el criterio que lo nombra. La única excepción es la compuerta de autoría (sección 5).</li>
+                    <li><strong>Nota final</strong> = Σ (nota × peso) / 100, redondeada a una cifra decimal, con las centésimas en 5 hacia arriba (4,85 → 4,9). La aprobación se decide con la nota redondeada y por la nota ponderada, no criterio a criterio: un criterio en Inicial puede compensarse con los demás.</li>
+                </ol>
+            </div>
+
+            <!-- 4. Tabla de la rúbrica -->
+            <h3 class="font-bold text-primary text-lg mb-3">4. Tabla de la rúbrica</h3>
+            <div class="overflow-x-auto card p-1" tabindex="0" role="region" aria-label="Tabla de la rúbrica (desplazable horizontalmente)">
+                <table id="rubrica-tabla" class="tbl" style="min-width:960px">
+                    <caption class="sr-only">Rúbrica de la Fase 1, versión 1.4: descriptores de cada criterio por nivel de desempeño. Los niveles están anidados y las condiciones de la columna Inicial son topes.</caption>
+                    <thead>
+                        <tr style="background:#001A4D">
+                            <th scope="col" style="width:16%">Criterio (peso)</th>
+                            <th scope="col" style="width:21%">Estratégico (4,6–5,0)</th>
+                            <th scope="col" style="width:21%">Autónomo (4,0–4,5)</th>
+                            <th scope="col" style="width:21%">Básico (3,0–3,9)</th>
+                            <th scope="col" style="width:21%">Inicial (1,0–2,9)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">1. Propuesta de datos y EDA (15 %)</th>
+                            <td data-nivel="Estratégico">Además de lo de Autónomo: cada hallazgo del EDA se enlaza con una decisión concreta de partición o de preprocesamiento (p. ej., «desbalance 85/15 → partición estratificada»), y la línea base comprometida en la Propuesta (clase mayoritaria y, si la modalidad aplanada resume un escalar, ese escalar crudo) queda calculada en el cuaderno. Probar ya la clave de alineación con rasgos agregados de la segunda modalidad es una extensión opcional que sube la nota dentro de la banda.</td>
+                            <td data-nivel="Autónomo">Además de lo de Básico: el EDA describe la distribución de las variables, sus escalas y los faltantes; la partición se justifica por escrito (estratificación, orden temporal o agrupación por entidad); la Propuesta nombra sus riesgos éticos y de protección de datos, con una mitigación para cada uno.</td>
+                            <td data-nivel="Básico">La Propuesta fue aprobada en la compuerta. El EDA muestra al menos la distribución de clases y hay una partición en entrenamiento, validación y prueba, aunque no se justifique.</td>
+                            <td data-nivel="Inicial">Se presenta al menos una: (a) no hay EDA; (b) no hay un conjunto de prueba separado; (c) el conjunto de prueba interviene en el ajuste del modelo o del preprocesamiento (fuga), por ejemplo un escalador ajustado antes de partir.</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">2. Diseño e implementación del MLP (30 %)</th>
+                            <td data-nivel="Estratégico">Además de lo de Autónomo: la salida es un <strong>logit</strong> (<span class="icode">nn.Linear(k, 1)</span>, sin sigmoide en el <span class="icode">forward</span>) con <span class="icode">BCEWithLogitsLoss</span> y etiqueta <span class="icode">(N, 1)</span> flotante; las activaciones se justifican con un argumento propio sobre la no linealidad que aportan (no basta «es la activación estándar»), y la capacidad de la red se justifica con al menos una comparación medida (p. ej., dos tamaños de capa).</td>
+                            <td data-nivel="Autónomo">Además de lo de Básico: el cuaderno corre de principio a fin sin editar; la semilla está fija en <span class="icode">torch</span> y en las demás librerías aleatorias que se usan; el código está comentado por secciones (datos, modelo, bucle, evaluación).</td>
+                            <td data-nivel="Básico">Hay un MLP en PyTorch con al menos dos capas ocultas y un bucle de entrenamiento explícito (forward, pérdida, limpieza de gradientes, backward, paso) que se ejecuta y reduce la pérdida de entrenamiento; la combinación salida–pérdida es coherente (logit con <span class="icode">BCEWithLogitsLoss</span>, o sigmoide con <span class="icode">BCELoss</span>).</td>
+                            <td data-nivel="Inicial">Se presenta al menos una: (a) no hay bucle explícito o no se limpian los gradientes antes de <span class="icode">backward()</span>; (b) hay doble sigmoide (sigmoide dentro del modelo y una pérdida que espera logits); (c) la red tiene menos de dos capas ocultas.</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">3. Regularización y experimentación (15 %)</th>
+                            <td data-nivel="Estratégico">Además de lo de Autónomo: el modelo final es el del mínimo de validación, conservado con la parada temprana (se guarda y se restaura el mejor estado), y el texto cuantifica el efecto de la regularización (pérdida mínima de validación y brecha entre entrenamiento y validación de cada corrida). Comparar dos o más intervenciones en una tabla, y elegir con argumento, sube la nota dentro de la banda.</td>
+                            <td data-nivel="Autónomo">Además de lo de Básico: hay dos corridas comparables, una que sobreajusta (la pérdida de validación alcanza un mínimo y luego sube mientras la de entrenamiento sigue bajando) y otra regularizada (Dropout, tasa de aprendizaje o tamaño de la red); el texto nombra la época del mínimo de validación de cada una. Si pese a aumentar la capacidad no aparece el sobreajuste, cuenta igual cuando el texto documenta qué se aumentó y qué se observó.</td>
+                            <td data-nivel="Básico">Se muestran las curvas de pérdida de entrenamiento y de validación por época de al menos una corrida, con un texto que describe lo que se observa.</td>
+                            <td data-nivel="Inicial">Se presenta al menos una: (a) no hay curva de validación; (b) las curvas no tienen ningún texto que las interprete; (c) hay una sola corrida, sin intento de inducir ni de corregir el sobreajuste.</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">4. Evaluación, errores y ética (15 %)</th>
+                            <td data-nivel="Estratégico">Además de lo de Autónomo: las métricas se reportan por clase; el umbral de decisión se elige en el conjunto de validación según el costo de cada error (nunca en el de prueba); la reflexión nombra un principio del <em>Marco ético para la inteligencia artificial en Colombia</em> y lo traduce en una decisión concreta para el cliente (umbral o política de alerta); si los datos describen territorios o grupos de población, se comparan los errores por subgrupo.</td>
+                            <td data-nivel="Autónomo">Además de lo de Básico: se reportan precisión, <em>recall</em> y F1 (al menos de la clase de riesgo) y se interpretan frente a la línea base de la clase mayoritaria; la reflexión dice qué error, falso negativo o falso positivo, es más costoso para el cliente y por qué, apoyada en el Marco Ético.</td>
+                            <td data-nivel="Básico">La evaluación final se hace una sola vez en el conjunto de prueba y muestra la matriz de confusión; la reflexión ética nombra el costo de un falso negativo o de un falso positivo para el cliente, aunque no llegue a una decisión.</td>
+                            <td data-nivel="Inicial">Se presenta al menos una: (a) la evaluación final se hace en el conjunto de entrenamiento o en el de validación; (b) no hay matriz de confusión; (c) no hay ninguna reflexión ética.</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">5. Uso responsable de IA (15 %)<span class="block text-xs font-medium text-slate-600 mt-1">Nota bajo la tabla.</span></th>
+                            <td data-nivel="Estratégico">Además de lo de Autónomo: la auditoría <strong>reproduce</strong> el fallo, con una celda que ejecuta la versión de la IA sobre los datos propios y la misma semilla, y otra con la versión corregida y la misma medición, que incluye una métrica de decisión (<em>recall</em>, matriz o AUC). Cada entrada de la bitácora remite a la celda o sección del cuaderno que afecta. Los casos que el curso ya publicó (doble sigmoide, bucle sin limpieza de gradientes, fuga del escalador) solo cuentan si ocurrieron en el propio proceso.</td>
+                            <td data-nivel="Autónomo">Además de lo de Básico: cada entrada dice cómo se verificó la sugerencia; hay al menos una entrada Modificada o Rechazada con su evidencia de origen (salida literal de la IA, o captura con fecha y herramienta); la auditoría documenta un fallo real del propio proyecto, con su evidencia de origen, la corrección y su fundamento. Si la IA no produjo un fallo genuino, se admite una auditoría <strong>inducida y declarada</strong>, que llega como máximo a este nivel.</td>
+                            <td data-nivel="Básico">La bitácora (plantilla del curso) tiene al menos tres entradas fechadas, con su decisión (Aceptada, Modificada o Rechazada) y una justificación en cada una; la auditoría describe un fallo de la IA, aunque sea de forma genérica (sin la salida literal ni su ubicación).</td>
+                            <td data-nivel="Inicial">Se presenta al menos una: (a) no hay bitácora, o solo lista <em>prompts</em> sin decisión ni justificación; (b) falta la auditoría; (c) la bitácora describe decisiones que el cuaderno entregado no refleja, o sus fechas son posteriores a la entrega.</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">6. Comunicación y <em>storytelling</em> (10 %)<span class="block text-xs font-medium text-slate-600 mt-1">Nota bajo la tabla.</span></th>
+                            <td data-nivel="Estratégico">Además de lo de Autónomo: un lector no técnico sigue el hilo problema → modelo → error → decisión sin abrir el cuaderno; cada cifra del texto aparece en las salidas del cuaderno; las citas siguen APA 7.</td>
+                            <td data-nivel="Autónomo">Además de lo de Básico: están las cinco secciones; las gráficas van dentro del informe, con rótulos y leyenda, y se citan en el texto; las referencias están completas (autor, año, título, fuente y URL o DOI).</td>
+                            <td data-nivel="Básico">Hay al menos tres de las cinco secciones; las gráficas llevan título y ejes rotulados, aunque falte la leyenda; se citan al menos las fuentes de datos.</td>
+                            <td data-nivel="Inicial">Se presenta al menos una: (a) hay menos de tres de las cinco secciones; (b) no hay ninguna referencia; (c) la conclusión principal se apoya en una cifra o afirmación que el cuaderno no respalda o contradice.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                <div class="callout callout-info">
+                    <p class="text-sm font-bold text-primary mb-1">Nota al criterio 5 · Uso responsable de IA</p>
+                    <p class="text-sm mb-1.5">Se califica con lo que está en la entrega: la bitácora y la auditoría. La sustentación no suma puntos; verifica la autoría (sección 5).</p>
+                    <p class="text-sm"><em>Quien no usó IA lo declara en la bitácora («Declaración de no uso») y hace la auditoría inducida; no usarla no se penaliza.</em></p>
+                </div>
+                <div class="callout callout-info">
+                    <p class="text-sm font-bold text-primary mb-1">Nota al criterio 6 · Comunicación y <em>storytelling</em></p>
+                    <p class="text-sm mb-1.5">El informe técnico-ético es un PDF de hasta 4 páginas, sin contar las referencias, con cinco secciones: 1) problema y cliente; 2) datos; 3) modelo y entrenamiento; 4) resultados y errores (falsos negativos y falsos positivos); 5) decisión recomendada y riesgos éticos. Las referencias van en APA 7. Lo que pase de la página 4 no se califica.</p>
+                    <p class="text-sm"><em>Una afirmación secundaria sin respaldo baja la nota dentro de la banda, pero no lleva el criterio a Inicial.</em></p>
+                </div>
+            </div>
+
+            <!-- 5. Sustentación y compuerta de autoría -->
+            <div id="sustentacion-compuerta" class="callout callout-eth mt-6">
+                <h3 class="font-bold text-navy mb-2"><i aria-hidden="true" class="fas fa-user-check text-teal-600 mr-2"></i>5. Sustentación y compuerta de autoría</h3>
+                <p class="text-sm mb-2">La sustentación se hace <strong>antes de emitir la nota</strong> y no suma puntos: verifica la autoría de todo el entregable. Durante ella se puede tener a la vista el cuaderno, el informe y la bitácora. En los equipos, cada integrante responde por una parte distinta.</p>
+                <p class="text-sm"><strong>Compuerta de autoría.</strong> Si quien sustenta no logra explicar una parte sustancial del trabajo —dos preguntas seguidas sobre la misma parte sin una respuesta válida, según la hoja de sustentación—, el criterio que se apoya en esa parte queda como máximo en Inicial, y el Criterio 5 también. En los equipos, la compuerta se aplica a cada integrante por separado.</p>
+            </div>
+
+            <!-- 6. Nulo e integridad académica -->
+            <div class="callout callout-danger mt-4">
+                <h3 class="font-bold text-navy mb-2"><i aria-hidden="true" class="fas fa-circle-exclamation text-red-600 mr-2"></i>6. Nulo e integridad académica</h3>
+                <p class="text-sm"><strong>Nulo (0,0) no es un nivel de desempeño.</strong> Se aplica a toda la fase cuando no se entrega el producto (cuaderno e informe). Un componente que falta dentro de una entrega (EDA, matriz, bitácora, auditoría) se califica como Inicial en su criterio. Fuera de la escala, ocultar el uso de IA, presentar como propio material que no se comprende o inventar resultados constituye una falta de integridad académica, que se trata según el reglamento estudiantil de la Universidad y no con esta tabla.</p>
+            </div>
+
+            <!-- 7. Resumen claro por criterio -->
+            <div class="card p-6 mt-6">
+                <h3 class="font-bold text-primary text-lg mb-1"><i aria-hidden="true" class="fas fa-list-check text-secondary mr-2"></i>7. Resumen claro por criterio</h3>
+                <p class="text-sm text-slate-600 mb-4">En una mirada: qué se espera de cada criterio y qué se necesita para llegar a Básico. El detalle por nivel está en la tabla de la sección 4.</p>
                 <!-- Leyenda de bandas -->
-                <div class="flex flex-wrap items-center gap-2 mb-5 text-xs">
-                    <span class="font-semibold text-slate-500 mr-1">Bandas:</span>
+                <div class="flex flex-wrap items-center gap-2 mb-2 text-xs">
+                    <span class="font-semibold text-slate-600 mr-1">Bandas:</span>
                     <span class="rounded-full px-3 py-1 font-semibold" style="background:#F3E8FF;color:#3D008D">Estratégico 4,6–5,0</span>
                     <span class="rounded-full px-3 py-1 font-semibold" style="background:#E0F2FE;color:#0E7490">Autónomo 4,0–4,5</span>
                     <span class="rounded-full px-3 py-1 font-semibold" style="background:#DCFCE7;color:#15803D">Básico 3,0–3,9</span>
                     <span class="rounded-full px-3 py-1 font-semibold" style="background:#FEF3C7;color:#B45309">Inicial 1,0–2,9</span>
-                    <span class="rounded-full px-3 py-1 font-semibold" style="background:#FEE2E2;color:#B91C1C">Nulo 0,0</span>
-                    <span class="rounded-full px-3 py-1 font-bold text-white" style="background:#0E9F6E"><i class="fas fa-check mr-1"></i>Aprueba con ≥ 3,0</span>
+                    <span class="rounded-full px-3 py-1 font-bold text-white" style="background:#047857"><i aria-hidden="true" class="fas fa-check mr-1"></i>Aprueba con ≥ 3,0</span>
                 </div>
-
+                <p class="text-sm text-slate-700 mb-5">La aprobación se decide por la nota ponderada (≥ 3,0), no criterio a criterio.</p>
                 <div class="grid md:grid-cols-2 gap-4">
                     <!-- C1 -->
                     <div class="border border-slate-200 rounded-xl p-4">
@@ -890,8 +1017,8 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                             <span class="font-bold text-navy text-sm">1. Propuesta de datos y EDA</span>
                             <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">15 %</span>
                         </div>
-                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> un problema y un cliente claros, fuentes reales no-Kaggle con licencia, y un EDA que justifique la partición y el preprocesamiento.</p>
-                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> propuesta con problema y fuente no-Kaggle (aunque omita la modalidad que se aplana o la licencia), una gráfica de clases y una partición entrenamiento/validación/prueba (aunque no esté justificada).</p>
+                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> Un problema y un cliente claros, fuentes reales con licencia y un EDA cuyos hallazgos deciden la partición y el preprocesamiento.</p>
+                        <p class="text-sm text-slate-700"><strong class="text-emerald-700">Para llegar a Básico se necesita:</strong> La Propuesta aprobada en la compuerta, la distribución de clases y una partición en entrenamiento, validación y prueba.</p>
                     </div>
                     <!-- C2 -->
                     <div class="border border-slate-200 rounded-xl p-4">
@@ -899,8 +1026,8 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                             <span class="font-bold text-navy text-sm">2. Diseño e implementación del MLP</span>
                             <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">30 %</span>
                         </div>
-                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> un MLP con ≥2 capas ocultas y un bucle de entrenamiento explícito que ejecuta y converge, con la pérdida y la activación coherentes.</p>
-                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> la red entrena con un defecto menor (sin semilla fija, sin comentarios o un ajuste manual de la etiqueta al ejecutar).</p>
+                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> Un MLP con salida en logit, un bucle explícito que converge y decisiones de diseño justificadas.</p>
+                        <p class="text-sm text-slate-700"><strong class="text-emerald-700">Para llegar a Básico se necesita:</strong> Un MLP en PyTorch con dos o más capas ocultas y un bucle explícito que se ejecuta y reduce la pérdida, con salida y pérdida coherentes.</p>
                     </div>
                     <!-- C3 -->
                     <div class="border border-slate-200 rounded-xl p-4">
@@ -908,8 +1035,8 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                             <span class="font-bold text-navy text-sm">3. Regularización y experimentación</span>
                             <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">15 %</span>
                         </div>
-                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> curvas de entrenamiento y validación que evidencien el sobreajuste y su corrección con Dropout o con la tasa de aprendizaje, bien interpretadas.</p>
-                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> se presentan las curvas, pero se describe el sobreajuste sin señalar dónde la validación deja de bajar.</p>
+                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> El sobreajuste inducido y corregido, con la época del mínimo de validación y el mejor modelo conservado.</p>
+                        <p class="text-sm text-slate-700"><strong class="text-emerald-700">Para llegar a Básico se necesita:</strong> Las curvas de entrenamiento y validación de al menos una corrida, con un texto que las describe.</p>
                     </div>
                     <!-- C4 -->
                     <div class="border border-slate-200 rounded-xl p-4">
@@ -917,8 +1044,8 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                             <span class="font-bold text-navy text-sm">4. Evaluación, errores y ética</span>
                             <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">15 %</span>
                         </div>
-                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> matriz de confusión y métricas (precisión/recall/F1) interpretadas, con una reflexión ética ligada al costo de FN/FP para el cliente.</p>
-                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> se reporta solo la exactitud global y se menciona la ética sin ligarla a FN/FP ni a una decisión.</p>
+                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> Métricas por clase frente a la línea base y una decisión ética ligada al costo de los falsos negativos y positivos.</p>
+                        <p class="text-sm text-slate-700"><strong class="text-emerald-700">Para llegar a Básico se necesita:</strong> La evaluación en el conjunto de prueba con su matriz de confusión y el costo de un falso negativo o positivo nombrado.</p>
                     </div>
                     <!-- C5 -->
                     <div class="border border-slate-200 rounded-xl p-4">
@@ -926,90 +1053,48 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                             <span class="font-bold text-navy text-sm">5. Uso responsable de IA</span>
                             <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">15 %</span>
                         </div>
-                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> bitácora completa y verificable (Aceptada/Modificada/Rechazada con motivo), saber explicar las decisiones propias y una auditoría que corrige un fallo real de la IA.</p>
-                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> la bitácora lista <em>prompts</em> sin el motivo, se titubea al explicar una decisión y la auditoría describe un fallo genérico.</p>
+                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> Una bitácora fechada y verificable y una auditoría que reproduce un fallo real de la IA.</p>
+                        <p class="text-sm text-slate-700"><strong class="text-emerald-700">Para llegar a Básico se necesita:</strong> Tres o más entradas fechadas con decisión y justificación, y una auditoría que describe un fallo.</p>
                     </div>
                     <!-- C6 -->
                     <div class="border border-slate-200 rounded-xl p-4">
                         <div class="flex items-start justify-between gap-2 mb-2">
-                            <span class="font-bold text-navy text-sm">6. Comunicación y storytelling</span>
+                            <span class="font-bold text-navy text-sm">6. Comunicación y <em>storytelling</em></span>
                             <span class="rounded-full px-2.5 py-0.5 text-xs font-bold text-white whitespace-nowrap" style="background:#3D008D">10 %</span>
                         </div>
-                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> un informe (≤4 págs.) estructurado y comprensible para audiencia no técnica, con visualizaciones legibles y referencias citadas.</p>
-                        <p class="text-sm text-slate-600"><strong class="text-emerald-700">Evidencia mínima para aprobar:</strong> informe con algunas secciones faltantes o gráficas sin rótulos ni leyenda.</p>
+                        <p class="text-sm text-slate-700 mb-1.5"><strong class="text-primary">Qué se espera:</strong> Un informe de cinco secciones, comprensible para el cliente, con gráficas propias y cifras que salen del cuaderno.</p>
+                        <p class="text-sm text-slate-700"><strong class="text-emerald-700">Para llegar a Básico se necesita:</strong> Tres o más de las cinco secciones, gráficas con título y ejes y las fuentes de datos citadas.</p>
                     </div>
                 </div>
             </div>
 
-            <div class="overflow-x-auto card p-1">
-                <table class="tbl" style="min-width:960px">
-                    <thead>
-                        <tr style="background:#001A4D">
-                            <th style="width:20%">Criterio (peso)</th>
-                            <th style="width:20%">Estratégico (4,6–5,0)</th>
-                            <th style="width:20%">Autónomo (4,0–4,5)</th>
-                            <th style="width:20%">Básico (3,0–3,9)</th>
-                            <th style="width:20%">Inicial (1,0–2,9)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>1. Propuesta de datos y EDA (15 %)</strong></td>
-                            <td>Declara problema, cliente y las dos modalidades, e <strong>indica cuál se aplana a tabla</strong>; fuentes no-Kaggle con enlace y licencia; el EDA reporta clases, escalas y faltantes, y <strong>cada hallazgo decide</strong> la partición o el preprocesamiento.</td>
-                            <td>Propuesta aprobada con fuentes válidas y modalidad aplanada declarada; el EDA incluye gráficas de distribución y una partición train/val/test justificada.</td>
-                            <td>La propuesta omite la modalidad que se aplana o la licencia; el EDA muestra solo una gráfica de clases y la partición no se justifica.</td>
-                            <td>Usa una fuente de Kaggle o un reto ya resuelto, <strong>o</strong> no hay EDA, <strong>o</strong> mezcla datos de prueba en el ajuste (fuga).</td>
-                        </tr>
-                        <tr>
-                            <td><strong>2. Diseño e implementación del MLP (30 %)</strong></td>
-                            <td>MLP con ≥2 capas ocultas y activaciones justificadas; la <strong>salida es un logit</strong> (<span class="icode">nn.Linear(8,1)</span>, sin sigmoide en el <span class="icode">forward</span>) con <span class="icode">BCEWithLogitsLoss</span>; etiqueta <span class="icode">y.float().view(-1,1)</span>; semilla fija y el notebook <strong>corre de principio a fin sin editar</strong>.</td>
-                            <td>El bucle de entrenamiento explícito ejecuta y converge; la combinación pérdida-activación es coherente (logit + <span class="icode">BCEWithLogitsLoss</span> o sigmoide + <span class="icode">BCELoss</span>); el código está comentado por secciones.</td>
-                            <td>La red entrena pero con un defecto menor: sin semilla fija, código sin comentar o forma de la etiqueta corregida a mano al ejecutar.</td>
-                            <td>El notebook <strong>no ejecuta</strong>, falta <span class="icode">zero_grad</span>, hay <strong>doble sigmoide</strong> (sigmoide en el modelo + <span class="icode">BCEWithLogitsLoss</span>) o las dimensiones no concuerdan.</td>
-                        </tr>
-                        <tr>
-                            <td><strong>3. Regularización y experimentación (15 %)</strong></td>
-                            <td>Muestra dos curvas (sin y con regularización) donde la validación cruza al alza y luego se estabiliza con Dropout/LR, <strong>y nombra la época</strong> del punto óptimo.</td>
-                            <td>Las curvas train vs. val. evidencian el sobreajuste y su corrección, con una interpretación correcta del cruce.</td>
-                            <td>Presenta las curvas pero describe el sobreajuste sin señalar dónde la validación deja de bajar.</td>
-                            <td>Una sola curva, o curvas sin sobreajuste visible, o gráficas sin texto que las interprete.</td>
-                        </tr>
-                        <tr>
-                            <td><strong>4. Evaluación, errores y ética (15 %)</strong></td>
-                            <td>Reporta matriz de confusión y precisión/recall/F1 <strong>por clase</strong>, <strong>convirtiendo el logit con <span class="icode">torch.sigmoid</span> en evaluación</strong>; argumenta qué error (FN o FP) priorizar por su costo para el cliente, citando el Marco Ético.</td>
-                            <td>Incluye matriz de confusión y las métricas principales interpretadas, con una reflexión ética pertinente al cliente.</td>
-                            <td>Reporta solo la exactitud global y menciona la ética sin ligarla a FN/FP ni a una decisión.</td>
-                            <td><strong>Evalúa en el conjunto de entrenamiento</strong>, o no hay matriz de confusión, o la ética está ausente.</td>
-                        </tr>
-                        <tr>
-                            <td><strong>5. Uso responsable de IA (15 %)</strong></td>
-                            <td>La bitácora registra casos <strong>Aceptada / Modificada / Rechazada</strong> con su motivo; en la sustentación responde sin notas por qué tomó cada decisión; la auditoría <strong>reproduce un fallo concreto de la IA</strong> (p. ej. bucle sin <span class="icode">zero_grad</span>) y muestra la corrección.</td>
-                            <td>Bitácora completa y verificable; explica la mayoría de sus decisiones en la sustentación; la auditoría documenta y corrige un fallo real.</td>
-                            <td>La bitácora solo lista <em>prompts</em> sin el motivo de aceptar o rechazar; titubea al explicar una decisión; la auditoría describe un fallo genérico.</td>
-                            <td>No hay bitácora o se redactó después; <strong>no puede explicar</strong> una parte sustancial de su propio código (delegación ciega).</td>
-                        </tr>
-                        <tr>
-                            <td><strong>6. Comunicación y storytelling (10 %)</strong></td>
-                            <td>El informe (≤4 págs.) explica el resultado a una audiencia no técnica con un hilo problema→modelo→error→decisión, gráficas rotuladas y citas APA completas.</td>
-                            <td>Informe estructurado y comprensible, con visualizaciones legibles y referencias citadas.</td>
-                            <td>Informe con secciones faltantes o gráficas sin rótulos ni leyenda.</td>
-                            <td>Informe sin estructura, sin referencias o con afirmaciones sin respaldo en los resultados.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="callout callout-danger mt-4">
-                <p class="text-sm"><i class="fas fa-circle-exclamation text-red-600 mr-2"></i><strong>Nivel Nulo (0,0):</strong> sin entrega del producto. En el Criterio 5 constituye además falta de integridad ocultar el uso de IA o presentar como propio material que no se comprende ni se puede defender.</p>
-            </div>
+            <!-- Registro de cambios (sección 7) -->
+            <details class="card p-5 mt-6">
+                <summary class="font-bold text-primary cursor-pointer"><i aria-hidden="true" class="fas fa-clock-rotate-left text-secondary mr-2"></i>Registro de cambios de la rúbrica</summary>
+                <div class="overflow-x-auto mt-4" tabindex="0" role="region" aria-label="Registro de cambios de la rúbrica (desplazable horizontalmente)">
+                    <table class="tbl" style="min-width:620px">
+                        <caption class="sr-only">Versiones de la rúbrica de la Fase 1</caption>
+                        <thead><tr style="background:#3D008D"><th scope="col">Versión</th><th scope="col">Fecha</th><th scope="col">Cambio</th><th scope="col">¿Afecta notas emitidas?</th></tr></thead>
+                        <tbody>
+                            <tr><th scope="row">1.0</th><td>2026-06-07</td><td>Publicación (93d1cf1).</td><td>—</td></tr>
+                            <tr><th scope="row">1.1</th><td>2026-06-07</td><td>Cuatro niveles separados, con anclas técnicas (9380ec5).</td><td>—</td></tr>
+                            <tr><th scope="row">1.2</th><td>2026-06-09</td><td>«Resumen claro por criterio» y calculadora de autoevaluación (ffcc083). Es la versión vigente en las calificaciones de julio.</td><td>—</td></tr>
+                            <tr><th scope="row">1.3</th><td>2026-10-10</td><td>C1: la evidencia mínima admite omitir la modalidad aplanada o la licencia; «training set» → «conjunto de entrenamiento» (8fd736a).</td><td>No</td></tr>
+                            <tr><th scope="row">1.4</th><td>(fecha de publicación)</td><td>Auditoría del 2026-10-23: admisibilidad, regla de aplicación, niveles anidados, C4 sin solape, C5 observable y compuerta de autoría, Nulo solo global, informe de cinco secciones, solo PyTorch.</td><td>No: no se recalifica lo ya emitido.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-sm text-slate-700 mt-3">Convención para versiones futuras: el número MAYOR cambia pesos, niveles o un requisito que mueve notas; el MENOR aclara un descriptor sin mover notas; el PARCHE corrige redacción. Rige la versión vigente al abrir la actividad, y un cambio posterior solo se aplica si favorece al estudiante o con aviso previo.</p>
+            </details>
         </section>
 
         <!-- ====================== AUTOEVALUACIÓN ====================== -->
         <section id="autoevaluacion" class="reveal">
-            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-3"><i class="fas fa-calculator text-secondary mr-2"></i>Calculadora de autoevaluación</h2>
-            <p class="text-slate-600 mb-4 max-w-3xl">Se elige, con honestidad, el nivel que mejor describe el entregable en cada criterio. La nota estimada se calcula <strong>en vivo</strong> con los pesos de la rúbrica oficial y sirve para detectar qué mejorar antes de entregar.</p>
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-3"><i aria-hidden="true" class="fas fa-calculator text-secondary mr-2"></i>Calculadora de autoevaluación</h2>
+            <p class="text-slate-600 mb-4 max-w-3xl">Se elige, con honestidad, el nivel que mejor describe el entregable en cada criterio. Con los seis criterios elegidos se calcula la nota estimada con los pesos de la rúbrica (punto medio de cada banda y redondeo de la sección 3) y el <strong>rango posible</strong>, de los pisos a los techos de las bandas. Si el rango cruza 3,0, la calculadora avisa de la <strong>zona límite</strong>. Mientras falte algún criterio no se muestra ninguna cifra.</p>
 
             <div class="callout callout-warn mb-6">
-                <p class="text-sm"><i class="fas fa-circle-info text-amber-500 mr-2"></i><strong>Herramienta orientativa.</strong> Esta autoevaluación se basa en la rúbrica oficial, pero <strong>la calificación definitiva la asigna el docente</strong>; no reemplaza la sustentación ni la revisión del entregable.</p>
+                <p class="text-sm"><i aria-hidden="true" class="fas fa-circle-info text-amber-600 mr-2"></i><strong>Herramienta orientativa.</strong> Esta autoevaluación se basa en la rúbrica v1.4, pero <strong>la calificación definitiva la asigna el docente</strong>. No estima la admisibilidad (sección 2) ni la compuerta de autoría de la sustentación (sección 5), y no reemplaza la revisión del entregable.</p>
             </div>
 
             <div class="grid lg:grid-cols-3 gap-6 items-start">
@@ -1019,29 +1104,29 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                 <!-- Panel de resultado (sticky en escritorio) -->
                 <div class="lg:sticky lg:top-20 space-y-4">
                     <div class="card p-6 text-center">
-                        <p class="text-xs uppercase tracking-wider text-slate-400 font-bold mb-1">Nota estimada</p>
-                        <div class="flex items-end justify-center gap-1">
-                            <span id="ae-nota" class="text-6xl font-extrabold usta-gradient-text leading-none">0,0</span>
-                            <span class="text-2xl font-bold text-slate-400 mb-1">/5,0</span>
+                        <p class="text-xs uppercase tracking-wider text-slate-600 font-bold mb-1">Nota estimada</p>
+                        <div class="flex items-end justify-center gap-1" aria-hidden="true">
+                            <span id="ae-nota" class="text-6xl font-extrabold usta-gradient-text leading-none">—</span>
+                            <span class="text-2xl font-bold text-slate-500 mb-1">/5,0</span>
                         </div>
                         <div class="mt-3 flex flex-col items-center gap-2">
-                            <span id="ae-banda" class="rounded-full px-4 py-1 text-sm font-bold">—</span>
-                            <span id="ae-estado" class="text-sm font-semibold" role="status" aria-live="polite">Falta seleccionar un nivel en cada criterio</span>
+                            <span id="ae-banda" class="rounded-full px-4 py-1 text-sm font-bold" aria-hidden="true">—</span>
+                            <p id="ae-estado" class="text-sm font-semibold mb-0" role="status" aria-live="polite" aria-atomic="true">Faltan 6 criterios por elegir; la nota aparece al elegir los 6.</p>
                         </div>
                         <button id="ae-reset" type="button" class="mt-5 w-full rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
-                            <i class="fas fa-rotate-left mr-1.5"></i>Reiniciar
+                            <i aria-hidden="true" class="fas fa-rotate-left mr-1.5"></i>Reiniciar
                         </button>
                     </div>
 
                     <!-- Checklist de entregables -->
                     <div class="card p-6">
                         <div class="flex items-center justify-between mb-3">
-                            <h3 class="font-bold text-primary text-sm"><i class="fas fa-clipboard-check text-emerald-600 mr-1.5"></i>Entregables</h3>
-                            <span id="ae-check-count" class="text-xs font-bold text-slate-500">0/5 listos</span>
+                            <h3 class="font-bold text-primary text-sm"><i aria-hidden="true" class="fas fa-clipboard-check text-emerald-600 mr-1.5"></i>Entregables y admisibilidad</h3>
+                            <span id="ae-check-count" class="text-xs font-bold text-slate-600" aria-live="polite">0/6 listos</span>
                         </div>
                         <div id="ae-checklist" class="space-y-2.5 text-sm text-slate-700"><!-- generado por JS --></div>
                         <p id="ae-check-warn" class="callout callout-warn text-xs mt-3 mb-0">
-                            <i class="fas fa-triangle-exclamation text-amber-500 mr-1.5"></i>Sin todos los entregables la actividad puede quedar incompleta (Nivel Nulo = sin entrega).
+                            <i aria-hidden="true" class="fas fa-triangle-exclamation text-amber-600 mr-1.5"></i>Sin el cuaderno y el informe no hay entrega: Nulo (0,0) se aplica a toda la fase. Un componente que falta dentro de la entrega se califica como Inicial en su criterio, y una entrega que no cumple la admisibilidad se devuelve sin calificar.
                         </p>
                     </div>
                 </div>
@@ -1141,121 +1226,145 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
         });
 
         /* ====================== CALCULADORA DE AUTOEVALUACIÓN ======================
-           SPEC: escala 0,0–5,0 (coma decimal); aprueba con ≥ 3,0.
-           notaEstimada = Σ(nota_nivel_i × peso_i) / 100, redondeada a 1 decimal. */
-        (function () {
-            // Niveles: etiqueta · nota representativa (punto medio de la banda)
-            var NIVELES = [
-                { id: 'estrategico', etq: 'Estratégico', rango: '4,6–5,0', nota: 4.8 },
-                { id: 'autonomo',    etq: 'Autónomo',    rango: '4,0–4,5', nota: 4.25 },
-                { id: 'basico',      etq: 'Básico',      rango: '3,0–3,9', nota: 3.45 },
-                { id: 'inicial',     etq: 'Inicial',     rango: '1,0–2,9', nota: 1.95 },
-                { id: 'nulo',        etq: 'Nulo (sin entrega)', rango: '0,0', nota: 0 }
+           SPEC: rúbrica v1.4, secciones 3 y 8. Escala 1,0–5,0 (coma decimal); aprueba con ≥ 3,0.
+           Nota estimada = Σ(punto medio de la banda × peso) / 100, redondeada a una cifra decimal
+           con las centésimas en 5 hacia arriba, y comparada con 3,0 DESPUÉS de redondear.
+           Solo los 4 niveles de desempeño: Nulo no es un nivel (sección 6). Sin valor inicial.
+           El bloque CALC-CORE es idéntico al de 00_ruta-aprendizaje-modulo-1.html. */
+            /* CALC-CORE-INICIO · rúbrica v1.4, secciones 3 y 8 (bloque idéntico en 11_ y en 00_) */
+            var AE_NIVELES = [
+                { id: 'estrategico', etq: 'Estratégico', rango: '4,6–5,0', piso: 460, techo: 500, medio: 480 },
+                { id: 'autonomo',    etq: 'Autónomo',    rango: '4,0–4,5', piso: 400, techo: 450, medio: 425 },
+                { id: 'basico',      etq: 'Básico',      rango: '3,0–3,9', piso: 300, techo: 390, medio: 345 },
+                { id: 'inicial',     etq: 'Inicial',     rango: '1,0–2,9', piso: 100, techo: 290, medio: 195 }
             ];
+            // Notas en centésimas × peso: la suma es entera y el redondeo de la sección 3
+            // (una cifra decimal, centésimas en 5 hacia arriba: 4,85 → 4,9) no sufre errores de coma flotante.
+            function aeRedondear(sumaEntera) { return Math.floor((sumaEntera + 500) / 1000); } // en décimas
+            function aeBanda(decimas) {
+                if (decimas >= 46) return AE_NIVELES[0];
+                if (decimas >= 40) return AE_NIVELES[1];
+                if (decimas >= 30) return AE_NIVELES[2];
+                return AE_NIVELES[3];
+            }
+            function aeFmt(decimas) { return Math.floor(decimas / 10) + ',' + (decimas % 10); } // 35 -> "3,5"
+            function aeCalcular(seleccion, pesos) {
+                var faltan = seleccion.filter(function (s) { return !(s >= 0 && s < AE_NIVELES.length); }).length;
+                if (faltan > 0) {
+                    return {
+                        completo: false, faltan: faltan,
+                        estado: faltan === 1
+                            ? 'Falta 1 criterio por elegir; la nota aparece al elegir los 6.'
+                            : 'Faltan ' + faltan + ' criterios por elegir; la nota aparece al elegir los 6.'
+                    };
+                }
+                var medio = 0, piso = 0, techo = 0;
+                seleccion.forEach(function (s, i) {
+                    medio += AE_NIVELES[s].medio * pesos[i];
+                    piso += AE_NIVELES[s].piso * pesos[i];
+                    techo += AE_NIVELES[s].techo * pesos[i];
+                });
+                var d = aeRedondear(medio), dMin = aeRedondear(piso), dMax = aeRedondear(techo);
+                var banda = aeBanda(d), aprueba = d >= 30; // se compara con 3,0 después de redondear
+                return {
+                    completo: true, faltan: 0, decimas: d, nota: aeFmt(d), banda: banda.etq, bandaId: banda.id,
+                    aprueba: aprueba, rangoMin: aeFmt(dMin), rangoMax: aeFmt(dMax), zonaLimite: dMin < 30 && dMax >= 30,
+                    estado: 'Nota estimada ' + aeFmt(d) + ' de 5,0, ' + banda.etq + '. ' +
+                        (aprueba ? 'Aprobado (estimado).' : 'Aún no aprueba (estimado).')
+                };
+            }
+            /* CALC-CORE-FIN */
 
-            // Descriptores VERBATIM por criterio (índice = posición del nivel; Nulo = "Sin entrega del producto.")
-            var SIN_ENTREGA = 'Sin entrega del producto.';
+        (function () {
+            // Descriptores LITERALES de la tabla de la sección 4 (índice = nivel: 0 Estratégico … 3 Inicial).
+            // ?selftest=1 comprueba que coinciden con el texto de la tabla del DOM.
             var CRITERIOS = [
                 {
                     nombre: 'Propuesta de datos y EDA', peso: 15,
                     desc: [
-                        'Declara problema, cliente y las dos modalidades, e indica cuál se aplana a tabla; fuentes no-Kaggle con enlace y licencia; el EDA reporta clases, escalas y faltantes, y cada hallazgo decide la partición o el preprocesamiento.',
-                        'Propuesta aprobada con fuentes válidas y modalidad aplanada declarada; el EDA incluye gráficas de distribución y una partición train/val/test justificada.',
-                        'La propuesta omite la modalidad que se aplana o la licencia; el EDA muestra solo una gráfica de clases y la partición no se justifica.',
-                        'Usa una fuente de Kaggle o un reto ya resuelto, o no hay EDA, o mezcla datos de prueba en el ajuste (fuga).',
-                        SIN_ENTREGA
+                        'Además de lo de Autónomo: cada hallazgo del EDA se enlaza con una decisión concreta de partición o de preprocesamiento (p. ej., «desbalance 85/15 → partición estratificada»), y la línea base comprometida en la Propuesta (clase mayoritaria y, si la modalidad aplanada resume un escalar, ese escalar crudo) queda calculada en el cuaderno. Probar ya la clave de alineación con rasgos agregados de la segunda modalidad es una extensión opcional que sube la nota dentro de la banda.',
+                        'Además de lo de Básico: el EDA describe la distribución de las variables, sus escalas y los faltantes; la partición se justifica por escrito (estratificación, orden temporal o agrupación por entidad); la Propuesta nombra sus riesgos éticos y de protección de datos, con una mitigación para cada uno.',
+                        'La Propuesta fue aprobada en la compuerta. El EDA muestra al menos la distribución de clases y hay una partición en entrenamiento, validación y prueba, aunque no se justifique.',
+                        'Se presenta al menos una: (a) no hay EDA; (b) no hay un conjunto de prueba separado; (c) el conjunto de prueba interviene en el ajuste del modelo o del preprocesamiento (fuga), por ejemplo un escalador ajustado antes de partir.'
                     ]
                 },
                 {
                     nombre: 'Diseño e implementación del MLP', peso: 30,
                     desc: [
-                        'MLP con ≥2 capas ocultas y activaciones justificadas; la salida es un logit (nn.Linear(8,1), sin sigmoide en el forward) con BCEWithLogitsLoss; etiqueta y.float().view(-1,1); semilla fija y el notebook corre de principio a fin sin editar.',
-                        'El bucle de entrenamiento explícito ejecuta y converge; la combinación pérdida-activación es coherente (logit + BCEWithLogitsLoss o sigmoide + BCELoss); el código está comentado por secciones.',
-                        'La red entrena pero con un defecto menor: sin semilla fija, código sin comentar o forma de la etiqueta corregida a mano al ejecutar.',
-                        'El notebook no ejecuta, falta zero_grad, hay doble sigmoide o las dimensiones no concuerdan.',
-                        SIN_ENTREGA
+                        'Además de lo de Autónomo: la salida es un <strong>logit</strong> (<span class="icode">nn.Linear(k, 1)</span>, sin sigmoide en el <span class="icode">forward</span>) con <span class="icode">BCEWithLogitsLoss</span> y etiqueta <span class="icode">(N, 1)</span> flotante; las activaciones se justifican con un argumento propio sobre la no linealidad que aportan (no basta «es la activación estándar»), y la capacidad de la red se justifica con al menos una comparación medida (p. ej., dos tamaños de capa).',
+                        'Además de lo de Básico: el cuaderno corre de principio a fin sin editar; la semilla está fija en <span class="icode">torch</span> y en las demás librerías aleatorias que se usan; el código está comentado por secciones (datos, modelo, bucle, evaluación).',
+                        'Hay un MLP en PyTorch con al menos dos capas ocultas y un bucle de entrenamiento explícito (forward, pérdida, limpieza de gradientes, backward, paso) que se ejecuta y reduce la pérdida de entrenamiento; la combinación salida–pérdida es coherente (logit con <span class="icode">BCEWithLogitsLoss</span>, o sigmoide con <span class="icode">BCELoss</span>).',
+                        'Se presenta al menos una: (a) no hay bucle explícito o no se limpian los gradientes antes de <span class="icode">backward()</span>; (b) hay doble sigmoide (sigmoide dentro del modelo y una pérdida que espera logits); (c) la red tiene menos de dos capas ocultas.'
                     ]
                 },
                 {
                     nombre: 'Regularización y experimentación', peso: 15,
                     desc: [
-                        'Muestra dos curvas (sin y con regularización) donde la validación cruza al alza y luego se estabiliza con Dropout/LR, y nombra la época del punto óptimo.',
-                        'Las curvas train vs. val. evidencian el sobreajuste y su corrección, con una interpretación correcta del cruce.',
-                        'Presenta las curvas pero describe el sobreajuste sin señalar dónde la validación deja de bajar.',
-                        'Una sola curva, o curvas sin sobreajuste visible, o gráficas sin texto que las interprete.',
-                        SIN_ENTREGA
+                        'Además de lo de Autónomo: el modelo final es el del mínimo de validación, conservado con la parada temprana (se guarda y se restaura el mejor estado), y el texto cuantifica el efecto de la regularización (pérdida mínima de validación y brecha entre entrenamiento y validación de cada corrida). Comparar dos o más intervenciones en una tabla, y elegir con argumento, sube la nota dentro de la banda.',
+                        'Además de lo de Básico: hay dos corridas comparables, una que sobreajusta (la pérdida de validación alcanza un mínimo y luego sube mientras la de entrenamiento sigue bajando) y otra regularizada (Dropout, tasa de aprendizaje o tamaño de la red); el texto nombra la época del mínimo de validación de cada una. Si pese a aumentar la capacidad no aparece el sobreajuste, cuenta igual cuando el texto documenta qué se aumentó y qué se observó.',
+                        'Se muestran las curvas de pérdida de entrenamiento y de validación por época de al menos una corrida, con un texto que describe lo que se observa.',
+                        'Se presenta al menos una: (a) no hay curva de validación; (b) las curvas no tienen ningún texto que las interprete; (c) hay una sola corrida, sin intento de inducir ni de corregir el sobreajuste.'
                     ]
                 },
                 {
                     nombre: 'Evaluación, errores y ética', peso: 15,
                     desc: [
-                        'Reporta matriz de confusión y precisión/recall/F1 por clase, convirtiendo el logit con torch.sigmoid en evaluación; argumenta qué error (FN o FP) priorizar por su costo para el cliente, citando el Marco Ético.',
-                        'Incluye matriz de confusión y las métricas principales interpretadas, con una reflexión ética pertinente al cliente.',
-                        'Reporta solo la exactitud global y menciona la ética sin ligarla a FN/FP ni a una decisión.',
-                        'Evalúa en el conjunto de entrenamiento, o no hay matriz de confusión, o la ética está ausente.',
-                        SIN_ENTREGA
+                        'Además de lo de Autónomo: las métricas se reportan por clase; el umbral de decisión se elige en el conjunto de validación según el costo de cada error (nunca en el de prueba); la reflexión nombra un principio del <em>Marco ético para la inteligencia artificial en Colombia</em> y lo traduce en una decisión concreta para el cliente (umbral o política de alerta); si los datos describen territorios o grupos de población, se comparan los errores por subgrupo.',
+                        'Además de lo de Básico: se reportan precisión, <em>recall</em> y F1 (al menos de la clase de riesgo) y se interpretan frente a la línea base de la clase mayoritaria; la reflexión dice qué error, falso negativo o falso positivo, es más costoso para el cliente y por qué, apoyada en el Marco Ético.',
+                        'La evaluación final se hace una sola vez en el conjunto de prueba y muestra la matriz de confusión; la reflexión ética nombra el costo de un falso negativo o de un falso positivo para el cliente, aunque no llegue a una decisión.',
+                        'Se presenta al menos una: (a) la evaluación final se hace en el conjunto de entrenamiento o en el de validación; (b) no hay matriz de confusión; (c) no hay ninguna reflexión ética.'
                     ]
                 },
                 {
                     nombre: 'Uso responsable de IA', peso: 15,
                     desc: [
-                        'La bitácora registra casos Aceptada/Modificada/Rechazada con su motivo; en la sustentación responde sin notas por qué tomó cada decisión; la auditoría reproduce un fallo concreto de la IA y muestra la corrección.',
-                        'Bitácora completa y verificable; explica la mayoría de sus decisiones en la sustentación; la auditoría documenta y corrige un fallo real.',
-                        'La bitácora solo lista prompts sin el motivo de aceptar o rechazar; titubea al explicar una decisión; la auditoría describe un fallo genérico.',
-                        'No hay bitácora o se redactó después; no puede explicar una parte sustancial de su propio código (delegación ciega).',
-                        SIN_ENTREGA
+                        'Además de lo de Autónomo: la auditoría <strong>reproduce</strong> el fallo, con una celda que ejecuta la versión de la IA sobre los datos propios y la misma semilla, y otra con la versión corregida y la misma medición, que incluye una métrica de decisión (<em>recall</em>, matriz o AUC). Cada entrada de la bitácora remite a la celda o sección del cuaderno que afecta. Los casos que el curso ya publicó (doble sigmoide, bucle sin limpieza de gradientes, fuga del escalador) solo cuentan si ocurrieron en el propio proceso.',
+                        'Además de lo de Básico: cada entrada dice cómo se verificó la sugerencia; hay al menos una entrada Modificada o Rechazada con su evidencia de origen (salida literal de la IA, o captura con fecha y herramienta); la auditoría documenta un fallo real del propio proyecto, con su evidencia de origen, la corrección y su fundamento. Si la IA no produjo un fallo genuino, se admite una auditoría <strong>inducida y declarada</strong>, que llega como máximo a este nivel.',
+                        'La bitácora (plantilla del curso) tiene al menos tres entradas fechadas, con su decisión (Aceptada, Modificada o Rechazada) y una justificación en cada una; la auditoría describe un fallo de la IA, aunque sea de forma genérica (sin la salida literal ni su ubicación).',
+                        'Se presenta al menos una: (a) no hay bitácora, o solo lista <em>prompts</em> sin decisión ni justificación; (b) falta la auditoría; (c) la bitácora describe decisiones que el cuaderno entregado no refleja, o sus fechas son posteriores a la entrega.'
                     ]
                 },
                 {
-                    nombre: 'Comunicación y storytelling', peso: 10,
+                    nombre: 'Comunicación y <em>storytelling</em>', peso: 10,
                     desc: [
-                        'El informe (≤4 págs.) explica el resultado a una audiencia no técnica con un hilo problema→modelo→error→decisión, gráficas rotuladas y citas APA completas.',
-                        'Informe estructurado y comprensible, con visualizaciones legibles y referencias citadas.',
-                        'Informe con secciones faltantes o gráficas sin rótulos ni leyenda.',
-                        'Informe sin estructura, sin referencias o con afirmaciones sin respaldo en los resultados.',
-                        SIN_ENTREGA
+                        'Además de lo de Autónomo: un lector no técnico sigue el hilo problema → modelo → error → decisión sin abrir el cuaderno; cada cifra del texto aparece en las salidas del cuaderno; las citas siguen APA 7.',
+                        'Además de lo de Básico: están las cinco secciones; las gráficas van dentro del informe, con rótulos y leyenda, y se citan en el texto; las referencias están completas (autor, año, título, fuente y URL o DOI).',
+                        'Hay al menos tres de las cinco secciones; las gráficas llevan título y ejes rotulados, aunque falte la leyenda; se citan al menos las fuentes de datos.',
+                        'Se presenta al menos una: (a) hay menos de tres de las cinco secciones; (b) no hay ninguna referencia; (c) la conclusión principal se apoya en una cifra o afirmación que el cuaderno no respalda o contradice.'
                     ]
                 }
             ];
+            var PESOS = CRITERIOS.map(function (c) { return c.peso; });
 
             var ENTREGABLES = [
-                'Notebook (.ipynb): clase del MLP, bucle de entrenamiento explícito, curvas de pérdida y matriz de confusión.',
-                'Informe técnico-ético en PDF (máx. 4 páginas).',
-                'Bitácora de IA diligenciada.',
-                'Propuesta de Datos aprobada.',
-                'Empaque único: Apellido_Nombre_Centinela_Fase1.zip (o enlace a repositorio GitHub).'
+                'El cuaderno corre con «Ejecutar todo» sin errores.',
+                'La Propuesta de Datos fue aprobada en la compuerta.',
+                'Cuaderno (.ipynb): clase del MLP, bucle de entrenamiento explícito, curvas de pérdida y matriz de confusión.',
+                'Informe técnico-ético en PDF: cinco secciones, hasta 4 páginas sin contar las referencias.',
+                'Bitácora de IA diligenciada (o «Declaración de no uso») y auditoría a la IA.',
+                'Empaque: un único .zip, o un repositorio privado compartido con el docente (o público, sin datos y con un script de descarga).'
             ];
 
             var cont = document.getElementById('ae-criterios');
             if (!cont) return; // sección ausente: no hacer nada
 
-            // Estado: índice de nivel elegido por criterio (-1 = sin elegir)
+            // Estado: índice de nivel elegido por criterio (-1 = sin elegir). Ningún nivel preseleccionado.
             var seleccion = CRITERIOS.map(function () { return -1; });
-
-            function fmt(n) { return n.toFixed(1).replace('.', ','); } // 4.8 -> "4,8"
 
             // Estilos de banda por id de banda
             var BANDAS = {
                 estrategico: { bg: '#F3E8FF', fg: '#3D008D' },
                 autonomo:    { bg: '#E0F2FE', fg: '#0E7490' },
                 basico:      { bg: '#DCFCE7', fg: '#15803D' },
-                inicial:     { bg: '#FEF3C7', fg: '#B45309' },
-                nulo:        { bg: '#FEE2E2', fg: '#B91C1C' }
+                inicial:     { bg: '#FEF3C7', fg: '#B45309' }
             };
-            function bandaDe(nota) {
-                if (nota >= 4.6) return { id: 'estrategico', etq: 'Estratégico' };
-                if (nota >= 4.0) return { id: 'autonomo', etq: 'Autónomo' };
-                if (nota >= 3.0) return { id: 'basico', etq: 'Básico' };
-                if (nota >= 1.0) return { id: 'inicial', etq: 'Inicial' };
-                return { id: 'nulo', etq: 'Nulo' };
-            }
 
             // Construcción de los criterios
             CRITERIOS.forEach(function (c, i) {
                 var card = document.createElement('div');
                 card.className = 'card p-5';
                 var selId = 'ae-sel-' + i;
-                var opciones = NIVELES.map(function (n, j) {
+                var opciones = AE_NIVELES.map(function (n, j) {
                     return '<option value="' + j + '">' + n.etq + ' · ' + n.rango + '</option>';
                 }).join('');
                 card.innerHTML =
@@ -1282,61 +1391,50 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                 var feed = document.getElementById('ae-feed-' + i);
                 var idx = seleccion[i];
                 if (idx < 0) { desc.textContent = ''; feed.textContent = ''; return; }
-                desc.innerHTML = '<i class="fas fa-quote-left text-slate-300 mr-1.5"></i>' + CRITERIOS[i].desc[idx];
-                // Retroalimentación: subir al nivel inmediatamente superior (índice menor)
+                desc.innerHTML = '<i aria-hidden="true" class="fas fa-quote-left text-slate-400 mr-1.5"></i>' + CRITERIOS[i].desc[idx];
+                // Retroalimentación: el descriptor del nivel inmediatamente superior (índice menor), nunca una condición de Inicial
                 if (idx === 0) {
-                    feed.style.color = '#0E9F6E';
-                    feed.innerHTML = '✓ Nivel máximo alcanzado';
+                    feed.style.color = '#047857';
+                    feed.innerHTML = '<span aria-hidden="true">✓</span> Nivel máximo alcanzado';
                 } else {
-                    var sig = NIVELES[idx - 1];
                     feed.style.color = '#3D008D';
-                    feed.innerHTML = '▲ Para subir a ' + sig.etq + ': ' + CRITERIOS[i].desc[idx - 1];
+                    feed.innerHTML = '<span aria-hidden="true">▲</span> Para subir a ' + AE_NIVELES[idx - 1].etq + ': ' + CRITERIOS[i].desc[idx - 1];
                 }
             }
 
             function recalcular() {
-                var elegidos = seleccion.filter(function (s) { return s >= 0; }).length;
+                var r = aeCalcular(seleccion, PESOS);
                 var notaEl = document.getElementById('ae-nota');
                 var bandaEl = document.getElementById('ae-banda');
                 var estadoEl = document.getElementById('ae-estado');
 
-                if (elegidos === 0) {
-                    notaEl.textContent = '0,0';
+                if (!r.completo) {
+                    // Una nota parcial no cuenta como 0 lo no elegido: no se muestra ninguna cifra.
+                    notaEl.textContent = '—';
                     bandaEl.textContent = '—';
                     bandaEl.style.background = '#F1F5F9';
-                    bandaEl.style.color = '#64748B';
-                    estadoEl.textContent = 'Falta seleccionar un nivel en cada criterio';
-                    estadoEl.style.color = '#64748B';
+                    bandaEl.style.color = '#475569';
+                    estadoEl.textContent = r.estado;
+                    estadoEl.style.color = '#475569';
                     return;
                 }
 
-                var suma = 0;
-                CRITERIOS.forEach(function (c, i) {
-                    var idx = seleccion[i];
-                    if (idx >= 0) suma += NIVELES[idx].nota * c.peso;
-                });
-                var nota = Math.round((suma / 100) * 10) / 10; // 1 decimal
+                notaEl.textContent = r.nota;
+                bandaEl.textContent = r.banda;
+                bandaEl.style.background = BANDAS[r.bandaId].bg;
+                bandaEl.style.color = BANDAS[r.bandaId].fg;
 
-                notaEl.textContent = fmt(nota);
-                var b = bandaDe(nota);
-                bandaEl.textContent = b.etq;
-                bandaEl.style.background = BANDAS[b.id].bg;
-                bandaEl.style.color = BANDAS[b.id].fg;
-
-                if (nota >= 3.0) {
-                    estadoEl.innerHTML = '<i class="fas fa-circle-check mr-1.5"></i>Aprobado (estimado)';
-                    estadoEl.style.color = '#0E9F6E';
-                } else {
-                    estadoEl.innerHTML = '<i class="fas fa-circle-exclamation mr-1.5"></i>Aún no aprueba';
-                    estadoEl.style.color = '#DC2626';
-                }
-
-                if (elegidos < CRITERIOS.length) {
-                    estadoEl.innerHTML += ' <span style="color:#94A3B8;font-weight:500">(' + elegidos + '/' + CRITERIOS.length + ' criterios)</span>';
-                }
+                // Región viva atómica: anuncia la cifra, la banda, el veredicto, el rango y la zona límite.
+                estadoEl.innerHTML =
+                    '<i aria-hidden="true" class="fas ' + (r.aprueba ? 'fa-circle-check' : 'fa-circle-exclamation') + ' mr-1.5"></i>' + r.estado +
+                    '<span class="block text-xs font-medium text-slate-600 mt-1">Rango posible: ' + r.rangoMin + '–' + r.rangoMax + ' (de los pisos a los techos de las bandas).</span>' +
+                    (r.zonaLimite
+                        ? '<span class="block text-xs font-semibold mt-1" style="color:#92400E">Zona límite: el rango posible cruza 3,0; la nota real depende de dónde quede cada criterio dentro de su banda.</span>'
+                        : '');
+                estadoEl.style.color = r.aprueba ? '#047857' : '#B91C1C';
             }
 
-            // Checklist de entregables
+            // Checklist de entregables y admisibilidad
             var lista = document.getElementById('ae-checklist');
             ENTREGABLES.forEach(function (txt, i) {
                 var row = document.createElement('label');
@@ -1353,7 +1451,7 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
                 var hechos = lista.querySelectorAll('input[type="checkbox"]:checked').length;
                 var counter = document.getElementById('ae-check-count');
                 counter.textContent = hechos + '/' + total + ' listos';
-                counter.style.color = (hechos === total) ? '#0E9F6E' : '#64748B';
+                counter.style.color = (hechos === total) ? '#047857' : '#475569';
                 document.getElementById('ae-check-warn').style.display = (hechos === total) ? 'none' : '';
             }
 
@@ -1370,6 +1468,40 @@ y_train  = y_train.<span class="fn">float</span>().<span class="fn">view</span>(
             // Estado inicial
             recalcular();
             actualizarCheck();
+
+            // Prueba ?selftest=1: paridad de los descriptores del JS con la tabla de la sección 4 y casos de la sección 3.
+            if (/[?&]selftest=1(&|$)/.test(window.location.search)) {
+                var norm = function (s) {
+                    var t = document.createElement('div');
+                    t.innerHTML = s;
+                    return t.textContent.replace(/[  ]/g, ' ').replace(/\s+/g, ' ').trim();
+                };
+                var filas = document.querySelectorAll('#rubrica-tabla tbody tr');
+                var fallos = [];
+                CRITERIOS.forEach(function (c, i) {
+                    var celdas = filas[i] ? filas[i].querySelectorAll('td') : [];
+                    c.desc.forEach(function (txt, j) {
+                        var tabla = celdas[j] ? norm(celdas[j].innerHTML) : '(sin celda)';
+                        if (tabla !== norm(txt)) fallos.push({ criterio: i + 1, nivel: AE_NIVELES[j].etq, js: norm(txt), tabla: tabla });
+                    });
+                });
+                var casos = [
+                    { sel: [0, 0, 0, 0, 0, 0], nota: '4,8', aprueba: true },
+                    { sel: [2, 3, 2, 2, 2, 2], nota: '3,0', aprueba: true },  // C2 Inicial y el resto Básico
+                    { sel: [2, 2, 2, 2, 2, 2], nota: '3,5', aprueba: true },  // 3,45 → 3,5 (centésimas en 5 hacia arriba)
+                    { sel: [3, 3, 3, 3, 3, 3], nota: '2,0', aprueba: false },
+                    { sel: [-1, 0, 0, 0, 0, 0], nota: null, aprueba: null }
+                ];
+                var casosMal = casos.filter(function (k) {
+                    var r = aeCalcular(k.sel, PESOS);
+                    return k.nota === null ? r.completo : (r.nota !== k.nota || r.aprueba !== k.aprueba);
+                });
+                window.__ae_selftest = {
+                    ok: fallos.length === 0 && filas.length === CRITERIOS.length && casosMal.length === 0,
+                    comparados: CRITERIOS.length * 4, fallos: fallos, casosFallidos: casosMal
+                };
+                console.log('[selftest calculadora v1.4]', window.__ae_selftest.ok ? 'OK' : 'FALLA', window.__ae_selftest);
+            }
         })();
     </script>
 
