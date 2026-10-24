@@ -230,7 +230,7 @@
             mcqAciertos:   { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
             videosVistos:  { seccion: false, profundizacion: false },
             guia1Pasos:    { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false },
-            act1Pasos:     { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false },
+            act1Pasos:     { 1: false, 2: false, 3: false, 4: false, 5: false, 6: false, 7: false, 8: false },
             guia1Entregada:  false,
             act1Entregada:   false,
             resetAt: new Date().toISOString(),
@@ -275,7 +275,7 @@
             const g1 = Object.values(p.guia1Pasos).filter(Boolean).length;
             pct += (g1 / 6) * 10;
             const a1 = Object.values(p.act1Pasos).filter(Boolean).length;
-            pct += (a1 / 7) * 10;
+            pct += (a1 / 8) * 10;   // Fase 1: 8 pasos (rúbrica v1.4)
             if (p.guia1Entregada) pct += 5;
             if (p.act1Entregada)  pct += 5;
             return Math.min(100, Math.round(pct));
@@ -993,35 +993,51 @@
                 titulo: 'Proyecto Centinela · Fase 1 — Línea Base: MLP sobre Datos Tabulares para Alerta Temprana',
                 peso: 20,
                 horas: 40,
-                desglose: '4 h directo · 4 h indirecto · 32 h autónomo',
-                entregable: 'Notebook (.ipynb) + Informe técnico-ético en PDF (máx. 4 págs.) + Bitácora de IA + Propuesta de Datos, todo en un .zip (Apellido_Nombre_Centinela_Fase1.zip) o repositorio GitHub.',
-                /* Checklist de entrega cristalino (solo Fase 1) — sin ambigüedad para el estudiante */
+                desglose: '4 h directo · 4 h indirecto · 16 h autónomo · 16 h colaborativo',
+                modalidad: 'Individual o en equipo de hasta 3, con rendición individual',
+                entregable: 'Cuaderno (.ipynb) + Informe técnico-ético en PDF (hasta 4 páginas) + Bitácora de IA con la auditoría + Propuesta de Datos aprobada, todo en un .zip (Apellido_Nombre_Centinela_Fase1.zip) o un repositorio GitHub privado y compartido con el docente (o público sin los datos).',
+                /* Checklist de entrega cristalino (solo Fase 1) — rúbrica v1.4, secciones 2, 4 y 6 */
                 entregables: [
-                    { titulo: 'Notebook (.ipynb)', detalle: 'Clase MLP + bucle de entrenamiento explícito + curvas de pérdida (entrenamiento frente a validación) + matriz de confusión. Debe correr de principio a fin sin editar.' },
-                    { titulo: 'Informe técnico-ético (PDF)', detalle: 'Máximo 4 páginas, con citas APA y la auditoría ética ligada a falsos positivos/negativos.' },
-                    { titulo: 'Bitácora de IA', detalle: 'Registro de qué se pidió a la IA y qué se Aceptó / Modificó / Rechazó, con el motivo.' },
-                    { titulo: 'Propuesta de Datos aprobada', detalle: 'Problema, cliente, dos modalidades, fuentes reales no-Kaggle con licencia y la modalidad que se aplana a tabla.' },
-                    { titulo: 'Empaque final', detalle: 'Apellido_Nombre_Centinela_Fase1.zip o un repositorio GitHub con todo lo anterior.' },
+                    { titulo: 'Cuaderno (.ipynb)', detalle: 'MLP en PyTorch con salida en logit y BCEWithLogitsLoss + bucle de entrenamiento explícito + curvas de pérdida (entrenamiento frente a validación) + matriz de confusión en el conjunto de prueba. Debe correr de principio a fin con «Ejecutar todo», sin editar.' },
+                    { titulo: 'Informe técnico-ético (PDF)', detalle: 'Hasta 4 páginas sin contar las referencias, con cinco secciones: 1) problema y cliente; 2) datos; 3) modelo y entrenamiento; 4) resultados y errores (falsos negativos y falsos positivos); 5) decisión recomendada y riesgos éticos. Referencias en APA 7; lo que pase de la página 4 no se califica.' },
+                    { titulo: 'Bitácora de IA y auditoría', detalle: 'Plantilla del curso con entradas fechadas: qué se pidió a la IA, qué se Aceptó / Modificó / Rechazó, por qué y cómo se verificó, más la auditoría de un fallo de la IA. Quien no usó IA lo declara («Declaración de no uso») y hace la auditoría inducida.' },
+                    { titulo: 'Propuesta de Datos aprobada', detalle: 'Aprobada en la compuerta (Paso 0), en la fecha que fija el campus virtual: problema, cliente, dos modalidades, fuentes reales no-Kaggle con licencia, la modalidad que se aplana a tabla y sus riesgos éticos, sin personas identificables.' },
+                    { titulo: 'Empaque final', detalle: 'Apellido_Nombre_Centinela_Fase1.zip (en equipo, con los apellidos de todos los integrantes) o un repositorio GitHub: privado y compartido con el docente, o público sin los datos, con un script que los descarga de la fuente primaria. Las salidas del cuaderno no muestran registros con datos personales.' },
                 ],
-                /* Nota de entrega (solo Fase 1) */
-                entregaNota: 'La sustentación oral se evalúa aparte. Nivel Nulo = sin entrega del producto.',
+                /* Nota de entrega (solo Fase 1) — rúbrica v1.4, secciones 5 y 6 */
+                entregaNota: 'La sustentación se hace antes de la nota: verifica la autoría y no suma puntos. Nulo (0,0) se aplica a toda la fase solo si no se entrega el producto (cuaderno e informe).',
                 caso: 'El rol: ingeniero de IA que construye la línea base de un sistema de alerta temprana «Centinela»: un MLP sobre datos tabulares. Escenario guía: clasificar hojas de café (sana frente a enferma) con la versión tabular del conjunto de datos RoCoLe (promedios de intensidad por canal R, G, B y descriptores derivados), o un problema multimodal propio aprobado.',
+                /* 8 pasos: las claves 1–7 del progreso guardado (localStorage) conservan su tema; la 8 es nueva */
                 pasos: [
-                    'Propuesta de Datos (compuerta): declarar el problema y el cliente, las dos modalidades del sistema, las fuentes reales no provenientes de Kaggle y cuál modalidad se aplana a tabla en esta fase.',
-                    'Preparar el entorno y realizar el EDA del conjunto tabular: revisar clases, escalas, faltantes y la partición en entrenamiento, validación y prueba.',
-                    'Diseñar el MLP con ≥ 2 capas ocultas, con salida en logit (nn.Linear(..., 1) sin sigmoide dentro del modelo), y justificar las funciones de activación.',
-                    'Configurar el entrenamiento con BCEWithLogitsLoss (estable; evita la doble sigmoide), el optimizador y la tasa de aprendizaje; escribir el bucle de entrenamiento explícito (zero_grad → forward → pérdida → backward → step).',
-                    <>Entrenar 50 épocas, graficar la pérdida de entrenamiento frente a la de validación, inducir el sobreajuste a propósito y corregirlo con <em>dropout</em> o con el ajuste de la tasa de aprendizaje.</>,
-                    'Evaluar (con modelo.eval()) mediante la matriz de confusión y las métricas; analizar falsos positivos y negativos (en alerta temprana los falsos negativos suelen ser los más costosos) y realizar la auditoría ética con el Marco ético para la IA en Colombia.',
-                    'Documentar la Bitácora de IA (qué se pidió, aceptó y rechazó) y la Auditoría a la IA (un fallo de la IA detectado y corregido); preparar la sustentación oral.',
+                    'Propuesta de Datos (compuerta, Paso 0): entregarla y obtener su aprobación antes de modelar, en la fecha que fija el campus virtual. Declara el problema y el cliente, las dos modalidades del sistema, las fuentes reales (ni Kaggle ni una réplica suya, ni un reto ya resuelto, ni el escenario vetado del ejemplo resuelto), la modalidad que se aplana a tabla en esta fase y los riesgos éticos con su mitigación. Sin personas identificables: solo datos públicos, agregados o anonimizados por la fuente oficial.',
+                    'Preparar el entorno y hacer el EDA del conjunto tabular: distribución de clases y de las variables, escalas y faltantes. Partir en entrenamiento, validación y prueba con una estrategia justificada (estratificación, orden temporal o agrupación por entidad), ajustar el preprocesamiento solo con el conjunto de entrenamiento (sin fuga) y calcular la línea base de la clase mayoritaria.',
+                    'Diseñar el MLP en PyTorch (único marco de esta fase) con al menos dos capas ocultas y salida en logit (nn.Linear(k, 1), sin sigmoide en el forward), con la etiqueta (N, 1) flotante; justificar las activaciones y la capacidad de la red con al menos una comparación medida (p. ej., dos tamaños de capa).',
+                    'Configurar el entrenamiento con BCEWithLogitsLoss (estable; evita la doble sigmoide), el optimizador, la tasa de aprendizaje y la semilla fija en torch y en las demás librerías aleatorias; escribir el bucle de entrenamiento explícito en el orden canónico: forward → pérdida → zero_grad → backward → step.',
+                    'Entrenar (50 épocas, ajustables) y graficar la pérdida de entrenamiento frente a la de validación; inducir el sobreajuste a propósito y corregirlo con Dropout, la tasa de aprendizaje o el tamaño de la red, nombrando la época del mínimo de validación de cada corrida; conservar como modelo final el del mínimo de validación con parada temprana, que guarda y restaura el mejor estado.',
+                    'Evaluar una sola vez en el conjunto de prueba (con modelo.eval() y torch.no_grad()), con la matriz de confusión y la precisión, el recall y el F1 frente a la línea base; elegir el umbral en el conjunto de validación según el costo de cada error (nunca en el de prueba); analizar los falsos positivos y negativos y hacer la reflexión ética con el Marco ético para la IA en Colombia.',
+                    'Llevar la Bitácora de IA (plantilla del curso) con entradas fechadas: qué se pidió, qué se aceptó, modificó o rechazó, por qué y cómo se verificó; documentar la Auditoría a la IA: un fallo real del propio proyecto, con su evidencia de origen y la corrección (si no hubo fallo o no se usó IA, una auditoría inducida y declarada).',
+                    'Redactar el informe técnico-ético en PDF (hasta 4 páginas sin contar las referencias, APA 7) con cinco secciones: 1) problema y cliente; 2) datos; 3) modelo y entrenamiento; 4) resultados y errores (falsos negativos y falsos positivos); 5) decisión recomendada y riesgos éticos. Preparar la sustentación, que se hace antes de la nota: verifica la autoría (en equipo, cada integrante responde por una parte distinta) y no suma puntos.',
                 ],
+                /* Resumen por criterio: textos literales de la sección 7 de la rúbrica v1.4 */
                 rubrica: [
-                    { criterio: 'Propuesta de datos y EDA', peso: 15, espera: 'Propuesta aprobada con fuentes no-Kaggle y modalidad aplanada declarada; EDA con clases, escalas, faltantes y partición train/val/test justificada.' },
-                    { criterio: 'Diseño e implementación del MLP', peso: 30, espera: 'MLP con ≥ 2 capas ocultas, salida en logit con BCEWithLogitsLoss, semilla fija y bucle de entrenamiento explícito que corre de principio a fin.' },
-                    { criterio: 'Regularización y experimentación', peso: 15, espera: 'Dos curvas (sin y con regularización) que evidencian el sobreajuste y su corrección con Dropout/LR, con la época del punto óptimo.' },
-                    { criterio: 'Evaluación, errores y ética', peso: 15, espera: 'Matriz de confusión y precisión/recall/F1 por clase; argumenta qué error (FN o FP) priorizar citando el Marco Ético.' },
-                    { criterio: 'Uso responsable de IA', peso: 15, espera: 'Bitácora con casos Aceptada/Modificada/Rechazada y su motivo; explica sus decisiones en la sustentación; auditoría de un fallo real de la IA.' },
-                    { criterio: 'Comunicación y storytelling', peso: 10, espera: 'Informe (≤ 4 págs.) para audiencia no técnica con hilo problema→modelo→error→decisión, gráficas rotuladas y citas APA.' },
+                    { criterio: 'Propuesta de datos y EDA', peso: 15,
+                      espera: 'Un problema y un cliente claros, fuentes reales con licencia y un EDA cuyos hallazgos deciden la partición y el preprocesamiento.',
+                      basico: 'La Propuesta aprobada en la compuerta, la distribución de clases y una partición en entrenamiento, validación y prueba.' },
+                    { criterio: 'Diseño e implementación del MLP', peso: 30,
+                      espera: 'Un MLP con salida en logit, un bucle explícito que converge y decisiones de diseño justificadas.',
+                      basico: 'Un MLP en PyTorch con dos o más capas ocultas y un bucle explícito que se ejecuta y reduce la pérdida, con salida y pérdida coherentes.' },
+                    { criterio: 'Regularización y experimentación', peso: 15,
+                      espera: 'El sobreajuste inducido y corregido, con la época del mínimo de validación y el mejor modelo conservado.',
+                      basico: 'Las curvas de entrenamiento y validación de al menos una corrida, con un texto que las describe.' },
+                    { criterio: 'Evaluación, errores y ética', peso: 15,
+                      espera: 'Métricas por clase frente a la línea base y una decisión ética ligada al costo de los falsos negativos y positivos.',
+                      basico: 'La evaluación en el conjunto de prueba con su matriz de confusión y el costo de un falso negativo o positivo nombrado.' },
+                    { criterio: 'Uso responsable de IA', peso: 15,
+                      espera: 'Una bitácora fechada y verificable y una auditoría que reproduce un fallo real de la IA.',
+                      basico: 'Tres o más entradas fechadas con decisión y justificación, y una auditoría que describe un fallo.' },
+                    { criterio: 'Comunicación y storytelling', peso: 10,
+                      espera: 'Un informe de cinco secciones, comprensible para el cliente, con gráficas propias y cifras que salen del cuaderno.',
+                      basico: 'Tres o más de las cinco secciones, gráficas con título y ejes y las fuentes de datos citadas.' },
                 ],
                 linkMd: 'modulos/modulo-1-fundamentos/actividades/actividad-1.md',
                 linkHtml: '11_Modulo_1_Actividad_Fase1_Centinela.html',
@@ -1029,168 +1045,181 @@
         };
 
         /* ============================================================
-           RÚBRICA OFICIAL · CENTINELA FASE 1 (datos para el calificador)
-           - Bandas en escala colombiana 0,0–5,0 (coma decimal). Aprueba ≥ 3,0.
-           - 6 criterios con peso; 5 niveles con rango y "nota" = punto medio.
-           - Descriptores VERBATIM del documento hermano 11_.
+           RÚBRICA OFICIAL · CENTINELA FASE 1 · versión 1.4 (aprobada por el docente el 2026-10-23)
+           - Escala colombiana 0,0–5,0 (coma decimal). La fase aprueba con una nota ponderada
+             de 3,0 o más, redondeada ANTES de comparar (sección 3 de la rúbrica).
+           - 6 criterios con peso y 4 niveles de desempeño. Nulo (0,0) no es un nivel por
+             criterio: se aplica a toda la fase solo si no se entrega el producto (sección 6).
+           - Descriptores literales de la sección 4 de la rúbrica v1.4, en texto plano (sin el
+             marcado de negrita, cursiva ni código): los mismos textos que la tabla de 11_.
         ============================================================ */
         const FASE1_BANDAS = [
-            { id: 'estrategico', etiqueta: 'Estratégico', rango: '4,6–5,0', nota: 4.8,  color: '#15803D', bg: '#F0FDF4' },
-            { id: 'autonomo',    etiqueta: 'Autónomo',    rango: '4,0–4,5', nota: 4.25, color: '#3D008D', bg: '#F5F0FA' },
-            { id: 'basico',      etiqueta: 'Básico',      rango: '3,0–3,9', nota: 3.45, color: '#B45309', bg: '#FFFBEB' },
-            { id: 'inicial',     etiqueta: 'Inicial',     rango: '1,0–2,9', nota: 1.95, color: '#BE185D', bg: '#FCE7F1' },
-            { id: 'nulo',        etiqueta: 'Nulo (sin entrega)', rango: '0,0', nota: 0, color: '#64748B', bg: '#F1F5F9' },
+            { id: 'estrategico', etiqueta: 'Estratégico', rango: '4,6–5,0', color: '#15803D', bg: '#F0FDF4' },
+            { id: 'autonomo',    etiqueta: 'Autónomo',    rango: '4,0–4,5', color: '#3D008D', bg: '#F5F0FA' },
+            { id: 'basico',      etiqueta: 'Básico',      rango: '3,0–3,9', color: '#B45309', bg: '#FFFBEB' },
+            { id: 'inicial',     etiqueta: 'Inicial',     rango: '1,0–2,9', color: '#BE185D', bg: '#FCE7F1' },
         ];
 
         const FASE1_CRITERIOS = [
             {
                 id: 'c1', nombre: 'Propuesta de datos y EDA', peso: 15,
                 desc: {
-                    estrategico: 'Declara problema, cliente y las dos modalidades, e indica cuál se aplana a tabla; fuentes no-Kaggle con enlace y licencia; el EDA reporta clases, escalas y faltantes, y cada hallazgo decide la partición o el preprocesamiento.',
-                    autonomo:    'Propuesta aprobada con fuentes válidas y modalidad aplanada declarada; el EDA incluye gráficas de distribución y una partición train/val/test justificada.',
-                    basico:      'La propuesta omite la modalidad que se aplana o la licencia; el EDA muestra solo una gráfica de clases y la partición no se justifica.',
-                    inicial:     'Usa una fuente de Kaggle o un reto ya resuelto, o no hay EDA, o mezcla datos de prueba en el ajuste (fuga).',
-                    nulo:        'Sin entrega del producto.',
+                    estrategico: 'Además de lo de Autónomo: cada hallazgo del EDA se enlaza con una decisión concreta de partición o de preprocesamiento (p. ej., «desbalance 85/15 → partición estratificada»), y la línea base comprometida en la Propuesta (clase mayoritaria y, si la modalidad aplanada resume un escalar, ese escalar crudo) queda calculada en el cuaderno. Probar ya la clave de alineación con rasgos agregados de la segunda modalidad es una extensión opcional que sube la nota dentro de la banda.',
+                    autonomo:    'Además de lo de Básico: el EDA describe la distribución de las variables, sus escalas y los faltantes; la partición se justifica por escrito (estratificación, orden temporal o agrupación por entidad); la Propuesta nombra sus riesgos éticos y de protección de datos, con una mitigación para cada uno.',
+                    basico:      'La Propuesta fue aprobada en la compuerta. El EDA muestra al menos la distribución de clases y hay una partición en entrenamiento, validación y prueba, aunque no se justifique.',
+                    inicial:     'Se presenta al menos una: (a) no hay EDA; (b) no hay un conjunto de prueba separado; (c) el conjunto de prueba interviene en el ajuste del modelo o del preprocesamiento (fuga), por ejemplo un escalador ajustado antes de partir.',
                 },
             },
             {
                 id: 'c2', nombre: 'Diseño e implementación del MLP', peso: 30,
                 desc: {
-                    estrategico: 'MLP con ≥2 capas ocultas y activaciones justificadas; la salida es un logit (nn.Linear(8,1), sin sigmoide en el forward) con BCEWithLogitsLoss; etiqueta y.float().view(-1,1); semilla fija y el notebook corre de principio a fin sin editar.',
-                    autonomo:    'El bucle de entrenamiento explícito ejecuta y converge; la combinación pérdida-activación es coherente (logit + BCEWithLogitsLoss o sigmoide + BCELoss); el código está comentado por secciones.',
-                    basico:      'La red entrena pero con un defecto menor: sin semilla fija, código sin comentar o forma de la etiqueta corregida a mano al ejecutar.',
-                    inicial:     'El notebook no ejecuta, falta zero_grad, hay doble sigmoide o las dimensiones no concuerdan.',
-                    nulo:        'Sin entrega del producto.',
+                    estrategico: 'Además de lo de Autónomo: la salida es un logit (nn.Linear(k, 1), sin sigmoide en el forward) con BCEWithLogitsLoss y etiqueta (N, 1) flotante; las activaciones se justifican con un argumento propio sobre la no linealidad que aportan (no basta «es la activación estándar»), y la capacidad de la red se justifica con al menos una comparación medida (p. ej., dos tamaños de capa).',
+                    autonomo:    'Además de lo de Básico: el cuaderno corre de principio a fin sin editar; la semilla está fija en torch y en las demás librerías aleatorias que se usan; el código está comentado por secciones (datos, modelo, bucle, evaluación).',
+                    basico:      'Hay un MLP en PyTorch con al menos dos capas ocultas y un bucle de entrenamiento explícito (forward, pérdida, limpieza de gradientes, backward, paso) que se ejecuta y reduce la pérdida de entrenamiento; la combinación salida–pérdida es coherente (logit con BCEWithLogitsLoss, o sigmoide con BCELoss).',
+                    inicial:     'Se presenta al menos una: (a) no hay bucle explícito o no se limpian los gradientes antes de backward(); (b) hay doble sigmoide (sigmoide dentro del modelo y una pérdida que espera logits); (c) la red tiene menos de dos capas ocultas.',
                 },
             },
             {
                 id: 'c3', nombre: 'Regularización y experimentación', peso: 15,
                 desc: {
-                    estrategico: 'Muestra dos curvas (sin y con regularización) donde la validación cruza al alza y luego se estabiliza con Dropout/LR, y nombra la época del punto óptimo.',
-                    autonomo:    'Las curvas train vs. val. evidencian el sobreajuste y su corrección, con una interpretación correcta del cruce.',
-                    basico:      'Presenta las curvas pero describe el sobreajuste sin señalar dónde la validación deja de bajar.',
-                    inicial:     'Una sola curva, o curvas sin sobreajuste visible, o gráficas sin texto que las interprete.',
-                    nulo:        'Sin entrega del producto.',
+                    estrategico: 'Además de lo de Autónomo: el modelo final es el del mínimo de validación, conservado con la parada temprana (se guarda y se restaura el mejor estado), y el texto cuantifica el efecto de la regularización (pérdida mínima de validación y brecha entre entrenamiento y validación de cada corrida). Comparar dos o más intervenciones en una tabla, y elegir con argumento, sube la nota dentro de la banda.',
+                    autonomo:    'Además de lo de Básico: hay dos corridas comparables, una que sobreajusta (la pérdida de validación alcanza un mínimo y luego sube mientras la de entrenamiento sigue bajando) y otra regularizada (Dropout, tasa de aprendizaje o tamaño de la red); el texto nombra la época del mínimo de validación de cada una. Si pese a aumentar la capacidad no aparece el sobreajuste, cuenta igual cuando el texto documenta qué se aumentó y qué se observó.',
+                    basico:      'Se muestran las curvas de pérdida de entrenamiento y de validación por época de al menos una corrida, con un texto que describe lo que se observa.',
+                    inicial:     'Se presenta al menos una: (a) no hay curva de validación; (b) las curvas no tienen ningún texto que las interprete; (c) hay una sola corrida, sin intento de inducir ni de corregir el sobreajuste.',
                 },
             },
             {
                 id: 'c4', nombre: 'Evaluación, errores y ética', peso: 15,
                 desc: {
-                    estrategico: 'Reporta matriz de confusión y precisión/recall/F1 por clase, convirtiendo el logit con torch.sigmoid en evaluación; argumenta qué error (FN o FP) priorizar por su costo para el cliente, citando el Marco Ético.',
-                    autonomo:    'Incluye matriz de confusión y las métricas principales interpretadas, con una reflexión ética pertinente al cliente.',
-                    basico:      'Reporta solo la exactitud global y menciona la ética sin ligarla a FN/FP ni a una decisión.',
-                    inicial:     'Evalúa en el conjunto de entrenamiento, o no hay matriz de confusión, o la ética está ausente.',
-                    nulo:        'Sin entrega del producto.',
+                    estrategico: 'Además de lo de Autónomo: las métricas se reportan por clase; el umbral de decisión se elige en el conjunto de validación según el costo de cada error (nunca en el de prueba); la reflexión nombra un principio del Marco ético para la inteligencia artificial en Colombia y lo traduce en una decisión concreta para el cliente (umbral o política de alerta); si los datos describen territorios o grupos de población, se comparan los errores por subgrupo.',
+                    autonomo:    'Además de lo de Básico: se reportan precisión, recall y F1 (al menos de la clase de riesgo) y se interpretan frente a la línea base de la clase mayoritaria; la reflexión dice qué error, falso negativo o falso positivo, es más costoso para el cliente y por qué, apoyada en el Marco Ético.',
+                    basico:      'La evaluación final se hace una sola vez en el conjunto de prueba y muestra la matriz de confusión; la reflexión ética nombra el costo de un falso negativo o de un falso positivo para el cliente, aunque no llegue a una decisión.',
+                    inicial:     'Se presenta al menos una: (a) la evaluación final se hace en el conjunto de entrenamiento o en el de validación; (b) no hay matriz de confusión; (c) no hay ninguna reflexión ética.',
                 },
             },
             {
                 id: 'c5', nombre: 'Uso responsable de IA', peso: 15,
                 desc: {
-                    estrategico: 'La bitácora registra casos Aceptada/Modificada/Rechazada con su motivo; en la sustentación responde sin notas por qué tomó cada decisión; la auditoría reproduce un fallo concreto de la IA y muestra la corrección.',
-                    autonomo:    'Bitácora completa y verificable; explica la mayoría de sus decisiones en la sustentación; la auditoría documenta y corrige un fallo real.',
-                    basico:      'La bitácora solo lista prompts sin el motivo de aceptar o rechazar; titubea al explicar una decisión; la auditoría describe un fallo genérico.',
-                    inicial:     'No hay bitácora o se redactó después; no puede explicar una parte sustancial de su propio código (delegación ciega).',
-                    nulo:        'Sin entrega del producto.',
+                    estrategico: 'Además de lo de Autónomo: la auditoría reproduce el fallo, con una celda que ejecuta la versión de la IA sobre los datos propios y la misma semilla, y otra con la versión corregida y la misma medición, que incluye una métrica de decisión (recall, matriz o AUC). Cada entrada de la bitácora remite a la celda o sección del cuaderno que afecta. Los casos que el curso ya publicó (doble sigmoide, bucle sin limpieza de gradientes, fuga del escalador) solo cuentan si ocurrieron en el propio proceso.',
+                    autonomo:    'Además de lo de Básico: cada entrada dice cómo se verificó la sugerencia; hay al menos una entrada Modificada o Rechazada con su evidencia de origen (salida literal de la IA, o captura con fecha y herramienta); la auditoría documenta un fallo real del propio proyecto, con su evidencia de origen, la corrección y su fundamento. Si la IA no produjo un fallo genuino, se admite una auditoría inducida y declarada, que llega como máximo a este nivel.',
+                    basico:      'La bitácora (plantilla del curso) tiene al menos tres entradas fechadas, con su decisión (Aceptada, Modificada o Rechazada) y una justificación en cada una; la auditoría describe un fallo de la IA, aunque sea de forma genérica (sin la salida literal ni su ubicación).',
+                    inicial:     'Se presenta al menos una: (a) no hay bitácora, o solo lista prompts sin decisión ni justificación; (b) falta la auditoría; (c) la bitácora describe decisiones que el cuaderno entregado no refleja, o sus fechas son posteriores a la entrega.',
                 },
             },
             {
                 id: 'c6', nombre: 'Comunicación y storytelling', peso: 10,
                 desc: {
-                    estrategico: 'El informe (≤4 págs.) explica el resultado a una audiencia no técnica con un hilo problema→modelo→error→decisión, gráficas rotuladas y citas APA completas.',
-                    autonomo:    'Informe estructurado y comprensible, con visualizaciones legibles y referencias citadas.',
-                    basico:      'Informe con secciones faltantes o gráficas sin rótulos ni leyenda.',
-                    inicial:     'Informe sin estructura, sin referencias o con afirmaciones sin respaldo en los resultados.',
-                    nulo:        'Sin entrega del producto.',
+                    estrategico: 'Además de lo de Autónomo: un lector no técnico sigue el hilo problema → modelo → error → decisión sin abrir el cuaderno; cada cifra del texto aparece en las salidas del cuaderno; las citas siguen APA 7.',
+                    autonomo:    'Además de lo de Básico: están las cinco secciones; las gráficas van dentro del informe, con rótulos y leyenda, y se citan en el texto; las referencias están completas (autor, año, título, fuente y URL o DOI).',
+                    basico:      'Hay al menos tres de las cinco secciones; las gráficas llevan título y ejes rotulados, aunque falte la leyenda; se citan al menos las fuentes de datos.',
+                    inicial:     'Se presenta al menos una: (a) hay menos de tres de las cinco secciones; (b) no hay ninguna referencia; (c) la conclusión principal se apoya en una cifra o afirmación que el cuaderno no respalda o contradice.',
                 },
             },
         ];
 
-        /* Niveles ordenados de mayor a menor (para el <select> y la lógica de "subir") */
-        const FASE1_NIVELES = [
-            { id: 'estrategico', etiqueta: 'Estratégico', rango: '4,6–5,0', nota: 4.8 },
-            { id: 'autonomo',    etiqueta: 'Autónomo',    rango: '4,0–4,5', nota: 4.25 },
-            { id: 'basico',      etiqueta: 'Básico',      rango: '3,0–3,9', nota: 3.45 },
-            { id: 'inicial',     etiqueta: 'Inicial',     rango: '1,0–2,9', nota: 1.95 },
-            { id: 'nulo',        etiqueta: 'Nulo (sin entrega)', rango: '0,0', nota: 0 },
+        /* Pesos en el orden de los criterios: [15, 30, 15, 15, 15, 10] */
+        const FASE1_PESOS = FASE1_CRITERIOS.map(c => c.peso);
+
+        /* Lista de comprobación de la calculadora: entregables + admisibilidad (sección 2) */
+        const FASE1_ENTREGABLES = [
+            'Cuaderno (.ipynb): MLP en PyTorch + bucle explícito + curvas + matriz de confusión.',
+            'El cuaderno corre con «Ejecutar todo» sin errores.',
+            'Informe técnico-ético en PDF (hasta 4 páginas, con las cinco secciones).',
+            'Bitácora de IA (Aceptada / Modificada / Rechazada, con su justificación) y auditoría a la IA.',
+            'La Propuesta de Datos fue aprobada en la compuerta.',
+            'Empaque Apellido_Nombre_Centinela_Fase1.zip o repositorio GitHub.',
         ];
 
-        /* Formato colombiano: 1 decimal con coma */
-        const fmtNota = (n) => (Math.round(n * 10) / 10).toFixed(1).replace('.', ',');
-
-        /* Banda del total según la nota estimada (escala 0,0–5,0) */
-        const bandaDeTotal = (nota) => {
-            if (nota >= 4.6) return FASE1_BANDAS[0];           // Estratégico
-            if (nota >= 4.0) return FASE1_BANDAS[1];           // Autónomo
-            if (nota >= 3.0) return FASE1_BANDAS[2];           // Básico
-            if (nota >= 1.0) return FASE1_BANDAS[3];           // Inicial
-            return FASE1_BANDAS[4];                            // Nulo
-        };
+        /* Núcleo de cálculo compartido con la calculadora de 11_ (copia literal del bloque
+           CALC-CORE; no se edita aquí: cualquier cambio se hace en las dos páginas a la vez). */
+        /* CALC-CORE-INICIO · rúbrica v1.4, secciones 3 y 8 (bloque idéntico en 11_ y en 00_) */
+        var AE_NIVELES = [
+            { id: 'estrategico', etq: 'Estratégico', rango: '4,6–5,0', piso: 460, techo: 500, medio: 480 },
+            { id: 'autonomo',    etq: 'Autónomo',    rango: '4,0–4,5', piso: 400, techo: 450, medio: 425 },
+            { id: 'basico',      etq: 'Básico',      rango: '3,0–3,9', piso: 300, techo: 390, medio: 345 },
+            { id: 'inicial',     etq: 'Inicial',     rango: '1,0–2,9', piso: 100, techo: 290, medio: 195 }
+        ];
+        // Notas en centésimas × peso: la suma es entera y el redondeo de la sección 3
+        // (una cifra decimal, centésimas en 5 hacia arriba: 4,85 → 4,9) no sufre errores de coma flotante.
+        function aeRedondear(sumaEntera) { return Math.floor((sumaEntera + 500) / 1000); } // en décimas
+        function aeBanda(decimas) {
+            if (decimas >= 46) return AE_NIVELES[0];
+            if (decimas >= 40) return AE_NIVELES[1];
+            if (decimas >= 30) return AE_NIVELES[2];
+            return AE_NIVELES[3];
+        }
+        function aeFmt(decimas) { return Math.floor(decimas / 10) + ',' + (decimas % 10); } // 35 -> "3,5"
+        function aeCalcular(seleccion, pesos) {
+            var faltan = seleccion.filter(function (s) { return !(s >= 0 && s < AE_NIVELES.length); }).length;
+            if (faltan > 0) {
+                return {
+                    completo: false, faltan: faltan,
+                    estado: faltan === 1
+                        ? 'Falta 1 criterio por elegir; la nota aparece al elegir los 6.'
+                        : 'Faltan ' + faltan + ' criterios por elegir; la nota aparece al elegir los 6.'
+                };
+            }
+            var medio = 0, piso = 0, techo = 0;
+            seleccion.forEach(function (s, i) {
+                medio += AE_NIVELES[s].medio * pesos[i];
+                piso += AE_NIVELES[s].piso * pesos[i];
+                techo += AE_NIVELES[s].techo * pesos[i];
+            });
+            var d = aeRedondear(medio), dMin = aeRedondear(piso), dMax = aeRedondear(techo);
+            var banda = aeBanda(d), aprueba = d >= 30; // se compara con 3,0 después de redondear
+            return {
+                completo: true, faltan: 0, decimas: d, nota: aeFmt(d), banda: banda.etq, bandaId: banda.id,
+                aprueba: aprueba, rangoMin: aeFmt(dMin), rangoMax: aeFmt(dMax), zonaLimite: dMin < 30 && dMax >= 30,
+                estado: 'Nota estimada ' + aeFmt(d) + ' de 5,0, ' + banda.etq + '. ' +
+                    (aprueba ? 'Aprobado (estimado).' : 'Aún no aprueba (estimado).')
+            };
+        }
+        /* CALC-CORE-FIN */
 
         /* ============================================================
            CALCULADORA DE AUTOEVALUACIÓN · CENTINELA FASE 1
-           Herramienta orientativa basada en la rúbrica oficial.
+           Herramienta orientativa basada en la rúbrica oficial (v1.4, sección 8).
+           Calcula SOLO con aeCalcular(seleccion, FASE1_PESOS).
         ============================================================ */
         const CalculadoraAutoevaluacion = () => {
-            // Estado: nivel elegido por criterio (por defecto, Autónomo) + checklist de entregables
-            const nivelInicial = () => {
-                const o = {};
-                FASE1_CRITERIOS.forEach(c => { o[c.id] = 'autonomo'; });
-                return o;
-            };
-            const [niveles, setNiveles] = useState(nivelInicial);
-            const [entregas, setEntregas] = useState([false, false, false, false, false]);
+            // Estado: índice de nivel por criterio (0 = Estratégico … 3 = Inicial; −1 = sin elegir).
+            // Sin valor inicial: ningún criterio llega preseleccionado.
+            const sinElegir = () => FASE1_CRITERIOS.map(() => -1);
+            const sinMarcar = () => FASE1_ENTREGABLES.map(() => false);
+            const [seleccion, setSeleccion] = useState(sinElegir);
+            const [entregas, setEntregas] = useState(sinMarcar);
             const ref = useRef(null);
-            useTypeset(ref, [niveles]);
+            useTypeset(ref, [seleccion]);
 
-            const setNivel = (cid, nid) => setNiveles(prev => ({ ...prev, [cid]: nid }));
+            const setNivel = (i, valor) => setSeleccion(prev => prev.map((s, k) => (k === i ? (valor === '' ? -1 : parseInt(valor, 10)) : s)));
             const toggleEntrega = (i) => setEntregas(prev => prev.map((v, k) => k === i ? !v : v));
-            const reiniciar = () => { setNiveles(nivelInicial()); setEntregas([false, false, false, false, false]); };
+            const reiniciar = () => { setSeleccion(sinElegir()); setEntregas(sinMarcar()); };
 
-            // Cálculo: Σ(nota_nivel × peso)/100
-            const notaEstimada = useMemo(() => {
-                let acc = 0;
-                FASE1_CRITERIOS.forEach(c => {
-                    const niv = FASE1_NIVELES.find(n => n.id === niveles[c.id]) || FASE1_NIVELES[1];
-                    acc += niv.nota * c.peso;
-                });
-                return acc / 100;
-            }, [niveles]);
-
-            const banda = bandaDeTotal(notaEstimada);
-            const aprobado = notaEstimada >= 3.0;
-
-            const ENTREGABLES = [
-                'Notebook (.ipynb): clase MLP + bucle explícito + curvas + matriz de confusión.',
-                'Informe técnico-ético en PDF (≤ 4 págs.).',
-                'Bitácora de IA (Aceptada / Modificada / Rechazada + motivo).',
-                'Propuesta de Datos aprobada (fuentes no-Kaggle, modalidad aplanada).',
-                'Empaque Apellido_Nombre_Centinela_Fase1.zip o repositorio GitHub.',
-            ];
+            // Nota, banda, rango, zona límite y estado: todo sale del núcleo compartido
+            const r = useMemo(() => aeCalcular(seleccion, FASE1_PESOS), [seleccion]);
+            const banda = r.completo ? FASE1_BANDAS.find(b => b.id === r.bandaId) : null;
             const entregasListas = entregas.filter(Boolean).length;
-
-            // Etiqueta del nivel inmediatamente superior (para la retroalimentación "▲ Para subir a…")
-            const nivelSuperior = (nid) => {
-                const idx = FASE1_NIVELES.findIndex(n => n.id === nid);
-                return idx > 0 ? FASE1_NIVELES[idx - 1] : null;
-            };
+            const totalEntregables = FASE1_ENTREGABLES.length;
 
             return (
                 <div ref={ref} className="rounded-2xl border border-gray-200 bg-white p-5 md:p-6 shadow-sm">
                     <div className="flex items-center gap-2.5 mb-1">
                         <div className="usta-gradient p-2 rounded-lg shadow-sm text-white">
-                            <i className="fas fa-calculator"></i>
+                            <i className="fas fa-calculator" aria-hidden="true"></i>
                         </div>
                         <h4 className="text-base md:text-lg font-extrabold text-navy">Calculadora de autoevaluación</h4>
                     </div>
-                    <p className="text-xs text-gray-500 mb-4">
-                        Escala 0,0–5,0 (aprueba con ≥ 3,0). En cada criterio se elige el nivel que mejor describe el entregable.
+                    <p className="text-xs text-gray-600 mb-4">
+                        Escala 0,0–5,0: la fase aprueba con una nota ponderada de 3,0 o más, no criterio a criterio. En cada
+                        criterio se elige el nivel que mejor describe el trabajo en conjunto; la nota aparece al elegir los 6.
                     </p>
 
                     {/* Criterios */}
                     <div className="space-y-3">
-                        {FASE1_CRITERIOS.map(c => {
-                            const nid = niveles[c.id];
-                            const sup = nivelSuperior(nid);
+                        {FASE1_CRITERIOS.map((c, i) => {
+                            const s = seleccion[i];
+                            const nivel = s >= 0 ? AE_NIVELES[s] : null;
+                            const sup = s > 0 ? AE_NIVELES[s - 1] : null;
                             return (
                                 <div key={c.id} className="rounded-xl border border-gray-200 p-3.5 bg-gray-50/50">
                                     <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
@@ -1200,28 +1229,35 @@
                                     <label className="block">
                                         <span className="sr-only">Nivel para {c.nombre}</span>
                                         <select
-                                            value={nid}
-                                            onChange={(e) => setNivel(c.id, e.target.value)}
+                                            value={nivel ? String(s) : ''}
+                                            onChange={(e) => setNivel(i, e.target.value)}
                                             className="w-full text-sm rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-700 focus:border-secondary focus:ring-1 focus:ring-secondary outline-none">
-                                            {FASE1_NIVELES.map(n => (
-                                                <option key={n.id} value={n.id}>{n.etiqueta} · {n.rango}</option>
+                                            <option value="">— Elegir un nivel —</option>
+                                            {AE_NIVELES.map((n, k) => (
+                                                <option key={n.id} value={String(k)}>{n.etq} · {n.rango}</option>
                                             ))}
                                         </select>
                                     </label>
-                                    {/* Descriptor del nivel elegido */}
-                                    <p className="mt-2 text-[0.85rem] text-gray-700 leading-relaxed">
-                                        <i className="fas fa-quote-left text-gray-300 text-[0.65rem] mr-1.5"></i>
-                                        {c.desc[nid]}
-                                    </p>
-                                    {/* Retroalimentación: cómo subir o nivel máximo */}
-                                    {sup ? (
-                                        <p className="mt-2 text-[0.82rem] text-primary bg-primary/5 rounded-lg px-3 py-2 leading-relaxed">
-                                            <span className="font-bold">▲ Para subir a {sup.etiqueta}: </span>{c.desc[sup.id]}
-                                        </p>
+                                    {nivel ? (
+                                        <>
+                                            {/* Descriptor literal del nivel elegido */}
+                                            <p className="mt-2 text-[0.85rem] text-gray-700 leading-relaxed">
+                                                <i className="fas fa-quote-left text-gray-300 text-[0.65rem] mr-1.5" aria-hidden="true"></i>
+                                                {c.desc[nivel.id]}
+                                            </p>
+                                            {/* Retroalimentación: descriptor del nivel siguiente o nivel máximo */}
+                                            {sup ? (
+                                                <p className="mt-2 text-[0.82rem] text-primary bg-primary/5 rounded-lg px-3 py-2 leading-relaxed">
+                                                    <span className="font-bold"><span aria-hidden="true">▲ </span>Para subir a {sup.etq}: </span>{c.desc[sup.id]}
+                                                </p>
+                                            ) : (
+                                                <p className="mt-2 text-[0.82rem] text-green-700 bg-green-50 rounded-lg px-3 py-2 font-semibold">
+                                                    <span aria-hidden="true">✓ </span>Nivel máximo alcanzado
+                                                </p>
+                                            )}
+                                        </>
                                     ) : (
-                                        <p className="mt-2 text-[0.82rem] text-green-700 bg-green-50 rounded-lg px-3 py-2 font-semibold">
-                                            ✓ Nivel máximo alcanzado
-                                        </p>
+                                        <p className="mt-2 text-[0.82rem] text-gray-600 italic">Sin nivel elegido todavía.</p>
                                     )}
                                 </div>
                             );
@@ -1229,45 +1265,69 @@
                     </div>
 
                     {/* Resultado en vivo */}
-                    <div className="mt-5 rounded-xl border p-4 flex flex-wrap items-center gap-4" style={{ borderColor: banda.color, background: banda.bg }}>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-4xl font-extrabold" style={{ color: banda.color }}>{fmtNota(notaEstimada)}</span>
-                            <span className="text-lg font-bold text-gray-400">/ 5,0</span>
+                    <div className="mt-5 rounded-xl border p-4"
+                        style={banda ? { borderColor: banda.color, background: banda.bg } : { borderColor: '#E5E7EB', background: '#F8FAFC' }}>
+                        <div className="flex flex-wrap items-center gap-4">
+                            <div className="flex items-baseline gap-1" aria-hidden="true">
+                                <span className="text-4xl font-extrabold" style={{ color: banda ? banda.color : '#64748B' }}>{r.completo ? r.nota : '—'}</span>
+                                <span className="text-lg font-bold text-gray-600">/ 5,0</span>
+                            </div>
+                            {r.completo && (
+                                <div className="flex flex-col gap-1.5">
+                                    <span aria-hidden="true" className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold text-white w-fit" style={{ background: banda.color }}>
+                                        <i className="fas fa-award"></i>Banda: {r.banda}
+                                    </span>
+                                    <span aria-hidden="true" className={`inline-flex items-center gap-1.5 text-sm font-bold ${r.aprueba ? 'text-emerald-700' : 'text-red-700'}`}>
+                                        <i className={`fas ${r.aprueba ? 'fa-circle-check' : 'fa-circle-xmark'}`}></i>
+                                        {r.aprueba ? 'Aprobado (estimado)' : 'Aún no aprueba (estimado)'}
+                                    </span>
+                                    <span className="text-[0.8rem] text-gray-700">
+                                        Rango posible: {r.rangoMin}–{r.rangoMax} (de los pisos a los techos de las bandas)
+                                    </span>
+                                </div>
+                            )}
                         </div>
-                        <div className="flex flex-col gap-1.5">
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold text-white w-fit" style={{ background: banda.color }}>
-                                <i className="fas fa-award"></i>Banda: {banda.etiqueta}
-                            </span>
-                            <span className={`inline-flex items-center gap-1.5 text-sm font-bold ${aprobado ? 'text-green-600' : 'text-red-500'}`}>
-                                <i className={`fas ${aprobado ? 'fa-circle-check' : 'fa-circle-xmark'}`}></i>
-                                {aprobado ? 'Aprobado (estimado)' : 'Aún no aprueba'}
-                            </span>
+                        {/* Región viva única: anuncia la frase completa (cifra, banda y veredicto) */}
+                        <div role="status" aria-live="polite" aria-atomic="true" className="mt-3">
+                            <p className="text-sm font-semibold text-navy">{r.estado}</p>
+                            {r.completo && r.zonaLimite && (
+                                <p className="mt-2 text-[0.8rem] text-amber-800 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg px-3 py-2 leading-relaxed">
+                                    <i className="fas fa-triangle-exclamation mr-1" aria-hidden="true"></i>
+                                    Zona límite: el rango posible cruza 3,0; la nota real depende de dónde quede cada criterio dentro de su banda.
+                                </p>
+                            )}
                         </div>
-                        <span className="text-[0.72rem] text-gray-500 ml-auto">Nota estimada = Σ(nota del nivel × peso) / 100</span>
+                        <p className="mt-3 text-[0.72rem] text-gray-600 leading-relaxed">
+                            Nota estimada = Σ (punto medio de la banda × peso) / 100, redondeada a una cifra decimal (centésimas en 5
+                            hacia arriba: 4,85 → 4,9) antes de compararla con 3,0.
+                        </p>
                     </div>
 
-                    {/* Checklist de entregables */}
+                    {/* Lista de comprobación: entregables y admisibilidad */}
                     <div className="mt-5">
                         <div className="flex items-center gap-2 mb-2 text-navy font-semibold text-sm">
-                            <i className="fas fa-box-open text-secondary"></i>Entregables
-                            <span className="ml-auto text-xs font-bold text-primary">{entregasListas}/5 listos</span>
+                            <i className="fas fa-box-open text-secondary" aria-hidden="true"></i>Entregables y admisibilidad
+                            <span className="ml-auto text-xs font-bold text-primary" aria-live="polite">{entregasListas}/{totalEntregables} listos</span>
                         </div>
                         <ul className="space-y-2">
-                            {ENTREGABLES.map((it, i) => (
+                            {FASE1_ENTREGABLES.map((it, i) => (
                                 <li key={i}>
                                     <label className={`flex items-start gap-2.5 cursor-pointer p-2 rounded-lg transition-colors ${entregas[i] ? 'bg-green-50/60' : 'hover:bg-gray-50'}`}>
                                         <input type="checkbox" checked={entregas[i]}
                                             onChange={() => toggleEntrega(i)}
                                             className="mt-0.5 w-4 h-4 accent-secondary cursor-pointer flex-shrink-0" />
-                                        <span className={`text-[0.88rem] leading-snug ${entregas[i] ? 'text-gray-400 line-through' : 'text-gray-700'}`}>{it}</span>
+                                        <span className={`text-[0.88rem] leading-snug ${entregas[i] ? 'text-gray-500 line-through' : 'text-gray-700'}`}>{it}</span>
                                     </label>
                                 </li>
                             ))}
                         </ul>
-                        {entregasListas < 5 && (
-                            <p className="mt-2 text-[0.8rem] text-amber-700 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg px-3 py-2 leading-relaxed">
-                                <i className="fas fa-triangle-exclamation mr-1"></i>
-                                Sin todos los entregables la actividad puede quedar incompleta (Nivel Nulo = sin entrega).
+                        {entregasListas < totalEntregables && (
+                            <p className="mt-2 text-[0.8rem] text-amber-800 bg-amber-50 border-l-4 border-amber-400 rounded-r-lg px-3 py-2 leading-relaxed">
+                                <i className="fas fa-triangle-exclamation mr-1" aria-hidden="true"></i>
+                                Sin el cuaderno y el informe no hay entrega: se aplica Nulo (0,0) a toda la fase. Un componente que falta
+                                dentro de la entrega (EDA, matriz, bitácora, auditoría) se califica como Inicial en su criterio. Si el
+                                cuaderno no corre o la Propuesta no fue aprobada, la entrega no se califica: se devuelve con un plazo breve
+                                para corregirla.
                             </p>
                         )}
                     </div>
@@ -1276,13 +1336,14 @@
                     <div className="mt-5 flex flex-wrap items-center gap-3">
                         <button onClick={reiniciar}
                             className="text-sm font-bold px-4 py-1.5 rounded-full border border-primary text-primary hover:bg-primary/5 transition-colors">
-                            <i className="fas fa-rotate-left mr-1.5"></i>Reiniciar
+                            <i className="fas fa-rotate-left mr-1.5" aria-hidden="true"></i>Reiniciar
                         </button>
                     </div>
-                    <p className="mt-4 text-[0.78rem] text-gray-500 italic leading-relaxed border-t border-gray-100 pt-3">
-                        <i className="fas fa-circle-info mr-1 text-gray-400"></i>
-                        Herramienta de autoevaluación orientativa basada en la rúbrica oficial. La calificación definitiva la asigna
-                        el docente; no reemplaza la sustentación ni la revisión del entregable.
+                    <p className="mt-4 text-[0.78rem] text-gray-600 italic leading-relaxed border-t border-gray-100 pt-3">
+                        <i className="fas fa-circle-info mr-1 text-gray-500" aria-hidden="true"></i>
+                        Herramienta de autoevaluación orientativa basada en la rúbrica oficial (v1.4). Cada nivel se calcula con el
+                        punto medio de su banda; la calificación definitiva la asigna el docente dentro de cada banda, después de la
+                        sustentación, que verifica la autoría y no suma puntos.
                     </p>
                 </div>
             );
@@ -1577,6 +1638,11 @@
                     </div>
                     <h3 className="text-lg md:text-xl font-bold text-navy leading-snug">{act.titulo}</h3>
                     <p className="text-xs text-gray-500 mt-1">{act.desglose}</p>
+                    {act.modalidad && (
+                        <p className="text-xs text-gray-600 mt-0.5">
+                            <i className="fas fa-users mr-1" aria-hidden="true"></i>Modalidad: {act.modalidad}.
+                        </p>
+                    )}
                     <Box type="info" label="Caso problematizador">
                         <p className="text-[0.88rem]">{act.caso}</p>
                     </Box>
@@ -1650,6 +1716,7 @@
                                             </span>
                                         ))}
                                     </div>
+                                    <p className="text-[0.78rem] text-gray-600 mt-1.5">La aprobación se decide por la nota ponderada (≥ 3,0), no criterio a criterio.</p>
                                 </div>
                                 <ul className="space-y-2.5">
                                     {act.rubrica.map((r, i) => (
@@ -1660,7 +1727,12 @@
                                             </div>
                                             {r.espera && (
                                                 <p className="text-[0.82rem] text-gray-600 mt-0.5 leading-snug">
-                                                    <span className="font-semibold text-gray-500">Qué se espera: </span>{r.espera}
+                                                    <span className="font-semibold text-gray-700">Qué se espera: </span>{r.espera}
+                                                </p>
+                                            )}
+                                            {r.basico && (
+                                                <p className="text-[0.82rem] text-gray-600 mt-0.5 leading-snug">
+                                                    <span className="font-semibold text-gray-700">Para llegar a Básico se necesita: </span>{r.basico}
                                                 </p>
                                             )}
                                         </li>
