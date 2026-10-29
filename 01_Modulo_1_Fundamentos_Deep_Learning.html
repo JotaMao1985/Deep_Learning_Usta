@@ -2103,7 +2103,7 @@ modelo = nn.Sequential(
                         <div className="rounded-xl px-4 py-3 mb-4 text-[0.95rem] text-gray-800 border-l-4" style={{ background: 'rgba(61,0,141,0.05)', borderColor: '#ED1E79' }}>
                             Una red con <strong>al menos una capa oculta</strong>, una activación no polinómica (sigmoide, tanh, ReLU…) y
                             suficientes neuronas puede aproximar, con un error tan pequeño como se desee, <strong>cualquier función
-                                continua sobre un dominio acotado</strong>{cita ? <> {cita}</> : null}. El teorema garantiza que esa red{' '}
+                                continua sobre un dominio compacto (cerrado y acotado)</strong>. El teorema{cita ? <> {cita}</> : null} garantiza que esa red{' '}
                             <strong>existe</strong>; no dice cuántas neuronas hacen falta ni que el entrenamiento la encuentre.
                         </div>
                         <p className="text-[0.92rem] text-gray-700 leading-relaxed mb-3">
@@ -3594,7 +3594,7 @@ modelo = nn.Sequential(
                 <p>
                     La capa oculta transforma un problema no separable en uno resoluble: <strong>combina fronteras lineales simples
                         para delimitar una región no lineal</strong>. Este es, en esencia, el mecanismo que el teorema de aproximación
-                    universal generaliza a cualquier función continua sobre un dominio acotado.
+                    universal generaliza a cualquier función continua sobre un dominio compacto (cerrado y acotado).
                 </p>
 
                 <h4>La misma idea, en tres dimensiones</h4>
@@ -3612,7 +3612,7 @@ modelo = nn.Sequential(
 
                 <h3>Interpolar puntos: la red como función</h3>
                 <p>
-                    El teorema garantiza que existe una red capaz de aproximar cualquier función continua en un intervalo acotado;
+                    El teorema garantiza que existe una red capaz de aproximar cualquier función continua en un intervalo cerrado y acotado;
                     aquí puede comprobarse de forma directa (la pérdida, la tasa de aprendizaje y las épocas que aparecen en los
                     controles se formalizan en el Capítulo 3; por ahora basta conservar sus valores por defecto). En el siguiente laboratorio se colocan puntos en el plano y una red de <strong>regresión</strong>{' '}
                     (salida lineal, pérdida del error cuadrático medio) ajusta la curva <em>y = f(x)</em> que mejor los explica.
@@ -3713,7 +3713,7 @@ modelo = nn.Sequential(
                         pregunta: 'Según el teorema de aproximación universal, con una capa oculta, una activación no polinómica y suficientes neuronas…',
                         opciones: [
                             { texto: 'el descenso del gradiente siempre encuentra la red que aproxima la función.', correcta: false },
-                            { texto: 'existe una red que aproxima cualquier función continua sobre un dominio acotado.', correcta: true },
+                            { texto: 'existe una red que aproxima cualquier función continua sobre un dominio compacto (cerrado y acotado).', correcta: true },
                             { texto: 'la red aproxima bien la función también fuera del rango de los datos.', correcta: false },
                         ],
                         justificacion: <>El teorema garantiza la existencia de la red <Cita k="cybenko1989approximation, hornik1991approximation" />, no que el entrenamiento la encuentre ni que extrapole. Cada neurona aporta una «pieza de Lego»; sumadas, recrean perfiles arbitrariamente complejos.</>
@@ -3751,7 +3751,7 @@ modelo = nn.Sequential(
                     <ul>
                         <li>Una <strong>neurona</strong> es una suma ponderada {String.raw`\(\mathbf{w}^\top\mathbf{x}+b\)`} seguida de una <strong>activación no lineal</strong>.</li>
                         <li>Las <strong>capas ocultas</strong> transforman datos crudos en características abstractas; sin no linealidad, apilar capas no aporta nada.</li>
-                        <li>El <strong>teorema de aproximación universal</strong>: con suficientes neuronas, una capa oculta puede aproximar cualquier función continua sobre un dominio acotado; garantiza que esa red existe, no que el entrenamiento la encuentre.</li>
+                        <li>El <strong>teorema de aproximación universal</strong>: con suficientes neuronas, una capa oculta puede aproximar cualquier función continua sobre un dominio compacto (cerrado y acotado); garantiza que esa red existe, no que el entrenamiento la encuentre.</li>
                         <li>Activaciones: <strong>ReLU</strong> en las ocultas; <strong>Sigmoide</strong> (binaria) o <strong>Softmax</strong> (multiclase) en la salida; <strong>lineal</strong> para regresión.</li>
                         <li>La <strong>propagación hacia adelante</strong> encadena {String.raw`\(\mathbf{a}^{[l]}=\sigma(\mathbf{W}^{[l]}\mathbf{a}^{[l-1]}+\mathbf{b}^{[l]})\)`}; entrenar es ajustar esos {String.raw`\(\mathbf{W}\)`} y {String.raw`\(\mathbf{b}\)`}.</li>
                     </ul>
@@ -5919,7 +5919,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
             ['Softmax', 'Convierte un vector de *logits* en probabilidades que suman 1; se usa en la salida de la clasificación multiclase.'],
             ['Subajuste (*underfitting*)', 'El modelo es demasiado simple: falla ya en el entrenamiento y también con datos nuevos (exceso de sesgo).'],
             ['Tasa de aprendizaje (η)', 'Hiperparámetro que define el tamaño del paso. Muy alta diverge; muy baja converge lento.'],
-            ['Teorema de aproximación universal', 'Con una capa oculta, una activación no polinómica y suficientes neuronas, existe una red que aproxima cualquier función continua sobre un dominio acotado. Garantiza la existencia, no la aprendibilidad.'],
+            ['Teorema de aproximación universal', 'Con una capa oculta, una activación no polinómica y suficientes neuronas, existe una red que aproxima cualquier función continua sobre un dominio compacto (cerrado y acotado). Garantiza la existencia, no la aprendibilidad.'],
         ];
 
         const EvaluacionSection = () => (
@@ -5989,7 +5989,7 @@ modelo.load_state_dict(torch.load('mejor.pt'))  # restaura el mejor`;
                         pregunta: 'Un MLP con una capa oculta de 1.000 neuronas no logra ajustar bien unos datos. A la luz del teorema de aproximación universal, ¿qué conclusión es correcta?',
                         opciones: [
                             { texto: 'El teorema garantiza que el entrenamiento encuentra la solución, así que necesariamente hay un error en el código.', correcta: false },
-                            { texto: 'Existe una red así capaz de aproximar la función en un dominio acotado, pero el teorema no garantiza que el entrenamiento la encuentre.', correcta: true },
+                            { texto: 'Existe una red así capaz de aproximar la función en un dominio compacto (cerrado y acotado), pero el teorema no garantiza que el entrenamiento la encuentre.', correcta: true },
                             { texto: 'El teorema solo vale para activaciones polinómicas, de modo que no se aplica a una red con ReLU.', correcta: false },
                             { texto: 'El teorema exige al menos dos capas ocultas, así que con una sola no puede cumplirse.', correcta: false },
                         ],
