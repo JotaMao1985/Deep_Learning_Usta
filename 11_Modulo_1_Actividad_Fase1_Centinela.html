@@ -222,6 +222,9 @@
            de su píldora .eq en lugar de ensanchar la página en móvil (375 px). */
         .grid > * { min-width: 0; }
 
+        /* Los textos .sr-only (posición absoluta) dentro de las tablas desplazables no deben ensanchar la página. */
+        .overflow-x-auto { position: relative; }
+
         /* Figuras en celular: cada SVG de escritorio (.svg-d) tiene una variante angosta propia (.svg-m,
            viewBox de 300 de ancho, texto ≥ 12) en lugar de encogerse a 6–7 px o desplazarse de lado. */
         .svg-m { display: none; }
@@ -993,7 +996,7 @@ modelo.<span class="fn">load_state_dict</span>(mejor_estado)               <span
         <!-- ====================== RÚBRICA (v1.4) ====================== -->
         <section id="rubrica" class="reveal">
             <h2 class="sec-title text-2xl md:text-3xl text-navy mb-2"><i aria-hidden="true" class="fas fa-table-list text-secondary mr-2"></i>Rúbrica de evaluación</h2>
-            <p id="rubrica-version" class="text-sm font-semibold text-slate-600 mb-6"><i aria-hidden="true" class="fas fa-code-branch text-primary mr-1.5"></i>Rúbrica Fase 1 · versión 1.4 · vigente desde (fecha de publicación)</p>
+            <p id="rubrica-version" class="text-sm font-semibold text-slate-600 mb-6"><i aria-hidden="true" class="fas fa-code-branch text-primary mr-1.5"></i>Rúbrica Fase 1 · versión 1.4 · vigente desde 2026-10-29</p>
 
             <!-- 1. Niveles y escala -->
             <div class="card p-6 mb-6">
@@ -1208,7 +1211,7 @@ modelo.<span class="fn">load_state_dict</span>(mejor_estado)               <span
                             <tr><th scope="row">1.1</th><td>2026-06-07</td><td>Cuatro niveles separados, con anclas técnicas (9380ec5).</td><td>—</td></tr>
                             <tr><th scope="row">1.2</th><td>2026-06-09</td><td>«Resumen claro por criterio» y calculadora de autoevaluación (ffcc083). Es la versión vigente en las calificaciones de julio.</td><td>—</td></tr>
                             <tr><th scope="row">1.3</th><td>2026-10-10</td><td>C1: la evidencia mínima admite omitir la modalidad aplanada o la licencia; «training set» → «conjunto de entrenamiento» (8fd736a).</td><td>No</td></tr>
-                            <tr><th scope="row">1.4</th><td>(fecha de publicación)</td><td>Auditoría del 2026-10-23: admisibilidad, regla de aplicación, niveles anidados, C4 sin solape, C5 observable y compuerta de autoría, Nulo solo global, informe de cinco secciones, solo PyTorch.</td><td>No: no se recalifica lo ya emitido.</td></tr>
+                            <tr><th scope="row">1.4</th><td>2026-10-29</td><td>Auditoría del 2026-10-23: admisibilidad, regla de aplicación, niveles anidados, C4 sin solape, C5 observable y compuerta de autoría, Nulo solo global, informe de cinco secciones, solo PyTorch.</td><td>No: no se recalifica lo ya emitido.</td></tr>
                         </tbody>
                     </table>
                 </div>
