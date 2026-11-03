@@ -4,110 +4,174 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Anatomía de una CNN — animación interactiva</title>
+<!--
+  Herramienta del Capítulo 2.1 (Módulo 2). Un archivo, dos vistas:
+    ?vista=recorrido (por defecto) → los 6 pasos de la cadena CNN sobre el ejemplo «X / O»
+                                     (adaptado de StatQuest, J. Starmer); iframe id = cnn-anatomia-frame.
+    ?vista=filtros                 → laboratorio libre de filtros: preajustes, filtro editable, relleno,
+                                     stride, ReLU y max-pooling en vivo; iframe id = cnn-filtros-frame.
+  Ambas vistas tienen «Modo práctica» (predecir el valor de una celda antes de verlo).
+  Enlaces directos: ?paso=1…6 abre el recorrido en ese paso; ?practica=1 activa el modo práctica.
+  Modelo y vista separados: el modelo es JS puro y se verifica con ?selftest=1.
+  Sin CDN: funciona sin conexión. Auto-altura por postMessage {type:'embed-tool-height', id, height}.
+-->
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    background: #ffffff;
-    color: #334155;
-    min-height: 0;
-    padding: 14px 14px 4px;
+  :root {
+    --morado: #3D008D; --magenta: #ED1E79; --tinta: #334155; --tinta-2: #1E293B; --gris: #64748B;
+    --borde: #E2E8F0; --suave: #F8FAFC; --lila: #FBF8FF; --cell: 40px;
   }
-  :root { --cell: 42px; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif; background: #ffffff; color: var(--tinta);
+    min-height: 0; padding: 14px 14px 4px; overflow-x: hidden;
+  }
   .container { max-width: 1400px; margin: 0 auto; }
+  [hidden] { display: none !important; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
   header {
-    text-align: center; margin-bottom: 18px; padding: 16px;
-    background: #FBF8FF; border-radius: 16px; border: 1px solid #E2E8F0;
+    text-align: center; margin-bottom: 14px; padding: 14px 16px;
+    background: var(--lila); border-radius: 16px; border: 1px solid var(--borde);
   }
   h1 {
-    font-size: 1.7rem;
+    font-size: 1.6rem; margin-bottom: 6px;
     background: linear-gradient(90deg, #3D008D, #ED1E79);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    margin-bottom: 6px;
   }
-  .subtitle { color: #64748B; font-size: 0.92rem; }
+  .subtitle { color: var(--gris); font-size: 0.9rem; line-height: 1.5; max-width: 860px; margin: 0 auto; }
 
+  /* Opciones (chips, interruptores) */
+  .opciones { display: flex; flex-wrap: wrap; gap: 10px 18px; justify-content: center; align-items: center; margin-bottom: 14px; }
+  .grupo { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; }
+  .grupo-rotulo { font-size: 0.8rem; font-weight: 700; color: var(--gris); margin-right: 2px; }
+  .chip {
+    padding: 7px 13px; background: #F1F5F9; border: 1px solid #CBD5E1; color: #475569;
+    border-radius: 8px; cursor: pointer; font: inherit; font-size: 0.85rem; font-weight: 600; transition: all 0.2s;
+  }
+  .chip:hover { border-color: var(--morado); color: var(--morado); }
+  .chip[aria-pressed="true"] { background: linear-gradient(135deg, #3D008D, #ED1E79); border-color: transparent; color: #fff; }
+  .interruptor { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 600; color: #475569; cursor: pointer; }
+  .interruptor input { width: 16px; height: 16px; accent-color: var(--magenta); cursor: pointer; }
+  .interruptor.desactivado { opacity: 0.45; cursor: not-allowed; }
+  .practica-switch { padding: 6px 12px; border: 2px dashed #D97706; border-radius: 10px; background: #FFFBEB; color: #92400E; }
+  .chip:focus-visible, .btn:focus-visible, .mini-btn:focus-visible, .cell:focus-visible,
+  .step-indicator:focus-visible, .interruptor input:focus-visible, select:focus-visible, input[type=text]:focus-visible {
+    outline: 2px solid var(--magenta); outline-offset: 2px;
+  }
+
+  /* Barra de pasos (recorrido) */
   .progress-bar {
-    display: flex; justify-content: space-between; margin-bottom: 18px; padding: 14px;
-    background: #F8FAFC; border-radius: 12px; border: 1px solid #E2E8F0; position: relative;
+    display: flex; justify-content: space-between; margin-bottom: 14px; padding: 12px 10px;
+    background: var(--suave); border-radius: 12px; border: 1px solid var(--borde); position: relative;
   }
-  .progress-bar::before {
-    content: ''; position: absolute; top: 50%; left: 30px; right: 30px;
-    height: 2px; background: #E2E8F0; z-index: 0;
-  }
+  .progress-bar::before { content: ''; position: absolute; top: 31px; left: 40px; right: 40px; height: 2px; background: var(--borde); z-index: 0; }
   .step-indicator {
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-    z-index: 1; cursor: pointer; transition: transform 0.2s; flex: 1;
-    background: none; border: 0; padding: 0; font: inherit; color: inherit;
+    display: flex; flex-direction: column; align-items: center; gap: 4px; z-index: 1; cursor: pointer;
+    transition: transform 0.2s; flex: 1; background: none; border: 0; padding: 0; font: inherit; color: inherit; border-radius: 10px;
   }
-  .step-indicator:focus-visible { outline: 2px solid #ED1E79; outline-offset: 4px; border-radius: 10px; }
-  .step-indicator:hover { transform: translateY(-3px); }
+  .step-indicator:hover { transform: translateY(-2px); }
   .step-dot {
-    width: 38px; height: 38px; border-radius: 50%;
-    background: #F1F5F9; border: 2px solid #CBD5E1; color: #64748B;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: bold; font-size: 0.9rem; transition: all 0.3s;
+    width: 38px; height: 38px; border-radius: 50%; background: #F1F5F9; border: 2px solid #CBD5E1; color: var(--gris);
+    display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; transition: all 0.3s;
   }
   .step-indicator.active .step-dot {
-    background: linear-gradient(135deg, #3D008D, #ED1E79); border-color: #3D008D; color: #fff;
-    box-shadow: 0 0 16px rgba(237,30,121,0.35);
+    background: linear-gradient(135deg, #3D008D, #ED1E79); border-color: #3D008D; color: #fff; box-shadow: 0 0 16px rgba(237,30,121,0.35);
   }
   .step-indicator.completed .step-dot { background: #15803D; border-color: #15803D; color: #fff; }
-  .step-label { font-size: 0.75rem; color: #64748B; text-align: center; max-width: 100px; }
-  .step-indicator.active .step-label { color: #3D008D; font-weight: 600; }
+  .step-label { font-size: 0.78rem; color: var(--gris); text-align: center; max-width: 110px; line-height: 1.25; }
+  .step-indicator.active .step-label { color: var(--morado); font-weight: 700; }
+  .step-dim { font-size: 0.72rem; color: #475569; font-variant-numeric: tabular-nums; background: #fff; border: 1px solid var(--borde); border-radius: 6px; padding: 0 5px; }
 
-  .main-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  /* Etapa: lo que entra → operación → lo que sale */
+  .etapa { display: flex; align-items: stretch; gap: 8px; margin-bottom: 12px; }
+  .etapa.solo .panel { max-width: 440px; margin: 0 auto; }
   .panel {
-    background: #ffffff; border: 1px solid #E2E8F0; border-radius: 16px;
-    padding: 18px; min-height: 320px; position: relative; transition: all 0.4s;
+    flex: 1 1 0; min-width: 0; background: #fff; border: 1px solid var(--borde); border-radius: 16px;
+    padding: 12px 12px 14px; display: flex; flex-direction: column; transition: border-color 0.3s, box-shadow 0.3s;
   }
-  .panel.highlight { border-color: #ED1E79; box-shadow: 0 0 0 3px rgba(237,30,121,0.12); }
-  .panel-title {
-    font-size: 1rem; font-weight: 600; margin-bottom: 15px;
-    display: flex; align-items: center; gap: 8px; color: #1E293B;
-  }
-  .panel-title .icon {
-    width: 28px; height: 28px; border-radius: 8px;
-    display: flex; align-items: center; justify-content: center; font-size: 0.9rem;
-  }
-  .icon-input { background: linear-gradient(135deg, #3b82f6, #1e40af); }
-  .icon-filter { background: linear-gradient(135deg, #f59e0b, #d97706); }
-  .icon-feature { background: linear-gradient(135deg, #15803D, #047857); }
-  .icon-relu { background: linear-gradient(135deg, #ED1E79, #be185d); }
-  .icon-pool { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
-  .icon-output { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+  .panel.foco { border-color: var(--magenta); box-shadow: 0 0 0 3px rgba(237,30,121,0.12); }
+  .panel-rol { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.07em; color: var(--gris); font-weight: 700; }
+  .panel.foco .panel-rol { color: #BE185D; }
+  .panel-title { font-size: 0.95rem; font-weight: 700; color: var(--tinta-2); margin: 2px 0 10px; line-height: 1.3; }
+  .panel-cuerpo { flex: 1; display: flex; flex-direction: column; align-items: center; align-items: safe center; justify-content: center; gap: 8px; overflow-x: auto; min-height: 120px; }
+  .flecha { align-self: center; font-size: 1.6rem; color: var(--magenta); font-weight: 700; flex: 0 0 auto; line-height: 1; }
+  .flecha::before { content: '→'; }
+  .espera { color: var(--gris); font-size: 0.85rem; text-align: center; }
+  .mini-rotulo { font-size: 0.75rem; font-weight: 700; color: var(--gris); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px; }
+  .fila-ops { display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .signo { font-size: 1.25rem; font-weight: 700; color: var(--morado); }
 
-  .matrix-container { display: flex; justify-content: center; align-items: center; min-height: 240px; overflow-x: auto; }
-  body { overflow-x: hidden; }
-  .matrix { display: grid; gap: 3px; padding: 10px; background: #F1F5F9; border-radius: 10px; position: relative; }
+  /* Matrices */
+  .matrix { display: grid; gap: 3px; padding: 8px; background: #F1F5F9; border-radius: 10px; position: relative; flex: 0 0 auto; }
+  .matrix.chica { gap: 2px; padding: 5px; border-radius: 8px; }
   .cell {
-    width: var(--cell); height: var(--cell); border-radius: 6px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.85rem; font-weight: 600; transition: all 0.3s; position: relative;
+    width: var(--cell); height: var(--cell); border-radius: 6px; border: 0; font-family: inherit;
+    display: flex; align-items: center; justify-content: center; position: relative;
+    font-size: clamp(10.5px, calc(var(--cell) * 0.38), 15px); font-weight: 700; font-variant-numeric: tabular-nums;
+    transition: background 0.25s, box-shadow 0.25s, transform 0.25s;
   }
-  .cell.highlight { box-shadow: 0 0 0 3px rgba(237,30,121,0.55); transform: scale(1.1); z-index: 10; }
-  .cell.in-filter { outline: 3px solid #ED1E79; outline-offset: -3px; }
+  .matrix.chica .cell { border-radius: 4px; }
+  button.cell { cursor: pointer; }
+  button.cell:hover { filter: brightness(0.94); }
+  .cell.ventana { box-shadow: inset 0 0 0 3px var(--magenta); }
+  .cell.actual { box-shadow: 0 0 0 3px rgba(237,30,121,0.7); transform: scale(1.08); z-index: 2; }
+  .cell.pendiente { background: #fff !important; box-shadow: inset 0 0 0 1px #CBD5E1; }
+  .cell.relleno { background: repeating-linear-gradient(45deg, #F8FAFC, #F8FAFC 4px, #E8EDF3 4px, #E8EDF3 8px) !important; color: #94A3B8 !important; cursor: default; }
+  .cell.oculta { background: #FEF3C7 !important; color: #92400E !important; box-shadow: inset 0 0 0 2px #D97706; }
+  .cell.anulada { outline: 2px dashed #1D4ED8; outline-offset: -4px; }
+  .cell.maximo::after {
+    content: '★'; position: absolute; top: -8px; right: -6px; font-size: 12px; line-height: 1;
+    color: var(--reg, #3D008D); text-shadow: 0 0 2px #fff, 0 0 2px #fff;
+  }
 
-  .filter-overlay {
-    position: absolute; border: 3px solid #ED1E79; border-radius: 8px; pointer-events: none;
-    box-shadow: 0 0 12px rgba(237,30,121,0.4); transition: all 0.4s ease-in-out; background: rgba(237,30,121,0.08);
+  .calc {
+    background: var(--suave); padding: 8px 10px; border-radius: 8px; margin-top: 10px; border: 1px solid var(--borde);
+    font-family: 'Courier New', monospace; font-size: 0.8rem; color: #166534; text-align: center; line-height: 1.5;
+    overflow-wrap: anywhere;
   }
+  .calc b { color: #BE185D; }
+  .nota { color: var(--gris); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 0.75rem; }
 
-  .explanation {
-    background: #FBF8FF; border: 1px solid #E2E8F0; border-radius: 16px;
-    padding: 18px; margin-bottom: 18px; min-height: 100px;
+  /* Leyenda */
+  .leyenda { display: flex; flex-wrap: wrap; gap: 6px 14px; justify-content: center; font-size: 0.78rem; color: #475569; margin-bottom: 12px; }
+  .muestra { display: inline-block; width: 14px; height: 14px; border-radius: 4px; vertical-align: -2px; margin-right: 5px; border: 1px solid #CBD5E1; }
+
+  /* Controles del barrido */
+  .barrido { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; margin: 0 0 12px; }
+  .barrido-rotulo { font-size: 0.8rem; font-weight: 700; color: var(--gris); }
+  .mini-btn {
+    padding: 6px 10px; border-radius: 8px; border: 1px solid #CBD5E1; background: #fff; color: var(--morado);
+    font: inherit; font-size: 0.9rem; font-weight: 700; cursor: pointer; min-width: 40px;
   }
-  .explanation h3 { color: #3D008D; margin-bottom: 10px; font-size: 1.1rem; }
-  .explanation p { color: #334155; line-height: 1.6; font-size: 0.95rem; }
+  .mini-btn:hover:not(:disabled) { border-color: var(--morado); }
+  .mini-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  select.vel { padding: 6px 8px; border-radius: 8px; border: 1px solid #CBD5E1; font: inherit; font-size: 0.85rem; color: var(--tinta); background: #fff; }
+
+  /* Modo práctica */
+  .practica { border: 2px dashed #D97706; background: #FFFBEB; border-radius: 12px; padding: 12px 14px; margin: 0 0 12px; }
+  .practica-titulo { font-weight: 700; color: #92400E; font-size: 0.9rem; margin-bottom: 6px; }
+  .practica p { font-size: 0.9rem; line-height: 1.5; color: var(--tinta); }
+  .practica-fila { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+  .practica input[type=text] {
+    width: 84px; padding: 7px 8px; border: 1px solid #CBD5E1; border-radius: 8px; font: inherit; font-size: 0.95rem;
+    text-align: center; font-variant-numeric: tabular-nums;
+  }
+  .fb { margin-top: 8px; font-size: 0.88rem; line-height: 1.5; }
+  .fb-ok { color: #166534; } .fb-no { color: #B91C1C; }
+  .contador { font-size: 0.8rem; color: #92400E; font-weight: 700; margin-left: auto; }
+
+  .explanation { background: var(--lila); border: 1px solid var(--borde); border-radius: 16px; padding: 16px 18px; margin-bottom: 14px; }
+  .explanation h3 { color: var(--morado); margin-bottom: 8px; font-size: 1.08rem; }
+  .explanation p { color: var(--tinta); line-height: 1.6; font-size: 0.95rem; }
   .formula {
-    background: #F8FAFC; padding: 10px 15px; border-radius: 8px; font-family: 'Courier New', monospace;
-    color: #be185d; margin-top: 10px; font-size: 0.9rem; border-left: 3px solid #ED1E79;
+    background: var(--suave); padding: 9px 14px; border-radius: 8px; font-family: 'Courier New', monospace;
+    color: #BE185D; margin-top: 10px; font-size: 0.88rem; border-left: 3px solid var(--magenta); overflow-wrap: anywhere;
   }
 
-  .controls { display: flex; justify-content: center; gap: 15px; margin-bottom: 18px; flex-wrap: wrap; }
+  .controls { display: flex; justify-content: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
   .btn {
-    padding: 12px 28px; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 600;
-    cursor: pointer; transition: all 0.2s; color: white; display: flex; align-items: center; gap: 8px;
+    padding: 11px 24px; border: none; border-radius: 10px; font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; color: white; display: flex; align-items: center; gap: 8px; font-family: inherit;
   }
   .btn-primary { background: linear-gradient(135deg, #3D008D, #5b21b6); }
   .btn-secondary { background: linear-gradient(135deg, #94A3B8, #64748B); }
@@ -115,48 +179,59 @@
   .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(61,0,141,0.18); }
   .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  .image-selector { display: flex; justify-content: center; gap: 10px; margin-bottom: 18px; }
-  .img-btn {
-    padding: 8px 20px; background: #F1F5F9; border: 1px solid #CBD5E1; color: #475569;
-    border-radius: 8px; cursor: pointer; transition: all 0.2s; font-weight: 600;
-  }
-  .img-btn.active { background: linear-gradient(135deg, #3D008D, #ED1E79); border-color: transparent; color: white; }
-
-  .calc-display {
-    background: #F8FAFC; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid #E2E8F0;
-    font-family: 'Courier New', monospace; font-size: 0.8rem; color: #15803D; text-align: center;
-    min-height: 40px; display: flex; align-items: center; justify-content: center;
-  }
-
-  .output-bars { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
-  .output-bar { display: flex; align-items: center; gap: 12px; }
-  .output-label { width: 60px; font-weight: 600; font-size: 1.1rem; color: #1E293B; }
-  .bar-track { flex: 1; height: 30px; background: #F1F5F9; border-radius: 15px; overflow: hidden; position: relative; }
+  /* Salida de la clasificación */
+  .output-bars { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+  .output-bar { display: flex; align-items: center; gap: 10px; }
+  .output-label { width: 28px; font-weight: 700; font-size: 1.05rem; }
+  .bar-track { flex: 1; height: 28px; background: #F1F5F9; border-radius: 14px; overflow: hidden; }
   .bar-fill {
-    height: 100%; border-radius: 15px; transition: width 1s ease-out; color: #fff;
-    display: flex; align-items: center; justify-content: flex-end; padding-right: 12px;
-    font-weight: 600; font-size: 0.85rem;
+    height: 100%; border-radius: 14px; transition: width 1s ease-out; color: #fff; min-width: 54px;
+    display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; font-weight: 700; font-size: 0.82rem;
   }
   .bar-fill.x-bar { background: linear-gradient(90deg, #3b82f6, #1e40af); }
   .bar-fill.o-bar { background: linear-gradient(90deg, #ED1E79, #be185d); }
-  .dense-note { font-size: 0.78rem; color: #475569; margin-top: 8px; line-height: 1.45; text-align: left; }
-  .dense-note code { font-family: 'Courier New', monospace; font-size: 0.76rem; color: #334155; }
+  .prediccion { color: #15803D; font-weight: 700; text-align: center; }
+  .vector { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; }
+  .vector .item { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 0.78rem; color: var(--gris); font-weight: 700; }
+  .lista-regiones { list-style: none; display: flex; flex-direction: column; gap: 6px; font-family: 'Courier New', monospace; font-size: 0.85rem; width: 100%; max-width: 240px; }
+  .lista-regiones li { display: flex; align-items: center; gap: 8px; }
+  .lista-regiones .muestra { border: 0; flex: 0 0 auto; }
+  svg.diagrama { width: 100%; max-width: 270px; height: auto; display: block; }
 
-  @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } h1 { font-size: 1.4rem; } }
+  /* Laboratorio */
+  .lab-etapa { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); margin-bottom: 12px; }
+  .lab-etapa .panel-cuerpo { justify-content: flex-start; }
+  .detalle { margin: 0 0 12px; }
+  .experimentos { background: var(--suave); border: 1px solid var(--borde); border-radius: 14px; padding: 12px 16px; margin-bottom: 14px; }
+  .experimentos > summary { font-weight: 700; color: var(--morado); cursor: pointer; font-size: 1rem; }
+  .experimentos ol { margin: 10px 0 0 20px; display: flex; flex-direction: column; gap: 10px; }
+  .experimentos li { font-size: 0.9rem; line-height: 1.5; }
+  .experimentos li .chip { margin: 4px 8px 0 0; padding: 5px 11px; font-size: 0.8rem; }
+  .experimentos details { display: inline-block; vertical-align: top; margin-top: 4px; }
+  .experimentos details summary { cursor: pointer; color: #BE185D; font-weight: 600; font-size: 0.85rem; }
+  .experimentos details p { margin-top: 6px; background: #fff; border-left: 3px solid var(--magenta); padding: 8px 10px; border-radius: 6px; }
+
+  pre#autotest { white-space: pre-wrap; font-size: 0.8rem; background: #F0FDF4; border: 1px solid #86EFAC; border-radius: 10px; padding: 10px; margin-bottom: 14px; }
+  pre#autotest.falla { background: #FEF2F2; border-color: #FCA5A5; }
+
   @media (max-width: 640px) {
     body { padding: 10px 8px 4px; }
     header { padding: 12px; }
     h1 { font-size: 1.2rem; }
-    .progress-bar { flex-wrap: wrap; gap: 6px; padding: 10px 6px; }
+    .subtitle { font-size: 0.85rem; }
+    .progress-bar { flex-wrap: wrap; gap: 8px 4px; padding: 10px 6px; }
     .progress-bar::before { display: none; }
     .step-indicator { flex: 1 0 30%; }
     .step-dot { width: 32px; height: 32px; font-size: 0.8rem; }
-    .panel { padding: 12px; min-height: 0; }
+    .etapa { flex-direction: column; }
+    .etapa.solo .panel { max-width: none; }
+    .flecha::before { content: '↓'; }
     .btn { padding: 10px 16px; font-size: 0.9rem; }
     .explanation { padding: 14px; }
     .explanation p { font-size: 0.9rem; }
+    .opciones { gap: 8px 12px; }
+    .chip { padding: 6px 10px; font-size: 0.82rem; }
   }
-  @media (max-width: 420px) { :root { --cell: 32px; } .cell { font-size: 0.75rem; } }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
   }
@@ -164,546 +239,1101 @@
 </head>
 <body>
 <div class="container">
-  <header>
-    <h1>🧠 Anatomía de una red neuronal convolucional</h1>
-    <p class="subtitle">Animación interactiva paso a paso — adaptada del ejemplo «X / O» de StatQuest (J. Starmer)</p>
-  </header>
+  <pre id="autotest" hidden></pre>
+  <div id="anuncio" class="sr" aria-live="polite"></div>
 
-  <div class="image-selector">
-    <button class="img-btn active" data-img="X">Imagen: X</button>
-    <button class="img-btn" data-img="O">Imagen: O</button>
-  </div>
+  <!-- ===================================== VISTA RECORRIDO ===================================== -->
+  <section id="vista-recorrido" hidden>
+    <header>
+      <h1>🧠 Anatomía de una red neuronal convolucional</h1>
+      <p class="subtitle">Recorrido paso a paso: cada paso muestra lo que entra, la operación y lo que sale. Adaptado del ejemplo «X / O» de StatQuest (J. Starmer).</p>
+    </header>
 
-  <div class="progress-bar" role="group" aria-label="Pasos de la animación">
-    <button type="button" class="step-indicator active" data-step="0" aria-label="Paso 1: Entrada">
-      <span class="step-dot">1</span>
-      <span class="step-label">Entrada</span>
-    </button>
-    <button type="button" class="step-indicator" data-step="1" aria-label="Paso 2: Filtro">
-      <span class="step-dot">2</span>
-      <span class="step-label">Filtro</span>
-    </button>
-    <button type="button" class="step-indicator" data-step="2" aria-label="Paso 3: Convolución">
-      <span class="step-dot">3</span>
-      <span class="step-label">Convolución</span>
-    </button>
-    <button type="button" class="step-indicator" data-step="3" aria-label="Paso 4: ReLU">
-      <span class="step-dot">4</span>
-      <span class="step-label">ReLU</span>
-    </button>
-    <button type="button" class="step-indicator" data-step="4" aria-label="Paso 5: Max-pooling">
-      <span class="step-dot">5</span>
-      <span class="step-label"><i>Max-pooling</i></span>
-    </button>
-    <button type="button" class="step-indicator" data-step="5" aria-label="Paso 6: Clasificación">
-      <span class="step-dot">6</span>
-      <span class="step-label">Clasificación</span>
-    </button>
-  </div>
-
-  <div class="main-grid">
-    <div class="panel" id="panel1">
-      <div class="panel-title"><span class="icon icon-input">📷</span>Imagen de entrada</div>
-      <div class="matrix-container" id="matrix1"></div>
+    <div class="opciones">
+      <div class="grupo" role="group" aria-label="Imagen de entrada">
+        <span class="grupo-rotulo">Imagen:</span>
+        <button type="button" class="chip" data-img="X" aria-pressed="true">X</button>
+        <button type="button" class="chip" data-img="O" aria-pressed="false">O</button>
+        <button type="button" class="chip" data-img="XR" aria-pressed="false">X imperfecta</button>
+        <button type="button" class="chip" data-img="D" aria-pressed="false">Dibujo propio</button>
+      </div>
+      <label class="interruptor practica-switch"><input type="checkbox" id="rec-practica"> Modo práctica</label>
     </div>
-    <div class="panel" id="panel2">
-      <div class="panel-title"><span class="icon icon-filter">🔍</span>Mapa de características</div>
-      <div class="matrix-container" id="matrix2"></div>
-      <div class="calc-display" id="calcDisplay">—</div>
+
+    <div class="progress-bar" id="pasos" role="group" aria-label="Pasos de la animación"></div>
+
+    <div class="etapa" id="rec-etapa"></div>
+
+    <div class="barrido" id="barrido" role="group" aria-label="Control del barrido de la convolución" hidden>
+      <span class="barrido-rotulo">Barrido:</span>
+      <button type="button" class="mini-btn" id="cv-inicio" aria-label="Primera posición">⏮</button>
+      <button type="button" class="mini-btn" id="cv-ant" aria-label="Posición anterior">◀</button>
+      <button type="button" class="mini-btn" id="cv-play" aria-label="Reproducir o pausar el barrido">⏸</button>
+      <button type="button" class="mini-btn" id="cv-sig" aria-label="Posición siguiente">▶</button>
+      <button type="button" class="mini-btn" id="cv-fin" aria-label="Última posición">⏭</button>
+      <label class="barrido-rotulo" for="cv-vel">Velocidad</label>
+      <select id="cv-vel" class="vel">
+        <option value="1200">lenta</option>
+        <option value="700" selected>normal</option>
+        <option value="300">rápida</option>
+      </select>
     </div>
-    <div class="panel" id="panel3">
-      <div class="panel-title"><span class="icon icon-output">🎯</span>Salida</div>
-      <div class="matrix-container" id="matrix3"></div>
-      <div class="output-bars" id="outputBars" style="display:none;">
-        <div class="output-bar">
-          <div class="output-label" style="color:#1D4ED8;">X</div>
-          <div class="bar-track"><div class="bar-fill x-bar" id="barX" style="width:0%;">0 %</div></div>
-        </div>
-        <div class="output-bar">
-          <div class="output-label" style="color:#BE185D;">O</div>
-          <div class="bar-track"><div class="bar-fill o-bar" id="barO" style="width:0%;">0 %</div></div>
-        </div>
+
+    <div class="practica" id="rec-practica-caja" hidden></div>
+
+    <div class="leyenda" aria-hidden="true">
+      <span><span class="muestra" style="background:#334155"></span>píxel encendido (1)</span>
+      <span><span class="muestra" style="background:#E2E8F0"></span>píxel apagado (0)</span>
+      <span><span class="muestra" style="background:#ED1E79"></span>valor positivo</span>
+      <span><span class="muestra" style="background:#3B82F6"></span>valor negativo</span>
+      <span><span class="muestra" style="background:#FFFFFF"></span>cero</span>
+    </div>
+
+    <div class="explanation" id="explanation"></div>
+
+    <div class="controls">
+      <button class="btn btn-secondary" id="prevBtn">⬅ Anterior</button>
+      <button class="btn btn-accent" id="autoBtn">▶ Auto</button>
+      <button class="btn btn-primary" id="nextBtn">Siguiente ➡</button>
+      <button class="btn btn-secondary" id="resetBtn">🔄 Reiniciar</button>
+    </div>
+  </section>
+
+  <!-- ===================================== VISTA LABORATORIO ===================================== -->
+  <section id="vista-filtros" hidden>
+    <header>
+      <h1>🔍 Laboratorio de filtros convolucionales</h1>
+      <p class="subtitle">Cada filtro se comporta como una «célula simple» del córtex visual: responde a un patrón con una orientación concreta dentro de su pequeña ventana. Se eligen o se editan la imagen y el filtro, y el mapa de características se recalcula al instante.</p>
+    </header>
+
+    <div class="opciones">
+      <div class="grupo" role="group" aria-label="Imagen de entrada">
+        <span class="grupo-rotulo">Imagen:</span>
+        <button type="button" class="chip" data-limg="X">X</button>
+        <button type="button" class="chip" data-limg="O">O</button>
+        <button type="button" class="chip" data-limg="V">Línea vertical</button>
+        <button type="button" class="chip" data-limg="H">Línea horizontal</button>
+        <button type="button" class="chip" data-limg="D">Diagonal</button>
+        <button type="button" class="chip" data-limg="vacia">Limpiar</button>
       </div>
     </div>
-  </div>
+    <div class="opciones">
+      <div class="grupo" role="group" aria-label="Filtro">
+        <span class="grupo-rotulo">Filtro:</span>
+        <button type="button" class="chip" data-lfil="diag">«\» diagonal</button>
+        <button type="button" class="chip" data-lfil="anti">«/» antidiagonal</button>
+        <button type="button" class="chip" data-lfil="vert">«|» borde vertical</button>
+        <button type="button" class="chip" data-lfil="horiz">«—» borde horizontal</button>
+        <button type="button" class="chip" data-lfil="pers">Personalizado</button>
+      </div>
+    </div>
+    <div class="opciones">
+      <div class="grupo" role="group" aria-label="Relleno">
+        <span class="grupo-rotulo">Relleno P:</span>
+        <button type="button" class="chip" data-lp="0">0</button>
+        <button type="button" class="chip" data-lp="1">1</button>
+      </div>
+      <div class="grupo" role="group" aria-label="Stride">
+        <span class="grupo-rotulo"><i>Stride</i> S:</span>
+        <button type="button" class="chip" data-ls="1">1</button>
+        <button type="button" class="chip" data-ls="2">2</button>
+      </div>
+      <label class="interruptor"><input type="checkbox" id="lab-relu"> Aplicar ReLU</label>
+      <label class="interruptor" id="lab-pool-rotulo"><input type="checkbox" id="lab-pool"> <span><i>Max-pooling</i> 2×2</span></label>
+      <label class="interruptor practica-switch"><input type="checkbox" id="lab-practica"> Modo práctica</label>
+    </div>
 
-  <div class="explanation" id="explanation">
-    <h3>Introducción</h3>
-    <p>Esta animación recorre cada paso del procesamiento de una imagen en una CNN; los controles permiten avanzar.</p>
-  </div>
+    <div class="lab-etapa" id="lab-etapa"></div>
 
-  <div class="controls">
-    <button class="btn btn-secondary" id="prevBtn">⬅ Anterior</button>
-    <button class="btn btn-accent" id="autoBtn">▶ Auto</button>
-    <button class="btn btn-primary" id="nextBtn">Siguiente ➡</button>
-    <button class="btn btn-secondary" id="resetBtn">🔄 Reiniciar</button>
-  </div>
+    <div class="calc detalle" id="lab-detalle" aria-live="polite"></div>
+
+    <div class="practica" id="lab-practica-caja" hidden></div>
+
+    <div class="leyenda" aria-hidden="true">
+      <span><span class="muestra" style="background:#334155"></span>píxel encendido (1)</span>
+      <span><span class="muestra" style="background:#E2E8F0"></span>píxel apagado (0)</span>
+      <span><span class="muestra" style="background:#ED1E79"></span>valor positivo</span>
+      <span><span class="muestra" style="background:#3B82F6"></span>valor negativo</span>
+      <span><span class="muestra" style="background:repeating-linear-gradient(45deg,#F8FAFC,#F8FAFC 3px,#CBD5E1 3px,#CBD5E1 6px)"></span>relleno de ceros</span>
+    </div>
+
+    <details class="experimentos" open>
+      <summary>Experimentos sugeridos</summary>
+      <ol>
+        <li>Con el filtro de <b>borde vertical</b> sobre una <b>línea vertical</b>, ¿se enciende el mapa sobre la línea o a sus lados? ¿Qué cambia al aplicar la ReLU?<br>
+          <button type="button" class="chip" data-exp="1">Probar</button>
+          <details><summary>Ver explicación</summary><p>El mapa vale 0 sobre la línea y ±3 a sus lados: +3 donde la línea cae en la columna izquierda de la ventana (encendido a la izquierda y apagado a la derecha, justo lo que premia el filtro) y −3 donde cae en la columna derecha. El filtro no detecta «la línea», sino sus <b>bordes</b>: las transiciones entre claro y oscuro. Con la ReLU solo sobrevive el borde positivo; para el otro haría falta un segundo filtro con los signos invertidos.</p></details>
+        </li>
+        <li>¿Qué filtro activa más la <b>«O»</b>? Conviene comparar el valor de la activación máxima con cada filtro.<br>
+          <button type="button" class="chip" data-exp="2">Probar</button>
+          <details><summary>Ver explicación</summary><p>Los filtros de borde vertical y horizontal llegan a 3 sobre la «O», y los diagonales solo a 2: en esta rejilla la «O» está hecha sobre todo de trazos rectos, y sus esquinas apenas insinúan diagonales. Por eso una red real combina muchos filtros: cada uno responde a un rasgo distinto y la capa siguiente los integra.</p></details>
+        </li>
+        <li>¿Qué dibujo lleva el filtro <b>«\»</b> a su activación máxima? Se parte de una imagen vacía y se encienden píxeles.<br>
+          <button type="button" class="chip" data-exp="3">Probar</button>
+          <details><summary>Ver explicación</summary><p>Con píxeles que valen 0 o 1, el máximo posible es la suma de los pesos positivos: 3. Se alcanza al encender los tres píxeles de la diagonal principal de una ventana y dejar apagadas las dos esquinas de la antidiagonal, que restarían 1 cada una. El filtro es, literalmente, una plantilla del patrón que busca.</p></details>
+        </li>
+        <li>¿Qué ocurre con un filtro cuyos nueve pesos valen <b>0</b>?<br>
+          <button type="button" class="chip" data-exp="4">Probar</button>
+          <details><summary>Ver explicación</summary><p>El mapa queda en ceros para cualquier imagen: un filtro sin pesos no distingue nada. Los valores del filtro son justamente lo que la red aprende por retropropagación; al comienzo del entrenamiento son aleatorios y, poco a poco, se convierten en detectores útiles para la tarea.</p></details>
+        </li>
+        <li>Con <b>relleno P = 1</b> y <b><i>stride</i> S = 2</b>, ¿qué tamaño tiene el mapa? ¿Y con P = 1 y S = 1?<br>
+          <button type="button" class="chip" data-exp="5">Probar</button>
+          <details><summary>Ver explicación</summary><p>El relleno añade un anillo de ceros alrededor de la imagen; con P = 1 y S = 1 la salida conserva el tamaño 6×6 (el llamado <i>same padding</i>, P = (k − 1)/2). Con S = 2 la ventana salta de dos en dos y la salida baja a 3×3 (o a 2×2 sin relleno). Todo sale de O = ⌊(W − k + 2P)/S⌋ + 1.</p></details>
+        </li>
+      </ol>
+    </details>
+  </section>
 </div>
 
 <script>
-// Imágenes de entrada 6x6 (1 = trazo de la figura, 0 = fondo)
-const IMAGES = {
-  X: [
-    [1,0,0,0,0,1],
-    [0,1,0,0,1,0],
-    [0,0,1,1,0,0],
-    [0,0,1,1,0,0],
-    [0,1,0,0,1,0],
-    [1,0,0,0,0,1]
-  ],
-  O: [
-    [0,1,1,1,1,0],
-    [1,0,0,0,0,1],
-    [1,0,0,0,0,1],
-    [1,0,0,0,0,1],
-    [1,0,0,0,0,1],
-    [0,1,1,1,1,0]
-  ]
-};
-
-// Filtro 3x3 que detecta trazos en la diagonal principal («\») y penaliza la
-// antidiagonal (ejemplo adaptado de StatQuest, J. Starmer)
-const FILTER = [
-  [1, 0, -1],
-  [0, 1, 0],
-  [-1, 0, 1]
-];
-
-// Capa densa ilustrativa (pesos elegidos a mano, NO entrenados) sobre el vector
-// aplanado [p11, p12, p21, p22] del max-pooling: premia la activación en las
-// esquinas de la diagonal principal (X) y penaliza la de la antidiagonal (O).
-const DENSE_W = [[1,-1,-1,1],[-1,1,1,-1]].map(r => r.map(w => 0.25*w));   // filas: X, O
-const fmtNum = (v, d) => v.toFixed(d).replace('.', ',').replace(/^-/, '−');
-const fmtPct = v => fmtNum(v*100, 1) + ' %';
+'use strict';
+const $ = (id) => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+const VISTA = params.get('vista') === 'filtros' ? 'filtros' : 'recorrido';
+const ID_IFRAME = VISTA === 'filtros' ? 'cnn-filtros-frame' : 'cnn-anatomia-frame';
 const reduceMotion = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
-let currentImage = 'X';
-let currentStep = 0;
-let autoInterval = null;
-let convAnimation = null;
-
-// Colores para heatmap (base claro USTA)
-function getHeatColor(value, max = 4) {
-  if (value === 0) return '#F1F5F9';
-  const intensity = Math.min(Math.abs(value) / max, 1);
-  if (value > 0) {
-    const r = Math.floor(237 * intensity + 241 * (1-intensity));
-    const g = Math.floor(30 * intensity + 245 * (1-intensity));
-    const b = Math.floor(121 * intensity + 249 * (1-intensity));
-    return `rgb(${r},${g},${b})`;
-  } else {
-    const r = Math.floor(59 * intensity + 241 * (1-intensity));
-    const g = Math.floor(130 * intensity + 245 * (1-intensity));
-    const b = Math.floor(246 * intensity + 249 * (1-intensity));
-    return `rgb(${r},${g},${b})`;
+/* ===================================== MODELO (JS puro) ===================================== */
+const Modelo = (() => {
+  const vacia = (n, m = n, v = 0) => Array.from({ length: n }, () => Array(m).fill(v));
+  const copiar = (M) => M.map((f) => f.slice());
+  const tamSalida = (n, k, P, S) => Math.floor((n - k + 2 * P) / S) + 1;
+  function rellenar(I, P) {
+    if (!P) return copiar(I);
+    const R = vacia(I.length + 2 * P, I[0].length + 2 * P);
+    I.forEach((f, i) => f.forEach((v, j) => { R[i + P][j + P] = v; }));
+    return R;
   }
-}
-
-function renderMatrix(containerId, matrix, size, highlightCells = []) {
-  const container = document.getElementById(containerId);
-  container.innerHTML = '';
-  const grid = document.createElement('div');
-  grid.className = 'matrix';
-  grid.style.gridTemplateColumns = `repeat(${size}, var(--cell))`;
-  
-  for (let i = 0; i < matrix.length; i++) {
-    for (let j = 0; j < matrix[i].length; j++) {
-      const cell = document.createElement('div');
-      cell.className = 'cell';
-      cell.dataset.row = i;
-      cell.dataset.col = j;
-      const val = matrix[i][j];
-      cell.textContent = typeof val === 'number' ? fmtNum(val, 0) : val;   // signo menos tipográfico
-      if (size === 6) {
-        cell.style.background = val === 1 ? '#334155' : '#E2E8F0';
-        cell.style.color = val === 1 ? '#FFFFFF' : '#94A3B8';
-      } else {
-        cell.style.background = getHeatColor(val);
-        cell.style.color = Math.abs(val) >= 2 ? '#fff' : '#475569';
-      }
-      if (highlightCells.some(c => c[0] === i && c[1] === j)) {
-        cell.classList.add('highlight');
-      }
-      grid.appendChild(cell);
+  // Correlación cruzada con relleno de ceros P y stride S: lo que PyTorch y Keras llaman «convolución».
+  function conv(I, F, P = 0, S = 1, b = 0) {
+    const R = rellenar(I, P), k = F.length;
+    const oi = tamSalida(I.length, k, P, S), oj = tamSalida(I[0].length, k, P, S);
+    const O = vacia(oi, oj);
+    for (let i = 0; i < oi; i++) for (let j = 0; j < oj; j++) {
+      let s = b;
+      for (let m = 0; m < k; m++) for (let n = 0; n < k; n++) s += R[i * S + m][j * S + n] * F[m][n];
+      O[i][j] = s;
     }
+    return O;
   }
-  container.appendChild(grid);
-  return grid;
-}
-
-function convolve(img, filter) {
-  const rows = img.length - 2;
-  const cols = img[0].length - 2;
-  const result = [];
-  for (let i = 0; i < rows; i++) {
-    result[i] = [];
-    for (let j = 0; j < cols; j++) {
-      let sum = 0;
-      for (let fi = 0; fi < 3; fi++) {
-        for (let fj = 0; fj < 3; fj++) {
-          sum += img[i+fi][j+fj] * filter[fi][fj];
+  // Los k×k términos de la celda (i, j): fila y columna en la entrada original (fuera de rango = relleno), valor, peso y producto.
+  function terminos(I, F, i, j, P = 0, S = 1) {
+    const k = F.length, t = [];
+    for (let m = 0; m < k; m++) for (let n = 0; n < k; n++) {
+      const r = i * S + m - P, c = j * S + n - P;
+      const dentro = r >= 0 && r < I.length && c >= 0 && c < I[0].length;
+      const v = dentro ? I[r][c] : 0;
+      t.push({ m, n, r, c, dentro, v, w: F[m][n], p: v * F[m][n] });
+    }
+    return t;
+  }
+  const relu = (M) => M.map((f) => f.map((v) => Math.max(0, v)));
+  // Max-pooling 2×2 sin solapamiento: salida y posición del máximo de cada región (el primero, si hay empate).
+  function pool2(M) {
+    const oi = Math.floor(M.length / 2), oj = Math.floor(M[0].length / 2);
+    const out = vacia(oi, oj), arg = [];
+    for (let a = 0; a < oi; a++) {
+      arg[a] = [];
+      for (let b = 0; b < oj; b++) {
+        let mejor = -Infinity, pos = null;
+        for (let di = 0; di < 2; di++) for (let dj = 0; dj < 2; dj++) {
+          const v = M[2 * a + di][2 * b + dj];
+          if (v > mejor) { mejor = v; pos = [2 * a + di, 2 * b + dj]; }
         }
-      }
-      result[i][j] = sum;
-    }
-  }
-  return result;
-}
-
-function applyRelu(matrix) {
-  return matrix.map(row => row.map(v => Math.max(0, v)));
-}
-
-function maxPool(matrix) {
-  const result = [];
-  for (let i = 0; i < matrix.length; i += 2) {
-    const row = [];
-    for (let j = 0; j < matrix[0].length; j += 2) {
-      row.push(Math.max(
-        matrix[i][j], matrix[i][j+1],
-        matrix[i+1][j], matrix[i+1][j+1]
-      ));
-    }
-    result.push(row);
-  }
-  return result;
-}
-
-function highlightPanel(id) {
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('highlight'));
-  if (id) document.getElementById(id).classList.add('highlight');
-}
-
-function updateStepIndicators() {
-  document.querySelectorAll('.step-indicator').forEach((ind, idx) => {
-    ind.classList.remove('active', 'completed');
-    if (idx === currentStep) ind.classList.add('active');
-    else if (idx < currentStep) ind.classList.add('completed');
-    if (idx === currentStep) ind.setAttribute('aria-current', 'step'); else ind.removeAttribute('aria-current');
-  });
-}
-
-function setExplanation(title, text, formula = null) {
-  const exp = document.getElementById('explanation');
-  exp.innerHTML = `<h3>${title}</h3><p>${text}</p>${formula ? `<div class="formula">${formula}</div>` : ''}`;
-}
-
-function clearPanels() {
-  ['matrix1','matrix2','matrix3'].forEach(id => document.getElementById(id).innerHTML = '');
-  document.getElementById('calcDisplay').textContent = '—';
-  document.getElementById('outputBars').style.display = 'none';
-}
-
-// PASO 0: Mostrar imagen de entrada
-function step0() {
-  clearPanels();
-  highlightPanel('panel1');
-  renderMatrix('matrix1', IMAGES[currentImage], 6);
-  document.getElementById('matrix2').innerHTML = '<p style="color:#64748B;text-align:center;">En espera…</p>';
-  document.getElementById('matrix3').innerHTML = '<p style="color:#64748B;text-align:center;">En espera…</p>';
-  setExplanation(
-    'Paso 1: Imagen de entrada',
-    `La imagen se representa como una matriz de 6×6 píxeles. Cada celda contiene un valor: <b>1 (trazo de la figura)</b> o <b>0 (fondo)</b>. Una imagen real a color tendría 3 canales (RGB) y valores de 0 a 255.`,
-    `Entrada: matriz 6×6 → 36 píxeles`
-  );
-}
-
-// PASO 1: Mostrar el filtro
-function step1() {
-  clearPanels();
-  highlightPanel('panel2');
-  renderMatrix('matrix1', IMAGES[currentImage], 6);
-  renderMatrix('matrix2', FILTER, 3);
-  document.getElementById('matrix3').innerHTML = '<p style="color:#64748B;text-align:center;">En espera…</p>';
-  setExplanation(
-    'Paso 2: El filtro (<i>kernel</i> de 3×3)',
-    `El <b>filtro</b> es una matriz pequeña (3×3) cuyos valores la red <i>aprende</i> automáticamente. Este filtro en particular detecta trazos en la <b>diagonal principal</b> («\\») y penaliza la antidiagonal. Se deslizará sobre la imagen calculando productos punto.`,
-    `Filtro: 3×3 = 9 pesos + 1 sesgo (frente a 36×N pesos de una capa densa con N neuronas)`
-  );
-}
-
-// PASO 2: Animar la convolución
-function step2() {
-  clearPanels();
-  highlightPanel('panel1');
-  const img = IMAGES[currentImage];
-  renderMatrix('matrix1', img, 6);
-  
-  const result = convolve(img, FILTER);
-  const rows = img.length - 2;
-  const cols = img[0].length - 2;
-  
-  // Crear matriz vacía para el feature map
-  const emptyResult = Array.from({length: rows}, () => Array(cols).fill(''));
-  renderMatrix('matrix2', emptyResult, cols);
-  document.getElementById('matrix3').innerHTML = '<p style="color:#64748B;text-align:center;">En espera…</p>';
-  
-  setExplanation(
-    'Paso 3: Convolución (deslizamiento del filtro)',
-    `El filtro se desliza sobre la imagen. En cada posición se calcula el <b>producto punto</b> entre los 9 píxeles de la imagen y los 9 valores del filtro. El resultado forma el <b>mapa de características</b> (<i>feature map</i>).`,
-    `Mapa[i, j] = Σ imagen[i+di, j+dj] × filtro[di, dj] + b   (aquí, b = 0)`
-  );
-  
-  // Animar el deslizamiento
-  let pos = 0;
-  const positions = [];
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      positions.push([i, j]);
-    }
-  }
-  
-  function animateStep() {
-    if (pos >= positions.length) {
-      // Finalizar mostrando el feature map completo
-      renderMatrix('matrix2', result, cols);
-      document.getElementById('calcDisplay').textContent = `✓ Mapa de características completo: ${rows}×${cols}`;
-      return;
-    }
-    const [i, j] = positions[pos];
-    
-    // Resaltar región en la imagen
-    const cells1 = document.querySelectorAll('#matrix1 .cell');
-    cells1.forEach(c => c.classList.remove('highlight', 'in-filter'));
-    cells1.forEach(c => {
-      const r = parseInt(c.dataset.row);
-      const col = parseInt(c.dataset.col);
-      if (r >= i && r < i+3 && col >= j && col < j+3) {
-        c.classList.add('in-filter');
-      }
-    });
-    
-    // Calcular producto punto para mostrar
-    let sum = 0;
-    let terms = [];
-    for (let fi = 0; fi < 3; fi++) {
-      for (let fj = 0; fj < 3; fj++) {
-        const v = img[i+fi][j+fj] * FILTER[fi][fj];
-        sum += v;
-        if (FILTER[fi][fj] !== 0) terms.push(`${img[i+fi][j+fj]}×${FILTER[fi][fj] < 0 ? '(−' + Math.abs(FILTER[fi][fj]) + ')' : FILTER[fi][fj]}`);
+        out[a][b] = mejor; arg[a][b] = pos;
       }
     }
-    document.getElementById('calcDisplay').innerHTML = 
-      `Pos. (${i}, ${j}): ${terms.join(' + ')} = <b style="color:#BE185D;">${fmtNum(sum, 0)}</b>`;
-    if (reduceMotion()) {
-      // Movimiento reducido: sin recorrido animado; se muestra el mapa completo y el cálculo de (0, 0).
-      renderMatrix('matrix2', result, cols, [[0, 0]]);
-      document.getElementById('calcDisplay').innerHTML +=
-        ` · ✓ Mapa de características completo: ${rows}×${cols}`;
-      return;
-    }
-    
-    // Actualizar feature map progresivamente
-    const partialResult = Array.from({length: rows}, (_, ri) => 
-      Array.from({length: cols}, (_, ci) => {
-        if (ri < i || (ri === i && ci <= j)) return result[ri][ci];
-        return '';
-      })
-    );
-    // Marcar la celda actual como highlight
-    renderMatrix('matrix2', partialResult, cols, [[i, j]]);
-    
-    pos++;
-    convAnimation = setTimeout(animateStep, 600);
+    return { out, arg };
   }
-  animateStep();
+  const region = (M, a, b) => [M[2 * a][2 * b], M[2 * a][2 * b + 1], M[2 * a + 1][2 * b], M[2 * a + 1][2 * b + 1]];
+  const aplanar = (M) => M.flat();
+  const densa = (W, x) => W.map((fila) => fila.reduce((acc, w, k) => acc + w * x[k], 0));
+  function softmax(z) {
+    const m = Math.max(...z), e = z.map((v) => Math.exp(v - m)), S = e.reduce((a, b) => a + b, 0);
+    return e.map((v) => v / S);
+  }
+  // Activación máxima posible con píxeles binarios (0/1): suma de los pesos positivos.
+  const maxPosible = (F) => F.flat().reduce((a, w) => a + Math.max(0, w), 0);
+  return { vacia, copiar, tamSalida, rellenar, conv, terminos, relu, pool2, region, aplanar, densa, softmax, maxPosible };
+})();
+
+/* ===================================== DATOS ===================================== */
+const X6 = [
+  [1,0,0,0,0,1],
+  [0,1,0,0,1,0],
+  [0,0,1,1,0,0],
+  [0,0,1,1,0,0],
+  [0,1,0,0,1,0],
+  [1,0,0,0,0,1]
+];
+const O6 = [
+  [0,1,1,1,1,0],
+  [1,0,0,0,0,1],
+  [1,0,0,0,0,1],
+  [1,0,0,0,0,1],
+  [1,0,0,0,0,1],
+  [0,1,1,1,1,0]
+];
+// «X imperfecta»: le falta un píxel del trazo (1, 1) y le sobra uno en el fondo (0, 3).
+const XR6 = Modelo.copiar(X6); XR6[1][1] = 0; XR6[0][3] = 1;
+const IMAGENES = { X: X6, O: O6, XR: XR6 };
+const IMG_LAB = {
+  X: X6, O: O6,
+  V: Array.from({ length: 6 }, () => [0,0,1,0,0,0]),
+  H: Array.from({ length: 6 }, (_, i) => Array(6).fill(i === 2 ? 1 : 0)),
+  D: Array.from({ length: 6 }, (_, i) => Array.from({ length: 6 }, (_, j) => (i === j ? 1 : 0))),
+  vacia: Modelo.vacia(6),
+};
+const FILTROS = {
+  diag:  { nombre: '«\\» diagonal', F: [[1,0,-1],[0,1,0],[-1,0,1]], busca: 'trazos en la diagonal principal («\\»); penaliza la antidiagonal.' },
+  anti:  { nombre: '«/» antidiagonal', F: [[-1,0,1],[0,1,0],[1,0,-1]], busca: 'trazos en la antidiagonal («/»); penaliza la diagonal principal.' },
+  vert:  { nombre: '«|» borde vertical', F: [[1,0,-1],[1,0,-1],[1,0,-1]], busca: 'bordes verticales: encendido a la izquierda y apagado a la derecha (el kernel de la Fig. 2.1.2).' },
+  horiz: { nombre: '«—» borde horizontal', F: [[1,1,1],[0,0,0],[-1,-1,-1]], busca: 'bordes horizontales: encendido arriba y apagado abajo.' },
+  pers:  { nombre: 'personalizado', F: null, busca: 'el patrón que definen sus pesos: un clic en un peso lo cambia (−1 → 0 → 1).' },
+};
+// Capa densa ilustrativa (pesos elegidos a mano, NO entrenados) sobre el vector aplanado [p1, p2, p3, p4]
+// del max-pooling: premia las esquinas de la diagonal principal (X) y penaliza las de la antidiagonal (O).
+const DENSE_W = [[1,-1,-1,1],[-1,1,1,-1]].map((r) => r.map((w) => 0.25 * w));   // filas: X, O
+const REGIONES = [
+  { nombre: 'roja', color: '#DC2626' }, { nombre: 'morada', color: '#7C3AED' },
+  { nombre: 'verde', color: '#15803D' }, { nombre: 'ámbar', color: '#D97706' },
+];
+// Entrada 5×5 de la Figura 2.1.2 del capítulo (solo para el autotest: S(0,0) = −5, S(0,1) = −4).
+const E5 = [[3,0,1,2,7],[1,5,8,9,3],[2,7,2,5,1],[0,1,3,1,7],[4,2,1,6,2]];
+
+/* ===================================== UTILIDADES DE VISTA ===================================== */
+const fmtNum = (v, d = 0) => (Object.is(v, -0) ? 0 : v).toFixed(d).replace('.', ',').replace(/^-/, '−');
+const fmtPct = (v) => fmtNum(v * 100, 1) + ' %';
+const fmtTerm = (v, w) => `${fmtNum(v)}×${w < 0 ? '(' + fmtNum(w) + ')' : fmtNum(w)}`;
+const sumaTexto = (t) => {
+  const nz = t.filter((x) => x.w !== 0);
+  return nz.length ? nz.map((x) => fmtTerm(x.v, x.w)).join(' + ') : 'todos los pesos valen 0';
+};
+// Acepta «−3», «-3», «3», «3,0»; devuelve null si no es un número.
+function leerNumero(txt) {
+  const s = String(txt).trim().replace(/[−–]/g, '-').replace(',', '.');
+  if (!/^[-+]?\d+(\.\d+)?$/.test(s)) return null;
+  return Number(s);
 }
-
-// PASO 3: ReLU
-function step3() {
-  clearPanels();
-  highlightPanel('panel2');
-  const img = IMAGES[currentImage];
-  const featureMap = convolve(img, FILTER);
-  const reluMap = applyRelu(featureMap);
-  
-  renderMatrix('matrix1', featureMap, 4);
-  document.querySelector('#matrix1 .panel-title .icon')?.classList.add('icon-feature');
-  
-  // Mostrar feature map con valores negativos visibles
-  const fmContainer = document.getElementById('matrix1');
-  
-  // Feature map con ReLU aplicado
-  renderMatrix('matrix2', reluMap, 4);
-  document.getElementById('matrix3').innerHTML = '<p style="color:#64748B;text-align:center;">En espera…</p>';
-  
-  setExplanation(
-    'Paso 4: Función de activación ReLU',
-    `ReLU (<i>Rectified Linear Unit</i>) convierte todos los valores <b>negativos en cero</b> y mantiene los positivos. Así introduce <b>no linealidad</b>: sin ella, apilar capas equivaldría a una sola transformación lineal.`,
-    `ReLU(x) = max(0, x)`
-  );
-  
-  // Mostrar cálculo de ejemplo
-  const negCount = featureMap.flat().filter(v => v < 0).length;
-  const posCount = featureMap.flat().filter(v => v > 0).length;
-  document.getElementById('calcDisplay').innerHTML = 
-    `${negCount} valores negativos → 0 | ${posCount} valores positivos → se mantienen`;
+const azar = (n) => Math.floor(Math.random() * n);
+function el(tag, clase, html) {
+  const e = document.createElement(tag);
+  if (clase) e.className = clase;
+  if (html != null) e.innerHTML = html;
+  return e;
 }
+function anunciar(txt) { $('anuncio').textContent = txt; }
 
-// PASO 4: Max Pooling
-function step4() {
-  clearPanels();
-  highlightPanel('panel3');
-  const img = IMAGES[currentImage];
-  const reluMap = applyRelu(convolve(img, FILTER));
-  const pooled = maxPool(reluMap);
-  
-  renderMatrix('matrix1', reluMap, 4);
-  renderMatrix('matrix2', pooled, 2);
-  document.getElementById('matrix3').innerHTML = '<p style="color:#64748B;text-align:center;">En espera…</p>';
-  
-  setExplanation(
-    'Paso 5: <i>Max-pooling</i> (submuestreo)',
-    `Una ventana de 2×2 se desliza <b>sin solapamiento</b> sobre el mapa de características y selecciona el <b>valor máximo</b> de cada región. Esto reduce la dimensionalidad (de 4×4 a 2×2) y aporta cierta <b>invariancia a pequeñas traslaciones</b>.`,
-    `Salida: 4×4 → 2×2 (reducción del 75 %)`
-  );
-  
-  // Mostrar regiones de pooling
-  const cells = document.querySelectorAll('#matrix1 .cell');
-  const colors = ['#ef4444','#3b82f6','#10b981','#fbbf24'];
-  let idx = 0;
-  cells.forEach(c => {
-    const r = parseInt(c.dataset.row);
-    const col = parseInt(c.dataset.col);
-    const region = Math.floor(r/2)*2 + Math.floor(col/2);
-    c.style.outline = `2px solid ${colors[region]}`;
-    c.style.outlineOffset = '-2px';
-  });
-  
-  document.getElementById('calcDisplay').innerHTML = 
-    `4 regiones de 2×2 → 4 valores máximos`;
+// Color de calor: magenta = positivo, azul = negativo, gris claro = cero.
+function calor(v, max = 3) {
+  if (v === 0) return '#FFFFFF';
+  const t = Math.min(Math.abs(v) / max, 1);
+  const mezcla = (a, b) => Math.floor(a * t + b * (1 - t));
+  return v > 0 ? `rgb(${mezcla(237,241)},${mezcla(30,245)},${mezcla(121,249)})`
+               : `rgb(${mezcla(59,241)},${mezcla(130,245)},${mezcla(246,249)})`;
 }
-
-// PASO 5: Clasificación (capa densa ilustrativa + softmax calculada)
-function step5() {
-  clearPanels();
-  highlightPanel('panel3');
-  const img = IMAGES[currentImage];
-  const pooled = maxPool(applyRelu(convolve(img, FILTER)));
-  
-  // Aplanado (flatten)
-  const flat = pooled.flat();
-  renderMatrix('matrix1', pooled, 2);
-  
-  document.getElementById('matrix2').innerHTML = `
-    <div style="text-align:center;">
-      <p style="color:#64748B;font-size:0.85rem;margin-bottom:10px;">Aplanado (<i>flatten</i>) → 4 valores</p>
-      <div style="display:flex;gap:5px;justify-content:center;">
-        ${flat.map(v => `<div style="width:40px;height:40px;background:${getHeatColor(v,4)};border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:600;">${v}</div>`).join('')}
-      </div>
-    </div>
-  `;
-  
-  // Capa densa: z = W · flat ; softmax(z) — valores calculados, no fijos
-  const z = DENSE_W.map(r => r.reduce((acc, w, k) => acc + w*flat[k], 0));
-  const e = z.map(Math.exp), S = e[0] + e[1];
-  const probX = e[0]/S, probO = e[1]/S;
-  const pred = probX >= probO ? 'X' : 'O';
-  
-  document.getElementById('matrix3').innerHTML = `
-    <div style="text-align:center;">
-      <p style="color:#64748B;font-size:0.85rem;margin-bottom:6px;">Capa densa + softmax</p>
-      <div style="font-size:2rem;margin:8px 0;" aria-hidden="true">${pred === 'X' ? '✖️' : '⭕'}</div>
-      <div style="color:#15803D;font-weight:600;">Predicción: ${pred}</div>
-      <p class="dense-note">Pesos ilustrativos, no entrenados:
-        <code>z<sub>X</sub> = 0,25·(p₁ − p₂ − p₃ + p₄)</code> y <code>z<sub>O</sub> = −z<sub>X</sub></code>.
-        Con [${flat.join('; ')}]: z<sub>X</sub> = ${fmtNum(z[0], 2)} y z<sub>O</sub> = ${fmtNum(z[1], 2)}.</p>
-    </div>
-  `;
-  
-  document.getElementById('outputBars').style.display = 'block';
-  setTimeout(() => {
-    document.getElementById('barX').style.width = `${probX*100}%`;
-    document.getElementById('barX').textContent = fmtPct(probX);
-    document.getElementById('barO').style.width = `${probO*100}%`;
-    document.getElementById('barO').textContent = fmtPct(probO);
-  }, 100);
-  
-  setExplanation(
-    'Paso 6: Clasificación final',
-    `El resultado del <i>max-pooling</i> se <b>aplana</b> (<i>flatten</i>) en un vector de 4 valores que alimenta una capa densa. Sus pesos son <b>ilustrativos</b> (elegidos a mano, no entrenados): premian la activación en las esquinas de la diagonal principal, típica de la «X», y penalizan la de la antidiagonal, típica de la «O». La capa final aplica <b>softmax</b> para convertir las dos puntuaciones (<i>logits</i>) en probabilidades que suman 1. Con estos pesos, la imagen «${currentImage}» se clasifica como «${pred}».`,
-    `Softmax: P(X) = e^(z_X) / (e^(z_X) + e^(z_O)) = e^(${fmtNum(z[0], 2)}) / (e^(${fmtNum(z[0], 2)}) + e^(${fmtNum(z[1], 2)})) = ${fmtPct(probX)}`
-  );
-  
-  document.getElementById('calcDisplay').innerHTML = 
-    `✓ Imagen «${currentImage}» → predicción «${pred}» con ${fmtPct(Math.max(probX, probO))} de probabilidad`;
-}
-
-const steps = [step0, step1, step2, step3, step4, step5];
-
-function goToStep(n) {
-  if (convAnimation) clearTimeout(convAnimation);
-  currentStep = Math.max(0, Math.min(n, steps.length - 1));
-  updateStepIndicators();
-  steps[currentStep]();
-  document.getElementById('prevBtn').disabled = currentStep === 0;
-  document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
-}
-
-document.getElementById('nextBtn').addEventListener('click', () => goToStep(currentStep + 1));
-document.getElementById('prevBtn').addEventListener('click', () => goToStep(currentStep - 1));
-document.getElementById('resetBtn').addEventListener('click', () => {
-  stopAuto();
-  goToStep(0);
-});
-
-document.getElementById('autoBtn').addEventListener('click', () => {
-  if (autoInterval) {
-    stopAuto();
+function estiloCelda(c, v, tipo, escala) {
+  if (v === null || v === '') { c.classList.add('pendiente'); return; }
+  if (tipo === 'imagen') {
+    c.style.background = v ? '#334155' : '#E2E8F0'; c.style.color = v ? '#FFFFFF' : '#64748B';
+  } else if (tipo === 'filtro') {
+    c.style.background = '#ECFEFF'; c.style.color = '#0E7490'; c.style.boxShadow = 'inset 0 0 0 1px #67E8F9';
+  } else if (tipo === 'patron') {
+    c.style.background = v > 0 ? '#334155' : v < 0 ? '#FFFFFF' : '#E2E8F0';
+    c.style.color = v > 0 ? '#FFFFFF' : v < 0 ? '#B91C1C' : '#64748B';
+    if (v < 0) c.style.boxShadow = 'inset 0 0 0 1px #FCA5A5';
   } else {
-    document.getElementById('autoBtn').textContent = '⏸ Pausa';
-    if (currentStep === steps.length - 1) goToStep(0);
-    autoInterval = setInterval(() => {
-      if (currentStep < steps.length - 1) goToStep(currentStep + 1);
-      else stopAuto();
-    }, 4500);
+    const max = escala || 3;
+    c.style.background = calor(v, max);
+    c.style.color = Math.abs(v) / max >= 0.6 ? '#FFFFFF' : '#334155';
   }
-});
+}
+function textoCelda(v, tipo) {
+  if (v === null || v === '') return '';
+  if (tipo === 'patron') return v > 0 ? '' : v < 0 ? '✕' : '·';
+  return fmtNum(v);
+}
+function etiquetaPatron(v) { return v > 0 ? 'encendido suma' : v < 0 ? 'encendido resta' : 'indiferente'; }
 
-function stopAuto() {
-  clearInterval(autoInterval);
-  autoInterval = null;
-  document.getElementById('autoBtn').textContent = '▶ Auto';
+/*
+  Crea una matriz de celdas. Opciones:
+    tipo ('imagen' | 'mapa' | 'filtro' | 'patron'), escala (máximo |v| para el color del mapa),
+    chica, frac (fracción del ancho del panel que puede ocupar), max (lado máximo de la celda en px),
+    vacia(i,j) → celda aún sin calcular, oculta(i,j) → «?» del modo práctica,
+    clases(i,j) → clases extra, estilo(celda,i,j), click(i,j), hover(i,j), etiqueta(i,j,v,oculta), aria.
+*/
+function matriz(M, o = {}) {
+  const g = el('div', 'matrix' + (o.chica ? ' chica' : ''));
+  const cols = M[0].length;
+  g.dataset.n = cols; g.dataset.frac = o.frac || 1; g.dataset.max = o.max || (o.chica ? 30 : 42);
+  g.style.gridTemplateColumns = `repeat(${cols}, var(--cell))`;
+  const interactiva = !!(o.click || o.hover);
+  g.setAttribute('role', interactiva ? 'group' : 'img');
+  g.setAttribute('aria-label', o.aria || `Matriz de ${M.length}×${cols}`);
+  M.forEach((fila, i) => fila.forEach((v, j) => {
+    const c = el(interactiva ? 'button' : 'div', 'cell');
+    if (interactiva) c.type = 'button';
+    c.dataset.row = i; c.dataset.col = j;
+    const vacia = o.vacia && o.vacia(i, j), oculta = !vacia && o.oculta && o.oculta(i, j);
+    estiloCelda(c, vacia ? null : v, o.tipo, o.escala);
+    c.textContent = vacia ? '' : oculta ? '?' : textoCelda(v, o.tipo);
+    if (oculta) c.classList.add('oculta');
+    if (o.clases) o.clases(i, j).forEach((cl) => cl && c.classList.add(cl));
+    if (o.estilo) o.estilo(c, i, j);
+    if (o.click) c.addEventListener('click', () => o.click(i, j));
+    if (o.hover) { c.addEventListener('mouseenter', () => o.hover(i, j)); c.addEventListener('focus', () => o.hover(i, j)); }
+    if (interactiva) c.setAttribute('aria-label', o.etiqueta ? o.etiqueta(i, j, v, oculta) : `Fila ${i}, columna ${j}: ${oculta ? 'oculto' : textoCelda(v, o.tipo)}`);
+    g.appendChild(c);
+  }));
+  return g;
 }
 
-document.querySelectorAll('.img-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.img-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentImage = btn.dataset.img;
-    stopAuto();
-    goToStep(0);
+// Ajusta el lado de las celdas al ancho real de su panel (el mismo código sirve en escritorio, en el iframe y en el celular).
+function ajustarCeldas(raiz = document) {
+  raiz.querySelectorAll('.matrix').forEach((g) => {
+    const cuerpo = g.closest('.panel-cuerpo') || g.parentElement;
+    const ancho = cuerpo ? cuerpo.clientWidth : 0;
+    if (!ancho) return;
+    const n = +g.dataset.n, frac = +g.dataset.frac, max = +g.dataset.max;
+    const chica = g.classList.contains('chica');
+    const pad = chica ? 10 : 16, gap = chica ? 2 : 3;
+    const c = Math.max(18, Math.min(max, Math.floor((ancho * frac - pad - gap * (n - 1) - 4) / n)));
+    g.style.setProperty('--cell', c + 'px');
   });
-});
+}
 
-document.querySelectorAll('.step-indicator').forEach(ind => {
-  ind.addEventListener('click', () => {
-    stopAuto();
-    goToStep(parseInt(ind.dataset.step));
+// Pinta paneles en una etapa; paneles = [{rol, titulo, cuerpo: Node | Node[], pie, foco, clave}].
+function pintarPaneles(cont, paneles, conFlechas) {
+  cont.innerHTML = '';
+  cont.classList.toggle('solo', paneles.length === 1);
+  paneles.forEach((p, k) => {
+    if (k && conFlechas) { const f = el('div', 'flecha'); f.setAttribute('aria-hidden', 'true'); cont.appendChild(f); }
+    const s = el('section', 'panel' + (p.foco ? ' foco' : ''));
+    if (p.clave) s.dataset.p = p.clave;
+    s.setAttribute('aria-label', p.titulo.replace(/<[^>]+>/g, ''));
+    s.appendChild(el('div', 'panel-rol', p.rol));
+    s.appendChild(el('div', 'panel-title', p.titulo));
+    const cuerpo = el('div', 'panel-cuerpo');
+    [].concat(p.cuerpo).forEach((n) => n && cuerpo.appendChild(n));
+    s.appendChild(cuerpo);
+    if (p.pie) s.appendChild(el('div', 'calc', p.pie));
+    cont.appendChild(s);
   });
-});
+}
 
-// Inicializar
-goToStep(0);
+/* ===================================== VISTA RECORRIDO ===================================== */
+const R = {
+  imagen: 'X', dibujo: null, paso: 0,
+  conv: { pos: 0, max: 0, tocando: false, timer: null, vel: 700 },
+  auto: { activo: false, timer: null, desde: 0 },
+  practica: { activa: false, aciertos: 0, intentos: 0, pregunta: null },
+};
+const PASOS = [
+  { nombre: 'Entrada', dim: '6×6' }, { nombre: 'Filtro', dim: '3×3' }, { nombre: 'Convolución', dim: '4×4' },
+  { nombre: 'ReLU', dim: '4×4' }, { nombre: '<i>Max-pooling</i>', dim: '2×2' }, { nombre: 'Clasificación', dim: '4 → 2' },
+];
+const LECTURA = [4000, 5000, 2500, 5000, 5500, 0];   // ms de lectura por paso en modo Auto (el barrido cuenta aparte)
 
-// Auto-ajuste de altura: informa al documento contenedor del alto real (varía por paso y por ancho).
-let __phT;
-function __postHeight() {
-  clearTimeout(__phT);
-  __phT = setTimeout(() => {
-    try {
-      const h = Math.ceil(document.documentElement.getBoundingClientRect().height);
-      parent.postMessage({ type: 'embed-tool-height', id: 'cnn-anatomia-frame', height: h }, '*');
-    } catch (e) {}
+const imgActual = () => (R.imagen === 'D' ? R.dibujo : IMAGENES[R.imagen]);
+function calculos() {
+  const img = imgActual(), F = FILTROS.diag.F;
+  const mapa = Modelo.conv(img, F), rel = Modelo.relu(mapa), pool = Modelo.pool2(rel);
+  const flat = Modelo.aplanar(pool.out), z = Modelo.densa(DENSE_W, flat), p = Modelo.softmax(z);
+  return { img, F, mapa, rel, pool, flat, z, p, pred: p[0] >= p[1] ? 'X' : 'O' };
+}
+const preguntaPendiente = () => { const q = R.practica.pregunta; return !!(q && !q.respondida); };
+const regionDe = (i, j) => Math.floor(i / 2) * 2 + Math.floor(j / 2);
+
+function construirPasos() {
+  const cont = $('pasos');
+  PASOS.forEach((p, k) => {
+    const b = el('button', 'step-indicator');
+    b.type = 'button'; b.dataset.step = k;
+    b.setAttribute('aria-label', `Paso ${k + 1}: ${p.nombre.replace(/<[^>]+>/g, '')}, ${p.dim}`);
+    b.innerHTML = `<span class="step-dot">${k + 1}</span><span class="step-label">${p.nombre}</span><span class="step-dim">${p.dim}</span>`;
+    b.addEventListener('click', () => { autoParar(); irAPaso(k); });
+    cont.appendChild(b);
+  });
+}
+
+function svgRelu(mapa) {
+  const xs = (x) => 20 + (x + 3) * (170 / 6), ys = (y) => 125 - y * (95 / 3);
+  const valores = [...new Set(mapa.flat())].sort((a, b) => a - b);
+  const puntos = valores.map((v) => {
+    const y = Math.max(0, v);
+    return `<circle cx="${xs(v)}" cy="${ys(y)}" r="6" fill="${v < 0 ? '#3B82F6' : v > 0 ? '#ED1E79' : '#94A3B8'}" stroke="#fff" stroke-width="1.5"/>`
+      + `<text x="${xs(v)}" y="${v < 0 ? ys(0) - 11 : ys(y) - 11}" text-anchor="middle" font-size="13" fill="#334155" font-weight="700">${fmtNum(v)}</text>`;
+  }).join('');
+  return `<svg class="diagrama" viewBox="0 0 210 150" role="img" aria-label="Gráfica de ReLU: los valores negativos del mapa se proyectan en 0 y los positivos se mantienen.">
+    <line x1="14" y1="${ys(0)}" x2="200" y2="${ys(0)}" stroke="#94A3B8" stroke-width="1.5"/>
+    <line x1="${xs(0)}" y1="18" x2="${xs(0)}" y2="140" stroke="#94A3B8" stroke-width="1.5"/>
+    <polyline points="${xs(-3)},${ys(0)} ${xs(0)},${ys(0)} ${xs(3)},${ys(3)}" fill="none" stroke="#3D008D" stroke-width="3"/>
+    <text x="198" y="${ys(0) + 16}" text-anchor="end" font-size="13" fill="#64748B">x</text>
+    <text x="${xs(0) + 6}" y="26" font-size="13" fill="#64748B">max(0, x)</text>
+    ${puntos}
+  </svg>`;
+}
+
+function svgDensa(flat, z) {
+  const yin = [24, 68, 112, 156], yout = [52, 124], xin = 46, xout = 188;
+  let lineas = '';
+  DENSE_W.forEach((fila, o) => fila.forEach((w, k) => {
+    const col = w > 0 ? '#ED1E79' : '#1D4ED8', op = flat[k] > 0 ? 0.9 : 0.15;
+    lineas += `<line x1="${xin + 17}" y1="${yin[k]}" x2="${xout - 21}" y2="${yout[o]}" stroke="${col}" stroke-width="2.6" opacity="${op}"/>`;
+  }));
+  const entradas = flat.map((v, k) => `<circle cx="${xin}" cy="${yin[k]}" r="17" fill="${calor(v)}" stroke="#94A3B8"/>
+      <text x="${xin}" y="${yin[k] + 5}" text-anchor="middle" font-size="15" font-weight="700" fill="${v >= 2 ? '#fff' : '#334155'}">${fmtNum(v)}</text>
+      <text x="${xin - 23}" y="${yin[k] + 5}" text-anchor="end" font-size="14" fill="#64748B">p${k + 1}</text>`).join('');
+  const salidas = ['X', 'O'].map((lab, o) => `<circle cx="${xout}" cy="${yout[o]}" r="21" fill="#F5F0FA" stroke="#3D008D" stroke-width="2"/>
+      <text x="${xout}" y="${yout[o] + 6}" text-anchor="middle" font-size="16" font-weight="700" fill="${o ? '#BE185D' : '#1D4ED8'}">${lab}</text>
+      <text x="${xout}" y="${yout[o] + 41}" text-anchor="middle" font-size="14" fill="#334155">z = ${fmtNum(z[o], 2)}</text>`).join('');
+  return `<svg class="diagrama" viewBox="0 0 228 180" role="img" aria-label="Capa densa: cuatro entradas conectadas con las salidas X y O; líneas magenta para pesos positivos y azules para pesos negativos.">
+    ${lineas}${entradas}${salidas}</svg>`;
+}
+
+function panelesRecorrido(c) {
+  const q = R.practica.pregunta, pend = preguntaPendiente();
+  const imgPanel = (titulo, extra = {}) => ({
+    rol: 'Entra', titulo,
+    cuerpo: matriz(c.img, Object.assign({ tipo: 'imagen', aria: 'Imagen de entrada de 6×6 píxeles' }, extra)),
+  });
+  switch (R.paso) {
+    case 0: {
+      const editable = R.imagen === 'D';
+      return [{
+        rol: 'Entrada', titulo: 'Imagen de entrada (6×6)', foco: true,
+        cuerpo: matriz(c.img, {
+          tipo: 'imagen', aria: 'Imagen de entrada de 6×6 píxeles',
+          click: editable ? (i, j) => { R.dibujo[i][j] = 1 - R.dibujo[i][j]; pintarRecorrido(); } : null,
+          etiqueta: (i, j, v) => `Píxel fila ${i}, columna ${j}: ${v ? 'encendido' : 'apagado'}`,
+        }),
+        pie: editable ? 'Un clic (o un toque) en un píxel lo enciende o lo apaga.' : '1 = trazo de la figura · 0 = fondo',
+      }];
+    }
+    case 1: {
+      const F = c.F;
+      return [
+        imgPanel('Imagen de entrada (6×6)'),
+        { rol: 'Operación', titulo: 'Filtro «\\» (3×3)', foco: true, cuerpo: matriz(F, { tipo: 'filtro', aria: 'Filtro de 3×3' }), pie: '9 pesos + 1 sesgo (aquí, b = 0)' },
+        { rol: 'Qué busca', titulo: 'Patrón que el filtro premia', cuerpo: [
+            matriz(F, { tipo: 'patron', max: 34, aria: 'Patrón del filtro: diagonal principal encendida, esquinas de la antidiagonal apagadas' }),
+          ], pie: '<span class="nota">■ encendido suma · ✕ encendido resta · · indiferente</span>' },
+      ];
+    }
+    case 2: {
+      const pos = R.conv.pos, i = Math.floor(pos / 4), j = pos % 4;
+      const preguntaAqui = pend && q.tipo === 'conv' && q.pos === pos;
+      const t = Modelo.terminos(c.img, c.F, i, j);
+      const ventana = [0, 1, 2].map((m) => [0, 1, 2].map((n) => c.img[i + m][j + n]));
+      const prods = [0, 1, 2].map((m) => [0, 1, 2].map((n) => t[m * 3 + n].p));
+      const ops = el('div', 'fila-ops');
+      ops.append(matriz(ventana, { tipo: 'imagen', chica: true, frac: 0.45, aria: 'Ventana de 3×3' }), el('span', 'signo', '⊙'),
+                 matriz(c.F, { tipo: 'filtro', chica: true, frac: 0.45, aria: 'Filtro de 3×3' }));
+      const sumaHTML = preguntaAqui ? 'Σ = <b>?</b>' : `Σ = ${sumaTexto(t)} = <b>${fmtNum(c.mapa[i][j])}</b>`;
+      const visible = (a, b) => a * 4 + b <= R.conv.max;
+      return [
+        { rol: 'Entra', titulo: `Imagen con la ventana en (${i}, ${j})`, cuerpo: matriz(c.img, {
+            tipo: 'imagen', aria: `Imagen con la ventana de 3×3 en la posición (${i}, ${j})`,
+            clases: (a, b) => [a >= i && a < i + 3 && b >= j && b < j + 3 ? 'ventana' : ''] }) },
+        { rol: 'Operación', titulo: 'Ventana ⊙ filtro', foco: true, cuerpo: [
+            ops, el('div', 'mini-rotulo', '= 9 productos'),
+            matriz(prods, { tipo: 'mapa', escala: 1, chica: true, frac: 0.5, oculta: () => preguntaAqui, aria: 'Productos elemento a elemento' }),
+          ], pie: sumaHTML },
+        { rol: 'Sale', titulo: 'Mapa de características (4×4)', cuerpo: matriz(c.mapa, {
+            tipo: 'mapa', aria: 'Mapa de características de 4×4',
+            vacia: (a, b) => !visible(a, b),
+            oculta: (a, b) => pend && q.tipo === 'conv' && a * 4 + b === q.pos,
+            clases: (a, b) => [a === i && b === j ? 'actual' : ''] }),
+          pie: `Posición ${pos + 1} de 16 · ${6} − 3 + 1 = 4 posiciones por fila` },
+      ];
+    }
+    case 3: {
+      const neg = c.mapa.flat().filter((v) => v < 0).length, posi = c.mapa.flat().filter((v) => v > 0).length;
+      return [
+        { rol: 'Entra', titulo: 'Mapa antes de ReLU (4×4)', cuerpo: matriz(c.mapa, { tipo: 'mapa', aria: 'Mapa de características antes de ReLU' }) },
+        { rol: 'Operación', titulo: 'ReLU: max(0, x)', foco: true, cuerpo: el('div', null, svgRelu(c.mapa)) },
+        { rol: 'Sale', titulo: 'Mapa después de ReLU (4×4)', cuerpo: matriz(c.rel, {
+            tipo: 'mapa', aria: 'Mapa de características después de ReLU',
+            oculta: (a, b) => pend && q.tipo === 'relu' && q.i === a && q.j === b,
+            clases: (a, b) => [c.mapa[a][b] < 0 ? 'anulada' : ''] }),
+          pie: `${neg} negativos → 0 (borde punteado) · ${posi} positivos se mantienen` },
+      ];
+    }
+    case 4: {
+      const lista = el('ul', 'lista-regiones');
+      for (let a = 0; a < 2; a++) for (let b = 0; b < 2; b++) {
+        const r = REGIONES[a * 2 + b], vals = Modelo.region(c.rel, a, b);
+        const oculto = pend && q.tipo === 'pool' && q.a === a && q.b === b;
+        lista.appendChild(el('li', null, `<span class="muestra" style="background:${r.color}"></span>máx(${vals.map((v) => fmtNum(v)).join(', ')}) = ${oculto ? '<b>?</b>' : '<b>' + fmtNum(c.pool.out[a][b]) + '</b>'}`));
+      }
+      const estiloRegion = (cel, a, b) => {
+        const r = REGIONES[regionDe(a, b)].color;
+        cel.style.outline = `2px solid ${r}`; cel.style.outlineOffset = '-2px'; cel.style.setProperty('--reg', r);
+        const [ma, mb] = c.pool.arg[Math.floor(a / 2)][Math.floor(b / 2)];
+        if (ma === a && mb === b) { cel.classList.add('maximo'); cel.style.boxShadow = `0 0 0 3px ${r}`; }
+      };
+      return [
+        { rol: 'Entra', titulo: 'Mapa tras ReLU, en 4 regiones de 2×2', cuerpo: matriz(c.rel, { tipo: 'mapa', estilo: estiloRegion, aria: 'Mapa tras ReLU dividido en cuatro regiones de 2×2; la estrella marca el máximo de cada una' }) },
+        { rol: 'Operación', titulo: 'Máximo de cada región', foco: true, cuerpo: lista },
+        { rol: 'Sale', titulo: 'Mapa reducido (2×2)', cuerpo: matriz(c.pool.out, {
+            tipo: 'mapa', aria: 'Mapa reducido de 2×2',
+            oculta: (a, b) => pend && q.tipo === 'pool' && q.a === a && q.b === b,
+            estilo: (cel, a, b) => { const r = REGIONES[a * 2 + b].color; cel.style.boxShadow = `0 0 0 3px ${r}`; } }),
+          pie: '4×4 → 2×2 · sin parámetros que aprender' },
+      ];
+    }
+    default: {
+      const vec = el('div', 'vector');
+      c.flat.forEach((v, k) => {
+        const it = el('div', 'item');
+        it.append(matriz([[v]], { tipo: 'mapa', chica: true, max: 36, aria: `p${k + 1} = ${fmtNum(v)}` }), el('span', null, `p${k + 1}`));
+        vec.appendChild(it);
+      });
+      const barras = el('div', 'output-bars', `
+        <div class="output-bar"><div class="output-label" style="color:#1D4ED8;">X</div><div class="bar-track"><div class="bar-fill x-bar" id="barX" style="width:0%;">0 %</div></div></div>
+        <div class="output-bar"><div class="output-label" style="color:#BE185D;">O</div><div class="bar-track"><div class="bar-fill o-bar" id="barO" style="width:0%;">0 %</div></div></div>`);
+      return [
+        { rol: 'Entra', titulo: 'Vector aplanado (4 valores)', cuerpo: [
+            matriz(c.pool.out, { tipo: 'mapa', chica: true, max: 36, aria: 'Mapa reducido de 2×2' }),
+            el('div', 'mini-rotulo', '↓ aplanado (<i>flatten</i>)'), vec ] },
+        { rol: 'Operación', titulo: 'Capa densa (pesos ilustrativos)', foco: true, cuerpo: el('div', null, svgDensa(c.flat, c.z)),
+          pie: `z<sub>X</sub> = 0,25·(p1 − p2 − p3 + p4) = <b>${fmtNum(c.z[0], 2)}</b> · z<sub>O</sub> = −z<sub>X</sub> = <b>${fmtNum(c.z[1], 2)}</b>` },
+        { rol: 'Sale', titulo: 'Softmax → probabilidades', cuerpo: [barras, el('div', 'prediccion', `Predicción: «${c.pred}»`)],
+          pie: '<span class="nota">Líneas magenta: peso +0,25 · azules: −0,25 · tenues: entrada 0, que no aporta</span>' },
+      ];
+    }
+  }
+}
+
+function explicacionRecorrido(c) {
+  const extraImg = {
+    XR: ' La «X imperfecta» tiene un píxel de menos en el trazo y uno de más en el fondo: sirve para ver si la red tolera pequeñas imperfecciones.',
+    D: ' En el dibujo propio, un clic (o un toque) sobre un píxel lo enciende o lo apaga; los pasos siguientes usan el dibujo.',
+  }[R.imagen] || '';
+  switch (R.paso) {
+    case 0: return ['Paso 1: Imagen de entrada',
+      `La imagen se representa como una matriz de 6×6 píxeles. Cada celda contiene un valor: <b>1 (trazo de la figura)</b> o <b>0 (fondo)</b>. Una imagen real a color tendría 3 canales (RGB) y valores de 0 a 255.${extraImg}`,
+      'Entrada: matriz 6×6 → 36 píxeles'];
+    case 1: return ['Paso 2: El filtro (<i>kernel</i> de 3×3)',
+      'El <b>filtro</b> es una matriz pequeña cuyos valores la red <i>aprende</i> durante el entrenamiento. Responde con fuerza cuando la ventana de la imagen se parece a su patrón: píxeles encendidos donde el filtro vale +1 y apagados donde vale −1. Este filtro premia los trazos de la <b>diagonal principal</b> («\\») y penaliza los de la antidiagonal, como una «célula simple» del córtex visual sensible a una orientación.',
+      'Filtro: 3×3 = 9 pesos + 1 sesgo (frente a 36×N pesos de una capa densa con N neuronas)'];
+    case 2: return ['Paso 3: Convolución (deslizamiento del filtro)',
+      'El filtro se desliza sobre la imagen, de izquierda a derecha y de arriba abajo. En cada posición se multiplica cada píxel de la ventana por el peso del filtro en la misma posición (producto elemento a elemento, ⊙) y se suman los 9 productos: ese número es una celda del <b>mapa de características</b> (<i>feature map</i>). Una ventana parecida al patrón del filtro da un valor alto; una opuesta, un valor negativo. Los controles del barrido permiten detenerlo y avanzar posición por posición.',
+      'Mapa[i, j] = Σ imagen[i+m, j+n] × filtro[m, n] + b   (aquí, b = 0)'];
+    case 3: return ['Paso 4: Función de activación ReLU',
+      'ReLU (<i>Rectified Linear Unit</i>) convierte todos los valores <b>negativos en cero</b> y mantiene los positivos; en el mapa de salida, el borde punteado marca las celdas que eran negativas. Así introduce <b>no linealidad</b>: sin ella, apilar capas equivaldría a una sola transformación lineal.',
+      'ReLU(x) = max(0, x)'];
+    case 4: return ['Paso 5: <i>Max-pooling</i> (submuestreo)',
+      'Una ventana de 2×2 recorre el mapa <b>sin solapamiento</b> y conserva el <b>valor máximo</b> de cada región (marcado con ★); cada color une una región con su celda del mapa reducido. Esto reduce la dimensión (de 4×4 a 2×2) y aporta cierta <b>invariancia a pequeñas traslaciones</b>: importa que el rasgo aparezca en la región, no su píxel exacto.',
+      'Salida: 4×4 → 2×2 (reducción del 75 %), sin parámetros que aprender'];
+    default: {
+      let txt = `El mapa reducido se <b>aplana</b> (<i>flatten</i>) en un vector de 4 valores que alimenta una capa densa. Sus pesos son <b>ilustrativos</b> (elegidos a mano, no entrenados): premian la activación en las esquinas de la diagonal principal (p1 y p4), típica de la «X», y penalizan la de la antidiagonal (p2 y p3), típica de la «O». La capa final aplica <b>softmax</b> para convertir las dos puntuaciones (<i>logits</i>) en probabilidades que suman 1. Con estos pesos, la imagen se clasifica como «${c.pred}».`;
+      if (R.imagen === 'XR') txt += ' Pese a sus imperfecciones, la «X imperfecta» se sigue reconociendo, con algo menos de confianza que la «X» completa: el <i>max-pooling</i> resume cada región y absorbe parte del ruido.';
+      if (R.imagen === 'D') txt += ' Conviene notar que esta red solo conoce dos clases: ante cualquier dibujo —aunque no sea ni X ni O— la softmax reparte el 100 % entre «X» y «O»; no existe la respuesta «ninguna».';
+      return ['Paso 6: Clasificación final', txt,
+        `Softmax: P(X) = e^(z_X) / (e^(z_X) + e^(z_O)) = e^(${fmtNum(c.z[0], 2)}) / (e^(${fmtNum(c.z[0], 2)}) + e^(${fmtNum(c.z[1], 2)})) = ${fmtPct(c.p[0])}`];
+    }
+  }
+}
+
+/* --- Modo práctica (recorrido) --- */
+function nuevaPreguntaRecorrido() {
+  const P = R.practica; P.pregunta = null;
+  if (!P.activa) return;
+  const c = calculos();
+  if (R.paso === 2) {
+    const pos = 1 + azar(15);
+    P.pregunta = { tipo: 'conv', pos, i: Math.floor(pos / 4), j: pos % 4, resp: c.mapa[Math.floor(pos / 4)][pos % 4] };
+  } else if (R.paso === 3) {
+    const negs = [], otras = [];
+    c.mapa.forEach((f, i) => f.forEach((v, j) => (v < 0 ? negs : otras).push([i, j])));
+    const fuente = negs.length && (Math.random() < 0.6 || !otras.length) ? negs : otras;
+    const [i, j] = fuente[azar(fuente.length)];
+    P.pregunta = { tipo: 'relu', i, j, antes: c.mapa[i][j], resp: c.rel[i][j] };
+  } else if (R.paso === 4) {
+    const a = azar(2), b = azar(2);
+    P.pregunta = { tipo: 'pool', a, b, vals: Modelo.region(c.rel, a, b), resp: c.pool.out[a][b] };
+  }
+}
+function preguntaVisibleRecorrido() {
+  const q = R.practica.pregunta;
+  if (!R.practica.activa || !q) return false;
+  return q.tipo !== 'conv' || R.conv.pos === q.pos;
+}
+function pintarPracticaRecorrido() {
+  const caja = $('rec-practica-caja'), q = R.practica.pregunta, P = R.practica;
+  if (!preguntaVisibleRecorrido()) {
+    const aviso = P.activa && q && q.tipo === 'conv' && !q.respondida ? `El barrido se detendrá en la posición (${q.i}, ${q.j}) para predecir su valor.` : null;
+    caja.hidden = !aviso;
+    if (aviso) caja.innerHTML = `<div class="practica-titulo">✎ Modo práctica</div><p>${aviso}</p>`;
+    return;
+  }
+  caja.hidden = false;
+  const enunciado = {
+    conv: () => `¿Cuánto vale el mapa de características en (${q.i}, ${q.j})? Se multiplica cada píxel de la ventana por el peso del filtro en la misma posición y se suman los productos.`,
+    relu: () => `La celda (${q.i}, ${q.j}) valía <b>${fmtNum(q.antes)}</b> antes de la ReLU. ¿Cuánto vale después?`,
+    pool: () => `¿Qué valor conserva el <i>max-pooling</i> de la región ${REGIONES[q.a * 2 + q.b].nombre}?`,
+  }[q.tipo]();
+  caja.innerHTML = `<div class="practica-titulo">✎ Modo práctica · antes de ver el resultado</div><p>${enunciado}</p>
+    <div class="practica-fila">
+      <label for="rec-resp" class="sr">Respuesta</label>
+      <input type="text" id="rec-resp" inputmode="numeric" autocomplete="off" ${q.respondida ? 'disabled' : ''} placeholder="valor">
+      <button type="button" class="chip" id="rec-comprobar" ${q.respondida ? 'disabled' : ''}>Comprobar</button>
+      <span class="contador">Aciertos: ${P.aciertos} de ${P.intentos}</span>
+    </div>
+    <div class="fb ${q.respondida ? (q.acierto ? 'fb-ok' : 'fb-no') : ''}" id="rec-fb">${q.mensaje || ''}</div>`;
+  const inp = $('rec-resp');
+  if (q.respondida) inp.value = q.dada;
+  $('rec-comprobar').addEventListener('click', comprobarRecorrido);
+  inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') comprobarRecorrido(); });
+}
+function comprobarRecorrido() {
+  const q = R.practica.pregunta; if (!q || q.respondida) return;
+  const txt = $('rec-resp').value, v = leerNumero(txt);
+  if (v === null) { const fb = $('rec-fb'); fb.className = 'fb fb-no'; fb.textContent = 'Se espera un número entero, por ejemplo −1 o 3.'; return; }
+  const c = calculos();
+  q.respondida = true; q.dada = txt; q.acierto = v === q.resp;
+  R.practica.intentos++; if (q.acierto) R.practica.aciertos++;
+  const inicio = q.acierto ? '✓ Correcto' : `✗ No es ${fmtNum(v)}`;
+  if (q.tipo === 'conv') q.mensaje = `${inicio}: Σ = ${sumaTexto(Modelo.terminos(c.img, c.F, q.i, q.j))} = <b>${fmtNum(q.resp)}</b>. El barrido continúa con ⏸/▶.`;
+  if (q.tipo === 'relu') q.mensaje = `${inicio}: max(0, ${fmtNum(q.antes)}) = <b>${fmtNum(q.resp)}</b>; ${q.antes < 0 ? 'los negativos pasan a 0.' : 'los valores positivos (y el cero) se mantienen.'}`;
+  if (q.tipo === 'pool') q.mensaje = `${inicio}: máx(${q.vals.map((x) => fmtNum(x)).join(', ')}) = <b>${fmtNum(q.resp)}</b>.`;
+  anunciar(q.mensaje.replace(/<[^>]+>/g, ''));
+  pintarRecorrido();
+  const b = $('cv-play'); if (R.paso === 2 && b) b.focus();
+}
+
+/* --- Barrido de la convolución --- */
+function convIniciar() {
+  const C = R.conv; clearTimeout(C.timer);
+  C.pos = 0; C.max = 0; C.tocando = !reduceMotion();
+  nuevaPreguntaRecorrido();
+  if (!C.tocando) {                       // movimiento reducido: mapa completo, sin animación
+    C.max = 15;
+    const q = R.practica.pregunta; if (q && q.tipo === 'conv') C.pos = q.pos;
+  }
+  pintarRecorrido();
+  if (C.tocando) C.timer = setTimeout(convTick, C.vel);
+}
+function convDebeDetenerse() { const q = R.practica.pregunta; return preguntaPendiente() && q.tipo === 'conv' && R.conv.pos === q.pos; }
+function convTick() {
+  const C = R.conv; if (!C.tocando || R.paso !== 2) return;
+  if (convDebeDetenerse() || C.pos >= 15) { C.tocando = false; pintarRecorrido(); return; }
+  C.pos++; C.max = Math.max(C.max, C.pos);
+  if (C.pos >= 15 || convDebeDetenerse()) C.tocando = false;
+  pintarRecorrido();
+  if (C.tocando) C.timer = setTimeout(convTick, C.vel);
+}
+function convIr(n) {
+  const C = R.conv; clearTimeout(C.timer); C.tocando = false;
+  const q = R.practica.pregunta;
+  let destino = Math.max(0, Math.min(15, n));
+  if (preguntaPendiente() && q.tipo === 'conv' && destino > q.pos) destino = q.pos;   // no se adelanta a la pregunta
+  C.pos = destino; C.max = Math.max(C.max, destino);
+  pintarRecorrido();
+  const i = Math.floor(destino / 4), j = destino % 4;
+  anunciar(convDebeDetenerse() ? `Posición (${i}, ${j}): valor por predecir.` : `Posición (${i}, ${j}): valor ${fmtNum(calculos().mapa[i][j])}.`);
+}
+function convAlternar() {
+  const C = R.conv;
+  if (C.tocando) { C.tocando = false; clearTimeout(C.timer); pintarRecorrido(); return; }
+  if (convDebeDetenerse()) return;
+  if (C.pos >= 15) { C.pos = 0; }
+  C.tocando = true; pintarRecorrido(); C.timer = setTimeout(convTick, C.vel);
+}
+function actualizarBarrido() {
+  const C = R.conv, bloqueada = convDebeDetenerse();
+  $('barrido').hidden = R.paso !== 2;
+  $('cv-play').textContent = C.tocando ? '⏸' : '▶';
+  $('cv-play').setAttribute('aria-label', C.tocando ? 'Pausar el barrido' : 'Reproducir el barrido');
+  $('cv-play').disabled = bloqueada;
+  $('cv-inicio').disabled = $('cv-ant').disabled = C.pos === 0;
+  $('cv-sig').disabled = $('cv-fin').disabled = C.pos >= 15 || bloqueada;
+}
+
+/* --- Modo Auto: avanza cuando el paso terminó (barrido completo, pregunta respondida) y pasó el tiempo de lectura --- */
+function autoTick() {
+  if (!R.auto.activo) return;
+  const C = R.conv;
+  let listo = !preguntaPendiente();
+  if (R.paso === 2) {
+    if (C.max < 15) {
+      listo = false;
+      if (!C.tocando && !convDebeDetenerse() && !reduceMotion()) convAlternar();   // reanuda tras responder
+    }
+  }
+  if (!listo) R.auto.desde = performance.now();
+  else if (performance.now() - R.auto.desde >= LECTURA[R.paso]) {
+    if (R.paso >= PASOS.length - 1) { autoParar(); return; }
+    irAPaso(R.paso + 1, true);
+    R.auto.desde = performance.now();
+    if (R.paso >= PASOS.length - 1) { autoParar(); return; }
+  }
+  R.auto.timer = setTimeout(autoTick, 250);
+}
+function autoIniciar() {
+  R.auto.activo = true; $('autoBtn').textContent = '⏸ Pausa';
+  if (R.paso === PASOS.length - 1) irAPaso(0, true);
+  R.auto.desde = performance.now();
+  autoTick();
+}
+function autoParar() {
+  R.auto.activo = false; clearTimeout(R.auto.timer);
+  $('autoBtn').textContent = '▶ Auto';
+}
+
+function irAPaso(n, desdeAuto = false) {
+  if (!desdeAuto) autoParar();
+  clearTimeout(R.conv.timer); R.conv.tocando = false;
+  R.paso = Math.max(0, Math.min(n, PASOS.length - 1));
+  if (R.paso === 2) { convIniciar(); return; }
+  nuevaPreguntaRecorrido();
+  pintarRecorrido();
+}
+
+function pintarRecorrido() {
+  const c = calculos();
+  document.querySelectorAll('#pasos .step-indicator').forEach((b, k) => {
+    b.classList.toggle('active', k === R.paso); b.classList.toggle('completed', k < R.paso);
+    if (k === R.paso) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current');
+  });
+  pintarPaneles($('rec-etapa'), panelesRecorrido(c), true);
+  const [t, txt, f] = explicacionRecorrido(c);
+  $('explanation').innerHTML = `<h3>${t}</h3><p>${txt}</p>${f ? `<div class="formula">${f}</div>` : ''}`;
+  actualizarBarrido();
+  pintarPracticaRecorrido();
+  $('prevBtn').disabled = R.paso === 0;
+  $('nextBtn').disabled = R.paso === PASOS.length - 1;
+  document.querySelectorAll('[data-img]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.img === R.imagen)));
+  ajustarCeldas($('rec-etapa'));
+  if (R.paso === 5) {
+    const fijar = () => {
+      const bx = $('barX'), bo = $('barO'); if (!bx) return;
+      bx.style.width = `${c.p[0] * 100}%`; bx.textContent = fmtPct(c.p[0]);
+      bo.style.width = `${c.p[1] * 100}%`; bo.textContent = fmtPct(c.p[1]);
+    };
+    if (reduceMotion()) fijar(); else requestAnimationFrame(() => requestAnimationFrame(fijar));
+  }
+}
+
+function iniciarRecorrido() {
+  $('vista-recorrido').hidden = false;
+  construirPasos();
+  $('nextBtn').addEventListener('click', () => irAPaso(R.paso + 1));
+  $('prevBtn').addEventListener('click', () => irAPaso(R.paso - 1));
+  $('resetBtn').addEventListener('click', () => { R.practica.aciertos = 0; R.practica.intentos = 0; irAPaso(0); });
+  $('autoBtn').addEventListener('click', () => (R.auto.activo ? autoParar() : autoIniciar()));
+  $('cv-inicio').addEventListener('click', () => convIr(0));
+  $('cv-ant').addEventListener('click', () => convIr(R.conv.pos - 1));
+  $('cv-sig').addEventListener('click', () => convIr(R.conv.pos + 1));
+  $('cv-fin').addEventListener('click', () => convIr(15));
+  $('cv-play').addEventListener('click', () => { autoParar(); convAlternar(); });
+  $('cv-vel').addEventListener('change', (e) => { R.conv.vel = +e.target.value; });
+  document.querySelectorAll('[data-img]').forEach((b) => b.addEventListener('click', () => {
+    const clave = b.dataset.img;
+    if (clave === 'D' && R.imagen !== 'D') R.dibujo = Modelo.copiar(imgActual());
+    R.imagen = clave;
+    irAPaso(clave === 'D' ? 0 : R.paso);
+  }));
+  $('rec-practica').addEventListener('change', (e) => {
+    R.practica.activa = e.target.checked;
+    irAPaso(R.paso);
+  });
+  if (params.get('practica') === '1') { R.practica.activa = true; $('rec-practica').checked = true; }
+  document.addEventListener('keydown', (e) => {
+    if (e.target.closest && e.target.closest('input, select, textarea')) return;
+    if (e.key === 'ArrowRight') { e.preventDefault(); irAPaso(R.paso + 1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); irAPaso(R.paso - 1); }
+  });
+  const pasoUrl = parseInt(params.get('paso'), 10);
+  irAPaso(pasoUrl >= 1 && pasoUrl <= PASOS.length ? pasoUrl - 1 : 0);
+}
+
+/* ===================================== VISTA LABORATORIO ===================================== */
+const L = {
+  img: Modelo.copiar(X6), imgClave: 'X', filtro: 'vert', F: Modelo.copiar(FILTROS.vert.F),
+  P: 0, S: 1, relu: false, pool: false, sel: null,
+  practica: { activa: false, aciertos: 0, intentos: 0, pregunta: null },
+};
+function calcLab() {
+  const mapa = Modelo.conv(L.img, L.F, L.P, L.S);
+  const vis = L.relu ? Modelo.relu(mapa) : mapa;
+  const n = vis.length, poolOk = n % 2 === 0;
+  const pl = L.pool && poolOk ? Modelo.pool2(vis) : null;
+  let max = -Infinity, arg = [0, 0];
+  vis.forEach((f, i) => f.forEach((v, j) => { if (v > max) { max = v; arg = [i, j]; } }));
+  const escala = Math.max(1, ...mapa.flat().map(Math.abs));
+  return { mapa, vis, n, poolOk, pl, max, arg, escala };
+}
+const pendienteLab = () => { const q = L.practica.pregunta; return !!(q && !q.respondida); };
+function nuevaPreguntaLab() {
+  L.practica.pregunta = null;
+  if (!L.practica.activa) return;
+  const c = calcLab(), i = azar(c.n), j = azar(c.n);
+  L.practica.pregunta = { i, j, resp: c.vis[i][j], raw: c.mapa[i][j] };
+  L.sel = [i, j];
+}
+function cambioLab(nuevaSel = true) {
+  if (nuevaSel) L.sel = null;
+  nuevaPreguntaLab();
+  pintarLab();
+}
+
+function panelesLab(c) {
+  const q = L.practica.pregunta, pend = pendienteLab();
+  const imgP = Modelo.rellenar(L.img, L.P), lado = imgP.length;
+  const esRelleno = (i, j) => L.P && (i < L.P || j < L.P || i >= lado - L.P || j >= lado - L.P);
+  const paneles = [
+    { clave: 'img', rol: 'Entra', titulo: `Imagen ${L.P ? 'con relleno (8×8)' : '(6×6)'}`,
+      cuerpo: matriz(imgP, {
+        tipo: 'imagen', aria: 'Imagen de entrada; un clic en un píxel lo enciende o lo apaga',
+        clases: (i, j) => [esRelleno(i, j) ? 'relleno' : ''],
+        click: (i, j) => {
+          if (esRelleno(i, j)) return;
+          L.img[i - L.P][j - L.P] = 1 - L.img[i - L.P][j - L.P]; L.imgClave = 'propia'; cambioLab(false);
+        },
+        etiqueta: (i, j, v) => (esRelleno(i, j) ? `Relleno de ceros, fila ${i}, columna ${j}` : `Píxel fila ${i - L.P}, columna ${j - L.P}: ${v ? 'encendido' : 'apagado'}`),
+      }),
+      pie: 'Un clic en un píxel lo enciende o lo apaga.' + (L.P ? ' El anillo rayado es el relleno de ceros.' : '') },
+    { clave: 'fil', rol: 'Operación', titulo: `∗ Filtro ${FILTROS[L.filtro].nombre} (3×3)`, foco: true,
+      cuerpo: [
+        matriz(L.F, {
+          tipo: 'filtro', max: 40, aria: 'Filtro de 3×3; un clic en un peso lo cambia',
+          click: (i, j) => {
+            if (L.filtro !== 'pers') L.filtro = 'pers';
+            const v = L.F[i][j]; L.F[i][j] = v >= 1 ? -1 : v + 1; cambioLab(false);
+          },
+          etiqueta: (i, j, v) => `Peso fila ${i}, columna ${j}: ${fmtNum(v)}`,
+        }),
+        el('div', 'mini-rotulo', 'Patrón que premia'),
+        matriz(L.F, { tipo: 'patron', chica: true, frac: 0.5, max: 26, aria: 'Patrón que premia el filtro' }),
+      ],
+      pie: `<span class="nota">Busca ${FILTROS[L.filtro].busca} ■ encendido suma · ✕ encendido resta · · indiferente</span>` },
+    { clave: 'mapa', rol: 'Sale', titulo: `= Mapa de características (${c.n}×${c.n})${L.relu ? ', tras ReLU' : ''}`,
+      cuerpo: matriz(c.vis, {
+        tipo: 'mapa', escala: c.escala, aria: 'Mapa de características; al pasar el cursor o tocar una celda se ve su cálculo',
+        oculta: (i, j) => pend && q.i === i && q.j === j,
+        clases: (i, j) => [L.relu && c.mapa[i][j] < 0 ? 'anulada' : ''],
+        estilo: c.pl ? (cel, i, j) => {
+          if (i >= 2 * c.pl.out.length || j >= 2 * c.pl.out.length) return;
+          const r = REGIONES[(Math.floor(i / 2) * c.pl.out.length + Math.floor(j / 2)) % 4].color;
+          cel.style.outline = `2px solid ${r}`; cel.style.outlineOffset = '-2px';
+        } : null,
+        hover: (i, j) => { L.sel = [i, j]; marcarSeleccion(); },
+        click: (i, j) => { L.sel = [i, j]; marcarSeleccion(); },
+        etiqueta: (i, j, v, oc) => `Celda (${i}, ${j}) del mapa: ${oc ? 'por predecir' : fmtNum(v)}`,
+      }),
+      pie: `O = ⌊(6 − 3 + 2·${L.P})/${L.S}⌋ + 1 = <b>${c.n}</b>` },
+  ];
+  if (L.pool) {
+    paneles.push({ clave: 'pool', rol: 'Resumen', titulo: c.poolOk ? `<i>Max-pooling</i> 2×2 → ${c.n / 2}×${c.n / 2}` : '<i>Max-pooling</i> 2×2',
+      cuerpo: c.poolOk
+        ? matriz(c.pl.out, {
+            tipo: 'mapa', escala: c.escala, aria: 'Mapa tras max-pooling',
+            oculta: () => pend,
+            estilo: (cel, a, b) => { cel.style.boxShadow = `0 0 0 3px ${REGIONES[(a * c.pl.out.length + b) % 4].color}`; } })
+        : el('p', 'espera', 'Con lado impar el <i>max-pooling</i> 2×2 dejaría fuera la última fila y columna; en este laboratorio se aplica solo a mapas de lado par.'),
+      pie: c.poolOk ? 'Cada celda conserva el máximo de su región' : null });
+  }
+  return paneles;
+}
+
+function marcarSeleccion() {
+  const c = calcLab(); if (!L.sel) L.sel = c.arg.slice();
+  const [i, j] = L.sel, q = L.practica.pregunta, pend = pendienteLab();
+  document.querySelectorAll('#lab-etapa [data-p="img"] .cell').forEach((cel) => {
+    const r = +cel.dataset.row, k = +cel.dataset.col;
+    cel.classList.toggle('ventana', r >= i * L.S && r < i * L.S + 3 && k >= j * L.S && k < j * L.S + 3);
+  });
+  document.querySelectorAll('#lab-etapa [data-p="mapa"] .cell').forEach((cel) => {
+    cel.classList.toggle('actual', +cel.dataset.row === i && +cel.dataset.col === j);
+  });
+  const t = Modelo.terminos(L.img, L.F, i, j, L.P, L.S), raw = c.mapa[i][j];
+  const omitidos = t.some((x) => x.w === 0) && t.some((x) => x.w !== 0) ? ' <span class="nota">(se omiten los productos con peso 0)</span>' : '';
+  const linea1 = pend && q.i === i && q.j === j
+    ? `Celda (${i}, ${j}): la ventana está resaltada en la imagen; su valor se predice en el recuadro de práctica.`
+    : `Celda (${i}, ${j}): ${sumaTexto(t)} = <b>${fmtNum(raw)}</b>${L.relu ? ` → ReLU: <b>${fmtNum(Math.max(0, raw))}</b>` : ''}${omitidos}`;
+  const linea2 = pend ? '' : `<br>Activación máxima del mapa: <b>${fmtNum(c.max)}</b> en (${c.arg.join(', ')}) · máximo posible con este filtro: ${fmtNum(Modelo.maxPosible(L.F))}`;
+  $('lab-detalle').innerHTML = linea1 + linea2;
+}
+
+function pintarPracticaLab() {
+  const caja = $('lab-practica-caja'), q = L.practica.pregunta, P = L.practica;
+  caja.hidden = !(P.activa && q);
+  if (caja.hidden) return;
+  caja.innerHTML = `<div class="practica-titulo">✎ Modo práctica · antes de ver el resultado</div>
+    <p>¿Cuánto vale la celda (${q.i}, ${q.j}) del mapa${L.relu ? ' tras la ReLU' : ''}? Su ventana está resaltada en la imagen.</p>
+    <div class="practica-fila">
+      <label for="lab-resp" class="sr">Respuesta</label>
+      <input type="text" id="lab-resp" inputmode="numeric" autocomplete="off" ${q.respondida ? 'disabled' : ''} placeholder="valor">
+      <button type="button" class="chip" id="lab-comprobar" ${q.respondida ? 'disabled' : ''}>Comprobar</button>
+      <button type="button" class="chip" id="lab-otra">Otra celda</button>
+      <span class="contador">Aciertos: ${P.aciertos} de ${P.intentos}</span>
+    </div>
+    <div class="fb ${q.respondida ? (q.acierto ? 'fb-ok' : 'fb-no') : ''}" id="lab-fb">${q.mensaje || ''}</div>`;
+  const inp = $('lab-resp');
+  if (q.respondida) inp.value = q.dada;
+  $('lab-comprobar').addEventListener('click', comprobarLab);
+  $('lab-otra').addEventListener('click', () => { nuevaPreguntaLab(); pintarLab(); const r = $('lab-resp'); if (r) r.focus(); });
+  inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') comprobarLab(); });
+}
+function comprobarLab() {
+  const q = L.practica.pregunta; if (!q || q.respondida) return;
+  const txt = $('lab-resp').value, v = leerNumero(txt);
+  if (v === null) { const fb = $('lab-fb'); fb.className = 'fb fb-no'; fb.textContent = 'Se espera un número entero, por ejemplo −1 o 3.'; return; }
+  q.respondida = true; q.dada = txt; q.acierto = v === q.resp;
+  L.practica.intentos++; if (q.acierto) L.practica.aciertos++;
+  const t = Modelo.terminos(L.img, L.F, q.i, q.j, L.P, L.S);
+  q.mensaje = `${q.acierto ? '✓ Correcto' : `✗ No es ${fmtNum(v)}`}: ${sumaTexto(t)} = <b>${fmtNum(q.raw)}</b>${L.relu ? ` → ReLU: <b>${fmtNum(q.resp)}</b>` : ''}.`;
+  anunciar(q.mensaje.replace(/<[^>]+>/g, ''));
+  pintarLab();
+  const b = $('lab-otra'); if (b) b.focus();
+}
+
+function pintarLab() {
+  const c = calcLab();
+  if (!L.sel || L.sel[0] >= c.n || L.sel[1] >= c.n) L.sel = c.arg.slice();
+  document.querySelectorAll('[data-limg]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.limg === L.imgClave && L.imgClave !== 'vacia')));
+  document.querySelectorAll('[data-lfil]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lfil === L.filtro)));
+  document.querySelectorAll('[data-lp]').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.lp === L.P)));
+  document.querySelectorAll('[data-ls]').forEach((b) => b.setAttribute('aria-pressed', String(+b.dataset.ls === L.S)));
+  $('lab-relu').checked = L.relu; $('lab-pool').checked = L.pool;
+  pintarPaneles($('lab-etapa'), panelesLab(c), false);
+  marcarSeleccion();
+  pintarPracticaLab();
+  ajustarCeldas($('lab-etapa'));
+}
+
+function experimento(n) {
+  L.relu = false; L.pool = false; L.P = 0; L.S = 1;
+  if (n === 1) { L.img = Modelo.copiar(IMG_LAB.V); L.imgClave = 'V'; L.filtro = 'vert'; L.F = Modelo.copiar(FILTROS.vert.F); }
+  if (n === 2) { L.img = Modelo.copiar(IMG_LAB.O); L.imgClave = 'O'; L.filtro = 'diag'; L.F = Modelo.copiar(FILTROS.diag.F); }
+  if (n === 3) { L.img = Modelo.vacia(6); L.imgClave = 'vacia'; L.filtro = 'diag'; L.F = Modelo.copiar(FILTROS.diag.F); }
+  if (n === 4) { L.filtro = 'pers'; L.F = Modelo.vacia(3); }
+  if (n === 5) { L.img = Modelo.copiar(IMG_LAB.X); L.imgClave = 'X'; L.P = 1; L.S = 2; }
+  cambioLab();
+  try { $('lab-etapa').scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block: 'nearest' }); } catch (e) { }
+}
+
+function iniciarLab() {
+  $('vista-filtros').hidden = false;
+  document.querySelectorAll('[data-limg]').forEach((b) => b.addEventListener('click', () => {
+    L.img = Modelo.copiar(IMG_LAB[b.dataset.limg]); L.imgClave = b.dataset.limg; cambioLab();
+  }));
+  document.querySelectorAll('[data-lfil]').forEach((b) => b.addEventListener('click', () => {
+    L.filtro = b.dataset.lfil;
+    if (L.filtro !== 'pers') L.F = Modelo.copiar(FILTROS[L.filtro].F);   // «Personalizado» parte del filtro actual
+    cambioLab();
+  }));
+  document.querySelectorAll('[data-lp]').forEach((b) => b.addEventListener('click', () => { L.P = +b.dataset.lp; cambioLab(); }));
+  document.querySelectorAll('[data-ls]').forEach((b) => b.addEventListener('click', () => { L.S = +b.dataset.ls; cambioLab(); }));
+  $('lab-relu').addEventListener('change', (e) => { L.relu = e.target.checked; cambioLab(false); });
+  $('lab-pool').addEventListener('change', (e) => { L.pool = e.target.checked; cambioLab(false); });
+  $('lab-practica').addEventListener('change', (e) => { L.practica.activa = e.target.checked; cambioLab(false); });
+  document.querySelectorAll('[data-exp]').forEach((b) => b.addEventListener('click', () => experimento(+b.dataset.exp)));
+  if (params.get('practica') === '1') { L.practica.activa = true; $('lab-practica').checked = true; nuevaPreguntaLab(); }
+  pintarLab();
+}
+
+/* ===================================== AUTOTEST (?selftest=1) ===================================== */
+function autotest() {
+  const res = [];
+  const prueba = (nombre, ok, valor) => res.push({ prueba: nombre, ok: !!ok, valor: typeof valor === 'string' ? valor : JSON.stringify(valor) });
+  const igual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  const D = FILTROS.diag.F, V = FILTROS.vert.F;
+  // 1) Caso X / O del recorrido (valores a mano del capítulo).
+  const mX = Modelo.conv(X6, D);
+  prueba('X ∗ «\\» = mapa 4×4 esperado', igual(mX, [[3,1,-1,-1],[1,3,-1,-1],[-1,-1,3,1],[-1,-1,1,3]]), mX);
+  const fX = Modelo.aplanar(Modelo.pool2(Modelo.relu(mX)).out), pX = Modelo.softmax(Modelo.densa(DENSE_W, fX));
+  prueba('X: pooling [3,0,0,3]', igual(fX, [3,0,0,3]), fX);
+  prueba('X: z = [1,5; −1,5]', igual(Modelo.densa(DENSE_W, fX), [1.5, -1.5]), Modelo.densa(DENSE_W, fX));
+  prueba('X: P(X) = 95,3 %', fmtPct(pX[0]) === '95,3 %', fmtPct(pX[0]));
+  const fO = Modelo.aplanar(Modelo.pool2(Modelo.relu(Modelo.conv(O6, D))).out), pO = Modelo.softmax(Modelo.densa(DENSE_W, fO));
+  prueba('O: pooling [0,2,2,0]', igual(fO, [0,2,2,0]), fO);
+  prueba('O: P(O) = 88,1 %', fmtPct(pO[1]) === '88,1 %', fmtPct(pO[1]));
+  const fR = Modelo.aplanar(Modelo.pool2(Modelo.relu(Modelo.conv(XR6, D))).out), pR = Modelo.softmax(Modelo.densa(DENSE_W, fR));
+  prueba('X imperfecta: sigue siendo «X», con menos confianza', pR[0] > 0.5 && pR[0] < pX[0], `${fmtPct(pR[0])} (pooling ${fR})`);
+  // 2) Figura 2.1.2 del capítulo y Reto 1.
+  const m5 = Modelo.conv(E5, V);
+  prueba('Fig. 2.1.2: S(0,0) = −5 y S(0,1) = −4', m5[0][0] === -5 && m5[0][1] === -4, [m5[0][0], m5[0][1]]);
+  // 3) Tamaños de salida, fórmula y conv coinciden.
+  const tam = [[6,3,0,1,4],[6,3,1,1,6],[6,3,0,2,2],[6,3,1,2,3],[224,3,0,1,222],[224,7,3,2,112]];
+  prueba('O = ⌊(W − k + 2P)/S⌋ + 1', tam.every(([W,k,P,S,o]) => Modelo.tamSalida(W,k,P,S) === o), tam.map(([W,k,P,S]) => Modelo.tamSalida(W,k,P,S)));
+  prueba('conv 6×6 con P∈{0,1} y S∈{1,2}: tamaño = fórmula', tam.slice(0, 4).every(([W,k,P,S,o]) => Modelo.conv(X6, D, P, S).length === o), tam.slice(0, 4).map(([,, P, S]) => Modelo.conv(X6, D, P, S).length));
+  prueba('Relleno de ceros: X ∗ «\\» con P = 1 en (0,0) = 2', Modelo.conv(X6, D, 1, 1)[0][0] === 2, Modelo.conv(X6, D, 1, 1)[0][0]);
+  const tR = Modelo.terminos(X6, D, 0, 0, 1, 1);
+  prueba('Términos con relleno: 5 fuera de la imagen, suma = 2', tR.filter((x) => !x.dentro).length === 5 && tR.reduce((a, x) => a + x.p, 0) === 2, tR.filter((x) => !x.dentro).length);
+  // 4) Experimentos del laboratorio.
+  const mV = Modelo.conv(IMG_LAB.V, V);
+  prueba('Borde vertical sobre línea vertical: columnas [−3, 0, 3, 0]', mV.every((f) => igual(f, [-3, 0, 3, 0])), mV[0]);
+  const maxDe = (M) => Math.max(...M.flat());
+  prueba('«O»: bordes llegan a 3, diagonales a 2', maxDe(Modelo.conv(O6, V)) === 3 && maxDe(Modelo.conv(O6, FILTROS.horiz.F)) === 3 && maxDe(Modelo.conv(O6, D)) === 2 && maxDe(Modelo.conv(O6, FILTROS.anti.F)) === 2,
+    [V, FILTROS.horiz.F, D, FILTROS.anti.F].map((F) => maxDe(Modelo.conv(O6, F))));
+  let mejor = -Infinity;
+  for (let b = 0; b < 512; b++) { const w = [0,1,2].map((m) => [0,1,2].map((n) => (b >> (m * 3 + n)) & 1)); mejor = Math.max(mejor, Modelo.conv(w, D)[0][0]); }
+  prueba('Máximo de «\\» con píxeles binarios = 3 (fuerza bruta)', mejor === 3 && Modelo.maxPosible(D) === 3, mejor);
+  prueba('Filtro de ceros → mapa nulo', Modelo.conv(X6, Modelo.vacia(3)).flat().every((v) => v === 0), 'ok');
+  // 5) Lectura de respuestas del modo práctica.
+  prueba('leerNumero acepta «−3», «-3», « 3 », «3,0» y rechaza «tres»',
+    leerNumero('−3') === -3 && leerNumero('-3') === -3 && leerNumero(' 3 ') === 3 && leerNumero('3,0') === 3 && leerNumero('tres') === null, 'ok');
+  // 6) DOM: los rótulos de los paneles corresponden al contenido de cada paso.
+  if (VISTA === 'recorrido') {
+    const titulos = (n) => { irAPaso(n); return [...document.querySelectorAll('#rec-etapa .panel-title')].map((e) => e.textContent); };
+    const t3 = titulos(3), t4 = titulos(4), t2 = titulos(2);
+    prueba('Paso ReLU: entra / operación / sale', igual(t3, ['Mapa antes de ReLU (4×4)', 'ReLU: max(0, x)', 'Mapa después de ReLU (4×4)']), t3);
+    prueba('Paso pooling: entra / operación / sale', igual(t4, ['Mapa tras ReLU, en 4 regiones de 2×2', 'Máximo de cada región', 'Mapa reducido (2×2)']), t4);
+    prueba('Paso convolución: el mapa sale en el tercer panel', t2[2] === 'Mapa de características (4×4)', t2);
+    irAPaso(0);
+  } else {
+    const prev = { P: L.P, S: L.S };
+    const tamDOM = [[0,1],[1,1],[0,2],[1,2]].map(([P, S]) => { L.P = P; L.S = S; cambioLab(); return document.querySelectorAll('#lab-etapa [data-p="mapa"] .cell').length; });
+    prueba('Laboratorio: celdas del mapa = O² para (P,S) = (0,1),(1,1),(0,2),(1,2)', igual(tamDOM, [16, 36, 4, 9]), tamDOM);
+    L.P = prev.P; L.S = prev.S; cambioLab();
+  }
+  return { pasa: res.every((r) => r.ok), resultados: res };
+}
+
+/* ===================================== ARRANQUE ===================================== */
+if (VISTA === 'filtros') iniciarLab(); else iniciarRecorrido();
+
+// Reajusta las celdas cuando cambia el ancho de una etapa (ventana, iframe o aparición de la barra de desplazamiento).
+if ('ResizeObserver' in window) {
+  const anchos = new WeakMap();
+  const ro = new ResizeObserver((entradas) => entradas.forEach((e) => {
+    const w = Math.round(e.contentRect.width);
+    if (anchos.get(e.target) !== w) { anchos.set(e.target, w); ajustarCeldas(e.target); }
+  }));
+  ['rec-etapa', 'lab-etapa'].forEach((id) => ro.observe($(id)));
+} else {
+  let tRedim;
+  window.addEventListener('resize', () => { clearTimeout(tRedim); tRedim = setTimeout(() => ajustarCeldas(), 60); });
+}
+
+window.__cnnAnat = { Modelo, R, L, autotest, irAPaso, pintarLab, experimento, VISTA };
+if (params.get('selftest') === '1') {
+  const Rt = autotest(), caja = $('autotest');
+  caja.hidden = false; caja.classList.toggle('falla', !Rt.pasa);
+  caja.textContent = (Rt.pasa ? 'AUTOTEST: PASA' : 'AUTOTEST: FALLA') + ` (${Rt.resultados.filter((r) => r.ok).length}/${Rt.resultados.length})\n`
+    + Rt.resultados.map((r) => `${r.ok ? '✓' : '✗'} ${r.prueba} → ${r.valor}`).join('\n');
+  console.log(caja.textContent); window.__cnnAnat.resultadoAutotest = Rt;
+}
+
+// Auto-ajuste de altura: informa al documento contenedor del alto real (varía por paso, por vista y por ancho).
+let tAltura;
+function avisarAltura() {
+  if (window.self === window.top) return;
+  clearTimeout(tAltura);
+  tAltura = setTimeout(() => {
+    try { parent.postMessage({ type: 'embed-tool-height', id: ID_IFRAME, height: Math.ceil(document.documentElement.getBoundingClientRect().height) }, '*'); } catch (e) { }
   }, 80);
 }
-window.addEventListener('load', __postHeight);
-window.addEventListener('resize', __postHeight);
-new MutationObserver(__postHeight).observe(document.body, { subtree: true, childList: true });
-__postHeight();
+window.addEventListener('load', avisarAltura);
+window.addEventListener('resize', avisarAltura);
+document.addEventListener('toggle', avisarAltura, true);
+new MutationObserver(avisarAltura).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ['hidden', 'open'] });
+avisarAltura();
 </script>
 <!-- Botón «Portal» al abrir la herramienta sola; dentro del iframe del módulo no actúa (auditoría 2026-10, D-09). -->
 <script defer src="portal-nav.js"></script>
 </body>
 </html>
-

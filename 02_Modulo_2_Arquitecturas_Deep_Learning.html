@@ -545,6 +545,7 @@
                 warn: { border: '#B45309', bg: '#FFFBEB', label: '#B45309', icon: 'fa-triangle-exclamation' },
                 danger: { border: '#B91C1C', bg: '#FEF2F2', label: '#B91C1C', icon: 'fa-circle-exclamation' },
                 eth: { border: '#0E7490', bg: '#ECFEFF', label: '#0E7490', icon: 'fa-scale-balanced' },
+                deep: { border: '#475569', bg: '#F8FAFC', label: '#475569', icon: 'fa-layer-group' },   // «Para profundizar»: ampliación opcional
             }[type] || { border: '#3D008D', bg: '#F5F0FA', label: '#3D008D', icon: 'fa-circle-info' };
             return (
                 <div className="rounded-xl px-5 py-4 my-4 border-l-4" style={{ borderColor: styles.border, background: styles.bg }}>
@@ -1424,7 +1425,7 @@
         const Cap21Section = () => {
             const ref = useRef(null);
             useTypeset(ref, []);
-            useEmbedHeight(['cnn-anatomia-frame', 'vit-anatomia-frame', 'convolucion-3d-frame']);
+            useEmbedHeight(['cnn-filtros-frame', 'cnn-anatomia-frame', 'vit-anatomia-frame', 'convolucion-3d-frame']);
             return (
                 <div ref={ref} className="prose-usta">
                     <SectionHeader title="Capítulo 2.1 — Redes convolucionales (CNN) y Vision Transformers" icon={Icons.Grid} />
@@ -1436,6 +1437,11 @@
                         problema imitando al córtex visual, cómo evolucionaron las arquitecturas hasta <strong>ResNet</strong>,
                         cómo los <strong>Vision Transformers</strong> reformulan el problema con atención, y cómo se lleva un
                         modelo entrenado al borde de la selva colombiana.
+                    </p>
+                    <p className="text-sm text-gray-600">
+                        Los recuadros marcados <strong>«Para profundizar»</strong> amplían el tema con matices técnicos y pueden dejarse para
+                        una segunda lectura sin perder el hilo. Los <strong>retos prácticos</strong> y el <strong>modo práctica</strong> de las
+                        animaciones sirven para comprobar lo aprendido.
                     </p>
 
                     {/* ============== 1. Fundamentos biológicos y límites del MLP ============== */}
@@ -1520,18 +1526,45 @@
                     <h3>2. Anatomía de una red convolucional</h3>
                     <p>
                         Las CNN superan al MLP mediante tres ideas: <strong>conexiones locales</strong>, <strong>pesos compartidos</strong> y
-                        <strong> submuestreo</strong>. El corazón del sistema es la <strong>convolución</strong>: deslizar un filtro
-                        (o <em>kernel</em>) pequeño sobre la entrada para producir un <em>mapa de características</em> —también
-                        llamado <em>mapa de activación</em>—. En cada posición se multiplica el filtro elemento a elemento por la
-                        región subyacente, se suman los productos y se añade un <strong>sesgo</strong> aprendido:
+                        <strong> submuestreo</strong>. Antes de examinar cada pieza conviene tener a la vista el recorrido completo que sigue
+                        una imagen dentro de la red; este apartado lo desarma pieza por pieza y, al final, lo pone en marcha de principio a fin.
                     </p>
-                    <Eq>{String.raw`$$ S(i,j) = (I * K)(i,j) + b = \sum_{m}\sum_{n} I(i+m,\,j+n)\cdot K(m,n) + b $$`}</Eq>
-                    <p className="text-xs text-gray-500 italic">
-                        Nota de rigor: con el signo {String.raw`\(+\)`} en {String.raw`\(I(i+m,\,j+n)\)`} esta operación es, en sentido estricto, una <em>correlación cruzada</em>; la convolución matemática invertiría el kernel {String.raw`\(\big(I(i-m,\,j-n)\big)\)`}. Como el kernel se <em>aprende</em>, la distinción es irrelevante en la práctica y por eso PyTorch, TensorFlow y Keras la llaman «convolución» <Cita k="goodfellow2016deep" p="sec. 9.1" />.
+                    <Pipeline steps={[
+                        { num: 1, title: 'Entrada', desc: 'Matriz de píxeles: alto × ancho × canales.' },
+                        { num: 2, title: 'Convolución', desc: 'Filtros que buscan patrones y producen mapas de características.' },
+                        { num: 3, title: 'ReLU', desc: 'Anula los valores negativos y aporta la no linealidad.' },
+                        { num: 4, title: <em>Pooling</em>, desc: 'Resume cada región y reduce la resolución.' },
+                        { num: 5, title: 'Clasificación', desc: 'Aplanado, capa densa y softmax: de los mapas a las probabilidades por clase.' },
+                    ]} />
+
+                    <h4>La convolución: un filtro que busca un patrón</h4>
+                    <p>
+                        El corazón del sistema es la <strong>convolución</strong>. Un <strong>filtro</strong> (o <em>kernel</em>) es una matriz
+                        pequeña —típicamente de 3 × 3— que funciona como una plantilla: se desliza sobre la entrada y, en cada posición, mide
+                        cuánto se parece la región subyacente a su patrón. Si la región coincide con la plantilla, el resultado es alto; si es
+                        su opuesto, es negativo. Los resultados de todas las posiciones forman un <em>mapa de características</em> —también
+                        llamado <em>mapa de activación</em>—, que indica <em>dónde</em> aparece el patrón. Es la versión matemática de las{' '}
+                        <strong>células simples</strong> de la sección anterior: cada filtro responde a un rasgo concreto dentro de un campo
+                        receptivo pequeño.
                     </p>
 
                     <ConvolucionSVG />
 
+                    <p>
+                        La figura muestra una sola posición: se multiplica el filtro elemento a elemento por la región resaltada, se suman los
+                        productos y se añade un <strong>sesgo</strong> aprendido (aquí, cero). El filtro de la figura, con unos a la izquierda y
+                        menos unos a la derecha, es un detector de <strong>bordes verticales</strong>: el resultado −5 indica que, en esa región,
+                        la intensidad crece hacia la derecha. Escrita para cualquier posición, la operación es:
+                    </p>
+                    <Eq>{String.raw`$$ S(i,j) = (I * K)(i,j) + b = \sum_{m}\sum_{n} I(i+m,\,j+n)\cdot K(m,n) + b $$`}</Eq>
+                    <p>
+                        donde {String.raw`\(I\)`} es la entrada, {String.raw`\(K\)`} la matriz del filtro, {String.raw`\(b\)`} el sesgo, y{' '}
+                        {String.raw`\(m\)`} y {String.raw`\(n\)`} recorren las filas y columnas del filtro. En adelante, {String.raw`\(k\)`}{' '}
+                        (minúscula) denota el <em>lado</em> del filtro: uno de 3 × 3 tiene {String.raw`\(k = 3\)`}.
+                    </p>
+                    <Box type="deep" label="Para profundizar · correlación cruzada">
+                        Con el signo {String.raw`\(+\)`} en {String.raw`\(I(i+m,\,j+n)\)`} esta operación es, en sentido estricto, una <em>correlación cruzada</em>; la convolución matemática invertiría el kernel {String.raw`\(\big(I(i-m,\,j-n)\big)\)`}. Como el kernel se <em>aprende</em>, la distinción es irrelevante en la práctica y por eso PyTorch, TensorFlow y Keras la llaman «convolución» <Cita k="goodfellow2016deep" p="sec. 9.1" />.
+                    </Box>
                     <p>
                         A diferencia de los detectores clásicos (<Termino def="Operadores clásicos de detección de bordes en procesamiento de imágenes, con coeficientes fijos definidos a mano (no aprendidos).">Sobel, Canny</Termino>) diseñados a mano, los valores del kernel son
                         <strong> parámetros aprendibles</strong>: la red los ajusta por <Termino def="Algoritmo que propaga el error hacia atrás para calcular gradientes.">retropropagación</Termino> hasta
@@ -1539,7 +1572,90 @@
                         filtro que se active ante curvas.
                     </p>
 
+                    {/* ============== Laboratorio interactivo de filtros ============== */}
+                    <h4>Laboratorio de filtros</h4>
+                    <p>
+                        Para ganar intuición sobre lo que «ve» cada filtro, el laboratorio siguiente permite elegir o dibujar la imagen, elegir
+                        uno de cuatro filtros clásicos —o editar uno propio— y observar cómo cambia el mapa de características al instante. Al
+                        pasar el cursor sobre una celda del mapa, o al tocarla, se resaltan su ventana en la imagen y su cálculo; el{' '}
+                        <em>modo práctica</em> oculta una celda para predecir su valor antes de comprobarlo.
+                    </p>
+                    <AntesDeInteractuar>con el filtro de borde vertical sobre una imagen con una línea vertical, ¿dónde se espera la activación más alta del mapa: sobre la línea, a sus lados o repartida por toda la imagen?</AntesDeInteractuar>
+                    <div className="bg-white border border-gray-200 rounded-xl p-2 shadow-sm my-4 overflow-hidden">
+                        <iframe id="cnn-filtros-frame" src="cnn-anatomia-interactiva.html?vista=filtros"
+                            title="Laboratorio interactivo de filtros convolucionales: imagen y filtro editables, relleno, stride, ReLU y pooling"
+                            className="w-full rounded-lg" style={{ display: 'block', width: '100%', height: 1500, border: 0 }} loading="lazy"></iframe>
+                        <p className="text-xs text-gray-500 italic text-center mt-2 px-2">
+                            Laboratorio de filtros: el mapa de características se recalcula al cambiar la imagen, el filtro, el relleno o el
+                            <em> stride</em>, y los experimentos sugeridos guían la exploración. Fuente: elaboración propia.
+                        </p>
+                    </div>
+                    <Reto titulo="Reto práctico 1 · Una celda a mano" solucion={<>
+                        <p className="!my-1">La ventana pasa a las columnas 1 a 3 de las tres primeras filas: {String.raw`\(\begin{bmatrix}0&1&2\\5&8&9\\7&2&5\end{bmatrix}\)`}.</p>
+                        <p className="!my-1">Fila a fila, con el kernel {String.raw`\((1,\ 0,\ -1)\)`}: {String.raw`\((0-2)+(5-9)+(7-5) = -2-4+2 = -4\)`}.</p>
+                        <p className="!my-1">Así, {String.raw`\(S_{0,1} = -4\)`}: en esa región la intensidad también crece hacia la derecha. Tras la ReLU queda {String.raw`\(\max(0,-4) = 0\)`}: un borde en el sentido contrario al que busca el filtro no deja señal.</p>
+                    </>}>
+                        En la Figura 2.1.2 la ventana se desplaza una columna a la derecha (<em>stride</em> 1). ¿Cuánto vale {String.raw`\(S_{0,1}\)`}?
+                        ¿Y después de aplicar la ReLU?
+                    </Reto>
+
+                    <h4>ReLU y <em>pooling</em>: quedarse con lo importante</h4>
+                    <p>
+                        Tras cada convolución se aplica la activación <strong>ReLU</strong> ({String.raw`\(\max(0,x)\)`}): anula los valores
+                        negativos —las regiones opuestas al patrón— y conserva los positivos. Así introduce la <strong>no linealidad</strong>{' '}
+                        sin la cual apilar convoluciones colapsaría en una única transformación lineal, incapaz de modelar patrones complejos.
+                    </p>
+                    <p>
+                        Después, el <strong><em>pooling</em></strong> (submuestreo) resume cada región del mapa en un solo número. El{' '}
+                        <strong><em>max pooling</em></strong> toma el máximo de cada región (p. ej., 2 × 2): si un rasgo se detectó allí, lo
+                        conserva y descarta su ubicación exacta, lo que da <strong>invarianza a pequeñas traslaciones</strong>. El{' '}
+                        <strong><em>average pooling</em></strong> promedia; su variante <em>global average pooling</em> reduce todo el mapa a
+                        un vector antes de clasificar, eliminando capas densas masivas. Ninguno de los dos tiene parámetros que aprender.
+                        Resulta contraintuitivo que <em>descartar</em> información mejore el modelo: al recortar la resolución, el{' '}
+                        <em>pooling</em> reduce los parámetros de las capas siguientes y, con ello, el sobreajuste, y suele favorecer la
+                        generalización.
+                    </p>
+                    <p>
+                        Esa es la división del trabajo que explica el éxito en visión: la <strong>convolución</strong> aprende{' '}
+                        <em>qué</em> patrón aparece, y el <strong><em>pooling</em></strong>, más tolerante a la posición, difumina <em>dónde</em>{' '}
+                        aparece exactamente —esa tolerancia a la posición es justo lo que le faltaba al MLP—.
+                    </p>
+
+                    {/* ============== Animación interactiva: pipeline CNN ============== */}
+                    <h4>Anatomía en movimiento: el recorrido interactivo</h4>
+                    <p>
+                        Hasta aquí las piezas se presentaron por separado; la siguiente animación las pone en marcha de principio a fin sobre un
+                        ejemplo mínimo —clasificar una «X» o una «O» en una rejilla de 6×6—. Cada paso muestra lo que entra, la operación y lo
+                        que sale. Al final, el mapa reducido se <strong>aplana</strong> en un vector que alimenta una capa densa, y la capa{' '}
+                        <strong>softmax</strong> convierte las puntuaciones sin escalar (los <em>logits</em>) en probabilidades de clase que{' '}
+                        <strong>suman 1</strong>. El recorrido avanza paso a paso o en modo automático, y el modo práctica pide predecir
+                        algunos valores antes de revelarlos.
+                    </p>
+                    <AntesDeInteractuar>en la «X», tras la convolución con el filtro diagonal, la ReLU y el <em>pooling</em>, ¿se espera que la señal más alta del mapa reducido de 2 × 2 quede repartida por igual en las cuatro casillas, concentrada en dos esquinas opuestas o en el centro? ¿Y en la «O»?</AntesDeInteractuar>
+                    <div className="bg-white border border-gray-200 rounded-xl p-2 shadow-sm my-4 overflow-hidden">
+                        <iframe id="cnn-anatomia-frame" src="cnn-anatomia-interactiva.html"
+                            title="Animación interactiva: anatomía de una red convolucional, recorrido paso a paso"
+                            className="w-full rounded-lg" style={{ display: 'block', width: '100%', height: 1100, border: 0 }} loading="lazy"></iframe>
+                        <p className="text-xs text-gray-500 italic text-center mt-2 px-2">
+                            Animación interactiva de la cadena de procesamiento de una CNN (entrada → convolución → ReLU → pooling → clasificación) sobre un
+                            caso adaptado del ejemplo «X / O» de StatQuest (J. Starmer); las probabilidades finales se calculan con pesos ilustrativos,
+                            no entrenados. Fuente: elaboración propia.
+                        </p>
+                    </div>
+
+                    <Box type="tip" label="Recurso externo · una CNN real para explorar">
+                        Para ver estos mismos pasos sobre una red entrenada de verdad, conviene explorar{' '}
+                        <a href="https://poloclub.github.io/cnn-explainer/" target="_blank" rel="noopener noreferrer" style={{ color: '#BE185D', fontWeight: 600, textDecoration: 'underline' }}>CNN Explainer</a>{' '}
+                        <Cita k="wang2021cnn" />: una CNN <em>Tiny VGG</em> que clasifica imágenes en 10 clases y permite pasar el cursor sobre las
+                        matrices para mover el kernel y ver el producto punto, además de variar en vivo el <em>padding</em>, el tamaño de
+                        kernel y el <em>stride</em>. Software libre (licencia MIT) del Polo Club of Data Science (Georgia Tech).
+                    </Box>
+
                     <h4>Hiperparámetros que controlan la dimensión</h4>
+                    <p>
+                        Dos hiperparámetros deciden cómo se desliza el filtro y, con ello, el tamaño del mapa de salida. Ambos pueden probarse
+                        con los controles «Relleno P» y «<em>Stride</em> S» del laboratorio de filtros.
+                    </p>
                     <Accordion items={[
                         {
                             titulo: <><em>Stride</em> (zancada): cuánto se desplaza el filtro</>,
@@ -1547,27 +1663,24 @@
                         },
                         {
                             titulo: <><em>Padding</em> (relleno): proteger los bordes</>,
-                            contenido: <span>Aplicar convoluciones encoge la imagen y descuida los bordes. El <em>zero-padding</em> agrega ceros alrededor de la entrada. El <strong>valid padding</strong> no rellena ({String.raw`\(P=0\)`}); el <strong>same padding</strong> rellena para conservar el tamaño con {String.raw`\(P=\tfrac{K-1}{2}\)`}, clave en ResNet para mantener las dimensiones espaciales y permitir la suma residual {String.raw`\(F(x)+x\)`} dentro del bloque.</span>
-                        },
-                        {
-                            titulo: <><em>Pooling</em> (submuestreo): invarianza y reducción</>,
-                            contenido: <span><strong><em>Max pooling</em></strong> toma el máximo de cada región (p. ej., 2×2): si un rasgo se detectó allí, lo conserva y descarta su ubicación exacta, dando invarianza a pequeñas traslaciones. El <strong><em>average pooling</em></strong> promedia; su variante <em>global average pooling</em> reduce todo el mapa a un vector antes de clasificar, eliminando capas densas masivas. Resulta contraintuitivo que <em>descartar</em> información mejore el modelo: al recortar la resolución, el <em>pooling</em> reduce los parámetros de las capas siguientes y, con ello, el sobreajuste, y suele favorecer la generalización.</span>
+                            contenido: <span>Aplicar convoluciones encoge la imagen y descuida los bordes. El <em>zero-padding</em> agrega ceros alrededor de la entrada. El <strong>valid padding</strong> no rellena ({String.raw`\(P=0\)`}); el <strong>same padding</strong> rellena para conservar el tamaño con {String.raw`\(P=\tfrac{k-1}{2}\)`}, clave en ResNet para mantener las dimensiones espaciales y permitir la suma residual {String.raw`\(F(x)+x\)`} dentro del bloque.</span>
                         },
                     ]} />
 
-                    <p>
-                        Esa es la división del trabajo que explica el éxito en visión: la <strong>convolución</strong> aprende{' '}
-                        <em>qué</em> patrón aparece, y el <strong><em>pooling</em></strong>, más tolerante a la posición, difumina <em>dónde</em>{' '}
-                        aparece exactamente —esa tolerancia a la posición es justo lo que le faltaba al MLP—.
-                    </p>
-
                     <p>El tamaño de salida de una capa convolucional se obtiene con la fórmula general <Cita k="dumoulin2016guide" />:</p>
-                    <Eq>{String.raw`$$ O = \left\lfloor \frac{W - K + 2P}{S} \right\rfloor + 1 $$`}</Eq>
+                    <Eq>{String.raw`$$ O = \left\lfloor \frac{W - k + 2P}{S} \right\rfloor + 1 $$`}</Eq>
                     <p>
-                        donde {String.raw`\(W\)`} es el tamaño de entrada, {String.raw`\(K\)`} el del kernel, {String.raw`\(P\)`} el
+                        donde {String.raw`\(W\)`} es el tamaño de entrada, {String.raw`\(k\)`} el lado del kernel, {String.raw`\(P\)`} el
                         relleno y {String.raw`\(S\)`} el <em>stride</em>. Una imagen de 224 × 224 con un filtro 3 × 3, sin relleno y <em>stride</em> 1,
                         produce un mapa de {String.raw`\(\lfloor(224-3)/1\rfloor + 1 = 222\)`} de lado.
                     </p>
+                    <Reto titulo="Reto práctico 2 · La primera capa de ResNet" solucion={<>
+                        <p className="!my-1">{String.raw`\(O = \left\lfloor \frac{224 - 7 + 2\cdot 3}{2} \right\rfloor + 1 = \left\lfloor \frac{223}{2} \right\rfloor + 1 = 111 + 1 = 112\)`}.</p>
+                        <p className="!my-1">El mapa mide 112 × 112: con <em>stride</em> 2, la red reduce la resolución a la mitad desde la primera capa, un submuestreo cuyos parámetros se aprenden.</p>
+                    </>}>
+                        La primera capa convolucional de ResNet recibe imágenes de 224 × 224 y aplica filtros de 7 × 7 con relleno {String.raw`\(P = 3\)`} y{' '}
+                        <em>stride</em> 2 <Cita k="he2016deep" />. ¿De qué tamaño es su mapa de salida?
+                    </Reto>
 
                     <h4>Convolución multicanal: de un canal a la profundidad</h4>
                     <p>
@@ -1584,9 +1697,9 @@
                         profundidad {String.raw`\(N\)`}. Cada filtro aprende a detectar un patrón distinto (un borde diagonal, una
                         mancha de color, una textura). El número de parámetros de la capa es, por tanto:
                     </p>
-                    <Eq>{String.raw`$$ \text{parámetros} = \big(\underbrace{K \times K \times C_{\text{in}}}_{\text{un filtro}} + 1\big)\times N $$`}</Eq>
+                    <Eq>{String.raw`$$ \text{parámetros} = \big(\underbrace{k \times k \times C_{\text{in}}}_{\text{un filtro}} + 1\big)\times N $$`}</Eq>
                     <p>
-                        donde {String.raw`\(K\)`} es el tamaño del kernel, {String.raw`\(C_{\text{in}}\)`} los canales de entrada,
+                        donde {String.raw`\(k\)`} es el lado del kernel, {String.raw`\(C_{\text{in}}\)`} los canales de entrada,
                         el {String.raw`\(+1\)`} el sesgo y {String.raw`\(N\)`} el número de filtros. Una capa {String.raw`\(3\times 3\)`} con 3 canales de entrada y 16 filtros usa apenas
                         {String.raw` \((3\cdot 3\cdot 3 + 1)\times 16 = 448\)`} parámetros, frente a los mil millones del MLP del inicio.
                     </p>
@@ -1606,7 +1719,7 @@
                             className="w-full rounded-lg" style={{ display: 'block', width: '100%', height: 1150, border: 0 }} loading="lazy"></iframe>
                     </div>
                     <PieFigura n="2.1.4" className="-mt-2 mb-4" fuente="elaboración propia (animación interactiva; valores enteros de juguete con semilla fija).">
-                        Convolución volumétrica: cada filtro K × K × C<sub>in</sub> produce un mapa; N filtros dan un volumen de salida de
+                        Convolución volumétrica: cada filtro k × k × C<sub>in</sub> produce un mapa; N filtros dan un volumen de salida de
                         profundidad N. La convolución de la animación coincide con la de PyTorch (<code>torch.nn.functional.conv2d</code>).
                     </PieFigura>
 
@@ -1618,7 +1731,7 @@ x = torch.randn(1, 3, 224, 224)
 print(x.shape)  # torch.Size([1, 3, 224, 224])
 
 # Convolución 3->16 filtros, kernel 3x3, sin padding, stride 1
-# Fórmula: O = floor((W - K + 2P) / S) + 1
+# Fórmula: O = floor((W - k + 2P) / S) + 1
 conv = nn.Conv2d(in_channels=3, out_channels=16, kernel_size=3)
 x = conv(x)
 print(x.shape)  # torch.Size([1, 16, 222, 222])  -> 222 = (224 - 3) / 1 + 1
@@ -1628,7 +1741,17 @@ pool = nn.MaxPool2d(2)
 x = pool(x)
 print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
 
+                    <Reto titulo="Reto práctico 3 · Contar parámetros" solucion={<>
+                        <p className="!my-1">Cada filtro abarca los 16 canales de entrada: {String.raw`\(3\cdot 3\cdot 16 = 144\)`} pesos más 1 sesgo.</p>
+                        <p className="!my-1">Con 32 filtros: {String.raw`\((3\cdot 3\cdot 16 + 1)\times 32 = 145\times 32 = 4\,640\)`} parámetros, y la capa produce <strong>32 mapas</strong> (profundidad 32).</p>
+                        <p className="!my-1">El tamaño de la imagen no interviene en la cuenta: la misma capa sirve para entradas de 64 × 64 o de 224 × 224.</p>
+                    </>}>
+                        Una segunda capa convolucional recibe los 16 mapas de la capa del ejemplo y aplica 32 filtros de 3 × 3. ¿Cuántos
+                        parámetros tiene? ¿Cuántos mapas produce?
+                    </Reto>
+
                     <h4>Tipos de capa en una CNN</h4>
+                    <p>La tabla resume, en el orden del recorrido, las capas de este apartado; sirve como ficha de repaso.</p>
                     <div className="overflow-x-auto my-4">
                         <table>
                             <thead>
@@ -1637,49 +1760,15 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr><td><strong>Convolucional</strong></td><td>Extracción de características</td><td>Según <em>stride</em>/<em>padding</em></td><td>Aumenta (n.º de filtros)</td><td>Kernel + sesgo</td></tr>
+                                <tr><td><strong>Convolucional</strong></td><td>Extracción de características: cada filtro busca un patrón</td><td>Según <em>stride</em>/<em>padding</em></td><td>La fija el n.º de filtros</td><td>Kernel + sesgo: (k·k·C<sub>in</sub> + 1)·N</td></tr>
+                                <tr><td><strong>ReLU</strong></td><td>No linealidad: anula los negativos</td><td>Igual</td><td>Igual</td><td>Ninguno</td></tr>
                                 <tr><td><strong><em>Pooling</em></strong></td><td>Reducción espacial, invarianza local</td><td>Reduce (≈ /2)</td><td>Igual</td><td>Ninguno</td></tr>
-                                <tr><td><strong>Densa (totalmente conectada)</strong></td><td>Clasificación</td><td>N/A (entrada aplanada)</td><td>N/A</td><td>Matriz densa</td></tr>
-                                <tr><td><strong>ReLU</strong></td><td>No linealidad</td><td>Igual</td><td>Igual</td><td>Ninguno</td></tr>
+                                <tr><td><strong>Aplanado (<em>flatten</em>)</strong></td><td>Convierte el volumen en un vector</td><td>N/A (vector de H·W·C valores)</td><td>N/A</td><td>Ninguno</td></tr>
+                                <tr><td><strong>Densa (totalmente conectada)</strong></td><td>Clasificación</td><td>N/A (entrada aplanada)</td><td>N/A</td><td>Matriz densa + sesgos</td></tr>
+                                <tr><td><strong>Softmax</strong></td><td>Probabilidades por clase que suman 1</td><td>N/A</td><td>N/A</td><td>Ninguno</td></tr>
                             </tbody>
                         </table>
                     </div>
-
-                    <p>
-                        Dos <strong>funciones de activación</strong> completan el flujo. Entre capas convolucionales se intercala la
-                        activación <strong>ReLU</strong> ({String.raw`\(\max(0,x)\)`}): anula los valores negativos y conserva los
-                        positivos, introduciendo la <strong>no linealidad</strong> sin la cual apilar convoluciones colapsaría en una
-                        única transformación lineal, incapaz de modelar patrones complejos. Al final de la red, la capa{' '}
-                        <strong>softmax</strong> convierte las puntuaciones sin escalar (los <em>logits</em>) en probabilidades de clase
-                        que <strong>suman 1</strong>.
-                    </p>
-
-                    {/* ============== Animación interactiva: pipeline CNN ============== */}
-                    <h4>Anatomía en movimiento: el recorrido interactivo</h4>
-                    <p>
-                        Hasta aquí las piezas se presentaron por separado; la siguiente animación las pone en marcha de principio a fin sobre un
-                        ejemplo mínimo —clasificar una «X» o una «O» en una rejilla de 6×6—: convolución, ReLU, <em>pooling</em> y clasificación
-                        final, paso a paso o en modo automático.
-                    </p>
-                    <AntesDeInteractuar>en la «X», tras la convolución con el filtro diagonal, la ReLU y el <em>pooling</em>, ¿se espera que la señal más alta del mapa reducido de 2 × 2 quede repartida por igual en las cuatro casillas, concentrada en dos esquinas opuestas o en el centro? ¿Y en la «O»?</AntesDeInteractuar>
-                    <div className="bg-white border border-gray-200 rounded-xl p-2 shadow-sm my-4 overflow-hidden">
-                        <iframe id="cnn-anatomia-frame" src="cnn-anatomia-interactiva.html"
-                            title="Animación interactiva: anatomía de una red convolucional, recorrido paso a paso"
-                            className="w-full rounded-lg" style={{ display: 'block', width: '100%', height: 1600, border: 0 }} loading="lazy"></iframe>
-                        <p className="text-xs text-gray-500 italic text-center mt-2 px-2">
-                            Animación interactiva de la cadena de procesamiento de una CNN (entrada → convolución → ReLU → pooling → clasificación) sobre un
-                            caso adaptado del ejemplo «X / O» de StatQuest (J. Starmer); las probabilidades finales se calculan con pesos ilustrativos,
-                            no entrenados. Fuente: elaboración propia.
-                        </p>
-                    </div>
-
-                    <Box type="tip" label="Recurso externo · una CNN real para explorar">
-                        Para ver estos mismos pasos sobre una red entrenada de verdad, conviene explorar{' '}
-                        <a href="https://poloclub.github.io/cnn-explainer/" target="_blank" rel="noopener noreferrer" style={{ color: '#BE185D', fontWeight: 600, textDecoration: 'underline' }}>CNN Explainer</a>{' '}
-                        <Cita k="wang2021cnn" />: una CNN <em>Tiny VGG</em> que clasifica imágenes en 10 clases y permite pasar el cursor sobre las
-                        matrices para mover el kernel y ver el producto punto, además de variar en vivo el <em>padding</em>, el tamaño de
-                        kernel y el <em>stride</em>. Software libre (licencia MIT) del Polo Club of Data Science (Georgia Tech).
-                    </Box>
 
                     {/* ============== 3. Evolución histórica ============== */}
                     <h3>3. Evolución de las arquitecturas CNN</h3>
@@ -1792,7 +1881,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                         </p>
                     </div>
 
-                    <Box type="info" label="Un tercer camino — el MLP-Mixer (2021)">
+                    <Box type="deep" label="Para profundizar · un tercer camino: el MLP-Mixer (2021)">
                         Si la convolución aporta localidad y el ViT aporta atención, ¿hace falta alguna de las dos? <Cita k="tolstikhin2021mlp" n />{' '}
                         mostraron que <strong>no</strong>: el <strong>MLP-Mixer</strong> prescinde de ambas y solo usa perceptrones
                         multicapa. La clave es que <em>no</em> es el MLP «aplanado» que fracasó al inicio del capítulo: primero trocea la
@@ -1903,6 +1992,7 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                     <Box type="tip" label="Puntos clave del Capítulo 2.1">
                         <ul>
                             <li>La <strong>convolución</strong> sustituye la conexión total por conectividad local y pesos compartidos: conserva la estructura espacial con pocos parámetros.</li>
+                            <li>Cada <strong>filtro</strong> es un detector de patrón: N filtros producen N mapas; la <strong>ReLU</strong> anula los valores negativos y el <em>pooling</em> resume cada región.</li>
                             <li>Al apilar capas surge la jerarquía <strong>bordes → texturas → partes → objeto</strong>, y el <em>pooling</em> aporta tolerancia a la posición.</li>
                             <li><strong>ResNet</strong> permite entrenar redes muy profundas gracias a las conexiones de salto.</li>
                             <li>El <strong>ViT</strong> cambia el sesgo inductivo de la convolución por atención global y exige preentrenamiento masivo.</li>
@@ -1924,13 +2014,40 @@ print(x.shape)  # torch.Size([1, 16, 111, 111])  -> 111 = 222 / 2`} />
                             justificacion: 'Aplanar la imagen destruye la vecindad de los píxeles y conectar todo con todo dispara los parámetros y el sobreajuste; el MLP tampoco reconoce un objeto desplazado. Los canales se pueden aplanar juntos y la pérdida sigue siendo diferenciable.'
                         },
                         {
+                            pregunta: 'En el recorrido «X / O», el filtro «\\» se desliza sobre la «X». El mapa de características alcanza su valor máximo donde…',
+                            opciones: [
+                                { texto: 'la ventana cae sobre el fondo, porque allí no hay píxeles que resten.', correcta: false },
+                                { texto: 'la ventana coincide con un trazo diagonal «\\»: píxeles encendidos donde el filtro vale +1 y apagados donde vale −1.', correcta: true },
+                                { texto: 'la ventana cubre más píxeles encendidos, sin importar cómo estén dispuestos.', correcta: false },
+                            ],
+                            justificacion: 'El filtro funciona como una plantilla: suma los píxeles encendidos que coinciden con sus pesos +1 y resta los que caen en sus −1. Sobre el fondo el resultado es 0, y acumular píxeles encendidos no basta, porque los de la antidiagonal restan. Por eso el valor 3 aparece justo en las cuatro posiciones de la diagonal principal del mapa.'
+                        },
+                        {
                             pregunta: <>Una entrada de 224 con kernel 3×3, sin relleno y <em>stride</em> 1 produce un mapa de lado…</>,
                             opciones: [
                                 { texto: '222', correcta: true },
                                 { texto: '224', correcta: false },
                                 { texto: '112', correcta: false },
                             ],
-                            justificacion: <>Con la fórmula O = ⌊(W − K + 2P)/S⌋ + 1 = ⌊(224 − 3 + 0)/1⌋ + 1 = 222. El valor 224 exigiría relleno P = 1, y 112, <em>stride</em> 2.</>
+                            justificacion: <>Con la fórmula O = ⌊(W − k + 2P)/S⌋ + 1 = ⌊(224 − 3 + 0)/1⌋ + 1 = 222. El valor 224 exigiría relleno P = 1, y 112, <em>stride</em> 2.</>
+                        },
+                        {
+                            pregunta: <>Tras la ReLU, un mapa de 4 × 4 pasa por <em>max pooling</em> 2 × 2 sin solapamiento. El resultado…</>,
+                            opciones: [
+                                { texto: 'es un mapa de 2 × 2 con el máximo de cada región, y la capa no añade parámetros que aprender.', correcta: true },
+                                { texto: 'es un mapa de 2 × 2 con el promedio de cada región, ponderado por pesos que se aprenden.', correcta: false },
+                                { texto: 'conserva el tamaño de 4 × 4, pero pone a cero los valores que no son máximos.', correcta: false },
+                            ],
+                            justificacion: <>Cada región de 2 × 2 se resume en su máximo, así que 4 × 4 → 2 × 2, y el <em>max pooling</em> no tiene pesos. Promediar corresponde al <em>average pooling</em> (que tampoco aprende pesos), y anular los no máximos sin reducir el tamaño no es <em>pooling</em>.</>
+                        },
+                        {
+                            pregunta: 'Una capa convolucional recibe una imagen RGB (3 canales) y aplica 8 filtros de 5 × 5. ¿Cuántos parámetros tiene?',
+                            opciones: [
+                                { texto: '600', correcta: false },
+                                { texto: '208', correcta: false },
+                                { texto: '608', correcta: true },
+                            ],
+                            justificacion: 'Cada filtro abarca los 3 canales: 5 · 5 · 3 = 75 pesos más 1 sesgo, es decir, 76; por 8 filtros, (5 · 5 · 3 + 1) × 8 = 608. Con 600 se olvidan los sesgos, y con 208 = (5 · 5 + 1) × 8, la profundidad de los filtros.'
                         },
                         {
                             pregunta: '¿Qué aporta la conexión de salto de ResNet?',

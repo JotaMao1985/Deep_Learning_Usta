@@ -85,7 +85,7 @@
       <div class="lienzo" id="lienzo" role="img" aria-label=""></div>
       <div class="leyenda" id="leyenda-capa" aria-hidden="true">
         <span><span class="muestra" style="background:#DC2626"></span><span class="muestra" style="background:#16A34A"></span><span class="muestra" style="background:#2563EB"></span>Canales de entrada (más intenso = valor mayor)</span>
-        <span><span class="muestra" style="background:#FDB913;opacity:.7"></span>Filtro K×K×C<sub>in</sub></span>
+        <span><span class="muestra" style="background:#FDB913;opacity:.7"></span>Filtro k×k×C<sub>in</sub></span>
         <span><span class="muestra" style="background:#3D008D"></span><span class="muestra" style="background:#ED1E79"></span>Salida positiva / negativa</span>
       </div>
       <div class="leyenda" id="leyenda-campo" aria-hidden="true" hidden>
@@ -101,7 +101,7 @@
         <div class="grupo">
           <h2>Capa</h2>
           <div class="fila"><span>Canales C<sub>in</sub></span><span class="botones" role="group" aria-label="Canales de entrada"><button type="button" data-c="1">1</button><button type="button" data-c="3">3 (RGB)</button></span></div>
-          <div class="fila"><span>Kernel K</span><span class="botones" role="group" aria-label="Tamaño del kernel"><button type="button" data-k="1">1</button><button type="button" data-k="3">3</button><button type="button" data-k="5">5</button></span></div>
+          <div class="fila"><span>Kernel k</span><span class="botones" role="group" aria-label="Tamaño del kernel"><button type="button" data-k="1">1</button><button type="button" data-k="3">3</button><button type="button" data-k="5">5</button></span></div>
           <div class="fila"><span>Relleno P</span><span class="botones" role="group" aria-label="Relleno"><button type="button" data-p="0">0</button><button type="button" data-p="1">1</button><button type="button" data-p="2">2</button></span></div>
           <div class="fila"><span><em>Stride</em> S</span><span class="botones" role="group" aria-label="Stride"><button type="button" data-s="1">1</button><button type="button" data-s="2">2</button></span></div>
           <div class="fila"><label for="n-filtros" style="min-width:92px;font-size:.85rem">Filtros N = <b id="n-valor">4</b></label><input type="range" id="n-filtros" min="1" max="16" value="4"></div>
@@ -484,7 +484,7 @@ function lecturaCapa(D) {
 function lecturaCampo() {
   const capas = Array.from({ length: estado.L }, () => ({ K: 3, S: estado.RS })); const R = Modelo.campoReceptivo(capas);
   const terminos = R.terminos.map((t) => `2·${t.salto}`).join(' + ');
-  let txt = `Campo receptivo en la entrada: <b>${R.r} × ${R.r}</b> píxeles<br>r = 1 + Σ (K − 1)·ΠS = 1 + ${terminos} = <b>${R.r}</b>`;
+  let txt = `Campo receptivo en la entrada: <b>${R.r} × ${R.r}</b> píxeles<br>r = 1 + Σ (k − 1)·ΠS = 1 + ${terminos} = <b>${R.r}</b>`;
   if (estado.RS === 1 && estado.L > 1) txt += `<br>Una sola capa ${R.r}×${R.r} usaría ${R.r * R.r} pesos por par de canales; la pila usa ${estado.L}·9 = ${9 * estado.L}.`;
   if (estado.RS === 2) txt += `<br>Salto entre neuronas de la capa superior: ${R.salto} píxeles.`;
   $('lectura-campo').innerHTML = txt;
