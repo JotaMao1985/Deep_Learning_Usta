@@ -1,0 +1,291 @@
+% =====================================================================
+%  Bitácora de IA · Proyecto Centinela
+%  Profundización I: Redes Neuronales — Deep Learning (EA-N-F-004)
+%  Universidad Santo Tomás · Maestría en Ciencia de Datos
+% ---------------------------------------------------------------------
+%  Cómo se usa
+%  1. Se compila con pdfLaTeX, el compilador por omisión de Overleaf
+%     («Nuevo proyecto → Subir proyecto» con este archivo), TeX Live o
+%     MiKTeX. Solo usa paquetes estándar. También compila con XeLaTeX o
+%     LuaLaTeX, pero los símbolos del punto 5 solo se ven con pdfLaTeX.
+%  2. Los integrantes y la fase se escriben una sola vez, en \integrantes
+%     y \fase (más abajo): aparecen en el encabezado de cada página.
+%  3. Cada \pendiente{...} es un texto guía en gris: se reemplaza,
+%     junto con el \pendiente, por el contenido propio.
+%  4. Por cada interacción se copia la ficha E-0 de la sección 3 (de
+%     \begin{ficha} a \end{ficha}) y se cambia su identificador.
+%  5. La salida literal de la IA va en el anexo, dentro de un bloque
+%     Verbatim; una captura de pantalla, con \includegraphics. Con
+%     pdfLaTeX ya se aceptan las flechas, los signos ≥ ≤ ≠ ≈ −, las letras
+%     griegas y las marcas ✓ ✗ ✅ ❌ ⚠ más comunes; si la salida trae
+%     otros símbolos (p. ej., otros emojis), cada uno se sustituye por
+%     su descripción entre corchetes, como [emoji de cohete].
+%  6. Para marcar una casilla, \casilla se cambia por \marcada.
+%  La plantilla en línea, con ejemplos y su lugar en la rúbrica:
+%  https://jotamao1985.github.io/Deep_Learning_Usta/13_Plantilla_Bitacora_IA.html
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{lmodern}
+  % Símbolos frecuentes en las respuestas de los asistentes de IA
+  \DeclareUnicodeCharacter{2192}{\ensuremath{\rightarrow}}
+  \DeclareUnicodeCharacter{2190}{\ensuremath{\leftarrow}}
+  \DeclareUnicodeCharacter{2194}{\ensuremath{\leftrightarrow}}
+  \DeclareUnicodeCharacter{21D2}{\ensuremath{\Rightarrow}}
+  \DeclareUnicodeCharacter{2265}{\ensuremath{\geq}}
+  \DeclareUnicodeCharacter{2264}{\ensuremath{\leq}}
+  \DeclareUnicodeCharacter{2260}{\ensuremath{\neq}}
+  \DeclareUnicodeCharacter{2248}{\ensuremath{\approx}}
+  \DeclareUnicodeCharacter{2261}{\ensuremath{\equiv}}
+  \DeclareUnicodeCharacter{2212}{\ensuremath{-}}
+  \DeclareUnicodeCharacter{2208}{\ensuremath{\in}}
+  \DeclareUnicodeCharacter{2211}{\ensuremath{\sum}}
+  \DeclareUnicodeCharacter{221A}{\ensuremath{\surd}}
+  \DeclareUnicodeCharacter{221E}{\ensuremath{\infty}}
+  \DeclareUnicodeCharacter{2202}{\ensuremath{\partial}}
+  \DeclareUnicodeCharacter{2207}{\ensuremath{\nabla}}
+  \DeclareUnicodeCharacter{03B1}{\ensuremath{\alpha}}
+  \DeclareUnicodeCharacter{03B2}{\ensuremath{\beta}}
+  \DeclareUnicodeCharacter{03B3}{\ensuremath{\gamma}}
+  \DeclareUnicodeCharacter{03B4}{\ensuremath{\delta}}
+  \DeclareUnicodeCharacter{03B5}{\ensuremath{\varepsilon}}
+  \DeclareUnicodeCharacter{03B7}{\ensuremath{\eta}}
+  \DeclareUnicodeCharacter{03B8}{\ensuremath{\theta}}
+  \DeclareUnicodeCharacter{03BB}{\ensuremath{\lambda}}
+  \DeclareUnicodeCharacter{03BC}{\ensuremath{\mu}}
+  \DeclareUnicodeCharacter{03C3}{\ensuremath{\sigma}}
+  \DeclareUnicodeCharacter{03C9}{\ensuremath{\omega}}
+  \DeclareUnicodeCharacter{2713}{\ensuremath{\checkmark}}
+  \DeclareUnicodeCharacter{2714}{\ensuremath{\checkmark}}
+  \DeclareUnicodeCharacter{2705}{\ensuremath{\checkmark}}
+  \DeclareUnicodeCharacter{2717}{\ensuremath{\times}}
+  \DeclareUnicodeCharacter{2718}{\ensuremath{\times}}
+  \DeclareUnicodeCharacter{274C}{\ensuremath{\times}}
+  \DeclareUnicodeCharacter{26A0}{(!)}
+  \DeclareUnicodeCharacter{FE0F}{}
+  \DeclareUnicodeCharacter{2500}{-}
+  \DeclareUnicodeCharacter{2501}{-}
+\else
+  \usepackage{fontspec}
+\fi
+\usepackage[spanish,es-noshorthands]{babel}
+\usepackage[a4paper,margin=2.2cm,headheight=14pt]{geometry}
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage[table]{xcolor}
+\usepackage{array,longtable}
+\usepackage{amssymb}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{fvextra}
+\usepackage{titlesec}
+\usepackage{fancyhdr,lastpage}
+\usepackage{hyperref}
+
+\definecolor{ustanavy}{HTML}{001A4D}
+\definecolor{ustamorado}{HTML}{3D008D}
+\definecolor{ustarosa}{HTML}{ED1E79}
+\definecolor{guia}{gray}{0.42}
+
+\hypersetup{colorlinks, linkcolor=ustamorado, urlcolor=ustamorado,
+  pdftitle={Bitácora de IA · Proyecto Centinela},
+  pdfsubject={Profundización I: Redes Neuronales — Deep Learning}}
+
+\titleformat{\section}{\Large\bfseries\color{ustanavy}}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\large\bfseries\color{ustamorado}}{\thesubsection}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.6em}{0.6em}
+\titlespacing*{\subsection}{0pt}{1.2em}{0.4em}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{guia}Bitácora de IA · Proyecto Centinela}
+\fancyhead[R]{\small\color{guia}\integrantes\ · \fase}
+\fancyfoot[C]{\small\color{guia}Página \thepage\ de \pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ---- Ayudas de la plantilla -----------------------------------------
+\newcommand{\pendiente}[1]{\textcolor{guia}{\textit{(#1)}}}
+
+% ---- Se escriben una sola vez: van en el encabezado de cada página ---
+\newcommand{\integrantes}{\pendiente{Integrantes}}
+\newcommand{\fase}{\pendiente{Fase}}
+% ----------------------------------------------------------------------
+
+\newcommand{\casilla}{$\square$}
+\newcommand{\marcada}{$\boxtimes$}
+
+% Ficha de dos columnas («Campo · Registro»); continúa en la página
+% siguiente si hace falta. Cada fila: \fila{campo}{registro}.
+\newenvironment{ficha}
+  {\renewcommand{\arraystretch}{1.3}%
+   \begin{longtable}{|>{\raggedright\arraybackslash\bfseries}p{0.30\linewidth}
+                     |>{\raggedright\arraybackslash}p{0.62\linewidth}|}
+   \hline
+   \rowcolor{ustamorado!10}\textbf{Campo} & \textbf{Registro} \\ \hline
+   \endhead}
+  {\end{longtable}}
+\newcommand{\fila}[2]{#1 & #2 \\ \hline}
+
+% Tabla de firmas. Cada fila: \firmante{nombre}.
+\newenvironment{firmas}
+  {\renewcommand{\arraystretch}{1.8}%
+   \begin{longtable}{|p{0.36\linewidth}|p{0.34\linewidth}|p{0.19\linewidth}|}
+   \hline
+   \rowcolor{ustamorado!10}\textbf{Integrante} & \textbf{Firma} & \textbf{Fecha} \\ \hline
+   \endhead}
+  {\end{longtable}}
+\newcommand{\firmante}[1]{#1 & & \pendiente{AAAA-MM-DD} \\ \hline}
+
+\begin{document}
+
+\begin{center}
+  {\small\color{ustamorado}\textsc{Universidad Santo Tomás · Maestría en Ciencia de Datos}}\\[2pt]
+  {\small Profundización I: Redes Neuronales — Deep Learning (EA-N-F-004)}\\[12pt]
+  {\LARGE\bfseries\color{ustanavy} Bitácora de IA · Proyecto Centinela}\\[6pt]
+  {\color{ustarosa}\rule{0.45\linewidth}{1.2pt}}
+\end{center}
+
+La bitácora se diligencia a lo largo del proyecto, no al final. No se registra cada indicación (\textit{prompt}): se documentan las interacciones que cambiaron una decisión técnica (arquitectura, datos, métricas, un error resuelto, un enfoque descartado). Cada entrada lleva la fecha y la hora de la consulta, anotadas cuando ocurre.
+
+A un asistente de IA no se le pegan ni se le suben registros con datos personales ni datos de terceros sin su permiso: se le muestran el esquema y filas sintéticas, y la bitácora registra qué datos se compartieron.
+
+% =====================================================================
+\section{Datos de la entrega}
+
+\begin{ficha}
+\fila{Integrantes}{\pendiente{nombre de cada integrante: individual o equipo de hasta 3}}
+\fila{Proyecto}{\pendiente{nombre del Centinela y problema que aborda}}
+\fila{Fase}{\pendiente{Fase 1 · MLP / Fase 2 · Multimodal / Fase 3 · Despliegue}}
+\fila{Primer identificador de esta fase}{\pendiente{E-1 en la Fase 1; en las fases siguientes, el número que sigue al último de la fase anterior}}
+\fila{Fecha de entrega}{\pendiente{AAAA-MM-DD}}
+\end{ficha}
+
+% =====================================================================
+\section{Declaración de uso de IA}
+
+\subsection*{Declaración de uso (la firma cada integrante)}
+
+Quienes firman declaran que durante esta fase usaron las siguientes herramientas de IA generativa:
+
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{\pendiente{herramienta · modelo · versión, si se conoce}} $\rightarrow$ para \pendiente{propósito, p.~ej. depurar el bucle de entrenamiento}.
+  \item \textbf{\pendiente{herramienta · modelo · versión, si se conoce}} $\rightarrow$ para \pendiente{propósito}.
+\end{itemize}
+
+Partes del entregable redactadas o programadas sin IA: \pendiente{…}.
+
+Quienes firman declaran también que \textbf{comprenden, verificaron y pueden defender} como propio cada artefacto entregado, que cada integrante responde en la sustentación por una parte distinta del trabajo y que esta bitácora refleja con honestidad cómo se usaron estas herramientas.
+
+\begin{firmas}
+\firmante{\pendiente{nombre}}
+\firmante{\pendiente{nombre}}
+\firmante{\pendiente{nombre}}
+\end{firmas}
+
+\subsection*{Declaración de no uso (alternativa)}
+
+Quien firma declara que durante esta fase \textbf{no usó IA generativa} para elaborar el entregable (código, análisis ni redacción). En ese caso, la auditoría de la sección~4 es \textbf{inducida y declarada}, y las consultas que la producen se registran como entradas en la sección~3. No usar IA no se penaliza.
+
+\begin{firmas}
+\firmante{\pendiente{nombre}}
+\end{firmas}
+
+En equipo, cada integrante firma la declaración que le corresponde: la de uso o la de no uso. Las filas que sobran se borran.
+
+% =====================================================================
+\section{Registro de interacciones}
+
+Cada interacción se marca como \textbf{Aceptada · Modificada · Rechazada}. La evidencia de origen (la salida literal de la IA, o una captura de pantalla con fecha y herramienta) es obligatoria en las entradas Modificada y Rechazada; en las Aceptadas es opcional.
+
+\textbf{Cómo se numera.} La ficha E-0 es el molde: se copia una vez por interacción y cada copia recibe el identificador siguiente (E-1, E-2…). La numeración no se reinicia entre fases: la Fase~2 continúa desde el último identificador de la Fase~1. El mismo identificador se escribe como comentario en la línea del código que cambió (\texttt{\# E-3}), para que la entrada se pueda localizar en el cuaderno.
+
+\textbf{Cuántas entradas.} Para llegar a Básico, el Criterio~5 pide al menos tres entradas fechadas, con su decisión y una justificación en cada una.
+
+% ---- Ficha E-0: se copia desde aquí ---------------------------------
+\subsection*{E-0 · molde}
+
+\begin{ficha}
+\fila{ID}{\pendiente{E-n}}
+\fila{Fecha y hora}{\pendiente{AAAA-MM-DD hh:mm de la consulta}}
+\fila{Fase · paso}{\pendiente{p.~ej. F1 · Paso 3}}
+\fila{Integrante que hizo la consulta}{\pendiente{nombre; en una entrega individual, se omite}}
+\fila{Herramienta y modelo}{\pendiente{producto · modelo · versión, si se conoce}}
+\fila{Celda o \textit{commit} afectado}{\pendiente{celda n del cuaderno, o hash corto del \textit{commit} · etiqueta \texttt{\# E-n} en el código}}
+\fila{Objetivo de la consulta}{\pendiente{qué se buscaba resolver}}
+\fila{Indicación (resumen)}{\pendiente{resumen de la indicación o \textit{prompt}}}
+\fila{Qué devolvió la IA}{\pendiente{resumen de la respuesta: código, afirmación, métrica o referencia}}
+\fila{Datos compartidos con la IA}{\pendiente{ninguno · solo el esquema, con nombres y tipos de columnas · filas sintéticas · otro: qué y por qué no contenía datos personales}}
+\fila{Decisión}{\pendiente{Aceptada · Modificada · Rechazada}}
+\fila{Justificación}{\pendiente{por qué se decidió así, con fundamento en la teoría del curso o en la documentación oficial}}
+\fila{Cómo se verificó}{\pendiente{prueba ejecutada $\rightarrow$ resultado, con su cifra}}
+\fila{Evidencia de origen}{\pendiente{obligatoria en Modificada y Rechazada: salida literal de la IA, o captura de pantalla con fecha y herramienta, en el anexo con este mismo identificador}}
+\end{ficha}
+% ---- Ficha E-0: hasta aquí ------------------------------------------
+
+Para cada interacción nueva se copia la ficha E-0 completa y se cambia su identificador. La ficha E-0 puede quedarse como molde vacío o borrarse: no cuenta como entrada.
+
+% =====================================================================
+\section{Auditoría a la IA}
+
+Obligatoria: se documenta al menos un caso en que la IA falló durante el propio proyecto y cómo se corrigió. Suele ser una de las entradas Modificada o Rechazada de la sección~3, desarrollada a fondo. Los casos que el curso ya publicó (doble sigmoide, bucle sin limpieza de gradientes, fuga del escalador) solo cuentan si ocurrieron en el propio proceso.
+
+\textbf{Tipo de auditoría} (se marca una):
+
+\begin{itemize}[leftmargin=1.8em, label={}]
+  \item[\casilla] \textbf{Real:} la IA produjo el fallo durante el proyecto.
+  \item[\casilla] \textbf{Inducida y declarada:} la IA no produjo un fallo genuino; se le pidió revisar una parte del propio código (p.~ej., el bucle o la evaluación) y se auditó su respuesta. Llega como máximo al nivel Autónomo del Criterio~5.
+\end{itemize}
+
+\subsection*{Qué evidencia corresponde a cada nivel}
+
+{\renewcommand{\arraystretch}{1.3}%
+\begin{longtable}{|>{\raggedright\arraybackslash\bfseries}p{0.20\linewidth}
+                  |>{\raggedright\arraybackslash}p{0.72\linewidth}|}
+\hline
+\rowcolor{ustamorado!10}\textbf{Nivel del Criterio 5} & \textbf{Qué muestra la auditoría} \\ \hline
+\endhead
+Básico & La auditoría describe un fallo de la IA, aunque sea de forma genérica (sin la salida literal ni su ubicación). \\ \hline
+Autónomo & La auditoría documenta un fallo real del propio proyecto, con su \textbf{evidencia de origen} (salida literal de la IA, o captura de pantalla con fecha y herramienta), la \textbf{corrección} y su \textbf{fundamento}. Es también el techo de la auditoría inducida y declarada. \\ \hline
+Estratégico & Además, la auditoría \textbf{reproduce} el fallo: una celda ejecuta la versión de la IA sobre los datos propios y la misma semilla, y otra ejecuta la versión corregida con la misma medición, que incluye una métrica de decisión (\textit{recall}, matriz o AUC). \\ \hline
+\end{longtable}}
+
+Lo que no es una auditoría: un error propio que la IA corrigió (se registra en la sección~3 como entrada Aceptada, pero no audita a la IA) y un caso que el curso ya publicó, narrado sin evidencia propia (queda como descripción genérica).
+
+\subsection*{Ficha del caso}
+
+\begin{ficha}
+\fila{Entrada de la bitácora}{\pendiente{E-n}}
+\fila{Contexto}{\pendiente{en qué parte del proyecto y con qué objetivo se consultó a la IA}}
+\fila{Qué dijo la IA}{\pendiente{la sugerencia: código, afirmación, métrica o referencia}}
+\fila{Evidencia de origen}{\pendiente{salida literal de la IA, o captura de pantalla con fecha y herramienta, en el anexo}}
+\fila{Por qué estaba mal}{\pendiente{el error concreto y su fundamento: teoría del curso o documentación oficial}}
+\fila{Cómo se detectó}{\pendiente{la señal: error de ejecución, resultado inverosímil, contradicción con la teoría, referencia inexistente…}}
+\fila{Corrección aplicada}{\pendiente{qué se cambió, en qué celda y cómo se comprobó que ahora es correcto}}
+\fila{Reproducción {\normalfont(la exige el nivel Estratégico)}}{\pendiente{celda con la versión de la IA · celda con la versión corregida · semilla · medición común, con una métrica de decisión: \textit{recall}, matriz o AUC}}
+\fila{Resultado de la medición}{\pendiente{cifras de las dos versiones}}
+\fila{Lección}{\pendiente{qué se aprendió sobre los límites de la IA y cómo cambia la forma de usarla}}
+\end{ficha}
+
+% =====================================================================
+\section*{Anexo · Evidencia de origen}
+
+Cada entrada Modificada o Rechazada, y el caso de auditoría, remiten aquí con su identificador. La salida literal de la IA se pega sin editar dentro del bloque \texttt{Verbatim}; una captura de pantalla con fecha y herramienta se incluye como imagen.
+
+% ---- Evidencia: se copia un bloque por entrada ----------------------
+\subsection*{E-0 · molde}
+
+\begin{Verbatim}[breaklines, breakanywhere, fontsize=\small, frame=single, framesep=2mm]
+(Aquí se pega, sin editar, la salida literal de la IA.)
+\end{Verbatim}
+
+% Captura de pantalla: se quita el % de las dos líneas siguientes y se
+% ajusta la ruta del archivo (p. ej., la carpeta bitacora/ del proyecto).
+% \includegraphics[width=\linewidth]{bitacora/E-n.png}
+% {\small Captura del AAAA-MM-DD hh:mm · herramienta · modelo}
+% ---- Evidencia: hasta aquí ------------------------------------------
+
+\end{document}

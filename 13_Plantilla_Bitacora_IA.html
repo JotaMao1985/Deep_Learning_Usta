@@ -161,7 +161,7 @@
         .chk { display: flex; gap: .65rem; align-items: flex-start; }
         .chk input { flex: none; width: 1.05rem; height: 1.05rem; margin-top: .2rem; accent-color: #3D008D; }
 
-        /* Bloque «Plantilla en Markdown» */
+        /* Bloque «Plantilla para descargar» (Markdown) */
         .md-region { max-height: 34rem; overflow: auto; background: #0F172A; }
         .md-pre { white-space: pre-wrap; overflow-wrap: anywhere; overflow: visible; }
         .btn {
@@ -237,6 +237,7 @@
                 <span class="bg-white/15 rounded-full px-3 py-1"><i aria-hidden="true" class="fas fa-scale-balanced mr-1.5 text-gold"></i>Criterio 5 · 15 % (Fase 1)</span>
                 <span class="bg-white/15 rounded-full px-3 py-1"><i aria-hidden="true" class="fas fa-signature mr-1.5 text-gold"></i>Una firma por integrante</span>
                 <span class="bg-white/15 rounded-full px-3 py-1"><i aria-hidden="true" class="fas fa-layer-group mr-1.5 text-gold"></i>Sirve para las tres fases</span>
+                <a href="#descargar" class="no-print bg-white/15 hover:bg-white/25 rounded-full px-3 py-1 text-white no-underline"><i aria-hidden="true" class="fas fa-download mr-1.5 text-gold"></i>Descargable en LaTeX y Markdown</a>
             </div>
         </div>
     </header>
@@ -251,7 +252,7 @@
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#declaraciones"><i aria-hidden="true" class="fas fa-signature mr-1"></i>Declaraciones</a>
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#registro"><i aria-hidden="true" class="fas fa-table-list mr-1"></i>Registro</a>
             <a class="navlink rounded-lg px-2.5 py-1.5" href="#auditoria"><i aria-hidden="true" class="fas fa-bug-slash mr-1"></i>Auditoría</a>
-            <a class="navlink rounded-lg px-2.5 py-1.5" href="#markdown"><i aria-hidden="true" class="fab fa-markdown mr-1"></i>Markdown</a>
+            <a class="navlink rounded-lg px-2.5 py-1.5" href="#descargar"><i aria-hidden="true" class="fas fa-download mr-1"></i>Descargar</a>
             </div>
             <div class="flex-none w-14 md:w-24" aria-hidden="true"></div>
         </div>
@@ -264,7 +265,7 @@
             <h2 class="sec-title text-2xl md:text-3xl text-navy mb-4"><i aria-hidden="true" class="fas fa-circle-info text-pink-700 mr-2"></i>Cómo se usa esta plantilla</h2>
             <p class="text-slate-700 max-w-4xl mb-5">La bitácora hace <strong>visible y evaluable el proceso de pensamiento</strong>: muestra que detrás de cada artefacto hubo una persona decidiendo —aceptando, modificando o rechazando lo que la IA propuso— <strong>y justificando por qué</strong>.</p>
             <div class="callout callout-info">
-                <p class="text-sm">La plantilla se copia a la entrega y se diligencia <strong>a lo largo del proyecto</strong>, no al final. No se registra <em>cada</em> indicación (<em lang="en">prompt</em>): se documentan las <strong>interacciones que cambiaron una decisión técnica</strong> (arquitectura, datos, métricas, un error resuelto, un enfoque descartado). Pocas entradas bien razonadas valen más que muchas que solo dicen «Aceptada». La política completa es la de Uso Responsable de IA del curso, y la rúbrica de la fase (Criterio 5) está en la <a href="11_Modulo_1_Actividad_Fase1_Centinela.html#rubrica">Actividad 1 · Fase 1</a>. Las Fases 2 y 3 califican el uso de IA con su propia rúbrica, en la página de cada actividad (<a href="21_Modulo_2_Actividad_Fase2_Centinela.html#rubrica">Fase 2</a> y <a href="31_Modulo_3_Actividad_Fase3_Centinela.html#rubrica">Fase 3</a>).</p>
+                <p class="text-sm">La plantilla se descarga en LaTeX o en Markdown (sección «<a href="#descargar">Plantilla para descargar</a>»), se copia a la entrega y se diligencia <strong>a lo largo del proyecto</strong>, no al final. No se registra <em>cada</em> indicación (<em lang="en">prompt</em>): se documentan las <strong>interacciones que cambiaron una decisión técnica</strong> (arquitectura, datos, métricas, un error resuelto, un enfoque descartado). Pocas entradas bien razonadas valen más que muchas que solo dicen «Aceptada». La política completa es la de Uso Responsable de IA del curso, y la rúbrica de la fase (Criterio 5) está en la <a href="11_Modulo_1_Actividad_Fase1_Centinela.html#rubrica">Actividad 1 · Fase 1</a>. Las Fases 2 y 3 califican el uso de IA con su propia rúbrica, en la página de cada actividad (<a href="21_Modulo_2_Actividad_Fase2_Centinela.html#rubrica">Fase 2</a> y <a href="31_Modulo_3_Actividad_Fase3_Centinela.html#rubrica">Fase 3</a>).</p>
             </div>
             <div class="grid md:grid-cols-3 gap-4 mt-5">
                 <div class="card p-5">
@@ -499,10 +500,19 @@
             </div>
         </section>
 
-        <!-- ====================== PLANTILLA EN MARKDOWN ====================== -->
-        <section id="markdown" class="no-print">
-            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-2"><i aria-hidden="true" class="fab fa-markdown text-pink-700 mr-2"></i>Plantilla en Markdown</h2>
-            <p class="text-slate-700 max-w-4xl mb-4">La bitácora completa, en Markdown limpio, para diligenciarla en el repositorio, en un editor de texto o en una celda de texto del cuaderno. El recuadro se puede seleccionar y copiar a mano; con JavaScript activo, los botones lo copian o lo descargan como <span class="icode">bitacora-ia.md</span>.</p>
+        <!-- ====================== PLANTILLA PARA DESCARGAR ====================== -->
+        <section id="descargar" class="no-print">
+            <h2 class="sec-title text-2xl md:text-3xl text-navy mb-2"><i aria-hidden="true" class="fas fa-download text-pink-700 mr-2"></i>Plantilla para descargar</h2>
+            <p class="text-slate-700 max-w-4xl mb-6">La bitácora completa viene en dos formatos con el mismo contenido: LaTeX, para compilarla en PDF, y Markdown, para el repositorio o una celda de texto del cuaderno.</p>
+
+            <h3 id="latex" class="font-bold text-navy text-lg mb-2"><i aria-hidden="true" class="fas fa-file-code text-primary mr-1.5"></i>En LaTeX</h3>
+            <p class="text-slate-700 max-w-4xl mb-4">El archivo <span class="icode">bitacora-ia.tex</span> se compila con pdfLaTeX, en el propio equipo o en Overleaf («Nuevo proyecto → Subir proyecto»), y solo usa paquetes estándar. Los integrantes y la fase se escriben una sola vez, al comienzo del archivo, y aparecen en el encabezado de cada página. Cada texto guía en gris va dentro de <span class="icode">\pendiente{…}</span> y se reemplaza por el contenido propio; la ficha E-0 se copia una vez por interacción, y la salida literal de la IA se pega en el anexo de evidencias, que acepta las flechas, los signos matemáticos y las letras griegas más comunes.</p>
+            <div class="flex flex-wrap gap-3 mb-10">
+                <a href="plantillas/bitacora-ia.tex" download="bitacora-ia.tex" class="btn btn-primario"><i aria-hidden="true" class="fas fa-download"></i>Descargar .tex (LaTeX)</a>
+            </div>
+
+            <h3 id="markdown" class="font-bold text-navy text-lg mb-2"><i aria-hidden="true" class="fab fa-markdown text-primary mr-1.5"></i>En Markdown</h3>
+            <p class="text-slate-700 max-w-4xl mb-4">La misma bitácora en Markdown limpio, para diligenciarla en el repositorio, en un editor de texto o en una celda de texto del cuaderno. El recuadro se puede seleccionar y copiar a mano; con JavaScript activo, los botones lo copian o lo descargan como <span class="icode">bitacora-ia.md</span>.</p>
             <div class="flex flex-wrap gap-3 mb-3">
                 <button type="button" id="md-copiar" class="btn btn-primario" hidden><i aria-hidden="true" class="fas fa-copy"></i>Copiar la plantilla en Markdown</button>
                 <a id="md-descargar" class="btn btn-secundario" download="bitacora-ia.md" hidden><i aria-hidden="true" class="fas fa-download"></i>Descargar .md</a>
